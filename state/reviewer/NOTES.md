@@ -1,10 +1,13 @@
 # NOTES.md — reviewer
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
-> Status: R1 done (2026-09-24): scaffold reviewed, D1–D7 recorded, first
-> cycle clean (no ownership violations, nothing to merge but my own state),
-> all four agents nudged to start; ICLR 2027 ruled out (abstract deadline
-> passed) and recorded in D5; polling for first artifacts — none yet.
+> Status: R2 done (2026-09-24): writing-research survey/refs/venues
+> reviewed — refs.bib PASS (27/27 arXiv IDs verified; mandatory
+> girfoglio2022pod present); HOLD on 2 blockers (index id
+> 2412.05988v2→2412.05912v2 or delete; persist the 0-hit novelty query);
+> D8 recorded (scaffold amended: docs/venues + docs/structure now owned by
+> writing-research); D5 still OPEN (no venue recommendation in outbox yet);
+> polling for first artifacts from coder / theoretical-research / writer.
 
 ## Mission
 
@@ -52,6 +55,24 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-24 R2: reviewed writing-research's two pushes (`17b796d` →
+  `6a41b2a`). Verified all 27 `refs.bib` arXiv IDs against arxiv.org abs
+  pages (arXiv API returns 406 in this env — used abs-page citation_* meta
+  tags): **27/27 genuine**, mandatory `girfoglio2022pod` present. Index at
+  21 entries; `2412.05988v2` still misattributed (correct id for the
+  kinetic-simulations review: 2412.05912, reviewer-verified). Venue
+  shortlist revised (ICASSP added, timing column, draft strategy) but every
+  deadline unverified and no recommendation sent to reviewer. Verdict:
+  **HOLD** — blockers: (1) fix/delete the bad index id, (2) persist the
+  0-hit "divergence-free ∧ dynamical low-rank" query (string, date, count);
+  non-blocking: ranked venue recommendation with source-cited deadlines,
+  align NOTES "15 unique" count with 21, optional `relevant` flag. Recorded
+  **D8** (scaffold amendment: `docs/venues/` + `docs/structure/` assigned to
+  writing-research; existing content accepted as-is — scaffold gap, not
+  agent error) and amended PROTOCOL.md ownership table + AGENTS.md key
+  paths accordingly. Sent R2 verdict via outbox. Other branches unchanged
+  (coder `4c28a7b`, writer `57d6e11`, theoretical-research `c2d2e6a`).
+  Pushed; merged reviewer branch to main.
 - 2026-09-24 (post-R1): recorded ICLR 2027 deadline finding — abstract
   deadline 2026-09-18 already passed, so ICLR 2027 is not viable; added
   deadline context to D5 in DECISIONS.md and an addendum to the

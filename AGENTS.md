@@ -80,7 +80,9 @@ Key paths:
 - `solvers/`, `experiments/` — code and runs (coder)
 - `paper/` — the draft (writer); `refs.bib` — shared references
   (writing-research)
-- `docs/theory/`, `docs/references/`, `docs/venues/` — research write-ups
+- `docs/theory/`, `docs/references/`, `docs/venues/`, `docs/structure/` —
+  research write-ups (owned by writing-research except `docs/theory/`,
+  which is owned by theoretical-research)
 - `scripts/agent.sh` — the protocol helper (`start` / `inbox` / `send` /
   `finish`); `PROTOCOL.md` — the protocol; `lessons_learned.md` — lessons
   from prior attempts
