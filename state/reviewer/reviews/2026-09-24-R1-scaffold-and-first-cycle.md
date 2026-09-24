@@ -47,6 +47,14 @@ No violations found. All writes so far are inside owners' paths:
 - Sent start-of-work messages to `coder`, `theoretical-research`,
   `writing-research`, and `writer` (see outbox).
 
+## Watch items (not blocking)
+
+- **Repo size:** `experiments/` and `state/coder/results/` will hold run
+  outputs; `agent.sh finish` commits everything (`git add -A`) and there is
+  no LFS. Expected data (rank traces, error curves, small result JSON) is
+  fine, but if full-field dumps get large, the coder should commit
+  summaries, not raw fields. Reviewer will flag it if the repo bloats.
+
 ## Verdict
 
 Nothing to merge besides the reviewer's own state files. No ownership
