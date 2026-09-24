@@ -1,8 +1,9 @@
 # AGENTS.md — read this first
 
-You are an agent working in the **qlora_ns_v2** repository. This file is the
-entry point: project context, repository structure, and the standard rules.
-The detailed cross-node protocol lives in [`PROTOCOL.md`](PROTOCOL.md) — read
+You are an agent working in this repository (local path `~/qlora_ns_v2` on
+every node — the only path guaranteed to exist). This file is the entry
+point: project context, repository structure, and the standard rules. The
+detailed cross-node protocol lives in [`PROTOCOL.md`](PROTOCOL.md) — read
 that too before your first session.
 
 ## What this project is
@@ -10,23 +11,20 @@ that too before your first session.
 We are contributing a paper to a scientific-computing conference that improves
 the current methodology for simulating the incompressible Navier–Stokes (NS)
 equations: **dynamical low-rank approximation (DLRA) with a structure-
-preserving (SP) split that enforces exact divergence-freeness**.
+preserving (SP) split that enforces exact divergence-freeness**, validated on
+**high-Reynolds-number, forced, turbulent dynamics** — where the interesting
+behavior lives: rank ≫ 3, slow singular-value decay, adaptive rank growth.
+That turbulence validation is the contribution.
 
-- **v1 (done, validated).** A matrix-free SP-DLRA engine for incompressible
-  2D NS in stream-function form. It enforces ∇·u = 0 exactly
-  (max |∇·u| ≈ 1.8e-14, not approximately), keeps kinetic energy monotone,
-  tracks the full-grid spectral solution (rel L2 ≈ 1.2e-2 at t=2; 0.77% at
-  32²), decays rank 3→2→1 on laminar Taylor–Green flow, and estimates a
-  ~3.1× speedup vs full grid at 64².
-  - v1 repo: `github.com:Azraelix316/qlora_ns` (local: `/home/jaredc/qlora_ns`)
-  - v1 handoff: `/home/jaredc/HANDOFF_qlora_ns.md`
-  - **Cite these numbers; do not re-derive or re-litigate them.**
-- **v2 (this repo).** Extend the validated engine to **high-Reynolds-number,
-  forced, turbulent dynamics** — where the interesting behavior lives:
-  rank ≫ 3, slow singular-value decay, adaptive rank growth. The v1 engine is
-  the foundation; the turbulence gap is the contribution.
+This is a fresh project. There were previous attempts at this goal, and they
+did not go well. Their data and sources are **not reusable** — they will not
+be cited in the paper, and do not go looking for prior-run artifacts (old
+repos, handoff docs, result files): they are not part of this project and may
+not exist on your node. What carries forward is the set of **lessons learned**
+from those runs — read [`lessons_learned.md`](lessons_learned.md) before your
+first session.
 
-### General directions (current consensus, see `summary_of_v2.md`)
+### General directions (current consensus, see `lessons_learned.md`)
 
 - **2D forced turbulence first** (Kolmogorov flow / 2D forced NS), not 3D.
 - **Re ∈ {100, 1000, 5000}**, benchmarked against full-grid spectral and
@@ -36,8 +34,9 @@ preserving (SP) split that enforces exact divergence-freeness**.
 - **Novelty claim (defensible, verify before asserting):** no known DLRA
   incompressible-NS solver is both exactly divergence-free and validated at
   high-Re turbulence. Closest prior art: Girfoglio–Quaini–Rozza
-  (arXiv:2201.00756, offline POD-Galerkin). `writing-research` is re-running
-  and persisting the literature survey — do not rely on memory of it.
+  (arXiv:2201.00756, offline POD-Galerkin). The literature survey must be
+  run and persisted by `writing-research` — do not rely on memory of prior
+  surveys.
 
 ### The goal — and what it is NOT
 
@@ -46,7 +45,9 @@ The novelty position is already defensible. **We do not need to invent an
 incredibly novel idea.** This is not a moonshot; the work is rigorous
 execution of a clear, standard plan:
 
-1. port the validated v1 engine (extend it; don't re-implement what works),
+1. build the SP-DLRA engine (structure-preserving split, exact
+   divergence-free, stream-function form for 2D NS), informed by
+   `lessons_learned.md`,
 2. add forced-turbulence drivers and adaptive rank,
 3. validate against the invariants and a full-grid reference,
 4. benchmark honestly,
@@ -66,7 +67,7 @@ merges it.
 | Agent | Branch | Worktree | Mission |
 |---|---|---|---|
 | theoretical-research | `agent/theoretical-research` | `worktrees/theoretical-research` | theory of turbulent DLRA-NS, improvement ideas |
-| coder | `agent/coder` | `worktrees/coder` | engine port, turbulence drivers, benchmarks |
+| coder | `agent/coder` | `worktrees/coder` | engine, turbulence drivers, benchmarks |
 | writer | `agent/writer` | `worktrees/writer` | the paper |
 | reviewer | `agent/reviewer` | `worktrees/reviewer` | reviews, decisions, sole merge into `main` |
 | writing-research | `agent/writing-research` | `worktrees/writing-research` | venues, references, novelty checks |
@@ -81,7 +82,8 @@ Key paths:
   (writing-research)
 - `docs/theory/`, `docs/references/`, `docs/venues/` — research write-ups
 - `scripts/agent.sh` — the protocol helper (`start` / `inbox` / `send` /
-  `finish`); `PROTOCOL.md` — the protocol; `summary_of_v2.md` — v1→v2 history
+  `finish`); `PROTOCOL.md` — the protocol; `lessons_learned.md` — lessons
+  from prior attempts
 - `worktrees/` — local per-node checkouts, gitignored, **not shared**
 
 ## Standard rules (all agents, no exceptions)

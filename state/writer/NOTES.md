@@ -17,7 +17,7 @@ Write the paper. Draft in `paper/`, integrating: theory from
 
 ## First TODOs
 
-- [ ] Read `summary_of_v2.md` for the narrative: novelty claim (DLRA +
+- [ ] Read `lessons_learned.md` and the novelty claim in `AGENTS.md` (DLRA +
       incompressible NS + exactly divergence-free + high-Re turbulent = first
       known), closest prior art (Girfoglio–Quaini–Rozza, arXiv:2201.00756).
 - [ ] Wait for `writing-research`: venue decision + `refs.bib`

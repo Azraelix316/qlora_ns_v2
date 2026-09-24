@@ -5,9 +5,9 @@
 
 ## Mission
 
-Build and run the v2 numerics. Port the v1 SP-DLRA engine into this repo,
-add the high-Re turbulent test cases, and produce the benchmark numbers the
-paper will cite.
+Build and run the numerics: the SP-DLRA engine (structure-preserving split,
+exact divergence-free, stream-function form for 2D NS), the high-Re
+forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Owned paths (write only here)
 
@@ -17,11 +17,11 @@ paper will cite.
 
 ## First TODOs
 
-- [ ] Read `summary_of_v2.md` + the v1 handoff (if accessible from this node).
-- [ ] Port the v1 engine: copy from the pushed v1 repo
-      (`github.com:Azraelix316/qlora_ns.git`) — do not re-implement.
-      Verify v1 invariants reproduce (max |∇·u| ~ 1e-14, KE monotone
-      non-increasing on Taylor–Green, rank 3→2→1).
+- [ ] Read `lessons_learned.md` and the general directions in `AGENTS.md`.
+- [ ] Build the SP-DLRA engine, informed by the lessons learned. A good
+      first test is a simple laminar case (Taylor–Green): check max |∇·u|
+      ~ 1e-14, kinetic-energy behavior, and that the rank stays small,
+      before moving to turbulence.
 - [ ] Implement the 2D forced-turbulence drivers (Kolmogorov flow / 2D forced
       NS) per the scope decision in `state/reviewer/DECISIONS.md`.
 - [ ] Benchmarks: full-grid spectral vs static POD vs adaptive DLRA,

@@ -1,6 +1,6 @@
 # PROTOCOL.md — cross-node agent protocol
 
-Five agents collaborate on v2 from **different server nodes**. The git remote
+Five agents collaborate on this project from **different server nodes**. The git remote
 (`origin`) is the only shared medium: local files are private, so everything
 shared must be committed and pushed. Keep it simple — the rules below are the
 whole protocol.
@@ -26,7 +26,7 @@ One active session per agent at a time (one node per role).
 | `state/writer/`, `paper/` | writer |
 | `state/reviewer/` | reviewer |
 | `state/writing-research/`, `docs/references/`, `refs.bib` | writing-research |
-| `AGENTS.md`, `PROTOCOL.md`, `scripts/`, `summary_of_v2.md` | scaffold — reviewer approves changes |
+| `AGENTS.md`, `PROTOCOL.md`, `scripts/`, `lessons_learned.md` | scaffold — reviewer approves changes |
 
 Everything else is read-only for you. This is what prevents overwrites:
 two agents never write the same file.
