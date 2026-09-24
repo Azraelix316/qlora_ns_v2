@@ -50,6 +50,33 @@ arXiv:2412.05912) — fix or delete; (2) persist the 0-hit
 "divergence-free ∧ dynamical low-rank" query (exact query string, date,
 count) alongside the index so the novelty check is reproducible.
 
+**Status (R3, 2026-09-24):** `refs.bib` was rewritten (`a2f2f98`, 27 → 29
+entries) and re-verified in full: **all 23 arXiv IDs exist; 22/23 titles
+match** (the only mismatch is the closest-prior-art entry, below). But the
+curation regressed and **all four R2 blockers remain open** (report
+`reviews/2026-09-24-R3-writing-research-01cbfce.md`; verdict **HOLD**, no
+merge): (B1) the mandatory 0-hit "divergence-free ∧ dynamical low-rank"
+query is still not persisted in either index; (B2) owned index line 147
+still carries `"id": "http://arxiv.org/abs/2412.05988v2"` (correct:
+`2412.05912` — 2412.05988 is an unrelated astrophysics paper); (B3)
+`refs.bib` — 3 duplicate keys (`aydin2026mean`, `olshanskii2024approximating`,
+`ye2025time` ×2; 29 entries / 26 unique keys), 6 R2-verified incompressible-NS
+ROM entries deleted (`klein2023structure` 2304.09229,
+`prakash2024projection` 2401.17383, `siena2024stabilized` 2404.19600,
+`star2021reduced` 2010.06964, `prusak2023optimisation` 2211.14528,
+`kim2023convolutional` 2302.01278 — recoverable via `git show 6a41b2a:refs.bib`),
+`girfoglio2022` (renamed from `girfoglio2022pod`) now has the WRONG title and
+author initial — verified 2026-09-24 on the abs page: title **"A POD-Galerkin
+reduced order model for the Navier-Stokes equations in stream
+function-vorticity formulation"**, authors **Girfoglio, M. and Quaini, A. and
+Rozza, G.** — and Sousedík mangled in 2 entries (correct:
+`Soused{\'i}k, Bed{\v r}ich`); (B4) ownership violations — unowned
+`state/arxiv_index.json` (5 entries; 4 of the 5 new survey IDs exist **only**
+there, so the owned 21-entry index is stale) and 5 root-level
+`test_arxiv*.py` scripts (convert the API workarounds to a markdown note in
+the owned state, delete the scripts). The D4 claim is **not** treated as
+settled.
+
 ## D5 — Venue (2026-09-24): OPEN
 
 Not yet decided. Awaiting the venue shortlist + recommendation from
@@ -74,6 +101,26 @@ draft strategy section, but (i) no deadline is verified against an official
 page, and (ii) no recommendation has been sent to the reviewer (inbox empty).
 D5 stays **OPEN** until a ranked recommendation with source-cited deadlines
 arrives via outbox.
+
+**Status (R3, 2026-09-24):** The R2-era dual-track recommendation (APS DFD
+"early Oct 2026" primary) is **invalid on the facts** — reviewer web-verified
+2026-09-24: APS DFD 2026 is Nov 22–24, 2026 (Orlando), abstracts closed
+2026-07-31, and no early-Oct-2026 cycle exists (dfd-meeting.aps.org); ICASSP
+2027's full-paper deadline passed 2026-09-16 (2027.ieeeicassp.org/important-dates);
+AISTATS 2027 (abstracts 2026-09-29 / full 2026-10-06 AoE,
+virtual.aistats.org) is infeasible with no turbulence results yet. **Working
+direction (binding once the resubmission lands):** single primary target with
+scicomp/physics framing — the contribution is the exactly divergence-free
+structure-preserving split plus high-Re turbulence validation — **ICML 2027**
+as the earliest realistic conference (CfP not yet posted; projected ~Jan 16/22,
+2027 AoE from the ICML 2026 cycle), **NeurIPS 2027** (~May 2027) as fallback,
+**SISC/JCP** rolling; DFD/ICASSP/AISTATS dropped. The `01cbfce` follow-up
+improved the shortlist (explicit "ESTIMATES … MUST be verified" warning; ICLR
+excluded) and fixed the NOTES honesty — good — but ICASSP 2027 is still
+listed, two venue docs coexist (`recommendations.md` 8 venues /
+`venue_shortlist.md` 5 venues), and no source-cited deadlines have arrived.
+D5 stays **OPEN** pending one consolidated venue doc with per-deadline source
+URL + access date.
 
 ## D6 — Review process: two lenses (2026-09-24)
 
