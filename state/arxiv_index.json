@@ -1,0 +1,47 @@
+[
+  {
+    "title": "TensorGRaD: Tensor Gradient Robust Decomposition for Memory-Efficient Neural Operator Training",
+    "authors": "S. Loeschcke, D. Pitt, et al.",
+    "arxiv_id": "2501.02379",
+    "divergence_freeness": "Not specified in abstract",
+    "turbulence_validation": "High-Re Validation: Explicitly validates on turbulent Navier-Stokes at Re = 10^5.",
+    "relevance_score": 4,
+    "notes": "Validates high Re but divergence-free method unclear from abstract."
+  },
+  {
+    "title": "A Mean-Informed Low-Rank Monolithic Stochastic Galerkin Solver for the Unsteady Navier-Stokes Equations",
+    "authors": "A. K. Aydin, B. Sousedík",
+    "arxiv_id": "2608.07526",
+    "divergence_freeness": "Uses Tensor Train (TT) and CP formats; no specific mention of divergence constraints.",
+    "turbulence_validation": "Mentions a channel-flow problem, but does not specify Re.",
+    "relevance_score": 3,
+    "notes": "Relevant tensor format, but lacks details on physical invariants."
+  },
+  {
+    "title": "Approximating a branch of solutions to the Navier-Stokes equations by reduced-order modeling",
+    "authors": "M. A. Olshanskii, L. G. Rebholz",
+    "arxiv_id": "2405.03796",
+    "divergence_freeness": "Uses Low-Rank Tensor Decomposition (LRTD) for incompressible NS; divergence handling not detailed in abstract.",
+    "turbulence_validation": "Validated on a Reynolds number range of [25, 400] (low-to-moderate Re).",
+    "relevance_score": 3,
+    "notes": "Uses LRTD but at low Re; doesn't address the high-Re turbulence requirement."
+  },
+  {
+    "title": "Data-driven linear analysis of turbulent flows",
+    "authors": "B. Herrmann, K. Cao, et al.",
+    "arxiv_id": "2606.28569",
+    "divergence_freeness": "Uses nonlinearity-subtracted DMD to find low-rank approximations of linearized dynamics.",
+    "turbulence_validation": "Turbulence Validation: Uses DNS and LES datasets, scaling from channel flow to full aircraft models.",
+    "relevance_score": 3,
+    "notes": "Focuses on linear/DMD approaches rather than DLRA."
+  },
+  {
+    "title": "Time integration of quantized tensor trains using the interpolative dynamical low-rank approximation",
+    "authors": "E. Ye, C. Yang",
+    "arxiv_id": "2512.15703",
+    "divergence_freeness": "Investigates interpolative DLRA schemes for hyperbolic systems (including NS).",
+    "turbulence_validation": "No specific turbulence validation mentioned in abstract.",
+    "relevance_score": 4,
+    "notes": "Directly uses DLRA but lacks high-Re/divergence-free details in abstract."
+  }
+]
