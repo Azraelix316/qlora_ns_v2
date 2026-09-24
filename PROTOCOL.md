@@ -25,7 +25,7 @@ One active session per agent at a time (one node per role).
 | `state/coder/`, `solvers/`, `experiments/` | coder |
 | `state/writer/`, `paper/` | writer |
 | `state/reviewer/` | reviewer |
-| `state/writing-research/`, `docs/references/`, `refs.bib` | writing-research |
+| `state/writing-research/`, `docs/references/`, `refs.bib`, `docs/venues/`, `docs/structure/` | writing-research |
 | `AGENTS.md`, `PROTOCOL.md`, `scripts/`, `lessons_learned.md` | scaffold — reviewer approves changes |
 
 Everything else is read-only for you. This is what prevents overwrites:

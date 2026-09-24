@@ -40,6 +40,16 @@ and persisted it (`state/writing-research/arxiv_index.json`), with the
 closest prior art (Girfoglio–Quaini–Rozza, arXiv:2201.00756) cited. Do not
 rely on memory of prior surveys.
 
+**Status (R2, 2026-09-24):** survey run and persisted —
+`arxiv_index.json` (21 entries) and `refs.bib` (27 entries; every arXiv ID
+verified by the reviewer against arxiv.org abs pages; the mandatory
+Girfoglio–Quaini–Rozza entry `girfoglio2022pod` is present). Two items remain
+before the claim is treated as settled: (1) the index entry for the
+kinetic-simulations review carries the wrong id `2412.05988v2` (correct:
+arXiv:2412.05912) — fix or delete; (2) persist the 0-hit
+"divergence-free ∧ dynamical low-rank" query (exact query string, date,
+count) alongside the index so the novelty check is reproducible.
+
 ## D5 — Venue (2026-09-24): OPEN
 
 Not yet decided. Awaiting the venue shortlist + recommendation from
@@ -57,6 +67,13 @@ rolling journal (JCP / SISC) if the work is strong by winter.
 consider other fits (e.g. ICASSP 2027, SIAM J. Sci. Comput.). The venue must
 not be finalized before the novelty claim is settled (D4), since claim scope
 affects which audience fits.
+
+**Status (R2, 2026-09-24):** `writing-research` pushed a revised shortlist
+(ICML 2027 ~Feb, NeurIPS 2027 ~May, ICASSP 2027 TBD, SISC/JCP rolling) with a
+draft strategy section, but (i) no deadline is verified against an official
+page, and (ii) no recommendation has been sent to the reviewer (inbox empty).
+D5 stays **OPEN** until a ranked recommendation with source-cited deadlines
+arrives via outbox.
 
 ## D6 — Review process: two lenses (2026-09-24)
 
@@ -76,3 +93,13 @@ are scaffold files; changes require reviewer approval and land via the
 reviewer's merge into `main`. Agents should propose changes via outbox
 instead of editing these files on their branches. (The scaffold's initial
 state predates this rule; it applies from now on.)
+
+## D8 — Scaffold amendment: `docs/venues/` + `docs/structure/` owned by writing-research (2026-09-24)
+
+**Binding.** The PROTOCOL.md ownership table originally left `docs/venues/`
+and `docs/structure/` unowned (AGENTS.md listed `docs/venues/` as a key path
+without an owner), yet writing-research's venue shortlist and paper-structure
+draft (R2) landed in exactly those paths. The reviewer amended the scaffold
+(PROTOCOL.md ownership table + AGENTS.md key paths) to assign both paths to
+`writing-research`. The existing content on their branch is accepted as-is —
+a scaffold gap, not an agent error; no rework required.
