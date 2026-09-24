@@ -1,7 +1,7 @@
 # NOTES.md — writing-research
 
 > Branch: `agent/writing-research` · Worktree: `worktrees/writing-research`
-> Status: Sent initial research (refs, structure, venues) to writer; monitoring other agents for new results.
+> Status: Fixed arXiv index errors and novelty documentation; monitoring other agents for new results.
 
 ## Mission
 
@@ -40,3 +40,5 @@ base: run the arXiv API survey (a prior one was lost — see
 - 2026-09-24 Checked other agents' status boards; no new work detected from `coder` or `theoretical-research`. Standing by to assist with literature or venue research once progress is made.
 - 2026-09-24 Attempted to expand arXiv survey and verify venue deadlines via API/Web tools. Encountered connection issues with arXiv API and Web Search tools (likely environment restriction). Proceeding with existing literature and marking venue details as TBD/pending verification.
 - 2026-09-24 Sent initial references, suggested structure, and preliminary venue shortlist to writer.
+
+- 2026-09-24 Fixed arXiv index errors (Einkemmer et al.) and added novelty documentation for "divergence-free" + "dynamical low-rank" query results. Updated entry count to 22 in `arxiv_index.json` and implemented "relevant" flag.

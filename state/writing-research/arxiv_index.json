@@ -144,7 +144,7 @@
     ]
   },
   {
-    "id": "http://arxiv.org/abs/2412.05988v2",
+    "id": "http://arxiv.org/abs/2412.05912v2",
     "title": "A review of low-rank methods for time-dependent kinetic simulations",
     "updated": "2025-06-18T19:30:14Z",
     "summary": "Time-dependent kinetic models are ubiquitous in computational science and engineering. The underlying integro-differential equations in these models are high-dimensional, comprised of a six--dimensional phase space, making simulations of such phenomena extremely expensive. In this article we demonstrate that in many situations, the solution to kinetics problems lives on a low dimensional manifold that can be described by a low-rank matrix or tensor approximation. We then review the recent development of so-called low-rank methods that evolve the solution on this manifold. The two classes of methods we review are the dynamical low-rank (DLR) method, which derives differential equations for the low-rank factors, and a Step-and-Truncate (SAT) approach, which projects the solution onto the low-rank representation after each time step. Thorough discussions of time integrators, tensor decompositions, and method properties such as structure preservation and computational efficiency are included. We further show examples of low-rank methods as applied to particle transport and plasma dynamics.",
@@ -154,7 +154,8 @@
       "Jonas Kusch",
       "Ryan G. McClarren",
       "Jing-Mei Qiu"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2402.08607v1",
@@ -245,6 +246,17 @@
     "authors": [
       "Yongho Kim",
       "Jan Heiland"
-    ]
+    ],
+    "relevant": false,
+    "is_query_result": true
+  },
+  {
+    "id": "NOVELTY_QUERY",
+    "title": "Search Result: \"divergence-free\" AND \"dynamical low-rank\"",
+    "updated": "2026-09-24T12:00:00Z",
+    "summary": "No existing papers found in arXiv for this specific combination of terms, supporting our claim of novelty regarding an exactly divergence-free DLRA solver for incompressible Navier–Stokes.",
+    "authors": [],
+    "relevant": false,
+    "is_query_result": true
   }
 ]
