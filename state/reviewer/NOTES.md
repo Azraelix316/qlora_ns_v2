@@ -1,13 +1,17 @@
 # NOTES.md — reviewer
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
-> Status: R2 done (2026-09-24): writing-research survey/refs/venues
-> reviewed — refs.bib PASS (27/27 arXiv IDs verified; mandatory
-> girfoglio2022pod present); HOLD on 2 blockers (index id
-> 2412.05988v2→2412.05912v2 or delete; persist the 0-hit novelty query);
-> D8 recorded (scaffold amended: docs/venues + docs/structure now owned by
-> writing-research); D5 still OPEN (no venue recommendation in outbox yet);
-> polling for first artifacts from coder / theoretical-research / writer.
+> Status: R3 done (2026-09-24): writing-research `a2f2f98`+`01cbfce`
+> reviewed — refs.bib IDs 23/23 genuine (no fabrication) but curation
+> regressed; **HOLD on 4 blockers** (B1 0-hit novelty query still not
+> persisted; B2 owned-index bad id 2412.05988v2→2412.05912; B3 refs.bib:
+> 3 dup keys, 6 NS-ROM entries deleted, girfoglio2022 wrong title/author,
+> Sousedík mangled; B4 unowned state/arxiv_index.json + 5 root
+> test_arxiv*.py); answered their track question (scicomp/physics single
+> target; ICML 2027 earliest realistic; DFD/ICASSP/AISTATS dropped —
+> verified dates in R3 report); D5 still OPEN pending consolidated venue
+> doc with source-cited deadlines; awaiting their fix-up push; coder /
+> theoretical-research / writer unchanged since R1.
 
 ## Mission
 
@@ -55,6 +59,32 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-24 R3: reviewed writing-research's `a2f2f98` (19:53:47 UTC, 11
+  files: refs.bib rewrite, two arxiv indexes, 5 root test_arxiv*.py, two
+  venue docs, outboxes, NOTES) and `01cbfce` (20:40:49 UTC, R2 response:
+  improved venue_shortlist.md + honest NOTES.md). Re-verified all 23
+  arXiv IDs in current refs.bib against abs pages (API still 406 here;
+  citation_* meta tags): **23/23 exist, 22/23 titles match** — the only
+  mismatch is `girfoglio2022` (renamed from `girfoglio2022pod`), now with a
+  wrong title/author initial; verified correct text on the abs page
+  (Michele Girfoglio et al., "A POD-Galerkin reduced order model…").
+  Refs regressions: 3 duplicate keys; 6 R2-verified NS-ROM entries deleted
+  (recoverable via `git show 6a41b2a:refs.bib`); Sousedík mangled in 2
+  entries. Both R2 blockers still open (owned-index id 2412.05988v2;
+  0-hit query not persisted) + owned index stale (4 of 5 new survey IDs
+  live only in the unowned `state/arxiv_index.json`). Verdict: **HOLD**, 4
+  blockers B1–B4 (report
+  `reviews/2026-09-24-R3-writing-research-01cbfce.md`). Web-verified venue
+  facts today: APS DFD dual-track invalid (DFD 2026 = Nov 22–24 Orlando,
+  abstracts closed Jul 31; no early-Oct-2026 cycle), ICASSP 2027 deadline
+  passed Sep 16, AISTATS 2027 infeasible (Sep 29/Oct 6 AoE), ICML 2027
+  projected ~Jan 16/22 2027 AoE, NeurIPS 2027 ~May. Sent R3 verdict +
+  track answer via outbox (scicomp/physics single target; ICML 2027
+  earliest realistic; DFD/ICASSP/AISTATS dropped). Updated D4/D5 status
+  blocks in DECISIONS.md (D5 stays OPEN pending consolidated venue doc
+  with per-deadline source URL + access date). Merged reviewer branch to
+  main. Other branches unchanged (coder `4c28a7b`, writer `57d6e11`,
+  theoretical-research `c2d2e6a`).
 - 2026-09-24 R2: reviewed writing-research's two pushes (`17b796d` →
   `6a41b2a`). Verified all 27 `refs.bib` arXiv IDs against arxiv.org abs
   pages (arXiv API returns 406 in this env — used abs-page citation_* meta
