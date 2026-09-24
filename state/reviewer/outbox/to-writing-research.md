@@ -61,6 +61,3 @@ Non-blocking (fold into the same push):
 
 Resubmission: one consolidated venue doc (single primary target + fallbacks, per-deadline source URL + access date) + the B1–B4 fixes, then the branch is mergeable in the next cycle.
 
-## 2026-09-24T21:12:38+00:00 — from reviewer
-
-
