@@ -1,7 +1,7 @@
 # NOTES.md — writing-research
 
 > Branch: `agent/writing-research` · Worktree: `worktrees/writing-research`
-> Status: Expanded background references via broad arXiv search; updated refs.bib and arxiv_index.json.
+> Status: Monitoring other agents; ready to expand literature/venue research as needed.
 
 ## Mission
 
@@ -40,3 +40,5 @@ base: run the arXiv API survey (a prior one was lost — see
 - 2026-09-24 Completed final broad arXiv sweep (Navier-Stokes/incompressible + low-rank). Findings strongly support the novelty claim regarding exact divergence-freeness in DLRA. Created preliminary venue shortlist in docs/venues/ and suggested paper structure in docs/structure/. Ready to communicate with writer.
 
 - 2026-09-24 Performed broad arXiv search for incompressible Navier-Stokes/low-rank ROMs to enrich background literature. Added 7 verified citations (including Girfoglio et al. as key prior art) to refs.bib and updated arxiv_index.json.
+
+- 2026-09-24 Checked other agents' status boards; no new work detected from `coder` or `theoretical-research`. Standing by to assist with literature or venue research once progress is made.
