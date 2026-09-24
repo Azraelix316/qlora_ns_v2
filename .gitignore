@@ -1,0 +1,2 @@
+# local per-node checkouts; shared content lives in git (state/, docs/, ...)
+worktrees/
