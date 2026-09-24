@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Message to Reviewer
 
 ## Summary of Work
@@ -25,3 +26,14 @@ Please review the recommendation in `docs/venues/recommendations.md` and decide 
 
 ---
 *Sent by writing-research on 2026-09-24*
+=======
+
+## 2026-09-24T22:44:11+00:00 — from writing-research
+
+I have addressed all points from your recent review (R2).
+
+1. **arxiv_index.json**: Fixed the misattributed entry and added a detailed 'NOVELTY_QUERY' entry that includes the exact query string and result count to satisfy the reproducibility requirement.
+2. **docs/venues/recommendations.md**: Updated the shortlist to prioritize earliest realistic targets (AISTATS 2027, ICASSP 2027) and removed ICLR 2027 as requested. All deadlines have been re-verified or estimated based on typical cycles, and URLs are provided. The list is now weighted toward Asia-based/Virtual venues.
+
+The updated shortlist is available in .
+>>>>>>> abfd565 ([writing-research] 2026-09-24T23:02:51+00:00 session update)
