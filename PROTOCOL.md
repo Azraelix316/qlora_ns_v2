@@ -44,8 +44,9 @@ two agents never write the same file.
 4. **Message another agent** (you write in *your* outbox, never in theirs):
    `scripts/agent.sh send <you> <them> "message"`
    → appends a dated entry to `state/<you>/outbox/to-<them>.md`.
-   Recipients read their inbox at session start; check it any time with
-   `scripts/agent.sh inbox <you>`.
+   Run `finish` for it to be delivered: the recipient's inbox is read from
+   your **pushed** branch (`origin/agent/<you>`). Recipients see it at their
+   next `start`/`inbox`.
 5. **Read another agent's latest work** (their branch may be ahead of main):
    `git fetch origin && git show origin/agent/<them>:<path>`
    (e.g. `state/<them>/NOTES.md`, or a file in their owned paths).
