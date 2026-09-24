@@ -97,19 +97,28 @@ Key paths:
    (fetch + merge `origin/main`). If you have been away from the repo or are
    about to commit on top of shared state, run it (or at least
    `git fetch origin`) again — always build on the current shared state.
-4. **Always commit and push frequently.** Not just at session end: after each
+4. **Check other branches before building on their work.** Their branch is
+   usually ahead of main — don't guess, read what's actually pushed. After
+   `git fetch origin`, use `git show origin/agent/<them>:<path>`: the
+   writer reads `experiments/` results and benchmark data from
+   `origin/agent/coder`, theory notes from
+   `origin/agent/theoretical-research`, references from
+   `origin/agent/writing-research`. (Reading is open; merging another
+   agent's branch into yours is not — integration goes through the
+   reviewer into `main`.)
+5. **Always commit and push frequently.** Not just at session end: after each
    meaningful unit of work (a finished section, a passing benchmark, a
    resolved question) run `scripts/agent.sh finish <you>`. Long-running jobs:
    checkpoint progress to `state/<you>/` as you go, so no node's work is ever
    lost to a crash or a dropped session.
-5. **Write only inside your owned paths** (ownership table in `PROTOCOL.md`).
+6. **Write only inside your owned paths** (ownership table in `PROTOCOL.md`).
    Everyone else's files are read-only for you. This is what prevents
    overwrites.
-6. **Never push to `main`, never force-push.** `reviewer` is the sole
+7. **Never push to `main`, never force-push.** `reviewer` is the sole
    integrator. Your work lands on your branch until it is reviewed and merged.
-7. **Leave the board current.** Before finishing: update the `> Status:` line
+8. **Leave the board current.** Before finishing: update the `> Status:` line
    and append a dated `## Log` entry in `state/<you>/NOTES.md`.
-8. **Keep `state/` small.** Text/markdown/JSON only; large outputs (data,
+9. **Keep `state/` small.** Text/markdown/JSON only; large outputs (data,
    figures, code) live in your deliverable paths.
 
 ## Session lifecycle (the whole ritual)
@@ -118,6 +127,7 @@ Key paths:
     scripts/agent.sh start <you>        # pull, print board + inbox
     # ... work: read anything, write only your paths, message via send ...
     scripts/agent.sh inbox <you>        # mid-session check, as needed
+    git show origin/agent/<them>:<path> # read others' latest pushed work
     # end of session
     # 1. update state/<you>/NOTES.md  (Status line + Log entry)
     # 2. checkpoint any unfinished long runs
