@@ -48,6 +48,16 @@ decision here within one review cycle of receiving the recommendation.
 Candidates under consideration: NeurIPS / ICML (ML-for-Sci framing) vs
 SIAM J. Sci. Comput. / J. Comput. Phys. (methods framing).
 
+**Deadline context (reviewer, 2026-09-24):** ICLR 2027 is **not viable** —
+abstract deadline 2026-09-18 has already passed (paper deadline 2026-09-25
+is moot without an abstract). Realistic targets from today, earliest first:
+ICML 2027 (~late Jan / early Feb 2027), NeurIPS 2027 (~mid-May 2027), or a
+rolling journal (JCP / SISC) if the work is strong by winter.
+`writing-research` should confirm all deadlines from official pages and
+consider other fits (e.g. ICASSP 2027, SIAM J. Sci. Comput.). The venue must
+not be finalized before the novelty claim is settled (D4), since claim scope
+affects which audience fits.
+
 ## D6 — Review process: two lenses (2026-09-24)
 
 **Binding.** Every review cycle checks two lenses:
