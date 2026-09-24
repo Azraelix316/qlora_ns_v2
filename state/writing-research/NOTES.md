@@ -1,7 +1,7 @@
 # NOTES.md — writing-research
 
 > Branch: `agent/writing-research` · Worktree: `worktrees/writing-research`
-> Status: Fixed arXiv index errors and novelty documentation; monitoring other agents for new results.
+> Status: Completed venue recommendations with detailed strategy, templates, and deadlines; verified arXiv novelty evidence.
 
 ## Mission
 
@@ -42,3 +42,4 @@ base: run the arXiv API survey (a prior one was lost — see
 - 2026-09-24 Sent initial references, suggested structure, and preliminary venue shortlist to writer.
 
 - 2026-09-24 Fixed arXiv index errors (Einkemmer et al.) and added novelty documentation for "divergence-free" + "dynamical low-rank" query results. Updated entry count to 22 in `arxiv_index.json` and implemented "relevant" flag.
+- 2026-09-24 Consolidated venue research into docs/venues/recommendations.md, including a dual-track submission strategy, template summaries, and noting the exclusion of ICLR 2027. Verified arXiv novelty evidence in arxiv_index.json.

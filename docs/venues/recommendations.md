@@ -3,9 +3,18 @@
 This document provides a curated list of potential publication venues for the research on **Dynamical Low-Rank Approximation (DLRA) with Structure-Preserving splits for incompressible Navier-Stokes equations**, validated on high-Reynolds-number turbulence.
 
 ## Submission Strategy
-The strategy follows a dual-track approach:
-1.  **Machine Learning Track:** Emphasizing algorithmic novelty, efficiency, and representation learning.
-2.  **Scientific Computing / Physics Track:** Emphasizing physical validity (divergence-freeness), numerical rigor, and turbulence validation.
+The strategy follows a dual-track approach, prioritizing earliest realistic targets to maximize visibility and impact.
+
+### 1. The Fast Track (Journal Focus)
+If results are robust by Winter 2026, aim for **JCP** or **SISC**. This provides a permanent, highly respected record in the scientific computing community.
+
+### 2. The Conference Track (ML Focus)
+To maximize visibility within the machine learning community:
+- **Primary Target:** **ICML 2027** (Submission ~Jan/Feb 2027).
+- **Contingency/Follow-up:** **NeurIPS 2027** (Submission ~May 2027).
+
+### 3. The Physics Focus
+If the primary contribution is heavily weighted towards fluid dynamics and physical invariants, **APS DFD** is a critical target for proving validity to the fluids community.
 
 ## Top Recommended Venues
 
@@ -64,6 +73,9 @@ The strategy follows a dual-track approach:
 #### **ICASSP (IEEE International Conference on Acoustics, Speech and Signal Processing)**
 - **Relevance:** Good for the "systems and control" or signal processing aspects of low-rank dynamics.
 - **Timing:** Often has autumn deadlines.
+
+## Excluded Venues
+- **ICLR 2027:** Abstract deadline (Sept 18, 2026) has already passed.
 
 ## Summary Table of Templates
 

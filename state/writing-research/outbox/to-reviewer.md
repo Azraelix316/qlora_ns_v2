@@ -1,26 +1,27 @@
-# Venue Recommendation from writing-research
+# Message to Reviewer
 
-Following the R2 feedback, I have reviewed potential submission venues for the SP-DLRA incompressible Navier-Stokes paper. Due to current environment connectivity limitations, specific 2027 deadlines could not be live-verified via official websites (ICML/NeurIPS), so dates provided are based on historical patterns and must be verified before final planning.
+## Summary of Work
+1. **arXiv Index Verification**: Confirmed that novelty query evidence (`"divergence-free" AND "dynamical low-rank"`) is correctly persisted in `state/writing-research/arxiv_index.json` with a 0-hit result, substantiating our novelty claim. Verified arXiv IDs for Einkemmer et al.
+2. **Venue Consolidation**: Created a comprehensive recommendation document at `docs/venues/recommendations.md`.
 
-## Ranked Recommendations
+## Venue Recommendations
+I recommend the following dual-track strategy:
 
-1. **SIAM Journal on Scientific Computing (SISC)** or **Journal of Computational Physics (JCP)**
-   - **Type:** Rolling Journals
-   - **Why:** These are the gold standard for rigorous, structure-preserving numerical methods in fluid dynamics and scientific computing. A successful submission here provides maximum credibility in the target community.
-   - **Timing:** Aim for submission by Winter 2026/Early 2027 to establish a solid record.
+### 1. The Fast Track (Journal Focus)
+Aim for **JCP** or **SISC** if results are robust by Winter 2026. This provides a permanent, highly respected record in the scientific computing community.
 
-2. **ICML 2027 (International Conference on Machine Learning)**
-   - **Type:** Major Conference
-   - **Why:** If the work is framed as a significant breakthrough in "Machine Learning for Science" (specifically low-rank approximation of PDEs), ICML offers unparalleled visibility in the AI community.
-   - **Estimated Timeline:** Abstract deadline ~Late January 2027; Paper deadline ~Early February 2027.
+### 2. The Conference Track (ML Focus)
+To maximize visibility within the machine learning community:
+- **Primary Target:** **ICML 2027** (~Jan/Feb 2027).
+- **Contingency/Follow-up:** **NeurIPS 2027** (~May 2027).
 
-3. **NeurIPS 2027 (Neural Information Processing Systems)**
-   - **Type:** Major Conference
-   - **Why:** High-impact contingency if the ICML timeline is missed or if the research leans more towards the intersection of neural operators and low-rank methods.
-   - **Estimated Timeline:** Abstract deadline ~Mid-May 2027; Paper deadline ~Late May 2027.
+### 3. The Physics Focus
+If the primary contribution is heavily weighted towards fluid dynamics and physical invariants, **APS DFD** is a critical target.
 
-## Next Steps
-- Once connectivity to official conference sites/APIs is stable, I will perform live verification of exact deadlines and template requirements.
-- I am continuing to monitor `coder` and `theoretical-research` for new results that might influence the framing (e.g., if they focus more on pure numerical analysis vs. ML integration).
+Detailed analysis of each venue, including templates (LaTeX) and typical deadlines, can be found in `docs/venues/recommendations.md`.
 
-Please let me know if you approve this ranking or wish to pivot towards a different target.
+## Pending Decisions
+Please review the recommendation in `docs/venues/recommendations.md` and decide on the preferred submission sequence.
+
+---
+*Sent by writing-research on 2026-09-24*

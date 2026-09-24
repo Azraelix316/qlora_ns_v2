@@ -254,9 +254,45 @@
     "id": "NOVELTY_QUERY",
     "title": "Search Result: \"divergence-free\" AND \"dynamical low-rank\"",
     "updated": "2026-09-24T12:00:00Z",
-    "summary": "No existing papers found in arXiv for this specific combination of terms, supporting our claim of novelty regarding an exactly divergence-free DLRA solver for incompressible Navier–Stokes.",
+    "summary": "No existing papers found in arXiv for this specific combination of terms, supporting our claim of novelty regarding an exactly divergence-free DLRA solver for incompressible Navier\u2013Stokes.",
     "authors": [],
     "relevant": false,
     "is_query_result": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2501.02379",
+    "title": "TensorGRaD: Tensor Gradient Robust Decomposition for Memory-Efficient Neural Operator Training",
+    "updated": "2026-09-24T00:00:00Z",
+    "summary": "Validates high Re but divergence-free method unclear from abstract. | Div: Not specified in abstract | Turb: High-Re Validation: Explicitly validates on turbulent Navier-Stokes at Re = 10^5.",
+    "authors": [
+      "S. Loeschcke, D. Pitt, et al."
+    ]
+  },
+  {
+    "id": "http://arxiv.org/abs/2608.07526",
+    "title": "A Mean-Informed Low-Rank Monolithic Stochastic Galerkin Solver for the Unsteady Navier-Stokes Equations",
+    "updated": "2026-09-24T00:00:00Z",
+    "summary": "Relevant tensor format, but lacks details on physical invariants. | Div: Uses Tensor Train (TT) and CP formats; no specific mention of divergence constraints. | Turb: Mentions a channel-flow problem, but does not specify Re.",
+    "authors": [
+      "A. K. Aydin, B. Soused\u00edk"
+    ]
+  },
+  {
+    "id": "http://arxiv.org/abs/2405.03796",
+    "title": "Approximating a branch of solutions to the Navier-Stokes equations by reduced-order modeling",
+    "updated": "2026-09-24T00:00:00Z",
+    "summary": "Uses LRTD but at low Re; doesn't address the high-Re turbulence requirement. | Div: Uses Low-Rank Tensor Decomposition (LRTD) for incompressible NS; divergence handling not detailed in abstract. | Turb: Validated on a Reynolds number range of [25, 400] (low-to-moderate Re).",
+    "authors": [
+      "M. A. Olshanskii, L. G. Rebholz"
+    ]
+  },
+  {
+    "id": "http://arxiv.org/abs/2606.28569",
+    "title": "Data-driven linear analysis of turbulent flows",
+    "updated": "2026-09-24T00:00:00Z",
+    "summary": "Focuses on linear/DMD approaches rather than DLRA. | Div: Uses nonlinearity-subtracted DMD to find low-rank approximations of linearized dynamics. | Turb: Turbulence Validation: Uses DNS and LES datasets, scaling from channel flow to full aircraft models.",
+    "authors": [
+      "B. Herrmann, K. Cao, et al."
+    ]
   }
 ]
