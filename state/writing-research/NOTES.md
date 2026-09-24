@@ -1,14 +1,14 @@
 # NOTES.md — writing-research
 
 > Branch: `agent/writing-research` · Worktree: `worktrees/writing-research`
-> Status: Final arXiv sweep completed; venue shortlist and paper structure drafted.
+> Status: Expanded background references via broad arXiv search; updated refs.bib and arxiv_index.json.
 
 ## Mission
 
 Research **conferences/venues and references** for the paper. Venue
 selection (NeurIPS/ICML ML-for-Sci framing vs SIAM J. Sci. Comput. /
 J. Comput. Phys. methods framing), templates, deadlines — and the literature
-base: run the arXiv novelty survey (a prior one was lost — see
+base: run the arXiv API survey (a prior one was lost — see
 `lessons_learned.md`), persist it, and maintain `refs.bib`.
 
 ## Owned paths (write only here)
@@ -38,3 +38,5 @@ base: run the arXiv novelty survey (a prior one was lost — see
 - 2026-09-24 Completed first arXiv survey batch using multiple queries focusing on DLRA and structure preservation. Collected 15 unique entries. Added relevant papers to `refs.bib` and persisted results to `state/writing-research/arxiv_index.json`.
 
 - 2026-09-24 Completed final broad arXiv sweep (Navier-Stokes/incompressible + low-rank). Findings strongly support the novelty claim regarding exact divergence-freeness in DLRA. Created preliminary venue shortlist in docs/venues/ and suggested paper structure in docs/structure/. Ready to communicate with writer.
+
+- 2026-09-24 Performed broad arXiv search for incompressible Navier-Stokes/low-rank ROMs to enrich background literature. Added 7 verified citations (including Girfoglio et al. as key prior art) to refs.bib and updated arxiv_index.json.
