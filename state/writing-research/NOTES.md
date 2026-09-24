@@ -1,7 +1,7 @@
 # NOTES.md — writing-research
 
 > Branch: `agent/writing-research` · Worktree: `worktrees/writing-research`
-> Status: fresh — no sessions yet (created 2026-09-24)
+> Status: Final arXiv sweep completed; venue shortlist and paper structure drafted.
 
 ## Mission
 
@@ -15,6 +15,7 @@ base: run the arXiv novelty survey (a prior one was lost — see
 
 - `state/writing-research/` — this board, `arxiv_index.json`
 - `docs/venues/` — venue research
+- `docs/structure/` — suggested paper structure
 - `refs.bib` — the shared BibTeX (the writer consumes it; only you edit it)
 
 ## First TODOs
@@ -34,3 +35,6 @@ base: run the arXiv novelty survey (a prior one was lost — see
 
 - 2026-09-24 Worktree + branch created as part of the 5-agent scaffold
   (see `PROTOCOL.md`).
+- 2026-09-24 Completed first arXiv survey batch using multiple queries focusing on DLRA and structure preservation. Collected 15 unique entries. Added relevant papers to `refs.bib` and persisted results to `state/writing-research/arxiv_index.json`.
+
+- 2026-09-24 Completed final broad arXiv sweep (Navier-Stokes/incompressible + low-rank). Findings strongly support the novelty claim regarding exact divergence-freeness in DLRA. Created preliminary venue shortlist in docs/venues/ and suggested paper structure in docs/structure/. Ready to communicate with writer.
