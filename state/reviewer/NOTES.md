@@ -17,8 +17,8 @@ you are the only agent allowed to write to `main`.
 ## First TODOs
 
 - [ ] Create `state/reviewer/DECISIONS.md` and record:
-      1. Scope: 2D forced turbulence first (recommendation in the v2
-         research notes; see `summary_of_v2.md` §2) — confirm or override.
+      1. Scope: 2D forced turbulence first (see the general directions in
+         `AGENTS.md` and `lessons_learned.md`) — confirm or override.
       2. Venue: open — awaiting the `writing-research` survey.
 - [ ] Review the scaffold (protocol + notes) for gaps; fix on your branch,
       merge to main.

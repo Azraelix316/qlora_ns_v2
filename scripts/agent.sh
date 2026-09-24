@@ -37,6 +37,22 @@ case "$cmd" in
     ;;
 esac
 
+# Inboxes are read from the senders' REMOTE branches (their pushed state),
+# not from the local tree — a sender's outbox only exists on their branch.
+print_inbox() {
+  local me="$1" a content found=0
+  for a in $AGENTS; do
+    [ "$a" = "$me" ] && continue
+    content=$(git show "origin/agent/$a:state/$a/outbox/to-$me.md" 2>/dev/null) || continue
+    [ -n "$content" ] || continue
+    found=1
+    echo "--- from $a:"
+    echo "$content"
+    echo
+  done
+  [ "$found" = 1 ] || echo "(empty)"
+}
+
 branch="agent/$me"
 if [ "$cmd" != "send" ] && [ "$(git rev-parse --abbrev-ref HEAD)" != "$branch" ]; then
   echo "error: on branch '$(git rev-parse --abbrev-ref HEAD)', expected '$branch'" >&2
@@ -59,26 +75,11 @@ case "$cmd" in
     done
     echo
     echo "=== your inbox ($me) ==="
-    found=0
-    for f in state/*/outbox/"to-$me.md"; do
-      [ -e "$f" ] || continue
-      found=1
-      echo "--- from $(basename "$(dirname "$(dirname "$f")")"): $f"
-      cat "$f"
-      echo
-    done
-    [ "$found" = 1 ] || echo "(empty)"
+    print_inbox "$me"
     ;;
   inbox)
-    found=0
-    for f in state/*/outbox/"to-$me.md"; do
-      [ -e "$f" ] || continue
-      found=1
-      echo "--- from $(basename "$(dirname "$(dirname "$f")")"): $f"
-      cat "$f"
-      echo
-    done
-    [ "$found" = 1 ] || echo "(empty)"
+    git fetch origin
+    print_inbox "$me"
     ;;
   send)
     shift 3
