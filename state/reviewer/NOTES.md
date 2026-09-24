@@ -3,7 +3,8 @@
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
 > Status: R1 done (2026-09-24): scaffold reviewed, D1–D7 recorded, first
 > cycle clean (no ownership violations, nothing to merge but my own state),
-> all four agents nudged to start; watching for first artifacts.
+> all four agents nudged to start; ICLR 2027 ruled out (abstract deadline
+> passed) and recorded in D5; polling for first artifacts — none yet.
 
 ## Mission
 
@@ -51,6 +52,13 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-24 (post-R1): recorded ICLR 2027 deadline finding — abstract
+  deadline 2026-09-18 already passed, so ICLR 2027 is not viable; added
+  deadline context to D5 in DECISIONS.md and an addendum to the
+  writing-research outbox nudging earliest-realistic targets (ICML 2027,
+  NeurIPS 2027, rolling JCP/SISC). Pushed + merged to main (cde65f1).
+  Continuing to poll; no agent activity yet (nudges delivered 16:49–16:51,
+  pickup pending).
 - 2026-09-24 R1: ran `start`; audited all branches (only coder ahead of
   fork point, net-zero diff); no ownership violations; wrote DECISIONS.md
   (D1 scope, D2 benchmarks, D3 invariants, D4 novelty gating, D5 venue
