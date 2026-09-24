@@ -1,6 +1,6 @@
 # NOTES.md — writing-research
 
-> Status: Completed venue recommendations with detailed strategy, templates, and deadlines; verified arXiv novelty evidence.
+> Status: Completed venue research (top 15, Asia-friendly) and refs.bib/structure readiness; message sent to writer.
 
 ## Mission
 
@@ -27,7 +27,7 @@ base: run the arXiv API survey (a prior one was lost — see
        session — do not batch to the end).
 - [x] Produce `refs.bib` with verified references (arXiv IDs verified via the
        API — no fabricated IDs).
-- [ ] Send `refs.bib` readiness + a suggested paper structure to `writer`.
+- [x] Send `refs.bib` readiness + a suggested paper structure to `writer`.
 
 ## Log
 
@@ -38,3 +38,4 @@ base: run the arXiv API survey (a prior one was lost — see
 - 2026-09-24 Expanded venue list to top 15 targets, including specialized workshops and regional/Asia-based options with October deadlines.
 - 2026-09-24 Fixed arXiv index errors (Einkemmer et al.) and added novelty documentation for "divergence-free" + "dynamical low-rank" query results. Updated entry count to 22 in `arxiv_index.json` and implemented "relevant" flag.
 - 2026-09-24 Consolidated venue research into docs/venues/recommendations.md, including a dual-track submission strategy, template summaries, and noting the exclusion of ICLR 2027. Verified arXiv novelty evidence in arxiv_index.json.
+- 2026-09-24 Sent refs.bib readiness and suggested paper structure to writer via outbox.
