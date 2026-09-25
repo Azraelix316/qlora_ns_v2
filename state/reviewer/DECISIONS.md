@@ -3227,3 +3227,63 @@ therefore a §7 observation and NOT a contribution, until the D31.5 sweep runs.*
 
 **D48.5 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42.6, D43.7, D44.8,
 D45.8, D46.8, D47.5a and D47.8 stands.
+
+---
+
+## D42c — **D42's PREMISE WAS FALSE. I MEASURED THE PAPER'S CITATIONS AGAINST A FILE THE PAPER DOES NOT USE. `paper/references.bib` HAS ALL 30 KEYS THE DRAFT CITES.** (2026-09-26) — **SUPERSEDES D42 and R77's conclusion.**
+
+> **OPERATIVE (R84).** **The paper's related work is NOT citation-blocked: it is written (188 lines)
+> and every key resolves.** **Of D42's four "missing" items, three are already in the paper, correctly,
+> under different keys. ONE is genuinely missing** (Kusch–Schotthöfer & Walter 2026) and is in
+> `CITATIONS.md` §1. **`refs.bib` at the root has a WRONG AUTHOR and is NOT the paper's bibliography.**
+
+**D42c.1 — THE ERROR. D42 AND R77 SAID "THE PAPER'S RELATED-WORK SECTION CANNOT BE WRITTEN: THREE OF
+ITS SIX REQUIRED CITATIONS ARE ABSENT." I MEASURED THAT AGAINST `refs.bib` AT THE REPOSITORY ROOT —
+`writing-research`'s shared file. THE PAPER'S BIBLIOGRAPHY IS `paper/references.bib`, THE WRITER'S,
+38 ENTRIES, AND ALL 30 KEYS `03_related_work.tex` CITES RESOLVE IN IT. 27 OF THE 30 ARE ABSENT FROM
+THE ROOT FILE, WHICH IS WHY THE GAP LOOKED REAL.**
+
+**D42c.2 — WHAT IS ACTUALLY TRUE, EVERY ITEM CROSSREF-VERIFIED 2026-09-26.**
+
+| D42/R77 said | reality in `paper/references.bib` |
+|---|---|
+| Lubich & Oseledets MISSING | **PRESENT, correct**, as `lubich2014` — BIT 54(1):171-188, 2014, `10.1007/s10543-013-0454-0`. Its note *"2013 in print; 2014 vol. 54"* is **exemplary**: Crossref's `published` is 2013, the issue year 2014. |
+| RAIL MISSING | **PRESENT, correct**, as `rail2025` — SISC 47(2):A1145-A1169, 2025, `10.1137/23M1622921`. |
+| Girfoglio has no `doi` | **PRESENT, correct**, as `girfoglio2022pod` — Comp. Fluids 244:105536, 2022, `10.1016/j.compfluid.2022.105536`. The missing-`doi` is in the ROOT file. |
+| Kusch–Schotthöfer & Walter 2026 MISSING | **CORRECT — the ONLY genuine gap.** |
+
+**D42c.3 — AND I ALMOST REPORTED THE INVERSE ERROR, WHICH IS THE PART THAT MATTERS. D42's OWN TABLE
+READS "Koch & Othmar (SIMAX 2007)" — I HAD THE RIGHT NAME IN MY OWN DECISION FILE. I THEN SAW THE
+PAPER'S `koch2007` SAY "Othmar", SAW THE ROOT `refs.bib` SAY "Olga", AND CONCLUDED THE PAPER WAS
+WRONG. CROSSREF FOR `10.1137/050639703` SAYS *Othmar Koch* — SO `refs.bib` IS WRONG AND THE PAPER IS
+RIGHT. I CONFUSED THE TWO FILES AND THEN DOUBTED THE CORRECT ONE. A CROSS-FILE CONTRADICTION IS A
+REASON TO CHECK WHICH FILE THE DOCUMENT ACTUALLY USES, NOT A REASON TO SUSPECT THE DOCUMENT. THE
+PAPER'S BIBLIOGRAPHY IS BETTER THAN THE SHARED ONE IT WAS MEASURED AGAINST.**
+
+**D42c.4 — TWO DEFECTS FOUND IN R84, BOTH NEEDING SOMEONE ELSE'S FILE. (1) `refs.bib` HAS A WRONG
+AUTHOR: `koch2007dlra` ATTRIBUTES THE 2007 PAPER TO *Koch, Olga*; CROSSREF SAYS *Othmar*. ONE-LINE
+FIX, NOT MY FILE. (2) THE PAPER CITES `koch2019dlra` — "Koch, **Michael** and Lubich", J. Nonlinear
+Science 29(1):1-35, 2019, NO DOI, WITH A NOTE READING *"[C] classic; listed in reviewer-verified shared
+bib"*. THAT NOTE IS FALSE IN BOTH FILES. CROSSREF HOLDS NO SUCH PAPER: the only Koch in that journal
+is *Hans* Koch on rattleback dynamics (2022, `10.1007/s00332-022-09797-7`), unrelated, and among the
+**73** PAPERS CROSSREF HOLDS FOR THAT JOURNAL IN 2019, NONE SITS AT VOL 29(1) PP. 1-35. I CANNOT
+PROVE IT DOES NOT EXIST (print-only, or absent from Crossref's index), SO THE HONEST FINDING IS
+"UNCORROBORATED, WITH A FALSE PROVENANCE NOTE", NOT "FABRICATED". ACTION: SUPPLY THE DOI OR DROP IT.**
+
+**D42c.5 — THE STRUCTURAL FINDING, BIGGER THAN ANY SINGLE ENTRY: THE PROJECT HAS TWO BIBLIOGRAPHIES
+COVERING THE SAME LITERATURE UNDER DIFFERENT KEY CONVENTIONS** — `girfoglio2022`/`girfoglio2022pod`,
+`musharbash2018dual`/`musharbash2018`, `koch2007dlra`/`koch2007`, and eight more. Root `refs.bib` has a
+DOI in **3 of 42** entries; `paper/references.bib` in **15 of 38**. **THIS IS A CONSOLIDATION TASK,
+NOT A CITATION GAP, AND IT IS `writing-research`'s AND THE WRITER'S. THE PAPER DOES NOT NEED THE ROOT
+FILE FIXED IN ORDER TO BE SUBMITTED; IT NEEDS ONE BIBLIOGRAPHY AT SUBMISSION TIME, AND THE WRITER'S IS
+THE BETTER ONE.**
+
+**D42c.6 — THE ERROR IS THE THIRD VARIANT OF ONE FAILURE. R81: I NEVER READ THE OUTPUT THE OTHER
+AGENTS PRODUCE. R82: I GENERALISED FROM ONE ARTIFACT TO A CLASS. R84: I INFERRED THE STATE OF A
+DOCUMENT FROM A FILE THAT DOCUMENT DOES NOT USE. ALL THREE ARE "AN INTERMEDIATE ARTIFACT IS NOT THE
+THING." THE DISCIPLINE THAT CATCHES ALL THREE: BEFORE REPORTING THAT A DELIVERABLE IS INCOMPLETE,
+OPEN THE DELIVERABLE AND READ IT. I HAVE NOW WRITTEN THAT GATE ITEM TWICE WITHOUT APPLYING IT TO
+MYSELF.**
+
+**D42c.7 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D43.7, D44.8, D45.8,
+D46.8, D47.5a, D47.8 and D48.5 stands. D42 and R77's conclusion are **superseded**.

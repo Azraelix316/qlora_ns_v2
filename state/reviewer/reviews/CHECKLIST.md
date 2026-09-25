@@ -271,6 +271,13 @@ no cycle behind it is an item nobody has tested.**
 - [ ] **(R78) Does a mechanical check over prose know where that file's legitimate
       withdrawal regions are?** Distinguish *"this number is void, here is why"* from
       *"this number is my claim"* **by structure, not by keyword.**
+- [ ] **(R84) Before reporting that a DELIVERABLE is incomplete, have I opened the deliverable and
+      read it — and is the file I measured the one the deliverable actually uses?** The paper uses
+      **`paper/references.bib`**, not the root `refs.bib`; D42 reported three missing citations that
+      were present and correct, and nearly reported a fabricated-citation error against the *better*
+      bibliography because the *worse* one looked familiar (D42c.3). **A shared file being incomplete
+      says nothing about whether the document is; different key conventions are evidence of two
+      files, not of a gap.**
 - [ ] **(R82) For the artifact the paper's thesis rests on: has the code at its OWN RECORDED COMMIT
       been run, rather than the artifact being fingerprinted or reasoned about?** `git archive <commit>
       | tar -x -C tmp` gives a tree with **no `.git`, so uncommitted code is impossible**; run its

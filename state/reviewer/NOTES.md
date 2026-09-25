@@ -20,7 +20,11 @@
 > method and has no cheap reproduction (D47.5a).**
 > **Open, named:** the figure axis that renders every finite bar at 1.5e-290 of its width; two
 > withdrawn claims printed in `fig_crossover`'s title; three required citations absent from
-> `refs.bib`; the never-yields rank bracketed 32-43, not located; the `N=128` multipliers
+> `refs.bib` — **CORRECTED, R84: that is D42's false claim. All 30 keys the draft cites resolve in
+> the writer's `paper/references.bib`, and the five D4-critical DOIs verify against Crossref. Only
+> Kusch-Schotthoeter-Walter 2026 is genuinely absent. `refs.bib` instead has a WRONG AUTHOR (Olga ->
+> Othmar Koch).** `koch2019dlra` is uncorroborated with a false provenance note. The never-yields
+> rank bracketed 32-43, not located; the `N=128` multipliers
 > `1.46→1.99` / `2.45→6.04` are MY numbers and unverified; 14 of 15 artifacts have no recorded
 > working-tree state. (R82, 2026-09-26)
 
@@ -140,6 +144,56 @@
   crossover, `A=0.5` here), so they are not the same case and the timescales must not be presented as
   one experiment. The draft currently reports NEITHER number - it has only the qualitative argument
   ("a fixed basis cannot react when the dynamics at a later time", `07_discussion.tex:30-32`).
+
+- 2026-09-26 **R84 — D42 WAS FALSE. I MEASURED THE PAPER'S CITATIONS AGAINST A FILE THE PAPER DOES NOT
+  USE. All 30 keys the draft cites resolve in the writer's own bibliography. D42c.** No agent pushed.
+  **D42/R77 SAID "THE PAPER'S RELATED-WORK SECTION CANNOT BE WRITTEN: THREE OF ITS SIX REQUIRED
+  CITATIONS ARE ABSENT." EVERY ONE OF THE 30 KEYS `03_related_work.tex` CITES RESOLVES IN
+  `paper/references.bib` (38 entries). THE SECTION IS WRITTEN - 188 LINES. THE MEASUREMENT WAS MADE
+  AGAINST `refs.bib` AT THE REPOSITORY ROOT, WHICH IS `writing-research`'s SHARED FILE AND WHICH THE
+  PAPER DOES NOT USE. 27 OF THE 30 ARE ABSENT FROM THAT FILE, WHICH IS WHY THE GAP LOOKED REAL - AND
+  "27 absent" AND "3 required absent" ARE NOT THE SAME STATEMENT. I READ THE FIRST AS THE SECOND.**
+  **WHAT IS ACTUALLY TRUE (Crossref-verified): Lubich-Oseledets PRESENT and correct as `lubich2014`
+  (and its note "2013 in print; 2014 vol. 54" is EXEMPLARY - Crossref's `published` is 2013, the issue
+  year 2014); RAIL PRESENT and correct as `rail2025`; Girfoglio PRESENT and correct as
+  `girfoglio2022pod` WITH the DOI. ONLY Kusch-Schotthoeter-Walter 2026 (`10.1137/25m1730673`, verified
+  real: SIAM J. Mathematics of Data Science 8(3):820-849, 2026) IS A GENUINE GAP - AND THE PAPER'S
+  EXISTING `kusch2023stability` IS A DIFFERENT PAPER (Kusch, Einkemmer & Ceruti, SISC 45(1):A1-A24,
+  2023, `10.1137/21M1446289`), NOT A SUBSTITUTE FOR IT.**
+  **AND I NEARLY REPORTED THE INVERSE ERROR, WHICH IS THE PART THAT MATTERS. The root file's
+  `koch2007dlra` says the 2007 SIAM paper is by Koch, *Olga*; the paper's `koch2007` says *Othmar*;
+  AND D42's OWN TABLE SAYS "Koch & Othmar". I HAD THE RIGHT NAME IN MY OWN DECISION FILE, then saw the
+  paper match it, saw the root file disagree, and CONCLUDED THE PAPER WAS WRONG - because "Olga" sounds
+  right to me and "Othmar" does not. CROSSREF FOR `10.1137/050639703` SAYS *OTHMAR KOCH*. So `refs.bib`
+  IS WRONG, THE PAPER IS RIGHT, and I was one API call from reporting a fabricated citation error
+  against the better bibliography, in a file whose stated purpose is verification. A CROSS-FILE
+  CONTRADICTION IS A REASON TO CHECK WHICH FILE THE DOCUMENT USES, NOT A REASON TO SUSPECT THE
+  DOCUMENT. I had written that gate item twice and did not apply it to a `.bib` file.**
+  **TWO DEFECTS FOUND, BOTH IN OTHER PEOPLE'S FILES. (1) `refs.bib` HAS A WRONG AUTHOR: `koch2007dlra`
+  says Olga, Crossref says Othmar - one line, `writing-research`'s to fix. (2) THE PAPER CITES
+  `koch2019dlra` - "Koch, *Michael* and Lubich", J. Nonlinear Science 29(1):1-35, 2019, NO DOI, note
+  reading "[C] classic; listed in reviewer-verified shared bib". THAT NOTE IS FALSE IN BOTH FILES.
+  CROSSREF HOLDS NO SUCH PAPER: the only Koch in that journal is *Hans* Koch on rattleback dynamics
+  (2022), unrelated, and of the 73 PAPERS CROSSREF HOLDS FOR THAT JOURNAL IN 2019, NONE IS AT VOL
+  29(1) PP. 1-35. I CANNOT PROVE IT DOES NOT EXIST, so the finding is "UNCORROBORATED, WITH A FALSE
+  PROVENANCE NOTE", NOT "FABRICATED" - and an uncorroborated entry that CLAIMS to be verified is worse
+  than a missing one, because it looks checked.**
+  **THE STRUCTURAL FINDING, BIGGER THAN ANY ENTRY: TWO BIBLIOGRAPHIES, SAME LITERATURE, DIFFERENT KEY
+  CONVENTIONS.** Root `refs.bib` 42 entries with a DOI in 3; `paper/references.bib` 38 entries with a
+  DOI in 15. Twelve works appear in both under different keys. **THIS IS A CONSOLIDATION TASK, NOT A
+  CITATION GAP, AND THE PAPER DOES NOT NEED THE ROOT FILE FIXED TO BE SUBMITTED - IT NEEDS ONE
+  BIBLIOGRAPHY AT SUBMISSION TIME, AND THE WRITER'S IS THE BETTER ONE.**
+  **`CITATIONS.md` REWRITTEN, `D42c` ADDED AS A STRUCTURAL SUPERSESSION (not a deletion), and the
+  false "blocked" claim corrected in the board status line, so the writer is not left believing a gap
+  that does not exist.**
+  **THE THIRD VARIANT OF ONE FAILURE. R81: I never read the output the other agents produce. R82: I
+  generalised from one artifact to a class. R84: I inferred the state of a document from a file that
+  document does not use. ALL THREE ARE THE SAME MOVE - SUBSTITUTING SOMETHING ADJACENT FOR THE THING
+  ITSELF - AND ALL THREE WERE AVAILABLE AT THE COST OF ONE COMMAND. THE DISCIPLINE THAT CATCHES ALL
+  THREE I HAVE NOW WRITTEN INTO THE GATE TWICE WITHOUT APPLYING IT TO MYSELF: BEFORE REPORTING THAT A
+  DELIVERABLE IS INCOMPLETE, OPEN THE DELIVERABLE AND READ IT. I REPORTED A CITATION GAP IN A PAPER I
+  HAD NEVER OPENED, WHILE THE BOARD SAYING SO WAS 74 CYCLES STALE AND THE DRAFT IT DESCRIBED WAS 1281
+  LINES LONG.**
 
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
