@@ -45,4 +45,5 @@ base: run the arXiv API survey (a prior one was lost — see
 - 2026-09-25 Performed intensive novelty check using subagent; confirmed that recent (2025-2026) works (Ye & Yang, Loeschcke, etc.) do not satisfy the dual requirement of exact divergence-freeness and high-Re turbulence validation. Documented findings in docs/references/novelty_defense_2026.md.
 - 2026-09-25 Expanded bibliography with foundational DLRA works (Koch & Lubich) and updated `arxiv_index.json`. Verified `refs.bib` for correctness of author names (e.g., Olga Koch).
 - 2026-09-25 Standing by; monitoring `coder` and `theoretical-research` for new papers or theoretical invariants to include in bibliography.
+- 2026-09-25 Checked status of other agents via subagent. Coder is progressing well with the stream-function engine and SP split; will monitor for benchmark results. Theoretical research shows no active sessions yet.
 
