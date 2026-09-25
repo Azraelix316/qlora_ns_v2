@@ -1120,3 +1120,64 @@ is regenerated, and the artifact is what a reader and the next agent actually re
 **D18.8 — Unchanged.** Every fitted `c·r^p` void. `t*` is grid-dependent (D17.1). No per-step
 advantage in time or memory. Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred
 claim stands.
+
+---
+
+## D19 — Peak memory: no advantage, and the BUG port's rank-dependent cost is now confirmed
+## on an independent axis (2026-09-25)
+
+> **OPERATIVE (R55).** The reduced integrator uses **`+2.5 MiB` (`N=64`) to `+3.8 MiB`
+> (`N=128`) MORE than the full-grid step**, flat in rank to within `0.3 MiB`. **The BUG port's
+> cost scales with rank and the projected integrator's does not — the same signature already
+> measured on time — which makes the port's rank-dependent cost the project's best-evidenced
+> positive claim.** Report the overhead, never raw RSS.
+
+**D19.1 — Two independent measurements agree.** Coder's `peak_memory.json` (a measured
+`0.1328 MiB` noise floor, one fresh process per configuration) gives overheads of `+2.52 MiB`
+(`N=64`) and `+3.79 MiB` (`N=128`); my independent R52 probes gave `+2.8` and `+3.1…+3.6`. **They
+agree to `0.3–0.7 MiB` on a `2.5–3.8 MiB` base with identical conclusions.** Two
+implementations, one written by each reviewer, converging — the strongest agreement available
+in this project.
+
+**D19.2 — The cross-axis result, and it is the best-supported positive claim in the project.**
+
+| method | spread over rank | vs `2×` noise floor | overhead |
+|---|---|---|---|
+| DLRA (projected), `N=64` / `N=128` | `0.293` / `0.289` | `1.10×` / `1.09×` | `+2.52` / `+3.79` |
+| **BUG**, `N=64` / `N=128` | `0.578` / **`1.531`** | `2.18×` / **`5.76×`** | `+2.32` / `+3.38` |
+
+**BUG's peak memory scales with rank and the projected integrator's does not** — the same
+structural signature measured on time (`1.17×` from `r=2` to `r=16` for BUG against `1.007×` for
+the projected step). **The port's rank-dependent cost is a prediction confirmed on two
+independent axes.** This matters because the project has almost no positive claims left — no
+per-step speedup, no memory saving, no stationary state — so **this is the one claim that is
+predicted, measured, and re-measured on an independent axis, and it should be stated as such
+rather than buried as a cost caveat.**
+
+**D19.3 — A counterintuitive detail worth one sentence: BUG's overhead is SMALLER than the
+projected integrator's** (`+2.32` against `+2.52`; `+3.38` against `+3.79`) even though BUG is
+`3.0–4.8×` slower. **The port trades memory for time, not both**: its `O(Nr²)` factor work is
+cheap in bytes and expensive in flops, because the K/L/S right-hand sides are full-grid field
+evaluations that stream rather than accumulate.
+
+**D19.4 — One marginality stated rather than allowed to pass.** The projected integrator's
+rank-flatness is resolved by only **`9–10%`** over the `2×` noise threshold (`0.293`/`0.289`
+against `0.266`). **Coder's `rank_independence_resolved: true` is correct on their criterion,
+but that criterion is a resolution threshold, not an effect size.** So the defensible claim is
+**"flat to within `0.3 MiB`"**, not "rank-independent" — and the effect is `~0.7%` of a `~43 MiB`
+peak in any case. **BUG's `5.76×` is comfortably resolved and _is_ an effect worth claiming.**
+
+**D19.5 — Report the overhead, never the raw RSS.** The interpreter and BLAS baseline is
+`~33 MiB` and no method choice affects it. Coder's artifact `interpretation` says this and it
+is **D16.4's caveat, earned from one reviewer's error and adopted by the other agent without
+being asked** — recorded as the system working.
+
+**D19.6 — Still not fixed: the shared case label.** `peak_memory.json` has the right structure
+(`case: "peak_memory"`, `case_family: "cost"`), so the fix is understood — **but
+`cost_bug_port.json` still carries `case: "cost_retiming"`**, identical to `cost_retiming.json`.
+Flagged in R47, unchanged. A consumer selecting by `case` will conflate a projected-integrator
+cost artifact with a BUG-port one.
+
+**D19.7 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1). No per-step
+advantage in time or memory. Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred
+claim stands.

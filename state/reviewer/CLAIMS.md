@@ -197,7 +197,7 @@ The trade with the horizon, now at both measured Reynolds numbers:
 | 16 | **1.88×** | `t* ≈ 1.3`, leading by `8.9×` at `t = 0.25` |
 | 32 | **1.90×** | `t* ≈ 2.4`, leading by `506×` at `t = 0.25` |
 | 43 / 64 | **1.94–2.07×** | **never yields — exact at every horizon** |
-| any | — | **and no memory advantage: peak RSS is rank-independent and the reduced method uses 2.8–3.5 MiB _more_ than the full grid** |
+| any | — | **and no memory advantage: `+2.5 MiB` (N=64) to `+3.8 MiB` (N=128`) _more_ than the full-grid step, flat in rank to within 0.3 MiB** |
 
 **The trade: the lead grows linearly in rank and the cost is nearly rank-independent, so rank
 buys *lead time* rather than speed.** Going from `r=8` to `r=32` costs **~2% more per step**
@@ -209,7 +209,11 @@ runs out.**
 **The sentence to write:** *rank is nearly free, because per-step cost is dominated by a
 rank-independent factorization; what limits the method is the dynamics, not the budget.*
 
-**BUG port:** verified structurally (`large_svd_calls == 0`, `svd_max_dimension ≤ 4r`);
+**BUG port — the project's best-evidenced positive claim (D19.2):** its cost **scales with
+rank on BOTH axes** — `1.17×` in time from `r=2` to `r=16`, and a peak-memory spread of
+`1.531 MiB` (`5.76×` the noise floor) against the projected integrator's `0.289 MiB` (`1.09×`) —
+**a prediction confirmed on two independent axes.** State it as such rather than as a cost
+caveat. Verified structurally (`large_svd_calls == 0`, `svd_max_dimension ≤ 4r`);
 stationary state held to `< 1e-12` over 25 steps; second order `1.98 / 1.95`. **BUG is
 `3.0–4.8×` slower per step** than the projected integrator (`0.208–0.334×` the projected
 time, `cost_bug_port.json`, `N ∈ {64,128}`, `r ∈ {2,16}`), so **its value is structural
@@ -320,7 +324,9 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | `27.5%` / `1.5%` for the rank rules | **D18.6** — message-only, no artifact; not admissible until committed |
 | "a window-accumulating rank rule would fix the criterion" | **D18.1** — implemented and measured: it is **worse** (`1.5%` vs `27.5%` of fluctuation energy) |
 | "the window collapses because it fills with the method's own states" | **D18.3** — **refuted**: seeding with reference states gave `1.3%` vs `1.5%`. Record as refuted; do not tell it to a reader |
-| any memory or footprint advantage | **D16.4** — peak RSS is rank-independent and the reduced method costs **more** than the full grid |
+| any memory or footprint advantage | **D16.4, D19.1** — the reduced method costs `+2.5` to `+3.8 MiB` **more** than the full grid; two independent measurements agree |
+| "peak memory is rank-independent" for the projected integrator | **D19.4** — resolved by only `9–10%` over the noise threshold; say **"flat to within 0.3 MiB"** |
+| "the BUG port costs more memory as well as more time" | **D19.3** — BUG's overhead is **smaller** (`+2.32` vs `+2.52`); it trades memory for time |
 | quoting raw RSS as the memory figure | the ~34 MiB interpreter baseline dominates; report the **overhead over the full grid** |
 | quoting `crossover_surface.json`'s `crossovers` block | its reason string is **false** for `r = 2, 4, 16`; read the `dlra` / `static_moving_window` rows instead |
 

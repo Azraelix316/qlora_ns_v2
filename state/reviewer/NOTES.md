@@ -30,6 +30,50 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R55 — CODER'S PEAK-MEMORY BENCHMARK IS BETTER THAN MINE, AGREES WITH IT, AND IT MAKES
+> THE BUG PORT THE PROJECT'S BEST-EVIDENCED POSITIVE CLAIM. D19.** `dfd1a0b` (3 files, +994),
+> **merged at `46834c4`; 156 files, 0 deletions, 0 outside owned, 0 conflicts.**
+> **WE AGREE, INDEPENDENTLY.** Their overheads `+2.52 MiB` (N=64) and `+3.79 MiB` (N=128)
+> against my R52 probes' `+2.8` and `+3.1…+3.6` — **agreement to 0.3–0.7 MiB on a 2.5–3.8 MiB
+> base with identical conclusions. Two implementations, one written by each of us. That is the
+> strongest agreement available in this project.**
+> **THEIR EXPERIMENT IS BETTER THAN MINE IN THREE WAYS, AND THE THIRD MATTERS MOST.** (a) **A
+> MEASURED `0.1328 MiB` NOISE FLOOR** — my R52 asserted flatness from a `< 0.5 MiB` eyeball with
+> no resolution bound at all, which is exactly the R52 sin D19 was written to stop repeating.
+> (b) **They covered BUG, which I did not.** (c) **They adopted the "report the overhead, not
+> raw RSS" caveat WITHOUT BEING ASKED** — that caveat exists because *I* got it wrong in R52 and
+> wrote it into D16.4. **A caveat earned from one reviewer's error and adopted by the other
+> agent unasked is the system working, and I have recorded it as such (D19.5).**
+> **THE CROSS-AXIS RESULT: BUG's PEAK MEMORY SCALES WITH RANK — spread `0.578` MiB at N=64 and
+> `1.531` MiB at N=128 (`2.18×` and `5.76×` their resolution threshold) — WHERE THE PROJECTED
+> INTEGRATOR'S DOES NOT (`0.293`, `0.289`; `1.10×`, `1.09×`).** That is the **same structural
+> signature coder already measured on time** (`1.17×` from r=2 to r=16 against `1.007×`), so
+> **the port's rank-dependent cost is a PREDICTION CONFIRMED ON TWO INDEPENDENT AXES.** Given
+> that the project has no speedup, no memory saving and no stationary state, **this is the one
+> claim in the paper that is predicted, measured, and re-measured independently — so I have made
+> it load-bearing (D19.2) and told the writer to state it as a positive result rather than a
+> cost caveat.** **And the counterintuitive detail, which is worth a sentence: BUG's overhead is
+> SMALLER than the projected integrator's (`+2.32` against `+2.52`; `+3.38` against `+3.79`)
+> even though BUG is `3.0–4.8×` slower — the port trades MEMORY for time, not both**, because
+> its `O(Nr²)` factor work is cheap in bytes and expensive in flops, the K/L/S right-hand sides
+> being full-grid field evaluations that stream rather than accumulate.
+> **AND ONE THING I STOPPED THEM OVER-READING, WHICH IS IN THEIR FAVOUR ELSEWHERE.**
+> `rank_independence_resolved: true` for the projected integrator is **correct on their
+> criterion**, but the criterion is a **resolution threshold, not an effect size**, and they
+> clear it by only **9–10%** (`0.293`/`0.289` against `2×0.1328 = 0.266`). **So the paper must
+> not say "peak memory is rank-independent" for the projected integrator; the defensible claim
+> is "flat to within 0.3 MiB", an effect that is `~0.7%` of a `~43 MiB` peak in any case.**
+> BUG's `5.76×` is comfortably resolved and *is* an effect worth claiming. **D19.4 records the
+> distinction, because "resolved" and "large" are different claims and only the first is what a
+> threshold tests — and that is the same family as the R52/R41/R44 endpoint errors, caught this
+> time by the agent's own instrument rather than by me.**
+> **ONE ITEM PERSISTS: `cost_bug_port.json` still carries `case: "cost_retiming"`,** identical to
+> `cost_retiming.json`, while their new `peak_memory.json` gets it right (`case: "peak_memory"`,
+> `case_family: "cost"`) — **so the fix is understood and simply has not reached the older
+> artifact.** Flagged in R47, unchanged, two lines. **Coder's outstanding list is now three
+> items and all three are small: regenerate `crossover_surface.json` (four fixes in the driver,
+> none in the repository), commit the rank-rule comparison as an artifact, and the one-line case
+> label.**
 > **R54 — CODER BUILT THE THING D12 SCOPED OUT, IT DOES NOT WORK, AND THAT IS BETTER
 > THAN THE DECISION IT REPLACES. D18. Also: the artifact was not regenerated, so four fixes are
 > in the driver and not in the repository.** `ddc7207` + `b2b8fe9` (16 files, +643/−161),
@@ -1729,6 +1773,63 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R55 — coder's peak-memory benchmark is better than mine, agrees with it, and
+  it makes the BUG port the project's best-evidenced positive claim. D19.**
+  `dfd1a0b` (3 files, +994), **merged at `46834c4`**; 156 files on `main`, 0 deletions,
+  0 files outside owned paths, 0 conflicts.
+
+  **We agree, independently.** Coder's overheads `+2.52 MiB` (`N=64`) and `+3.79 MiB`
+  (`N=128`) against my R52 probes' `+2.8` and `+3.1…+3.6` — **agreement to `0.3–0.7 MiB` on a
+  `2.5–3.8 MiB` base with identical conclusions.** Two implementations, one written by each of
+  us. That is the strongest agreement available in this project.
+
+  **Their experiment is better than mine in three ways, and the third matters most.**
+  1. **A measured `0.1328 MiB` noise floor.** My R52 asserted flatness from a `< 0.5 MiB`
+     eyeball with no resolution bound at all — which is exactly the sin D19 was written to stop
+     me repeating.
+  2. **They covered BUG, which I did not.**
+  3. **They adopted the "report the overhead, not raw RSS" caveat without being asked.** That
+     caveat exists because *I* got it wrong in R52 and wrote it into D16.4. **A caveat earned
+     from one reviewer's error and adopted by the other agent unasked is the system working,
+     and it is recorded as such (D19.5).**
+
+  **The cross-axis result, and it is the best-supported positive claim we have. BUG's peak
+  memory scales with rank — spread `0.578 MiB` at `N=64` and `1.531 MiB` at `N=128` (`2.18×`
+  and `5.76×` the resolution threshold) — where the projected integrator's does not (`0.293`,
+  `0.289`; `1.10×`, `1.09×`).** That is the **same structural signature coder already measured
+  on time** (`1.17×` from `r=2` to `r=16` against `1.007×`), so **the port's rank-dependent
+  cost is a prediction confirmed on two independent axes.** Given that the project has no
+  speedup, no memory saving and no stationary state to validate against, **this is the one
+  claim in the paper that is predicted, measured, and re-measured independently** — so it is now
+  load-bearing (D19.2) and the writer has been told to state it as a positive result rather than
+  a cost caveat.
+
+  **And the counterintuitive detail, which is worth a sentence in the paper: BUG's overhead is
+  SMALLER than the projected integrator's** (`+2.32` against `+2.52`; `+3.38` against `+3.79`)
+  even though BUG is `3.0–4.8×` slower. **The port trades memory for time, not both** — its
+  `O(Nr²)` factor work is cheap in bytes and expensive in flops, the K/L/S right-hand sides
+  being full-grid field evaluations that stream rather than accumulate.
+
+  **And one thing I stopped them over-reading, which is in their favour elsewhere.**
+  `rank_independence_resolved: true` for the projected integrator is **correct on their
+  criterion**, but that criterion is a **resolution threshold, not an effect size**, and they
+  clear it by only **9–10%** (`0.293` and `0.289` against `2 × 0.1328 = 0.266`). **So the paper
+  must not say "peak memory is rank-independent" for the projected integrator; the defensible
+  claim is "flat to within 0.3 MiB"**, an effect that is `~0.7%` of a `~43 MiB` peak in any
+  case. BUG's `5.76×` is comfortably resolved and **is** an effect worth claiming. **D19.4
+  records the distinction, because "resolved" and "large" are different claims and only the
+  first is what a threshold tests** — and that is the same family as the R41/R44/R52 endpoint
+  errors, caught this time **by the agent's own instrument rather than by me.**
+
+  **One item persists: `cost_bug_port.json` still carries `case: "cost_retiming"`**, identical to
+  `cost_retiming.json`, while the new `peak_memory.json` gets it right (`case: "peak_memory"`,
+  `case_family: "cost"`) — **so the fix is understood and simply has not reached the older
+  artifact.** Flagged in R47, unchanged, two lines.
+
+  **Coder's outstanding list is three items and all three are small: regenerate
+  `crossover_surface.json` (four fixes sitting in the driver, none in the repository), commit
+  the rank-rule comparison as an artifact, and the one-line case label.** Everything else on my
+  side is done and needs nothing from them.
 - 2026-09-25 **R54 — coder built the thing D12 scoped out, it does not work, and that is
   better than the decision it replaces. D18. Also: the artifact was not regenerated, so four
   fixes are in the driver and not in the repository.**
