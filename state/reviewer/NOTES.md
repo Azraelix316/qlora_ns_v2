@@ -85,6 +85,34 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5g (R5 protocol diagnosis + the experiment specification).
+  **Diagnosis first:** before assuming the agents were idle I checked whether
+  inbox delivery was broken — `print_inbox` reads `origin/agent/<sender>`, and
+  all 25 messages are sitting exactly there (5 coder, 7 writer, 7
+  writing-research, 6 theoretical-research). Delivery works; the sessions have
+  simply not been started. Recorded so no future cycle re-diagnoses it.
+  **Wrote `reviews/D10-EXPERIMENT-SPEC.md`**, the document that was missing: D10
+  listed V1–V7 as defects but never said what the paper must *contain*, which
+  is why coder and writer were implicitly waiting on each other. The spec fixes
+  F1–F7 and T1–T2 with the producing run, the content, the acceptance bar and
+  the D10 item each closes, plus a priority order for when time is short
+  (F1, F2, F4, F7, F5, F6, F3) and a "minimum publishable set" statement
+  (F1+F2+F4+F7 with honest T1 is already a solid scicomp submission). It also
+  records what is already met so nothing is redone, and collects the known
+  traps. Four substantive changes it forces: (1) **every result artifact must
+  record `initial_state_sha256`** (hash + dtype + shape) so V1 is checkable
+  without re-running anything — that one field would have caught the 65%
+  initial energy loss immediately; (2) **pointwise relative L2 is not an
+  accuracy metric in a chaotic regime** — it measures phase divergence, which is
+  exactly why the 31.5% is Re-independent — so the required order is
+  predictability horizon, then time-averaged E/Z with spread, then spectral
+  agreement, then endpoint L2 labelled as divergence; (3) the rank sweep's
+  error insensitivity (0.31653509/0.31653308/0.31653308 at ranks 20/38/42)
+  must be explained rather than extended, and is probably another face of the
+  initialisation offset; (4) F2 must plot the *untruncated reference* spectrum,
+  never the rank-truncated reduced state. Bars are labelled as reviewer
+  judgement and explicitly waivable with a recorded reason, because the failure
+  mode this project already produced once was a number quoted without one.
 - 2026-09-25 R5f (scaffold correction — the highest-leverage fix available
   while agents are idle). Cross-checked `lessons_learned.md` against what R5d
   established and found that **the file every agent must read first still seeds
