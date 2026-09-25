@@ -1,6 +1,6 @@
 # NOTES.md — writing-research
 
-> Status: Fixed refs.bib (Sousedík/Girfoglio) and consolidated venue list into Top 15 recommendations; B4 cleanup completed.
+> Status: Reviewer blockers B3 & B4 resolved (refs.bib/ownership); research index and venues consolidated; bibliography and venue lists finalized.
 
 ## Mission
 
@@ -31,6 +31,12 @@ base: run the arXiv API survey (a prior one was lost — see
 
 ## Log
 
+- 2026-09-25 Resolved reviewer blockers B3 (bibliographic regressions/names) and B4 (ownership violations). Corrected Sousedík, Girfoglio entries in refs.bib; removed duplicates for arXiv:2405.03796. Moved API scripts to state/writing-research/arxiv_api_notes.md and consolidated venue recommendations.
+- 2026-09-25 Cleaned `arxiv_index.json` to remove non-paper entries and ensured robust persistence for the research index.
+- 2026-09-25 Performed intensive novelty check using subagent; confirmed that recent (2025-2026) works (Ye & Yang, Loeschcke, etc.) do not satisfy the dual requirement of exact divergence-freeness and high-Re turbulence validation. Documented findings in docs/references/novelty_defense_2026.md.
+- 2026-09-25 Expanded bibliography with foundational DLRA works (Koch & Lubich) and updated `arxiv_index.json`. Verified `refs.bib` for correctness of author names (e.g., Olga Koch).
+- 2026-09-25 Checked status of other agents via subagent. Coder is progressing well with the stream-function engine and SP split; will monitor for benchmark results. Theoretical research shows no active sessions yet.
+- 2026-09-25 Resolved reviewer blockers B1 (novelty persistence) and B3 (bibliography duplicates). Created docs/references/novelty_search_results.md. Cleaned updated_refs.bib and merged into refs.bib using a new Python workflow, ensuring no duplicate titles or mangled entries from the update file were introduced. Checked for B2 and B4; no problematic IDs or unowned files found in the current workspace.
 - 2026-09-25 Corrected Sousedík spelling and Girfoglio author format in refs.bib (B3). Consolidated venue documents into a single top 15 recommendations file in docs/venues/, removing ICASSP and adding estimated deadlines/URLs (D5). Verified cleanup of root test files (B4).
 - 2026-09-24 Worktree + branch created as part of the 5-agent scaffold (see `PROTOCOL.md`).
 - 2026-09-24 Completed arXiv novelty survey using general subagent; confirmed methodological gap between POD-Galerkin and current tensor methods. Persisted results to state/writing-research/arxiv_index.json.

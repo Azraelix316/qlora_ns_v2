@@ -1,8 +1,3 @@
-# arXiv API and Indexing Scripts
-
-## arxiv_search.py
-
-```python
 
 import requests
 import xml.etree.ElementTree as ET
@@ -72,11 +67,6 @@ else:
         print(f"Summary: {item['summary'][:200]}...")
         print("-" * 30)
 
-```
-
-## clean_bib.py
-
-```python
 import re
 
 def clean_bib():
@@ -161,11 +151,6 @@ def clean_bib():
 
 if __name__ == "__main__":
     clean_bib()
-```
-
-## update_all.py
-
-```python
 import json
 import os
 
@@ -256,11 +241,6 @@ if os.path.exists(notes_path):
             f.writelines(new_lines)
         print("Successfully updated NOTES.md")
 
-```
-
-## update_arxiv.py
-
-```python
 import json
 import os
 
@@ -303,11 +283,6 @@ else:
         json.dump(data, f, indent=2)
 
     print(f"Successfully updated arxiv_index.json. Added {added_count} entries.")
-```
-
-## update_index.py
-
-```python
 import json
 
 with open('state/writing-research/arxiv_index.json', 'r') as f:
@@ -362,5 +337,3 @@ with open('state/writing-research/arxiv_index.json', 'w') as f:
     json.dump(new_data, f, indent=2)
 
 print("Successfully updated arxiv_index.json")
-```
-
