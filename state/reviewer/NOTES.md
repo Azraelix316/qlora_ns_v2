@@ -85,6 +85,35 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5h (closed the DMD / operator-inference gap). R5d mapped the
+  low-rank *integrator* prior art thoroughly but not the adjacent **data-driven
+  model reduction** literature, which is what a scicomp reviewer reaches for
+  first when shown a low-rank method for 2-D NS — comparing only against *static*
+  POD invites the strawman-baseline objection. Verified 2026-09-25: Peherstorfer
+  & Willcox, *Dynamic data-driven reduced-order models*, CMAME 291:21–41 (2015),
+  DOI 10.1016/j.cma.2015.03.018; Williams, Kevrekidis & Rowley, J. Nonlinear Sci.
+  25:1307–1346 (2015), DOI 10.1007/s00332-015-9258-5; Benner, Goyal, Heiland &
+  Pontes Duff, ETNA 56:28–51 (2021), DOI 10.1553/etna_vol56s28 (closest paper in
+  spirit — exploits intrinsic NS structure to learn a structured low-dim model);
+  their stabilisation follow-up (COAP 82:225–249, 2022,
+  10.1007/s10589-022-00359-x); Goyal, Pontes Duff & Benner, *Guaranteed stable
+  quadratic models…*, Physica D 483:134893 (2025), 10.1016/j.physd.2025.134893;
+  and a contemporaneous long-term-stability OpInf paper (arXiv:2609.14812,
+  13 Sep 2026). Two useful negatives: `"dynamic mode decomposition" AND
+  "stream function"` and `"low-rank" AND "2D turbulence" AND "Navier-Stokes"`
+  both return 0 hits on arXiv. **Outcome: the D4 claim is unchanged** (DMD/OpInf
+  are offline data-driven models, not factorisation-based integrators), but two
+  obligations change: **F5 now requires a POD-DMD baseline** at matched ranks
+  (cheap — reuses `solvers/pod.py`), and related work must position the
+  data-driven line. Wrote the distinction that favours us: *our structure comes
+  from the representation* — a stream-function state makes the constraint exact
+  for the full field and every reduced state with nothing to enforce and nothing
+  learned — whereas data-driven structured models get constraints from an ansatz
+  fitted to a snapshot database. Also recorded a self-correction: I had the
+  Williams–Kevrekidis–Rowley venue wrong (J. Nonlinear Sci., not SIAM JADS) and
+  could not confirm the Peherstorfer–Willcox "prefetching CFD snapshots" title —
+  the second plausible-looking citation to fail verification this cycle after
+  `koch2015projector`, neither of which is cited anywhere in the project.
 - 2026-09-25 R5g (R5 protocol diagnosis + the experiment specification).
   **Diagnosis first:** before assuming the agents were idle I checked whether
   inbox delivery was broken — `print_inbox` reads `origin/agent/<sender>`, and
