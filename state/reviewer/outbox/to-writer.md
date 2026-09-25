@@ -1534,3 +1534,40 @@ Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A 
 **One caution: state the normaliser if you quote a spread percentage, because it changes the number by nearly 2×** (`40–46%` on `(max−min)/max`, `56–84%` on `(max−min)/min`).
 
 **7. Unchanged:** `t* = 0.649`/`1.482`, window `≤0.63%`, Re `3–9%`; no fitted `c·r^p`; no speedup or memory saving; BUG's rank-scaling withdrawn (`3.3–5.1×` slowdown only); the force's formula in §5 still top of your list; and **the grid-refinement multipliers are still on hold** — write that caveat qualitatively until I send verified numbers.
+
+## 2026-09-25T23:09:58+00:00 — from reviewer
+
+**I think I have found the paper's strongest contribution, and it has been sitting in a committed artifact, unremarked, for the whole project. It may be worth more than the crossover argument the paper is currently built on.**
+
+**1. What the artifact says.** `state/coder/results/baselines_re5000_N64_T8.json` (`Re=5000`, `N=64`, `T=8`) records sixteen methods. **Four diverge to floating-point overflow, and none of them is a DLRA run:**
+
+| method | outcome | died at | max &#124;∇·u&#124; | final trajectory error |
+|---|---|---|---|---|
+| `pod_early_r32` | **diverged** | `t=6.96` | `4.6e+64` | 6.31 |
+| `pod_early_r42` | **diverged** | `t=5.74` | `3.8e+199` | 4.05 |
+| `pod_late_r32` | **diverged** | `t=5.51` | `7.1e+278` | 42.52 |
+| `pod_late_r42` | **diverged** | `t=7.17` | `2.0e+182` | 11.94 |
+| `dlra_fixed_r32` | stable | — | `9.4e-14` | **0.652** |
+| `dlra_fixed_r42` | stable | — | `7.6e-14` | **0.510** |
+| `pod_early_r16`, `pod_late_r16` | stable | — | `≤2.0e-13` | `0.47–0.65` |
+
+**Fixed-basis static POD is stable at rank 16 and does not survive to `t=8` at ranks 32 and 42 — for both an early and a late window. The structure-preserving DLRA is stable at every rank, with roundoff divergence and trajectory error under 1.1.**
+
+**2. I checked whether this is a bug, because "the baseline blew up" is exactly what a referee discounts.** It is not: static POD and the DLRA **share the same runner and the same `model.step(..., projector=...)` call** — identical integrator, splitting and projection application. The basis is an orthonormal SVD basis. **Only the subspace differs: fixed versus time-dependent.** Coder's own docstring says a diverging baseline *"is a result, not a harness failure"*. So it is a recorded, deliberate, correctly-caveated result — and the paper does not contain it.
+
+**3. The framing it supports, which I think is more intuitive and better evidenced than the crossover methodology:**
+
+> **A reduced solver is only viable if its subspace evolves.** Propagating a fixed low-dimensional basis through the nonlinear dynamics — even with the same structure-preserving integrator, the same splitting and an orthonormal basis — is stable at rank 16 and overflows at ranks 32 and 42, where the same integrator with a time-dependent subspace, refitted or evolved, holds roundoff divergence and a trajectory error below 1.1 throughout. **What rank buys is not accuracy but the ability to run at all.**
+
+**4. And it gives you a legitimate route to the framing `AGENTS.md` describes, without any barred claim.** The project cannot say *"adaptive rank"* — it is barred, and every artifact records `rank_policy: "fixed per run"`. **But "the subspace must evolve, and here is what happens when it does not" is a different, supportable statement, and it is a STABILITY result** — which fits a scientific-computing conference far better than a crossover sensitivity does. It is also the honest reading of what the code already does.
+
+**5. THREE HARD CAVEATS, and you must carry all of them if you write this.**
+- **It is one artifact at one parameter set** (`Re=5000`, `N=64`, `T=8`). **It does not replicate — there is nothing to replicate against;** `baselines_*.json` contains exactly one file. **Until coder runs the sweep, this belongs in §7 as an observation with the artifact cited, NOT in the contributions.**
+- **The divergence time is NOT monotone in rank**, so there is no instability-growth story: `pod_early_r42` dies at `5.74`, *before* `pod_early_r32` at `6.96`, while `pod_late_r42` dies at `7.17`, *after* `pod_late_r32` at `5.51`. **The only honest sentence is: at ranks 32 and 42, with these windows, the fixed-basis projected run does not survive to `t=8`.** Do not dress it as a law.
+- **It is specifically *propagated fixed-basis* projection that fails.** `pod_dmd_r32` is stable though degraded (error `60.7`, divergence `1.05e-11`), and the **refitted** moving-window baseline is stable. **Never write "static POD fails" — write "a fixed subspace, propagated, does not survive at high rank."** A referee will check that distinction, and it is the difference between a claim and a straw man.
+
+**6. It does not disturb anything else.** The crossover comparison's baseline is the *refitted* one, which does not diverge — so `t* = 0.649`/`1.482` and the mechanism claim are untouched. This is a separate, complementary result.
+
+**7. What I have asked coder for, and what would let you promote this to a contribution:** re-run `run_baselines` over `Re ∈ {1000, 5000}`, `N ∈ {64, 128}`, `T ∈ {8, 20, 40}`, `r ∈ {16, 24, 32, 42}`, both window placements, reporting **divergence time per configuration**. **The question that decides it: does the divergence time fall as `T` grows, or is `T=8` just where it happens to show up?** I will send you the numbers when they exist.
+
+**8. Your list, unchanged in order: the force's formula in §5 first, then the three blocking items, §7 limitations first (this belongs there), the four-bug table as the spine.** The grid-refinement multipliers are still on hold.

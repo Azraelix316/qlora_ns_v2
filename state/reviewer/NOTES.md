@@ -30,6 +30,58 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R66 — THE PROJECT'S STRONGEST POSITIVE RESULT IS UNREMARKED IN A COMMITTED ARTIFACT: A
+> FIXED-BASIS PROJECTED STATIC POD RUN DIVERGES AT `r ≥ 32` AND THE SP-DLRA DOES NOT. D31.** No
+> agent pushed. **R65's rule applied to a SUPPORTING claim rather than a structural one.**
+> **THE FINDING, from `state/coder/results/baselines_re5000_N64_T8.json` (`Re=5000`, `N=64`,
+> `T=8`): sixteen methods, FOUR DIVERGE TO FLOATING-POINT OVERFLOW AND NONE IS A DLRA RUN.**
+> `pod_early_r32` at `t=6.96` (`4.6e+64`), `pod_early_r42` at `t=5.74` (`3.8e+199`), `pod_late_r32`
+> at `t=5.51` (`7.1e+278`), `pod_late_r42` at `t=7.17` (`2.0e+182`). **Meanwhile `dlra_fixed_r32`
+> finishes at `9.4e-14` divergence and `0.652` trajectory error, `dlra_fixed_r42` at `7.6e-14` and
+> `0.510`, the full grid at `7.6e-14`, and every static POD run at `r ≤ 16` is fine.**
+> **AND IT IS NOT A HARNESS ARTEFACT — THAT IS THE PART THAT MAKES IT USABLE.** `run_projected` is
+> documented as *"a projected run: static POD or fixed-rank DLRA share this path"*, both call
+> `model.step(old, dt, t=..., projector=projector)` — **IDENTICAL integrator, splitting and
+> projection application; only the subspace differs, fixed versus time-dependent** — and the basis
+> is an orthonormal `PODGalerkin` SVD fit, so there is no conditioning defect to blame. **CODER
+> ALREADY CODED FOR IT:** `run_projected`'s docstring says *"A baseline that goes non-finite is a
+> result, not a harness failure... 'POD is worse' is not a citable claim unless the divergence is
+> itself reported (R24's lesson)."* **So it is a recorded, deliberate, correctly-caveated result —
+> AND THE PAPER DOES NOT CONTAIN IT.**
+> **THE FRAMING IT SUPPORTS:** *a reduced solver is only viable if its subspace evolves.
+> Propagating a fixed low-dimensional basis through the nonlinear dynamics — same
+> structure-preserving integrator, same splitting, orthonormal basis — is stable at rank 16 and
+> overflows at ranks 32 and 42, where the same integrator with a time-dependent subspace holds
+> roundoff divergence and error below 1.1 throughout. **What rank buys is not accuracy but the
+> ability to run at all.*** **And it gives a LEGITIMATE route to the framing `AGENTS.md` describes
+> WITHOUT the barred claim:** we cannot say "adaptive rank" (D4/D12, and every artifact records
+> `rank_policy: "fixed per run"`), **but "the subspace must evolve, and here is what happens when it
+> does not" is supportable and is a STABILITY result, which suits the venue better than a crossover
+> sensitivity.**
+> **THE CAVEATS, WHICH ARE SUBSTANTIAL AND WHICH I AM NOT SOFTENING. (1) ONE artifact, ONE
+> parameter set — it does not replicate BECAUSE THERE IS NOTHING TO REPLICATE AGAINST;
+> `baselines_*.json` contains exactly one file, so it is NOT a paper claim yet. (2) THE DIVERGENCE
+> TIME IS NOT MONOTONE IN RANK, so there is NO instability-growth story: `pod_early_r42` dies at
+> `5.74`, BEFORE `pod_early_r32` at `6.96`, while `pod_late_r42` dies at `7.17`, AFTER
+> `pod_late_r32` at `5.51`. **The only honest sentence is the weak one: at `r ≥ 32`, with these
+> windows, the fixed-basis projected run does not survive to `T=8`. I will not dress that as a
+> scaling law.** (3) It is specifically PROPAGATED FIXED-BASIS projection that fails — `pod_dmd_r32`
+> is stable though degraded (`60.7` error, `1.05e-11` divergence) and the REFITTED moving-window
+> baseline is stable — **so the claim is NOT "static POD fails" but "a FIXED subspace, propagated,
+> does not survive at high rank."** (4) **It does not touch the crossover result**, whose baseline is
+> the refitted one; the two are complementary. (5) A referee will ask whether the DLRA at `r=32` is
+> "the same method" — it is the same integrator with a TIME-DEPENDENT subspace, **so the claim must
+> be framed as fixed versus time-dependent, in STABILITY terms, not accuracy terms.**
+> **THE SWEEP THAT MAKES IT CITABLE, and it is cheap:** `run_baselines` over `Re ∈ {1000, 5000}`,
+> `N ∈ {64, 128}`, `T ∈ {8, 20, 40}`, `r ∈ {16, 24, 32, 42}`, both window placements, reporting
+> **divergence time per configuration**. **The question that decides it: does the divergence time
+> FALL as `T` grows, or is `T=8` simply where it happens to appear?**
+> **THE LESSON, AND IT IS THE MIRROR OF R65's.** R65 caught me asserting a mechanism I had never
+> tested. **R66 catches the opposite failure: a real, recorded, well-caveated result sitting in a
+> committed artifact that nobody — including me, across sixty-six cycles — surfaced, because the
+> paper was being organised around a different contribution and I was auditing CLAIMS rather than
+> ARTIFACTS. AUDITING A CLAIM MEANS ASKING WHAT WOULD FALSIFY IT; AUDITING AN ARTIFACT MEANS ASKING
+> WHAT IT WOULD SUPPORT. I did the first for twenty cycles and not the second.**
 > **R65 — `r=43` IS THE LARGEST RANK TESTED, NOT THE DEALIASING CEILING. THE PAPER'S "at that
 > rank the method IS THE FULL-GRID SOLVER" IS FALSE, AND IT IS IN THE ABSTRACT. D30.** No agent
 > pushed. **Applying R64's rule in its POSITIVE form: before ASSERTING a mechanism, read the numbers
@@ -2324,6 +2376,70 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R66 — the project's strongest positive result is unremarked in a committed
+  artifact: a fixed-basis projected static POD run diverges at `r ≥ 32` and the SP-DLRA does not.
+  D31.**
+
+  No agent pushed. 167 files on `main`, clean. **R65's rule applied to a *supporting* claim rather
+  than a structural one.**
+
+  **The finding**, from `state/coder/results/baselines_re5000_N64_T8.json` (`Re=5000`, `N=64`,
+  `T=8`, `A=0.2`): sixteen methods, **four diverge to floating-point overflow and none is a DLRA
+  run.** `pod_early_r32` at `t=6.96` (`4.6e+64`), `pod_early_r42` at `t=5.74` (`3.8e+199`),
+  `pod_late_r32` at `t=5.51` (`7.1e+278`), `pod_late_r42` at `t=7.17` (`2.0e+182`). **Meanwhile
+  `dlra_fixed_r32` finishes at `9.4e-14` divergence and `0.652` trajectory error, `dlra_fixed_r42`
+  at `7.6e-14` and `0.510`, the full grid at `7.6e-14`, and every static POD run at `r ≤ 16` is
+  fine.**
+
+  **And it is not a harness artefact — that is the part that makes it usable.** `run_projected` is
+  documented as *"a projected run: static POD or fixed-rank DLRA share this path"*, both call
+  `model.step(old, dt, t=..., projector=projector)` — **identical integrator, splitting and
+  projection application; only the subspace differs, fixed versus time-dependent** — and the basis
+  is an orthonormal `PODGalerkin` SVD fit, so there is no conditioning defect to blame. **Coder
+  already coded for it:** `run_projected`'s docstring says *"A baseline that goes non-finite is a
+  result, not a harness failure... 'POD is worse' is not a citable claim unless the divergence is
+  itself reported (R24's lesson)."* **So it is a recorded, deliberate, correctly-caveated result —
+  and the paper does not contain it.**
+
+  **The framing it supports:** *a reduced solver is only viable if its subspace evolves. Propagating
+  a fixed low-dimensional basis through the nonlinear dynamics — same structure-preserving
+  integrator, same splitting, orthonormal basis — is stable at rank 16 and overflows at ranks 32 and
+  42, where the same integrator with a time-dependent subspace holds roundoff divergence and error
+  below 1.1 throughout. **What rank buys is not accuracy but the ability to run at all.*** And it
+  gives a **legitimate route to the framing `AGENTS.md` describes without the barred claim:** we
+  cannot say *"adaptive rank"* (D4/D12; every artifact records `rank_policy: "fixed per run"`), **but
+  "the subspace must evolve, and here is what happens when it does not" is supportable and is a
+  STABILITY result, which suits the venue better than a crossover sensitivity.**
+
+  **The caveats, which are substantial and which I am not softening.**
+  1. **One artifact, one parameter set** — it does not replicate **because there is nothing to
+     replicate against**; `baselines_*.json` contains exactly one file. **Not a paper claim yet.**
+  2. **The divergence time is NOT monotone in rank, so there is no instability-growth story:**
+     `pod_early_r42` dies at `5.74`, *before* `pod_early_r32` at `6.96`; `pod_late_r42` dies at
+     `7.17`, *after* `pod_late_r32` at `5.51`. **The only honest sentence is the weak one: at
+     `r ≥ 32`, with these windows, the fixed-basis projected run does not survive to `T=8`. I will
+     not dress that as a scaling law.**
+  3. **It is specifically propagated fixed-basis projection that fails** — `pod_dmd_r32` is stable
+     though degraded (`60.7` error, `1.05e-11`), and the **refitted** moving-window baseline is
+     stable. **The claim is not "static POD fails" but "a fixed subspace, propagated, does not
+     survive at high rank."**
+  4. **It does not touch the crossover result**, whose baseline is the refitted one; the two are
+     complementary, not in conflict.
+  5. A referee will ask whether the DLRA at `r=32` is "the same method" — it is the same integrator
+     with a **time-dependent** subspace, **so the claim must be framed as fixed versus
+     time-dependent, in stability terms, not accuracy terms.**
+
+  **The sweep that makes it citable, and it is cheap:** `run_baselines` over `Re ∈ {1000, 5000}`,
+  `N ∈ {64, 128}`, `T ∈ {8, 20, 40}`, `r ∈ {16, 24, 32, 42}`, both window placements, reporting
+  **divergence time per configuration**. **The question that decides it: does the divergence time
+  fall as `T` grows, or is `T=8` simply where it happens to appear?**
+
+  **The lesson, and it is the mirror of R65's.** R65 caught me asserting a mechanism I had never
+  tested. **R66 catches the opposite failure: a real, recorded, well-caveated result sitting in a
+  committed artifact that nobody — including me, across sixty-six cycles — surfaced, because the
+  paper was being organised around a different contribution and I was auditing *claims* rather than
+  *artifacts*.** **Auditing a claim means asking what would falsify it; auditing an artifact means
+  asking what it would support.** I did the first for twenty cycles and not the second.
 - 2026-09-25 **R65 — `r=43` is the largest rank tested, not the dealiasing ceiling. The paper's
   "at that rank the method is the full-grid solver" is false, and it is in the abstract. D30.**
 
