@@ -39,7 +39,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from solvers import DLRA, Grid2D, KolmogorovForcing, StreamFunctionNS, ZeroForcing
+from solvers import BUGIntegrator, DLRA, Grid2D, StreamFunctionNS, ZeroForcing
 
 
 def _git_commit() -> str:
@@ -62,18 +62,27 @@ def thread_settings() -> dict:
     return {key: os.environ.get(key) for key in keys}
 
 
-def make_state(grid: Grid2D, seed: int = 20260925) -> np.ndarray:
-    """A reproducible, band-limited turbulent state to integrate."""
-    rng = np.random.default_rng(seed)
-    raw = rng.normal(size=(grid.N, grid.N))
-    F = grid.fft(raw)
-    mask = (np.abs(grid.kx)[:, None] <= 8) & (np.abs(grid.ky)[None, :] <= 8)
-    state = grid.ifft(F * mask)
-    u, v = grid.velocity(state)
-    rms = float(np.sqrt(np.mean(u * u + v * v)))
-    if rms > 0:
-        state *= 1.0 / rms
-    return state - np.mean(state)
+def make_state(grid: Grid2D, seed: int = 20260925, amplitude: float = 1.0) -> np.ndarray:
+    """A bounded, smooth multi-mode state for the cost measurement.
+
+    The cost question is "how long does a reduced step take", and the answer is
+    set by the whole-field SVD (Theta(N^3)) plus the full-grid nonlinear
+    evaluation -- neither depends on the state's content.  The canonical forced
+    IC is deliberately *not* used here: holding a fixed low rank for thousands
+    of steps on a forced field drives the state to extreme magnitudes, and
+    LAPACK then fails to converge, which is a statement about that
+    configuration rather than about cost.  ``measure`` verifies the
+    content-independence claim instead of asserting it, by repeating the
+    measurement at a second amplitude.
+    """
+    X, Y = np.meshgrid(grid.x, grid.y, indexing="ij")
+    field = (
+        np.sin(X) * np.sin(Y)
+        + 0.5 * np.cos(2 * X) * np.sin(Y)
+        + 0.25 * np.sin(3 * X) * np.cos(2 * Y)
+    )
+    field = field - field.mean()
+    return float(amplitude) * field
 
 
 def full_step_seconds(model: StreamFunctionNS, state, dt: float, steps: int) -> float:
@@ -87,12 +96,13 @@ def full_step_seconds(model: StreamFunctionNS, state, dt: float, steps: int) -> 
 
 
 def reduced_step_seconds(
-    N: int, rank: int, dt: float, steps: int, re: int
+    N: int, rank: int, dt: float, steps: int, amplitude: float = 1.0
 ) -> tuple[float, float, int]:
     """Return (full_step_seconds, linear_algebra_seconds, svd_calls)."""
     grid = Grid2D(N)
-    forcing = KolmogorovForcing(amplitude=0.5, wavenumber=1.0) if re > 0 else ZeroForcing()
-    model = StreamFunctionNS(grid, nu=1.0 / re, forcing=forcing, dealias=True)
+    # Unforced: the cost of a step is independent of the forcing, and an
+    # unforced decay keeps the benchmark state bounded for a long run.
+    model = StreamFunctionNS(grid, nu=0.02, forcing=ZeroForcing(), dealias=True)
     dlra = DLRA(
         model,
         rank=rank,
@@ -102,7 +112,7 @@ def reduced_step_seconds(
         check_every=10**9,   # hold the rank fixed: this measures cost, not adaptation
         adapt_initial=False,
     )
-    state = dlra.initialize(make_state(grid))
+    state = dlra.initialize(make_state(grid, amplitude=amplitude))
     start = time.perf_counter()
     for i in range(steps):
         state = dlra.step(state, dt, t=i * dt)
@@ -112,6 +122,36 @@ def reduced_step_seconds(
     return elapsed, dlra.projector.svd_seconds, dlra.projector.svd_calls
 
 
+def bug_step_seconds(
+    N: int, rank: int, dt: float, steps: int, amplitude: float = 1.0
+) -> tuple[float, float, int, int]:
+    """Return (full_step_seconds, svd_seconds, svd_calls, svd_max_dimension).
+
+    Same protocol as :func:`reduced_step_seconds` -- same unforced state, same
+    held rank, warm-up discarded by the caller -- so the BUG timing and the
+    projected timing are directly comparable.  The rank is held fixed by
+    ``min_rank == max_rank``; this measures cost, not adaptation.
+    """
+    grid = Grid2D(N)
+    model = StreamFunctionNS(grid, nu=0.02, forcing=ZeroForcing(), dealias=True)
+    bug = BUGIntegrator(
+        model,
+        rank=rank,
+        min_rank=rank,
+        max_rank=rank,
+        relative_amplitude_cutoff=1e-10,
+        substeps=2,
+    )
+    state = bug.initialize(make_state(grid, amplitude=amplitude))
+    start = time.perf_counter()
+    for i in range(steps):
+        state = bug.step(dt=dt, t=i * dt)
+    elapsed = time.perf_counter() - start
+    if not np.isfinite(state).all():
+        raise FloatingPointError("BUG step went non-finite")
+    return elapsed, bug.svd_seconds, bug.svd_calls, bug.svd_max_dimension
+
+
 def measure(
     N: int,
     ranks: list[int],
@@ -119,11 +159,11 @@ def measure(
     repeats: int,
     warmup: int,
     dt: float,
-    re: int,
+    amplitude_check: bool = True,
+    bug_ranks: list[int] | None = None,
 ) -> dict:
     grid = Grid2D(N)
-    forcing = KolmogorovForcing(amplitude=0.5, wavenumber=1.0) if re > 0 else ZeroForcing()
-    model = StreamFunctionNS(grid, nu=1.0 / re, forcing=forcing, dealias=True)
+    model = StreamFunctionNS(grid, nu=0.02, forcing=ZeroForcing(), dealias=True)
     state0 = make_state(grid)
 
     # Discarded warm-up: first touch of every buffer, and the LAPACK handle.
@@ -133,14 +173,20 @@ def measure(
     rows = []
     for rank in ranks:
         # Warm-up, discarded: it also reports the per-step SVD call count.
-        _, _, calls = reduced_step_seconds(N, rank, dt, warmup, re)
-        runs = [reduced_step_seconds(N, rank, dt, steps, re) for _ in range(repeats)]
+        _, _, calls = reduced_step_seconds(N, rank, dt, warmup)
+        runs = [reduced_step_seconds(N, rank, dt, steps) for _ in range(repeats)]
         # Both accountings come from the same runs, so they are directly
         # comparable rather than independently noisy.
         red_med = statistics.median([r[0] for r in runs])
         la_med = statistics.median([r[1] for r in runs])
         run_secs = [r[0] for r in runs]
         full_med = statistics.median(full_runs)
+        # Content-independence, measured rather than assumed: the same step at
+        # a 1e-3 amplitude must cost the same.
+        amp_med = statistics.median(
+            [reduced_step_seconds(N, rank, dt, steps, amplitude=1e-3)[0]
+             for _ in range(max(2, repeats // 3))]
+        ) if amplitude_check else red_med
         rows.append(
             {
                 "rank": rank,
@@ -154,15 +200,44 @@ def measure(
                 "svd_calls_per_step": calls / warmup,
                 "full_step_ratio_vs_reference": red_med / full_med,
                 "linear_algebra_ratio_vs_reference": la_med / full_med,
+                "amplitude_1e_3_seconds_median": amp_med,
+                "amplitude_cost_ratio": red_med / amp_med,
             }
         )
+        # The BUG port, on the same protocol and the same state, so the two
+        # timings differ only in the integrator.
+        if bug_ranks is not None and rank in bug_ranks:
+            bug_step_seconds(N, rank, dt, warmup)          # discarded warm-up
+            bug_runs = [bug_step_seconds(N, rank, dt, steps) for _ in range(repeats)]
+            bug_secs = [b[0] for b in bug_runs]
+            bug_med = statistics.median(bug_secs)
+            rows[-1]["bug"] = {
+                "full_step_seconds_median": bug_med,
+                "full_step_seconds_min": min(bug_secs),
+                "full_step_seconds_max": max(bug_secs),
+                "full_step_seconds_per_step": bug_med / steps,
+                "full_step_relative_spread": (max(bug_secs) - min(bug_secs)) / bug_med,
+                "svd_seconds_median": statistics.median([b[1] for b in bug_runs]),
+                "svd_calls_per_step": bug_runs[0][2] / steps,
+                "svd_max_dimension": bug_runs[0][3],
+                "full_step_ratio_vs_reference": bug_med / full_med,
+                "speedup_over_projected_same_rank": red_med / bug_med,
+                "note": (
+                    "same state, same held rank, same warm-up and repeat count; "
+                    "the only factorization inside a BUG step is of the "
+                    "augmented S-matrix, so svd_max_dimension is at most 4r"
+                ),
+            }
     return {
         "N": N,
         "steps_per_repeat": steps,
         "repeats": repeats,
         "warmup_steps_discarded": warmup,
         "dt": dt,
-        "re": re,
+        "benchmark_state": (
+            "unforced multi-mode decay (nu=0.02, ZeroForcing) at amplitude 1, "
+            "with an amplitude-1e-3 repeat to measure content-independence"
+        ),
         "reference_full_step_seconds_median": statistics.median(full_runs),
         "reference_full_step_seconds_per_step": statistics.median(full_runs) / steps,
         "reference_relative_spread": (
@@ -180,7 +255,11 @@ def main() -> None:
     parser.add_argument("--steps", type=int, default=2000)
     parser.add_argument("--repeats", type=int, default=7)
     parser.add_argument("--warmup", type=int, default=200)
-    parser.add_argument("--re", type=int, default=5000)
+    parser.add_argument(
+        "--bug-ranks", type=int, nargs="*", default=None,
+        help="ranks at which to also time the BUG port, on the same protocol; "
+             "omit to time the projected integrator only",
+    )
     parser.add_argument("--dt", type=float, default=None)
     parser.add_argument(
         "--output",
@@ -195,7 +274,12 @@ def main() -> None:
         # item 3/4): the canonical N=64 run uses dt=5e-4 at CFL 0.0147.
         dt = args.dt if args.dt is not None else 5e-4 * (64.0 / N)
         print(f"timing N={N} ranks={args.ranks} ...", flush=True)
-        grids.append(measure(N, args.ranks, args.steps, args.repeats, args.warmup, dt, args.re))
+        grids.append(
+            measure(
+                N, args.ranks, args.steps, args.repeats, args.warmup, dt,
+                bug_ranks=args.bug_ranks,
+            )
+        )
 
     rank_independence = []
     for entry in grids:
@@ -205,14 +289,22 @@ def main() -> None:
             hi = by_rank[64]["full_step_seconds_median"]
             lo_la = by_rank[2]["linear_algebra_seconds_median"]
             hi_la = by_rank[64]["linear_algebra_seconds_median"]
-            rank_independence.append(
-                {
-                    "N": entry["N"],
-                    "full_step_ratio_r64_over_r2": hi / lo,
-                    "linear_algebra_ratio_r64_over_r2": hi_la / lo_la,
-                    "within_1p25": bool(hi / lo <= 1.25 and hi_la / lo_la <= 1.25),
-                }
-            )
+            row = {
+                "N": entry["N"],
+                "full_step_ratio_r64_over_r2": hi / lo,
+                "linear_algebra_ratio_r64_over_r2": hi_la / lo_la,
+                "within_1p25": bool(hi / lo <= 1.25 and hi_la / lo_la <= 1.25),
+            }
+            # The port's claim is the opposite one: its cost should *scale* with
+            # the rank, because that is what the O(N r^2) factor work means.
+            if "bug" in by_rank[2] and "bug" in by_rank[64]:
+                b_lo = by_rank[2]["bug"]["full_step_seconds_median"]
+                b_hi = by_rank[64]["bug"]["full_step_seconds_median"]
+                row["bug_full_step_ratio_r64_over_r2"] = b_hi / b_lo
+                row["bug_rank_dependent"] = bool(b_hi / b_lo > 1.25)
+                row["bug_speedup_r2"] = by_rank[2]["bug"]["speedup_over_projected_same_rank"]
+                row["bug_speedup_r64"] = by_rank[64]["bug"]["speedup_over_projected_same_rank"]
+            rank_independence.append(row)
 
     output = {
         "case": "cost_retiming",
@@ -235,6 +327,12 @@ def main() -> None:
             },
             "rank_held_fixed": "check_every is set beyond the run, so cost is "
                                "measured at a fixed rank rather than under adaptation",
+            "benchmark_state": "unforced multi-mode decay; the forced IC is not "
+                               "used because a fixed low rank on a forced field "
+                               "grows unboundedly and makes LAPACK fail, which is "
+                               "a property of that configuration and not of cost. "
+                               "An amplitude-1e-3 repeat measures the "
+                               "content-independence claim rather than assuming it.",
             "why": "the factorization is of the whole N x N field, so it is "
                    "rank-independent and Theta(N^3); a linear-algebra win is "
                    "not a per-step win",

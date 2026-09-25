@@ -13,6 +13,25 @@ from __future__ import annotations
 import numpy as np
 
 
+def zonal_mean(psi: np.ndarray) -> np.ndarray:
+    """The streamwise-uniform part of a state, ``x-avg(psi)``.
+
+    Axis 0 is x in this grid's convention, so averaging over it leaves a
+    y-profile.  In a forced 2-D problem with an unidirectional shear this mode
+    can grow secularly -- the zonal momentum equation has no restoring term on
+    it -- which is why every statistic in this project is computed on
+    ``psi - zonal_mean(psi)`` with the zonal part reported alongside, rather
+    than mixed in.
+    """
+    psi = np.asarray(psi, dtype=float)
+    return np.broadcast_to(psi.mean(axis=0), psi.shape)
+
+
+def fluctuations(psi: np.ndarray) -> np.ndarray:
+    """``psi' = psi - x-avg(psi)``: the state with the zonal mode removed."""
+    return np.asarray(psi, dtype=float) - zonal_mean(psi)
+
+
 class Grid2D:
     """Uniform periodic 2D grid with rfft-based spectral operators."""
 
@@ -83,22 +102,95 @@ class Grid2D:
         F[m] = G[m] / self.k2[m]
         return self.ifft(F)
 
+    def _full_spectrum(self, F: np.ndarray) -> np.ndarray:
+        """Reconstruct the full last-axis spectrum from the rfft half-spectrum.
+
+        ``rfftn`` keeps axis 0 full and halves axis 1, and for a real field the
+        missing columns are ``F_full[k, N-j] = conj(F_half[N-k, j])`` -- note
+        the *k-flip*.  ``irfftn`` instead assumes ``F[k, N-j] = conj(F[k, j])``,
+        which is a different field.  The two agree for fields whose spectrum is
+        symmetric in k, and disagree by O(1) otherwise, so any operator whose
+        multiplier depends on k cannot be applied to a half spectrum and then
+        inverted with ``irfftn``.
+        """
+        tail = np.conj(self._flip_x(F[:, 1:-1]))
+        return np.concatenate([F, tail], axis=1)
+
+    def _flip_x(self, A: np.ndarray) -> np.ndarray:
+        """Reverse axis 0, the full x-axis."""
+        return A[::-1, :]
+
+    def _deriv(self, f: np.ndarray, axis: int) -> np.ndarray:
+        """Spectral first derivative, correct for any real field.
+
+        The full spectrum is formed first, the real wavenumber multiplier is
+        applied to it, and the inverse is a plain complex ``ifft2``.  The cost
+        is O(N^2 log N) with a factor ~2 over the half-spectrum route, which is
+        negligible beside the Theta(N^3) factorization this project actually
+        pays for, and correctness is not optional: the nonlinear term is built
+        from these derivatives.
+
+        Both axes use ``kx``, which is already ``2*pi*fftfreq`` over the *full*
+        grid; ``ky`` is the rfft half-axis and is not the right multiplier for a
+        full-spectrum inversion.
+        """
+        if axis not in (0, 1):
+            raise ValueError("axis must be 0 (x) or 1 (y)")
+        arr = np.asarray(f, dtype=float)
+        F = np.fft.fft2(arr)
+        mult = self.kx[:, None] if axis == 0 else self.kx[None, :]
+        return np.fft.ifft2(1j * mult * F).real
+
     def grad(self, f: np.ndarray):
-        F = self.fft(f)
-        fx = self.ifft(1j * self.kx[:, None] * F)
-        fy = self.ifft(1j * self.ky[None, :] * F)
-        return fx, fy
+        """(d/dx f, d/dy f), exact for any real field including full-band ones."""
+        return self._deriv(f, 0), self._deriv(f, 1)
 
     def velocity(self, psi: np.ndarray):
         """Velocity from the stream function: u = (psi_y, -psi_x)."""
-        F = self.fft(psi)
-        u = self.ifft(1j * self.ky[None, :] * F)
-        v = self.ifft(-1j * self.kx[:, None] * F)
-        return u, v
+        return self._deriv(psi, 1), -self._deriv(psi, 0)
 
     def vorticity(self, psi: np.ndarray) -> np.ndarray:
         """Vorticity omega = curl(u) = -Lap(psi) for u=(psi_y,-psi_x)."""
         return self.ifft(self.k2 * self.fft(psi))
+
+    def factor_semigroup(
+        self, factor: np.ndarray, tau: float, nu: float
+    ) -> np.ndarray:
+        r"""Exact heat semigroup applied to one low-rank factor.
+
+        Writing the state as ``Y = U S V^T`` with ``U``'s rows indexing ``x``
+        and ``V``'s rows indexing ``y``, a field-level diffusion is a
+        left-multiplication by ``A_x = nu * Delta_x`` and a right-multiplication
+        by ``A_y = nu * Delta_y``, so
+
+            e^{\nu\tau\Delta}Y
+                = (e^{\nu\tau\Delta_x}U)\,S\,(e^{\nu\tau\Delta_y}V)^{T},
+            \qquad (e^{\nu\tau\Delta_y}V)^{T} = V^{T}e^{\nu\tau\Delta_y T}.
+
+        **Both factors are therefore transformed along axis 0** -- the leading
+        axis is the spatial one in each case, with ``U`` carrying ``x`` and ``V``
+        carrying ``y``.  Applying the ``y`` semigroup along ``V``'s columns
+        would be transforming its ``r`` singular-value directions instead, which
+        is a different operator.
+
+        This is what lets a BUG step avoid any full-size factorization: the
+        factors keep their rank exactly and the cost is two length-``N`` FFTs per
+        factor column, O(N r log N).
+
+        The full-grid wavenumber array ``kx`` is used with a full ``fft``/``ifft``,
+        matching :meth:`_deriv`: the rfft half-axis is not a valid multiplier for
+        a full-spectrum inversion.
+        """
+        arr = np.asarray(factor)
+        if arr.ndim != 2:
+            raise ValueError(f"expected a 2-D factor, got shape {arr.shape}")
+        if arr.shape[0] != self.N:
+            raise ValueError(
+                f"factor's leading axis is {arr.shape[0]}, expected N={self.N}"
+            )
+        spectrum = np.fft.fft(arr, axis=0)
+        mult = np.exp(-nu * self.kx ** 2 * tau)[:, None]
+        return np.fft.ifft(spectrum * mult, axis=0).real
 
     # -- norms / diagnostics ------------------------------------------------
     def l2_sq(self, f: np.ndarray) -> float:
@@ -136,6 +228,64 @@ class Grid2D:
         """Integral |grad omega|² (enstrophy-dissipation integrand)."""
         return self.spec_norm_sq(-self.k2 * self.fft(psi), self.k2)
 
+    def isotropic_spectra(self, psi: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Shell-summed isotropic energy and enstrophy spectra of ``psi``.
+
+        Returns ``(k, E, Z)`` with integer shell index ``k`` (unit spacing, which
+        is the mode spacing on ``[0,2*pi)^2``) and
+
+            E(k) = 1/2 (L^2/N^4) sum_{shell} w k^2 |F|^2 ,
+            Z(k) = 1/2 (L^2/N^4) sum_{shell} w k^4 |F|^2 ,
+
+        so that ``sum(E)`` reproduces ``ke(psi)`` and ``sum(Z)`` reproduces
+        ``enstrophy(psi)`` to roundoff.  Modes are assigned to shells by
+        rounding ``|k|`` to the nearest integer, which keeps the sum exact and
+        avoids the half-shell bookkeeping that would otherwise lose energy at
+        the bin edges.
+
+        This is a spectrum of a *state*; it is not a spectrum of a problem, and
+        a rank-truncated reduced state has only as many values as its rank.  It
+        must be computed on the full-grid reference (and, for agreement checks,
+        on the reduced state), never read off a rank-``r`` state's own
+        singular values.
+        """
+        F = self.fft(np.asarray(psi, dtype=float))
+        if not np.isfinite(psi).all():
+            return np.empty(0), np.empty(0), np.empty(0)
+        radius = np.sqrt(self.k2)
+        shell = np.rint(radius).astype(int)
+        k_max = int(shell.max())
+        energy = np.zeros(k_max + 1, dtype=float)
+        enstrophy = np.zeros(k_max + 1, dtype=float)
+        weight = self.w * (F.real**2 + F.imag**2)
+        prefactor = 0.5 * (self.L**2 / self.n**2)
+        np.add.at(energy, shell.ravel(), (weight * self.k2).ravel())
+        np.add.at(enstrophy, shell.ravel(), (weight * self.k2**2).ravel())
+        energy *= prefactor
+        enstrophy *= prefactor
+        k = np.arange(k_max + 1, dtype=float)
+        return k, energy, enstrophy
+
+    def max_divergence(self, u: np.ndarray, v: np.ndarray) -> float:
+        """max |div u| of an *explicit* velocity field, measured spectrally.
+
+        This is the diagnostic itself, exposed so that a test can feed it a
+        field that is known **not** to be divergence-free and confirm it
+        reports O(1).  Without that negative control, an invariant that holds
+        by representation would be a vacuous test: it would pass for any
+        implementation, including a broken one.
+
+        It differentiates with ``grad``, i.e. the *same* operator ``velocity``
+        uses.  Differentiating by a different route would measure the
+        disagreement between two spectral conventions rather than the
+        divergence of the field.
+        """
+        if u.shape != v.shape or u.shape != (self.N, self.N):
+            raise ValueError(f"velocity shape {u.shape}/{v.shape} does not match grid")
+        ux, _ = self.grad(u)
+        _, vy = self.grad(v)
+        return float(np.max(np.abs(ux + vy)))
+
     def max_div_velocity(self, psi: np.ndarray) -> float:
         """max |div u| of the velocity *round-tripped* through real space.
 
@@ -144,8 +294,4 @@ class Grid2D:
         roundoff, since div u = 0 holds structurally.
         """
         u, v = self.velocity(psi)
-        div = self.ifft(
-            1j * self.kx[:, None] * self.fft(u)
-            + 1j * self.ky[None, :] * self.fft(v)
-        )
-        return float(np.max(np.abs(div)))
+        return self.max_divergence(u, v)

@@ -89,6 +89,17 @@ exactly consistent with R8a's independent finding that at `Re=5000` the fluctuat
 energy was still *accelerating* (+295%) at `t=40`: it was still being fed structure the
 grid could not hold.
 
+> **CORRECTED BY R29 — DO NOT USE THE SENTENCE ABOVE.** I concluded "resolution
+> artefact" from **two** resolutions. The `N=256` point gives `r99 = 13` at `W=16`, so
+> the sequence is `14, 24, 13` across `N=64/128/256` — **non-monotone**, and the `N=128`
+> value is the outlier, not `N=64`. The claim that the required rank *keeps growing with
+> the grid* is **not supported and is retracted.** The matched-`t` comparison is also
+> confounded: the three grids differ in total energy by 35% at `t=16`, because the secular
+> mean growth of R8a proceeds at a different rate on each. What survives is *stronger* and
+> *simpler*: `r99` is **grid-independent for `W ≤ 8`** across all three grids — 2/2/2,
+> 4/4/3, 6/6/6, 11/10/10 — spanning a 4× range in linear resolution and a 16× range in
+> the dealiasing ceiling (43/85/171). See `2026-09-25-R29-resolution-sweep-N256.md`.
+
 ## 3. Four findings
 
 **3.1 The energetically relevant rank grows by a factor of sixteen over the first eight

@@ -20,7 +20,7 @@ from typing import Optional
 import numpy as np
 
 from .ns_psi import StreamFunctionNS
-from .spectral import Grid2D
+from .spectral import Grid2D, zonal_mean
 
 
 @dataclass
@@ -37,12 +37,69 @@ class RankStats:
 class SVDProjector:
     """Rank-r projector with candidate-stage tracking and rank adaptation.
 
-    Rank selection is an **amplitude** test, not an accuracy criterion: the
-    retained rank counts the singular values above
-    ``relative_amplitude_cutoff * s[0]``.  Because singular values are
-    amplitudes, a cutoff of 1e-6 keeps modes down to an *energy* ratio of
-    1e-12, so the parameter is deliberately not called a tolerance and must not
-    be described as one.
+    Rank selection offers two criteria, and which one is used is recorded in
+    every artifact because the choice decides what the rank trace can see:
+
+    ``rank_criterion="amplitude"`` (the historical default) counts modes above
+    ``relative_amplitude_cutoff * s[0]``.  It is an amplitude test, so 1e-6 is
+    an energy ratio of 1e-12, and in practice it selects the grid's dealiasing
+    ceiling: the dealiased candidate has a nine-order cliff at the band edge and
+    no further significant modes, so the retained rank is the grid's, not the
+    dynamics'.
+
+    ``rank_criterion="energy"`` keeps the smallest r with
+    ``sum(s[:r]**2)/sum(s**2) >= energy_fraction`` -- an r99-style rule.  It is
+    a far better-behaved criterion than the amplitude test: it leaves the
+    dealiasing ceiling behind and selects a physically meaningful number.  It
+    is **not**, however, the criterion that tracks the sixteenfold rank growth
+    measured on forced 2-D NS, and the earlier version of this docstring said
+    so.  The reason is the distinction spelled out below: the growth is a
+    *windowed* quantity and this rule reads an *instantaneous* one.
+
+    **Which quantity a criterion measures is part of its meaning, so artifacts
+    record it.**  Both rules above act on a single stage candidate, and the
+    rank they return is therefore a *spatial* rank -- the dimension of the
+    subspace one field needs -- not the dimension of the subspace a trajectory
+    sweeps through.  A rank trace labelled only "rank" is ambiguous between the
+    two, which is how the ceiling and the windowed growth got conflated.
+
+    Both are clamped to ``[min_rank, max_rank]``.  Neither is an accuracy
+    criterion: they say how many modes to keep, not how close the result is.
+
+    **``rank_basis`` decides whose energy is counted.**  This is not cosmetic
+    at late times: the zonal mean grows secularly and holds 94% of the total
+    energy by t=20 (measured), so an energy fraction of the *whole state* is
+    eventually reached by the mean alone, while the fluctuation fraction -- the
+    one R26 measured and the one S1 requires of every statistic here -- does
+    not.  ``rank_basis="fluctuations"`` ranks on the zonal-mean-removed field,
+    costing one extra spectrum computation (``compute_uv=False``, so no
+    singular vectors are formed) per projection; the projection itself is
+    unchanged and still acts on the whole state.
+
+    **What no choice of criterion or basis can do, measured.**  A per-step rule
+    reads one state at a time, so it can only ever select the *instantaneous*
+    rank.  On the canonical case at t=8 the final state's own r99 is **2** (on
+    the fluctuations as well as on the whole state), while the r99 of the
+    *window* [0, 8] -- the modes needed to represent the 401 snapshots the
+    trajectory passes through -- is **14**.  The growth R26 measures is
+    therefore a property of the subspace the trajectory *visits*, not of any
+    single state, and a per-step instantaneous rule does not approach it: the
+    energy criterion moves the selection off the dealiasing ceiling and onto a
+    physically meaningful ~2, but 2 is not 16 and no threshold on one snapshot
+    will make it so.  Tracking the windowed rank needs a method that
+    accumulates the visited subspace over a window, which this per-step
+    truncation is not.
+
+    **Cost model, as implemented (this is today's behaviour, not a design
+    goal).** ``_svd`` factorizes the **whole N x N field** at four stage
+    boundaries per step, so per-step cost is Theta(N^3) and
+    **rank-independent**: r=2 and r=64 cost the same, because the truncated
+    reconstruction only changes which *columns* of an already-computed
+    factorization are used.  The V6 port (per-stage rank update) is expected to
+    **invert** this property, and two tests pin it so the change is visible as
+    a test failing rather than as a claim in prose: ``test_full_field_svd_is_rank_independent``
+    (the factorization must return the full N-value spectrum for any rank) and
+    ``test_svd_call_count_per_step`` (four whole-field factorizations per step).
     """
 
     def __init__(
@@ -52,6 +109,9 @@ class SVDProjector:
         min_rank: int = 2,
         max_rank: int = 64,
         relative_amplitude_cutoff: float = 1e-6,
+        rank_criterion: str = "amplitude",
+        energy_fraction: float = 0.99,
+        rank_basis: str = "state",
     ):
         integer_values = (rank, min_rank, max_rank)
         if any(int(value) != value for value in integer_values):
@@ -62,6 +122,12 @@ class SVDProjector:
             raise ValueError("rank must lie between min_rank and max_rank")
         if not 0.0 < float(relative_amplitude_cutoff) < 1.0:
             raise ValueError("relative_amplitude_cutoff must lie in (0,1)")
+        if rank_criterion not in ("amplitude", "energy"):
+            raise ValueError("rank_criterion must be 'amplitude' or 'energy'")
+        if not 0.0 < float(energy_fraction) < 1.0:
+            raise ValueError("energy_fraction must lie in (0,1)")
+        if rank_basis not in ("state", "fluctuations"):
+            raise ValueError("rank_basis must be 'state' or 'fluctuations'")
         if int(min_rank) > grid.N:
             raise ValueError("min_rank cannot exceed the physical matrix rank")
         self.grid = grid
@@ -70,6 +136,9 @@ class SVDProjector:
         self.max_rank = min(int(max_rank), grid.N)
         self.rank = min(int(rank), self.max_rank)
         self.relative_amplitude_cutoff = float(relative_amplitude_cutoff)
+        self.rank_criterion = rank_criterion
+        self.energy_fraction = float(energy_fraction)
+        self.rank_basis = rank_basis
         self.last_stats: Optional[RankStats] = None
         self.last_singular_values = np.empty(0, dtype=float)
         self._last_u: Optional[np.ndarray] = None
@@ -107,6 +176,15 @@ class SVDProjector:
         self.svd_seconds = 0.0
         self.svd_calls = 0
 
+    def reset_counters_only(self) -> None:
+        """Zero the measured factorization time without touching the rank.
+
+        Used when a caller projects once to obtain a starting state and then
+        wants the per-step cost of the steps alone.
+        """
+        self.svd_seconds = 0.0
+        self.svd_calls = 0
+
     def _svd(self, field: np.ndarray):
         centered = np.asarray(field, dtype=float)
         if centered.shape != (self.grid.N, self.grid.N):
@@ -122,10 +200,42 @@ class SVDProjector:
         self.svd_calls += 1
         return centered, u, s, vh
 
+    def _rank_spectrum(self, field: np.ndarray, s: np.ndarray) -> np.ndarray:
+        """The singular values the *rank rule* reads.
+
+        Equal to the projection's own spectrum unless ``rank_basis`` asks for
+        the fluctuations, in which case the zonal mode is removed first.  The
+        extra spectrum is computed without singular vectors, and it is only
+        computed when the rule actually needs it.
+        """
+        if self.rank_basis == "state" or self.rank_criterion != "energy":
+            return s
+        prime = np.asarray(field, dtype=float) - zonal_mean(field)
+        if not np.isfinite(prime).all():
+            return s
+        try:
+            return np.linalg.svd(prime, compute_uv=False)
+        except np.linalg.LinAlgError:
+            return s
+
     def _target_from_spectrum(self, s: np.ndarray) -> int:
+        """Retained rank for the configured criterion, clipped to the bounds."""
         if s.size == 0 or s[0] <= np.finfo(float).eps:
             return self.min_rank
-        numerical = int(np.count_nonzero(s > self.relative_amplitude_cutoff * s[0]))
+        if self.rank_criterion == "energy":
+            # Smallest r whose leading energy fraction reaches the target.  The
+            # cumulative sum is taken in descending order, so this is the
+            # Eckart--Young rank for the requested energy fraction.
+            energy = np.cumsum(s.astype(float) ** 2)
+            total = energy[-1]
+            if total <= 0.0:
+                return self.min_rank
+            reached = int(np.searchsorted(energy, self.energy_fraction * total) + 1)
+            numerical = min(reached, s.size)
+        else:
+            numerical = int(
+                np.count_nonzero(s > self.relative_amplitude_cutoff * s[0])
+            )
         return max(self.min_rank, min(self.max_rank, numerical))
 
     def _record_svd(
@@ -179,7 +289,7 @@ class SVDProjector:
         centered, u, s, vh = self._svd(field)
         self._record_svd(centered, u, s, vh, stage=stage)
         if adapt:
-            self.rank = self._target_from_spectrum(s)
+            self.rank = self._target_from_spectrum(self._rank_spectrum(field, s))
         return self._reconstruct(centered, u, s, vh)
 
     def project_stage(self, field: np.ndarray, stage: str) -> np.ndarray:
@@ -194,7 +304,9 @@ class SVDProjector:
 
     def _set_rank_from_candidate(self, candidate) -> None:
         centered, u, s, vh = candidate
-        self.rank = self._target_from_spectrum(s)
+        # ``centered`` is spatially mean-free but still carries the zonal mode,
+        # so it is the right input for the fluctuation spectrum.
+        self.rank = self._target_from_spectrum(self._rank_spectrum(centered, s))
         self._last_centered, self._last_u, self._last_s, self._last_vh = candidate
         numerical = (
             int(np.count_nonzero(s > self.relative_amplitude_cutoff * s[0]))
@@ -238,6 +350,9 @@ class DLRA:
         min_rank: int = 2,
         max_rank: int = 64,
         relative_amplitude_cutoff: float = 1e-6,
+        rank_criterion: str = "amplitude",
+        energy_fraction: float = 0.99,
+        rank_basis: str = "state",
         check_every: int = 5,
         adapt_initial: bool = False,
     ):
@@ -250,6 +365,9 @@ class DLRA:
             min_rank=min_rank,
             max_rank=max_rank,
             relative_amplitude_cutoff=relative_amplitude_cutoff,
+            rank_criterion=rank_criterion,
+            energy_fraction=energy_fraction,
+            rank_basis=rank_basis,
         )
         self.check_every = int(check_every)
         self.adapt_initial = bool(adapt_initial)

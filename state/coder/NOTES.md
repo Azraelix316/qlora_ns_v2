@@ -1,16 +1,23 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: the static-POD baseline is repaired — its root cause was a reshape
-> bug in `PODGalerkin.fit` (the SVD was fitted to interleaved data, so every POD
-> number the project had produced was void). With the fix plus P0-compliant
-> fitting, the baseline starts bit-identically and tracks the full grid to
-> 1.0e-8 at T=0.1. V1 passes (IC energy to roundoff, rank 17, rel L2 1.5e-15).
-> Also landed: the R20 rank-cap assert, the R25 `DLRA` warm-object reset, the
-> D11.5 `relative_amplitude_cutoff` rename, and untruncated F2 spectra. 19 tests
-> pass. **Not yet done: every committed result artifact still carries the void
-> POD column and must be regenerated.** No per-step speedup may be claimed
-> (D11.1); F5 is blocked behind the regime decision (D11.2).
+> Status: every item on the reviewer's queue is done and reported. The R5q cost
+> gate is complete (full-step ratio saturates at ≈2.1 and never reaches parity,
+> so the long high-N run is declined); the V6 midpoint-BUG port is implemented
+> from the primary text and verified by a machine-precision stationary-state
+> test, a structural no-full-factorization assertion, and a measured second
+> order of 1.98/1.95; R26/R29's windowed rank is reproduced with project code at
+> N=64 and N=128 (r99 = 16 on both at W=8, while the amplitude rule asks 174 and
+> 357); S2 passes at no affordable horizon; and F5 at T=8 is reported as not
+> favouring the proposed method. 36 tests pass, six figures build from
+> artifacts, and `benchmark_summary.json` is generated. **Two results that
+> constrain the paper rather than support it:** the per-step rank rule reads one
+> state at a time so it cannot track the windowed rank (adaptive rank 1, 17% of
+> the fluctuation energy), and the BUG port is ~5× *slower* per step than the
+> projected integrator, so its cost argument does not hold here. **Open
+> question put to the reviewer:** rework the rank rule to accumulate the visited
+> subspace over a window, or report the instantaneous/windowed distinction as a
+> finding. No per-step speedup may be claimed (D11.1) — none is available.
 
 ## Mission
 
@@ -39,6 +46,291 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 - [x] Send a readiness note to `writer` once the first numbers exist.
 
 ## Log
+
+- 2026-09-25 **V6 done: midpoint BUG implemented from the primary text
+  (arXiv:2402.08607 §§2–3) and verified three ways.** `solvers/bug.py`. The
+  augmented step (K/L/S with `Ŝ(t0)=M̂S₀N̂ᵀ`), then the Galerkin step in bases
+  augmented by `h·F(t₁ᐟ₂,Ŷ)V̂`, then SVD truncation; the Remark-1 3r variant
+  too. Verified by: (a) a stationary state held to **machine precision** over
+  25 steps (the `SelfConsistentForcing` test — every sub-equation has zero
+  RHS there, so the factor algebra either holds to roundoff or not at all, and
+  a transposed factor fails it while passing any loose tolerance); (b) a
+  **structural** assertion that the only factorization in a step is of the
+  ≤4r augmented S-matrix (`large_svd_calls == 0`), which is what a timing
+  claim cannot establish on a shared node; (c) **measured second order, 1.98
+  and 1.95**.
+- 2026-09-25 Two bugs of mine, both silent, both caught by tests rather than by
+  output. A **duplicate `Grid2D.lap` shadowed the real one with a flipped sign**
+  (real `lap` returns −Δf, mine returned +Δf) and broke four operator tests at
+  once. And my first BUG `step` re-factorized the state every step to apply the
+  diffusion — which would have put Θ(N³) back into every step and defeated the
+  port. The fix is exact, not approximate: the heat semigroup acts on the
+  factors, `e^{ντΔ}Y = (e^{ντΔ_x}U)S(e^{ντΔ_y}V)ᵀ`, re-orthonormalised by QR at
+  O(Nr²). Both axes of the factor semigroup act on **axis 0** (U's rows are x,
+  V's rows are y) — my first version applied the y-semigroup to V's *columns*,
+  which is a different operator.
+- 2026-09-25 **Second order is conditional on the rank, and that is a finding.**
+  Same code, same test: at rank 6 the observed order is 1.01/1.02/1.05, at
+  rank 16 it is 1.98/1.95. The rank-6 truncation discards 18 of 24 augmented
+  directions every step and that error is O(1) in dt, so it dominates the time
+  error and masks the scheme's order. So an under-selecting rank rule does not
+  merely lose accuracy — it loses the scheme's order too, which is the same
+  conditioning F5's rank-1 result runs into.
+- 2026-09-25 **R5q cost gate complete and it settles the reviewer's open
+  question in the negative.** Pinned threads (recorded), warm-up discarded,
+  2000-step regions, median of 7 with min/max spread, both accountings from the
+  same runs. Full-step ratio 1.78/2.07 (N=64), 2.05/2.14 (N=128), 2.13/2.18
+  (N=256) for r=2/64: it **saturates at ≈2.1 and never approaches parity**, so
+  the near-parity-by-N=512 expectation does not exist and I declined the long
+  high-N run. The LA column shows why: 0.60× a full step at N=64 rising to
+  1.17× at N=256, so the SVD's relative weight grows with N while its absolute
+  share stays under half. Cost is content-independent (0.94–1.03) and
+  rank-independence is measured (r=64/r=2 = 1.165/1.046/1.022), with the N=64
+  point outside 1.25 left visible rather than hidden by a wider bar.
+- 2026-09-25 **The BUG port is ~5× slower per step than the projected
+  integrator** (0.19–0.29× the projected time), despite factorizing only an 8×8
+  matrix. The K/L/S right-hand sides are evaluated on *rank-augmented fields*
+  (`K(t)V₀ᵀ`, `U₀L(t)ᵀ`, `ÛŜV̂ᵀ`) and each is a full-grid field evaluation with a
+  spectral advection inside, several times per step. The rank-1 factorization
+  saving is real and is swamped. So the **cost** argument for BUG does not
+  survive contact with this engine; what survives is the Galerkin step in the
+  augmented basis and, per Remark 3, the route to norm/energy/dissipation
+  preservation. My calibration run had a 64.6% reference spread and produced a
+  physically impossible ordering (projected r=16 faster than r=2), so it is
+  discarded, not reported; a full-protocol re-measurement is running into
+  `cost_bug_port.json`.
+
+- 2026-09-25 `make_figures.py` rewritten, because the committed figures
+  violated three binding rules rather than merely being stale. It titled a rank
+  trace "Adaptive rank growth" when that trace is the dealiasing ceiling
+  (D11.3 retires the claim); it labelled pointwise L2 as "error" when the P0
+  metric order makes it trajectory divergence; and it plotted the singular
+  values of the **rank-truncated reduced state** as a spectrum, which F2/R5
+  bar ("never the rank-truncated reduced state"). The two offending figure
+  files are deleted rather than left for the writer to pick up. The five new
+  figures are: the windowed-rank premise figure at two grids with the
+  amplitude rule's grid-scaling beside it, the full-grid state spectrum with
+  the IC's rank-17 cliff, trajectory divergence paired with the KE series and
+  labelled, max |∇·u| for every method including all F5 baselines, and the
+  fluctuation E(k)/Z(k) over the dealiased range. A `PROVENANCE.md` records
+  the artifact and commit behind every figure so a figure cannot outlive its
+  numbers. The cost figure appears when the gate lands.
+
+- 2026-09-25 **R29's grid-independence reproduced with project code, and it is
+  the cleanest statement of the whole rank question.** Running the pilot at
+  N=128 (dt scaled with dx per P0 item 3, snapshots every 0.02, fluctuations
+  with the zonal mean removed) and putting it beside my N=64 column:
+
+  | W | r99 N=64 | r99 N=128 | r999 64/128 | amp 1e-6 64/128 |
+  |---|---|---|---|---|
+  | 0.5 | 2 | 2 | 3 / 4 | 13 / 21 |
+  | 1 | 4 | 4 | 6 / 6 | 22 / 39 |
+  | 2 | 6 | 6 | 11 / 11 | 42 / 77 |
+  | 4 | 11 | 10 | 22 / 18 | 85 / 163 |
+  | 8 | **16** | **16** | 38 / 31 | **174 / 357** |
+
+  My N=64 and N=128 r99 columns match R29's reported 2/2/2, 4/4/3, 6/6/6,
+  11/10/10 exactly at every window they tabulate. The decisive comparison is
+  the last row: **r99 is 16 on both grids while the amplitude rule asks 174 and
+  357** — 4.0x and 4.2x their respective dealias ceilings (43 and 85). So the
+  energy fraction measures something physical and grid-independent over
+  [0, 8], and the amplitude rule's demand is a property of the discretisation,
+  not the flow. That is the paper's claim, and it needs no resolution story.
+- 2026-09-25 S2 at N=128 also fails everywhere it is measurable (T=4: 8.8%/23.5%;
+  T=8: 2.2%/24.7%), so the no-stationary-window conclusion is not a
+  resolution artefact either. Consistent at both grids and both amplitudes.
+
+- 2026-09-25 **A mechanism I nearly got wrong, caught by measuring it.** The
+  first F5 run at T=8 returned an adaptive rank of **1**, not R26's 16, and my
+  first explanation was the secular zonal mean (94% of the energy by t=20, so
+  a 99% fraction of the whole state is reached by the mean alone). Measuring it
+  refuted that: at t=8 the zonal share is 73.7%, and the *instantaneous*
+  fluctuation r99 is **2** — the same as the whole-state r99. The real
+  difference is **instantaneous versus windowed rank**: each snapshot at t=8 is
+  nearly 2-dimensional, while the 401 snapshots spanning [0, 8] occupy a
+  14-dimensional subspace. So R26's 1→16 growth is a property of the subspace
+  the trajectory *visits*, and a per-step rule that reads one state at a time
+  cannot approach it — the energy criterion moves the selection off the
+  dealiasing ceiling onto a physically meaningful ~2, but 2 is not 16 and no
+  threshold on a single snapshot makes it so. Tracking the windowed rank needs
+  a method that accumulates the visited subspace, which per-step truncation is
+  not. I corrected the `SVDProjector` docstring, which had asserted the
+  refuted explanation with numbers.
+- 2026-09-25 F5 harness hardened: a baseline that goes non-finite is now a
+  **recorded result**, not an abort. The first T=8 run died when
+  `pod_early_r32` went non-finite at t=6.96, discarding every other method's
+  numbers. Each run now reports `diverged`, the step and time it died at, the
+  window it actually covered, and `accuracy_metrics_valid: false`, and the
+  artifact lists `diverged_methods`. Aborting a comparison because one
+  baseline failed is the R24 lesson recurring: "POD is worse" is not citable
+  unless the divergence is itself reported.
+
+- 2026-09-25 **S2 answered at the canonical amplitude, and the answer is no.**
+  The full ladder to T=20 at A=0.5 gives drift between the last two thirds of
+  `E_fluct` / `Z_fluct` of 31%/9% (T=3), 40%/11% (T=4), 30%/8% (T=6), 25%/15%
+  (T=8), 29%/7% (T=12), 34%/28% (T=16), 3%/29% (T=20) against a bar of 10% on
+  **both**. `qualifying_horizons` is empty: no affordable horizon is stationary
+  in the S2 sense. Two supporting measurements from the same run: the zonal
+  mean holds **93.8%** of the total energy at T=20 (E_total 939.7 against
+  E_fluct 58.3, total energy up 42x from 22.2), and the rank ladder at A=0.5
+  gives r99 = 1, 2, 2, 4, 7, 10, 11, 12, 14 at W = 0.1 … 8 while the amplitude
+  rule asks 46, 99 and 230 modes at W = 2, 4, 8 against a ceiling of 43. So the
+  regime is mean-dominated exactly as D11.2 states, now measured at our own
+  amplitude, and the paper reports time-dependent fluctuation statistics with
+  the zonal trajectory alongside rather than a plateau that does not exist.
+- 2026-09-25 R27's F5 spec addition implemented: **three static-POD window
+  placements** (early `[0, train]`, late `[T-train, T]`, and a moving/oracle
+  window refitted on a trailing window of the reference) with the comparison
+  made against the best of them, because "the cost of staticity" is a function
+  of window placement rather than a property of POD. `PODDMD` now also learns
+  from the reference's own snapshots, so it needs no extra PDE pass.
+  **That change fixed a real defect in the baseline:** fitted on a separately
+  re-run trajectory, POD-DMD diverged (E_fluct 8e11 at r=8, max div 4.2e-9);
+  fitted consistently with the rollout it is stable at every rank (18.8/22.3/
+  19.3 against a reference 19.1). A baseline that blows up because its training
+  and rollout trajectories differ is not a baseline, it is a harness error —
+  which is the R24 failure mode recurring in new code, caught by the smoke run
+  rather than by a test.
+
+- 2026-09-25 **R26's central measurement reproduced independently, and it
+  matches their table value for value.** Running the S1–S3 pilot at R26's exact
+  configuration (N=64, A=0.2, dt=5e-4, snapshots every 0.02, nested windows
+  from t=0, fluctuations with the zonal mean removed), the modes needed to
+  represent a window are
+
+  | W | r99 | r999 | amp 1e-6 | amp 1e-10 |
+  |---|---|---|---|---|
+  | 0.1 | 1 | 2 | 5 | 5 |
+  | 0.5 | 2 | 3 | 13 | 19 |
+  | 1 | 4 | 6 | 22 | 35 |
+  | 2 | 6 | 11 | 42 | 69 |
+  | 4 | 11 | 22 | 85 | 144 |
+  | 8 | **16** | 38 | **174** | 321 |
+
+  against R26's 1/2, 2/3, 4/6, 6/11, 11/22, 16/38 and 4/12, 12/21, 21/41,
+  41/84, 84/174 — the energy columns are identical and the amplitude column is
+  within one. This is a cross-check of their headline number from my own code
+  with the corrected derivative operators, not a restatement of it.
+  **The consequence is now measured on our side too:** r99 grows 16x over the
+  first eight time units, while the implemented amplitude rule asks for 42
+  modes at W=2 and 174 at W=8 against a dealias ceiling of 43 — so from t=2 its
+  rank is the grid's, exactly as R26 reports, and the 1e-10 cutoff reaches 321
+  (7.5x the ceiling) by W=8.
+- 2026-09-25 S2 measured rather than assumed, and the honest answer is that it
+  is not available at the horizon the rank question lives on: with the spec's
+  >= 2 time-unit blocks over the final third, T=3 passes (E drift 4.2%, Z drift
+  8.5%) but T=4, 6 and 8 fail (11–16%), and no T <= 8 can have two blocks in its
+  final third below T ~ 12. So S2 is *unmeasurable* for T < 12 by construction
+  and *failing* for T in [4, 8] once it is measurable. Running the ladder to
+  T=20 at the canonical amplitude to see whether any developed window passes.
+
+- 2026-09-25 **A real defect in the first-derivative operators, found by the
+  R5k full-band test — and proved inert for every committed result.** Applying
+  a k-dependent multiplier to the rfft *half* spectrum and inverting with
+  `irfftn` is a different operator: `irfftn` rebuilds the missing columns as
+  `conj(F[k, N-j])` where a real field requires `conj(F[N-k, j])`. Measured on
+  a full-band random field at N=32, `grid.grad`'s x-component differed from the
+  independent full-2-D route by 7.5 against a field scale of 35.9. The
+  nonlinear term is built from `velocity`/`grad` (`ns_psi.py:91-93`), so this
+  was a defect in the dynamics, not only in a diagnostic. Fixed by forming the
+  derivative from the **full** spectrum (`fft2` → real multiplier → `ifft2`);
+  `grad` now matches the independent route to 0.0 relative error on both axes,
+  and `max_divergence` had to be routed through the same operator (it had been
+  differentiating with the old route, which is why it briefly reported
+  div = 215 on a full-band field). Cost is ~2x on an O(N^2 log N) operation
+  beside the Theta(N^3) factorization, so it is immaterial.
+  **Impact on committed results: none, measured not assumed.** The canonical
+  Re=5000 KE trajectory reproduces to 2.8e-14 over 200 steps and the IC energy
+  to all 15 digits, because the affected content never enters: the IC is
+  band-limited to |k|<=8, the 2/3 dealias mask keeps every step inside the band,
+  and a projected rank-43 state has spectral mass 3.7e-17 outside it. Old and
+  new velocity agree to 6e-15 on the IC and 1.1e-13 on a projected state. The
+  test now asserts both halves: the operators match the independent route
+  *everywhere* including the Nyquist planes, **and** the half-spectrum shortcut
+  is demonstrably not the same operator, so nobody reintroduces it.
+- 2026-09-25 R26's constructive consequence implemented: an **energy-based rank
+  criterion** alongside the amplitude one. `rank_criterion="energy"` keeps the
+  smallest r reaching `--energy-fraction` (default 0.99) of the energy, i.e. the
+  r99 rule, which is the criterion that can track the state's 1→16 growth; the
+  amplitude rule is kept as the default so nothing changes silently, and every
+  artifact records which criterion produced its rank trace. Both are pinned by
+  a test against brute force, including that they provably differ (12 vs 2 on
+  the same spectrum).
+- 2026-09-25 R27's blocking defect fixed: `benchmark_summary.json` was still
+  built from `c5fc827` and carried the void POD column (1.07759) and the old
+  V1 step-0 value (0.315248). It is now **generated** by
+  `experiments/make_summary.py` from the artifacts, which also refuses to emit
+  a summary whose cases disagree about the IC fingerprint or whose POD IC
+  projection is not at roundoff. Two of my own generator bugs surfaced and were
+  fixed: it checked the DLRA block for a POD-only field, and it read
+  `parameters.re`/`N` from the long-run artifact, which does not record them —
+  the old hand-assembled summary had asserted values the artifact never
+  contained. The generator now reports them as null and says so, and
+  `run_long_time.py` is being fixed to record them.
+- 2026-09-25 R27's second point fixed: `dlra_max_rank` defaulted to 48, which
+  at N=128 capped the rank trace while the dealiased band holds 85 modes — a
+  driver artifact plotted as adaptation. `--dlra-max-rank 0` (the new default)
+  resolves to the grid's own ceiling `2*floor(N/3)+1`, and the ceiling is
+  recorded in every artifact next to the cap.
+- 2026-09-25 R27's instruction adopted: provenance beats fingerprint. The stale
+  summary was found by comparing fields against the artifacts, not by searching
+  for a remembered string, and the summary now carries each member's
+  `git_commit` plus an explicit statement of the rank mismatch (POD r=16 vs
+  DLRA r=43, not rank-matched) and of the Re-independent-error red flag (the
+  DLRA trajectory divergence is 9.8e-5 / 1.00e-4 / 1.01e-4 at the three Re, so
+  at T=0.1 it measures the setup and no Re-dependence may be claimed).
+
+- 2026-09-25 Closing standing CHECKLIST items that were open on my side, in
+  `experiments/test_engine.py`. **R5 negative control**: `Grid2D.max_divergence`
+  is now exposed so a test can feed the diagnostic a velocity that is *known*
+  not to be divergence-free — an injected `grad(phi)` must report ~1, and a
+  divergence-free perturbation of the same size must not trip it. Without this,
+  "exact by representation" would be a vacuous test that passes for any
+  implementation. **R5q cost model, two assertions as the checklist words it**:
+  `test_full_field_svd_is_rank_independent` (the factorization returns the full
+  N-value spectrum for *any* rank, which is the structural fact behind the
+  measured rank-independence, and fails when the V6 per-stage port lands) and
+  `test_svd_call_count_per_step` (exactly 4 whole-field factorizations per
+  step, so a 4 → 1 change is a failing test). The `SVDProjector` docstring now
+  states the cost model as today's behaviour and that V6 must invert it.
+  **R5k operator tests on a full-band field** against an independent full 2-D
+  `numpy.fft.fft2` route covering `lap`, `vorticity`, `velocity`, `grad` and
+  divergence. **R5l**: the rank rule is checked against brute force
+  `#{sigma_i > cutoff*sigma_1}` clipped to the bounds, including the degenerate
+  spectra; `PODGalerkin.project` is checked for idempotence and
+  least-squares agreement on fields with a **nonzero mean**, which is the case
+  the old trailing `out - mean(out)` defect hid in. **R5 reduced-path order**:
+  Taylor–Green is exactly rank 1, so a rank-1 projector is lossless and the
+  reduced step's second-order convergence in dt is measurable (halving dt must
+  cut the error by ~4).
+- 2026-09-25 Added `PODDMD`, the dynamic data-driven baseline F5 asks for
+  (closes the "POD-DMD" half of F5's bar). One fitted linear operator on a POD
+  basis, advanced exactly one solver step per application so it shares the dt
+  policy. The normal equations are accumulated **online** (O(r^2) memory, not
+  O(n_snapshots·r)), which matters because a long training segment is tens of
+  thousands of steps. Tested against the only case whose answer is known: a
+  synthetic linear system, where the least-squares fit must be exact — that
+  catches a transposed normal equation or a stride error, the same class as the
+  R24 reshape.
+- 2026-09-25 Added isotropic `E(k)`/`Z(k)` as `Grid2D.isotropic_spectra`, with
+  the shell sums required to reproduce `ke()` and `enstrophy()` exactly (a test
+  asserts it, so the spectra cannot silently lose or invent energy). This is
+  P0 metric 3 and the E(k)/Z(k) half of F2, and it is computed on
+  `psi' = psi - x-avg(psi)` per S1. `zonal_mean`/`fluctuations` moved into
+  `solvers/spectral.py` because they are operations on the state, not on a
+  driver, and three drivers now share one definition.
+- 2026-09-25 Wrote the two remaining drivers, both blocked on measurement
+  rather than on code. `run_regime_pilot.py` implements S1–S3 mechanically:
+  fluctuation E and Z, block means of >= 2 time units over the final third,
+  drift between the last two thirds, the bar |drift| <= 10% on both, and the
+  horizon reported as a function of T so T is chosen from a measurement. It also
+  accumulates windowed E(k)/Z(k). `run_baselines.py` implements F5's bar:
+  full grid, static POD and POD-DMD at r = 16/32/42 **and at the rank adaptivity
+  actually reached**, plus fixed-rank DLRA to separate rank from adaptivity,
+  all from one hash-verified IC, judged on time-averaged fluctuation KE/enstrophy
+  and spectra with pointwise L2 last and labelled. It pre-checks the offline
+  window against the largest requested rank and fails before the long run
+  instead of inside it.
 
 - 2026-09-25 Regenerated **every** committed result artifact from commit
   `78607f3`, so the POD column is no longer void anywhere. Re-suite

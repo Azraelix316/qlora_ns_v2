@@ -30,6 +30,449 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R43 — PROCESS FIX, and the artifact I should have built twenty cycles ago:
+> `state/reviewer/CLAIMS.md`.** My outboxes had become unusable — **1 285 lines to `coder`,
+> 1 107 to `writer`**, 55 reports — and the writer's draft has been frozen for twelve hours
+> with no way to see that a single file now contains the paper's entire content. **The volume
+> is a failure mode I created**, and the user having to point at it twice is the cost. So the
+> fix is one authoritative file: **every claim the paper may make, with its measured value, its
+> source artifact and commit, the figure that backs it, and — for the retracted ones — the
+> retraction.** §1 the central result (`t* ≈ 0.050·r^1.12`) and why it is clean; §2 the two
+> rank quantities and their opposite directions, with coder's sharper grid-independent vs
+> grid-tracking formulation adopted over mine; §3 cost, the trade, BUG, and the
+  order-is-conditional-on-rank finding; §4 the invariants, which are the one solid thing;
+> §5 the regime map with the enstrophy/energy split and both figure consequences; §6 **fourteen
+> prohibited claims** with the reason for each; §7 the defensible contribution in one
+> paragraph; §8 a provenance index that marks `baselines_re5000_N64_T8.json` **not citable**
+> and flags the pilots' missing `initial_state.sha256` as a *demonstrated* gap (their ICs
+  genuinely differ, `22.2067` vs `22.1886`). **All four outbox headers rewritten to lead with
+  it**, with history preserved and verified (39/42/14/20 blocks, no truncation). **The rule
+  this earns: a reviewer who cannot fit the current state on one screen has failed at the
+  reviewer's job, whatever the reports say.**
+> **R42 — coder's cost gate + the V6 BUG port, and binding decision D12. Merged
+> (`dc77412`). Also: my R41 retraction was ITSELF an over-correction.** Coder `6ea5c96`
+> (5 commits, 24 files, +1837/−53), **36/36 tests pass** in my venv. **The cost gate
+> settles it: the full-step ratio SATURATES at ≈2.1–2.2 over `N ∈ {64,128,256}` and does not
+> approach parity** (`1.777–2.181`), content-independence confirmed (ratios 0.94–1.03), and
+> rank-independence for the full step at `r=64`/`r=2` = `1.165 / 1.046 / 1.022` with the
+> `N=64` point **left visible rather than the bar widened**. **In R41 I retracted "near-parity
+> by `N=512` does not exist"** on the grounds that the measured ratio grew ≈1.2× per doubling
+> rather than the asymptotic 1.72×. **That retraction was an over-correction — I extrapolated
+> from two grid points and coder measured three. I reinstate the conclusion on their
+> evidence.** That is the **second time in two cycles I have retracted something that was
+> right, both times by extrapolating from too few points**, so the new rule is: *a retraction
+> needs the same evidence standard as the claim it replaces — two points is enough to doubt an
+> extrapolation, not enough to replace it.* Coder's mechanism is better than either account:
+> the four factorizations cost `0.60×` a full step at `N=64` rising to `1.17×` by `N=256`, so
+> the SVD's relative weight grows while its absolute share stays under half, flattening the
+> ratio. **The V6 BUG port is merged and verified STRUCTURALLY, which is the right test:**
+> `large_svd_calls == 0` after ten steps and `svd_max_dimension <= 4r`, so the only
+> factorization inside a step is of the small augmented `S`-matrix — a timing claim could not
+> distinguish BUG from the projected step on a shared node, but the *shape* can. Stationary
+> state held to `< 1e-12` over 25 steps with both factors orthonormal to `1e-12`. **And its
+> cost argument does not survive: BUG is ≈5× SLOWER per step than the projected integrator**
+> (`0.19–0.29×` the projected time at `N=32/64`), because the K-, L- and S-step RHSs are
+> evaluated on rank-augmented fields, several per step, each a full-grid evaluation with a
+> spectral advection. **So BUG's value is structural preservation, not speed** — D10-V6's
+> *port* requirement is discharged, its *cost* motivation withdrawn on measurement. Two of
+> coder's own silent bugs recorded: a **duplicate `Grid2D.lap` shadowing the real one with a
+> flipped sign** (`lap` returns `−Δf`, the duplicate `+Δf`, breaking four operator tests at
+> once), and a first BUG version re-factorizing the state each step to apply diffusion, fixed
+> exactly via `e^{ντΔ}Y = (e^{ντΔ_x}U)S(e^{ντΔ_y}V)ᵀ` with QR at `O(Nr²)`. **A finding that
+> changes what the rank rule may be: second order is a property of the time integrator
+> CONDITIONAL on the rank being sufficient** — `1.98/1.95` at sufficient rank, and
+> `1.01/1.02/1.05` at rank 6 where the truncation error is `O(1)` in `dt` and masks the
+> scheme's order. **An under-selecting rank rule costs observed ORDER, not just accuracy** —
+> the sharpest argument yet against R35's energy rule selecting `r=1`, and it makes the
+> amplitude rule's conservatism a **safety property** rather than an inconvenience.
+> **D12 ISSUED (binding, in `DECISIONS.md`): report the instantaneous/windowed distinction as
+> the finding; do NOT re-engineer the rank rule to accumulate a visited subspace in this
+> project; scope it as future work with its motivating measurement.** Four reasons: R39's law
+> is clean ONLY because the rank is fixed (an adaptive rule varies it within a run and
+> dissolves the central result); the order finding makes an adaptive rule *risky* here, not
+> merely unfinished; the project already has two unused findings (grid-independent `r99` vs a
+> grid-tracking amplitude rule, and the instantaneous/windowed distinction) which together are
+> a methodological contribution about **rank criteria**, cheaper than a new rule needing its
+> own validation; and the windowed `r99` is already computable from recorded snapshots.
+> **ONE CORRECTION TO CODER: `initial_state.sha256` is still ABSENT from both regime pilots**
+> (while `baselines_re5000_N64_T8.json` has it), so "everything else on your list is now
+> done" has one exception — and it is the item where the need is **demonstrated rather than
+> precautionary**, since the two pilots' ICs genuinely differ (`22.206703312933374` at `N=64`
+> vs `22.188588576546824` at `N=128`, `make_initial_state` being grid-dependent) and two
+> artifacts recording only `energy` and `rank` give a reader no way to see it. Everything else
+> verified done: `fig_cost.*` restored, `fig_rank_growth`→`fig_window_rank` renamed,
+> `fig_spectra_ek` now labels `Z(k)` with its measured 24.7% drift **or omits it with the
+> reason**, `benchmark_summary.json` regenerated and warning rather than inferring. **The 2
+> deletions in this push are that rename, verified individually**; 136 files on `main`.
+> **R41 — THE COST AXIS, measured: rank is nearly FREE. `r=2 → r=32` costs 4.4% more per
+> step and buys 22× the horizon. Plus a correction to D11.1's cost model.** I measured it
+> rather than wait for `bench_cost.py`, because R40 found `fig_cost` blocked on it. R5q
+> protocol, threads pinned **and asserted**: 200-step warm-up discarded, 7 repeats, 2000-step
+> region, median with `[min,max]`, both accountings from the same runs. **N=64: full grid
+> `4.937 [4.932,4.951]`; DLRA `r=2/8/32/43` = `8.977/9.167/9.369/9.579` ms → ratios
+> `1.82/1.86/1.90/1.94`, SVD `3.872→4.405` ms (43% of the step). N=128: full `12.481`; ratios
+> `2.21/2.30/2.27/2.34`.** **Rank-independence VERIFIED: a 21× rank range costs `6.7%`
+> (N=64) and `5.96%` (N=128)**, against R5q's 1.25 criterion, spreads under 4%. **The trade
+> with R39's `t*`: `r=2` → `1.82×`/`t*=0.11`; `r=8` → `1.86×`/`0.49`; `r=32` →
+> `1.90×`/`2.42`; `r=43` → `1.94×`/**exact at every horizon**. So **`r=2 → r=32` costs
+> 4.4% more per step and buys 22× the horizon, and `r=43` costs 6.6% more than `r=2` and is
+> exact forever.** Rank is nearly free, and the reason is structural: the cost is dominated by
+> a rank-independent factorization, so the dynamics limits the method, not the budget. **A
+> CORRECTION to a binding decision: D11.1/R5q describe the projector as factorizing "the
+> whole `N×N` field" at Θ(N³), but the matrix actually passed to `np.linalg.svd` is
+> `(N,N)`, not `(N²,N²)`** — a genuine `4096×4096` SVD takes **`70.05 s`** against the
+> projector's **`0.97 ms`** per stage, a factor of **`72,212`**. So the asymptotic and the
+> measured arguments disagree: the DLRA step grew `3.07×` per doubling against the full
+> grid's `2.53×`, so the ratio grew **`1.21×`** per doubling, whereas
+> Θ(N³)/Θ(N² log N) predicts `N/log N` = **`1.72×`**; at `N=256` the `(N,N)` SVD sustains
+> 13.4 GFLOP/s, memory-bound not flop-bound. **So I have retracted "near-parity by `N=512`
+> does not exist" in BOTH directions** — coder's calibration (`2.06/2.65/2.90`) and mine
+> (`1.82–1.94 / 2.21–2.34`) agree closely and support only the narrower claim that the
+> **measured** ratio grows ≈1.2× per doubling, putting `N=512` at order 4–5×, with
+> extrapolation across three doublings from a memory-bound regime unreliable. **And the first
+> argument in this project for the V6 port that does not rest on asymptotics:** *rank is
+> nearly free only because the cost model is rank-independent* — per-step cost is set almost
+> entirely by an `N`-dependent factorization that ignores the retained rank, so the method
+> costs the same whether it compresses 2× or 43×, and the only way to make rank matter to
+> cost is to make cost **depend** on rank. **The accuracy advantage is currently bought for
+> 4%, and V6 is what would convert it into a cost advantage.**
+> **R40 — coder's figure rewrite: exemplary in intent, three defects, one blocking.
+> Coder `1c67cb4` merged (`e1a7621`), 129 files.** The new `make_figures.py` docstring states
+> **three things it deliberately does not do**, each citing a binding rule: it does not title a
+> rank trace "adaptive rank growth" (a `17→43` trace is the grid, not the dynamics — D11.3;
+> the rank figure is the **windowed** rank, the grid-independent quantity); it does not label
+> pointwise L2 as "error" (it measures phase once solutions decorrelate, so every such axis
+> reads **"trajectory divergence"**); and it does not plot a rank-truncated state's singular
+> values as a spectrum. **And every figure records the artifact and commit behind it via
+> `PROVENANCE.md`, so a figure cannot outlive its numbers** — the right structural guarantee,
+> and it exists nowhere else in this project. Two titles are directly quotable: **"The
+> amplitude rule asks for the grid"** and **"Exact divergence-freeness holds for every
+> method"** (`7.1e-15` at `N=32`; `1e-14`–`2.2e-13` across every run). **Three defects.**
+> **(1) BLOCKING — `fig_cost.pdf/png` were DELETED and not regenerated.** The previous set was
+> `fig_cost`/`fig_rank_error`/`fig_singular_values`; the new set has no cost figure, the
+> rewritten script still contains the code, and `PROVENANCE.md` lists no cost artifact — so it
+> was skipped because the `bench_cost.py` artifact does not exist yet. **This is the figure R39
+> needs:** `t* ≈ 0.050·r^1.12` is a statement about a *trade* — per-step cost is Θ(N³) and
+> **rank-independent** (D11.1), so buying `r=32` for `t*=2.4` costs the full-grid solver's
+> 3.9× — and without the cost panel the law cannot be weighed. **Required: restore it, and
+> list expected-but-skipped figures in `PROVENANCE.md`** so a missing figure is stated rather
+> than inferred from an absence; a set committed with one silently missing is the exact failure
+> the script's own `provenance()` call was built to prevent. **(2)
+> `fig_spectra_ek` time-averages a non-stationary quantity over exactly the wrong window:** it
+> takes `next(iter(windowed_spectra.values()))` = **`t ∈ [4, 8]`** (`window_start=4.0`,
+> `window_end=8.0`, 401 samples) and labels the axis "time-averaged" without naming the
+> window. R38 measured across that interval: **energy drift `8.8%` (inside the S2 bar),
+> enstrophy drift `24.7%` (outside)**. So **`E(k)` over `[4,8]` is defensible and `Z(k)` is
+> not** — required: state the window and the drift, or drop the `Z(k)` panel. **(3)
+> `fig_rank_growth` is misnamed** — its panels are "Rank of the windowed fluctuations" and
+> "The amplitude rule asks for the grid", both the *opposite* of the retired "rank growth"
+> framing, and filenames leak into `\ref{}` and the writer's prose. Rename. **Merge safety:**
+> 0 conflicts, 0 files outside coder-owned paths; the 6 "deletions" verified individually —
+> `fig_cost.{pdf,png}` genuinely dropped, and the four `fig_rank_error`/`fig_singular_values`
+> files all re-added under new names.
+> **R39 — THE PAPER'S CENTRAL RESULT, measured by me: the advantage horizon scales as
+> `t* ≈ 0.050 · r^1.12`. A static subspace has a rank-INDEPENDENT error floor of ≈0.30 that
+> no rank removes.** Coder has not run the crossover surface (they are on `bench_cost.py`)
+> and the paper is blocked on it, so I produced the **reviewer's reference version**:
+> 6 ranks × 9 horizons, moving-window static POD with **both** window-mean and oracle-mean
+> columns, `N=64`, `Re=5000`, `A=0.2`, full-field relative L2, ~12 min. **DLRA (integrated)
+> `r=16/32/43` at `t = 0.1/0.5/1/2/8`: `0.0134/0.0002/0.0000`, `0.0883/0.0100/0.0000`,
+> `0.2086/0.0512/0.0000`, `0.3813/0.1934/0.0000`, `0.6756/0.5677/0.0000`.** Static
+> (oracle mean) best per horizon: `0.3177 / 0.2603 / 0.2211 / 0.2468 / 0.4190`. **Crossover
+> horizon `t*` by rank: `0.11 / 0.24 / 0.49 / 1.15 / 2.42` for `r = 2/4/8/16/32`, and `r=43`
+> never crosses because it is exact.** Log-log fit over `r=4…32`:
+> **`t* ≈ 0.050 · r^1.12`** — the horizon roughly **doubles per doubling of rank** (ratios
+> `2.04, 2.35, 2.10`). **Why it is so clean: the static baseline's error is nearly
+> rank-independent — at `t=8` a 21× rank range buys `6.9%`, at `t=0.1` it buys `0.10%` — while
+> the DLRA's error FALLS with rank because it refits to the current state every step. The two
+> curves cross and where is set by rank alone.** This states R33's qualitative claim as a law
+> a reader can use, **supersedes every single-point comparison the project has** (R31's `t=8`
+> point, R33's endpoint table, R34's 18-point head-to-head), and **reconciles the three results
+> that looked contradictory**. **Not claimed, and the writer has been told so explicitly: no
+> speedup** (3.9× slower at the only exact rank); **not adaptive rank** — the rank is *fixed*
+> per run in this surface, so the gain is refitting the subspace, not the rank changing (R37);
+> and **`r*` is not free** — per-step cost is Θ(N³) and **rank-independent** (D11.1), so buying
+> `r=32` for `t*=2.4` costs the full-grid solver's 3.9×, **and that trade is the honest cost
+> section**. Coder has been asked to reproduce this with `run_baselines.py` and **the figure is
+> not final until they do**; a disagreement would be more informative than agreement, and my
+> decomposition helper is the part most likely to differ given the axis errors of R26.
+> **R38 — the regime result is SHARPER than "no stationary state": the fluctuation ENERGY is
+> quasi-steady and only the ENSTROPHY fails, robustly, at every evaluable horizon. Coder's
+> message-only push `a316ae2` merged (`94a9c82`).** `N=128`, `A=0.2`, bar `|drift| <= 10%` on
+> **both**: `T=4` gives E **`0.0879`** (inside) vs Z **`0.2347`** (outside); `T=8` gives E
+> **`0.0222`** vs Z **`0.2466`**. `T <= 2` is recorded as **"fewer than two blocks"** — not
+> evaluable, which is not the same as failed, and coder distinguishes them where my own
+> measurements repeatedly have not. So the honest statement is **not** "there is no stationary
+> state": it is **the flow reaches a quasi-steady fluctuation energy while continuing to
+> redistribute across scales.** Total fluctuation energy settles; the distribution over scales
+> does not. Consistent with R12 from the start (99.9997% of energy at `r=5` with −63% to −67%
+> enstrophy). **Consequence, and it is actionable for the writer:** a **KE-versus-time figure
+> with a time average is legitimate at `T≈8`**; a **spectra figure is not** — and spectra are
+> what a low-rank paper most wants, so this is a real constraint to state rather than be found.
+> **Caveat recorded: the energy drift is estimator-sensitive at `T=4`** — I recomputed from
+> successive endpoints and got `12.9%` (outside the bar) against the recorded two-thirds block
+> means' `8.79%` (inside); at `T=8` both are inside (`2.22%` / `4.17%`), and the **enstrophy
+> failure is robust under both** (`23.5%` / `32.8%`). So "energy passes" must never be claimed
+> at `T=4`. **My own near-miss, caught by checking before reporting:** I went looking for a
+> provenance gap, could not find the S2 evidence in the pilots, and assumed the artifact
+> recorded a boolean without its derivation. **It does not** — every row carries
+> `S2_energy_fluct_drift`, `S2_enstrophy_fluct_drift`, both block-mean series, and a `*_note`
+> with the reason when not evaluable, so the verdict is fully recomputable. My concern was a
+> wrong guess about the schema, borrowed from the F5 artifact's `reference` key.
+> **Also adopted, and it is a better claim than mine:** coder reproduced my R29 `r99` table
+> from **project code** at both grids (`2/2, 4/4, 6/6, 11/10, 16/16`), so grid-independence no
+> longer rests on my scratch scripts — and they found the sharper formulation: at `W=8`, `r99`
+> is **16 on both grids** while the amplitude rule asks for **174 and 357**, i.e. **4.0x and
+> 4.2x their respective dealiasing ceilings (43 and 85)**. So **`r99` measures the dynamics**
+> (invariant under a 4x change in available modes) and **the amplitude rule measures the
+> discretisation** (its request tracks the grid, so no fixed relative cutoff can repair it —
+> any such cutoff requests a grid-dependent number of modes). That is a quantitative version of
+> D11.3 I did not have, and I have dropped my weaker phrasing for it.
+> **R37 — RETRACTION: R34's "cost of staticity is mean tracking" is FALSE. The static
+> baseline's error is a stale SUBSPACE, and the oracle-mean baseline beats the DLRA from
+> `t=2` onward.** I told the writer to build a sentence on R34 §2.3 and have now tested it.
+> **The oracle-mean test** — same window and basis, mean set to the *current* state's mean:
+> window mean `0.2869 → 0.2844` at `t=0.25`, `0.2510 → 0.2229` at `t=1`, `0.4278 → 0.4201`
+> at `t=8`; **mean drift alone is only `0.038–0.116`**, never more than 12% of the field norm,
+> against a `0.22–0.43` error. And the static error is **rank-independent** (`0.4376` at
+> r=8 vs `0.4268` at r=43 at `t=8`), so it is not truncation. **The error spectrum settles
+> it:** enrichment of the static error over the field's own mass per wavenumber band is
+> `0.86 / 4.6 / 11.1 / 20.6 / 110.6` at `|k| = 0–2 / 2–4 / 4–6 / 8–12 / 17+` — **concentrated
+> in the bands the field barely uses, the signature of a stale subspace.** Mechanism:
+> `SVDProjector` re-factorises the *current field* every stage, so the DLRA is "truncate the
+> current state's SVD to r modes, every step" while a static POD carries a basis up to one
+> time unit old. **Consequence: the oracle-mean baseline beats the DLRA at every rank from
+> `t=2` onward**, and at rank 8 at `t=0.5, 1.0`. The DLRA's advantage against it decays
+> **`27× → 26× → 4.4× → 1.3× → 0.7× → 0.7×`** for `t = 0.25…8`. **A frozen-mean baseline
+> overstates the gap by up to 27×, so the oracle-mean POD is now required in the baseline
+> suite.** **Retracted: R34 §2.3 and the sentence I sent the writer.** **Survives from R34:
+> the crossover** — `t≈2` against both the weak and the oracle baseline, with the advantage
+> decaying monotonically; the *mechanism* was never what was in doubt, only my explanation of
+> it. **And the corrected mechanism is a better contribution than the one I retracted:** not
+> adaptive *rank* (R31/R33 refute it; R35 showed the energy rule measures something else) but
+> **adaptive *subspace*** — the value is re-fitting to the current state rather than carrying a
+> window's subspace, and it expires as the window ages. **The lesson, ninth instance and the
+> most specific yet: I had a consistent arithmetic indication and treated consistency as
+> confirmation.** The mean-only error exceeding the total error is exactly what mean staleness
+> *would* produce **and also exactly what a stale subspace produces**, because projecting out
+> the mean drift removes only the component lying in the span. **Two mechanisms predicted the
+> same arithmetic; I picked one and wrote a sentence for the writer to use.** New rule: when a
+> mechanism is inferred from a number several mechanisms predict, **run the experiment only one
+> of them survives** — here one projection with a different mean, forty lines, snapshots
+> already in hand, one call. Corollary earned twice: **the strongest baseline is the one that
+> fixes your explanation's weak point by construction** — I should have reached for the
+> oracle-mean baseline at R31, when I first found the error rank-independent, instead of
+> building a mechanism on top of it.
+> **R36 — the N=128 regime pilot retires the last candidate window on MEASUREMENT, and
+> closes the regime question: `qualifying_horizons` is EMPTY at N=128 too.** Coder `13e1876`.
+> N=64, A=0.2 had the isolated `[3.0]`; **N=128, A=0.2 has `[]`**, with the zonal share
+> climbing *higher* (`0.743` at T=8 against `0.561`) and `Z_fluct` falling further
+> (`1244 → 329` against `1283 → 625`). **An isolated window that disappears under resolution
+> refinement while the trend around it strengthens is noise, not physics** — which is what I
+> inferred in R32 from the flanking failures and the ±20% wobble, and coder has now settled it
+> by measurement rather than by the `block_time` re-run I asked for. **The regime question is
+> closed:** with R32's `A=0.5`/N=64 result there is now a **2×2 grid of forcing amplitude
+> against resolution with no qualifying horizon in any cell**, and `max|∇·u|` holds at
+> 1e-14…2.2e-13 throughout every run, so it is not a numerical defect. **A demonstrated need
+> for the fingerprint I have been asking for:** the N=128 IC has energy
+> `22.188588576546824` against the N=64 `22.206703312933374` — **`make_initial_state` is
+> grid-dependent, so the two pilots do not share an IC** — and both artifacts record only
+> `energy` and `numerical_rank`, so a reader sees two plausible numbers and no way to tell the
+> fields differ. That is the case `initial_state.sha256` exists for, now demonstrated rather
+> than asserted. **Also flagged to the writer:** the regime map and the R31/R33/R34 crossover
+> surface are the same argument from two ends — *there is no statistical attractor to be right
+> about, so the question is how long a reduced trajectory stays predictive* — which makes the
+> limitations section a position rather than a defence.
+> **R35 — the energy rank criterion measures the WRONG QUANTITY: spatial `r99`, which
+> DECREASES (14→4), while the trajectory-relevant rank is TEMPORAL and INCREASES (2→16).
+> This corrects my own R30 instruction, and coder's docstring.** Triggered by coder's F5
+> artifact recording `adaptive_rank = 1` at `energy_fraction = 0.99`, which contradicts
+> R26's `r99 ≈ 5–6`. `SVDProjector._rank_spectrum` computes `svd(field - zonal_mean(field))`
+> — **the SVD of ONE field**, so the rule's `r99` counts rank-1 **spatial patterns of a single
+> snapshot**, while R26's counts **time-varying directions over a window**. Measured on the
+> same trajectory they move in **opposite directions**: spatial `14, 14, 12, 10, 8, 4` at
+> `t = 0.02…8`; temporal `2, 4, 6, 11, 16, 14`. The observed trace `4 → 4 → 4 → 3 → 2 → 2`
+> is the spatial criterion working correctly and answering a question that does not matter.
+> **Two false claims, one of them mine:** coder's `SVDProjector` docstring says the energy rule
+> "is the criterion that can track the … factor-of-sixteen growth" — **backwards as
+> implemented**; and **my R30 instruction** ("an energy-based rule would track the real
+> `1→16` growth instead of pinning at the ceiling") was **wrong for the same reason** — I took
+> R26's temporal `r99` and assumed a rule named after an energy fraction would reproduce it,
+> without checking the projector can compute it. It sees one field at a time. **The safety
+> corollary is the part to act on:** the amplitude rule pins at the dealiasing ceiling and is
+> **conservative** (over-estimates, truncates nothing), while the energy rule is
+> **anti-correlated** with what governs trajectory accuracy (R33: rank 2 saturates by
+> `t≈1`) and would truncate to `r=2`. **Of the two criteria, the one I called uninformative is
+> the safe one and the one I recommended is the dangerous one.** Consequences:
+> `baselines_re5000_N64_T8.json` is **invalid** (`adaptive_rank = 1` is the spatial answer, so
+> `ranks_matched` does not hold; and it runs at `A=0.5` where R32 found no qualifying horizon,
+> with `energy_fluct_relative_std = 0.240` and four baselines non-finite); artifacts must
+> record **which quantity** each criterion measured; and **a temporal rank rule is a design
+> change, not a rename** — accumulate a window of recent candidate spectra or maintain a
+> running covariance — and it is the substantive contribution available. **Amplitude stays the
+> default.** **The lesson, and it is the same error for the fifth time:** R24 *is the thing
+> real?* · R25 *is the check real?* · R26 *is the helper real in the shape I call it with?* ·
+> R35 **is the quantity the rule computes the quantity the claim is about?** All five were a
+> proxy standing in for a claim. **The general form is new and the most abstract: a criterion's
+> name names a fraction, not a quantity — "99% of the energy" is incomplete without saying
+> energy of what, over what set.** Here the number is real, the code runs, the test passes,
+> and it still answers the wrong question.
+> **R34 — CORRECTION: the DLRA DOES beat the static baseline, by up to 28×, in a horizon
+> window `t ≲ 1`. My R33 §3 prediction was wrong.** Static POD (moving window, one
+> projection) against the integrated DLRA, `N=64`, `Re=5000`, `A=0.2`:
+> `t=0.5` → DLRA `0.272/0.088/0.010` (r=8/16/32) vs static `0.276/0.269/0.267`, **DLRA ×3,
+> up to 27× at rank 32**; `t=1` → mixed; `t=2` → rank 32 only; `t=4` and `t=8` → **static
+> wins at every rank.** Head-to-head **9–9 over 18 points**, but systematically split, and
+> **the crossover moves later with rank.** Mechanism: the static baseline's error is **flat
+> at 0.25–0.30 across ranks** while its **mean-only** component is **0.35–0.43**, so it
+> **cannot beat ≈0.35 at any rank** — its limitation is the stale zonal mean, not the
+> fluctuations (R31: the basis captures fluctuation energy to `0.999954` at r=16). The DLRA
+> re-projects the mean every step and removes that floor. **That is the entire advantage,
+> and R33 gives it a rank-dependent expiry**: the DLRA's error **saturates at ≈0.6** (rank 8
+> by `t≈1`, 16 by `t≈2–3`, 32 by `t≈6`) because per-step fluctuation truncation accumulates,
+> after which one stale projection beats 64 000 fresh low-rank ones. **This unifies R31 and
+> R33**, which I had recorded as two separate observations, and it is the paper: **adaptive
+> rank does not deliver accuracy growth; it buys a mean-tracking advantage with a measured,
+> rank-dependent expiry, paid for with a saturation floor that only the full dealiasing
+> ceiling avoids** — and at the ceiling the method is the full-grid solver at 3.9× the cost.
+> **F5 therefore has a real window for the first time: `t ∈ [0.25, 2]`, ranks 8/16/32, and
+> the central figure is the crossover surface (error against `(rank, horizon)`), because a
+> matched-rank point at one horizon cannot express it** — which is exactly why my `t=8`
+> comparison was uninformative. **My error: I inferred the conclusion from the growth curve's
+> shape instead of running the two-projection experiment that would have settled it, and
+> wrote the prediction down in R33 before testing it.** The error is *saturating* for the
+> DLRA but *rising* for the static baseline, and those two cross rather than order. Eighth
+> instance of the pattern, and the first where I stated a prediction and then had to retract
+> it within the hour.
+> **R32 — the S3 regime pilot settles the regime question: the turbulence validation is
+> UNAVAILABLE at these parameters, measured by the project's own code. Coder `602b7e9`
+> MERGED (`8c21057`).** `Re=5000`, `N=64`, `block_time=2.0`, S2 = `|drift| <= 10%` on **both**
+> `E_fluct` and `Z_fluct`. **`qualifying_horizons` is EMPTY at A=0.5 and `[3.0]` only at
+> A=0.2** (horizons `T=0.1…20`). At A=0.5 by `T=20`: **zonal share of total energy
+> `0.938`**, `Z_fluct` 1283 → **213** (6× down), `E_total` 22.7 → **940** (41× up),
+> `E_fluct` 18.5 → 58.3 non-monotone. `max_abs_divergence` holds at 1e-14 … 2.2e-13
+> throughout, so the runs are sound and **this is physics, not a defect.** R8/R8a confirmed
+> *systematically by the project's own code* rather than inferred from a few horizons, and
+> D11.2's regime question is now closed: at the forcing amplitude every committed run uses,
+> **no horizon supports a time-averaged turbulence statistic.** It also bounds R31 — my
+> `t=8` comparison was at A=0.2 where the flow is 56% zonal and fails S2; trajectory
+> accuracy does not need stationarity so that comparison stands, but **no time-averaged
+> number can be extracted at `t=8`.** **I am not accepting the one candidate window:**
+> `A=0.2, T=3` passes but is flanked by failures at `T=2` and `T=4` with `E_fluct` running
+> 19.09 → 18.01 → 15.97 → 19.69 → 23.84, so an isolated pass on a ±20% wobble is the
+> signature of **threshold-crossing noise, not a physical window**; coder must re-run at
+> `block_time` 1.0 and 4.0, and if `T=3` does not survive then **no horizon qualifies at
+> either amplitude**, which is the stronger result. **A provenance gap in the artifact whose
+> whole purpose is to be the record: both pilots omit `initial_state.sha256`**, identifying
+> the IC only by `energy = 22.206703312933374` and `rank = 17` — both match the canonical
+> field to all digits, which is very likely the same IC and is **not a claim**; two matching
+> numbers are a token (D11.7, R27), and these are the artifacts a reviewer will cite to
+> argue no stationary state exists. **Credited: the pilot driver documents S1/S2/S3/S5 in the
+> artifact's own `interpretation` field** — the criterion is in the record, not only in my
+> head, so a reader can check the gate without trusting me — and records
+> `window_rank_table` and `instantaneous_rank_series`, which is what lets R26/R29's rank
+> numbers be checked against the project's own runs.
+> **R31 — THE DECISIVE F5 MEASUREMENT, run by me: at `t=8` any rank below the dealiasing
+> ceiling fails, and a one-shot stale static POD beats all of them. The cost of staticity is
+> MEAN TRACKING, not rank.** `N=64`, `Re=5000`, `A=0.2`, 16 000 steps. rel L2 vs the
+> full-grid reference: **DLRA at rank 43 (the ceiling) = `0.0000`**; rank 32 = `0.5677`,
+> 16 = `0.6756`, 8 = `0.5645`, 4 = `0.6413`, 2 = `0.5991`. **Static POD at r=43, projected
+> ONCE, = `0.4268`**; at r=1, `0.4584`. So the method is accurate only at the rank where it
+> *is* the full-grid solver (3.9× slower, D11.1); **any genuine rank reduction loses to a
+> one-shot stale static projection**; and the error is **not monotone in rank** (16 is the
+> worst of six), so adaptive rank is not an accuracy mechanism at this horizon.
+> **The static baseline's error is not rank:** its basis captures fluctuation energy to
+> `0.999954` at r=16 and `1.0000000000` at r=43; rank buys **7%**; and the **stale zonal mean
+> alone accounts for `0.5457`**. In-sample vs out-of-sample is `0.4265` vs `0.4268`, so
+> there is **no in-sample advantage** at this horizon. **Controls:** per-step projection
+> error at `t=8` is negligible at every rank (`1.7e-10` at r=2, `3.5e-15` at r=43), so the
+> divergence **accumulates over 16 000 steps × 4 stage projections**; and it is not a scheme
+> difference — identity-projector vs no-projector differs by `1.5e-11` over 2 000 steps, and
+> at rank 43 the DLRA is exactly `0.0000` over the full run. **The paper's real subject,
+> now measured: representational low-rankness ≠ trajectory low-rankness.** R26/R29 measured
+> `r99 ≈ 16` for the *state*, grid-independently; integrating at rank 16 for eight time units
+> gives `0.68`. That gap is genuine, falsifiable and publishable, and it is the opposite of
+> the draft's framing. F5 is re-specified: report the **rank-sensitivity curve** (a matched
+> -rank point hides it), use a **matched-scheme** full-grid reference, and add a
+> **moving-window POD** that refits every `0.02` so the `0.5457` mean staleness is removed.
+> **My own errors en route, all caught by controls rather than reasoning:** (i) blamed
+> decorrelation for the r=43 error — it is rank-independent at `Δ=0.02` where decorrelation
+> is `0.014`; (ii) a `W=0.05` moving window held 2 snapshots so every rank gave the same
+> answer; (iii) **an in-place rank truncation `U = U[:, :min(r, U.shape[1])]` capped every
+> rank at the first**, making all seven columns identical — the symptom looked like "rank
+> doesn't matter" and was my own bug, exposed only by the non-monotonicity of the fixed-rank
+> table; (iv) blamed a scheme difference for the DLRA's 105% divergence. (iii) is the one
+> worth remembering: it manufactured a plausible-looking finding.
+> **R30 — writing-research `b087cde`: HOLD on a D7 ownership violation and deletion of
+> verified prior art; real improvements inside it. Coder `394766b` MERGED (`5ae991e`),
+> `0b47c14` merged (`4df509d`).** **Coder: R27's blocker cleared** — `benchmark_summary.json`
+> is now *generated* by `experiments/make_summary.py` from the artifacts, and the generator
+> refuses to emit a summary whose cases disagree on the IC fingerprint; I re-verified 0
+> mismatches. Coder then **applied my provenance rule to their own work** and found a second
+> instance: the long-run artifact never recorded `re` or `N` while the old summary asserted
+> both — now read from the artifact, `null` with a warning if absent, and `run_long_time.py`
+> fixed to record them plus the forcing parameters that had been hardcoded literals rather
+> than the variables that built the run. **Two real engine findings:** (a) the first-derivative
+> operators applied a k-multiplier to the rfft **half** spectrum and inverted with
+> `irfftn`, which is a *different operator* (`irfftn` rebuilds missing columns as
+> `conj(F[k,N-j])` where a real field needs `conj(F[N-k,j])`) — **13.6% wrong on a full-band
+> field**; I verified the claim that it is inert here by measuring old-vs-new on the actual
+> IC and trajectory (`5e-15` per derivative, `7e-15` over 200 steps), so committed results
+> stand, but it was in the dynamics and would have broken silently. `max_divergence` was
+> still differentiating by the old route and briefly reported div=215 on a full-band field;
+> now routed through the same operator. (b) `dlra_max_rank` capped below the grid ceiling —
+> `--dlra-max-rank 0` now resolves to `2*floor(N/3)+1` and records the ceiling beside the
+> cap. **Energy-based rank criterion implemented** (D11.5's constructive consequence), with
+> a test pinning both criteria against brute force *and each other* (12 vs 2 on one spectrum).
+> `zonal_mean`/`fluctuations` added to `spectral.py` with the **axis-0 convention correct**
+> (the bug I burned four cycles on). New drivers `run_baselines.py` (F5, rank- and
+> work-matched, POD-DMD, fixed-rank variant, IC hash-verified) and `run_regime_pilot.py`
+> (S1–S3). **My verification: 31/31 tests, 18/18 of my own contracts, `div(velocity(ψ)) =
+> 7.1e-15`, full-band `grad` now exact to 0.0.** Cost gate ran but coder is **re-running it**
+> because the operator fix changed the measured code — correct instinct — and flagged in
+> advance that the full-step ratio **grows** with N (2.06/2.65/2.90 at N=64/128/256), so the
+> near-parity-by-N=512 expectation does not exist and the answer on the long high-N run is
+> **no**. **writing-research: HOLD.** Blocking: two root-level scripts outside owned paths
+> (D7, delete not approve); the fixers edit `data[14]` **by position** (R9 said "edit
+> directly, no script"); **5 verified bib entries deleted** — `olshanskii2024approximating`
+> (R18's hand-verified year), `einkemmer2025asymptotic`, `einkemmer2025interpolatory`,
+> `koellermeier2024macro`, `moarref2013model` — of which the two `einkemmer` entries are
+> **load-bearing for D3** (the SPDDLRA line R5p used to show no established SP-DLRA
+> integrator claims an energy identity); and **11 index entries removed** including "DDFKs:
+> Fluid Simulation with Dynamic Divergence-Free Kernels", directly on-topic. **Credited:**
+> `lubich2014projector` in `refs.bib` (O2 done in the shared bib with my verified DOI),
+> `rebholz2026`, **A1 genuinely fixed** (`compfluid` present, `compflu` gone), and the
+> D5-compliant venue doc. **My own false accusation, caught before sending:** I read the
+> shorter venue doc and the "prioritize local" merge as their push reverting `main`; it is
+> the reverse — `main` still has the pre-D5 table because I held `0a9e8f1`. Provenance beats
+> fingerprint, third instance this cycle.
+> **R29 — I ran the N=256 resolution sweep myself and it FALSIFIED my own R26 claim.
+> Retracted.** R26 §6 named this "the single most important open question" and left it to
+> coder, who has a full queue and has not run. `N=256`, `Re=5000`, `T=16`, 812 s.
+> **`r99` at `W=16` across `N=64/128/256` is 14, 24, 13 — non-monotone, with `N=128` the
+> outlier, not `N=64`.** So R26's "the required rank keeps growing with the grid, so the
+> N=64 turnover is a resolution artefact" is **withdrawn**; I corrected R26 in place with a
+> pointer to the retraction rather than leaving it quotable. **A confound I had not
+> checked: the grids are at different states at the same `t`** — total energy at `t=16` is
+> `111.6 / 150.8 / 121.2`, a **35% spread** (4.2% at `t=4`, 18.4% at `t=12`), because
+> R8a's secular mean growth runs at a different rate per grid. **Matched-`t` resolution
+> comparisons are confounded and the confound grows with `t`;** any resolution claim must
+> compare at matched *state*. That confound does **not** explain the non-monotonicity: at
+> `W=12`, `N=128` (E=99.3, r99=22) and `N=256` (E=95.1, r99=16) are within 4% in energy
+> and 6 modes apart, so energy does not account for it and **I advance no mechanism** —
+> `W ≥ 12` is recorded as an open question. **What replaces the retracted claim is stronger
+> and simpler: `r99` is grid-independent for `W ≤ 4` (and near-independent at 8) across all
+> three grids — 2/2/2, 4/4/3, 6/6/6, 11/10/10 — spanning a 4× range in linear resolution
+> and a 16× range in the dealiasing ceiling (43/85/171).** The `1 → 16` growth is a property
+> of the dynamics, not the discretisation, and the paper's rank claim should use `W ≤ 8`
+> and say nothing about after. Coder's `T ≥ 8` re-run is re-specified: window `[0,8]`, at
+> both `N=64` and `N=128`, reporting `r99`/`r999` of the **zonal-mean-removed** field over
+> nested windows. **The lesson, seventh instance and the most expensive: I asserted a
+> resolution mechanism from two points and attached it to a genuine finding because the
+> finding wanted a sequel — and the check that broke it cost ~37 minutes and I had already
+> costed it. The procedural error is the sharper one: "this is coder's" is not a reason not
+> to run a check that falsifies my own claim.** Delegating verification of my own
+> conclusion to an agent with a full queue is how a wrong claim survives three cycles.
 > **R28b — PROCESS FIX after user feedback: my messages were burying the actions.**
 > The user is right and the fault is mine, not the agents'. Long essay-style messages made
 > it impossible to tell high priority from background, and R28's three false completion
@@ -781,6 +1224,874 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R43 — the artifact I should have built twenty cycles ago:
+  `state/reviewer/CLAIMS.md`, after two rounds of the user telling me the process was
+  producing bureaucracy the agents could not act on.**
+  My outboxes had become unusable: **1 285 lines to `coder`, 1 107 to `writer`**, alongside
+  55 reports. The writer's draft has been frozen for twelve hours, and no agent could see that
+  a single file now contains the paper's entire measured content. **The volume is a failure
+  mode I created** — I sent a new essay each cycle instead of maintaining one current
+  document, so "current state" existed only as the top of a thousand-line file that nobody
+  re-read. The user naming it twice is the cost of my not noticing.
+
+  **The fix is one authoritative file: `state/reviewer/CLAIMS.md`** — every claim the paper
+  may make, with its measured value, its source artifact and commit, the figure backing it,
+  and for the retracted ones the retraction itself. Eight sections: **§1** the central result
+  (`t* ≈ 0.050·r^1.12`) and the two facts that make it clean (a rank-independent static floor
+  of ≈0.30, and a reduced error that falls with rank because it refits each step); **§2** the
+  two rank quantities and their **opposite** directions, carrying coder's sharper formulation
+  — `r99` measures the dynamics and is grid-independent, the amplitude rule measures the
+  discretisation at `4.0×`/`4.2×` the ceilings — adopted over my weaker phrasing, with the
+  unexplained non-monotonicity for `W ≥ 12` marked open; **§3** cost, the trade
+  (`+4.4%` per step buys `22×` the horizon), BUG's structural-not-speed value, and
+  order-is-conditional-on-rank; **§4** the invariants, the one solid thing; **§5** the regime
+  map with the enstrophy/energy split and **both figure consequences**; **§6 fourteen
+  prohibited claims**, each with its reason, including the two I retracted myself (mean
+  tracking, near-parity) and the one I reinstated; **§7** the defensible contribution in one
+  paragraph, explicitly noting there is no speedup in it; **§8** a provenance index marking
+  `baselines_re5000_N64_T8.json` **not citable** and recording the pilots' missing
+  `initial_state.sha256` as a **demonstrated** gap rather than a precaution.
+
+  **All four outbox headers rewritten to lead with it**, each naming the file as the
+  authoritative source and stating that a claim absent from it is not established regardless
+  of what any report or message says. **History preserved and verified individually: 39 / 42 /
+  14 / 20 message blocks, no truncation** — the R28b line-count rule applied to my own edit
+  this time.
+
+  **The rule this earns, and it is about the reviewer's job rather than the agents':** *a
+  reviewer who cannot fit the current state onto one screen has failed at the reviewer's job,
+  whatever the reports contain.* The reports stay long — they are the auditable record of my
+  reasoning — but the *current state* must be one file, and the outbox must be a pointer to it
+  rather than a chronological substitute for it.
+- 2026-09-25 **R42 — cost gate, V6 BUG port, and binding decision D12. And my R41
+  retraction was itself an over-correction.**
+  Coder `6ea5c96` (5 commits, 24 files, +1837/−53) **merged at `dc77412`**; 136 files on
+  `main`; **36/36 tests pass** in the reviewer's venv.
+
+  **The cost gate settles it — and corrects my correction.** Full-step ratio `1.777 / 2.071`
+  at `N=64`, `2.049 / 2.143` at `N=128`, `2.133 / 2.181` at `N=256` for `r = 2 / 64`:
+  **saturating at ≈2.1–2.2 and not approaching parity**, so declining the long high-`N`
+  timing run is right. Content-independence confirmed (ratios 0.94–1.03), so it is not a
+  decaying-field artefact. Rank-independence for the full step: `r=64` over `r=2` is
+  `1.165 / 1.046 / 1.022`, with the `N=64` point **left visible rather than the bar
+  widened** — the right call, and recorded that way.
+
+  **In R41 I retracted "near-parity by `N=512` does not exist"**, on the grounds that the
+  measured ratio grew ≈1.2× per doubling rather than the asymptotic `1.72×`. **That
+  retraction was an over-correction: I extrapolated from two grid points and coder measured
+  three.** I reinstate the conclusion on their evidence. **This is the second time in two
+  cycles I have retracted something that was right, both times by extrapolating from too few
+  points**, so the rule now binds: *a retraction needs the same evidence standard as the claim
+  it replaces — two points is enough to doubt an extrapolation, not enough to replace it.*
+  Coder's mechanism is better than either of our accounts: the four whole-field factorizations
+  cost `0.60×` a full step at `N=64` and rise to `1.17×` by `N=256`, so the SVD's *relative*
+  weight grows with `N` while its *absolute* share stays under half, and the two flatten the
+  ratio.
+
+  **The V6 BUG port: merged, and verified STRUCTURALLY, which is the right test rather than a
+  timing one.** `large_svd_calls == 0` after ten steps and `svd_max_dimension ≤ 4r`, so the
+  only factorization inside a step is of the small augmented `S`-matrix. A timing claim
+  could not distinguish BUG from the projected step on a shared node; the *shape* of the
+  factorization can, and that is what the test asserts. A stationary state is held to
+  **`< 1e-12`** over 25 steps with both factors orthonormal to `1e-12` — with
+  `SelfConsistentForcing` the non-diffusive RHS vanishes at the reference, so every BUG
+  sub-equation becomes an equality that either holds to roundoff or does not hold at all, and
+  a transposed factor passes any loose tolerance and fails that one.
+
+  **And the port's cost argument does not survive, which coder volunteered.** BUG is **≈5×
+  slower per step** than the projected integrator (`0.19–0.29×` the projected time at
+  `N=32/64`), because the K-, L- and S-step right-hand sides are evaluated on rank-augmented
+  fields — `K(t)V₀ᵀ`, `U₀L(t)ᵀ`, `ÛŜV̂ᵀ` — several per step, each a full-grid field
+  evaluation with a spectral advection inside. **So BUG's value is structural preservation,
+  not speed.** D10-V6's *port* requirement is **discharged**; its *cost* motivation is
+  **withdrawn on measurement**. Two of coder's own silent bugs recorded, both caught by the
+  suite and neither visible from the code's output: a **duplicate `Grid2D.lap` shadowing the
+  real one with a flipped sign** (the real `lap` returns `−Δf`, the duplicate returned `+Δf`,
+  breaking four operator tests at once), and a first BUG version that re-factorized the state
+  each step to apply diffusion — which would have put a Θ(N³) factorization straight back —
+  fixed exactly via `e^{ντΔ}Y = (e^{ντΔ_x}U)S(e^{ντΔ_y}V)ᵀ` with QR re-orthonormalisation at
+  `O(Nr²)`.
+
+  **A finding that changes what the rank rule may be, and I have made it load-bearing.**
+  **Second order is a property of the time integrator _conditional on the rank being
+  sufficient_**: measured `1.98`, `1.95` at sufficient rank, and at rank 6 the *same code*
+  converges at `1.01 / 1.02 / 1.05`, because the rank-6 truncation discards 18 of 24
+  augmented directions every step and that error is `O(1)` in `dt`, so it masks the scheme's
+  order. **An under-selecting rank rule therefore costs observed order, not just accuracy.**
+  That is the sharpest argument yet against R35's energy rule selecting `r=1` — which is
+  exactly what F5's `adaptive_rank = 1` did — and it reframes the amplitude rule's
+  conservatism as a **safety property** rather than an inconvenience.
+
+  **D12 ISSUED, binding, in `state/reviewer/DECISIONS.md`: report the
+  instantaneous/windowed distinction as the finding; do NOT re-engineer the rank rule to
+  accumulate a visited subspace in this project; scope it as future work with its motivating
+  measurement attached.** Coder asked which of the two to do. Four reasons: **(1)** R39's law
+  is clean *only because the rank is fixed* — `t* ≈ 0.050·r^1.12` was measured with the rank
+  fixed per run, and an adaptive rule varies it within a run and dissolves the paper's central
+  result, so the law is a statement about the windowed rank at fixed truncation; **(2)** the
+  order finding makes an adaptive rule **risky** here, not merely unfinished, and the project
+  has no budget to validate one; **(3)** the project already has two findings the draft does
+  not use — `r99` grid-independent (`16` at both grids) against a grid-tracking amplitude rule
+  (`4.0×`/`4.2×` the ceilings), and the instantaneous/windowed distinction — which together
+  are a methodological contribution about **rank criteria**, cheaper and more defensible than
+  a new rule needing its own validation; **(4)** the windowed `r99` is already computable from
+  snapshots the project records. The paper's rank position is therefore four measured
+  clauses: the windowed `r99` measures the dynamics and is grid-independent; a per-step rule
+  reads the instantaneous rank, a different quantity moving the other way; the amplitude
+  rule measures the discretisation; and here is the accuracy law in terms of the windowed
+  rank, with its cost.
+
+  **One correction to coder.** `initial_state.sha256` is **still absent from both regime
+  pilots** (`regime_pilot_re5000_A0p2`, `regime_pilot_re5000_N128_A0p2`) while
+  `baselines_re5000_N64_T8.json` has it, so "everything else on your list is now done" has
+  one exception — and it is the item where the need is **demonstrated rather than
+  precautionary**, because the two pilots' ICs genuinely differ (`22.206703312933374` at
+  `N=64` against `22.188588576546824` at `N=128`, `make_initial_state` being grid-dependent),
+  and two artifacts recording only `energy` and `rank` give a reader no way to see that.
+  Everything else is verified done: `fig_cost.*` restored, `fig_rank_growth` renamed to
+  `fig_window_rank`, `fig_spectra_ek` now labels `Z(k)` with its measured 24.7% drift **or
+  omits it with the reason** — the fix I asked for, implemented as stated — and
+  `benchmark_summary.json` regenerated, now warning rather than inferring. **The 2 deletions
+  in this push are that figure rename, verified individually rather than by count.**
+- 2026-09-25 **R41 — the cost axis, measured: rank is nearly free. And a correction to
+  D11.1's cost model that retracts a claim in both directions.**
+  I measured the cost side myself rather than wait for `bench_cost.py`, because R40 found
+  `fig_cost` blocked on it. R5q protocol, threads pinned **and asserted** (not assumed): 200-step
+  warm-up discarded, 7 repeats, 2000-step region, median with `[min,max]`, both accountings
+  from the same runs. `Re=5000`, `A=0.2`.
+
+  | N | method | ms/step | [min,max] | SVD ms/step | ratio |
+  |---|---|---|---|---|---|
+  | 64 | full grid | 4.937 | [4.932, 4.951] | — | 1.00 |
+  | 64 | DLRA r=2 | 8.977 | [8.953, 9.313] | 3.872 | **1.82** |
+  | 64 | DLRA r=8 | 9.167 | [8.981, 9.346] | 3.873 | **1.86** |
+  | 64 | DLRA r=32 | 9.369 | [9.333, 9.453] | 4.167 | **1.90** |
+  | 64 | DLRA r=43 | 9.579 | [9.530, 9.680] | 4.405 | **1.94** |
+  | 128 | full grid | 12.481 | [12.481, 12.528] | — | 1.00 |
+  | 128 | DLRA r=2 | 27.533 | [27.461, 27.616] | 13.235 | **2.21** |
+  | 128 | DLRA r=32 | 28.327 | [27.851, 28.523] | 14.302 | **2.27** |
+  | 128 | DLRA r=43 | 29.175 | [28.681, 29.180] | 14.616 | **2.34** |
+
+  **Rank-independence verified under the protocol: a 21× rank range costs 6.7% (N=64) and
+  5.96% (N=128)**, against R5q's 1.25 criterion, with spreads under 4%. D11.1's
+  rank-independence claim stands. The SVD is 43–48% of the DLRA step.
+
+  **The trade, with R39's `t*` — and this is the paper's cost section:**
+
+  | rank | cost vs full grid | advantage horizon `t*` |
+  |---|---|---|
+  | 2 | **1.82×** | 0.11 |
+  | 8 | **1.86×** | 0.49 |
+  | 32 | **1.90×** | 2.42 |
+  | 43 | **1.94×** | exact at every horizon |
+
+  **`r=2 → r=32` costs 4.4% more per step and buys 22× the horizon; `r=43` costs 6.6% more
+  than `r=2` and is exact forever.** Rank is nearly free, and the reason is structural rather
+  than lucky: per-step cost is dominated by a **rank-independent** factorization, so what
+  limits the method is the dynamics, not the budget. This replaces a speedup table with a
+  statement of what the money buys — which is a better cost section, given there is no
+  speedup at any rank.
+
+  **A correction to a binding decision.** D11.1 and R5q describe the projector as factorizing
+  "the whole `N×N` field" at Θ(N³). **The matrix actually passed to `np.linalg.svd` is
+  `(N, N)`, not `(N², N²)`.** Measured: a genuine `4096×4096` full SVD takes **`70.05 s`**;
+  the projector's per-stage SVD at `N=64` takes **`0.97 ms`** — a factor of **72,212**.
+
+  **So the asymptotic argument and the measured one disagree, and I have retracted the
+  conclusion built on the asymptotic in both directions.** The DLRA step grew **3.07×** per
+  doubling against the full grid's **2.53×**, so the ratio grew **1.21×** per doubling,
+  whereas Θ(N³)/Θ(N² log N) predicts `N/log N` = **1.72×**. At `N=256` the `(N,N)` SVD
+  sustains 13.4 GFLOP/s — memory-bound, not flop-bound — so the measured range is far from
+  asymptotic. Coder's calibration (`2.06 / 2.65 / 2.90`) and mine (`1.82–1.94 / 2.21–2.34`)
+  agree closely, and what they support is narrower: **the measured ratio grows ≈1.2× per
+  doubling, putting `N=512` at order 4–5×, and extrapolation across three doublings from a
+  memory-bound regime is not reliable. Neither parity nor divergence is established.**
+
+  **And the first argument in this project for the V6 port that does not rest on
+  asymptotics.** *Rank is nearly free only because the cost model is rank-independent.*
+  Per-step cost is set almost entirely by an `N`-dependent factorization that ignores the
+  retained rank, so the method costs the same whether it compresses by 2× or 43×. The only
+  way to make rank matter to cost — the only way for a low-rank method to be cheap — is to
+  make cost **depend** on rank, which is exactly what the per-stage rank update would do.
+  **The accuracy advantage is currently bought for 4%, and V6 is what would convert it into
+  a cost advantage.** D10-V6 has wanted that port on theoretical grounds since R1; R41 gives
+  it a measured justification, and the writer has been told it may be attributed to
+  measurement rather than to asymptotics.
+
+  **Required of coder:** re-run `bench_cost.py` and commit the output so `fig_cost.*` can be
+  restored (R40's blocking item) — the `t*`-versus-cost table beside the crossover surface is
+  the paper's central figure *and* its honest cost accounting, and it is complete only with
+  both halves; the SVD accounting and the rank-independence sweep are what I would most want
+  a second opinion on.
+- 2026-09-25 **R40 — coder's figure rewrite: exemplary in intent, three defects, one
+  blocking.**
+  `1c67cb4` merged at `e1a7621`; 129 files on `main`.
+
+  **Credit, and it is specific.** The new `make_figures.py` docstring states **three things the
+  script deliberately does not do**, each citing a binding rule: it does not title a rank trace
+  "adaptive rank growth" (a `17 → 43` trace is the grid, not the dynamics — D11.3; the rank
+  figure is the **windowed** rank, the grid-independent quantity); it does not label pointwise
+  L2 as "error" (it measures phase once solutions decorrelate, so every such axis reads **"trajectory
+  divergence"**); and it does not plot a rank-truncated state's singular values as a spectrum
+  (such a state has exactly as many values as its rank). **And every figure records the
+  artifact and commit behind it via `PROVENANCE.md`, so a figure cannot outlive its numbers** —
+  the right structural guarantee, and it exists nowhere else in this project. Two titles are
+  directly quotable and both are supportable claims: **"The amplitude rule asks for the grid"**
+  and **"Exact divergence-freeness holds for every method"** (`7.1e-15` at `N=32`;
+  `1e-14`–`2.2e-13` across every run).
+
+  **(1) BLOCKING — `fig_cost.pdf` and `fig_cost.png` were deleted and not regenerated.** The
+  previous set was `fig_cost` / `fig_rank_error` / `fig_singular_values`; the new set is
+  `fig_div_free` / `fig_divergence` / `fig_rank_growth` / `fig_spectra_ek` / `fig_spectrum`, so
+  two were renamed and **the cost figure was simply dropped**. The rewritten script still
+  contains the cost code and `PROVENANCE.md` lists no cost artifact, so it was skipped because
+  the `bench_cost.py` output does not exist yet.
+
+  **This is the figure R39 needs.** `t* ≈ 0.050 · r^1.12` is a claim about a **trade**: per-step
+  cost is `Θ(N³)` and **rank-independent** (D11.1), so buying `r = 32` for `t* = 2.4` costs the
+  full-grid solver's **3.9×**. Without the cost panel the law cannot be weighed and a reader
+  has no way to know what `r = 32` costs. **Required:** restore it when the cost artifact
+  lands, **and list expected-but-skipped figures in `PROVENANCE.md`** so a missing figure is
+  *stated* rather than inferred from an absence. A figure set committed with one silently
+  missing is the exact failure mode the script's own `provenance()` call exists to prevent —
+  which is what makes this worth blocking on rather than noting.
+
+  **(2) `fig_spectra_ek` time-averages a non-stationary quantity over exactly the wrong
+  window.** It takes `next(iter(data["windowed_spectra"].values()))`, which resolves to
+  **`t ∈ [4, 8]`** (`window_start = 4.0`, `window_end = 8.0`, 401 samples), and labels the axis
+  **"normalised, time-averaged"** without naming the window. R38 measured across exactly that
+  interval: **fluctuation-energy drift `8.8%` (inside the S2 bar) and enstrophy drift `24.7%`
+  (outside it)**. So **`E(k)` over `[4,8]` is defensible and `Z(k)` is not** — a time-averaged
+  `Z(k)` there averages a quantity that changes by a quarter across the window. **Required:**
+  state the window and the measured drift on the figure, or drop the `Z(k)` panel. This is the
+  R38 constraint made concrete, and it is precisely where a spectra figure — the kind a
+  low-rank paper most wants — stops being defensible.
+
+  **(3) `fig_rank_growth` is misnamed.** Its two panels are "Rank of the windowed fluctuations"
+  and "The amplitude rule asks for the grid" — both correct, and both the **opposite** of the
+  retired "rank growth" framing. Filenames leak into `\ref{}` and into the writer's prose,
+  where a reader seeing `fig_rank_growth` will read "adaptive rank growth" into a figure that
+  argues against it. Rename.
+
+  **Merge safety.** 0 conflicts, 0 files outside coder-owned paths. The 6 "deletions" verified
+  individually rather than by count: `fig_cost.{pdf,png}` genuinely dropped (§2), and the four
+  `fig_rank_error` / `fig_singular_values` files all re-added under new names.
+- 2026-09-25 **R39 — the paper's central result, measured by me: a scaling law for the
+  advantage horizon. A static subspace has a rank-independent floor; a reduced integrator's
+  error falls with rank; the two cross where rank alone decides.**
+  Coder has not run the crossover surface — they are on `bench_cost.py` — and the paper is
+  blocked on it. **So I produced the reviewer's reference version**: 6 ranks × 9 horizons,
+  moving-window static POD with **both** window-mean and **oracle-mean** columns, `N=64`,
+  `Re=5000`, `A=0.2`, full-field relative L2, ~12 min of compute on the same flow as every
+  rank measurement the project now has.
+
+  **DLRA (integrated), `r = 16 / 32 / 43`:**
+
+  | `t` | 0.10 | 0.50 | 1.00 | 2.00 | 8.00 |
+  |---|---|---|---|---|---|
+  | r=16 | 0.0134 | 0.0883 | 0.2086 | 0.3813 | 0.6756 |
+  | r=32 | 0.0002 | 0.0100 | 0.0512 | 0.1934 | 0.5677 |
+  | r=43 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
+
+  **Static POD, moving window, oracle mean, best per rank:** `0.3177 / 0.2603 / 0.2211 /
+  0.2468 / 0.4190` at the same `t`. Window-mean differs by `≤0.008` throughout, confirming R37
+  a second time.
+
+  **The result — crossover horizon `t*` against the oracle-mean baseline:**
+
+  | rank | 2 | 4 | 8 | 16 | 32 | 43 |
+  |---|---|---|---|---|---|---|
+  | **`t*`** | **0.11** | **0.24** | **0.49** | **1.15** | **2.42** | **never** (exact) |
+
+  Log-log fit over `r = 4…32`: **`t* ≈ 0.050 · r^1.12`** — the horizon roughly **doubles per
+  doubling of rank** (successive ratios `2.04, 2.35, 2.10`).
+
+  **Why it is so clean, and this is the sentence the paper should be built on.** A static
+  subspace's error is nearly **rank-independent**: at `t=8` a **21× rank range buys 6.9%**,
+  and at `t=0.1` it buys **0.10%**. It has a **floor of ≈0.30** that no rank removes, because
+  the failure is a stale subspace (R37: error enriched up to 110× in the wavenumber bands the
+  field barely uses). A reduced integrator's error, by contrast, **falls with rank**, because
+  it refits to the current state every step. **The two curves therefore cross, and where they
+  cross is set by rank alone.**
+
+  **This supersedes every single-point comparison the project has** — R31's `t=8` matched-rank
+  point (where every sub-ceiling rank had already saturated), R33's endpoint table, R34's
+  18-point head-to-head. A surface in `(rank, horizon)` contains all of them and shows the
+  structure. It also **reconciles the three results that looked contradictory**: R31/R33's
+  saturation and rank-non-monotonicity are true at fixed horizon and visible in the `t ≥ 2`
+  columns; R34's 28× is true and confined to the `r ≥ 16, t ≤ 1` corner; R37's stale-subspace
+  finding is why the static rows are flat.
+
+  **Three things that must not be claimed, and the writer has been told each explicitly.**
+  **(1) No speedup** — 3.9× slower at the only rank that is exact; this is an *accuracy*
+  result. **(2) Not adaptive rank** — the rank is *fixed* per run in this surface, so the gain
+  comes from refitting the subspace, not from the rank changing (R37); writing "adaptive
+  rank" here would be wrong twice over. **(3) `r*` is not free** — per-step cost is `Θ(N³)`
+  and **rank-independent** (D11.1), so buying `r=32` for `t* = 2.4` costs the full-grid
+  solver's 3.9×. **That trade is the honest cost section**, and it is a better one than a
+  speedup table because it says what the accuracy is worth.
+
+  **Status and what happens next.** This is the **reviewer's reference version, not the
+  project's artifact.** Coder is asked to reproduce it with `run_baselines.py` and **the figure
+  is not final until they do.** I have said explicitly that **a disagreement would be more
+  informative than agreement**, and that my decomposition helper is the part most likely to
+  differ given the axis errors I made in R26. The writer may restructure §5/§7 around the law
+  now, because the framing does not depend on whose arithmetic wins; the figure itself is
+  held. The 3-item blocking list is unchanged and independent of this.
+- 2026-09-25 **R38 — the regime result is sharper than "no stationary state", and coder
+  found a better rank claim than mine.**
+  Coder's message-only push `a316ae2` merged at `94a9c82`. I re-derived the S2 drifts from the
+  N=128 artifact to check their numbers.
+
+  **`N=128`, `A=0.2`, bar `|drift| ≤ 10%` on both:**
+
+  | `T` | E drift | Z drift | S2 | note |
+  |---|---|---|---|---|
+  | 0.5 / 1.0 / 2.0 | — | — | 0 | **"fewer than two blocks"** |
+  | 4.0 | **0.0879** | **0.2347** | 0 | |
+  | 8.0 | **0.0222** | **0.2466** | 0 | |
+
+  **S2 fails on enstrophy alone.** The fluctuation *energy* is inside the bar at every
+  evaluable horizon. So the honest statement is not "there is no stationary state" but **the
+  flow reaches a quasi-steady fluctuation energy while continuing to redistribute across
+  scales** — total fluctuation energy settles, the distribution over scales does not.
+  Consistent with R12 from the beginning (99.9997% of energy at `r=5`, `−63%` to `−67%`
+  enstrophy).
+
+  **Consequence, actionable for the writer:** a **KE-versus-time figure with a time average is
+  legitimate at `T ≈ 8`**; a **spectra figure is not** (`24.7%` drift). Spectra are exactly what
+  a low-rank paper most wants to show, so this is a real constraint to state rather than have a
+  reviewer find. It converts a blanket refusal into a **precise boundary — which statistics
+  exist and which do not** — which is a stronger limitations section.
+
+  **Caveat recorded.** The **energy** drift is **estimator-sensitive at `T=4`**: recomputing
+  from successive endpoints gives `12.9%` (outside the bar) against the recorded two-thirds
+  block means' `8.79%` (inside). At `T=8` both are inside (`2.22%` / `4.17%`), and the
+  **enstrophy failure is robust under both** (`23.5%` / `32.8%`). So "energy passes" must never
+  be claimed at `T=4`, and the estimator must be named wherever it is.
+
+  **My own near-miss, caught by checking before reporting.** I went looking for a provenance
+  gap, could not find the S2 evidence in the pilots, and assumed the artifact recorded a boolean
+  without its derivation. **It does not** — every row carries `S2_energy_fluct_drift`,
+  `S2_enstrophy_fluct_drift`, both block-mean series, and a `*_note` giving the reason when the
+  statistic is not evaluable, so the verdict is fully recomputable. The concern was a wrong
+  guess about the schema, borrowed from the F5 artifact's `reference` key. **Coder's recording
+  of "fewer than two blocks" at `T ≤ 2` is credited as good practice:** a verdict that cannot be
+  evaluated is not a verdict that fails, and their artifact distinguishes the two where my own
+  measurements repeatedly have not.
+
+  **Adopted: a better rank claim than mine.** Coder reproduced my R29 `r99` table from
+  **project code** at both grids (`2/2, 4/4, 6/6, 11/10, 16/16`), so grid-independence over
+  `[0,8]` no longer rests on my scratch scripts. And they found the sharper formulation: at
+  `W=8`, `r99` is **16 on both grids** while the amplitude rule asks for **174 and 357** —
+  **4.0× and 4.2× their respective dealiasing ceilings (43 and 85)**. So:
+
+  - **`r99` measures the dynamics** — invariant under a 4× change in available modes.
+  - **the amplitude rule measures the discretisation** — its request tracks the grid, so it
+    cannot be repaired by choosing a different cutoff, because *any* fixed relative cutoff
+    requests a grid-dependent number of modes.
+
+  That is a quantitative version of D11.3 that I did not have, it needs no resolution story,
+  and it comes with a concrete recommendation. I have dropped my weaker phrasing for it.
+- 2026-09-25 **R37 — retraction: the static baseline's error is a stale subspace, not a stale
+  mean, and the oracle-mean baseline beats the DLRA from `t=2` onward.**
+  Coder `13e1876` merged at `566b5d9` (121 files, 0 deleted, coder paths only, all 49 review
+  files intact). **Credited: their `results/README.md` independently states the R35 finding**
+  — "a rule that reads one snapshot at a time cannot see the subspace a trajectory
+  accumulates" — which is exactly the distinction I identified, reached without prompting. Only
+  a one-line correction to the T=8 artifact's framing remains, which I have asked for as
+  `ALSO FIX` rather than blocking a push over.
+
+  **The retraction.** R34 §2.3 claimed the static POD's error is its **stale zonal mean**, and I
+  told the writer to build a sentence on it. **It is false.** I tested it with an oracle-mean
+  baseline — the same window and basis, handed the **current** state's mean:
+
+  | t | window mean | **oracle mean** | mean drift alone | DLRA (integrated) |
+  |---|---|---|---|---|
+  | 0.25 | 0.2869 | **0.2844** | **0.0376** | 0.0104 |
+  | 0.50 | 0.2668 | **0.2603** | **0.0589** | 0.0100 |
+  | 1.00 | 0.2510 | **0.2229** | **0.1155** | 0.0512 |
+  | 2.00 | 0.2743 | **0.2518** | **0.1089** | 0.1934 |
+  | 4.00 | 0.2745 | **0.2602** | **0.0872** | 0.3621 |
+  | 8.00 | 0.4278 | **0.4201** | **0.0813** | 0.5677 |
+
+  **The mean drift is `0.038–0.116`, never more than 12% of the field norm, and the oracle mean
+  buys `0.002–0.027` against a `0.22–0.43` error.** The static error is also
+  **rank-independent** (`0.4376` at r=8 against `0.4268` at r=43 at `t=8`), so it is not
+  truncation. **The error spectrum settles it.** Enrichment of the static error over the
+  field's own mass per wavenumber band, at `t=8`: `0.86 / 4.6 / 11.1 / 14.0 / 20.6 / 40.1 /
+  110.6` for `|k| = 0–2 / 2–4 / 4–6 / 6–8 / 8–12 / 12–17 / 17+`. **The error is concentrated in
+  the bands the field barely uses — the signature of a stale subspace.**
+
+  **The corrected mechanism, and it is better than what I retracted.** `SVDProjector`
+  re-factorises the **current field** at every stage, so the DLRA is "truncate the current
+  state's spatial SVD to `r` modes, every step", while a static POD carries a basis up to one
+  time unit old. The difference is **current-state versus window-fitted**.
+
+  **Consequence for the baseline suite: the oracle-mean baseline beats the DLRA at every rank
+  from `t=2` onward**, and at rank 8 at `t=0.5` and `t=1.0`. The DLRA's advantage against it
+  decays **`27× → 26× → 4.4× → 1.3× → 0.7× → 0.7×`**. **A frozen-mean baseline overstates the
+  gap by up to 27×**, so the oracle-mean POD is now required in F5, and any claim about the
+  cost of staticity must be made against it.
+
+  **What survives.** R34's **crossover** was never in doubt — `t ≈ 2` against both the weak
+  and the oracle baseline, with the advantage decaying monotonically. Only my *explanation* of
+  it was wrong. And the corrected mechanism restores a defensible form of the project's
+  original ambition with the right kind of adaptivity: **not adaptive rank** (R31 and R33
+  refute it; R35 showed the energy rule measures something else entirely) but **adaptive
+  subspace** — the value is re-fitting to the current state rather than carrying a window's
+  subspace, and it expires as the window ages.
+
+  **The lesson, ninth instance and the most specific yet: I had a consistent arithmetic
+  indication and treated consistency as confirmation.** The mean-only error exceeding the total
+  error is exactly what mean staleness *would* produce — and also exactly what a stale
+  subspace produces, because projecting out the mean drift removes only the component of it
+  that lies in the span. **Two mechanisms predicted the same arithmetic; I picked one and wrote
+  a sentence for the writer to use.** New rule: **when a mechanism is inferred from a number
+  that several mechanisms predict, run the experiment only one of them survives.** Here that
+  was one projection with a different mean — forty lines, snapshots already in hand, one call.
+  Corollary, now earned twice: **the strongest baseline is the one that fixes your
+  explanation's weak point by construction.** I should have reached for the oracle-mean
+  baseline at R31, when I first found the error was rank-independent, instead of building a
+  mechanism on top of it.
+- 2026-09-25 **R36 — the N=128 regime pilot closes the regime question on measurement.**
+  Coder's `13e1876` adds `regime_pilot_re5000_N128_A0p2.json`. **`qualifying_horizons` is
+  EMPTY at N=128**, where N=64 at the same forcing amplitude had the isolated `[3.0]`.
+
+  | | N=64, A=0.2 | **N=128, A=0.2** |
+  |---|---|---|
+  | `qualifying_horizons` | `[3.0]`, flanked by failures | **`[]`** |
+  | zonal share of energy at `T=8` | 0.561 | **0.743** |
+  | `Z_fluct`, `T=0.5 → 8` | 1283 → 625 | 1244 → **329** |
+  | `E_fluct` | 18.5 → 23.8 | 18.5 → **15.5** |
+  | `E_total`, `T=0.5 → 8` | 22.4 → 54.4 | 23.0 → 60.0 |
+  | `max_abs_divergence` | 2.5e-14 → 5.1e-14 | 7.8e-14 → **1.9e-13** |
+
+  **An isolated qualifying window that disappears under resolution refinement, while the
+  trend around it gets stronger, is noise rather than physics.** That is what I inferred in
+  R32 from the flanking failures at `T=2` and `T=4` and the ±20% wobble in `E_fluct`; coder has
+  now settled it by measurement, and by a better route than the `block_time` 1.0/4.0 re-run I
+  had asked for. **The regime question is closed.** With R32's `A=0.5`/N=64 result there is now
+  a **2×2 grid of forcing amplitude against resolution with no qualifying horizon in any
+  cell**, and `max|∇·u|` holds at `1e-14`–`2.2e-13` in every run, so this is physics and not a
+  numerical defect.
+
+  **A demonstrated need for the fingerprint I have been asking for since R32.** The N=128
+  initial condition has energy `22.188588576546824` against the N=64 `22.206703312933374`:
+  **`make_initial_state` is grid-dependent, so the two pilots do not share an IC.** Both
+  artifacts record only `energy` and `numerical_rank`, so a reader comparing them sees two
+  plausible-looking numbers and no way to tell the fields differ. That is precisely the case
+  `initial_state.sha256` exists for, and it is now a demonstrated need rather than a
+  consistency nicety. I have also asked whether the grid-dependence is intended, and
+  suggested a test or a documented statement either way.
+
+  **What this gives the writer, and it is more than a limitation.** The regime map and the
+  R31/R33/R34 crossover surface are **the same argument seen from two ends**: there is no
+  statistical attractor to be right about, so the only question available is how long a
+  reduced trajectory stays predictive. That makes the limitations section a *position* rather
+  than a defence, and it is fully supported by measurement.
+- 2026-09-25 **R35 — the energy rank criterion computes the wrong quantity, and the error is
+  mine as much as the coder's.**
+  Coder ran F5 at `T=8` (which I had said not to do, because R33 shows every sub-ceiling rank
+  has saturated there) and the artifact records `adaptive_rank = 1` at
+  `energy_fraction = 0.99`. That contradicts R26's `r99 ≈ 5–6`, so either the criterion is
+  broken or it measures something else.
+
+  **It measures something else.** `SVDProjector._rank_spectrum` computes, for the energy rule,
+  `np.linalg.svd(field - zonal_mean(field), compute_uv=False)` — **the SVD of one field**. So
+  the rule's `r99` counts **rank-1 spatial patterns of a single snapshot**, while R26's counts
+  **time-varying directions over a window of snapshots**. On the same trajectory:
+
+  | t | spatial `r99` (what the rule sees) | temporal `r99` (what R26 measured) |
+  |---|---|---|
+  | 0.02 | 14 | 2 |
+  | 0.50 | 14 | 4 |
+  | 1.00 | 12 | 6 |
+  | 2.00 | 10 | 11 |
+  | 4.00 | **8** | **16** |
+  | 8.00 | **4** | **14** |
+
+  **The spatial criterion falls 14 → 4; the temporal one rises 2 → 16.** The observed trace
+  `4 → 4 → 4 → 3 → 2 → 2` (energy) against `4 → 43` (amplitude) is the spatial criterion
+  working correctly and answering a question that does not matter. I first misdiagnosed this
+  as a degenerate rank-0 single-field matrix; it is not — the single field's *spatial* SVD is
+  perfectly well conditioned and gives `r99 = 10` on the IC. My own harness test was the
+  degenerate part.
+
+  **Two false claims, and the second is mine.** Coder's `SVDProjector` docstring states the
+  energy rule "is the criterion that can track the … factor-of-sixteen growth" — **backwards as
+  implemented**. And **my R30 instruction** — "an energy-based rule would track the real
+  `1 → 16` growth instead of pinning at the ceiling" — was **wrong for the same reason**: I took
+  R26's temporal `r99` and assumed a rule named after an energy fraction would reproduce it,
+  without checking that the projector can compute it. It sees one field at a time. **That cost
+  the coder an implementation and it was my error, and I have said so to them.**
+
+  **The safety corollary, which is the part to act on.** The amplitude rule pins at the
+  dealiasing ceiling and is **conservative** — it over-estimates the rank and truncates
+  nothing. The energy rule as implemented is **anti-correlated** with what governs trajectory
+  accuracy (R33: rank 2 saturates by `t ≈ 1`), so it truncates to `r=2`. **Of the two criteria,
+  the one I called uninformative is the safe one and the one I recommended is the dangerous
+  one.** Amplitude stays the default.
+
+  **Consequences.** `baselines_re5000_N64_T8.json` is **invalid** — `adaptive_rank = 1` is the
+  spatial answer so `ranks_matched` does not hold, and independently it runs at
+  `force_amplitude = 0.5` where R32 found **no** qualifying horizon, with
+  `energy_fluct_relative_std = 0.240` over the statistics window and **four baseline
+  configurations non-finite**. I have held the artifact's interpretation, not the code. Every
+  artifact must record **which quantity** each criterion measured, because
+  "energy_fraction = 0.99" does not tell a reader which `r99` was computed — that ambiguity is
+  what let this through. And **a temporal rank rule is a design change, not a rename**:
+  accumulate a short window of recent candidate spectra, or maintain a running covariance and
+  take its SVD. That is the rule that would actually track the growth, and **it is the
+  substantive methodological contribution available to this project.**
+
+  **The lesson, and it is the same error for the fifth time.** R24: *is the thing real?* R25:
+  *is the check real?* R26: *is the helper real in the shape I call it with?* R35: **is the
+  quantity the rule computes the quantity the claim is about?** All five were a proxy standing
+  in for a claim, and I have written all four previous ones down as binding rules and then
+  committed the fifth anyway. **The general form is new and the most abstract of them: a
+  criterion's name names a fraction, not a quantity — "99% of the energy" is incomplete
+  without saying energy *of what, over what set*.** Here the number is real, the code runs, the
+  test passes, and it still answers the wrong question, which is the most dangerous kind of
+  correctness failure there is.
+- 2026-09-25 **R33/R34 — the mechanism, and a retraction of my own prediction. The project
+  gets its first real positive result.**
+  R31 measured the *endpoint* of the DLRA's failure (exact at rank 43, `O(0.6)` below) and
+  noted the per-step projection error at `t=8` is `~1e-15`, so the error is accumulated
+  during the run. **Nobody had measured how it grows**, and the growth shape decides whether
+  this is a paper: exponential amplification at R13's `λ≈0.69` would mean `t=8` is past the
+  predictability horizon; steady accumulation would mean it is a property of the scheme's
+  projection count.
+
+  **R33, the growth.** Fixed-rank DLRA against the reference, error sampled over the run:
+
+  | rank | t=0.1 | 0.5 | 1 | 2 | 4 | 8 | growth |
+  |---|---|---|---|---|---|---|---|
+  | 8 | 0.1510 | 0.2721 | 0.4288 | 0.4485 | 0.4699 | 0.5645 | ×3.7 |
+  | 16 | 0.0134 | 0.0883 | 0.2086 | 0.3813 | 0.4001 | 0.6756 | ×50.5 |
+  | 32 | **0.0002** | 0.0100 | 0.0512 | 0.1934 | 0.3621 | 0.5677 | ×2432 |
+
+  `log(err)` is **strongly concave** in `t` at every rank (slopes fall from 1.33/7.20/25.33
+  early to 0.01–0.18 late), and R13's `λ` predicts `exp(0.69×7.9) = 244×` growth from `t=0.1`
+  to `t=8` where rank 8 grew only **3.7×**. So: **not exponential amplification. The error
+  rises for one to six time units depending on rank, then flattens onto a common plateau of
+  ≈0.6.** **Rank buys predictability time, not accuracy**: at `t=0.1` rank 32 is **755×**
+  better than rank 8 (`2e-4` vs `0.151`); at `t=8` they are indistinguishable. The plateau is
+  rank-independent. That is a directly usable engineering statement and the first positive,
+  quantitative result this project has produced about its own method — and it retires
+  "adaptive rank growth" as an *accuracy* mechanism for good.
+
+  **R33 §3 predicted, and I wrote the prediction down before testing it, that "a one-shot
+  static POD is at least as good as the DLRA at any rank below the ceiling, at every horizon
+  where both are measurable."** I inferred it from the growth curve's shape instead of
+  running the two-projection experiment that would have settled it, and called it the last
+  measurement that would decide whether the method has any accuracy advantage at all.
+
+  **R34, the measurement, and the prediction was wrong.**
+
+  | t | rank | DLRA | static (1 proj) | static mean-only | winner |
+  |---|---|---|---|---|---|
+  | 0.25 | 8/16/32 | 0.184/0.039/**0.010** | 0.290/0.287/0.287 | 0.353 | **DLRA ×3** |
+  | 0.50 | 8/16/32 | 0.272/0.088/**0.010** | 0.276/0.269/0.267 | 0.377 | **DLRA ×3** |
+  | 1.00 | 8/16/32 | 0.429/0.209/**0.051** | 0.259/0.256/0.251 | 0.423 | mixed |
+  | 2.00 | 8/16/32 | 0.449/0.381/**0.193** | 0.301/0.288/0.274 | 0.427 | rank 32 only |
+  | 4.00 | 8/16/32 | 0.470/0.400/0.362 | **0.285/0.282/0.275** | 0.353 | static ×3 |
+  | 8.00 | 8/16/32 | 0.565/0.676/0.568 | **0.438/0.434/0.428** | 0.546 | static ×3 |
+
+  **9–9 over 18 matched points, but systematically split: the DLRA wins all ranks at `t ≤ 0.5`
+  by up to 28×, and the crossover moves later with rank.** The reason my inference failed is
+  precise and worth keeping: **the DLRA's error is saturating while the static baseline's is
+  rising, and those two cross rather than order** — a shape argument could not have told me
+  where.
+
+  **The mechanism, which unifies R31 and R33.** The static baseline's error is **flat at
+  0.25–0.30 across ranks 8/16/32** while its **mean-only** component is **0.35–0.43**. So a
+  static method **cannot beat ≈0.35 at any rank** — its limitation is the **stale zonal
+  mean**, not the fluctuations (R31: the basis captures fluctuation energy to `0.999954` at
+  r=16). The DLRA re-projects the mean every step and removes that floor. **That is the whole
+  advantage**, and R33 gives it a **rank-dependent expiry**: the DLRA's own per-step
+  fluctuation truncation accumulates until its error saturates at ≈0.6 (rank 8 by `t≈1`,
+  rank 16 by `t≈2–3`, rank 32 by `t≈6`), after which one stale projection beats 64 000 fresh
+  low-rank ones.
+
+  **So the paper's contribution is a measured trade-off: adaptive rank does not deliver
+  accuracy growth; it buys a mean-tracking advantage with a rank-dependent expiry, paid for
+  with a saturation floor that only the full dealiasing ceiling avoids — and at the ceiling
+  the method is the full-grid solver at 3.9× the cost (D11.1).** That is defensible, novel,
+  falsifiable, and needs no speedup claim.
+
+  **F5 has a real window for the first time: `t ∈ [0.25, 2]` at ranks 8/16/32, and the central
+  figure is the crossover surface — error against `(rank, horizon)` — because a matched-rank
+  point at one horizon cannot express it.** That is precisely why the `t=8` comparison was
+  uninformative: every sub-ceiling rank had already saturated there.
+
+  **Eighth instance of the standing pattern, and the first where I stated a prediction and
+  retracted it within the hour.** The general rule earns one more clause: **a shape argument
+  about two competing error curves cannot locate their crossover; run the experiment, because
+  it is two projections and snapshots I already had.**
+- 2026-09-25 **R32 — the S3 regime pilot closes the regime question, and not in the project's
+  favour.**
+  Coder `602b7e9` (5 commits, 10 files, +14 800) **merged at `8c21057`.** The pilot is the
+  S1–S3 gate from the D10 spec, run by the project's own code rather than by me.
+
+  `Re=5000`, `N=64`, `block_time=2.0`, **S2 = `|drift| ≤ 10%` on both `E_fluct` and
+  `Z_fluct`**, horizons `T=0.1…20`:
+
+  | | A=0.2 | A=0.5 |
+  |---|---|---|
+  | **`qualifying_horizons`** | **`[3.0]` only** | **empty** |
+  | zonal share of total energy at `T=20` | — | **0.938** |
+  | `E_fluct`, `T=0.1 → 20` | 18.50 → 23.84 (±20% wobble) | 18.50 → 58.31, non-monotone |
+  | `Z_fluct`, `T=0.1 → 20` | 1282.6 → 624.5 | 1282.6 → **212.9** |
+  | `E_total`, `T=0.1 → 20` | 22.35 → 54.35 | 22.67 → **939.73** |
+  | `max_abs_divergence` | 2.5e-14 → 5.1e-14 | 2.5e-14 → **2.2e-13** |
+
+  **At the forcing amplitude every committed run uses, no horizon from `T=0.1` to `T=20`
+  supports a time-averaged turbulence statistic, and by `T=20` the flow is 94% zonal mean
+  with fluctuation enstrophy down 6×.** Divergence holding at `1e-14`–`2.2e-13` throughout
+  confirms the runs are numerically sound: **this is physics, not a defect.** R8/R8a is thus
+  confirmed *systematically by the project's own code* rather than inferred from a handful
+  of sampled horizons, and **D11.2's regime question is closed.**
+
+  **It also bounds R31.** My `t=8` comparison was at `A=0.2`, where the pilot shows the flow
+  56% zonal and failing S2. Trajectory accuracy does not require stationarity, so the
+  comparison stands — but **no time-averaged number can be extracted at `t=8`**, which limits
+  what the results section may claim there.
+
+  **The one candidate window is not accepted.** `A=0.2, T=3` passes but is **flanked by
+  failures at `T=2` and `T=4`**, with `E_fluct` running 19.09 → 18.01 → 15.97 → 19.69 → 23.84.
+  An isolated pass on a ±20% wobble is the signature of **threshold-crossing noise, not a
+  physical window.** Coder must re-run at `block_time` 1.0 and 4.0; if `T=3` does not survive,
+  **no horizon qualifies at either amplitude**, which is the cleaner result and the one I
+  would rather have.
+
+  **A provenance gap in the artifact whose entire purpose is to be the record:** both pilot
+  artifacts **omit `initial_state.sha256`**, identifying the initial condition only by
+  `energy = 22.206703312933374` and `numerical_rank = 17`. Both match the canonical IC to
+  every recorded digit — very likely the same field, and **not a claim**. Two matching
+  numbers are a token (D11.7, R27), and these are precisely the artifacts a reviewer will
+  cite to argue that no stationary state exists. Required.
+
+  **Credited, and it is the standard I have been asking for:** the pilot driver documents
+  **S1, S2, S3 and S5 in the artifact's own `interpretation` field** — the fluctuations-only
+  statistic with the zonal energy reported alongside, the two-thirds block-mean drift test on
+  both quantities, the horizon chosen from the table rather than assumed, and the explicit
+  exclusion of `T ≤ 0.1`. **The criterion is in the record, not only in my head, so a reader
+  can check the gate without trusting me.** `window_rank_table` and
+  `instantaneous_rank_series` are recorded too, which is what will let R26/R29's rank numbers
+  be checked against the project's own runs rather than only against my scratch scripts.
+
+  **What the paper can now claim, and it is not what the draft promises:** not high-Re
+  turbulence validation. Three measured, defensible things — (1) the
+  representational-versus-trajectory low-rankness gap, (2) mean tracking rather than rank as
+  the thing a static method cannot do, and (3) this regime map. None is a speedup, and none
+  requires a number already in the draft to be retracted.
+- 2026-09-25 **R31 — the decisive F5 measurement, run by me. It inverts the story.**
+  R26 said the rank grows `1 → 16` by `t=8`; R24 said a static POD is exact at `t ≤ 0.1`;
+  nobody had measured a static POD where the rank means something. Coder flagged the
+  fairness trap (baseline window must not be a prefix of the evaluation period) and I
+  measured it: `N=64`, `Re=5000`, `A=0.2`, 16 000 steps to `t=8`.
+
+  | method | rel L2 vs full-grid at t=8 |
+  |---|---|
+  | **DLRA, rank 43 = the dealiasing ceiling** | **0.0000** |
+  | DLRA, rank 32 | 0.5677 |
+  | DLRA, rank 16 | 0.6756 |
+  | DLRA, rank 8 | 0.5645 |
+  | DLRA, rank 4 | 0.6413 |
+  | DLRA, rank 2 | 0.5991 |
+  | **static POD, r=43, projected ONCE** | **0.4268** |
+  | static POD, r=1, projected once | 0.4584 |
+
+  **The method is accurate only at the rank where it *is* the full-grid solver** (3.9× slower,
+  D11.1). **Any genuine rank reduction loses to a one-shot stale static projection.** The
+  error is **not monotone in rank** — rank 16 is the worst of six — so adaptive rank is not
+  an accuracy mechanism at this horizon.
+
+  **The static baseline's error is not rank.** Its basis captures fluctuation energy to
+  `0.999954` at r=16 and `1.0000000000` at r=43; **rank buys 7%** (0.4584 → 0.4268); and the
+  **stale zonal mean alone accounts for `0.5457`**. A static basis stores the window-average
+  mean and the mean grows secularly (R8a, ≈0.11–0.13/time-unit), so it cannot represent the
+  current value. In-sample vs out-of-sample is `0.4265` vs `0.4268`, so coder's in-sample
+  worry was right in principle but is **not** the effect here.
+
+  **Controls.** Per-step projection error at `t=8` is negligible at every rank (`1.7e-10` at
+  r=2, `3.5e-15` at r=43), so the divergence **accumulates over 16 000 steps × 4 stage
+  projections**. It is **not** a scheme difference: identity-projector vs no-projector differs
+  by `1.5e-11` over 2 000 steps, and at rank 43 the DLRA is exactly `0.0000` over the full run.
+
+  **So the paper's real subject, now measured: representational low-rankness is not
+  trajectory low-rankness.** R26/R29 measured `r99 ≈ 16` for the *state*, grid-independently;
+  integrating at rank 16 for eight time units gives `0.68`. **That gap is genuine,
+  falsifiable, publishable, and the opposite of the draft's framing** — and it makes the
+  project's weakest area its contribution. It also explains the history honestly: the rank
+  criterion decides whether a run sits at the ceiling or below it, the amplitude rule pins at
+  the ceiling, and an energy rule does not.
+
+  **F5 re-specified:** report the **rank-sensitivity curve** `0.60/0.64/0.56/0.68/0.57/0.00`
+  for `r = 2…43` (a matched-rank point hides it); use a **matched-scheme** full-grid
+  reference; add a **moving-window POD** refitted every `0.02` so the `0.5457` mean staleness
+  is removed and the baseline is honestly strong.
+
+  **My own errors en route — four, all caught by controls rather than reasoning.** (i) I
+  blamed decorrelation for the r=43 error; it is rank-independent at `Δ=0.02` where
+  decorrelation is `0.014`. (ii) My `W=0.05` moving window held 2 snapshots, so every rank
+  gave the same answer; `W=1.0` (50 snapshots, enough for rank 43) fixed it — coder's own
+  fairness point. (iii) **An in-place rank truncation `U = U[:, :min(r, U.shape[1])]` capped
+  every rank at the first one**, making all seven columns identical; the symptom — "rank
+  doesn't matter" — looked like a finding and was my own bug, exposed only by the
+  non-monotonicity of the independent fixed-rank table. (iv) I blamed a scheme difference for
+  the DLRA's 105% divergence. **(iii) is the one to remember: it manufactured a
+  plausible-looking result, and the R25 rule caught it only because an independent
+  measurement disagreed with it.**
+- 2026-09-25 **R30 — coder merged; writing-research held on an ownership violation and on
+  deletions of verified work.**
+  **Coder `394766b` MERGED (`5ae991e`); `0b47c14` (outbox only) merged (`4df509d`).**
+  111 files on `main`, 0 deleted, coder-owned paths only.
+
+  **R27's blocker is cleared.** `benchmark_summary.json` is now generated by
+  `experiments/make_summary.py` from the artifacts, not hand-assembled, and the generator
+  **refuses to emit** a summary whose cases disagree on the IC fingerprint. I re-verified
+  independently: **0 mismatches**, all four cases consistent, `git_commit` matching.
+  Coder then **applied my provenance rule to their own work** and found a second instance of
+  the same shape: the long-run artifact **never recorded `re` or `N`** while the old summary
+  asserted both. The generator now reads them from the artifact, emits `null` with a warning
+  if absent, and `run_long_time.py` records them plus the forcing parameters — which had
+  been **hardcoded literals in the record rather than the variables that built the run**.
+  They also state the two CHECKLIST §1.0 items inside the summary rather than leaving them
+  implicit: the **rank mismatch** (POD r=16 against DLRA r=43 is not rank-matched) and the
+  **Re-independence red flag** (DLRA divergence is 9.8e-5/1.00e-4/1.01e-4, so at T=0.1 it
+  measures the setup and no Re-dependence may be claimed).
+
+  **Two real engine findings, both new.**
+  **(a) The first derivatives were the wrong operator.** `grad`/`velocity` applied a
+  k-multiplier to the rfft **half** spectrum and inverted with `irfftn`, which rebuilds the
+  missing columns as `conj(F[k, N-j])` where a real field requires `conj(F[N-k, j])` — a
+  different operator. I measured it: **13.6% wrong on a full-band random field**, while the
+  new full-`fft2` route is exact to **0.0**. It is in the **dynamics**, not just a diagnostic.
+  **Impact on committed results: none, and they measured it rather than arguing it** — I
+  re-verified independently, old-vs-new on the actual IC and along the actual trajectory is
+  `5e-15` per derivative and `7e-15` over 200 steps, because the IC is band-limited to
+  |k|≤8, the 2/3 mask keeps every step inside the band, and a projected rank-43 state has
+  spectral mass `3.7e-17` outside it. So it is a latent-defect fix that would have broken
+  silently the moment anything admitted full-band content. One more thing they caught while
+  testing: **`max_divergence` was still differentiating by the old route** and briefly
+  reported div = 215 on a full-band field; it is now routed through the same operator as
+  `velocity`. The test asserts **both** halves — agreement with the independent route *and*
+  that the half-spectrum shortcut is demonstrably a different operator — so it cannot pass
+  by accident.
+  **(b) `dlra_max_rank` no longer caps below physics.** `--dlra-max-rank 0` is the new
+  default and resolves to the grid's own ceiling `2*floor(N/3)+1`, recorded next to the cap
+  in every artifact. My R27 point stands and is fixed: at N=128 the trace had been the
+  driver setting, not adaptation.
+
+  **D11.5's constructive consequence is implemented.** `--rank-criterion energy` keeps the
+  smallest r reaching `--energy-fraction` (default 0.99) — the r99 rule, the one that can
+  track the `1→16` growth. The amplitude rule remains the default so nothing changes
+  silently, every artifact records which criterion produced its trace, and a test pins both
+  against brute force **and against each other** (12 vs 2 on the same spectrum, so they
+  cannot be conflated). `zonal_mean`/`fluctuations` added to `spectral.py` with the
+  **axis-0 convention correct** — the bug I burned four cycles on. New drivers
+  `run_baselines.py` (F5: rank- and work-matched, POD-DMD, fixed-rank variant so adaptivity
+  is separated from rank, IC hash-verified) and `run_regime_pilot.py` (S1–S3, horizon chosen
+  from a measured drift rather than assumed).
+
+  **My verification, not their suite's:** 31/31 tests pass, and **18/18 of my own contracts**
+  including `div(velocity(ψ)) = 7.1e-15`, full-band `grad` exact to 0.0 on both axes, the
+  R24 POD check at `3.1e-16`, the R20 raise, R5l idempotence, the R25 warm-object reset at
+  0.0, and the new `zonal_mean`/`fluctuations` identities. **No new defect found.**
+
+  **Cost gate: run, and correctly not shipped.** `bench_cost.py` completed under the R5q
+  protocol, but coder is **re-running it from `394766b`** because the operator fix changed the
+  code it measured — "should" is not a provenance record, and they said so before I saw the
+  numbers. Flagged in advance: with one thread the **full-step ratio grows with N**
+  (calibration 2.06× / 2.65× / 2.90× at N=64/128/256), because the whole-field SVD is
+  Θ(N³) against a reference step of Θ(N² log N). **So the near-parity-by-N=512 expectation
+  does not exist in that direction, and the answer on the long high-N run is no.** D11.1's
+  2.9/3.1/3.6× is the same direction at higher values.
+
+  **writing-research `b087cde` — HOLD, not merged. Branch 24 commits behind `main`.**
+  **Blocking, four items.** (1) `fix_arxiv_index.py` and `fix_refs_bib.py` are at the
+  **repository root**, outside every owned path — a D7 violation; **delete, do not approve**,
+  since one-off fixers have no ongoing value. (2) The fixers edit **`data[14]` by list
+  position**; positional edits are how this record has been corrupted three times, and R9
+  said "edit it directly, no script." (3) **Five verified bib entries deleted:**
+  `olshanskii2024approximating` (whose year R18 corrected by hand), `einkemmer2025asymptotic`,
+  `einkemmer2025interpolatory`, `koellermeier2024macro`, `moarref2013model` — and the two
+  `einkemmer` entries are **load-bearing for D3**, being the SPDDLRA line R5p used to
+  establish that no established structure-preserving DLRA integrator claims an energy
+  identity. (4) **Eleven index entries removed**, among them **"DDFKs: Fluid Simulation with
+  Dynamic Divergence-Free Kernels"** — directly on-topic for an exactly-divergence-free DLRA
+  paper — plus "Structure-preserving Lift & Learn", "Structure-Preserving Operator Learning"
+  and four DLRA applications; restore or justify each removal in NOTES.
+
+  **Credited, and it is substantial.** `lubich2014projector` is now in `refs.bib` — the O2
+  item done in the *shared* bibliography with the DOI I verified, not only in the index.
+  `rebholz2026` added. **A1 is genuinely fixed this time**: the Girfoglio entry is
+  `10.1016/j.compfluid.2022.105536` and I verified the old `compflu` string is gone.
+  `recommendations.md` is the D5-compliant version, and `suggested_structure.md` still
+  carries S4/S5/S6.
+
+  **My own near-miss, caught before it was sent.** I read the shorter venue document
+  (57 → 32 lines) and the "prioritize local" merge message as *their* push reverting
+  `main`. It is the reverse: `main` still carries the pre-D5 AISTATS-first table because I
+  held `0a9e8f1`, and their branch carries the corrected one. I nearly wrote a false
+  accusation into the record on the strength of a line count and a commit message.
+  **Provenance beats fingerprint — third instance this cycle, and the cheapest available
+  check was the one I skipped.**
+- 2026-09-25 **R29 — the N=256 resolution sweep falsified my own R26 claim. Retracted.**
+  R26 §6 named this the single most important open question in the project and assigned it
+  to `coder`, who has a three-item blocking queue and has not run. **I ran it myself.**
+  `N=256`, `Re=5000`, `A=0.2`, `dt=5e-4`, `T=16`, 320 snapshots, 812 s. Decomposition
+  helper validated as in R26e (ground truth `‖ψ−zonal(ψ)‖=84.9558` at `t=4`, reproduced to
+  the last digit by an independent broadcast construction, `match=True`; batched form
+  bit-for-bit equal to unbatched). Ceiling 43/85/171.
+
+  **`r99` at `W=16` across `N=64/128/256` = 14, 24, 13 — non-monotone, `N=128` the outlier.**
+  R26 concluded "the required rank keeps growing with the grid, so the `N=64` turnover is a
+  resolution artefact, not saturation" **from two resolutions.** The third destroys the
+  trend. **Retracted**, and corrected in place in R26 with a pointer to R29 rather than
+  left quotable. Same for R26's abstract-level "keeps growing with the resolved scale
+  range".
+
+  **A confound I had not checked.** The grids are not at the same state at the same `t`:
+  total energy at `t=16` is `111.6 / 150.8 / 121.2`, a **35.1% spread**, against 4.2% at
+  `t=4` and 18.4% at `t=12`, because R8a's secular mean growth proceeds at a different rate
+  per grid. **Matched-`t` resolution comparisons are confounded and the confound grows with
+  `t`.** Any resolution statement on this problem must compare at matched *state* (matched
+  `E` or `ū_bar`). I did not check this in R26 and did not notice.
+
+  **The confound does not explain the non-monotonicity, and I advanced no mechanism.** At
+  `W=12`, `N=128` has `E=99.30, r99=22` and `N=256` has `E=95.11, r99=16` — within 4% in
+  energy, 6 modes apart. Energy does not account for it. `r999` behaves the same way
+  (44/50/30 at `W=16`). **`W ≥ 12` is recorded as an open question**, not as growth and not
+  as saturation.
+
+  **What replaces the retracted claim is stronger and simpler.** For `W ≤ 4` (near-
+  independent at 8), `r99` is grid-independent across all three grids — 2/2/2, 4/4/3, 6/6/6,
+  11/10/10 at `W` = 0.5, 1, 2, 4 — spanning a **4× range in linear resolution and a 16×
+  range in the dealiasing ceiling**. The `1 → 16` growth that `AGENTS.md` asserts, and the
+  growth the paper needs, is **a property of the dynamics, not of the discretisation.** That
+  claim needs no resolution story, is supported by three resolutions, and is the one the
+  writer should use. The paper's rank claim should live inside `W ≤ 8`.
+
+  **Coder's re-run is re-specified** (blocking item 2, amended): window `[0, 8]`; at both
+  `N=64` and `N=128` so the grid-independence is reproduced by the project's own code and
+  not only by my scratch scripts; report `r99`/`r999` of the **zonal-mean-removed** field
+  over nested windows, since the zonal mean is rank 1 and grows secularly; and an
+  energy-based rank rule (D11.5) at the same time is the most useful addition, because it
+  is what would let the rank track `1 → 16` instead of pinning at the ceiling.
+
+  **The lesson, and it is the seventh instance and by far the most expensive.** I asserted
+  a resolution mechanism from two points and attached it to a genuine finding **because the
+  finding wanted a sequel** — I worked for the `1 → 16` growth, then wrote an unworked
+  resolution story on top of it. The check that broke the claim cost ~37 minutes and I had
+  already costed it, so the decision not to run it was not a budget judgement. The sharper,
+  procedural form: **"this is coder's" is not a reason not to run a check that falsifies my
+  own claim.** Delegating verification of my own conclusion to an agent with a full queue is
+  how a wrong claim survives three cycles, and it is the same shape as R24's
+  is-the-thing-real and R25's is-the-check-real: **verify the claim, including mine, before
+  building on it.**
 - 2026-09-25 **R28b — process fix: stop burying the actions.**
   The user reported that the agents cannot tell what is high priority, and that I am doing
   too much bureaucracy. Both are true and the fault is mine. Concretely: R28's three false
