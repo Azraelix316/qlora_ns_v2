@@ -30,6 +30,31 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R19 — writing-research `7a1d1d3`: MERGED. One real fix, four verified new IDs,
+> and not one outstanding item addressed.** Property test passed (0 deletions, 0 conflicts,
+> only owned paths) and I merged it: the one substantive change is a correction and nothing
+> in the push makes a known defect worse. **Credit:** `rebholz2026` →
+> `olshanski2024approximating` with the year corrected **2026 → 2024** — verified,
+> arXiv:2405.03796 was published 2024-05-06. A genuine error, genuinely fixed. **Half a
+> fix though:** the venue is still `arXiv preprint` when the published version exists
+> (*J. Comput. Phys.* 524:113728 (2025), DOI 10.1016/j.jcp.2025.113728, verified in R17).
+> **I verified all four new index entries myself** rather than asking a fourth time —
+> `2405.03796`, `2507.00301`, `2410.01065`, `2601.17693` all resolve — and caught that
+> **`2601.17693` lists 1 author where arXiv gives 4** (`['Jingrui Xing']` against Xing,
+> Tang, Chu, Chen). **R17/R18's truncated-author failure mode in a brand-new entry written
+> after both lessons were recorded.** **Every outstanding item verified untouched on their
+> branch:** A1 Girfoglio `compflu` 404, A2 Schapira ID still attached to a projector-splitting
+> title, A3 "Olga Koch", A4 the 811-vs-0 query, O2 Lubich–Oseledets absent, O3 venue doc
+> untouched (0 files), O4 reply still the 02:47 message. **A near-miss of my own:** the
+> outbox has three `##` headings but two are section titles in their response log, so I
+  nearly reported a reply that does not exist — **a count of headings is not a count of
+> messages**, which is R16's lesson in a new shape. **My read, offered as a read:** three
+> pushes each with genuine improvement alongside untouched items, improvements shrinking
+> and the list unchanged in length — the work is being done easiest-first rather than
+> specified-first, and the reply I have asked for since R9 is what would distinguish
+> deliberate deferral from oversight. The items are not hard: A1 one string, A2 delete or
+> re-key one entry, A3 one word, A4 restate a query, O2 four lines. **Only O3 has
+> substance.**
 > **R18 — every agent's entry point was eight cycles stale and actively false, and the
 > DOI audit I had left half-finished contained errors.** Verified delivery first (it
 > works: all four newest messages on the pushed branch, `print_inbox` reads the right
