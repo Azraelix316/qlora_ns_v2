@@ -117,3 +117,103 @@ def fit_pod(
 ) -> PODGalerkin:
     """Convenience function used by benchmark drivers."""
     return PODGalerkin(grid, rank).fit(snapshots)
+
+
+class PODDMD:
+    """POD-DMD baseline: a fitted linear operator on a POD basis.
+
+    This is the dynamic data-driven comparator F5 asks for, not a second copy
+    of the static projection.  The basis and snapshot mean come from
+    :class:`PODGalerkin`; the dynamics are a single linear operator ``A`` on the
+    modal coefficients, fitted by least squares over a training segment:
+
+        A = argmin ||C_{n+1} - A C_n||_F  =>  A = (C_n C_n^T)^-1 C_n C_{n+1}^T .
+
+    The normal equations are accumulated **online**, one step at a time, so the
+    memory is O(r^2) rather than O(n_snapshots * r).  That matters here: the
+    training segment of a long run is tens of thousands of steps, and holding
+    every snapshot would be gigabytes.
+
+    The operator advances exactly one solver time step per application, so the
+    baseline is compared on the same time grid as everything else (F5's "same
+    dt policy").  A ridge term is available for conditioning and its value is
+    recorded by the driver; ``ridge=0`` is plain least squares.
+    """
+
+    def __init__(self, pod: PODGalerkin, ridge: float = 0.0):
+        if ridge < 0.0:
+            raise ValueError("ridge must be non-negative")
+        self.pod = pod
+        self.ridge = float(ridge)
+        self.operator: np.ndarray | None = None
+        self._gram: np.ndarray | None = None
+        self._cross: np.ndarray | None = None
+        self._samples = 0
+        self._previous: np.ndarray | None = None
+
+    # -- offline phase ----------------------------------------------------
+    def accumulate(self, psi: np.ndarray) -> None:
+        """Add one training sample; pairs it with the previous accumulated one."""
+        pod = self.pod
+        pod._check_fitted()
+        c = pod.basis.T @ (np.asarray(psi, dtype=float).reshape(-1) - pod.mean.reshape(-1))
+        if self._gram is None:
+            r = pod.basis.shape[1]
+            self._gram = np.zeros((r, r), dtype=float)
+            self._cross = np.zeros((r, r), dtype=float)
+        if self._previous is not None:
+            self._gram += np.outer(self._previous, self._previous)
+            # Least squares for A in min ||C_{n+1} - A C_n|| gives
+            # A (C_n C_n^T) = C_{n+1} C_n^T, so the *next* coefficient goes on
+            # the left of the outer product.  Transposing this silently fits
+            # A^T, which a symmetric test operator can hide -- the dedicated
+            # non-symmetric linear-system test exists for that reason.
+            self._cross += np.outer(c, self._previous)
+            self._samples += 1
+        self._previous = c
+
+    def fit(self) -> "PODDMD":
+        """Solve the accumulated normal equations for ``A``."""
+        if self._gram is None or self._samples == 0:
+            raise RuntimeError("PODDMD.accumulate must be called before fit")
+        gram = self._gram.copy()
+        if self.ridge > 0.0:
+            gram += self.ridge * np.trace(self._gram) / gram.shape[0] * np.eye(gram.shape[0])
+        # A = C_{n+1} C_n^T (C_n C_n^T)^{-1}; the Gram is symmetric, so this is
+        # solve(G, cross^T)^T.
+        self.operator = np.linalg.solve(gram, self._cross.T).T
+        return self
+
+    # -- online phase -----------------------------------------------------
+    def coefficients(self, psi: np.ndarray) -> np.ndarray:
+        """Modal coordinates of a state, i.e. its projection in coefficient space."""
+        pod = self.pod
+        pod._check_fitted()
+        f = np.asarray(psi, dtype=float)
+        if f.shape != (pod.grid.N, pod.grid.N):
+            raise ValueError(f"field shape {f.shape} does not match grid")
+        return pod.basis.T @ (f.reshape(-1) - pod.mean.reshape(-1))
+
+    def reconstruct(self, coefficients: np.ndarray) -> np.ndarray:
+        """State for a set of modal coordinates: mean + B c, no mean fix-up."""
+        pod = self.pod
+        pod._check_fitted()
+        out = pod.mean.reshape(-1) + pod.basis @ np.asarray(coefficients, dtype=float)
+        return out.reshape(pod.grid.N, pod.grid.N)
+
+    def initialize(self, psi: np.ndarray) -> np.ndarray:
+        """Project the initial condition, giving the same bit-identical start.
+
+        The online state is the exact L2 projection of the IC, which is the IC
+        itself when the basis contains it -- the same P0 requirement the static
+        baseline meets.
+        """
+        if self.operator is None:
+            raise RuntimeError("PODDMD.fit must be called before use")
+        return self.reconstruct(self.coefficients(psi))
+
+    def step(self, coefficients: np.ndarray) -> np.ndarray:
+        """Advance the modal coefficients by one time step."""
+        if self.operator is None:
+            raise RuntimeError("PODDMD.fit must be called before use")
+        return self.operator @ np.asarray(coefficients, dtype=float)

@@ -50,14 +50,19 @@ def run_case(
     if history_stride < 1:
         raise ValueError("history_stride must be positive")
     grid = Grid2D(N)
+    # Named once and recorded in the artifact: the previous hand-assembled
+    # summary asserted an re and an N that this artifact never wrote down, which
+    # is the provenance failure P0 item 5 exists to prevent (R27).
+    force_amplitude, base_speed, perturbation_velocity_rms = 0.5, 0.5, 1.0
+    cutoff, seed, wavenumber = 8, 20260925, 1.0
     initial = make_initial_state(
         grid,
-        base_speed=0.5,
-        perturbation_velocity_rms=1.0,
-        cutoff=8,
-        seed=20260925,
+        base_speed=base_speed,
+        perturbation_velocity_rms=perturbation_velocity_rms,
+        cutoff=cutoff,
+        seed=seed,
     )
-    forcing = KolmogorovForcing(amplitude=0.5, wavenumber=1.0)
+    forcing = KolmogorovForcing(amplitude=force_amplitude, wavenumber=wavenumber)
     full_model = StreamFunctionNS(grid, 1.0 / re, forcing=forcing, dealias=True)
     dlra_model = StreamFunctionNS(grid, 1.0 / re, forcing=forcing, dealias=True)
     dlra_model.track_step_diagnostics = True
@@ -194,6 +199,8 @@ def run_case(
         "grid": {"N": N, "L": grid.L},
         "reynolds": re,
         "parameters": {
+            "re": re,
+            "N": N,
             "dt": dt,
             "nsteps": nsteps,
             "final_time": final_time,
@@ -202,13 +209,15 @@ def run_case(
             "initial_rank": rank,
             "min_rank": min_rank,
             "max_rank": max_rank,
+            "dealias_rank_ceiling": 2 * (N // 3) + 1,
             "relative_amplitude_cutoff": relative_amplitude_cutoff,
             "adapt_initial": adapt_initial,
-            "force_amplitude": 0.5,
-            "base_speed": 0.5,
-            "perturbation_velocity_rms": 1.0,
-            "cutoff": 8,
-            "seed": 20260925,
+            "force_amplitude": force_amplitude,
+            "base_speed": base_speed,
+            "perturbation_velocity_rms": perturbation_velocity_rms,
+            "forcing_wavenumber": wavenumber,
+            "cutoff": cutoff,
+            "seed": seed,
         },
         "initial_state": initial_state_fingerprint(grid, initial),
         "initial_energy": grid.ke(initial),
