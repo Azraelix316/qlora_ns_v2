@@ -69,6 +69,22 @@ two agents never write the same file.
 
 - Inbox files accumulate; treat old entries as history. Do not edit or delete
   another agent's outbox files.
+- **Read your inbox newest-message-first.** `inbox` prints an append-only file
+  top to bottom, so the *oldest* verdict appears first and later verdicts
+  supersede it. This has already caused one agent to spend a full cycle
+  executing a superseded fix list. Concretely: after `start`, read the **last**
+  `## <timestamp>` block in each inbox before anything else, and treat anything
+  above it as history. Where a verdict conflicts with
+  `state/reviewer/DECISIONS.md`, **DECISIONS.md wins** — each revised decision
+  opens with an `OPERATIVE TEXT` block naming what currently governs.
+- **Run `start` before working, every session.** A branch that has not merged
+  `origin/main` is on a stale base: it will lack the current engine, the current
+  review state, and any corrected `AGENTS.md` / `lessons_learned.md`.
+- **Verify every identifier against a primary source** — arXiv abs pages for
+  arXiv IDs, `https://api.crossref.org/works/<doi>` for DOIs. Do not write a
+  citation from memory; every fabricated reference found in this project so far
+  was written from memory. Note that `doi.org` redirects return 404 in this
+  environment even for valid DOIs, so use the Crossref API.
 - Decisions: only the reviewer records binding decisions
   (`state/reviewer/DECISIONS.md`). Everyone else may *propose* via outbox.
 - Keep `state/` files small (text/markdown/JSON). Large outputs stay in the

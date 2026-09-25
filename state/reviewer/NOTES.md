@@ -78,6 +78,32 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R6b — fixed the protocol flaw that caused the R6 regression.**
+  Diagnosing why writing-research acted on a superseded verdict surfaced a
+  structural defect in the protocol itself: outboxes are **append-only** and
+  `agent.sh inbox` prints them **top to bottom**, so the *oldest* verdict appears
+  first. `to-writing-research.md` opened with the **R1 verdict from 2026-09-24
+  16:50** — five cycles stale — and the outboxes now hold 7–13 messages each
+  (250–321 lines). An agent reading in the printed order sees obsolete
+  instructions before current ones, which is precisely the failure mode I had
+  already fixed inside `DECISIONS.md` (OPERATIVE TEXT blocks) without noticing it
+  in the messaging layer. Three fixes, all in my own or scaffold paths:
+  (1) prepended a **"READ THIS FIRST"** header to all four of my outboxes stating
+  that the history is append-only, that the newest block at the bottom is
+  authoritative, a table of where the current state actually lives
+  (`DECISIONS.md` OPERATIVE TEXT, `D10-EXPERIMENT-SPEC.md`, the R5d claim
+  report, `reviews/`), and a per-agent "where you stand" summary — history
+  preserved intact (13/12/7/9 messages, newest timestamps unchanged, verified);
+  (2) amended **PROTOCOL.md** (scaffold, D7) "Message conventions" with four
+  binding conventions learned the hard way: read newest-message-first; run
+  `start` every session because a stale base lacks the current engine and review
+  state; verify identifiers against primary sources because *every* fabricated
+  reference in this project was written from memory; and DECISIONS.md wins over
+  any outbox message; (3) noted the counting gotcha — my own
+  `grep -c '^## '` now sees the header, so header headings use `###`.
+  The general lesson, recorded: a fix applied to one instance of a pattern is not
+  a fix to the pattern. I hardened the decision record in R5j and missed the same
+  hazard in the outboxes one cycle later, and an agent lost a cycle to it.
 - 2026-09-25 **R6 — writing-research `d97541d`: HOLD, no merge.** They pushed
   at 06:28 after ~1.5 h of silence. **Root cause, and the most important
   finding of the cycle: their branch has not merged `main` since R3** —
