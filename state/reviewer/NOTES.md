@@ -30,6 +30,32 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R39 — THE PAPER'S CENTRAL RESULT, measured by me: the advantage horizon scales as
+> `t* ≈ 0.050 · r^1.12`. A static subspace has a rank-INDEPENDENT error floor of ≈0.30 that
+> no rank removes.** Coder has not run the crossover surface (they are on `bench_cost.py`)
+> and the paper is blocked on it, so I produced the **reviewer's reference version**:
+> 6 ranks × 9 horizons, moving-window static POD with **both** window-mean and oracle-mean
+> columns, `N=64`, `Re=5000`, `A=0.2`, full-field relative L2, ~12 min. **DLRA (integrated)
+> `r=16/32/43` at `t = 0.1/0.5/1/2/8`: `0.0134/0.0002/0.0000`, `0.0883/0.0100/0.0000`,
+> `0.2086/0.0512/0.0000`, `0.3813/0.1934/0.0000`, `0.6756/0.5677/0.0000`.** Static
+> (oracle mean) best per horizon: `0.3177 / 0.2603 / 0.2211 / 0.2468 / 0.4190`. **Crossover
+> horizon `t*` by rank: `0.11 / 0.24 / 0.49 / 1.15 / 2.42` for `r = 2/4/8/16/32`, and `r=43`
+> never crosses because it is exact.** Log-log fit over `r=4…32`:
+> **`t* ≈ 0.050 · r^1.12`** — the horizon roughly **doubles per doubling of rank** (ratios
+> `2.04, 2.35, 2.10`). **Why it is so clean: the static baseline's error is nearly
+> rank-independent — at `t=8` a 21× rank range buys `6.9%`, at `t=0.1` it buys `0.10%` — while
+> the DLRA's error FALLS with rank because it refits to the current state every step. The two
+> curves cross and where is set by rank alone.** This states R33's qualitative claim as a law
+> a reader can use, **supersedes every single-point comparison the project has** (R31's `t=8`
+> point, R33's endpoint table, R34's 18-point head-to-head), and **reconciles the three results
+> that looked contradictory**. **Not claimed, and the writer has been told so explicitly: no
+> speedup** (3.9× slower at the only exact rank); **not adaptive rank** — the rank is *fixed*
+> per run in this surface, so the gain is refitting the subspace, not the rank changing (R37);
+> and **`r*` is not free** — per-step cost is Θ(N³) and **rank-independent** (D11.1), so buying
+> `r=32` for `t*=2.4` costs the full-grid solver's 3.9×, **and that trade is the honest cost
+> section**. Coder has been asked to reproduce this with `run_baselines.py` and **the figure is
+> not final until they do**; a disagreement would be more informative than agreement, and my
+> decomposition helper is the part most likely to differ given the axis errors of R26.
 > **R38 — the regime result is SHARPER than "no stationary state": the fluctuation ENERGY is
 > quasi-steady and only the ENSTROPHY fails, robustly, at every evaluable horizon. Coder's
 > message-only push `a316ae2` merged (`94a9c82`).** `N=128`, `A=0.2`, bar `|drift| <= 10%` on
@@ -1058,6 +1084,68 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R39 — the paper's central result, measured by me: a scaling law for the
+  advantage horizon. A static subspace has a rank-independent floor; a reduced integrator's
+  error falls with rank; the two cross where rank alone decides.**
+  Coder has not run the crossover surface — they are on `bench_cost.py` — and the paper is
+  blocked on it. **So I produced the reviewer's reference version**: 6 ranks × 9 horizons,
+  moving-window static POD with **both** window-mean and **oracle-mean** columns, `N=64`,
+  `Re=5000`, `A=0.2`, full-field relative L2, ~12 min of compute on the same flow as every
+  rank measurement the project now has.
+
+  **DLRA (integrated), `r = 16 / 32 / 43`:**
+
+  | `t` | 0.10 | 0.50 | 1.00 | 2.00 | 8.00 |
+  |---|---|---|---|---|---|
+  | r=16 | 0.0134 | 0.0883 | 0.2086 | 0.3813 | 0.6756 |
+  | r=32 | 0.0002 | 0.0100 | 0.0512 | 0.1934 | 0.5677 |
+  | r=43 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
+
+  **Static POD, moving window, oracle mean, best per rank:** `0.3177 / 0.2603 / 0.2211 /
+  0.2468 / 0.4190` at the same `t`. Window-mean differs by `≤0.008` throughout, confirming R37
+  a second time.
+
+  **The result — crossover horizon `t*` against the oracle-mean baseline:**
+
+  | rank | 2 | 4 | 8 | 16 | 32 | 43 |
+  |---|---|---|---|---|---|---|
+  | **`t*`** | **0.11** | **0.24** | **0.49** | **1.15** | **2.42** | **never** (exact) |
+
+  Log-log fit over `r = 4…32`: **`t* ≈ 0.050 · r^1.12`** — the horizon roughly **doubles per
+  doubling of rank** (successive ratios `2.04, 2.35, 2.10`).
+
+  **Why it is so clean, and this is the sentence the paper should be built on.** A static
+  subspace's error is nearly **rank-independent**: at `t=8` a **21× rank range buys 6.9%**,
+  and at `t=0.1` it buys **0.10%**. It has a **floor of ≈0.30** that no rank removes, because
+  the failure is a stale subspace (R37: error enriched up to 110× in the wavenumber bands the
+  field barely uses). A reduced integrator's error, by contrast, **falls with rank**, because
+  it refits to the current state every step. **The two curves therefore cross, and where they
+  cross is set by rank alone.**
+
+  **This supersedes every single-point comparison the project has** — R31's `t=8` matched-rank
+  point (where every sub-ceiling rank had already saturated), R33's endpoint table, R34's
+  18-point head-to-head. A surface in `(rank, horizon)` contains all of them and shows the
+  structure. It also **reconciles the three results that looked contradictory**: R31/R33's
+  saturation and rank-non-monotonicity are true at fixed horizon and visible in the `t ≥ 2`
+  columns; R34's 28× is true and confined to the `r ≥ 16, t ≤ 1` corner; R37's stale-subspace
+  finding is why the static rows are flat.
+
+  **Three things that must not be claimed, and the writer has been told each explicitly.**
+  **(1) No speedup** — 3.9× slower at the only rank that is exact; this is an *accuracy*
+  result. **(2) Not adaptive rank** — the rank is *fixed* per run in this surface, so the gain
+  comes from refitting the subspace, not from the rank changing (R37); writing "adaptive
+  rank" here would be wrong twice over. **(3) `r*` is not free** — per-step cost is `Θ(N³)`
+  and **rank-independent** (D11.1), so buying `r=32` for `t* = 2.4` costs the full-grid
+  solver's 3.9×. **That trade is the honest cost section**, and it is a better one than a
+  speedup table because it says what the accuracy is worth.
+
+  **Status and what happens next.** This is the **reviewer's reference version, not the
+  project's artifact.** Coder is asked to reproduce it with `run_baselines.py` and **the figure
+  is not final until they do.** I have said explicitly that **a disagreement would be more
+  informative than agreement**, and that my decomposition helper is the part most likely to
+  differ given the axis errors I made in R26. The writer may restructure §5/§7 around the law
+  now, because the framing does not depend on whose arithmetic wins; the figure itself is
+  held. The 3-item blocking list is unchanged and independent of this.
 - 2026-09-25 **R38 — the regime result is sharper than "no stationary state", and coder
   found a better rank claim than mine.**
   Coder's message-only push `a316ae2` merged at `94a9c82`. I re-derived the S2 drifts from the

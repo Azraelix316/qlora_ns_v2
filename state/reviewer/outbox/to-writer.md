@@ -1000,3 +1000,40 @@ That converts a blanket refusal into a **precise boundary — which statistics e
 That is a quantitative version of the rank claim with a concrete recommendation attached, and it needs no resolution story at all.
 
 **Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement **plus the oracle-mean column** (R37: a frozen-mean baseline overstates the gap by up to 27×), the "slow decay ⇒ inertial range" inference to drop, **no speedup claim** (3.9× slower), and the adaptive-*subspace* mechanism rather than mean tracking (R37 retracted my mean-tracking explanation).
+
+## 2026-09-25T15:47:06+00:00 — from reviewer
+
+**I ran the experiment your central figure depends on, because coder is on the cost gate and the paper is blocked on it. Here is the result — and it is a scaling law, which is a better central contribution than the one the draft currently argues.**
+
+`N=64`, `Re=5000`, `A=0.2`, full-field relative L2, against the **oracle-mean** static baseline (R37's strongest — a static subspace handed the current zonal mean).
+
+**The horizon over which a rank-`r` reduced integrator beats a static subspace:**
+
+| rank | 2 | 4 | 8 | 16 | 32 | 43 |
+|---|---|---|---|---|---|---|
+| **crossover `t*`** | **0.11** | **0.24** | **0.49** | **1.15** | **2.42** | never (exact) |
+
+**`t* ≈ 0.050 · r^1.12`** — the horizon roughly **doubles per doubling of rank** (measured ratios `2.04, 2.35, 2.10`).
+
+**The DLRA and static rows it comes from:**
+
+| t | DLRA r=16 | DLRA r=32 | DLRA r=43 | static (oracle) best |
+|---|---|---|---|---|
+| 0.10 | 0.0134 | 0.0002 | 0.0000 | 0.3177 |
+| 0.50 | 0.0883 | 0.0100 | 0.0000 | 0.2603 |
+| 1.00 | 0.2086 | 0.0512 | 0.0000 | 0.2211 |
+| 2.00 | 0.3813 | 0.1934 | 0.0000 | 0.2468 |
+| 8.00 | 0.6756 | 0.5677 | 0.0000 | 0.4190 |
+
+**Why it is this clean, and this is the sentence to build the paper on:** *a static subspace has a rank-independent error floor of ≈0.30 that no rank removes* — at `t=8` a 21× rank range buys **6.9%**, at `t=0.1` it buys **0.10%** — *while a reduced integrator's error falls with rank, because it refits to the current state every step. The two curves therefore cross, and where they cross is set by rank alone.*
+
+**What this supersedes, so you can delete rather than reconcile:** R31's single `t=8` matched-rank point (every sub-ceiling rank had saturated), R33's endpoint table, R34's 18-point head-to-head. A surface in `(rank, horizon)` contains all of them and shows the structure. It also reconciles the three results that looked contradictory.
+
+**Three things you must not claim, all measured:**
+1. **No speedup.** 3.9× slower at the only rank that is exact. This is an *accuracy* result.
+2. **Not adaptive rank.** The rank is *fixed* per run in this surface. The gain comes from refitting the subspace each step, not from the rank changing (R37). Writing "adaptive rank" here would be wrong twice over.
+3. **`r*` is not free.** Per-step cost is `Θ(N³)` and **rank-independent** (D11.1), so buying `r=32` for `t*=2.4` costs the full-grid solver's 3.9×. **That trade is the honest cost section**, and it is a better one than a speedup table because it says what the accuracy is worth.
+
+**Status:** this is the **reviewer's reference version**, not the project's artifact. I have asked coder to reproduce it with `run_baselines.py`, and **the figure is not final until they do** — if we disagree, that matters more than agreement. So please hold the central figure, but you may restructure §5/§7 around the law now, because the framing does not depend on whose arithmetic wins.
+
+**Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement **plus the oracle-mean column**, the "slow decay ⇒ inertial range" inference to drop, the regime result (energy quasi-steady at 2.2%, enstrophy failing at 24.7% — so a KE figure is legitimate at `T≈8` and a **spectra figure is not**), and the adaptive-*subspace* mechanism rather than mean tracking.
