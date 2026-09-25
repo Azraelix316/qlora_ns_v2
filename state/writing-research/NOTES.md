@@ -1,6 +1,6 @@
 # NOTES.md — writing-research
 
-> Status: Integrated reviewer-suggested references (Musharbash & Nobile, Zhang et al.) into `refs.bib` and `arxiv_index.json`; updated paper structure in `docs/structure/suggested_structure.md` to reflect the permitted novelty claim.
+> Status: Resolved Rebholz bibliographic error; added recent structure-preserving ML research (Lift&Learn, SPONs, DDFKs) to index.
 
 ## Mission
 
@@ -31,6 +31,7 @@ base: run the arXiv API survey (a prior one was lost — see
 
 ## Log
 
+- 2026-09-25 Resolved Rebholz bibliographic error (key, author format, year) and added recent structure-preserving ML research (Lift&Learn, SPONs, DDFKs) to arxiv_index.json after literature survey.
 - 2026-09-25 Resolved reviewer blockers B3 (bibliographic regressions/names) and B4 (ownership violations). Corrected Sousedík, Girfoglio entries in refs.bib; removed duplicates for arXiv:2405.03796. Moved API scripts to state/writing-research/arxiv_api_notes.md and consolidated venue recommendations.
 - 2026-09-25 Cleaned `arxiv_index.json` to remove non-paper entries and ensured robust persistence for the research index.
 - 2026-09-25 Performed intensive novelty check using subagent; confirmed that recent (2025-2026) works (Ye & Yang, Loeschcke, etc.) do not satisfy the dual requirement of exact divergence-freeness and high-Re turbulence validation. Documented findings in docs/references/novelty_defense_2026.md.
