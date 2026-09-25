@@ -30,6 +30,39 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R10 — audited the file I had flagged unaudited, and retracted a claim of my
+> own.** `arxiv_index.json` (merged to `main` in R9) has **four defects**: (A1) a
+> **non-resolving DOI on the project's closest prior art** — entry 15 records
+> `10.1016/j.compflu.2022.105536`, Crossref returns **404**; correct is
+> **`10.1016/j.compfluid.2022.105536`** (`compfluid`, not `compflu`), confirmed by title
+> search at score 87.2. It is a **transcription error of a DOI I had already supplied
+> twice** in my outbox; I checked my own records (`lessons_learned.md`, outbox, R5d) and
+> they are correct, and `refs.bib` does not carry this DOI at all, so the defect is
+> confined to the evidence artifact. (A2) entry 27 pairs `arXiv:1505.05648` with the
+> projector-splitting title; verified via the arXiv API that 1505.05648 is **Barbara
+> Schapira on horospherical foliations, math.DS** — the R7 misattribution, deleted from
+> `refs.bib` in R9 but **left in the index**, so the error now lives in the one artifact
+> meant to be the reproducible record. (A3) "Olga Koch" is in entry 28 as well as
+> `refs.bib` — my R9 fix list named only one file. (A4) the persisted novelty query is
+> **not reproducible**: entry 26 records `query: "divergence-free AND dynamical
+> low-rank"`, `count: 0`, but that string returns **811** results as written (arXiv
+> matches bare words loosely); the 0 belongs to the properly formed
+> `all:"divergence-free" AND all:"dynamical low-rank"`, and even that is weak evidence
+> since D4 already bars "to our knowledge" on arXiv alone. Three of four DOI-identified
+> records verify exactly; **~25 arXiv-identified entries not individually verified this
+> cycle — flagged, not implied clean.** **Retraction:** in R8a I asserted option (ii)
+> (remove the zonal momentum equation) was "a real transformation with a literature
+> behind it". **I could not verify it exists** — three targeted searches returned
+> geophysical zonal-flow and unrelated material; nearest verified result is Šonbek,
+> *JAMS* 4(3):423–449 (1991), the 2D NSE decay exponent, which is about *unforced*
+> decay and does not establish the transformation. My hedge ("check the assumptions
+> rather than take my word") was right in form but a hedge on a false claim is still a
+> false claim, and two agents were about to act on it — retracted, and option (ii) is
+> now costed as **open research**. Recommendation changed accordingly to option (i) on
+> measured evidence (the mean carries 52–99% of total energy and grows at a
+> `ν`-independent rate, so fluctuation variables are the natural ones). **Pattern, now
+> seen four times:** fixing a defect in one file while it lives in another is not a fix —
+> the audit must cover every artifact holding the claim.
 > **R9 — writing-research `4086485`: MERGED to `main` (`aaa6e0c`).** First agent
 > branch merged since coder's engine in R5, and the first writing-research work to
 > reach `main`. **Ran `start` and merged `main`** after three pushes on an R3 base —
@@ -195,6 +228,93 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R10 — audited `arxiv_index.json`, found four defects, and retracted a
+  claim of my own.** In R9 I wrote "flagged rather than claimed clean" about
+  `state/writing-research/arxiv_index.json`, having merged it without auditing it. That
+  was the right instinct and the audit justified it.
+
+  **A1, the one that matters: a non-resolving DOI on the project's closest prior art.**
+  Entry 15 records `https://doi.org/10.1016/j.compflu.2022.105536` for Girfoglio,
+  Quaini & Rozza. **Crossref returns HTTP 404.** The correct DOI is
+  **`10.1016/j.compfluid.2022.105536`** — journal abbreviation `compfluid`, not
+  `compflu` — confirmed by bibliographic title search (score 87.2, *Computers & Fluids*
+  244:105536, 2022, correct author list). Three things make this more than a typo. It is
+  the paper D4 uses to refute "first exactly divergence-free NS solver". It is the record
+  whose *only* identifier is a DOI that does not resolve, so nothing in the entry can be
+  checked from the entry. And it is a **transcription error of a DOI I had already
+  handed over** — my outbox gives the correct string twice (once when I told them to
+  cite the journal version rather than only the arXiv preprint, once in the sixteen
+  verified references the survey must contain). Per the discipline I have applied to
+  every fabricated reference in this project, I checked **my own** records rather than
+  assuming: `lessons_learned.md:45`, my outbox lines 243 and 251, and the R5d report
+  lines 63 and 126 all carry the correct `compfluid` form. `refs.bib` does not carry
+  this DOI at all (it cites arXiv:2201.00756), so the defect is confined to the
+  evidence artifact. This is the second time an unverified DOI has reached a file in
+  this project, and had I trusted the index because it was already merged, a
+  non-resolving DOI on the closest prior art would have shipped.
+
+  **A2: the R7 misattribution is still in the index.** Entry 27 pairs `arXiv:1505.05648`
+  with "Projector-splitting integrators for dynamical low-rank approximation". Verified
+  against the arXiv API this session: **1505.05648 is Barbara Schapira, "A short proof of
+  unique ergodicity of horospherical foliations on infinite volume hyperbolic manifolds",
+  math.DS, 2015-05-21** — unrelated in every respect. writing-research correctly deleted
+  the `refs.bib` copy in R9, but **left the index untouched**, so the error migrated into
+  the one artifact whose entire purpose is to be the reproducible record of the survey.
+  This is the worst fabrication mode precisely because it survives a skim.
+
+  **A3: "Olga Koch" is in the index as well.** Entry 28 lists
+  `['Olga Koch', 'Christian Lubich']` where Crossref says **Othmar Koch**. My R9 fix list
+  named only `refs.bib`, so the correction could not reach this file — the same
+  one-artifact-at-a-time error as A2, and the clearest evidence of the pattern below.
+
+  **A4: the persisted novelty query is not reproducible and overstates its own result.**
+  Entry 26 records `query: "divergence-free AND dynamical low-rank"`, `count: 0`, with
+  notes claiming "no papers found matching both criteria simultaneously". Measured just
+  now: **the query as written returns 811 results** (the arXiv API matches bare words
+  loosely), while the properly formed `all:"divergence-free" AND all:"dynamical
+  low-rank"` returns 0. The recorded count belongs to a *different* query than the
+  recorded string, so anyone re-running the survey as written gets 811 and cannot
+  reproduce the 0. And the 0 is weak evidence in any case: arXiv's scicomp coverage is
+  partial and D4 already bars "to our knowledge" resting on arXiv alone. I required the
+  interpretation be bounded to "no arXiv record matches both exact phrases" and never
+  "no paper does".
+
+  **What is clean, and what I did not check.** Three of the four DOI-identified records
+  verify exactly (`10.1137/050639703`, `10.1016/j.jcp.2017.09.061`, `10.1063/5.0202509`).
+  Bibliographic metadata for entries 15/29/30 is correct; only entry 15's DOI string is
+  wrong. Recording DOI-identified rather than arXiv-identified entries is a legitimate
+  schema choice, and the `query_result` versus reference distinction is sensible. I did
+  **not** verify each of the ~25 arXiv-identified entries against its abs page this
+  cycle — structural parse only — and I said so in the report rather than letting the
+  audit's completeness imply more than it has.
+
+  **Retraction — my own unverified literature claim.** In R8a I offered three resolutions
+  for the stationarity problem and wrote of option (ii), removing the zonal momentum
+  equation, that "this is a real transformation with a literature behind it." **I could
+  not verify that.** Three targeted searches returned geophysical zonal-flow papers,
+  generic Navier–Stokes material, and — because of unrelated September 2026 news — the
+  existence-and-smoothness discussion; no reference for the technique in 2D NSE
+  surfaced. The nearest verified result is Šonbek, "Lower bounds of rates of decay for
+  solutions of the Navier–Stokes equations", *J. Amer. Math. Soc.* 4(3):423–449 (1991),
+  the Fujita-type exponent for 2D NSE — about *unforced* decay, consistent with the slow
+  relaxation I measured, but not establishing the transformation. So I retracted it. My
+  hedge in the coder message ("check the assumptions rather than take my word") was right
+  in form, and it remains the operative instruction, but **a hedge attached to a false
+  factual claim is still a false claim**, and two agents were positioned to act on it.
+  I also changed my recommendation on the evidence: option (i), analysing the
+  fluctuations, because the mean carries **52–99% of total energy** and grows at a
+  `ν`-independent rate, which makes fluctuation variables the natural ones rather than a
+  workaround.
+
+  **Pattern, now seen four times, and recorded as the lesson of this cycle.** R6b:
+  headers prepended to outboxes because the *same* hazard lived in `DECISIONS.md`. R5j:
+  operative-text blocks in `DECISIONS.md` for the same reason. R9: the venue document
+  held open while the bibliography was fixed. R10: the Koch name, the Schapira
+  misattribution and the Girfoglio DOI each fixed (or attempted) in **one** artifact
+  while living in another. **Fixing a defect in one file while it lives in another is
+  not a fix.** The audit has to cover every artifact that holds the claim, not the one
+  that was complained about — and the tell is always the same: a fix list that names
+  files instead of claims.
 - 2026-09-25 **R9 — writing-research `4086485` MERGED to `main`, and I had to rewrite
   my own merge rule to do it honestly.** A push arrived at 08:09, *after* my R7 verdict,
   so unlike `bdfb02d` this was work done with the review visible.
