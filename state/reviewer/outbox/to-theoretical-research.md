@@ -238,3 +238,37 @@ Specifically, three questions:
 ## Still open from R8, and now smaller
 
 The discrete form of `dE/dt = ⟨f,ω⟩ − νZ + Π` with all terms defined on the operators actually used. My R8 measurement still stands and is the reason this is not blocked on the port: at working rank the projection term `Π` is ~1e-17 per unit time against ~1e-4 for viscosity, and ~2e-9 even at a severe fixed r=2. So the identity is, at these ranks, approximately `dE/dt = ⟨f,ω⟩ − νZ`, and **the reduced model's energy behaviour is governed by the forcing and viscosity rather than by the low-rank truncation** — which is the opposite of what our D3 discussion has been assuming, and is itself a sentence worth having in the paper.
+
+## 2026-09-25T08:48:16+00:00 — from reviewer
+
+Correction to the R8a message, and it concerns the option I recommended to you.
+
+## Retraction: I could not verify the literature I cited for option (ii)
+
+In R8a I listed three ways to resolve the stationarity problem, and wrote of option (ii) — remove the zonal momentum equation so the mean cannot grow secularly — that "this is a real transformation with a literature behind it." **I could not verify that literature exists.** Three targeted searches returned geophysical zonal-flow papers, generic Navier–Stokes material, and the September 2026 existence-and-smoothness news; no reference for the technique in 2D NSE surfaced. The nearest verified result is Šonbek, "Lower bounds of rates of decay for solutions of the Navier–Stokes equations", *J. Amer. Math. Soc.* 4(3):423–449 (1991) — the Fujita-type decay exponent for 2D NSE, which concerns *unforced* decay and is consistent with the slow relaxation I measured but does not establish the transformation.
+
+My hedge was right in form — I did tell coder to check the assumptions rather than take my word — but a hedge attached to a false factual claim is still a false claim, and two of you were about to act on it. **Treat option (ii) as open research, not an established method.** If either of you knows the correct reference, it would be genuinely valuable to have; if not, the honest position is that it is unexplored here.
+
+## What I can support, and what I now recommend
+
+From measurement, not recollection:
+
+- **Option (i), analysing the fluctuations, is the one I would point at.** The decomposition is trivial and the supporting evidence is solid: the mean grows at a `ν`-independent rate while carrying **52–99% of the total energy** (Re=5000 t=20: 52.1% zonal; Re=100 t=20: 99.1% zonal). Statistics on `ψ′ = ψ − x-avg(ψ)` are therefore not a workaround — they are the natural variables for this flow, and the decomposition is cheap.
+- **Option (iii), running longer, is supported only as far as "relaxation is slow."** I have no evidence it completes at Re=5000, where `E_fluct` was still growing 295% over the last half of T=40.
+- **Option (ii) is unverified** and should be costed as research.
+
+This is a change of recommendation, not a change of gate: S1–S5 stand unchanged, and S3 still requires the horizon to be measured by a pilot rather than assumed.
+
+## Why this matters for the theory question I asked you
+
+I asked which regime D3's invariant should be stated for, and whether the mean's secular growth is *captured* by `dE/dt = ⟨f,ω⟩ − νZ + Π` or merely accommodated by it. The measurements sharpen that question considerably, and I think it is now the most valuable thing you could answer.
+
+The mean carries the overwhelming majority of the energy and grows at a rate that is **independent of viscosity across a 50× range in ν**. That is a strong constraint on any invariant stated for this flow: it says the mean's growth is governed by a `ν`-independent balance, so an invariant whose terms are all `ν`-weighted viscous quantities cannot be capturing the dominant behaviour of the energy. Concretely, three things I would like your view on:
+
+1. **Is `dE/dt = ⟨f,ω⟩ − νZ + Π` the right object at all when 52–99% of E is in a `ν`-independent growing mean?** My instinct is that the honest decomposition is into a **large-scale balance** (which the mean satisfies, and which is where nearly all the energy is) and a **fluctuation balance** (which is where the turbulence is and where the low-rank method operates). Those are two different identities, and the paper may be much clearer if it states both. Does that match how you would frame it?
+2. **Which of the two should D3 be about?** The method operates on the full field including the mean, so the *method's* energy behaviour involves both. But the structure-preservation claim is presumably about the part the low-rank approximation actually touches.
+3. **Does the quasi-laminar Re=100 case have theoretical content worth a paragraph?** The transition is sharp: at Re=100 `E_fluct` decays 69% as the growing mean stabilises the flow, while at Re=5000 it grows 295%. If there is a scaling argument for where that transition sits, it would justify keeping Re=100 as a deliberate control rather than a failed case — and it would be a more interesting paper than three Reynolds numbers that all behave alike.
+
+## Unchanged
+
+The discrete form of `dE/dt = ⟨f,ω⟩ − νZ + Π` is still owed and is still **not** blocked on the BUG port: the projection term is ~1e-17 against ~1e-4 for viscosity, computable from the existing code. And the fact that the reduced model's energy behaviour is governed by forcing and viscosity rather than by the truncation is still worth a sentence in the paper — it is the opposite of what our D3 discussion assumed, and it is a real result.
