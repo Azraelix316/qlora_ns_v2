@@ -24,6 +24,58 @@ if str(ROOT) not in sys.path:
 RESULTS = ROOT / "state" / "coder" / "results"
 
 
+def static_error_spread(
+    static_rows_by_rank: dict, ranks: list, window: float
+) -> list[dict]:
+    """How much the static baseline's error can be reduced by rank, per horizon.
+
+    The definition matters, because two normalisations differ by a factor of
+    several and a paper quoting one against another's numbers would be
+    comparing conventions rather than results.  Both are reported here:
+
+    ``spread_over_min``
+        ``(max - min) / min`` -- the improvement available to the *worst* rank
+        relative to the best.  This is the conservative, largest number and is
+        what the figure plots.
+    ``spread_over_max``
+        ``(max - min) / max`` -- the same interval as a fraction of the worst
+        rank, which is smaller and is the more flattering of the two.
+
+    Every rank is included.  The rank at which the *DLRA* is exact must be
+    excluded from a comparison of the DLRA's curves, but the static baseline's
+    error at that rank is an ordinary measurement, and dropping it would quietly
+    change the quantity being summarised.
+    """
+    prefix = f"W{window:g}_"
+    out = []
+    horizons = None
+    for rank in ranks:
+        rows = static_rows_by_rank.get(f"{prefix}r{rank}")
+        if rows:
+            horizons = [r["time"] for r in rows]
+            break
+    if not horizons:
+        return out
+    for i, h in enumerate(horizons):
+        vals = []
+        for rank in ranks:
+            rows = static_rows_by_rank.get(f"{prefix}r{rank}")
+            if rows and i < len(rows):
+                vals.append(rows[i]["relative_l2_oracle_mean"])
+        if len(vals) < 2:
+            continue
+        lo, hi = min(vals), max(vals)
+        out.append({
+            "time": h,
+            "min": lo,
+            "max": hi,
+            "spread_over_min": (hi - lo) / lo if lo > 0 else None,
+            "spread_over_max": (hi - lo) / hi if hi > 0 else None,
+            "n_ranks": len(vals),
+        })
+    return out
+
+
 def _git_commit() -> str:
     try:
         return subprocess.check_output(
@@ -316,7 +368,7 @@ def main() -> None:
         crossover = {
             "file": "crossover_surface.json",
             "git_commit": crossover_data["provenance"]["git_commit"],
-            "re": p["re"],
+            "re": p.get("re"),
             "N": p["N"],
             "force_amplitude": p["force_amplitude"],
             "ranks": p["ranks"],
@@ -347,6 +399,12 @@ def main() -> None:
                     ],
                     "dlra_surface": re_case["dlra"],
                     "static_moving_window_surface": re_case["static_moving_window"],
+                    "static_error_spread": {
+                        f"W{w:g}": static_error_spread(
+                            re_case["static_moving_window"], p["ranks"], w
+                        )
+                        for w in p.get("moving_window_lengths", [])
+                    },
                 }
                 for re_key, re_case in crossover_data["by_reynolds"].items()
             },
