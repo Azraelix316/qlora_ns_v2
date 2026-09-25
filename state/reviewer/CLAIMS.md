@@ -41,6 +41,34 @@ recorded here and the earlier figure is struck, not quietly dropped.
 | `t*`, `W=0.25`, `Re=1000` | *never leads* | *never leads* | *never leads* | **1.24** | **2.53** | **never (exact)** |
 | `t*`, `W=1.0`, `Re=1000` | *never leads* | *never leads* | *never leads* | **1.33** | **2.53** | **never (exact)** |
 
+> ### ⚠⚠ D27.3 — **STOP. Read this before using ANY `t*` above, including the qualitative
+> sentence.**
+>
+> **I tried to reproduce the static rows three ways and failed all three** (single projection:
+> `0.010→0.051`, 10–50× too good; the driver's own propagated run: `0.000→0.155`, wrong shape; the
+> committed rows: `0.090–0.122`, **flat**). **The artifact is NOT stale** — `5909af6` is on `main`
+> and contains the code that produced it.
+>
+> **The diagnostic: the committed static error is essentially CONSTANT (`0.090`–`0.122`) from
+> `t=0.1` to `t=8`, and is `0.094` at `t=0.1` where the true propagated dynamic error is exactly
+> `0.000000`.** A baseline that is 9.4% wrong where it is provably exact **is not measuring
+> trajectory error.**
+>
+> **HYPOTHESIS (D27.3, not confirmed): the static rows are a fixed rank-limited FLOOR, not a
+> moving-window baseline's error.** If so, the "crossover" is **not two methods exchanging places**
+> but the DLRA's error **growing past a constant** — so **`t*` would measure when the reduced
+> method's error reaches a constant floor, not a horizon of methodological advantage.**
+>
+> **So the qualitative sentence is ALSO provisional until D27.3 is settled.** Do not write "the two
+> methods exchange places", "the static baseline catches up", or "the crossover horizon". **Write
+> only what survives either way:** *a fixed-rank reduced integrator holds a large accuracy advantage
+> over a refitted static subspace for a horizon that depends on the baseline's construction and on
+> the resolution, and the advantage is not purchased with per-step time or memory.*
+>
+> **Also do not write "static baseline" as if it were verified to be a moving-window baseline.** The
+> one-line test that settles this is coder's: **print which state each `static_moving_window` row is
+> measured on.**
+
 > ### ⚠ D25.5 — **every `t*` above is PROVISIONAL. Do not quote one until coder reconciles the
 > two static bases.**
 >
@@ -421,6 +449,8 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | quoting `crossover_surface.json`'s `crossovers` block | its reason string is **false** for `r = 2, 4, 16`; read the `dlra` / `static_moving_window` rows instead |
 | **any `t*` value at all, until the two static bases are reconciled** | **D25.5** — the figure's rows and the block are different bases, `1.90×` apart; coder's values are `0.649`/`1.482`. **State the qualitative claim only.** |
 | "the rows are authoritative" (my R58 conclusion) | **withdrawn (D25.4)** — that assumed the block was computed from the rows; it was not |
+| calling the central column `relative_l2_oracle_mean`, or describing it as an oracle-mean / perfect-mean error | **D27.1** — it is `d_fluct/‖ref‖` with **each field's own** zonal mean removed, which the artifact's `error_columns` block documents as the opposite. Rename it or compute the column its name promises. |
+| "the crossover is where the two methods exchange places" / "the static baseline catches up" | **D27.3** — unconfirmed hypothesis that the static rows are a fixed floor; if so `t*` measures the DLRA's error reaching a constant, not a methodological horizon |
 | **"BUG's cost scales with rank on both axes"** / "`1.165`" / "`1.531 MiB`" / "the project's best-evidenced positive claim" | **withdrawn (D25.6)** — time is `1.366` (N=64) vs `1.043` (N=128), unresolved; the memory spread moved `0.125 → 0.398 MiB` between identical runs. **Report the `3.3–5.1×` slowdown only.** |
 
 ---
