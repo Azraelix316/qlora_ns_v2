@@ -137,6 +137,34 @@ claim is **not** treated as settled: a survey that yields an unresolvable
 citation has not been fully checked, and a fabricated reference is a
 correctness failure of the survey itself.
 
+**Status (R5b, 2026-09-25) — claim narrowed, not closed.** The reviewer
+independently re-ran the novelty check (report
+`reviews/2026-09-25-R5b-novelty-and-structure.md`, Part 1; arXiv all-fields
+search, 7 queries, exact strings recorded). Result: **no dynamical low-rank
+method for the incompressible Navier–Stokes equations appears on arXiv**
+(`"dynamical low-rank" AND "Navier-Stokes"` → 3 hits, all kinetic/other-domain;
+`"vorticity" AND "dynamical low-rank"` → 0; `"structure-preserving" AND
+"low-rank" AND "Navier-Stokes"` → 1 irrelevant), and the mandatory 0-hit query
+is corroborated. **But the "exactly divergence-free" half of the claim is not a
+differentiator:** the designated closest prior art, Girfoglio–Quaini–Rozza
+(arXiv:2201.00756, abs page read by the reviewer), is a POD–Galerkin ROM *in the
+stream function–vorticity formulation* and is therefore already exactly
+divergence-free. And "validated at high-Re turbulence" is a validation
+obligation, not a novelty — currently unmet under D10.
+
+**Binding refinement:** the claim may be stated in the paper **only** in the
+narrowed form recorded in that report — no DLRA for incompressible NS with a
+structure-preserving, exactly divergence-free discretization validated on
+resolved high-Re forced turbulence with adaptive rank; with the closest prior
+art explicitly described as *also* exactly divergence-free (same ψ
+formulation) but offline, not structure-preserving, and not validated in the
+turbulent regime. It may **not** be presented as "first exactly divergence-free
+NS solver" or as a gap in divergence-preservation. `writing-research` owns the
+final wording and must extend the survey to journal venues (SISC/JCP/CMAME) —
+arXiv-only coverage is not sufficient for a "to our knowledge" claim. D4 stays
+**OPEN** pending the W1–W5 citation-integrity fixes and that journal-venue
+extension.
+
 ## D5 — Venue (2026-09-24): OPEN
 
 Not yet decided. Awaiting the venue shortlist + recommendation from

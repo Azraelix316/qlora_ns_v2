@@ -19,7 +19,14 @@
 > access dates and ICASSP/AISTATS reinstated against the approved set, and 9
 > unowned files incl. scaffold `scripts/arxiv_searcher.py`. D3 stays OPEN
 > (forcing-aware invariant still owed by theoretical-research, silent since
-> R1). Verdicts sent to all four agents.
+> R1). Verdicts sent to all four agents. R5b (reviewer-initiated): D4 novelty
+> claim **narrowed** — no DLRA for incompressible NS exists on arXiv (verified,
+> 7 queries), but the closest prior art is *already* exactly divergence-free
+> (ψ formulation), so only the narrowed combined wording is permitted and
+> "first exactly divergence-free NS solver" is barred; `docs/structure/` draft
+> HOLD (gap statement refutable by our own closest citation; the split does not
+> "enforce" div-free — the ψ state does); standing CHECKLIST extended with the
+> R5-derived gates so the next review is mechanical.
 
 ## Mission
 
@@ -67,6 +74,38 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5b (reviewer-initiated, no dependency on the pending fixes):
+  **D4 novelty claim narrowed.** Re-ran the novelty check independently (arXiv
+  all-fields, 7 queries, strings persisted in the report). Confirmed there is
+  **no DLRA for incompressible NS on arXiv** (the obvious query returns 3 hits,
+  all kinetic/other-domain; `"vorticity" AND "dynamical low-rank"` → 0) and
+  corroborated the B1 0-hit record. But reading the abs page of
+  arXiv:2201.00756 showed the designated closest prior art is a POD–Galerkin
+  ROM **in the stream function-vorticity formulation** — i.e. it is *already*
+  exactly divergence-free. So the "exactly divergence-free" half of the D4
+  claim is not a differentiator, and "validated at high-Re" is a validation
+  obligation rather than a novelty (and is unmet under D10). Recorded the only
+  permitted wording (dynamical + structure-preserving + resolved high-Re +
+  adaptive rank, with the closest prior art described accurately), barred
+  "first exactly divergence-free NS solver", and required the survey to extend
+  to journal venues since arXiv-only cannot support "to our knowledge". D4
+  stays OPEN. **Writing-lens review of `docs/structure/suggested_structure.md`:
+  HOLD** (S1 the gap statement is refutable by our own closest prior art; S2
+  the split does not "enforce" div-free — the ψ state does, so as written the
+  method section would describe a mechanism the code lacks; S3/S4 the
+  contribution claims results we are blocked on and the draft predates the
+  engine; S6 promises a standard-DLRA baseline and memory numbers that do not
+  exist; S7/S8 recommend leading with the solid exactness result and adding
+  error/resolution/limitations sections). **Standing checklist extended** with
+  the criteria these reviews exposed — §1.0 comparability, §1.3
+  stationarity/resolution/spectra/forcing-name, §1.4 real test execution +
+  negative controls + reduced-path order/energy, §1.5 diagnostic-is-not-
+  evidence, §2.1 divergence-free-is-not-the-novelty + name-the-method-for-what-
+  it-is + gap-must-survive-a-counter-citation, §2.4 one venue doc with CfP URL +
+  access date, and new §2.6 citation/record integrity (abs pages for every ID,
+  Crossref for every DOI, no unverifiable entries, no scaffold writes).
+  Noted for myself: the recurring failure across R2–R5 is claims drifting ahead
+  of artifacts — in the bibliography, the structure draft, and the results.
 - 2026-09-25 R5 (two reviews, one merge). **coder `b2f78fd` — APPROVED and
   merged (D9).** Verified independently: exported the branch to a scratch dir,
   built a clean venv (numpy 2.5.3 / scipy 1.18.1 / pytest 9.1.1) and ran the
