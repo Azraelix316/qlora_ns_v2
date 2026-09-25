@@ -1042,3 +1042,81 @@ not know.**
 `N=64`. No per-step advantage in time (`1.78–2.18×` slower) or memory (`2.8–3.5 MiB` more).
 `crossover_surface.json`'s `crossovers` block still wrong. The artifact still does not record the
 refit offset. Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred claim stands.
+
+---
+
+## D18 — The windowed rank rule was built, measured, and **does not work**. That converts
+## D12's preference into evidence, and yields a no-go statement (2026-09-25)
+
+> **OPERATIVE (R54).** Report the **instantaneous/local versus cumulative** distinction as the
+> finding, **with the constraint that makes it a finding**: *a causal per-step or fixed-window
+> rank rule reads an instantaneous or local rank — measured at `≈2` — while the cumulative
+> `1 → 16` is unreachable without an unbounded subspace, which is precisely what static and
+> offline methods do and what a causal method cannot.* **D12 is amended, not reversed: the
+> recommendation is unchanged and now has a measurement behind it.**
+
+**D18.1 — Coder implemented the option D12 scoped out, measured it, and it fails.** New
+criterion `window_energy`: retain the last `rank_window` candidates and take the singular values
+of the matrix they form, computed from an `n×n` Gram and its eigenvalues at `O(n N²)` against
+the step's four `Θ(N³)` factorizations. At `T=8, N=64, A=0.5` against a reference fluctuation
+energy of `33.0`:
+
+| rule | ranks seen | `E_fluct` | % of reference |
+|---|---|---|---|
+| per-step energy (current) | 1 … 14 | 9.06 | **27.5%** |
+| windowed `W=10` | 1 … 2 | 0.50 | 1.5% |
+| windowed `W=20` | 1 … 2 | 0.50 | 1.5% |
+| windowed `W=50` | 1 … 2 | 0.47 | 1.4% |
+
+**The windowed rule never exceeds rank 2 and keeps `1.5%` of the fluctuation energy — worse
+than the per-step rule, not better.**
+
+**D18.2 — The cause is definitional, and it is the useful part.** The `1 → 16` growth is a
+window **anchored at `t = 0`**. A rule retaining the last `n` candidates sees only the last
+`n·dt` time units, and the pilot's own table gives `r99 ≈ 2` for a `0.4`-time-unit window
+against `14` for the full `[0, 8]` window. **So the windowed rule measures *local* complexity,
+which genuinely is `≈2`, and `2` is not enough — that is the `98%` energy loss. The cumulative
+rank is only readable by remembering the entire trajectory, which is exactly what static and
+offline methods do and what a causal per-step method cannot do.**
+
+**D18.3 — The obvious counter-explanation was tested and refuted, and the refuted story was
+not reported as a finding.** The natural objection is that the window fills with the method's
+own already-deficient states, making the collapse self-reinforcing. Seeding the window with
+**reference** states instead changed nothing (`1.3%` against `1.5%`). **So that explanation is
+refuted, and it is recorded here as refuted rather than told to the reader.** That is the
+correct handling and it should be said so.
+
+**D18.4 — D12 is amended, not reversed.** D12 said to report the distinction and scope the
+windowed rule as future work. Coder did the future work early and obtained a negative. **The
+recommendation is unchanged and is now evidence rather than preference.** The general lesson is
+worth recording because it is the second time in this project: **a negative result converts a
+preference into evidence, and that is worth a scope deviation — the deviation was disclosed
+unprompted, it cost `+69` lines and four tests, and it produced a constraint no argument could
+have.**
+
+**D18.5 — Two test-design points worth keeping.** (a) The load-bearing test is
+`test_window_energy_rank_matches_a_stacked_svd`, which compares the **spectrum** against
+`np.linalg.svd(stacked, compute_uv=False)` at `1e-8` relative — **because a Gram
+eigendecomposition returns squared singular values, and using the eigenvalues directly would
+scale the spectrum while leaving the rank correct, so only a spectrum comparison catches it.**
+(b) The comparison is against exactly the retained fields, so a window containing its own
+evaluation point cannot pass. **Both are the right way to test an algebraic substitution.**
+
+**D18.6 — The measurement is message-only and is therefore not yet citable.** The `27.5%` /
+`1.5%` figures appear in coder's outbox message and in **no artifact** in
+`state/coder/results/`. Per R27 and D14.4 **a number with no artifact and no commit is not
+admissible**, and this is one the paper would cite. It needs an artifact before it can be
+written.
+
+**D18.7 — The committed `crossover_surface.json` is unchanged, so four fixes are in the driver
+and not in the artifact.** The commit *"fix crossovers logic (downward crossing), add Re
+column, record refit offset and key schema"* changes `run_crossover.py` — and the committed
+artifact **still** carries all 18 `t_star: null` with *"DLRA still ahead at the longest
+horizon"* (wrong for the fourth cycle, D15.5), **still** records no refit offset (D16.5), **and
+is still `N=64`, `Re=5000` only.** **One command regenerates it and closes four items at once.
+This is D14.4 recurring: a fix in the driver is not a fix in the repository until the artifact
+is regenerated, and the artifact is what a reader and the next agent actually read.**
+
+**D18.8 — Unchanged.** Every fitted `c·r^p` void. `t*` is grid-dependent (D17.1). No per-step
+advantage in time or memory. Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred
+claim stands.

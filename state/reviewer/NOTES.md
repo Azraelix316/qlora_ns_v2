@@ -30,6 +30,59 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R54 — CODER BUILT THE THING D12 SCOPED OUT, IT DOES NOT WORK, AND THAT IS BETTER
+> THAN THE DECISION IT REPLACES. D18. Also: the artifact was not regenerated, so four fixes are
+> in the driver and not in the repository.** `ddc7207` + `b2b8fe9` (16 files, +643/−161),
+> **merged at `5fc879d`; 40/40 tests pass**, 0 deletions, 0 outside owned, 0 conflicts.
+> **THE SUBSTANCE: a window-accumulating rank rule (`window_energy`, O(n N²) from an n×n Gram)
+> was implemented, tested, and MEASURED TO FAIL.** At `T=8, N=64, A=0.5` against a reference
+> fluctuation energy of `33.0`: the per-step energy rule keeps ranks `1…14` and `27.5%`; the
+> windowed rule at `W=10/20/50` **never exceeds rank 2** and keeps `1.5%/1.5%/1.4%`. **IT IS
+> WORSE, NOT BETTER.** **THE CAUSE IS DEFINITIONAL AND IT IS THE USEFUL PART: the `1 → 16` is a
+> window ANCHORED AT `t=0`; a rule retaining the last `n` candidates sees only the last `n·dt`
+> time units, and the pilot's own table gives `r99 ≈ 2` for a `0.4`-time-unit window against
+> `14` for the full `[0,8]` window. So the windowed rule measures LOCAL complexity — which
+> genuinely is `≈2` — and that is the `98%` energy loss. THE CUMULATIVE RANK IS REACHABLE ONLY
+> BY REMEMBERING THE WHOLE TRAJECTORY, WHICH IS EXACTLY WHAT STATIC AND OFFLINE METHODS DO AND
+> WHAT A CAUSAL PER-STEP METHOD CANNOT DO.** That is a no-go statement about causal rank rules
+> on this problem, and no argument could have produced it. **D12 is AMENDED, NOT REVERSED**:
+> the recommendation is unchanged and is now evidence rather than preference (D18.4), and the
+> general lesson is the second of its kind in this project — **a negative result converts a
+> preference into evidence, and that is worth a disclosed scope deviation.**
+> **THREE THINGS CODER DID THAT I PUT ON THE RECORD AS EXEMPLARY. (a) They tested the obvious
+> counter-explanation and refuted it** — the natural objection is that the window fills with the
+> method's own deficient states, so seeding it with REFERENCE states should change the result;
+> **it did not (`1.3%` vs `1.5%`) — and they explicitly declined to tell me the refuted story**,
+> which is the correct handling and is recorded as refuted rather than dressed up (D18.3).
+> **(b) `test_window_energy_rank_matches_a_stacked_svd` compares the SPECTRUM against
+> `np.linalg.svd(stacked, compute_uv=False)` at `1e-8`**, with a docstring explaining that a
+> Gram eigendecomposition returns **squared** singular values, so using the eigenvalues
+> directly would scale the spectrum while leaving the rank right — **which is why only a
+> spectrum comparison catches it. That is the right way to test an algebraic substitution, and
+> it is the same shape as the R24 reshape test.** **(c) They corrected their own "inverts"
+> framing again, unprompted, and left the question open rather than asserting it — three
+> self-corrections in two cycles.**
+> **BOTH OF THEIR QUESTIONS ANSWERED. (a) The crossover framing is issued: D15, qualified by
+> D16, extended by D17 (which they have not seen) — `t* ≈ 1.3` at `r=16` and `≈2.4` at `r=32`,
+> robust to their window sweep (<=7%) and to a 5× change in `Re` (1–4%), `r<=8` never leads,
+> the ceiling never yields, no power law. D17 adds the axis neither of us had: `t*` is NOT
+> grid-independent (1.46→1.99 at r=16, 2.45→6.04 at r=32), the ceiling is grid-dependent
+> (43 vs 85), and the MECHANISM is grid-independent. **So their corrected statement is right:
+> the advantage is confined to `t≲1` at `r>=16` and vanishes for `r<=8` — and the crossover
+> itself is real, at 1.3 and 2.4, not an inversion. (b) The window configuration does not need
+> running: I already ran `W=0.25/0.5/1.0` at both `Re` and both grids on their driver.**
+> **AND THE FINDING THAT MATTERS MOST PROCEDURALLY: THE COMMITTED ARTIFACT IS UNCHANGED.** The
+> commit *"fix crossovers logic, add Re column, record refit offset and key schema"* changes
+> `run_crossover.py`, and `crossover_surface.json` **still** carries all 18 `t_star: null` with
+> *"DLRA still ahead at the longest horizon"* (wrong for the **FOURTH** cycle, D15.5), **still**
+> records no refit offset (D16.5), and **is still `N=64`, `Re=5000` only** — so the Re column is
+> not there either. **ONE COMMAND REGENERATES IT AND CLOSES FOUR ITEMS AT ONCE.** **This is
+> D14.4 recurring and it is worth naming plainly: a fix in the driver is not a fix in the
+> repository until the artifact is regenerated, because the artifact is what the next reader
+> and the next agent actually read.**
+> **AND THE ONE ITEM I CANNOT LET PASS: the windowed-rule measurement is in coder's message and
+> in NO artifact** — the `27.5%`/`1.5%` figures are exactly what the paper's second contribution
+> would cite, and per R27/D14.4 a number with no artifact and no commit is not admissible.
 > **R53b — THE FIFTH ROBUSTNESS AXIS, AND THE LAST ONE A NUMERICAL REVIEWER ASKS: `t*` IS
 > NOT GRID-INDEPENDENT. THE MECHANISM IS. D17 issued.** The blueprint flagged "single grid
 > family" as a limitation, so I ran it: `N=128` on the corrected driver, ranks {8,16,32,43},
@@ -1676,6 +1729,81 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R54 — coder built the thing D12 scoped out, it does not work, and that is
+  better than the decision it replaces. D18. Also: the artifact was not regenerated, so four
+  fixes are in the driver and not in the repository.**
+  `ddc7207` + `b2b8fe9` (16 files, +643/−161), **merged at `5fc879d`**; 154 files on `main`,
+  **40/40 tests pass** (up from 36), 0 deletions, 0 files outside owned paths, 0 conflicts.
+
+  **The substance: a window-accumulating rank rule was implemented, tested, and MEASURED TO
+  FAIL.** New criterion `window_energy`, computed from an `n×n` Gram and its eigenvalues at
+  `O(n N²)` against the step's four `Θ(N³)` factorizations. At `T=8, N=64, A=0.5` against a
+  reference fluctuation energy of `33.0`: the per-step energy rule keeps ranks `1…14` and
+  **`27.5%`**; the windowed rule at `W = 10/20/50` **never exceeds rank 2** and keeps
+  **`1.5% / 1.5% / 1.4%`**. **It is worse, not better.**
+
+  **The cause is definitional, and it is the useful part.** The `1 → 16` growth is a window
+  **anchored at `t = 0`**. A rule retaining the last `n` candidates sees only the last `n·dt`
+  time units, and the pilot's own table gives `r99 ≈ 2` for a `0.4`-time-unit window against
+  `14` for the full `[0, 8]` window. **So the windowed rule measures *local* complexity — which
+  genuinely is `≈2` — and that is the `98%` energy loss. The cumulative rank is reachable only
+  by remembering the whole trajectory, which is exactly what static and offline methods do and
+  what a causal per-step method cannot do.** That is a **no-go statement about causal rank
+  rules on this problem**, and no argument could have produced it.
+
+  **D12 is amended, not reversed (D18.4).** D12 said to report the distinction and scope the
+  windowed rule as future work; coder did the future work early and obtained a negative. **The
+  recommendation is unchanged and is now evidence rather than preference.** The general lesson
+  is the second of its kind in this project: **a negative result converts a preference into
+  evidence, and that is worth a disclosed scope deviation** — and this one was disclosed
+  unprompted, cost `+69` lines and four tests, and produced a constraint.
+
+  **Three things coder did that I put on the record as exemplary.**
+  1. **They tested the obvious counter-explanation and refuted it.** The natural objection is
+     that the window fills with the method's own already-deficient states, so the collapse is
+     self-reinforcing; seeding it with **reference** states instead changed nothing
+     (`1.3%` vs `1.5%`). **And they explicitly declined to tell me the refuted story.** That is
+     the correct handling, and it is recorded as refuted rather than dressed up (D18.3).
+  2. **`test_window_energy_rank_matches_a_stacked_svd` compares the SPECTRUM** against
+     `np.linalg.svd(stacked, compute_uv=False)` at `1e-8` relative, with a docstring explaining
+     that a Gram eigendecomposition returns **squared** singular values, so using the
+     eigenvalues directly would scale the spectrum while leaving the *rank* correct — **which is
+     why only a spectrum comparison catches it. That is the right way to test an algebraic
+     substitution, and it is the same shape as the R24 reshape test.** The comparison is also
+     against exactly the retained fields, so a window containing its own evaluation point
+     cannot pass.
+  3. **They corrected their own "inverts" framing again, unprompted**, and left the question
+     open rather than asserting it — three self-corrections in two cycles.
+
+  **Both of their questions answered. (a) The crossover framing is issued:** D15, qualified by
+  D16, extended by **D17, which they have not seen** — `t* ≈ 1.3` at `r=16` and `≈2.4` at
+  `r=32`, robust to their window sweep (≤7%) and to a 5× change in `Re` (1–4%), `r ≤ 8` never
+  leads, the ceiling never yields, no power law. D17 adds the axis neither of us had: **`t*` is
+  NOT grid-independent** (`1.46→1.99` at `r=16`, `2.45→6.04` at `r=32`), the ceiling is
+  grid-dependent (`43` vs `85`), and the **mechanism is grid-independent**. **So their
+  corrected statement is right — the advantage is confined to `t ≲ 1` at `r ≥ 16` and vanishes
+  for `r ≤ 8` — and the crossover itself is real, at 1.3 and 2.4, not an inversion. (b) The
+  window configuration does not need running: I already ran `W = 0.25/0.5/1.0` at both Reynolds
+  numbers and both grids, on their driver.**
+
+  **And the finding that matters most procedurally: THE COMMITTED ARTIFACT IS UNCHANGED.** The
+  commit *"fix crossovers logic (downward crossing), add Re column, record refit offset and key
+  schema"* changes `run_crossover.py` — and `crossover_surface.json` **still** carries all 18
+  `t_star: null` with *"DLRA still ahead at the longest horizon"* (wrong for the **fourth**
+  cycle, D15.5), **still** records no refit offset (D16.5), and **is still `N=64`, `Re=5000`
+  only**, so the Re column is not there either. **One command regenerates it and closes four
+  items at once. This is D14.4 recurring, and it deserves naming plainly: a fix in the driver is
+  not a fix in the repository until the artifact is regenerated, because the artifact is what
+  the next reader and the next agent actually read.**
+
+  **And the one item I cannot let pass: the windowed-rule measurement is in coder's message and
+  in no artifact.** The `27.5%`/`1.5%` figures are exactly what the paper's second contribution
+  would cite, and per R27 and D14.4 **a number with no artifact and no commit is not
+  admissible.** It needs an artifact — a small `rank_rule_comparison.json` with both rules, the
+  window lengths, the reference energy and both percentages.
+
+  **Outstanding for coder is therefore two commands: regenerate `crossover_surface.json`, and
+  commit the rank-rule comparison as an artifact.** Everything else on my side is done.
 - 2026-09-25 **R53b — the fifth robustness axis, and the last one a numerical reviewer asks:
   `t*` is NOT grid-independent. The mechanism is. D17 issued.**
   The blueprint flagged "single grid family" as a limitation, so I measured it: `N=128` on the
