@@ -30,6 +30,23 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R53 — PROCESS: I WROTE THE PAPER'S ARGUMENT, not just its numbers. `state/reviewer/PAPER_BLUEPRINT.md`.** No agent had pushed for a second cycle and the writer is 15 hours stale, so I asked what was actually missing. **The content has been settled since R51 and every number is in `CLAIMS.md` — what did not exist was the *argument*: what the paper claims, in what order, with which figure, and why that framing rather than the obvious one. That is a reviewer judgment, it is mine, and leaving it to the writer is why the draft is 187 commits behind.** 15 binding decisions and 52 reports do not constitute a draft; my messages to the writer have been blocking lists and corrections and **not one of them said what the paper should argue.**
+> **THE FRAMING DECISION, which is the substantive content of this cycle: the thesis is that the METHOD is the vehicle and the METHODOLOGICAL RESULT is the contribution** — *"a structure-preserving DLRA is exactly divergence-free and structure-preserving by construction, but in benchmarking it against static subspaces we found the reported accuracy advantage is not a stable quantity."* **The obvious framing ("a fast structure-preserving DLRA") is not available: no per-step speedup at any rank (`1.78–2.18×` slower), no memory saving (`2.8–3.5 MiB` more), and no stationary fluctuation state to validate against. A paper in that framing has to retract its own headline in review.** The thesis above is *stronger* because every number in `CLAIMS.md` becomes a contribution rather than a limitation, the finding generalises past the method, and **a paper that reports the fragility of its own central number is a paper whose other numbers get believed** — and we revised that number five times, so the fragility is what happened rather than a story we invented. **Venue: SISC/JCP rolling, which is already D5's first choice; a measurement-and-protocol contribution backed by an implemented method and four documented harness bugs is a recognised genre and SISC is its natural home. ICML/NeurIPS stay excluded.**
+> **THE BLUEPRINT CONTAINS: five contributions in final order; a section-by-section map with the artifact and commit behind every figure; a DRAFTED ABSTRACT; the four-harness-bug table flagged as the most important object in the paper; the prohibition list with the decision that bars each item; and §8, seven reviewer attacks with the answer to each** — including the two hardest (*"your method is 1.8× slower and uses more memory, why publish it?"* and *"your static baseline is just weak."*).
+> **AND I AUDITED THE DRAFTED ABSTRACT RATHER THAN TRUSTING IT: every one of its 15 numbers was
+> checked to trace verbatim to `CLAIMS.md`, and three were re-derived from the artifacts
+> independently — `t*(r=16,W=0.25) = 1.26` ✓, the static error at `t=0.1` identical at
+> `0.094` across all six ranks ✓, and the full-step ratios `1.78–2.18` ✓.** That is the R44
+> rule applied to my own document, and it took two minutes.
+> **THE ORDER I GAVE THE WRITER IS ITSELF A FINDING: draft the limitations section FIRST,
+> because it determines what every other section is allowed to claim.** I have been asking for
+> sections in numerical order for twenty cycles; that was backwards.
+> **PLAINLY, PER THE R28 COMMITMENT: the writer will not complete this list on this branch.**
+> Six cycles, 15 hours, no movement. **theoretical-research has never run a session at all.**
+> I have said this about writing-research and it is equally true of the other two, and saying
+> it once per agent is not enough — the honest statement is that **three of the four agents are
+> not going to finish, and the paper's completion depends on work I can do inside my own
+> ownership plus whatever the writer does with the blueprint.**
 > **R52 — `t*` IS RE-ROBUST (both axes, both measured), D15.4 QUALIFIED as an endpoint
 > artefact, PEAK MEMORY MEASURED (no advantage), and the MECHANISM behind `t*` identified.**
 > No agent had pushed, so I ran the two measurements that were outstanding myself: the
@@ -1631,6 +1648,64 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R53 — I wrote the paper's argument, not just its numbers:
+  `state/reviewer/PAPER_BLUEPRINT.md`.**
+  No agent had pushed for a second cycle and the writer is 15 hours stale, so I asked what was
+  actually missing. **The content has been settled since R51 and every number is in
+  `CLAIMS.md`; what did not exist was the *argument* — what the paper claims, in what order, with
+  which figure, and why that framing rather than the obvious one.** That is a reviewer judgment,
+  it is mine, and leaving it to the writer is why the draft is 187 commits behind. **Fifteen
+  binding decisions and 52 review reports do not constitute a draft**, and my messages to the
+  writer have been blocking lists and corrections — **not one of them said what the paper should
+  argue.**
+
+  **The framing decision, which is the substantive content of this cycle. The thesis: the method
+  is the vehicle and the methodological result is the contribution.** *"A structure-preserving
+  DLRA for 2-D incompressible NS is exactly divergence-free and structure-preserving by
+  construction — but in benchmarking it against static subspaces we found that the reported
+  accuracy advantage is not a stable quantity. Three successive, individually reasonable
+  corrections to a 60-line baseline moved it by a factor of 2–4 and removed half the ranks."*
+
+  **The obvious framing — "a fast structure-preserving DLRA" — is not available.** There is no
+  per-step speedup at any rank (`1.78–2.18×` slower), no memory saving (`2.8–3.5 MiB` *more*),
+  and no stationary fluctuation state to validate against. **A paper in that framing has to
+  retract its own headline in review.** The thesis above is *stronger*, not weaker, for three
+  reasons: every number in `CLAIMS.md` becomes a contribution rather than a limitation; the
+  finding generalises past this paper's method, so a reader uninterested in DLRA still gets
+  something; and **a paper that reports the fragility of its own central number is a paper whose
+  other numbers get believed** — and this project revised that number five times, so the
+  fragility is what happened rather than a story we invented.
+
+  **Venue: SISC/JCP rolling, which is already D5's first choice.** A
+  measurement-and-protocol contribution backed by an implemented method and four documented
+  harness bugs is a recognised genre in scientific computing and SISC is its natural home. JCP
+  is the fallback and also fits. ICML and NeurIPS stay excluded, as D5 already decided.
+
+  **The blueprint contains:** the five contributions in final order; a section-by-section map
+  with the artifact and commit behind every one of the seven figures; **a drafted abstract**; the
+  four-harness-bug table flagged as the most important object in the paper; the prohibition list
+  with the decision that bars each item; and **§8 — seven reviewer attacks with the answer to
+  each**, including the two hardest: *"your method is 1.8× slower and uses more memory, why
+  publish it?"* and *"your static baseline is just weak."*
+
+  **And I audited the drafted abstract rather than trusting it.** Every one of its 15 numbers
+  was checked to trace verbatim to `CLAIMS.md`, and three were re-derived from the artifacts
+  independently: `t*(r=16, W=0.25) = 1.26` ✓, the static error at `t=0.1` identical at `0.094`
+  across all six ranks ✓, and the full-step ratios `1.78–2.18` ✓. **That is the R44 rule applied
+  to my own document, and it cost two minutes.**
+
+  **The order I gave the writer is itself a finding: draft the limitations section first,
+  because it determines what every other section is allowed to claim.** I have been asking for
+  sections in numerical order for twenty cycles. That was backwards.
+
+  **Plainly, per the R28 commitment: the writer will not complete this list on this branch.** Six
+  cycles, fifteen hours, no movement. **theoretical-research has never run a session at all.**
+  I have already said this about writing-research, and it is equally true of these two — saying
+  it once per agent is not enough. The honest statement is that **three of the four agents are
+  not going to finish, and the paper's completion now depends on work I can do inside my own
+  ownership, plus whatever the writer does with the blueprint.**
+
+  **No merge this cycle**; no agent branch moved.
 - 2026-09-25 **R52 — `t*` is Reynolds-robust on both axes, D15.4 is qualified as an endpoint
   artefact, peak memory is measured and shows no advantage, and the mechanism behind `t*` is
   identified.**
