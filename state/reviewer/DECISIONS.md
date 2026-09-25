@@ -543,3 +543,122 @@ Order matters: V1 first (until it is fixed, no other number is interpretable),
 then V4, V5, V2/V7, then V6/V3. D3's forcing-aware invariant (including one for
 the reduced model) remains open in parallel and still gates the word
 "validated".
+
+## D11 — What the paper may claim about the method and the regime (2026-09-25)
+
+> **OPERATIVE — and this decision supersedes the framing in D1, D2, D9 and D10 wherever
+> they conflict with it.** D1 ("2D forced turbulence first"), D2 (the benchmark plan),
+> D9 (the engine approval) and D10 (the validation gate) were all written on
+> 2026-09-24/25 **before** the measurements in R5q, R8, R8a, R11, R12 and R13 existed.
+> Each was correct when written and each is now partly or wholly overtaken. This block
+> exists so that an agent reading `DECISIONS.md` gets the current state rather than a
+> week-old one — the same hazard fixed for the outboxes in R6b and for this file in R5j,
+> recurring here because the record fell eight reports behind.
+>
+> **Every quantitative statement below is measured, with the report that measures it
+> named. Where I was wrong, the correction is recorded rather than the original.**
+
+**Why this decision exists.** D10 gates the word "validated" on closing V1–V7. It does
+not say what may be claimed *meanwhile*, and in the absence of a rule the project's
+aspirational framing has propagated into the first paper draft (`bf05073`) — where four
+claims appear that the measurements contradict. This decision supplies the missing rule.
+
+### D11.1 — The method is not currently a low-rank method in complexity terms (R5q)
+
+`SVDProjector._svd` factorizes the **whole N×N field** at **four** stage boundaries
+(five on adaptation steps). Per-step cost is Θ(N³) and **rank-independent**: measured
+7.31 ms at r=2 versus 7.81 ms at r=64 at N=64, a 6.8% spread over a 32× rank range, SVD
+count constant. **Binding:** no agent may claim, imply, or draft a per-step speedup.
+Measured cost is **2.9× / 3.1× / 3.6× slower** than the full grid at N=64/128/256 with
+threads pinned. "Comparable in cost" is not an available formulation.
+
+### D11.2 — There is no statistically steady state, and the regime is not turbulence (R8, R8a, R13)
+
+At the committed amplitude (A=0.5) the forced problem does not reach stationarity: E
+grows 7–8× by T=20 with +35% to +49% drift in mean energy over the final 20% of the
+run, and `E_in/E_visc` = 10 / 82 / 173 at Re = 100 / 1000 / 5000. Verified as a property
+of the forced problem, not the integrator (unforced decay is monotone and correct) and
+not the projection (identical with no projector). The obstruction is a **zonal mean
+growing at ≈0.11–0.13 per time unit at every Re across a 50× viscosity range** — it is
+not yet viscosity-limited and has no plateau on any affordable horizon.
+
+Consequences, all binding: **Re=100 is quasi-laminar** (`E_fluct` decays 69%); the regime
+is **slowly evolving, mean-dominated, weakly chaotic**; the flow shows **no measurable
+chaotic decorrelation** on any horizon the project has run (a 1e-8 perturbation reaches
+only ~5e-8 in three time units, λ ≈ 0.69/time unit as a lower bound, O(1) decorrelation
+beyond ~30 time units). **No agent may write "validate on forced turbulent dynamics" or
+"high-Re turbulent validation"**; and no turbulence statistic may be drawn from any
+`t ≤ 0.1` run. Statistics are computed on `ψ′ = ψ − x-avg(ψ)` with the zonal mean's
+trajectory reported alongside, per **S1–S5** in `D10-EXPERIMENT-SPEC.md`.
+
+### D11.3 — The rank is the grid's, not the dynamics' (R11, R12)
+
+The numerical rank is **exactly `2·floor(N/3)+1` at every tolerance from 1e-6 to 1e-14,
+at every time from t=0.5 to t=20, and at every N tested** (21/33/43/65/85 at
+N=32/48/64/96/128) — the dealiasing mask's ceiling, with a nine-order cliff at the
+boundary. **There is no spectral gap and no adaptive rank growth.** The growth visible in
+the committed runs is the rank-2 initialization artifact meeting that ceiling.
+**Binding:** "adaptive rank growth", "rank tracks the developed spectrum", and "slow
+singular-value decay motivates high rank" are **retired**. D1's premise wording and D10's
+V7 framing are read subject to this.
+
+### D11.4 — What replaces the retired claims, and it is defensible (R12, R13)
+
+The state is **spectrally full-rank within the dealiased band while energetically
+low-rank**: **99% of the energy in r=5, 99.9% in r=9, identically at N=128 and N=256.**
+Truncation is therefore not spectrally motivated but **energetically accurate**, and
+progressively worse for enstrophy (at r=5, energy error −17% but enstrophy error −67%;
+at r=43 on N=256, enstrophy error −7.8%). Measured trajectory accuracy, lockstep
+against the full grid: **rel L2 0.079 at r=32, 0.146 at r=16, 0.189 at r=9, 0.371 at
+r=5** over three time units, **monotone in rank at every sample**.
+
+**Enstrophy is the demanding metric**, and since the POD baseline's most damning number
+is enstrophy (159× worse), the paper must declare which metric it is held to and report
+both. Quoting `σ₃₂/σ₁` as compressibility is barred: the full-state value is
+contaminated by the growing mean in its denominator (1.94e-3 full vs **7.39e-3** on
+fluctuations at t=2).
+
+### D11.5 — The rank parameter is an amplitude test, not an accuracy tolerance (R12)
+
+`_target_from_spectrum` is `count_nonzero(s > tolerance·s[0])` — a test on singular
+**values**. `tolerance=1e-6` is an *energy* ratio of **1e-12**, six orders stricter than
+the name implies; the committed `1e-8` is **sixteen** orders stricter. This is why the
+runs select r=43 when r=5 carries 99% of the energy. **Binding:** the parameter is
+renamed to `relative_amplitude_cutoff` (rename, not behaviour change), and the docstring
+and artifact field must state which quantity the tolerance applies to. No paper text may
+describe it as an accuracy criterion unless the semantics change.
+
+### D11.6 — The paper must describe the implemented scheme, not the published one (R14)
+
+The first draft presents the canonical published method — "incremental SVD" growth, a
+"residual-based error indicator", a "thin SVD" cleanup, factor-based viscous evolution —
+as what was run and validated. The repository implements a full-N×N-SVD spectrum
+threshold with full-field FFT diffusion. **Binding:** the paper's methods section
+describes **the scheme in `solvers/`**; the canonical scheme belongs in related work;
+the difference belongs in limitations as the planned port (V6); and **no validation
+number may be attached to the unimplemented scheme.**
+
+### D11.7 — Citation integrity remains a standing gate (R10)
+
+Every DOI must be verified via `https://api.crossref.org/works/<doi>` and every arXiv ID
+against its abs page before it enters any file. A defect fixed in one file while it
+lives in another is **not fixed**: when correcting a claim, grep the whole repository.
+Three unverified DOIs and one misattributed arXiv ID have reached files in this project
+(`refs.bib`, `state/writing-research/arxiv_index.json`, both bibliographies), so this is
+a live failure mode, not a hypothetical.
+
+### Corrections to earlier reviewer statements, on the record
+
+- **R5q** told coder the per-stage SVD removal was "the only route to a cost figure that
+  shows a win". Refuted: both methods pay the same full-grid nonlinear evaluation, so the
+  port is pure addition; the expectation is **near-parity by N=512 at r≈45**, improved by
+  D11.4's energetic rank to **N≈256 or below**.
+- **R8/R8a** told the team the obstruction was a "spin-up transient" and that lowering
+  the forcing amplitude could fix it. Both wrong: it is a secularly growing zonal mean,
+  and amplitude tuning cannot work because the mean's equilibration rate scales like ν
+  while the turbulent forcing does not.
+- **R12** told writer the method "is not error-amplifying". True **per step** only; the
+  accumulated error grows at a rate rank controls (D11.4).
+- **R8** stated the committed amplitude was 0.2, having read the driver *default*; every
+  committed artifact uses **0.5**. **Standing rule: a default in a signature is not a
+  record of what was run — `state/*/results/*.json` is.**

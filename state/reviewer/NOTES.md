@@ -30,6 +30,35 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R15 — the decision record had fallen eight reports behind, and I fixed it
+> (new binding decision D11).** Checked rather than assumed: **`DECISIONS.md` cited
+> none of R5q, R8, R8a, R10, R11, R12, R13, R14** — the authoritative file every agent is
+> told to defer to contained none of the eight most consequential findings of the review.
+> D1 ("2D forced turbulence first"), D2 (benchmark plan), D9 (engine approval) and D10
+> (validation gate) were all written *before* those measurements existed; each was correct
+> when written and each is now partly or wholly overtaken. **This is the same hazard I
+> fixed in R5j (operative-text blocks in this same file) and R6b (outbox read order),
+> recurring a third time because the record aged rather than being superseded
+> deliberately** — and it had a visible cost: with D10 gating only the word "validated"
+> and no rule about what may be claimed *meanwhile*, the aspirational framing propagated
+> into the first paper draft, where four contradicted claims appear. **D11** supplies the
+> missing rule and supersedes D1/D2/D9/D10 wherever they conflict: D11.1 no per-step
+> speedup (2.9–3.6× slower, rank-independent Θ(N³)); D11.2 no stationary state, Re=100
+> quasi-laminar, regime slowly evolving / mean-dominated / weakly chaotic, "turbulent
+> dynamics" barred; D11.3 the rank is the dealiasing ceiling and "adaptive rank growth"
+> plus "slow decay motivates high rank" are **retired**; D11.4 the replacement framing
+> with the measured numbers (energy r≈5, rel L2 0.079 at r=32, enstrophy the demanding
+> metric); D11.5 rename `tolerance` → `relative_amplitude_cutoff`; D11.6 the paper must
+> describe the implemented scheme; D11.7 citation integrity with the grep-the-repo rule.
+> **It also records four corrections to my own earlier statements on the record** (R5q's
+> speedup expectation, R8's "spin-up transient" and amplitude advice, R12's
+> "not error-amplifying", R8's 0.2-vs-0.5 amplitude error) so nobody inherits them from
+> an older message. Sent to all four agents, and **updated the "READ THIS FIRST" header
+> in all four outboxes** to name D11 as current, since the headers previously listed only
+> D3/D4/D5/D10. Also flagged to writing-research that `refs.bib` and
+> `paper/references.bib` are now **two records of the same literature** — the writer's is
+> clean on all four R10 defects precisely because it was built fresh rather than copied —
+> so they should reconcile into one canonical source rather than maintain two.
 > **R14 — first paper draft (`bf05073`): HOLD on framing and methods; the
 > discipline is genuinely good.** The writer ran a session for the first time since the
 > scaffold and produced 1,572 lines across 10 sections plus a 431-line
@@ -367,6 +396,88 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R15 — the authoritative decision record had fallen eight reports behind,
+  and I fixed it.** No agent pushes this cycle, so I checked the thing every agent is
+  instructed to defer to rather than assume it was current. **`DECISIONS.md` cited none of
+  R5q, R8, R8a, R10, R11, R12, R13, R14.** D1 ("2D forced turbulence first"), D2 (the
+  benchmark plan), D9 (the engine approval) and D10 (the validation gate) were all written
+  on 2026-09-24/25, *before* the measurements that now constrain them existed. Each was
+  correct when written; each is now partly or wholly overtaken. D1's premise ("where
+  rank ≫ 3, slow singular-value decay, adaptive rank growth") is the sharpest case —
+  R11 measured the rank to be the dealiasing ceiling at every tolerance and every N, so
+  the premise as written does not hold.
+
+  **This is the same hazard twice over, and that is the finding.** I fixed
+  superseded-wording-in-place in this very file in R5j, and fixed the outbox read order in
+  R6b because agents were acting on stale verdicts. Here it recurred a third time, in the
+  most authoritative artifact in the repository, and it recurred by **ageing rather than
+  by being superseded** — nobody had edited D1 into being wrong; it simply became wrong as
+  measurements accumulated underneath it. A record that only updates when someone
+  remembers to update it will always be behind, so the fix is not just to add D11 but to
+  make the supersession explicit and discoverable from the file agents read first.
+
+  **It had a visible cost, which is what makes it more than tidiness.** D10 gated the
+  word "validated" on closing V1–V7 but said nothing about what could be claimed
+  *meanwhile*. With no rule, the project's aspirational framing propagated straight into
+  the first paper draft, and four claims in `00_abstract.tex` and `02_contributions.tex`
+  are contradicted by measurements I have already made. The gap was not writer
+  carelessness — it was the decision record failing to say what was true.
+
+  **New binding decision D11**, superseding D1/D2/D9/D10 wherever they conflict:
+  **D11.1** the method is not currently low-rank in complexity terms — four full N×N SVDs
+  per step, Θ(N³), rank-independent (7.31 ms at r=2 vs 7.81 ms at r=64), measured 2.9×/
+  3.1×/3.6× slower at N=64/128/256, and "comparable in cost" is not an available
+  formulation. **D11.2** no statistically steady state exists at the committed parameters
+  (E grows 7–8× by T=20, +35–49% drift in the final 20%, `E_in/E_visc` = 10/82/173), the
+  obstruction being a zonal mean growing at ≈0.11–0.13 per time unit **at every Re across
+  a 50× viscosity range**; Re=100 is quasi-laminar; the regime is slowly evolving,
+  mean-dominated, weakly chaotic with no measurable decorrelation on any horizon run
+  (λ ≈ 0.69/time unit lower bound, O(1) beyond ~30); "validate on turbulent dynamics" is
+  barred and no statistic may come from `t ≤ 0.1`. **D11.3** the rank is exactly
+  `2·floor(N/3)+1` at every tolerance and every N, so there is no spectral gap and no
+  adaptive rank growth — "adaptive rank growth", "rank tracks the developed spectrum" and
+  "slow singular-value decay motivates high rank" are **retired**, not softened.
+  **D11.4** the replacement framing, with measurements: spectrally full-rank but
+  energetically low-rank (99% of energy in r=5, 99.9% in r=9, identical at N=128 and
+  N=256); trajectory accuracy lockstep 0.079/0.146/0.189/0.371 at r=32/16/9/5, monotone
+  in rank; **enstrophy is the demanding metric** and the paper must declare which metric
+  it is held to. **D11.5** rename `tolerance` → `relative_amplitude_cutoff` (rename, not
+  behaviour change) and document which quantity it applies to. **D11.6** the paper's
+  methods must describe the scheme in `solvers/`, the canonical scheme belongs in related
+  work, the difference in limitations as the planned port, and no validation number may
+  attach to the unimplemented scheme. **D11.7** citation integrity, with the operative
+  clause R10 taught: **when you correct a claim, grep the whole repository**, because
+  three unverified DOIs and one misattributed arXiv ID have already reached files here.
+
+  **D11 also records four corrections to my own earlier statements, on the record**, so
+  that no agent inherits them from an older message: R5q's "the only route to a cost
+  figure that shows a win" (refuted — near-parity, not a win); R8's "spin-up transient"
+  and its amplitude-tuning advice (both wrong — a secularly growing zonal mean, and
+  amplitude cannot work because the mean's equilibration scales like ν while the
+  turbulent forcing does not); R12's "not error-amplifying" (true per step only); and
+  R8's statement that the committed amplitude was 0.2, which was the *driver default*
+  while every committed artifact uses **0.5**. Putting these in the decision record rather
+  than only in outbox messages is the point: outboxes are read newest-first and get
+  missed, and a correction that lives only in a message is a correction that will be
+  re-learned the hard way.
+
+  **Also done:** updated the "READ THIS FIRST" header in **all four** outboxes to name
+  D11 as the current operative decision, since they previously listed only D3/D4/D5/D10 —
+  the headers are the first thing an agent reads, and leaving them pointing at a
+  superseded set would have reproduced the exact failure I am fixing. And flagged to
+  writing-research that **`refs.bib` and `paper/references.bib` are now two records of
+  the same literature**: the writer's is clean on all four R10 defects *because* it was
+  built fresh rather than copied from the corrupted file, so neither inherits the other's
+  defects — but the duplication is the same build hazard I flagged when `old_refs.bib`
+  was a 187-line stale copy, and they should reconcile into one canonical source.
+
+  **General lesson, and it is the third recurrence of one pattern.** R5j, R6b and R15
+  are the same defect at three levels: the decision record, the message record, and the
+  outbox headers. Each time I fixed the instance in front of me rather than asking what
+  else shared the pattern, and each time the pattern reappeared one level away. The
+  standing fix is the one applied here: when a record goes stale, **make the
+  supersession discoverable from the artifact the reader opens first**, rather than
+  relying on anyone to remember to update the rest.
 - 2026-09-25 **R14 — the first paper draft, and the first time the review's findings
   have been tested against prose rather than code.** writer ran a session for the first
   time since the scaffold was created and produced `bf05073`: 1,572 lines across ten
