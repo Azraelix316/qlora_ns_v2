@@ -24,123 +24,77 @@ recorded here and the earlier figure is struck, not quietly dropped.
 
 ## 1. The paper's central result
 
-> ### The settled claim — write this
+> ### The settled claim — write this, and nothing fitted
 >
-> > A rank-`r` reduced integrator at **fixed** rank leads a static subspace refit on a
-> > **strictly causal trailing window** for **`t* ≈ 0.11·r^0.95`** time units — essentially
-> > **linear in rank** — and the only rank that never yields is the **dealiasing ceiling**,
-> > where the method *is* the full-grid solver. The result is **invariant to the baseline's
-> > window length** (≤1% over `W ∈ {0.5, 1, 2}`) and **nearly invariant to Reynolds number**
-> > (3–8% over `Re ∈ {1000, 5000}`).
+> > Against a **strictly out-of-sample** static subspace — a trailing window refit every `0.25`
+> > with the refit schedule **offset by half an interval, so no basis ever contains the time it
+> > is scored at** — a fixed-rank reduced integrator **leads for `t* ≈ 1.3` at `r = 16` and
+> > `≈ 2.4` at `r = 32`**, **robust to a 4× change in the baseline's window length**;
+> > **it does not lead at all at `r ≤ 8`**; and **only the dealiasing ceiling leads at every
+> > horizon**, because at that rank the method *is* the full-grid solver.
+> > **Do not fit a power law** — two resolved ranks cannot support one.
 
 | rank | 2 | 4 | 8 | 16 | 32 | 43 |
 |---|---|---|---|---|---|---|
-| `t*` at `Re=5000` | *unresolved* | *unresolved* | **0.75** | **1.83** | **2.81** | **never (exact)** |
-| `t*` at `Re=1000` | *unresolved* | *unresolved* | **0.72** | **1.86** | **3.03** | **never (exact)** |
+| `t*`, `W=0.25` | *never leads* | *never leads* | *never leads* | **1.26** | **2.44** | **never (exact)** |
+| `t*`, `W=0.5` | *never leads* | *never leads* | *never leads* | **1.26** | **2.42** | **never (exact)** |
+| `t*`, `W=1.0` | *never leads* | *never leads* | *never leads* | **1.46** | **2.45** | **never (exact)** |
 
-Fit over `r = 8…32` (where `t*` is resolved): **`0.1124·r^0.951`** at `Re=5000`,
-**`0.0915·r^1.031`** at `Re=1000`. `N=64`, `A=0.2`, full-field relative L2, static baseline
-refit every `0.25` on `[t−W, t]` excluding `t`. Source: R50, **D14.1**.
+`N=64`, `Re=5000`, `A=0.2`, full-field relative L2. Source: `crossover_surface.json` @
+`6571c46`, R51, **D15.1**. `r ≤ 8`'s `0.25` is the first measurable interval, so "never leads"
+means *no resolvable lead*, not a measured zero.
 
-**The robustness check that makes it a law rather than a fit** (R50, **D14.2**):
+**What survives unchanged, and is the paper's spine** (R51, **D15.4**): **the static error is
+flat in rank** — at `t=8, W=0.25`, `r=2` gives `0.101` and `r=43` gives `0.099`, a **43-fold
+rank range buying 2%** — while the reduced integrator's falls from `0.599` to `1.6e-8`.
+**A static subspace has a rank-independent floor that no rank removes.** This is R37's result,
+it is baseline-robust, and **it should be the central claim rather than any value of `t*`.**
 
-| baseline window `W` | `t*` at r=8 | r=16 | r=32 |
+### 1.1 The sensitivity is itself the result, and it is the most publishable finding here
+
+**Three successive, individually reasonable corrections to a 60-line baseline moved `t*` by a
+factor of 2–4 and eliminated three of six ranks** (R51, **D15.3**):
+
+| baseline as implemented | `t*` at r=16 | at r=32 | ranks resolved |
 |---|---|---|---|
-| 0.5 | 0.75 | 1.83 | 2.81 |
-| 1.0 | 0.75 | 1.83 | 2.81 |
-| 2.0 | 0.75 | **1.84** | 2.81 |
+| window refit once per evaluation (R39) | 1.15 | 2.42 | 5 of 6 |
+| refit every `0.25`, trailing window **includes `t`** (R50) | 1.83 | 2.81 | 5 of 6 |
+| **refit every `0.25`, schedule offset, out-of-sample** | **1.26–1.46** | **2.42–2.45** | **2 of 6** |
 
-**A 4× change in the baseline's window moves `t*` by ≤1%.** A 5× change in `Re` moves it by
-3–8%. **R39 never had either check.**
+> **The advantage of a reduced integrator over a static subspace is not a stable quantity: it
+> is a function of how well the baseline is implemented. Any published crossover horizon for
+> this class of method should be reported with the baseline's window length, refit interval,
+> offset, and an explicit check that no basis contains its evaluation time.**
 
-**`t*` at `r = 2, 4` is UNRESOLVED** — `0.25` is the first measurable interval, so the lowest
-ranks have **no measurable lead**. The fit correctly excludes them. Do not quote them.
+**Why this is worth more than any value of `t*`.** It is invariant to all three of the things
+that moved it; it generalises past this paper's method; and it **undercuts the paper's own
+headline**, which is why a reviewer will trust it. It also completes R37's mechanism: the
+static baseline's power is a property of *stale subspaces*, and how stale depends on refit
+cadence — an implementation choice, not a property of the method.
 
-**Why the law is clean, and the mechanism is unchanged from R39:** the static baseline's error
-is nearly rank-independent — at `t = 0.1` it spans `0.3176–0.3178` across a **43-fold** rank
-range — while the reduced integrator's error falls with rank. The two therefore cross, and
-where is set by rank alone. The advantage itself is the **stale subspace**, not the mean
-(§1.3).
+### 1.1a Every fitted form is void — and why, which is the useful part
 
-### 1.1a Superseded claims — all three are wrong, and one of them is mine twice over
-
-| was | cycle | why it is wrong |
+| was | cycle | why void |
 |---|---|---|
-| `t* ≈ 0.0509·r^1.115` | R39 | **prefactor 2.2× too small, exponent too steep.** Direction and the ceiling result were right. |
-| "the curves cross repeatedly, so `t*` is not well defined" | R48 | **over-correction.** True of the *buggy* committed artifact; on the fixed driver the excursion is a single ≤17% blip at `t=6` and the crossing is essentially unique. |
-| "`r ≥ 32` wins at every horizon; `r ≤ 8` does not pay" | D13 | **flatly wrong, from the same buggy artifact.** On the fixed driver `r=32` yields at `t = 3, 4, 6, 8`, and `r=8` leads until `t ≈ 0.75`. **D13 is superseded by D14 — do not write it.** |
+| `t* ≈ 0.0509·r^1.115` | R39 | weak baseline; later found in-sample and starvation-affected |
+| "the curves cross repeatedly, so `t*` is undefined" | R48 | over-correction; an artefact of the starvation bug |
+| "`r ≥ 32` wins at every horizon; `r ≤ 8` does not pay" | D13 | from the starvation-affected artifact |
+| `t* ≈ 0.1124·r^0.951`, "invariant to window and Re" | R50/D14 | measured on `bc35666`, whose baseline window **ends at the evaluation time** — in-sample at 7 of 9 horizons |
+| **any `c·r^p` at all** | **R51/D15** | **only two ranks have a resolvable crossover. Two points do not make a power law.** |
 
-**The cause, and it is the standing rule now: an artifact must be checked against the code
-that produced it.** `crossover_surface.json`'s `provenance.git_commit` is `5853ba9`, and the
-driver changed in `bc35666` to fix a bug where *"skipping the refit leaves the baseline stuck
-on whatever basis it started with, which silently turns a rank-`r` baseline into a rank-1
-one."* At `W=1.0` the window holds **12 snapshots at the `t=0.25` refit and 24 at `t=0.50`**,
-so ranks 16/32/43 were starved **at exactly the short horizons where the lead is largest**.
-**I printed that provenance field in R48 and did not act on it** (**D14.3–D14.4**).
+**The standing rule, now applied to my own work** (**D15.6**): an artifact is not verified
+until it has been checked against the code that produced it, **and that applies to reviewer
+measurements on a shared driver too.** R50's numbers were taken on a driver whose baseline I
+had not audited, one cycle after I wrote the rule. The four baseline bugs coder found are
+recorded in their driver: off-by-one sample; the initial basis fitted on the future; a window
+holding fewer snapshots than the rank silently skipping the refit; and **a refit at exactly an
+evaluation time being in-sample**.
 
-**Do not use `crossover_surface.json` as committed** — it was produced by the pre-fix driver.
-And **do not use its `crossovers` block** (R48): it reports `t_star: null` and *"DLRA still
-ahead at the longest horizon"* for all six ranks, where the fixed driver gives three resolved
-values and two unresolved. The driver's output keys also changed between the commits, so the
-committed artifact is **not reproducible by the committed driver without a key mapping**.
-
-### 1.2 The oscillation — real in the buggy artifact, largely an artefact of it
-
-`static ÷ DLRA` by horizon, oracle-mean column. **> 1 means the DLRA is better.**
-
-| `t` | r=2 | r=4 | r=8 | r=16 | r=32 |
-|---|---|---|---|---|---|
-| 0.25 | 0.57 | 0.80 | 1.42 | **15.94** | **911.33** |
-| 0.50 | 1.10 | 1.23 | 1.99 | 8.97 | 194.51 |
-| 1.00 | 1.31 | 1.36 | 1.84 | 5.57 | 48.77 |
-| 2.00 | 1.14 | 1.11 | 1.21 | 2.37 | 9.70 |
-| 3.00 | 0.95 | 0.88 | **0.91** | 1.10 | 2.11 |
-| 4.00 | 0.96 | 0.87 | **0.83** | **0.91** | 1.15 |
-| 6.00 | 1.30 | 1.18 | 1.09 | 1.31 | 1.45 |
-| 8.00 | 1.19 | 1.14 | 1.04 | **0.82** | 1.05 |
-
-**This is the `r=8` row of the artifact generated at `5853ba9`, i.e. BEFORE the starvation
-fix.** On the fixed driver the same row reads `1.46, 1.24, 0.86, 0.46, 0.37, 0.35, 0.41,
-0.23` — a single crossing near `t ≈ 0.75` and one ≤17% blip at `t=6`. **So the dramatic
-re-crossing was largely the bug, and `t*` is well defined after all.** The table is kept
-because it is the evidence for that conclusion, not because the crossings are real.
-
-**The superseded numbers**, kept for the record: `t* = 0.11 / 0.24 / 0.49 / 1.15 / 2.42` at
-`Re = 5000` and `0.11 / 0.25 / 0.51 / 1.33 / 3.11` at `Re = 1000`, fitted
-`0.0509·r^1.115` and `0.0435·r^1.226`. These were measured correctly — the estimator is
-pinned as code and reproduces them exactly — **against a baseline refit only once per
-evaluation point, which is what made the curves monotone and the fit look like a law.** R45's
-Re-dependence result is **moot with them**: the statistic is not well defined against a strong
-baseline. Sources: R39, R45, R48.
-
-**Do not use `crossover_surface.json`'s `crossovers` block.** It reports `t_star: null` and
-the reason *"DLRA still ahead at the longest horizon"* for all six ranks, and **for
-`r = 2, 4, 16` that reason is false** — their own surface gives `0.999`, `0.921`, `0.820` at
-`t = 8`. The logic tests only the final horizon, so it cannot see a crossing that reverses.
-Take the numbers from the `dlra` and `static_moving_window` rows.
-
-**`t*` at `r=2` is not resolved.** `0.11` sits within 10% of the first measured horizon
-`t=0.1` at both Reynolds numbers, so the lowest rank has no *measurable* horizon. The fit is
-over `r=4…32` and correctly excludes it. **Do not quote `t*` at `r=2` as if it were resolved.**
-
-**`Re=1000` is the reviewer's second measurement, not the project's.** Coder reproducing R39
-must reproduce **both** columns, and `run_crossover.py` must take `Re` as a parameter rather
-than being pinned to 5000 — otherwise the reproduction can only check half the result.
-
-### 1.2 Why the law is clean
-
-> A static subspace has a **rank-independent error floor of ≈0.30** that no rank removes; a
-> reduced integrator's error falls with rank because it refits to the current state each
-> step. The two curves therefore cross, and where is set by rank alone.
-
-Evidence: at `t=8` a **21× rank range buys 6.9%** (`0.4376` at `r=8` vs `0.4268` at `r=43`);
-at `t=0.1` it buys **0.10%**. The static failure is a **stale subspace**: the error spectrum
-is enriched over the field's own mass by `0.86 / 4.6 / 11.1 / 20.6 / 110.6` at
-`|k| = 0–2 / 2–4 / 4–6 / 8–12 / 17+`. Source: R37, R39.
-
-**NOT the mean.** Giving the static method the current zonal mean improves it by
-`0.002–0.027` against a `0.22–0.43` error; the mean drift is only `0.038–0.116`. The
-mean-tracking explanation was **retracted (R37)** and must not reappear.
+**Do not use `crossover_surface.json`'s `crossovers` block** — wrong for the third cycle
+(R48, R50, R51). All 18 entries report `t_star: null` and *"DLRA still ahead at the longest
+horizon"*, which is **false at `r=16` and `r=32` for every window**. Read the `dlra` and
+`static_moving_window` rows. **The committed artifact itself is current** — its
+`provenance.git_commit` is `6571c46`, matching the driver (**D14.4** verified).
 
 ### 1.3 The two structural facts, which do not drift with `Re`
 
@@ -320,10 +274,13 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "slow singular-value decay ⇒ broad inertial range ⇒ hard to compress" | R12: 99% of energy in `r=5`, identical at N=128 and N=256 |
 | "the rank saturates" / "grows without limit" | R29: non-monotone in `N` for `W ≥ 12`, unexplained |
 | a convergence order without naming its rank | R42: order is conditional on rank sufficiency |
-| `t* ≈ 0.05·r^1.12` | **R39's constants: prefactor 2.2× too small** (R50) |
-| "the curves cross repeatedly, so no horizon exists" | **R48's over-correction** — true of a buggy artifact only (R50) |
-| "`r ≥ 32` wins at every horizon" / "`r ≤ 8` does not pay" | **D13, superseded by D14** — from the same buggy artifact |
-| quoting `crossover_surface.json` as committed | produced by the **pre-fix** driver (`5853ba9`); use a regenerated artifact |
+| **any fitted `c·r^p` for the crossover, at any constants** | **void (R51/D15)** — the baseline moved it 2–4× and left only two resolvable ranks. State the two values. |
+| `t* ≈ 0.05·r^1.12` (R39) | weak baseline; later found in-sample and starvation-affected |
+| `t* ≈ 0.11·r^0.95` (R50/D14) | measured on a driver whose baseline window **ends at the evaluation time** |
+| "the curves cross repeatedly, so no horizon exists" (R48) | over-correction; an artefact of the starvation bug |
+| "`r ≥ 32` wins at every horizon" / "`r ≤ 8` does not pay" (D13) | from the starvation-affected artifact |
+| quoting `crossover_surface.json`'s `crossovers` block | wrong for the third cycle; read the `dlra` / `static_moving_window` rows |
+| reporting `t*` without the baseline's window, refit interval and offset | **D15.3** — the number is meaningless without them |
 | quoting `crossover_surface.json`'s `crossovers` block | its reason string is **false** for `r = 2, 4, 16`; read the `dlra` / `static_moving_window` rows instead |
 
 ---
@@ -332,22 +289,22 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 
 Everything below is measured, and none of it requires retracting a number:
 
-1. **A reduced integrator's lead over a static subspace is a power law in rank, and it is
-   robust.** `t* ≈ 0.11·r^0.95` — essentially linear — invariant to the baseline's window
-   length (≤1%) and nearly invariant to Reynolds number (3–8%). The lead grows steeply with
-   rank at short horizons (`1.5×` at `r=8`, `16×` at `r=16`, `941×` at `r=32` at `t=0.25`)
-   while per-step cost is nearly rank-independent (`1.78–2.18×`). **So rank buys lead time
-   rather than speed, and the practical question is how long a lead you need** — with the
-   honest caveat that the step costs ~1.9× a full-grid step at every rank, and only the
-   dealiasing ceiling leads at every horizon.
-2. **The limit is structural, not numerical.** A static subspace cannot track a flow whose
+1. **A static subspace has a rank-independent error floor that no rank removes** — a 43-fold
+   rank range buys 2% — while a reduced integrator's error falls from `0.6` to `1.6e-8`. **Rank
+   buys predictability time, not accuracy**, and the horizon is `≈1.3` at `r=16` and `≈2.4` at
+   `r=32` against a correctly implemented baseline.
+2. **That horizon is not a stable quantity, and saying so is the methodological contribution.**
+   Three successive corrections to a 60-line baseline moved it by 2–4× and removed half the
+   ranks. **Any published crossover for this class of method should carry the baseline's window
+   length, refit interval, offset, and a check that no basis contains its evaluation time.**
+3. **The limit is structural, not numerical.** A static subspace cannot track a flow whose
    support moves, and its error floor is rank-independent; a refitting integrator can, until
    its own per-step truncation accumulates onto a saturation plateau.
-3. **Rank criteria measure different things.** The windowed `r99` is grid-independent and
+4. **Rank criteria measure different things.** The windowed `r99` is grid-independent and
    measures the dynamics; a per-step rule reads the instantaneous rank, which moves the other
    way; the amplitude rule measures the discretisation, and cannot be repaired by any fixed
    cutoff.
-4. **There is no statistically steady fluctuation state** for forced 2-D NS at these
+5. **There is no statistically steady fluctuation state** for forced 2-D NS at these
    parameters, at either forcing amplitude or either resolution — so the honest statistic is
    a quasi-steady fluctuation *energy*, and enstrophy-based and spectral statistics are not
    available.

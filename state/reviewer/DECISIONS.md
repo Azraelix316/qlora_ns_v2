@@ -849,3 +849,69 @@ three values, not six nulls.**
 floor is rank-independent (`0.3176–0.3178` at `t=0.1` across a 43-fold rank range). Exact
 divergence-freeness, `2.3e-14`–`2.2e-13`. The dealiasing ceiling is the full-grid solver
 (`r=43` DLRA error `0.0` to `2.8e-09`). Every D4 barred claim stands.
+
+---
+
+## D15 — **`t*` is not a stable quantity. D14 and every fitted form are void (2026-09-25)**
+
+> **OPERATIVE (R51).** Write: against a **strictly out-of-sample** static subspace, a
+> fixed-rank reduced integrator **leads for `t* ≈ 1.3` at `r=16` and `≈2.4` at `r=32`**, robust
+> to a 4× change in the baseline's window; **it does not lead at all at `r ≤ 8`**; and **only
+> the dealiasing ceiling leads at every horizon.** **Do not fit a power law** — two resolved
+> ranks cannot support one. **D14, D13, R48 and R39 are all void.**
+
+**D15.1 — The claim.** With the baseline refit every `0.25` and the refit schedule **offset by
+half an interval so no basis ever contains the time it is scored at**: `t* = 1.26 / 1.26 / 1.46`
+at `r=16` for `W = 0.25 / 0.5 / 1.0`, and `2.44 / 2.42 / 2.45` at `r=32`. `r ≤ 8` never leads
+(`0.25` is the first measurable interval). `r=43` never yields, by construction.
+
+**D15.2 — Why no power law, and this is structural rather than a shortfall.** **Two of six
+ranks have a resolvable crossover.** A line through two points has no exponent to report, so
+the honest claim is *monotone increasing in rank, with the values stated*, and the *values* are
+what a reader needs anyway.
+
+**D15.3 — The sensitivity is the result, and it is the most publishable finding here.**
+**Three successive, individually reasonable corrections to a 60-line baseline moved `t*` by a
+factor of 2–4 and eliminated three of six ranks:**
+
+| baseline | `t*` at r=16 | at r=32 | ranks resolved |
+|---|---|---|---|
+| window refit once per evaluation (R39) | 1.15 | 2.42 | 5 of 6 |
+| refit every 0.25, window **includes `t`** (R50) | 1.83 | 2.81 | 5 of 6 |
+| **refit every 0.25, offset, out-of-sample** | **1.26–1.46** | **2.42–2.45** | **2 of 6** |
+
+> **The advantage of a reduced integrator over a static subspace is not a stable quantity: it
+> is a function of how well the baseline is implemented. Any published crossover horizon for
+> this class of method should be reported together with the baseline's window length, refit
+> interval, offset, and an explicit check that no basis contains its evaluation time.**
+
+This generalises past this paper's method, is invariant to all three of the things that moved
+it, and **undercuts the paper's own headline — which is why a reviewer will trust it.** It also
+completes R37's mechanism: the static baseline's power is a property of *stale subspaces*, and
+how stale depends on refit cadence, which is an implementation choice.
+
+**D15.4 — What survives unchanged, and is the paper's spine.** **The static error is flat in
+rank**: at `t=8, W=0.25`, `r=2` gives `0.101` and `r=43` gives `0.099` — a **43-fold rank
+range buys 2%** — while the reduced integrator's falls from `0.599` to `1.6e-8`. **A static
+subspace has a rank-independent floor that no rank removes.** That is baseline-robust, it is
+R37's result, and it should be the paper's central claim rather than any value of `t*`.
+
+**D15.5 — `crossover_surface.json`'s `crossovers` block is wrong for the third cycle** (R48,
+R50, R51). All 18 entries report `t_star: null` and *"DLRA still ahead at the longest horizon"*;
+against its own surface that reason is **false at `r=16` and `r=32` for every window**. It
+should report `1.26/1.26/1.46`, `2.44/2.42/2.45`, `unresolved` for `r ≤ 8`, and `never` for
+`r=43`. **The logic still inspects only the final horizon.** **Do not quote the block; read the
+`dlra` and `static_moving_window` rows.**
+
+**D15.6 — D14.4 extends to my own measurements.** R50's numbers were taken on `bc35666`, whose
+trailing window **ended at the evaluation time**, and refits fell on `0.25` multiples — **seven
+of nine horizons**. **I wrote the "check the artifact against the code that produced it" rule
+and then ran a measurement on a driver whose baseline I had not audited.** Any reviewer
+measurement on a shared driver must re-check that driver's baseline before the numbers are
+quoted.
+
+**D15.7 — Unchanged.** No per-step speedup (`1.78–2.18×`). Exact divergence-freeness,
+`2.3e-14`–`2.2e-13`. The ceiling is the full-grid solver. BUG is `3.0–4.8×` slower than the
+projected integrator but its cost *does* scale with rank (`1.17×` from `r=2` to `r=16`) where
+the projected one does not (`1.007×`) — the port's structural signature survives even though
+its cost argument does not. Every D4 barred claim stands.

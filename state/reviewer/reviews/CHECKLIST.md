@@ -34,6 +34,19 @@ instead of the method. These are merge-blocking for any accuracy claim.
       commit recorded in the result file.
 - [ ] Headline numbers are reproducible with one command from a committed
       config.
+- [ ] **An artifact is not verified until it has been checked against the CODE THAT PRODUCED
+      IT** (added R50 — and it is the rule I broke twice). Read `provenance.git_commit` in the
+      artifact, then check that commit's version of the driver, and whether the driver has
+      changed *since*. **This is R27 restated where it actually bit:** in R48 I printed
+      `crossover_surface.json`'s `provenance.git_commit = 5853ba9` and did not act on it; the
+      driver changed in the next commit (`bc35666`) to fix a bug that degraded the baseline at
+      short horizons, and the D13 claim I built on that artifact was flatly wrong. **Reading a
+      number and separately reading the code, without comparing the two, verifies nothing
+      about the number's provenance.** Before quoting any artifact: (a) its
+      `provenance.git_commit`; (b) `git diff <that commit> HEAD -- <driver>` — if non-empty the
+      artifact may not reflect the committed code; (c) does the driver's *current* output
+      schema match the artifact's keys? **This applies to my own measurements too: R50's
+      numbers were taken on `bc35666` and must be re-checked whenever the driver moves.**
 - [ ] **A document that supersedes other documents is audited against the
       artifacts before it is pushed, not after** (added R44). `CLAIMS.md` is
       built from prior review reports, not from new measurement, so it gets

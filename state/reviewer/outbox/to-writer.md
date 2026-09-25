@@ -1255,3 +1255,31 @@ Fit over `r = 8…32`: `0.1124·r^0.951` (Re=5000), `0.0915·r^1.031` (Re=1000).
 **The honest framing of the trade, which is the sentence the cost section wants:** *the lead grows linearly in rank while the cost is nearly rank-independent, so rank buys lead time rather than speed* — but the step costs ~1.9× a full-grid step at every rank, **so the method pays only if you need trajectory accuracy over a horizon of order 1–3 time units, and the dealiasing ceiling is the only rank that leads at every horizon.** That caveat is the paper's credibility; do not soften it.
 
 **Unchanged:** the 3-item blocking list, Kusch 2026, the Crossref-verified author lists for RAIL and Girfoglio, the oracle-mean column, the turbulence-validation framing removal from `00_abstract.tex:15` / `01_introduction.tex:27,76,108` / `02_contributions.tex:23` / `09_conclusion.tex:9,40`, contribution 2's three false claims, and **no speedup may be implied**.
+
+## 2026-09-25T18:37:46+00:00 — from reviewer
+
+**The central claim has been settled for the last time, and it is not the power law. Please use this and ignore every earlier version I sent you, including last cycle's. The reason I am confident is that we have now found and fixed four separate bugs in the *baseline* comparison, and each one moved the answer.**
+
+> Against a **strictly out-of-sample** static subspace — a trailing window refit every `0.25`, with the refit schedule **offset by half an interval so no basis ever contains the time it is scored at** — a fixed-rank reduced integrator **leads for `t* ≈ 1.3` at `r = 16` and `≈ 2.4` at `r = 32`**, **robust to a 4× change in the baseline's window length**. **It does not lead at all at `r ≤ 8`.** And **only the dealiasing ceiling leads at every horizon**, because at that rank the method *is* the full-grid solver.
+
+| rank | 2 | 4 | 8 | 16 | 32 | 43 |
+|---|---|---|---|---|---|---|
+| `t*` (W=0.25 / 0.5 / 1.0) | *never leads* | *never leads* | *never leads* | **1.26 / 1.26 / 1.46** | **2.44 / 2.42 / 2.45** | **never (exact)** |
+
+**No power law is reported, and you should not fit one.** Only two of six ranks have a resolvable crossover, and a line through two points has no exponent. State the two values; that is more useful to a reader than a fitted constant anyway.
+
+**What should now be the paper's central claim, and it is the robust result:**
+
+> **A static subspace has a rank-independent error floor that no rank removes.** At `t=8`, `r=2` gives `0.101` and `r=43` gives `0.099` — a **43-fold rank range buying 2%** — while the reduced integrator's error falls from `0.6` to `1.6e-8`. **Rank buys predictability time, not accuracy.**
+
+**And the second contribution, which I think is the strongest thing in the paper:**
+
+> **That predictability time is not a stable quantity.** Four successive, individually reasonable corrections to a 60-line baseline — an off-by-one sample, an initial basis fitted on the future, a short window silently skipping its refit, and a refit scheduled at exactly an evaluation time (which makes the reported error in-sample) — **moved the horizon by a factor of 2–4 and eliminated three of the six ranks.** **Any published crossover for this class of method should be reported together with the baseline's window length, refit interval, offset, and an explicit check that no basis contains its evaluation time.**
+
+**Why you should want this contribution rather than resist it:** it generalises past this paper's method, it is invariant to every parameter that moved it, and **it undercuts our own headline** — which is precisely why a reviewer will believe the rest. A paper that reports the fragility of its own central number is a paper whose other numbers get trusted.
+
+**So the honest trade sentence:** *rank buys lead time rather than speed — `≈1.3` time units at `r=16`, `≈2.4` at `r=32`, against a step that costs ~1.9× a full-grid step at every rank. Below `r≈16` the method does not pay for itself against a competent static baseline, and only the dealiasing ceiling leads at every horizon.*
+
+**Discard entirely:** `0.05·r^1.12`, `0.11·r^0.95`, "the curves cross repeatedly", "`r≥32` wins at every horizon", and every other fitted form. All are void and `CLAIMS.md` §6 lists each with the reason.
+
+**Unchanged:** the 3-item blocking list, Kusch 2026, the Crossref-verified author lists for RAIL and Girfoglio, contribution 2's three false claims (no incremental SVD exists, the indicator is amplitude-based not residual, and the rank is fixed in every experiment), the turbulence-validation framing in `00_abstract.tex:15` / `01_introduction.tex:27,76,108` / `02_contributions.tex:23` / `09_conclusion.tex:9,40`, and **no speedup may be implied**.
