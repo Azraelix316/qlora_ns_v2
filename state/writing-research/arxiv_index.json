@@ -361,5 +361,120 @@
       "Feng, J."
     ],
     "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2405.03796",
+    "title": "Approximating a branch of solutions to the Navier-Stokes equations by reduced-order modeling",
+    "updated": "2026-09-25T10:00:00Z",
+    "summary": "Reduced order modeling for approximating branches of Navier-Stokes solutions.",
+    "authors": [
+      "Olshanskii, M. A.",
+      "Rebholz, L. G."
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2507.00301v2",
+    "title": "Structure-preserving Lift & Learn: Scientific machine learning for nonlinear conservative partial differential equations",
+    "updated": "2026-01-08T05:55:02Z",
+    "summary": "A scientific machine learning method that employs lifting variable transformations to learn structure-preserving reduced-order models for nonlinear PDEs with conservation laws.",
+    "authors": [
+      "Harsh Sharma",
+      "Juan Diego Draxl Giannoni",
+      "Boris Kramer"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2410.01065v1",
+    "title": "Structure-Preserving Operator Learning",
+    "updated": "2024-10-01T20:46:16Z",
+    "summary": "Introduces Structure-Preserving Operator Networks (SPONs) that leverage finite element discretizations to preserve key mathematical and physical properties of continuous systems.",
+    "authors": [
+      "Nacime Bouziani",
+      "Nicolas Boull\u00e9"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2601.17693v1",
+    "title": "DDFKs: Fluid Simulation with Dynamic Divergence-Free Kernels",
+    "updated": "2026-01-25T04:48:24Z",
+    "summary": "Fluid simulations based on memory-efficient spatial representations like implicit neural spatial representations (INSRs) and Gaussian spatial representation (GSR), where the velocity fields are parameterized by neural networks or weighted Gaussian functions, has been an emerging research area. This paper proposes DDFKs for incompressible flows.",
+    "authors": [
+      "Jingrui Xing"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2101.07104v2",
+    "title": "An efficient dynamical low-rank algorithm for the Boltzmann-BGK equation close to the compressible viscous flow regime",
+    "updated": "2021-05-12T11:31:23Z",
+    "summary": "Proposes an efficient DLRA integrator that captures the fluid limit (Navier-Stokes) of the Boltzmann-BGK model even in the compressible regime by using a $f=Mg$ decomposition.",
+    "authors": [
+      "Lukas Einkemmer",
+      "Jingwei Hu",
+      "Lexing Ying"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2502.08951v1",
+    "title": "Asymptotic-Preserving Dynamical Low-Rank Method for the Stiff Nonlinear Boltzmann Equation",
+    "updated": "2025-02-13T04:19:54Z",
+    "summary": "Proposes an asymptotic-preserving DLRA integrator (XL and sXL) for the stiff nonlinear Boltzmann equation, capturing the asymptotic fluid limit.",
+    "authors": [
+      "Lukas Einkemmer",
+      "Jingwei Hu",
+      "Shiheng Zhang"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/1302.1594v2",
+    "title": "Model-based scaling of the streamwise energy density in high-Reynolds number turbulent channels",
+    "updated": "2013-02-06T22:02:12Z",
+    "summary": "Uses a low-rank approximation via the resolvent formulation to describe streamwise turbulence intensity in high-Re turbulent channels.",
+    "authors": [
+      "Rashad Moarref",
+      "Ati S. Sharma",
+      "Joel A. Tropp",
+      "Beverley J. McKeon"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2608.07526v1",
+    "title": "A Mean-Informed Low-Rank Monolithic Stochastic Galerkin Solver for the Unsteady Navier-Stokes Equations",
+    "updated": "2026-07-18T21:43:44Z",
+    "summary": "Studies a low-rank solver using Tensor Train (TT) and CP formats for stochastic unsteady incompressible NS equations.",
+    "authors": [
+      "Ahmet Kaan Aydin",
+      "Bed\u0159ich Soused\u00edk"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2302.01391v2",
+    "title": "Macro-micro decomposition for consistent and conservative model order reduction of hyperbolic shallow water moment equations: A study using POD-Galerkin and dynamical low rank approximation",
+    "updated": "2024-07-16T13:27:10Z",
+    "summary": "Develops a macro-micro decomposition to achieve mass conservation in model reduction for hyperbolic shallow water moment equations using POD-Galerkin or DLRA.",
+    "authors": [
+      "Julian Koellermeier",
+      "Philipp Krah",
+      "Jonas Kusch"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2411.15990v2",
+    "title": "Interpolatory dynamical low-rank approximation for the 3+3d Boltzmann-BGK equation",
+    "updated": "2025-08-19T18:11:34Z",
+    "summary": "Introduces two novel interpolatory DLR methods for efficient time integration of the Boltzmann-BGK equation, overcoming limitations of orthogonal projections.",
+    "authors": [
+      "Lukas Einkemmer",
+      "Dektor"
+    ],
+    "relevant": true
   }
 ]
