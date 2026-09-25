@@ -294,6 +294,29 @@ def main() -> None:
             ),
         }
 
+    crossover = None
+    crossover_data = load("crossover_surface.json")
+    if crossover_data is not None:
+        p = crossover_data["parameters"]
+        crossover = {
+            "file": "crossover_surface.json",
+            "git_commit": crossover_data["provenance"]["git_commit"],
+            "re": p["re"],
+            "N": p["N"],
+            "force_amplitude": p["force_amplitude"],
+            "ranks": p["ranks"],
+            "horizons": p["horizons"],
+            "dealias_ceiling": p["dealias_ceiling"],
+            "moving_window_length": p["moving_window_length"],
+            "moving_window_refit_interval": p["moving_window_refit_interval"],
+            "rank_policy": p["rank_policy"],
+            "crossovers": crossover_data["crossovers"],
+            "dlra_surface": crossover_data["dlra"],
+            "static_moving_window_surface": crossover_data["static_moving_window"],
+            "error_columns": crossover_data["error_columns"],
+            "interpretation": crossover_data["interpretation"],
+        }
+
     output = {
         "generated_by": "experiments/make_summary.py",
         "git_commit": _git_commit(),
@@ -355,6 +378,7 @@ def main() -> None:
         "rank_threshold_sweep": sweep,
         "cost_retiming": cost,
         "regime_pilot": regime,
+        "crossover_surface": crossover,
         "honesty_note": (
             "The static-POD baseline is now correct (its fit had reshaped the "
             "snapshot stack in C order, interleaving snapshots); every number "

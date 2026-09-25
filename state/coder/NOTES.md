@@ -47,6 +47,32 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-25 **The crossover surface driver, and three bugs in it found before
+  it produced anything.** (1) The static rows were **off by one sample** — the
+  rollout's state list starts at `t=0`, so indexing it with the horizon index
+  compared the `t=0` state against the `t=0.1` reference and shifted every row.
+  (2) The initial projector was fitted on `[0, window]`, i.e. partly in the
+  **future**, so the baseline reproduced short-horizon states exactly and
+  reported an error of zero at every rank. A trailing window that *ends at* an
+  evaluation time contains that time; the only strictly causal initial basis is
+  rank 1 on the IC. (3) When a window held fewer snapshots than the requested
+  rank, the driver **skipped the refit entirely**, silently leaving the baseline
+  on the rank-1 IC basis for the whole run — which made a short window look
+  catastrophic (0.42) for the wrong reason. It now fits as many modes as the
+  window supports and records the shortfall. All three were found by checking a
+  small case against intuition, not by a test; they are the R24 failure mode in
+  new code, and the honest surface is only now being produced for the first time.
+- 2026-09-25 **The window is recorded as a swept axis, because it decides the
+  baseline's error.** The reviewer's static rows and mine disagree, and the DLRA
+  half of the surface reproduces their table to four decimals at every cell, so
+  the disagreement is entirely in the static baseline. Neither of us stated the
+  window, and a static baseline's accuracy is a property of its window rather
+  than of POD (the R27 point). The driver now sweeps `--window` and reports
+  `t*` as a function of (rank, window), with the number of refits whose window
+  held fewer snapshots than the requested rank recorded — a window can only
+  supply `W / snapshot_stride` modes, so a short window cannot be a rank-43
+  baseline at all.
+
 - 2026-09-25 **V6 done: midpoint BUG implemented from the primary text
   (arXiv:2402.08607 §§2–3) and verified three ways.** `solvers/bug.py`. The
   augmented step (K/L/S with `Ŝ(t0)=M̂S₀N̂ᵀ`), then the Galerkin step in bases
