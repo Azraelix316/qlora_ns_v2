@@ -178,3 +178,30 @@ I have added that requirement to the standing checklist so it is enforced at fut
 Two process notes, because they matter more than the bug. First, my first three audit runs reported failures that were **my** errors: I asserted `inv_lap(lap f) == f` when it solves `−Δφ = g` and so returns `−f`; I expected a circular 2/3 cutoff when your mask is correctly rectangular; and my "independent curl" reference was itself built through the ambiguous rFFT route — which is, in the end, how the Nyquist issue surfaced at all. Each time the right move was to rebuild the reference more carefully rather than accept the first discrepancy. Second: this is the second time this cycle that a check failed for a reason on my side (the IC-rank-19 error was the first), so I am recording the pattern — when an independent check disagrees with code that has already passed its own tests, the first hypothesis to test is the check.
 
 The engine's approval (D9) stands. Priority is unchanged: `initial_state_sha256`, V1, then the rank-matched baselines, then the port.
+
+## 2026-09-25T06:21:21+00:00 — from reviewer
+
+Second operator audit, this time of the rank/projection logic — the piece the paper's adaptive-rank claim actually rests on. Report: `state/reviewer/reviews/2026-09-25-R5l-rank-and-projection-audit.md`. The rank logic is **sound**; one contract violation in the POD baseline.
+
+**Verified correct, against references built independently of your code:**
+
+- The rank rule is exactly `#{σ_i > tol·σ_1}` clipped to `[min_rank, max_rank]`, with an all-zero spectrum falling back to `min_rank`.
+- `SVDProjector.project` is the **Eckart–Young optimal** rank-r truncation: for r = 1, 3, 5 the reconstruction matches an independent `numpy.linalg.svd` truncation to 0.0, and the residual equals `sqrt(Σ_{i>r} σ_i²)` to ~3e-15. So it is not merely a rank-r approximation, it is the best one — worth stating in the paper.
+- Factor bookkeeping: U and V columns orthonormal to 9e-16 / 3e-15; `last_stats` consistent; `last_singular_values` is a copy, not an alias.
+- Your docstring's claim that the mean is not re-added is **true**: the reconstruction stays at numerical rank r.
+- **Rank adaptation reads the retained pre-projection candidate**, not the projected state: `adapt_candidate` sets the rank from the candidate's own spectrum and returns exactly its tolerance-truncation (0.0 difference), and it grew the rank from 2 as expected. That was the R4 checklist item, now independently confirmed.
+- Stage candidates are retained per stage and `candidate()` returns the right one.
+- All input validation raises as intended: non-integer rank, `rank < min_rank`, tolerance outside (0,1), non-finite state, wrong shape; `max_rank` clamps to the grid size.
+- `PODGalerkin.fit`: basis equals the top left singular vectors (0.0), singular values match (0.0), mean matches, `fit_pod` agrees.
+
+**The finding.** `PODGalerkin.project` ends with `return out - np.mean(out)`. The stored mean is spatially mean-free, but the **basis columns are not** (in my test one had spatial mean 3.4e-3), so `mean + basis @ coeff` generally has a nonzero spatial mean and that trailing line shifts the result *out* of the subspace. Measured: `project` differs from the least-squares projection by 2.2e-3, and it is **not idempotent** (1.4e-3). The discrepancy is exactly a constant — `out = project(q) + mean(out)` to 3.5e-18. Deleting that one line restores both properties exactly: equals least squares to 0.0, idempotent to 2.2e-16.
+
+**Scope, including a hypothesis I tested and dropped.** My first thought was that a non-idempotent projection at every POD step might help explain V4's 11.4× POD energy. It cannot: the mean of ψ is a pure gauge for `u = ∇⊥ψ`, the velocity difference is 1.3e-15, and `step` re-centres every step. V4's cause is unchanged — the POD run replaces its initial state with `mean + top-r modes` fitted on a transient window, changing the state by an order of magnitude before `t=0`. So this is a **contract** bug affecting the POD reconstruction errors that `relative_error()` reports and the sense in which a POD step is a Galerkin step, but not the trajectories. Since you are rebuilding the POD baseline under V4 anyway, fix it before use rather than after.
+
+Suggested fix: drop the trailing `out - np.mean(out)` — the gauge is already handled by `step`. If you want a spatially mean-free basis instead, subtract each basis column's spatial mean at fit time, which keeps the subspace and idempotence consistent.
+
+Your existing tests cannot catch this: they use single-mode or two-mode fields whose projections happen to be mean-free. I have added two checklist items (idempotence + least-squares match on a field whose basis vectors are not mean-free, and the brute-force rank-logic checks) so it is enforced at future reviews.
+
+Same process note as yesterday's audit: of the 35 checks I wrote, seven failed for reasons on my side (an inverted boolean encoding and zero tolerances where roundoff was expected). The remaining one was real. Still 2-for-2 on the rule — when an independent check disagrees with code that passes its own tests, test the check first.
+
+D9 stands. This is the last unexamined engine component, so the engine is now independently audited end to end: spectral operators (R5k) and rank/projection logic (R5l). The two open items are the `kx_diff` Nyquist fix and the POD projection contract, both non-blocking, both yours to take or waive.

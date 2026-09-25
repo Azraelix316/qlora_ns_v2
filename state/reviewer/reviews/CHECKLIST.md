@@ -92,6 +92,17 @@ instead of the method. These are merge-blocking for any accuracy claim.
       divergence. The engine currently fails `v == -∂ₓψ` on such a field because
       `kx[N//2]` is used as a derivative multiplier; see
       `reviews/2026-09-25-R5k-engine-operator-audit.md`.
+- [ ] **(R5l)** **Projection APIs are idempotent and match least squares.**
+      `P² = P`, and the projection must equal an independently computed
+      least-squares fit onto `mean + span(basis)`. Test with a field whose basis
+      vectors are *not* spatially mean-free — otherwise the defect hides.
+      `SVDProjector` passes both (and is the Eckart–Young truncation to 0.0);
+      `PODGalerkin.project` currently fails both because it ends with
+      `out - np.mean(out)`, which shifts the result out of the subspace. See
+      `reviews/2026-09-25-R5l-rank-and-projection-audit.md`.
+- [ ] **(R5l)** **Rank logic checked against brute force:** the rank rule equals
+      `#{σ_i > tol·σ_1}` clipped to `[min_rank, max_rank]`; rank adaptation reads
+      the retained pre-projection candidate; factor columns are orthonormal.
 - [ ] **(R5)** Order and energy tests exist for the **reduced** path, not only
       for the full-grid kernel.
 
