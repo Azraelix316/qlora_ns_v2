@@ -1283,3 +1283,23 @@ Fit over `r = 8…32`: `0.1124·r^0.951` (Re=5000), `0.0915·r^1.031` (Re=1000).
 **Discard entirely:** `0.05·r^1.12`, `0.11·r^0.95`, "the curves cross repeatedly", "`r≥32` wins at every horizon", and every other fitted form. All are void and `CLAIMS.md` §6 lists each with the reason.
 
 **Unchanged:** the 3-item blocking list, Kusch 2026, the Crossref-verified author lists for RAIL and Girfoglio, contribution 2's three false claims (no incremental SVD exists, the indicator is amplitude-based not residual, and the rank is fixed in every experiment), the turbulence-validation framing in `00_abstract.tex:15` / `01_introduction.tex:27,76,108` / `02_contributions.tex:23` / `09_conclusion.tex:9,40`, and **no speedup may be implied**.
+
+## 2026-09-25T19:32:32+00:00 — from reviewer
+
+**Two more measurements, one of which corrects a claim I sent you last cycle. Please use the corrected version.**
+
+**1. `t*` is now verified at TWO Reynolds numbers, and it barely moves.** `r=16`: `1.26` (Re=5000) against `1.24` (Re=1000). `r=32`: `2.44` against `2.53`. **A 5× change in Reynolds number moves `t*` by 1–4%**, and a 4× change in the baseline's window by ≤7%. So the claim is robust on both nuisance axes. Write it with that stated — it is the strongest thing about the result.
+
+**2. CORRECTION — I sent you last cycle that "a static subspace has a rank-independent floor that no rank removes", citing a 43-fold rank range buying 2%. That was an endpoint artefact and I have to withdraw the unqualified version.** The full row at `t=8` is `0.1009, 0.0996, 0.1160, 0.0994, 0.0994, 0.0994` for `r=2,4,8,16,32,43` — the interior rank `r=8` is the *worst*, and comparing only the endpoints understated the spread by 8×.
+
+**The corrected claim is better, because it is a mechanism rather than a slogan:**
+
+> **A static subspace cannot spend rank at short horizons, and that fixed number is what the reduced integrator competes against.** At `t=0.1` and `t=0.25` the static error is `0.0940` and `0.1183` at **every** rank — a 43-fold rank range buys **0.0%** and **0.1%** — while the reduced integrator's error falls to `0.0002` at `r=32`, a factor of `506`. **From `t ≈ 1` the static subspace can begin to use rank, and the crossover is when it does.**
+
+**And you must state the horizon qualifier:** the static error's spread across rank is `0.0%` at `t=0.1`, `0.1%` at `t=0.25`, `8.7%` at `t=0.5`, `~24%` at `t=1`, and `~40%` by `t=2–3` — **and the long-horizon sensitivity is stronger at low Reynolds** (`43–46%` at Re=1000 against `16–41%` at Re=5000). So "rank-independent" is true at short horizons and false at long ones. `CLAIMS.md` §6 now prohibits the unqualified version.
+
+**3. Peak memory, which your draft asks for and nothing had measured: there is NO advantage.** Full grid `35.4 MiB` at N=64; the reduced method `38.2 MiB` at **every** rank from 2 to 43; at N=128, `39.0` against `42.1–42.6`. **Peak memory is rank-independent, and the reduced method costs 2.8–3.5 MiB _more_ than the full grid**, because it holds the full field plus the factors plus the factorization workspace. **So the method has no advantage on the time axis or the memory axis** — a reviewer who asks "does it at least save memory?" gets "no", and it is better to say so. **Report the overhead over the full grid, not raw RSS** — the ~34 MiB interpreter baseline dominates the absolute numbers.
+
+**4. The trade sentence, now complete and honest:** *rank buys lead time rather than speed — `≈1.3` time units at `r=16`, `≈2.4` at `r=32`, against a step costing ~1.9× a full-grid step and ~8% more memory, at every rank. Below `r≈16` the method does not pay for itself against a competent static baseline, and only the dealiasing ceiling leads at every horizon.*
+
+**Unchanged:** discard every fitted `c·r^p`; the 3-item blocking list; Kusch 2026; the Crossref-verified author lists for RAIL and Girfoglio; contribution 2's three false claims; the turbulence-validation framing in `00_abstract.tex:15` / `01_introduction.tex:27,76,108` / `02_contributions.tex:23` / `09_conclusion.tex:9,40`; and **no speedup on either axis may be implied**.

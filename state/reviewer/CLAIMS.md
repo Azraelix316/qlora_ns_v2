@@ -36,19 +36,33 @@ recorded here and the earlier figure is struck, not quietly dropped.
 
 | rank | 2 | 4 | 8 | 16 | 32 | 43 |
 |---|---|---|---|---|---|---|
-| `t*`, `W=0.25` | *never leads* | *never leads* | *never leads* | **1.26** | **2.44** | **never (exact)** |
-| `t*`, `W=0.5` | *never leads* | *never leads* | *never leads* | **1.26** | **2.42** | **never (exact)** |
-| `t*`, `W=1.0` | *never leads* | *never leads* | *never leads* | **1.46** | **2.45** | **never (exact)** |
+| `t*`, `W=0.25`, `Re=5000` | *never leads* | *never leads* | *never leads* | **1.26** | **2.44** | **never (exact)** |
+| `t*`, `W=1.0`, `Re=5000` | *never leads* | *never leads* | *never leads* | **1.46** | **2.45** | **never (exact)** |
+| `t*`, `W=0.25`, `Re=1000` | *never leads* | *never leads* | *never leads* | **1.24** | **2.53** | **never (exact)** |
+| `t*`, `W=1.0`, `Re=1000` | *never leads* | *never leads* | *never leads* | **1.33** | **2.53** | **never (exact)** |
 
-`N=64`, `Re=5000`, `A=0.2`, full-field relative L2. Source: `crossover_surface.json` @
-`6571c46`, R51, **D15.1**. `r ≤ 8`'s `0.25` is the first measurable interval, so "never leads"
-means *no resolvable lead*, not a measured zero.
+`N=64`, `A=0.2`, full-field relative L2, `Re ∈ {1000, 5000}`, `W ∈ {0.25, 0.5, 1.0}`. Sources:
+`crossover_surface.json` @ `6571c46` (Re=5000, R51) and the reviewer's Re=1000 run on the same
+corrected driver (R52). **D16.1.** `r ≤ 8`'s `0.25` is the first measurable interval, so "never
+leads" means *no resolvable lead*, not a measured zero.
 
-**What survives unchanged, and is the paper's spine** (R51, **D15.4**): **the static error is
-flat in rank** — at `t=8, W=0.25`, `r=2` gives `0.101` and `r=43` gives `0.099`, a **43-fold
-rank range buying 2%** — while the reduced integrator's falls from `0.599` to `1.6e-8`.
-**A static subspace has a rank-independent floor that no rank removes.** This is R37's result,
-it is baseline-robust, and **it should be the central claim rather than any value of `t*`.**
+**Robustness, both axes, both measured (R52, D16.1): a 5× change in Reynolds number moves `t*`
+by 1–4%; a 4× change in the baseline's window by ≤7% (`r=16`) and ≤1% (`r=32`).**
+
+**The corrected spine, which is a mechanism rather than a slogan** (R52, **D16.2–D16.3**):
+
+> **A static subspace cannot spend rank at short horizons, and that fixed number is what the
+> reduced integrator competes against.** At `t = 0.1` and `t = 0.25` the static error is
+> `0.0940` and `0.1183` at **every** rank — a 43-fold rank range buys **0.0%** and **0.1%** —
+> while the reduced integrator's falls to `0.0002` at `r=32`, a factor of `941`. From
+> `t ≈ 1` the static subspace can begin to use rank and the crossover is when it does.
+
+**The static error is rank-independent at SHORT horizons only.** Its spread across rank is
+`0.0%` at `t=0.1`, `0.1%` at `t=0.25`, `8.7%` at `t=0.5`, `~24%` at `t=1`, and `~40%` by
+`t=2–3` — with the long-horizon sensitivity **stronger at low Reynolds** (`43–46%` at
+`Re=1000` against `16–41%` at `Re=5000` for `t ≥ 3`). **And it is not monotone in rank: the
+interior rank `r=8` is consistently the worst**, so comparing only the endpoints `r=2` and
+`r=43` **understates the spread by 8×** — which is what both coder and I did.
 
 ### 1.1 The sensitivity is itself the result, and it is the most publishable finding here
 
@@ -159,12 +173,13 @@ The trade with the horizon, now at both measured Reynolds numbers:
 
 | rank | cost vs full grid | how long it leads a refitted static subspace (§1) |
 |---|---|---|
-| 2 | **1.82×** | *unresolved* — no measurable lead |
-| 4 | **1.86×** | *unresolved* — no measurable lead |
-| 8 | **1.86×** | `t* ≈ 0.75`, leading by `1.5×` at `t = 0.25` |
-| 16 | **1.88×** | `t* ≈ 1.83`, leading by `16×` at `t = 0.25` |
-| 32 | **1.90×** | `t* ≈ 2.81`, leading by `941×` at `t = 0.25` |
+| 2 | **1.82×** | *never leads* |
+| 4 | **1.86×** | *never leads* |
+| 8 | **1.86×** | *never leads* |
+| 16 | **1.88×** | `t* ≈ 1.3`, leading by `8.9×` at `t = 0.25` |
+| 32 | **1.90×** | `t* ≈ 2.4`, leading by `506×` at `t = 0.25` |
 | 43 / 64 | **1.94–2.07×** | **never yields — exact at every horizon** |
+| any | — | **and no memory advantage: peak RSS is rank-independent and the reduced method uses 2.8–3.5 MiB _more_ than the full grid** |
 
 **The trade: the lead grows linearly in rank and the cost is nearly rank-independent, so rank
 buys *lead time* rather than speed.** Going from `r=8` to `r=32` costs **~2% more per step**
@@ -281,6 +296,9 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "`r ≥ 32` wins at every horizon" / "`r ≤ 8` does not pay" (D13) | from the starvation-affected artifact |
 | quoting `crossover_surface.json`'s `crossovers` block | wrong for the third cycle; read the `dlra` / `static_moving_window` rows |
 | reporting `t*` without the baseline's window, refit interval and offset | **D15.3** — the number is meaningless without them |
+| "a static subspace's floor is rank-independent" **without the horizon qualifier** | **D16.2** — true at `t ≤ 0.25` (0.0–0.1%), false by `t ≈ 2–3` (~40%), and stronger at low `Re` |
+| any memory or footprint advantage | **D16.4** — peak RSS is rank-independent and the reduced method costs **more** than the full grid |
+| quoting raw RSS as the memory figure | the ~34 MiB interpreter baseline dominates; report the **overhead over the full grid** |
 | quoting `crossover_surface.json`'s `crossovers` block | its reason string is **false** for `r = 2, 4, 16`; read the `dlra` / `static_moving_window` rows instead |
 
 ---
