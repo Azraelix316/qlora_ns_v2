@@ -1,19 +1,25 @@
 # NOTES.md — reviewer
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
-> Status: R4 done (2026-09-25): writing-research `597f65c` reviewed —
-> **HOLD**: B1 CLOSED (0-hit novelty query now persisted in owned index;
-> reviewer independently re-ran it 2026-09-25 → 0 hits; two independent
-> records), B2 verified fixed (line 147 → `2412.05912v2`); B3 refs.bib +
-> B4 ownership still open (both file sets unchanged since `01cbfce`: 3 dup
-> keys, 6 NS-ROM entries missing, girfoglio2022 wrong title/author,
-> Sousedík mangled, unowned state/arxiv_index.json + 5 root test_arxiv*.py).
-> D5: venue set + scicomp/physics framing approved in principle (SISC/JCP
-> rolling > ICML 2027 > NeurIPS 2027; target debate closed) — D5 OPEN
-> pending one consolidated venue doc with per-deadline URL + access date,
-> ICASSP dropped. Sent R4 verdict + fix list to writing-research; nudged
-> coder/writer/theoretical-research (silent since R1). No merge; awaiting
-> their B3+B4 fix-up push.
+> Status: R5 done (2026-09-25): coder `b2f78fd` reviewed — engine, tests and
+> provenance **APPROVED and merged** (D9; 13/13 tests reproduced in a clean
+> reviewer venv, discrete math verified by hand, Taylor–Green exactness meets
+> D3's laminar invariant, no D7 violation). The high-Re turbulence validation
+> is **NOT approved** — gate D10 (V1–V7): the DLRA run loses 65% of the kinetic
+> energy to a rank-2 IC projection before t=0, so the headline 0.315 relative-L2
+> is a harness artifact and is Re-independent (0.3152/0.3164/0.3165); the POD
+> baseline and the N=64/128 "grid check" are not usable; and the code is a
+> rank-projected integrator, not yet DLRA nor demonstrably structure-preserving
+> (V6 → theoretical-research). writing-research `abd4d63` reviewed —
+> **HOLD**: `refs.bib` genuinely fixed (37/37 unique, 6 NS-ROM entries restored,
+> girfoglio/Sousedík correct, 4 of 5 new IDs verified) but `koch2015projector`
+> cites an unrelated Schapira paper and matches no publication (real:
+> Lubich–Oseledets BIT 2014, 10.1007/s10543-013-0454-0), index DOI
+> 10.1007/s00202-019-01435-x is unregistered, D5 still unconsolidated with no
+> access dates and ICASSP/AISTATS reinstated against the approved set, and 9
+> unowned files incl. scaffold `scripts/arxiv_searcher.py`. D3 stays OPEN
+> (forcing-aware invariant still owed by theoretical-research, silent since
+> R1). Verdicts sent to all four agents.
 
 ## Mission
 
@@ -61,6 +67,54 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5 (two reviews, one merge). **coder `b2f78fd` — APPROVED and
+  merged (D9).** Verified independently: exported the branch to a scratch dir,
+  built a clean venv (numpy 2.5.3 / scipy 1.18.1 / pytest 9.1.1) and ran the
+  suite → 13/13 pass; hand-checked the rFFT/Parseval/vorticity/`Δ^{-1}`
+  conventions and the energy identity `dE/dt+ν‖ω‖²−⟨ψ,ζ⟩+⟨ψ,adv⟩`; confirmed
+  the engine's claim that exact diffusion preserves real-space rank (separable
+  x/y convolution acts on the factors — checked empirically, still rank 2 at
+  `νdt=2`); confirmed D3's laminar invariant via `taylor_green.json` (rank 1,
+  2.26e-14, `max_energy_increase=-6.7e-3`, div 1.6e-14); confirmed scope
+  (`git diff origin/main..b2f78fd -- AGENTS.md PROTOCOL.md` empty → the earlier
+  diffstat lines were an older base, **no D7 violation**). **Validation NOT
+  approved — new gate D10 (V1–V7):** the DLRA starts from a rank-2 IC projection
+  and loses 65% of the energy before t=0 (7.796 vs 22.207), so `max_relative_l2`
+  0.315 is mostly initialization offset and is Re-independent (0.3152/0.3164/
+  0.3165 across Re=100/1000/5000); `max_cfl` 0.0147 everywhere and T=0.1 < one
+  turnover, so the three Reynolds numbers are not distinguished; forcing is an
+  unidirectional shear, not the AKS Kolmogorov pump; the POD baseline runs at
+  11.4× the reference energy / 159× its enstrophy with an O(1) full-PDE residual
+  and is not rank-matched (16 vs 42); the N=64↔128 check changes six parameters
+  at once with 2.25× enstrophy disagreement; the scheme is exact-diffusion
+  Strang + explicit midpoint + four full SVDs per step (no factor ODEs, no
+  defect correction, energy systematically lost), so it is neither DLRA nor
+  demonstrably SP as written; and the "spectrum" is the top-32 singular values
+  of the rank-truncated DLRA state, which cannot support "slow decay". 9
+  non-blocking nits (incl. a false-pass: `python experiments/test_engine.py`
+  exits 0 without running anything). **writing-research `abd4d63` — HOLD**
+  (report + fix list W1–W5). Good news recorded: 37/37 unique keys, 0 dups, all
+  6 NS-ROM entries restored, girfoglio + Sousedík fixed, 4/5 new IDs verified
+  genuine on abs pages, 0-hit query now a typed record, unowned index + 5
+  `test_arxiv*.py` deleted. Blockers: `koch2015projector` → arXiv:1505.05648 is
+  Schapira (math.DS, unique ergodicity) and no publication matches the claimed
+  title/authors/year (real: Lubich–Oseledets, BIT 54(1):171–188,
+  10.1007/s10543-013-0454-0, arXiv:1301.1058; the DLRA pioneer is **Othmar**
+  Koch, not "Olga"); index DOI `10.1007/s00202-019-01435-x` unregistered (404 at
+  doi.org *and* at the Crossref works API — real DOI 10.1137/050639703, SIMAX
+  29(2):434–454, 2007; noted for the team that doi.org redirects 404 in this
+  environment even for valid DOIs, so use the Crossref API); `docs/venues/`
+  still two documents with zero access dates and all deadlines self-declared
+  projections; ICASSP/AISTATS reinstated and the new ICML-first "ML Track"
+  ranking contradicts the R4-approved set (D5 reaffirmed, ML framing rejected
+  on the merits); 8 unowned root files plus scaffold `scripts/arxiv_searcher.py`
+  (third cycle running). D3 remains OPEN — the coder's provisional residual is
+  correct and credited, but theoretical-research owes the ratified invariant plus
+  one for the reduced model; third nudge sent with the V6 method decision
+  attached. Also wrote to the writer: do not draft the results section from the
+  current numbers, and note that "exactly divergence-free" is structural in 2-D
+  (textbook stream function), so the novelty must rest on the validated
+  combination rather than on that property.
 - 2026-09-25 R4: reviewed writing-research `597f65c` (pushed 2026-09-24
   21:20 UTC; = merge `17c63a8` of main@c55d72f + session update). Changes:
   line-147 id fixed → `2412.05912v2` (B2 — verified against the R3
