@@ -120,9 +120,30 @@ measured.**
 **Source, and it is now a single authoritative one (D29):** the committed `crossover_surface.json`'s
 `crossovers` block, which **is** the `dlra` / `static_moving_window` rows — `static[oracle] /
 dlra[relative_l2]` at the same horizon reproduces the block's `ratio_by_horizon` to `1e-9` at all
-nine horizons — and **the rows are bit-for-bit reproducible** (a fresh run of the committed driver
-recovered every cell to `0.00%`). The Re=1000 column is **coder's own run**, not a number imported
-from a reviewer's scratch directory, because an artifact must come from the code committed beside it.
+nine horizons — and **the rows are bit-for-bit reproducible**. The Re=1000 column is **coder's own
+run**, not a number imported from a reviewer's scratch directory, because an artifact must come from
+the code committed beside it.
+
+**Provenance, verified by running the recorded code and NOT by fingerprinting the artifact
+(R82/D47).** `crossover_surface.json` records `git_commit: 5909af66` and **no working-tree flag**, so
+the run that produced it could in principle have used uncommitted code — a staleness one commit
+further out than the one D14.4 covers, and therefore easy to miss. **Settled by extraction, not by
+argument:** the recorded commit was extracted with `git archive` into a tree with **no `.git`
+directory, so an uncommitted modification was not even possible**, and its own `run_crossover.py` was
+run at `Re=5000`, `N=64`, `dt=5e-4`, `A=0.2`, `W=0.25`, `seed=20260925`, ranks 16 and 32, horizons
+through `t=2.0` (160 s wall clock, BLAS threads pinned to 1). It returned
+**`t* = 0.6493281145096707` and `t* = 1.4816252539052939` — bit-for-bit identical to the committed
+artifact, as was every ratio inside both crossing brackets** (`[0.5, 1.0]` and `[1.0, 2.0]`). A run on
+uncommitted code would have had to produce coincidentally identical doubles. `solvers/ns_psi.py` and
+`solvers/forcing.py` are additionally **md5-identical** between `5909af66` and `HEAD`, and
+`run_crossover.py` differs from `HEAD` only by the additive `provenance()` helper.
+
+**A second claim this established, which had been an assumption: the rows are PATH-INDEPENDENT.** A
+500-step run to `t=0.25` reproduced the 16 000-step run's ratios at `t=0.1` and `t=0.25` exactly
+(`0.00e+00` relative difference, exact float equality), so **a row depends only on the trajectory up
+to that time, not on the horizon list or on `final_time`.** That is what makes a short run a valid
+reproduction of a long one, and therefore what makes this class of check cheap enough to run
+routinely — a 500-step check of the central number costs 12 seconds.
 
 **The Re dependence is `2.8%` at `r=16` and `8.6%` at `r=32`** (`0.667/0.649` and `1.609/1.482`).
 **WITHDRAWN (D29.2–D29.3): the earlier `0.989`/`1.037` "1–4%" figures, and the "three independent
