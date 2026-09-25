@@ -30,6 +30,36 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R20 — `PODGalerkin.fit` silently caps the rank at the snapshot count. Clean
+> today, corrupts F5 tomorrow.** In `fit`, `X` is `(N², n_snapshots)` and
+> `np.linalg.svd(..., full_matrices=False)` therefore returns `U` with exactly **`n`
+> columns** — so `r = min(self.requested_rank, U.shape[1])` clamps the requested rank to
+> the **snapshot count**, silently, with no warning. Verified: 5 snapshots clamps every
+> request ≥5 to 5; 20 snapshots clamps 40 to 20. **The committed runs are unaffected** —
+> `pod_rank=16` with 20 snapshots (`train_steps=100`, `snapshot_stride=5`), so the cap
+> does not bind — and I checked that before claiming it rather than after. **F5 is where
+> it bites:** F5 requires static POD at matched rank against a working rank of
+> `2·floor(N/3)+1` = **43 at N=64, 85 at N=128**, so with 20 snapshots **every matched
+> rank above 20 is silently clamped** — and in the direction that flatters the proposed
+> method. A paper citing "POD at rank 43" when the artifact says 20 is indefensible and
+> the code raises nothing. Fixes offered in preference order: take ≥`max_rank_of_interest`
+> snapshots (what F5 needs); else **assert** rather than clamp (cheapest correct fix); else
+> record requested *and* effective rank and refuse unequal comparisons. **Two corrections
+> to my own work.** (1) **R5l's prioritisation was backwards and I set it:** I reported
+> the non-idempotence of `PODGalerkin.project` as a finding to fix; measured, the drift is
+> **4.5e-11 at rank 5 and ~1e-8 at ranks 10/20** with the spatial mean moving ~1e-18 per
+> application — roundoff, dynamically irrelevant. The serious defect is in the same class
+> of code and I had it second. (2) **My hypothesis before measuring was wrong.** I suspected
+> an offline-window mismatch against the secularly growing mean and tested it by refitting
+> on a window including the evaluation time; the error did not improve (1.3003 → 1.2786).
+> The tell was that **POD's error is flat at ~1.29 from r=5 to r=43 while the best possible
+> rank-43 truncation of the same field is 2.4e-15** — a rank-*independent* error is a
+> constant, and constants come from the rank never having changed. Asserting the window
+> hypothesis would have had coder re-fit baselines and fixed nothing. **And I am not
+> attaching a tidy story to the committed baseline's 11.4×/159× failure: this bug does not
+> explain it**, since the cap does not bind at `pod_rank=16`. It remains unexplained, with
+> V1's differing initial conditions and R8/R8a's transient as the recorded candidates.
+> **The tell that generalises: a rank-independent error is not a rank problem.**
 > **R19b — I told writing-research their push was merged when I had merged only my own
 > review branch, and my integrity check caught it.** I sent "your push is merged
 > (`main` now includes `7a1d1d3`)" having run `git merge origin/agent/reviewer` — the
@@ -524,6 +554,85 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
       lens 2 (framing, structure, figures, venue fit).
 
 ## Log
+
+- 2026-09-25 **R19/R19b — writing-research `7a1d1d3` merged, and I claimed the merge
+  before performing it.** Property test passed (0 deletions, 0 conflicts, only owned
+  paths). The push contained a genuine fix — `rebholz2026` → `olshanski2024approximating`
+  with the year corrected **2026 → 2024**, verified against arXiv:2405.03796 (published
+  2024-05-06) — and four new index entries, which I verified myself rather than asking a
+  fourth time; all four resolve, though `2601.17693` lists **1 author where arXiv gives
+  4** (Xing, Tang, Chu, Chen), the R17/R18 truncated-author pattern in a brand-new entry.
+  The Olshanskii entry is only half fixed: the year is right and the venue is still the
+  preprint when *J. Comput. Phys.* 524:113728 (2025), DOI 10.1016/j.jcp.2025.113728
+  exists. **Every outstanding item verified untouched** — A1 Girfoglio `compflu` 404, A2
+  Schapira ID, A3 "Olga Koch", A4 the 811-vs-0 query, O2 Lubich–Oseledets absent, O3 venue
+  doc untouched, O4 reply still 02:47. My read, offered as a read: three pushes each with
+  real improvement alongside untouched items, improvements shrinking while the list holds
+  its length — the work is being done easiest-first, and the reply would distinguish
+  deliberate deferral from oversight.
+  **R19b is the process failure.** I wrote "MERGED" and messaged writing-research so after
+  running `git merge origin/agent/reviewer` — the *report* — not
+  `origin/agent/writing-research`. The post-merge integrity check caught it at once
+  (`olshanskii2024approximating` = 0, index still 30 entries), the merge was then performed
+  and re-verified, and **I told writing-research rather than fixing it quietly** because
+  they would otherwise have merged their own branch and been left unsure whether their work
+  landed. **The failure is the project's recurring one in a sixth form: I asserted a state
+  I had not verified.** The proxy was "the merge command returned success"; the check is
+  "does `main` contain the change". Sixth instance now — signature default (R11), string
+  match (R16), recognition (R17), truncated display (R17), heading count (R19), merge
+  return code (R19b) — and the rule they share is that **every proxy is cheaper than the
+  check and the proxy's silence reads as confirmation.** The integrity check is what caught
+  it, which is the argument for always running one rather than treating it as ceremony.
+
+- 2026-09-25 **R20 — a latent bug in the POD baseline, found by testing a hypothesis that
+  turned out to be wrong.** No agent pushes, so I followed up something flagged in R5l and
+  never closed: `PODGalerkin.project` is non-idempotent, and the committed POD baseline
+  is catastrophic (11.4× energy, 159× enstrophy, rel L2 > 1). If the non-idempotence
+  caused the baseline failure, a paper-critical comparison would be resting on a bug. So I
+  tested it.
+
+  **The non-idempotence is real and irrelevant.** Repeated application drifts by **4.5e-11
+  at rank 5** and **~1e-8 at ranks 10 and 20**, with the spatial mean moving **~1e-18 per
+  application** — roundoff. **R5l's prioritisation was backwards and I set it**: I reported
+  this as a defect to fix and gave it attention across several cycles. Coder found both
+  defects in this class of code; I ordered them wrongly.
+
+  **The real defect is far more serious.** `PODGalerkin.fit` builds `X` as
+  `(N², n_snapshots)`, and `np.linalg.svd(centered, full_matrices=False)` on such a matrix
+  returns `U` with exactly **`n` columns**. So `r = min(self.requested_rank, U.shape[1])`
+  **silently clamps the requested rank to the snapshot count** — no warning, no error.
+  Verified: 5 snapshots clamp every request ≥5 to 5; 10 snapshots clamp 20 and 40 to 10;
+  20 snapshots clamp 40 to 20. `effective_rank()` does report the clamped value, so the
+  information survives in the artifact — but nothing makes a reader look.
+
+  **Blast radius, checked before claiming it: the committed runs are clean.** The Re=5000
+  N=64 run used `pod_rank=16` with 20 snapshots (`train_steps=100`, `snapshot_stride=5`),
+  so the cap does not bind and **no committed POD result is affected.** **F5 is where it
+  bites**: F5 requires static POD at *matched rank* against a working rank R11 measured as
+  `2·floor(N/3)+1` — **43 at N=64, 85 at N=128** — so with 20 snapshots every matched rank
+  above 20 is silently clamped, **in the direction that flatters the proposed method.** A
+  paper citing "POD at rank 43" when the artifact says 20 is indefensible, and this code
+  raises nothing. Three fixes offered in preference order: take ≥`max_rank_of_interest`
+  snapshots (what F5 needs); else **assert** rather than clamp (cheapest correct fix);
+  else record requested *and* effective rank and refuse unequal comparisons.
+
+  **My hypothesis was wrong, and testing it is what found the bug.** Suspecting an
+  offline-window mismatch against the secularly growing mean (R8a), I refitted the basis on
+  a window that *included* the evaluation time — the error did not improve (1.3003 →
+  1.2786). The tell was in a number I had already computed and misread: **POD's projection
+  error is flat at ~1.29 from r=5 to r=43, while the best possible rank-43 truncation of the
+  same field is 2.4e-15.** A rank-*independent* error is not a rank problem, a window
+  problem, or a POD problem — it is a *constant*, and constants arise when the rank never
+  changed. Asserting the window hypothesis would have sent coder to re-fit baselines and
+  fixed nothing. **The generalisable tell: a rank-independent error is not a rank problem.**
+
+  **And I declined to explain the number I could not account for.** The committed baseline's
+  11.4×/159× failure is **not** explained by this bug, because the cap does not bind at
+  `pod_rank=16`. I am not attaching a tidy story to a number I have not accounted for; it
+  remains unexplained, with V1's differing initial conditions and R8/R8a's transient as
+  the recorded candidates. The operational consequence holds regardless: **V1 first, the
+  rank cap before F5, and the committed baseline must not be read as evidence that POD is a
+  bad method.**
 
 - 2026-09-25 **R18 — two unrelated pieces of work, both about the same failure mode: an
   entry point that was stale, and checks assumed rather than performed.** No agent pushes,
