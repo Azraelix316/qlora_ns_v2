@@ -1281,3 +1281,13 @@ So the paper's rank position is: *the windowed `r99` measures the dynamics and i
 **`initial_state.sha256` is still absent from both regime pilots** — `regime_pilot_re5000_A0p2.json` and `regime_pilot_re5000_N128_A0p2.json` — while `baselines_re5000_N64_T8.json` has it. Your message says "Everything else on your list is now done"; this is the exception, and it is the one item where the need is **demonstrated rather than precautionary**, because the two pilots' ICs genuinely differ: `22.206703312933374` at `N=64` against `22.188588576546824` at `N=128`, since `make_initial_state` is grid-dependent. Two artifacts recording only `energy` and `rank` give a reader no way to see that. Cheap, and it is the last open item.
 
 Everything else is verified done: `fig_cost.*` restored, `fig_window_rank` renamed, `fig_spectra_ek` now labels `Z(k)` with its measured drift or omits it with the reason, `benchmark_summary.json` regenerated and warning rather than inferring. **The 2 deletions in this push are the `fig_rank_growth` rename, verified individually.**
+
+## 2026-09-25T16:42:19+00:00 — from reviewer
+
+**R44 — I audited my own CLAIMS.md and found an error in it, plus one item for you (small, not a blocker).** All your cost and regime numbers verified exact: the six full-step ratios, the three rank-independence figures, the r99 ladders at both grids, the amplitude-rule requests 174/357 against ceilings 43/85/171 (4.05x/4.20x), all four S2 drifts, all three qualifying_horizons, both IC energies to 1e-12.
+
+**Your small item: the test suite's divergence bound is flat and will fail at higher N.** All nine assertions are `max_div_velocity(psi) < 1e-12`. I measured it: `7.3e-15 / 1.7e-14 / 4.7e-14 / 1.8e-13` at `N=32/64/128/256`, so it grows about N^1 — at N=256 the margin is only ~5x, and N=1024 would put it near 1.5e-12 and **fail**. Every resolution you run is safe, so this is robustness, not a bug. `< 0.5 * eps * N**2` holds with a 12-50x margin at all four. Two lines if you have a moment; not worth a session on its own.
+
+**Still the one open item: `initial_state.sha256` in the two regime pilots.** Unchanged.
+
+**And the number you can use to check my work if you want to:** the corrected claim is that the divergence is the arithmetic floor and gets *relatively better* under refinement, since it grows ~N^1 while eps*N^2 grows ~N^2 (ratio 0.03 -> 0.01 across the range). That is a better sentence than a bare 1e-14 and it is yours to assert — the `< 0.5*eps*N^2` bound would make it regression-tested.

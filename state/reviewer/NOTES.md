@@ -30,6 +30,41 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R44 — I audited `CLAIMS.md` before anyone could, and it was not clean: 29 numbers
+> verified exact, 1 real error, 1 of my own numbers struck.** I wrote that file in one pass
+> from my own 55 reports and pushed it unexamined — the same mistake I spend this project
+> catching in other agents' work, made on my own artifact. The audit walked all 13 result
+> artifacts field by field. **Verified exact:** the `r99` ladders at both grids (5/5 each),
+> the amplitude-rule requests `174`/`357` and ceilings `43/85/171`, the four S2 drifts
+> (`8.79%`/`23.47%`/`2.22%`/`24.66%`), the three `qualifying_horizons`, both IC energies to
+> `1e-12`, **all 6 full-step cost ratios**, all 3 rank-independence figures, the zonal share,
+> and the three `baselines` non-citable flags. **Six apparent mismatches were my script's
+> key-name guess, not the data** (`full_step_ratio_vs_reference`, `amp_1e-6`) — resolved by
+> re-reading the artifact, not by loosening the check. **THE ERROR, mine: §4 stated the
+> committed divergence range as `1e-14 … 2.2e-13` when the true range over all artifacts is
+> `2.32e-14 … 2.24e-13`** — I had taken the lower bound from a remembered figure, so the
+> claim was optimistic at its most-quoted end. **AND A NUMBER STRUCK: `5.8e-15` is
+> withdrawn.** R25 quoted it at `N=32` and R30 repeated it; re-measuring gives `7.3e-15`,
+> because R25's harness recorded no setup, so the number cannot be reproduced from anything.
+> That is the R27 failure exactly — *provenance beats fingerprint* — and I had been
+> propagating a measurement whose only surviving record was my own memory of having made it,
+> for nineteen cycles. **Replaced by a better claim:** the divergence grows ≈`N¹`
+> (`7.3e-15 / 1.7e-14 / 4.7e-14 / 1.8e-13` at `N=32/64/128/256`) while `eps·N²` grows ≈`N²`,
+> so the ratio to the floating-point floor **falls by an order of magnitude** across the
+> range. That makes it a property of the *representation* rather than of the scheme, and it
+> is what the paper should say instead of a bare `≈1e-14`. **One suspicion of mine was
+> wrong and cost one grep to discard:** I expected no test to assert the divergence bound
+> numerically; there are **nine**, all `< 1e-12`, plus a diagnostic test that checks the
+> diagnostic does not fire on a divergence-free perturbation of equal size. **But the bound
+> is flat, and the measurement shows that is latent:** at `N=256` the `1.8e-13` leaves only
+> ~`5×` margin, and `N¹` growth puts `N=1024` near `1.5e-12`, where the assertion would
+> **fail**. Every resolution the project runs is safe, so this is a small robustness item,
+> not a blocker; `< 0.5·eps·N²` would hold with a `12–50×` margin at all four. **The rule
+> this earns, now CHECKLIST §1.1: a document that supersedes other documents must be audited
+> against the artifacts before it is pushed, not after** — and an authoritative summary
+> inherits every unverified number it contains **with more authority than the originals had**,
+> so reading a number as "already checked" because it came from my own earlier work is the
+> same error as reading a default as a record of what was run.
 > **R43 — PROCESS FIX, and the artifact I should have built twenty cycles ago:
 > `state/reviewer/CLAIMS.md`.** My outboxes had become unusable — **1 285 lines to `coder`,
 > 1 107 to `writer`**, 55 reports — and the writer's draft has been frozen for twelve hours
@@ -1224,6 +1259,66 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R44 — I audited `CLAIMS.md` before anyone else could, and it was not clean:
+  29 numbers verified exact, 1 real error, 1 of my own numbers struck.**
+  I wrote `CLAIMS.md` in one pass from my own 55 reports and pushed it unexamined — the same
+  mistake I spend this project catching in other agents' work, committed on my own artifact.
+  The audit walks all 13 result artifacts and compares field by field; the script is
+  `/tmp/opencode/audit_claims.py`.
+
+  **Verified exact (29):** the windowed `r99` ladders at both grids (5/5 each), the
+  amplitude-rule requests `174` (`N=64`) and `357` (`N=128`) against ceilings `43 / 85 / 171`
+  — i.e. `4.05×` and `4.20×`, the S2 drifts `8.79%`/`23.47%` at `T=4` and `2.22%`/`24.66%` at
+  `T=8`, the three `qualifying_horizons` (`[3.0]`, `[]`, `[]`), both IC energies to `1e-12`,
+  **all six full-step cost ratios** (`1.777 / 2.071 / 2.049 / 2.143 / 2.133 / 2.181`), all
+  three rank-independence figures (`1.165 / 1.046 / 1.022`), the zonal share `0.938`, and the
+  three `baselines` non-citable flags (`adaptive_rank = 1`, `A=0.5`, `sha256` present).
+
+  **Six apparent mismatches were my script's key-name guess, not the data** — the field is
+  `grids[].rows[].full_step_ratio_vs_reference`, not `full_step_ratio`, and the amplitude rule
+  is `window_rank_table[].amp_1e-6`, not `r_amp`. Both resolved to exact matches by
+  **re-reading the artifact rather than loosening the check**, which is the standing rule and
+  the only reason six "mismatches" did not become six accepted guesses.
+
+  **The error, and it was mine: §4 stated the committed divergence range as `1e-14 … 2.2e-13`
+  when the true range over every artifact is `2.32e-14 … 2.24e-13`.** I had taken the lower
+  bound from a remembered figure rather than from the minimum, so the claim was optimistic at
+  exactly the end that gets quoted.
+
+  **And a number struck: `5.8e-15` is withdrawn.** R25 quoted it at `N=32` and R30 repeated
+  it. Re-measuring gives **`7.3e-15`** at the same `N` — the discrepancy is not noise, it is
+  that R25's harness recorded no setup, so the number cannot be reproduced from anything.
+  **That is the R27 failure exactly — provenance beats fingerprint — and I had been propagating
+  a measurement whose only surviving record was my own memory of having made it, for nineteen
+  cycles.**
+
+  **Replaced by a stronger claim, since the measurement is better than the number was.** The
+  divergence grows ≈`N¹` — `7.3e-15 / 1.7e-14 / 4.7e-14 / 1.8e-13` at `N = 32/64/128/256` —
+  while `eps·N²` grows ≈`N²`, so the ratio to the floating-point floor **falls by an order of
+  magnitude** across the range (`0.03 → 0.01`). **That is what makes it a property of the
+  representation rather than of the scheme**, and it is the sentence the paper should use
+  instead of a bare `≈1e-14`. §4 now carries the table and its own setup, which is the
+  difference the strike is about.
+
+  **One suspicion of mine was wrong, and one grep discarded it.** I expected no test to assert
+  the divergence bound numerically, since it is `AGENTS.md`'s headline invariant. **There are
+  nine**, every one `assert grid.max_div_velocity(psi) < 1e-12`, plus
+  `test_divergence_diagnostic_detects_an_injected_violation`, which asserts the diagnostic
+  does **not** fire on a divergence-free perturbation of the same size. **But the bound is
+  flat, and my measurement shows that is latent rather than harmless:** at `N=256` the
+  `1.8e-13` leaves only ~`5×` margin, and `N¹` growth puts `N=1024` near `1.5e-12`, where the
+  assertion would **fail**. Every resolution the project actually runs is safe, so this is a
+  small robustness item and not a blocker; `< 0.5 · eps · N²` would hold with a `12–50×`
+  margin at all four. §4 records the margin so the next agent is not surprised.
+
+  **The rule this earns, now binding as CHECKLIST §1.1: a document that supersedes other
+  documents must be audited against the artifacts before it is pushed, not after** — and an
+  authoritative summary inherits every unverified number it contains **with more authority
+  than the originals had**. Reading a number as "already checked" because it came from my own
+  earlier work is the same error as reading a default as a record of what was run (R8). **A
+  number whose only surviving record is a remembered measurement is not admissible: strike it
+  and re-measure with the setup recorded.** The audit took twenty minutes; the numbers it
+  checked took nineteen cycles to accumulate.
 - 2026-09-25 **R43 — the artifact I should have built twenty cycles ago:
   `state/reviewer/CLAIMS.md`, after two rounds of the user telling me the process was
   producing bureaucracy the agents could not act on.**

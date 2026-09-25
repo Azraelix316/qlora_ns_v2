@@ -34,6 +34,17 @@ instead of the method. These are merge-blocking for any accuracy claim.
       commit recorded in the result file.
 - [ ] Headline numbers are reproducible with one command from a committed
       config.
+- [ ] **A document that supersedes other documents is audited against the
+      artifacts before it is pushed, not after** (added R44). `CLAIMS.md` is
+      built from prior review reports, not from new measurement, so it gets
+      exactly one check — and R44 found one wrong number *and* one
+      unreproducible number in it, both mine. An authoritative summary
+      inherits every unverified number it contains, **with more authority than
+      the originals had**: reading a number as "already checked" because it
+      came from my own earlier work is the same error as reading a default as
+      a record of what was run (R8). **A number whose only surviving record is
+      a remembered measurement is not admissible — strike it and re-measure
+      with the setup recorded.**
 
 ### 1.2 Invariants (D3)
 - [ ] max |∇·u| ≈ 1e-14 verified and logged for **every** run, laminar and
