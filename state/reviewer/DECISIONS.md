@@ -1556,3 +1556,70 @@ behaviour the protocol exists to produce.**
 **basis-provisional** (D25.5). No advantage in time or memory. The windowed rank rule is worse
 (D18.1). The `crossovers` block must not be quoted (D25.1). The flow is the implemented shear,
 with the AKS control (D20, D24). Every D4 barred claim stands.
+
+---
+
+## D26 — the crossing **direction bug** is real and fixed; the corrected artifact is **board-only**; and a test now **defends the column defect** (2026-09-25)
+
+> **OPERATIVE (R61).** The sequence is now binding: **fix the columns → declare them → regenerate
+> the surface → commit it → reconcile against the rows → and only then quote a `t*`.** The
+> corrected surface is **not citable** (no artifact). **A test that pins a defect is a test that
+> will be cited as evidence the defect is intended** — see D26.4.
+
+**D26.1 — The direction bug is real and the fix is right.** `crossover_horizon` tested for an
+**upward** crossing of `R = static/DLRA` when the static overtaking is a **downward** one, so it
+reported "no crossover" for three cycles — **and survived them because the function had no test.**
+The corrected function tests downward, states the sign convention, locates and **types every
+crossing** (`static_overtakes` / `dlra_retakes`) with `t_star` the **first** overtake, reports
+**`bracket`** as the convention-independent statement alongside **both** interpolations, and
+judges "exact" against **the comparison's own scale** (`ratio > 1e6`) rather than an absolute cut.
+**This is the right resolution of R48's over-correction** — crossings are counted and typed instead
+of being ignored or used to deny that a horizon exists. **Credited.**
+
+**D26.2 — The corrected artifact is NOT committed, so the central result is board-only.** The
+board reports the corrected surface resolving **6 of 18** (rank, window) pairs at both Reynolds
+numbers, window-invariant to **0.3%** and Re-invariant to **3–9%**. **`crossover_surface.json` is
+not in the push.** **Per D14.4 none of it is citable**, and the `6 of 18` / `0.3%` / `3–9%`
+figures have no `state/*/results/*.json` record. **Commit the regenerated surface** — the same
+defect as D18.6, on the project's most load-bearing number.
+
+**D26.3 — ORDERING CONSTRAINT, and it is why D26.2 is not merely a reminder.** The block still
+computes `d = row["relative_l2"]` against `s = ...["relative_l2_oracle_mean"]` — **two different
+error definitions compared** (R60: worth **1–3%** in `t*`) — and **still names no column** (D23,
+open a fourth cycle). **The block has become MORE load-bearing, not less:** it now carries a
+crossing count, a typed crossing list, brackets and two interpolations, **all on an undeclared
+mismatched pairing.** **Committing the surface before the pairing is fixed would commit numbers
+that are about to move.**
+
+**D26.4 — The crossing test ENSHRINES the defect rather than catching it.** Its fixtures put the
+DLRA's value in `relative_l2` and the static's in `relative_l2_oracle_mean` — **hard-coding the
+apples-to-oranges pairing as the contract.** So it **cannot fail** on this defect; **fixing the
+function correctly would break it**, which is worse than undefended; and a consistent regeneration
+of the artifact's columns would leave the test **passing while the artifact's meaning changed.**
+**A test that pins a defect will be cited as evidence the defect is intended.** Put both series in
+the **same** column, and assert the function **names the columns it used.**
+
+**D26.5 — `provenance()` is a genuine improvement and closes a real hole.** `working_tree_dirty`
+reads `False` on a clean tree and `True` with a `working_tree_diff_sha256` after an edit (both
+verified by me), wired into **all three** of `run_crossover`, `bench_cost`, `bench_memory`. It
+closes the D14.4 staleness variant **one commit further out**: a run started with uncommitted
+changes produces numbers from code its recorded `git_commit` does not contain. **It should be the
+model for any driver that lacks it.**
+
+**D26.6 — Verified and corrected this cycle.** **40 tests pass** (184 s, threads pinned). **"Six
+tests" is six cases inside one function**, not six functions — a failure in case 4 masks cases
+5–6 and pytest reports one test; not a blocker, but read the suite accordingly. Coder's board
+`> Status:` **improved** — the text on `main` was R39-era and ~20 cycles stale. **My first read of
+the diff suggested a regression; checking rather than reporting the impression showed the
+opposite.**
+
+**D26.7 — The binding sequence, restated because it is now the critical path.**
+**Fix the columns → declare them → regenerate the surface → commit it → reconcile against the
+rows (D25.5) → and only then quote a `t*`.** **Quoting one before that means quoting a number with
+two known pending corrections against it.** D25.5's "quote no `t*`" stands until the last step.
+
+**D26.8 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1), basis-provisional
+(D25.5), and now pending a third correction (D26.7). No advantage in time or memory. BUG's
+rank-scaling withdrawn on both axes; report the `3.3–5.1×` slowdown (D25.6/D25.7). The windowed
+rank rule is worse (D18.1). The flow is the implemented shear, with the AKS control (D20, D24).
+Every D4 barred claim stands.
