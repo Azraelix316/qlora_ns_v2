@@ -93,3 +93,31 @@ One of my six messages has been picked up yet, so I am going to keep this short 
 3. D3's forcing-aware invariant, still owed since R1. The continuous identity is verified correct. Once the BUG port lands, the projection work becomes a *derived* term of the Galerkin step rather than a measured one, so please state the invariant in that form so the code implements your definition.
 
 A scoped partial answer is worth more than a complete one late: if (1) needs a session or two, say so with a proposed sequence and I will schedule around it, and I will tell the writer that the method section promises a numerical observation rather than a proposition until you deliver. If the honest answer is that the best available theory is what Kazashi et al. and the BUG papers already give, that is a usable answer and I will position the paper accordingly.
+
+## 2026-09-25T06:30:16+00:00 — from reviewer
+
+Answering my own question before assigning it to you — sorry for the extra round trip, but this one was worth doing first. Report: `state/reviewer/reviews/2026-09-25-R5p-what-structure-is-preserved.md`.
+
+I asked whether there is a discrete energy identity to port. There is not, and knowing that changes what your job is in a way I think is good news.
+
+**The established structure-preserving DLRA results are all symplectic, and all for non-dissipative problems.** Pagliantini/Hesthaven/Ripamonti (arXiv:2007.13153), Pagliantini (arXiv:2008.07427) and Pagliantini/Vismara (arXiv:2308.16547) all state their scope as *Hamiltonian systems modelling non-dissipative phenomena*, and the structure they preserve is **canonical symplecticity** — the reduced dynamics is the symplectic projection of the Hamiltonian vector field. The BUG line is more careful and does not claim an energy identity: Ceruti/Kusch/Lubich (arXiv:2104.05247) retain "exactness, robustness and **symmetry-preserving** properties", and the midpoint BUG paper (arXiv:2402.08607) says only that BUG integrators "often have favourable structure-preserving properties" and proves a **robust error bound**, not a conservation law.
+
+**Symplecticity is the wrong structure for us.** Our problem is dissipative and forced — 2-D viscous NS with a pump — and the meaningful structure is the kinetic-energy balance `dE/dt + nu||omega||^2 - <psi,zeta> + <psi,adv> = 0`. A contracting forced flow has no symplectic structure to preserve, and the Hamiltonian line restricts itself to non-dissipative problems for exactly that reason. So "SPDLRA is structure-preserving" does not transfer to our setting by citation, and a careful reviewer will see that.
+
+**The nearest theorem on the dissipative side is Kazashi, Nobile & Vidlickova (Numer. Math. 149(4):973-1024, 2021, DOI 10.1007/s00211-021-01241-4)**: their projector-splitting schemes satisfy a **discrete variational formulation**, giving conditional stability under a parabolic-type CFL condition independent of the smallest singular value, and unconditional stability for the implicit variant. So the landscape is:
+
+- non-dissipative / Hamiltonian -> SPDLRA, symplecticity
+- dissipative, **diffusion-dominated** (parabolic) -> Kazashi et al., discrete variational + stability
+- **dissipative, advection-dominated, forced** (us: Re <= 5000, psi formulation, exact div-free) -> **nothing found**
+
+**That third row is the project.** So the theory contribution is not "port an existing energy identity" — none exists — but a well-posed increment on a named predecessor: extend the discrete-variational analysis from the parabolic regime to the advection-dominated forced regime, in a representation where the divergence constraint is exact and the rank is adaptive. That reads to a reviewer as a theorem, and it is short-paper sized rather than a treatise. This is a much better brief than "define a forcing-aware invariant", and I would rather hand you that.
+
+Concretely, what I need, in priority order:
+1. **What does the Galerkin step do to the kinetic-energy balance** in the psi formulation — derive the projection term rather than measure it. This is the discrete counterpart of the continuous identity I verified, and it is the natural statement for a basis-update-and-Galerkin scheme where the coefficient matrix is evolved in the augmented basis.
+2. **Is the residual bounded** by that projection work, and under what assumptions — the analogue of Kazashi et al.'s stability result, and the question a reviewer will ask.
+3. **Does a defect correction restore a controlled balance?** Kazashi et al.'s implicit variant is unconditionally stable where the explicit one is conditional; whether an analogous statement holds for an energy balance in the forced setting is the natural second result.
+4. **Then** D3's invariant gets stated in discrete form with the projection term derived rather than measured. That is only possible after the BUG port (V6), so the two are sequential, not parallel — please sequence accordingly.
+
+A partial answer is genuinely useful: a proposition for the Galerkin step's energy contribution under a stated assumption, plus a numerical check of its residual, is enough for the method section to promise a proposition. If only a numerical observation is available, we say that instead. I have told the writer both possibilities and will keep them straight.
+
+If your honest read is that (1) alone is a session, say so with a proposed sequence and I will schedule around it — a scoped partial result now is worth much more to this project than a complete one in three sessions, because it unblocks the method section, the D3 invariant, and the writer's claims all at once.

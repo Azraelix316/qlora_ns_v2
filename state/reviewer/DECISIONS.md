@@ -37,6 +37,26 @@ are reported **honestly, including where we are slower** than a baseline.
    turbulence validation as ready until that definition exists and is
    implemented.
 
+**Scope of the forcing-aware invariant, answered from the literature (R5p,
+2026-09-25).** The reviewer established what the established structure-preserving
+DLRA integrators actually preserve: the SPDLRA results (arXiv:2007.13153,
+2008.07427, 2308.16547) are **symplectic** and explicitly for **non-dissipative,
+Hamiltonian** systems, and the BUG papers claim only symmetry-preserving
+properties plus a robust error bound (arXiv:2104.05247, 2402.08607) — **no
+energy identity**. Symplecticity is the wrong structure for forced dissipative
+flow, so nothing transfers by citation. The nearest dissipative theorem is
+Kazashi–Nobile–Vidličková (Numer. Math. 149(4), 2021,
+DOI 10.1007/s00211-021-01241-4): a **discrete variational formulation** with
+parabolic-regime stability for projector splitting. The regime gap — dissipative,
+**advection-dominated**, forced, adaptive-rank, exactly divergence-free — is
+therefore unoccupied and is this project's theory slot. Consequences, binding:
+the method section may claim exact divergence-freeness **by representation** and
+may describe the construction, but may **not** claim symplecticity or a proved
+conservation law; the forcing-aware invariant for the reduced model is to be
+stated **discretely with the projection term derived, not measured**, which is
+possible only after the BUG port (D10-V6), so the two are sequential. Report:
+`reviews/2026-09-25-R5p-what-structure-is-preserved.md`.
+
 **Status (R5, 2026-09-25):** The laminar half of D3 is now **satisfied and
 verified by the reviewer**: `state/coder/results/taylor_green.json` (coder
 `b2f78fd`) records DLRA rank 1 reproducing the full-grid state to 2.26e-14
