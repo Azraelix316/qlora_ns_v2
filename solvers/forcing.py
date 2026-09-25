@@ -104,6 +104,10 @@ class FrozenVorticityForcing:
 
     def __init__(self, zeta: np.ndarray):
         self.zeta = np.asarray(zeta, dtype=float).copy()
+        self.mean_removed = float(np.mean(self.zeta))
+        # The stream-function inverse Laplacian is defined only for a
+        # zero-mean vorticity source; record and remove any supplied gauge.
+        self.zeta -= self.mean_removed
 
     def vorticity(self, grid: Grid2D, t: float = 0.0) -> np.ndarray:
         if self.zeta.shape != (grid.N, grid.N):

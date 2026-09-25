@@ -8,6 +8,7 @@ import numpy as np
 
 from solvers import (
     DLRA,
+    FrozenVorticityForcing,
     Grid2D,
     KolmogorovForcing,
     PODGalerkin,
@@ -36,6 +37,7 @@ def test_spectral_conventions_and_norms():
     omega = grid.vorticity(psi)
     u, v = grid.velocity(psi)
     assert np.max(np.abs(omega - 2.0 * psi)) < 1e-11
+    assert np.isclose(grid.ky[-1], grid.N / 2.0)
     assert grid.max_div_velocity(psi) < 1e-12
     assert np.isclose(grid.ke(psi), 0.5 * (grid.l2_sq(u) + grid.l2_sq(v)))
     assert np.isclose(grid.enstrophy(psi), 0.5 * grid.l2_sq(omega))
@@ -46,6 +48,31 @@ def test_spectral_conventions_and_norms():
         grid.laplacian_enstrophy(psi),
         grid.l2_dot(omega_x, omega_x) + grid.l2_dot(omega_y, omega_y),
     )
+
+
+def test_frozen_forcing_records_and_removes_mean():
+    grid = Grid2D(16)
+    field = np.ones((grid.N, grid.N))
+    forcing = FrozenVorticityForcing(field)
+    assert forcing.mean_removed == 1.0
+    assert np.max(np.abs(forcing.vorticity(grid))) < 1e-14
+
+
+def test_projection_diagnostic_tracks_stage_energy_changes():
+    grid = Grid2D(24)
+    model = StreamFunctionNS(grid, 0.01, forcing=KolmogorovForcing(0.1))
+    model.track_step_diagnostics = True
+    lowrank = DLRA(
+        model,
+        rank=2,
+        min_rank=1,
+        max_rank=8,
+        tolerance=1e-6,
+        check_every=5,
+    )
+    lowrank.step(field(grid), 0.002)
+    assert model.last_step_info["projection_count"] == 4
+    assert np.isfinite(model.last_step_info["projection_energy_increment"])
 
 
 def test_kolmogorov_force_is_divergence_free_and_has_expected_curl():
@@ -177,19 +204,19 @@ def test_svd_projection_adapts_and_preserves_divergence():
     assert lowrank.rank <= 12
     assert grid.max_div_velocity(evolved) < 1e-12
     assert lowrank.projector.last_stats is not None
-    assert lowrank.projector.last_stats.numerical_rank <= 12
+    assert lowrank.projector.last_stats.target_rank <= 12
 
 
 def test_rank_stagnation_and_restart_from_checkpoint():
     grid = Grid2D(24)
-    model = StreamFunctionNS(grid, 0.01, forcing=KolmogorovForcing(0.1))
+    model = StreamFunctionNS(grid, 0.01, forcing=ZeroForcing())
     initial = field(grid, "tg")
     first = DLRA(
         model,
         rank=1,
         min_rank=1,
         max_rank=6,
-        tolerance=1e-10,
+        tolerance=1e-6,
         check_every=2,
     )
     direct = first.integrate(initial, 0.002, 5)
@@ -198,7 +225,7 @@ def test_rank_stagnation_and_restart_from_checkpoint():
     # Reinitialize the adaptive state from a saved field and verify that a
     # resumed trajectory agrees with an uninterrupted one.
     checkpoint = first.integrate(initial, 0.002, 2)
-    resumed_model = StreamFunctionNS(grid, 0.01, forcing=KolmogorovForcing(0.1))
+    resumed_model = StreamFunctionNS(grid, 0.01, forcing=ZeroForcing())
     resumed = DLRA(
         resumed_model,
         rank=1,

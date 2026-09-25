@@ -23,10 +23,10 @@ class Grid2D:
         self.n = N * N
         # numpy's rfftn leaves axis 0 full and halves axis 1.  The physical
         # coordinates use the same convention: x is axis 0, y is axis 1.
-        # fftfreq returns cycles per unit length; convert to angular
+        # fftfreq/rfftfreq return cycles per unit length; convert to angular
         # wavenumbers (the default L=2*pi therefore gives integer modes).
         kx = 2.0 * np.pi * np.fft.fftfreq(N, d=L / N)
-        ky = 2.0 * np.pi * np.fft.fftfreq(N, d=L / N)[: N // 2 + 1]
+        ky = 2.0 * np.pi * np.fft.rfftfreq(N, d=L / N)
         self.kx = kx
         self.ky = ky
         self.k2 = kx[:, None] ** 2 + ky[None, :] ** 2

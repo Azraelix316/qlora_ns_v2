@@ -75,11 +75,19 @@ class StreamFunctionNS:
         self.forcing = ZeroForcing() if forcing is None else forcing
         self.dealias = bool(dealias)
         self.step_count = 0
+        self.track_step_diagnostics = False
+        self.last_step_info: dict = {}
 
     # -- operators ---------------------------------------------------------
+    def _dealias_field(self, field: np.ndarray) -> np.ndarray:
+        if not self.dealias:
+            return field
+        return self.grid.ifft(self.grid.fft(field) * self.grid.dealias_mask)
+
     def advection(self, psi: np.ndarray) -> np.ndarray:
         """Return ``(u.grad) omega`` with optional 2/3 dealiasing."""
         grid = self.grid
+        psi = self._dealias_field(psi)
         u, v = grid.velocity(psi)
         omega = grid.vorticity(psi)
         omega_x, omega_y = grid.grad(omega)
@@ -108,6 +116,12 @@ class StreamFunctionNS:
         return self.grid.ifft(np.exp(-self.nu * self.grid.k2 * dt) * F)
 
     # -- integration --------------------------------------------------------
+    @staticmethod
+    def _apply_projector(projector: Projector, field: np.ndarray, stage: str) -> np.ndarray:
+        if hasattr(projector, "project_stage"):
+            return projector.project_stage(field, stage)
+        return projector(field)
+
     def step(
         self,
         psi: np.ndarray,
@@ -127,22 +141,51 @@ class StreamFunctionNS:
         state = np.asarray(psi, dtype=float)
         state = state - np.mean(state)
         state = self.diffuse(state, 0.5 * dt)
+        projection_energy = 0.0
         if projector is not None:
-            state = np.asarray(projector(state), dtype=float)
+            before = self.grid.ke(state) if self.track_step_diagnostics else 0.0
+            state = np.asarray(
+                self._apply_projector(projector, state, "after_diffusion_half"),
+                dtype=float,
+            )
+            if self.track_step_diagnostics:
+                projection_energy += self.grid.ke(state) - before
 
         y0 = self.nonlinear_forcing(state, t)
         midpoint = state + 0.5 * dt * y0
         if projector is not None:
-            midpoint = np.asarray(projector(midpoint), dtype=float)
+            before = self.grid.ke(midpoint) if self.track_step_diagnostics else 0.0
+            midpoint = np.asarray(
+                self._apply_projector(projector, midpoint, "after_midpoint"),
+                dtype=float,
+            )
+            if self.track_step_diagnostics:
+                projection_energy += self.grid.ke(midpoint) - before
         ymid = self.nonlinear_forcing(midpoint, t + 0.5 * dt)
         state = state + dt * ymid
         if projector is not None:
-            state = np.asarray(projector(state), dtype=float)
+            before = self.grid.ke(state) if self.track_step_diagnostics else 0.0
+            state = np.asarray(
+                self._apply_projector(projector, state, "after_nonlinear"),
+                dtype=float,
+            )
+            if self.track_step_diagnostics:
+                projection_energy += self.grid.ke(state) - before
 
         state = self.diffuse(state, 0.5 * dt)
         if projector is not None:
-            state = np.asarray(projector(state), dtype=float)
+            before = self.grid.ke(state) if self.track_step_diagnostics else 0.0
+            state = np.asarray(
+                self._apply_projector(projector, state, "after_diffusion_half_final"),
+                dtype=float,
+            )
+            if self.track_step_diagnostics:
+                projection_energy += self.grid.ke(state) - before
         self.step_count += 1
+        self.last_step_info = {
+            "projection_energy_increment": float(projection_energy),
+            "projection_count": 0 if projector is None else 4,
+        }
         return state
 
     def integrate(

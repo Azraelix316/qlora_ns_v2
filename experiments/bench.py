@@ -60,7 +60,7 @@ def main() -> None:
             dlra_tolerance=args.dlra_tolerance,
         )
         case_path = args.output_dir / f"kolmogorov_re{re}_N{args.N}.json"
-        case_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+        case_path.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n")
         summary.append(
             {
                 "re": re,
@@ -76,7 +76,7 @@ def main() -> None:
                 "dlra_s_per_step": result["dlra"]["wall_seconds_per_step"],
             }
         )
-        print(json.dumps(summary[-1], sort_keys=True))
+        print(json.dumps(summary[-1], sort_keys=True, allow_nan=False))
     aggregate = args.output_dir / f"benchmark_summary_N{args.N}.json"
     aggregate.write_text(
         json.dumps(
@@ -88,6 +88,7 @@ def main() -> None:
             },
             indent=2,
             sort_keys=True,
+            allow_nan=False,
         )
         + "\n"
     )

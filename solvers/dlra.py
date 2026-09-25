@@ -1,13 +1,15 @@
 """Dynamical low-rank projection and adaptive-rank driver.
 
-The implementation uses a stream-function field as the state and applies a
-rank-r real SVD projector at every split-stage boundary.  This is a direct
-Riemannian-projection form of a structure-preserving DLRA discretisation: any
-linear combination of stream functions remains exactly divergence-free, while
-the nonlinear term is evaluated on the current reduced state before projection.
-The SVD is intentionally kept explicit (rather than hidden in a factorized
-implementation) so singular-value diagnostics and honest wall-clock costs are
-reproducible.
+This module implements a *projected stream-function DLRA* discretization:
+the nonlinear residual is evaluated on the current full field, then an
+explicit SVD projector is applied at split-stage boundaries.  It is not a
+claim that the factor ODEs of a factorized Fourier DLRA have been eliminated;
+the experiment driver reports the resulting SVD cost honestly.
+
+The stream-function constant is an irrelevant gauge.  SVD inputs are centered,
+but the truncated reconstruction is not mean-subtracted a second time (that
+would add a rank-one constant).  The integrator centers before physical
+operators, so divergence-freeness is unaffected.
 """
 from __future__ import annotations
 
@@ -32,14 +34,7 @@ class RankStats:
 
 
 class SVDProjector:
-    """Rank-r projector with an optional adaptive target rank.
-
-    Inputs are centered before the SVD because the stream-function constant is
-    an irrelevant gauge.  The truncated reconstruction is returned without a
-    second mean subtraction: that subtraction would add a rank-one constant
-    matrix.  The integrator discards the constant before applying physical
-    operators, and error diagnostics compare centered states.
-    """
+    """Rank-r projector with candidate-stage tracking and rank adaptation."""
 
     def __init__(
         self,
@@ -49,26 +44,30 @@ class SVDProjector:
         max_rank: int = 64,
         tolerance: float = 1e-6,
     ):
-        if not 0 < min_rank <= max_rank:
+        integer_values = (rank, min_rank, max_rank)
+        if any(int(value) != value for value in integer_values):
+            raise ValueError("rank, min_rank, and max_rank must be integers")
+        if not 0 < int(min_rank) <= int(max_rank):
             raise ValueError("require 0 < min_rank <= max_rank")
-        if not min_rank <= rank <= max_rank:
+        if not int(min_rank) <= int(rank) <= int(max_rank):
             raise ValueError("rank must lie between min_rank and max_rank")
-        if not 0.0 < tolerance < 1.0:
+        if not 0.0 < float(tolerance) < 1.0:
             raise ValueError("tolerance must lie in (0,1)")
+        if int(min_rank) > grid.N:
+            raise ValueError("min_rank cannot exceed the physical matrix rank")
         self.grid = grid
         self.min_rank = int(min_rank)
-        self.max_rank = int(max_rank)
-        self.rank = int(rank)
+        # A square N x N physical field cannot have rank above N.
+        self.max_rank = min(int(max_rank), grid.N)
+        self.rank = min(int(rank), self.max_rank)
         self.tolerance = float(tolerance)
         self.last_stats: Optional[RankStats] = None
         self.last_singular_values = np.empty(0, dtype=float)
-        # The final projector call in a split step sees the untruncated
-        # candidate.  Retaining its factors lets rank adaptation see modes
-        # that the current low-rank projection discarded, so growth is real
-        # rather than an artifact of re-inspecting an already projected state.
         self._last_u: Optional[np.ndarray] = None
         self._last_s: Optional[np.ndarray] = None
         self._last_vh: Optional[np.ndarray] = None
+        self._last_centered: Optional[np.ndarray] = None
+        self._stage_candidates: dict[str, tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]] = {}
 
     def _svd(self, field: np.ndarray):
         centered = np.asarray(field, dtype=float)
@@ -76,6 +75,8 @@ class SVDProjector:
             raise ValueError(
                 f"field shape {centered.shape} does not match grid {(self.grid.N, self.grid.N)}"
             )
+        if not np.isfinite(centered).all():
+            raise FloatingPointError("cannot SVD-project a non-finite state")
         centered = centered - np.mean(centered)
         u, s, vh = np.linalg.svd(centered, full_matrices=False)
         return centered, u, s, vh
@@ -86,11 +87,25 @@ class SVDProjector:
         numerical = int(np.count_nonzero(s > self.tolerance * s[0]))
         return max(self.min_rank, min(self.max_rank, numerical))
 
-    def _record_svd(self, centered: np.ndarray, u: np.ndarray, s: np.ndarray, vh: np.ndarray) -> None:
+    def _record_svd(
+        self,
+        centered: np.ndarray,
+        u: np.ndarray,
+        s: np.ndarray,
+        vh: np.ndarray,
+        stage: Optional[str] = None,
+    ) -> None:
+        self._last_centered = centered
         self._last_u = u
         self._last_s = s
         self._last_vh = vh
-        numerical = int(np.count_nonzero(s > self.tolerance * s[0])) if s.size and s[0] > 0 else 0
+        if stage is not None:
+            self._stage_candidates[stage] = (centered, u, s, vh)
+        numerical = (
+            int(np.count_nonzero(s > self.tolerance * s[0]))
+            if s.size and s[0] > 0
+            else 0
+        )
         self.last_stats = RankStats(
             target_rank=self.rank,
             numerical_rank=numerical,
@@ -98,51 +113,77 @@ class SVDProjector:
         )
         self.last_singular_values = s.copy()
 
-    def _reconstruct(self, centered: np.ndarray, u: np.ndarray, s: np.ndarray, vh: np.ndarray) -> np.ndarray:
+    def _reconstruct(
+        self,
+        centered: np.ndarray,
+        u: np.ndarray,
+        s: np.ndarray,
+        vh: np.ndarray,
+    ) -> np.ndarray:
         r = min(self.rank, s.size)
         if r:
             out = (u[:, :r] * s[:r]) @ vh[:r, :]
         else:
             out = np.zeros_like(centered)
-        # Do not subtract the reconstruction's mean here.  The stream
-        # function has an irrelevant constant gauge; subtracting it after a
-        # truncated SVD would add a rank-one constant and destroy exact rank
-        # preservation.  The integrator centers the state before each physical
-        # operator, and diagnostics use the centered field.
+        # Do not subtract the reconstruction's mean here; see module docstring.
         return out
 
-    def project(self, field: np.ndarray, adapt: bool = False) -> np.ndarray:
-        """Project ``field`` onto the current (or newly selected) rank-r space."""
+    def project(
+        self,
+        field: np.ndarray,
+        adapt: bool = False,
+        stage: Optional[str] = None,
+    ) -> np.ndarray:
+        """Project ``field`` and optionally record the untruncated candidate."""
         centered, u, s, vh = self._svd(field)
-        self._record_svd(centered, u, s, vh)
+        self._record_svd(centered, u, s, vh, stage=stage)
         if adapt:
             self.rank = self._target_from_spectrum(s)
-        out = self._reconstruct(centered, u, s, vh)
-        return out
+        return self._reconstruct(centered, u, s, vh)
+
+    def project_stage(self, field: np.ndarray, stage: str) -> np.ndarray:
+        return self.project(field, adapt=False, stage=stage)
 
     def __call__(self, field: np.ndarray) -> np.ndarray:
         return self.project(field, adapt=False)
 
+    def candidate(self, stage: str):
+        """Return the retained untruncated SVD candidate for a named stage."""
+        return self._stage_candidates.get(stage)
+
+    def _set_rank_from_candidate(self, candidate) -> None:
+        centered, u, s, vh = candidate
+        self.rank = self._target_from_spectrum(s)
+        self._last_centered, self._last_u, self._last_s, self._last_vh = candidate
+        numerical = (
+            int(np.count_nonzero(s > self.tolerance * s[0]))
+            if s.size and s[0] > 0
+            else 0
+        )
+        self.last_stats = RankStats(
+            target_rank=self.rank,
+            numerical_rank=numerical,
+            singular_values=s.copy(),
+        )
+        self.last_singular_values = s.copy()
+
     def adapt(self, field: np.ndarray) -> np.ndarray:
-        """Select rank from the spectrum and return the projected state."""
+        """Select rank from a supplied field and return its projection."""
         return self.project(field, adapt=True)
 
+    def adapt_candidate(self, candidate) -> np.ndarray:
+        """Select rank from a retained untruncated stage candidate."""
+        if candidate is None:
+            raise RuntimeError("no retained stage candidate is available")
+        self._set_rank_from_candidate(candidate)
+        return self._reconstruct(*candidate)
+
     def adapt_last(self) -> np.ndarray:
-        """Adapt using the unprojected candidate from the latest projector call."""
+        """Adapt using the most recently recorded SVD candidate."""
         if self._last_u is None or self._last_s is None or self._last_vh is None:
             raise RuntimeError("no projector candidate is available")
-        self.rank = self._target_from_spectrum(self._last_s)
-        if self.last_stats is not None:
-            self.last_stats = RankStats(
-                target_rank=self.rank,
-                numerical_rank=self.last_stats.numerical_rank,
-                singular_values=self.last_stats.singular_values,
-            )
-        return self._reconstruct(
-            (self._last_u * self._last_s) @ self._last_vh,
-            self._last_u,
-            self._last_s,
-            self._last_vh,
+        return self.adapt_candidate(
+            (self._last_centered, self._last_u, self._last_s, self._last_vh)
         )
 
 
@@ -157,9 +198,10 @@ class DLRA:
         max_rank: int = 64,
         tolerance: float = 1e-6,
         check_every: int = 5,
+        adapt_initial: bool = False,
     ):
-        if check_every < 1:
-            raise ValueError("check_every must be positive")
+        if int(check_every) != check_every or check_every < 1:
+            raise ValueError("check_every must be a positive integer")
         self.model = model
         self.projector = SVDProjector(
             model.grid,
@@ -169,6 +211,7 @@ class DLRA:
             tolerance=tolerance,
         )
         self.check_every = int(check_every)
+        self.adapt_initial = bool(adapt_initial)
         self.steps = 0
         self.rank_history: list[int] = [self.projector.rank]
         self.spectrum_history: list[np.ndarray] = []
@@ -178,19 +221,44 @@ class DLRA:
         return self.projector.rank
 
     def initialize(self, psi: np.ndarray) -> np.ndarray:
-        return self.projector.project(np.asarray(psi, dtype=float))
+        field = np.asarray(psi, dtype=float)
+        if self.adapt_initial:
+            return self.projector.adapt(field)
+        return self.projector.project(field)
 
     def _record(self, state: np.ndarray) -> None:
         self.rank_history.append(self.projector.rank)
         self.spectrum_history.append(self.projector.last_singular_values.copy())
 
     def step(self, psi: np.ndarray, dt: float, t: float = 0.0) -> np.ndarray:
+        # The model records ``after_nonlinear`` before its projection.  At an
+        # adaptation checkpoint, use that untruncated candidate rather than
+        # the already-projected final state; otherwise nonlinear modes lost at
+        # the stage projection could never trigger rank growth.
         state = self.model.step(psi, dt, projector=self.projector, t=t)
+        step_info = dict(self.model.last_step_info)
         self.steps += 1
         if self.steps % self.check_every == 0:
-            # The final projector call retained the untruncated candidate;
-            # adapt from that candidate so discarded modes can cause growth.
-            state = self.projector.adapt_last()
+            candidate = self.projector.candidate("after_nonlinear")
+            if candidate is not None:
+                centered, u, s, vh = candidate
+                candidate_field = (u * s) @ vh
+                before_adapt = self.model.grid.ke(candidate_field)
+                state = self.projector.adapt_candidate(candidate)
+                after_adapt = self.model.grid.ke(state)
+                extra_projection_work = after_adapt - before_adapt
+                state = self.model.diffuse(state, 0.5 * dt)
+                before_final = self.model.grid.ke(state)
+                state = self.projector(state)
+                extra_projection_work += self.model.grid.ke(state) - before_final
+                step_info["projection_energy_increment"] = float(
+                    step_info.get("projection_energy_increment", 0.0)
+                    + extra_projection_work
+                )
+                step_info["projection_count"] = int(step_info.get("projection_count", 0)) + 2
+            else:
+                state = self.projector.adapt_last()
+        self.last_step_info = step_info
         self._record(state)
         return state
 

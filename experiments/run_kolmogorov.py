@@ -99,7 +99,7 @@ def normalized_spectrum(field: np.ndarray, count: int = 32) -> list[float]:
         values = np.linalg.svd(field, compute_uv=False)
     except np.linalg.LinAlgError:
         return []
-    if values.size == 0 or values[0] <= np.finfo(float).eps:
+    if values.size == 0 or not np.isfinite(values).all() or values[0] <= np.finfo(float).eps:
         return [0.0 for _ in range(min(count, values.size))]
     return [float(x) for x in (values[:count] / values[0])]
 
@@ -111,12 +111,67 @@ def _energy_residual(
     dt: float,
     t: float,
     grid: Grid2D,
+    projection_energy_increment: float = 0.0,
 ) -> float:
     terms = model.energy_terms(old, t)
     derivative = (grid.ke(new) - grid.ke(old)) / dt
     residual = terms.residual_from_derivative(derivative)
+    # A projection changes the numerical state by an explicit amount.  For a
+    # reduced run, subtract that measured control work before judging the
+    # discrete balance; the unmodified residual is retained separately as a
+    # full-PDE diagnostic.
+    residual -= projection_energy_increment / dt
     scale = max(1.0, abs(terms.dissipation), abs(terms.forcing_input))
     return abs(residual) / scale
+
+
+def _stability_assessment(
+    energy_history: list[float],
+    enstrophy_history: list[float],
+    max_divergence: float,
+    max_cfl: float,
+    unstable_step: int | None,
+) -> dict:
+    """Apply scale-aware sanity limits in addition to finite-value checks."""
+    limits = {
+        "max_relative_energy": 10.0,
+        "max_relative_enstrophy": 100.0,
+        "max_abs_divergence": 1.0e-10,
+        "max_cfl": 0.5,
+    }
+    finite = all(np.isfinite(energy_history)) and all(np.isfinite(enstrophy_history))
+    max_energy_ratio = (
+        max(energy_history) / max(abs(energy_history[0]), np.finfo(float).eps)
+        if energy_history
+        else np.inf
+    )
+    max_enstrophy_ratio = (
+        max(enstrophy_history) / max(abs(enstrophy_history[0]), np.finfo(float).eps)
+        if enstrophy_history
+        else np.inf
+    )
+    reasons = []
+    if unstable_step is not None:
+        reasons.append(f"nonfinite_state_at_step_{unstable_step}")
+    if not finite:
+        reasons.append("nonfinite_energy_or_enstrophy")
+    if max_energy_ratio > limits["max_relative_energy"]:
+        reasons.append("energy_sanity_limit")
+    if max_enstrophy_ratio > limits["max_relative_enstrophy"]:
+        reasons.append("enstrophy_sanity_limit")
+    if max_divergence > limits["max_abs_divergence"]:
+        reasons.append("divergence_limit")
+    if max_cfl > limits["max_cfl"]:
+        reasons.append("cfl_limit")
+    return {
+        "stable": not reasons,
+        "unstable_step": unstable_step,
+        "unstable_reason": reasons,
+        "max_relative_energy": finite_or_none(max_energy_ratio),
+        "max_relative_enstrophy": finite_or_none(max_enstrophy_ratio),
+        "max_cfl": finite_or_none(max_cfl),
+        "limits": limits,
+    }
 
 
 def _run_full(
@@ -137,6 +192,8 @@ def _run_full(
     energy_history = [grid.ke(state)]
     enstrophy_history = [grid.enstrophy(state)]
     max_div = grid.max_div_velocity(state)
+    u0, v0 = grid.velocity(state)
+    max_cfl = float(np.max(np.hypot(u0, v0)) * dt / grid.dx)
     max_residual = 0.0
     max_energy_increase = -np.inf
     unstable_step = None
@@ -151,6 +208,8 @@ def _run_full(
             break
         energy_history.append(grid.ke(state))
         enstrophy_history.append(grid.enstrophy(state))
+        u_now, v_now = grid.velocity(state)
+        max_cfl = max(max_cfl, float(np.max(np.hypot(u_now, v_now)) * dt / grid.dx))
         max_div = max(max_div, grid.max_div_velocity(state))
         max_residual = max(
             max_residual, _energy_residual(model, old, state, dt, t, grid)
@@ -163,6 +222,9 @@ def _run_full(
             times.append(step)
             spectra[step] = normalized_spectrum(state)
     seconds = time.perf_counter() - start
+    stability = _stability_assessment(
+        energy_history, enstrophy_history, max_div, max_cfl, unstable_step
+    )
     if not training:
         training = [initial.copy(), state.copy()]
     return {
@@ -178,14 +240,21 @@ def _run_full(
         "final_energy": energy_history[-1],
         "final_enstrophy": enstrophy_history[-1],
         "forcing_aware_invariant": {
+            "status": "full_grid_pde_balance",
             "formula": "dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv>",
             "max_scaled_residual": finite_or_none(max_residual),
         },
         "max_abs_divergence": finite_or_none(max_div),
+        "max_scaled_full_pde_energy_residual": finite_or_none(max_residual),
         "max_scaled_energy_balance_residual": finite_or_none(max_residual),
         "max_energy_increase": finite_or_none(max_energy_increase),
-        "stable": unstable_step is None,
-        "unstable_step": unstable_step,
+        "stable": stability["stable"],
+        "unstable_step": stability["unstable_step"],
+        "unstable_reason": stability["unstable_reason"],
+        "max_relative_energy": stability["max_relative_energy"],
+        "max_relative_enstrophy": stability["max_relative_enstrophy"],
+        "max_cfl": stability["max_cfl"],
+        "stability_limits": stability["limits"],
         "wall_seconds": seconds,
         "wall_seconds_per_step": seconds / max(nsteps, 1),
     }
@@ -207,9 +276,13 @@ def _run_projected(
     spectra = {0: normalized_spectrum(state)}
     energy_history = [grid.ke(state)]
     enstrophy_history = [grid.enstrophy(state)]
+    projection_energy_history = []
     errors = []
     max_div = grid.max_div_velocity(state)
+    u0, v0 = grid.velocity(state)
+    max_cfl = float(np.max(np.hypot(u0, v0)) * dt / grid.dx)
     max_residual = 0.0
+    max_full_pde_residual = 0.0
     max_energy_increase = -np.inf
     unstable_step = None
     start = time.perf_counter()
@@ -217,15 +290,30 @@ def _run_projected(
         old = state
         t = (step - 1) * dt
         old_energy = grid.ke(old)
-        state = model.step(old, dt, projector=projector, t=t)
+        try:
+            state = model.step(old, dt, projector=projector, t=t)
+        except (FloatingPointError, np.linalg.LinAlgError):
+            unstable_step = step
+            break
+        projection_increment = float(model.last_step_info.get("projection_energy_increment", 0.0))
+        projection_energy_history.append(projection_increment)
         if not np.isfinite(state).all():
             unstable_step = step
             break
         energy_history.append(grid.ke(state))
         enstrophy_history.append(grid.enstrophy(state))
+        u_now, v_now = grid.velocity(state)
+        max_cfl = max(max_cfl, float(np.max(np.hypot(u_now, v_now)) * dt / grid.dx))
         max_div = max(max_div, grid.max_div_velocity(state))
+        max_full_pde_residual = max(
+            max_full_pde_residual,
+            _energy_residual(model, old, state, dt, t, grid, 0.0),
+        )
         max_residual = max(
-            max_residual, _energy_residual(model, old, state, dt, t, grid)
+            max_residual,
+            _energy_residual(
+                model, old, state, dt, t, grid, projection_increment
+            ),
         )
         max_energy_increase = max(max_energy_increase, grid.ke(state) - old_energy)
         if step % compare_stride == 0 or step == nsteps:
@@ -242,6 +330,9 @@ def _run_projected(
                     }
                 )
     seconds = time.perf_counter() - start
+    stability = _stability_assessment(
+        energy_history, enstrophy_history, max_div, max_cfl, unstable_step
+    )
     finite_errors = [
         item["relative_l2"]
         for item in errors
@@ -251,8 +342,8 @@ def _run_projected(
         max_error = max(finite_errors)
         final_error = errors[-1]["relative_l2"]
     else:
-        max_error = None if unstable_step is not None else 0.0
-        final_error = None if unstable_step is not None else 0.0
+        max_error = None if not stability["stable"] else 0.0
+        final_error = None if not stability["stable"] else 0.0
     result = {
         "state": state,
         "checkpoints": checkpoints,
@@ -260,21 +351,29 @@ def _run_projected(
         "singular_values": [spectra[step] for step in sorted(spectra)],
         "energy_history": energy_history,
         "enstrophy_history": enstrophy_history,
+        "projection_energy_history": projection_energy_history,
         "initial_energy": energy_history[0],
         "final_energy": energy_history[-1],
         "final_enstrophy": enstrophy_history[-1],
         "forcing_aware_invariant": {
-            "formula": "dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv>",
-            "max_scaled_residual": max_residual,
+            "status": "projected_discrete_balance_with_projection_work",
+            "formula": "dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv> - projection_energy_increment/dt",
+            "max_scaled_residual": finite_or_none(max_residual),
         },
         "comparison": errors,
         "max_relative_l2_vs_full": max_error,
         "final_relative_l2_vs_full": final_error,
         "max_abs_divergence": finite_or_none(max_div),
+        "max_scaled_full_pde_energy_residual": finite_or_none(max_full_pde_residual),
         "max_scaled_energy_balance_residual": finite_or_none(max_residual),
         "max_energy_increase": finite_or_none(max_energy_increase),
-        "stable": unstable_step is None,
-        "unstable_step": unstable_step,
+        "stable": stability["stable"],
+        "unstable_step": stability["unstable_step"],
+        "unstable_reason": stability["unstable_reason"],
+        "max_relative_energy": stability["max_relative_energy"],
+        "max_relative_enstrophy": stability["max_relative_enstrophy"],
+        "max_cfl": stability["max_cfl"],
+        "stability_limits": stability["limits"],
         "wall_seconds": seconds,
         "wall_seconds_per_step": seconds / max(nsteps, 1),
     }
@@ -330,10 +429,54 @@ def run_case(
         compare_stride,
     )
 
+    def strip(result):
+        return {
+            key: value
+            for key, value in result.items()
+            if key not in {"state", "training", "checkpoints"}
+        }
+
+    if not full["stable"] or not np.isfinite(full["state"]).all():
+        return {
+            "case": "kolmogorov",
+            "provenance": {
+                "git_commit": _git_commit(),
+                "driver": "experiments/run_kolmogorov.py",
+            },
+            "grid": {"N": N, "L": grid.L},
+            "reynolds": re,
+            "viscosity": 1.0 / re,
+            "parameters": {
+                "dt": dt,
+                "nsteps": nsteps,
+                "final_time": nsteps * dt,
+                "force_amplitude": force_amplitude,
+                "base_speed": base_speed,
+                "perturbation_velocity_rms": perturbation_velocity_rms,
+                "cutoff": cutoff,
+                "seed": seed,
+                "train_steps": train_steps,
+                "snapshot_stride": snapshot_stride,
+                "compare_stride": compare_stride,
+                "pod_rank": pod_rank,
+                "dlra_initial_rank": dlra_rank,
+                "dlra_min_rank": dlra_min_rank,
+                "dlra_max_rank": dlra_max_rank,
+                "dlra_tolerance": dlra_tolerance,
+                "dlra_check_every": dlra_check_every,
+            },
+            "initial_energy": grid.ke(initial),
+            "full": strip(full),
+            "pod": None,
+            "dlra": None,
+            "skipped_reason": "full-grid run failed finite/scale-aware stability checks",
+        }
+
     fit_start = time.perf_counter()
     pod = PODGalerkin(grid, pod_rank).fit(full["training"])
     fit_seconds = time.perf_counter() - fit_start
     pod_model = StreamFunctionNS(grid, nu=1.0 / re, forcing=forcing, dealias=True)
+    pod_model.track_step_diagnostics = True
     pod_result = _run_projected(
         pod_model,
         initial,
@@ -345,9 +488,13 @@ def run_case(
         rank_history=[pod.effective_rank()] * (nsteps + 1),
     )
     pod_result["fit_seconds"] = fit_seconds
+    pod_result["offline_plus_online_seconds"] = (
+        fit_seconds + pod_result["wall_seconds"]
+    )
     pod_result["effective_rank"] = pod.effective_rank()
 
     dlra_model = StreamFunctionNS(grid, nu=1.0 / re, forcing=forcing, dealias=True)
+    dlra_model.track_step_diagnostics = True
     dlra = DLRA(
         dlra_model,
         rank=dlra_rank,
@@ -357,30 +504,61 @@ def run_case(
         check_every=dlra_check_every,
     )
     # The stateful driver is used here rather than a static projector so that
-    # rank adaptation is exercised and included in the timing.
+    # rank adaptation is exercised and included in the timing.  Keep the
+    # one-time projection visible separately from online evolution.
+    dlra_init_start = time.perf_counter()
     dlra_state = dlra.initialize(initial)
+    dlra_init_seconds = time.perf_counter() - dlra_init_start
     dlra_start = time.perf_counter()
     dlra_max_div = grid.max_div_velocity(dlra_state)
+    u0, v0 = grid.velocity(dlra_state)
+    dlra_max_cfl = float(np.max(np.hypot(u0, v0)) * dt / grid.dx)
     dlra_max_residual = 0.0
+    dlra_max_full_pde_residual = 0.0
     dlra_max_energy_increase = -np.inf
     dlra_unstable_step = None
     dlra_errors = []
     dlra_spectra = {0: normalized_spectrum(dlra_state)}
     dlra_energy_history = [grid.ke(dlra_state)]
     dlra_enstrophy_history = [grid.enstrophy(dlra_state)]
+    dlra_projection_energy_history = []
     for step in range(1, nsteps + 1):
         old = dlra_state
         t = (step - 1) * dt
-        dlra_state = dlra.step(old, dt, t=t)
+        try:
+            dlra_state = dlra.step(old, dt, t=t)
+        except (FloatingPointError, np.linalg.LinAlgError):
+            dlra_unstable_step = step
+            break
+        dlra_projection_increment = float(
+            dlra.last_step_info.get("projection_energy_increment", 0.0)
+        )
+        dlra_projection_energy_history.append(dlra_projection_increment)
         if not np.isfinite(dlra_state).all():
             dlra_unstable_step = step
             break
         dlra_energy_history.append(grid.ke(dlra_state))
         dlra_enstrophy_history.append(grid.enstrophy(dlra_state))
+        u_now, v_now = grid.velocity(dlra_state)
+        dlra_max_cfl = max(
+            dlra_max_cfl, float(np.max(np.hypot(u_now, v_now)) * dt / grid.dx)
+        )
         dlra_max_div = max(dlra_max_div, grid.max_div_velocity(dlra_state))
+        dlra_max_full_pde_residual = max(
+            dlra_max_full_pde_residual,
+            _energy_residual(dlra_model, old, dlra_state, dt, t, grid, 0.0),
+        )
         dlra_max_residual = max(
             dlra_max_residual,
-            _energy_residual(dlra_model, old, dlra_state, dt, t, grid),
+            _energy_residual(
+                dlra_model,
+                old,
+                dlra_state,
+                dt,
+                t,
+                grid,
+                dlra_projection_increment,
+            ),
         )
         dlra_max_energy_increase = max(
             dlra_max_energy_increase, grid.ke(dlra_state) - grid.ke(old)
@@ -398,6 +576,13 @@ def run_case(
                     }
                 )
     dlra_seconds = time.perf_counter() - dlra_start
+    dlra_stability = _stability_assessment(
+        dlra_energy_history,
+        dlra_enstrophy_history,
+        dlra_max_div,
+        dlra_max_cfl,
+        dlra_unstable_step,
+    )
     finite_dlra_errors = [
         item["relative_l2"]
         for item in dlra_errors
@@ -406,37 +591,44 @@ def run_case(
     dlra_result = {
         "max_relative_l2_vs_full": max(finite_dlra_errors)
         if finite_dlra_errors
-        else (None if dlra_unstable_step is not None else 0.0),
+        else (None if not dlra_stability["stable"] else 0.0),
         "final_relative_l2_vs_full": dlra_errors[-1]["relative_l2"]
         if dlra_errors
-        else (None if dlra_unstable_step is not None else 0.0),
+        else (None if not dlra_stability["stable"] else 0.0),
         "comparison": dlra_errors,
         "singular_value_steps": sorted(dlra_spectra),
         "singular_values": [dlra_spectra[step] for step in sorted(dlra_spectra)],
         "energy_history": dlra_energy_history,
         "enstrophy_history": dlra_enstrophy_history,
+        "projection_energy_history": dlra_projection_energy_history,
         "initial_energy": dlra_energy_history[0],
         "final_energy": dlra_energy_history[-1],
         "final_enstrophy": dlra_enstrophy_history[-1],
         "forcing_aware_invariant": {
-            "formula": "dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv>",
+            "status": "projected_discrete_balance_with_projection_work",
+            "formula": "dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv> - projection_energy_increment/dt",
             "max_scaled_residual": finite_or_none(dlra_max_residual),
         },
         "max_abs_divergence": finite_or_none(dlra_max_div),
+        "max_scaled_full_pde_energy_residual": finite_or_none(dlra_max_full_pde_residual),
         "max_scaled_energy_balance_residual": finite_or_none(dlra_max_residual),
         "max_energy_increase": finite_or_none(dlra_max_energy_increase),
-        "stable": dlra_unstable_step is None,
-        "unstable_step": dlra_unstable_step,
+        "stable": dlra_stability["stable"],
+        "unstable_step": dlra_stability["unstable_step"],
+        "unstable_reason": dlra_stability["unstable_reason"],
+        "max_relative_energy": dlra_stability["max_relative_energy"],
+        "max_relative_enstrophy": dlra_stability["max_relative_enstrophy"],
+        "max_cfl": dlra_stability["max_cfl"],
+        "stability_limits": dlra_stability["limits"],
         "wall_seconds": dlra_seconds,
+        "initialization_seconds": dlra_init_seconds,
+        "offline_plus_online_seconds": dlra_init_seconds + dlra_seconds,
         "wall_seconds_per_step": dlra_seconds / max(nsteps, 1),
         "rank_history": [int(x) for x in dlra.rank_history],
         "rank_min": int(min(dlra.rank_history)),
         "rank_max": int(max(dlra.rank_history)),
         "rank_final": int(dlra.rank),
     }
-
-    def strip(result):
-        return {key: value for key, value in result.items() if key not in {"state", "training", "checkpoints"}}
 
     return {
         "case": "kolmogorov",
@@ -518,8 +710,8 @@ def main() -> None:
     )
     output = args.output or Path(f"state/coder/results/kolmogorov_re{args.re}_N{args.N}.json")
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
-    print(json.dumps(result, indent=2, sort_keys=True))
+    output.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n")
+    print(json.dumps(result, indent=2, sort_keys=True, allow_nan=False))
 
 
 if __name__ == "__main__":

@@ -78,8 +78,8 @@ def main() -> None:
         "interpretation": "The unprojected candidate is inspected at each check; tighter thresholds retain more slowly decaying singular directions and therefore grow rank.",
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(output, indent=2, sort_keys=True) + "\n")
-    print(json.dumps(output, indent=2, sort_keys=True))
+    args.output.write_text(json.dumps(output, indent=2, sort_keys=True, allow_nan=False) + "\n")
+    print(json.dumps(output, indent=2, sort_keys=True, allow_nan=False))
 
 
 if __name__ == "__main__":

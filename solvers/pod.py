@@ -70,7 +70,9 @@ class PODGalerkin:
     def relative_error(self, field: np.ndarray) -> float:
         f = np.asarray(field, dtype=float)
         p = self.project(f)
-        denom = max(np.linalg.norm(f - np.mean(f)), np.finfo(float).eps)
+        f = f - np.mean(f)
+        p = p - np.mean(p)
+        denom = max(np.linalg.norm(f), np.finfo(float).eps)
         return float(np.linalg.norm(p - f) / denom)
 
     def effective_rank(self) -> int:

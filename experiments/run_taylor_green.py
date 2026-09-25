@@ -147,8 +147,8 @@ def main() -> None:
     args = parser.parse_args()
     result = run_case(args.N, args.nu, args.dt, args.steps, args.rank)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
-    print(json.dumps(result, indent=2, sort_keys=True))
+    args.output.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n")
+    print(json.dumps(result, indent=2, sort_keys=True, allow_nan=False))
 
 
 if __name__ == "__main__":
