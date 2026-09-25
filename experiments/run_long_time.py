@@ -83,6 +83,7 @@ def run_case(
     dlra_max_cfl = float(np.max(np.hypot(u0, v0)) * dt / grid.dx)
     full_residual = 0.0
     dlra_residual = 0.0
+    dlra_full_pde_residual = 0.0
     full_max_energy = full_energy[0]
     dlra_max_energy = dlra_energy[0]
     full_max_enstrophy = full_enstrophy[0]
@@ -134,6 +135,10 @@ def run_case(
         dlra_div = max(dlra_div, grid.max_div_velocity(reduced))
         full_residual = max(
             full_residual, _energy_residual(full_model, old_full, full, dt, t, grid)
+        )
+        dlra_full_pde_residual = max(
+            dlra_full_pde_residual,
+            _energy_residual(dlra_model, old_reduced, reduced, dt, t, grid, 0.0),
         )
         dlra_residual = max(
             dlra_residual,
@@ -214,7 +219,13 @@ def run_case(
             "stability_limits": full_stability["limits"],
             "final_energy": full_energy[-1],
             "final_enstrophy": full_enstrophy[-1],
+            "forcing_aware_invariant": {
+                "status": "full_grid_pde_balance",
+                "formula": "dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv>",
+                "max_scaled_residual": full_residual,
+            },
             "max_abs_divergence": full_div,
+            "max_scaled_full_pde_energy_residual": full_residual,
             "max_scaled_energy_balance_residual": full_residual,
             "singular_value_steps": sorted(full_spectrum),
             "singular_values": [full_spectrum[s] for s in sorted(full_spectrum)],
@@ -232,7 +243,13 @@ def run_case(
             "stability_limits": dlra_stability["limits"],
             "final_energy": dlra_energy[-1],
             "final_enstrophy": dlra_enstrophy[-1],
+            "forcing_aware_invariant": {
+                "status": "projected_discrete_balance_with_projection_work",
+                "formula": "dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv> - projection_energy_increment/dt",
+                "max_scaled_residual": dlra_residual,
+            },
             "max_abs_divergence": dlra_div,
+            "max_scaled_full_pde_energy_residual": dlra_full_pde_residual,
             "max_scaled_energy_balance_residual": dlra_residual,
             "rank_history": [int(x) for x in dlra.rank_history],
             "rank_min": int(min(dlra.rank_history)),
