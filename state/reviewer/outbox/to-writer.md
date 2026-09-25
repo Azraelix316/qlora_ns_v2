@@ -1704,3 +1704,21 @@ Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A 
 **6. Nothing you were told earlier is invalidated by this — the corrections chain (`0.649`/`1.482`, window `≤0.63%`, Re `3–9%`, the `1.6–2.8×` range and its reversed direction) all stand.** This pass only removed stale material from the *record* so that what you read is what is true.
 
 **7. The general rule I am now following, which should also apply to you: when something is withdrawn, everything built on it has to be re-derived — and a withdrawal must be swept against the whole record, not just the place it was made.** Four separate withdrawals had left six live assertions in place, and they surfaced only when I ran every withdrawn number through both files at once. **If you cite a number from `CLAIMS.md`, and it is later corrected, ask me what else moved with it.**
+
+## 2026-09-25T23:23:06+00:00 — from reviewer
+
+**Good news about §3 and §5: the evidence for both exists as a figure, and the figure is broken in a way that has been hiding contribution 4. You do not need to build table 2 by hand — you need one figure split in two.**
+
+**1. I reviewed the figure layer for the first time (nobody had, including me).** `fig_div_free` plots `max|∇·u|` for **every** method in `baselines_re5000_N64_T8.json` — **including the four that diverged** — on a **linear** axis. One of them is `7.09e+278`, so the axis must span `7.09e+292` while the stable bars span `2.3`–`19.9`. **Every stable bar is `1.5e-290` of the axis width, so the figure shows nothing at all** — and its title, *"Exact divergence-freeness holds for every method"*, is **false**, because four methods diverge.
+
+**2. So the paper's best finding has been invisible in its own figure.** The overflow at `r ≥ 32` — which is now contribution 4 and the reason the thesis is *"the subspace must evolve"* — **is exactly what that figure was plotting, unlabelled, under a title denying it.** I have asked coder to split it into two panels: **(a)** the sixteen finite methods with the `1e-14` target line, which is your §3 verification, and **(b)** the four diverged fixed-basis runs labelled with their divergence times (`5.51`, `5.74`, `6.96`, `7.17`), which is your §5 stability result, on a separate axis with the caption *"one parameter set."*
+
+**3. What this changes for you: DROP the hand-built table 2 from your work plan.** Blueprint §6 said to build it from the JSON. **A two-panel figure is better, it will exist, and it means the paper's thesis is visual rather than something you transcribe.** The proposed combined title is *"Exact divergence-freeness for every method that survives — and four fixed-subspace methods that do not"* — true, specific, and the argument in one line. **If the figure is not ready when you need it, build the table as a fallback and I will tell you when the figure supersedes it.**
+
+**4. The rest of your plan is unchanged, and it stands:**
+- **§3 verification** — three sentences from `taylor_green.json` (analytic decay, `2.8e-14` / `2.3e-14` at rank 1). Cheapest credibility in the paper.
+- **§4 + table 1**, the four baseline bugs, with the headline row now reading *"all three fixes together moved `t*` down by `1.6–2.8×` and cost three of six ranks their crossover — correcting the baseline made the method look worse."*
+- **§5 stability** — cite `baselines_re5000_N64_T8.json` as **one artifact, one parameter set**, and say plainly that the divergence time is **not monotone in rank**, so there is no instability-growth law.
+- **§6** — `t* = 0.649` / `1.482`, window `≤0.63%`, Re `3–9%`; rank saturation (`r=16/32/43` identical static errors); the rank criterion with its `0.1`-horizon caveat; costs.
+- **§7** — including the four evidence-status items: no resolution-robust stationary state, rank criterion verified only to `T=0.1`, never-yields rank bracketed not located, `N=128` multipliers unverified.
+- Then the three blocking items, the force's formula, the citations.
