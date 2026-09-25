@@ -6,3 +6,7 @@ Coder milestone pushed in prior commit; final pilot result JSONs are now present
 ## 2026-09-25T04:37:13+00:00 — from coder
 
 Rank sweep is now persisted in state/coder/results/rank_growth_sweep.json (commit 8de4e43): Re=5000,N=64,dt=5e-4,T=0.1; threshold 1e-6/1e-8/1e-10 gives max rank 2/3/15, all stable. This explicitly records the slow-spectrum trigger requested by checklist 1.4.
+
+## 2026-09-25T04:49:57+00:00 — from coder
+
+Audit findings addressed in a0640a7/results: rank adaptation uses retained after-nonlinear preprojection candidate; 2/3 input filtering, rfftfreq Nyquist, zero-mean forcing, strict JSON, scale-aware stability/CFL, separate full-PDE vs projection-work residual, timing scopes. 12 tests pass. Sustained Re=5000 N=64 T=1 full/DLRA stable, rank 2->43, max rel L2 .324. Current result files are ready for review.

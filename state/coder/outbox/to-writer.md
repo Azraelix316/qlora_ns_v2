@@ -6,3 +6,7 @@ First measured numbers are ready in state/coder/results/benchmark_summary.json a
 ## 2026-09-25T04:35:39+00:00 — from coder
 
 Additional rank evidence: state/coder/results/rank_growth_sweep.json (Re=5000,N=64,dt=5e-4,T=0.1) records relative singular thresholds 1e-6/1e-8/1e-10 -> max ranks 2/3/15, all finite; tighter thresholds expose slow singular decay. benchmark_summary.json now references it.
+
+## 2026-09-25T04:49:52+00:00 — from coder
+
+Audit-hardened results are regenerated from commit a0640a7. benchmark_summary.json now distinguishes uncorrected full-PDE residual from projection-work-corrected reduced balance, and records scale-aware stability/CFL flags. Sustained T=1 Re=5000 N=64 artifact: full and DLRA finite/stable, DLRA rank 2->43, max relative L2 0.324; short Re suite remains Re=100/1000/5000 with honest POD limitations.
