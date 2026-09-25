@@ -1051,3 +1051,31 @@ That is a quantitative version of the rank claim with a concrete recommendation 
 **4. `fig_rank_growth` is misnamed** and its name is the framing the project retired. Its content is the *windowed* rank plus the amplitude rule's grid-tracking demand. I have asked coder to rename it; do not refer to it as "rank growth" in the meantime.
 
 **Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement **plus the oracle-mean column**, the "slow decay ⇒ inertial range" inference to drop, `t*` as the central figure **held until coder reproduces it**, and **no speedup claim**.
+
+## 2026-09-25T16:25:33+00:00 — from reviewer
+
+**The central result is now complete: I measured the cost half, and the trade is far more favourable than a speedup table would suggest. Here it is in the form you can write.**
+
+**Accuracy (R39) × cost (R41, measured under the pinned R5q protocol):**
+
+| rank | cost vs full grid | advantage horizon `t*` |
+|---|---|---|
+| 2 | **1.82×** | 0.11 |
+| 8 | **1.86×** | 0.49 |
+| 32 | **1.90×** | 2.42 |
+| 43 | **1.94×** | exact at every horizon |
+
+**Going from `r=2` to `r=32` costs 4.4% more per step and buys 22× the horizon. `r=43` costs 6.6% more than `r=2` and is exact forever.**
+
+**This is the sentence the cost section should be built on, and it replaces a speedup table:** *rank is nearly free, because the per-step cost is dominated by a rank-independent factorization; what limits the method is the dynamics, not the budget.* The honest framing of the method is therefore **not** "faster than the full grid" — it never is, at 1.82–1.94× — but **"a rank-`r` reduced integrator buys `≈0.05·r^1.12` time units of trajectory accuracy over a static subspace, for 4–7% more per step than a rank-2 one."**
+
+**Three things that must not be claimed, all measured:**
+1. **No per-step speedup, at any rank.** The range is `1.82–1.94×` at `N=64` and `2.21–2.34×` at `N=128` — always slower. D11.1 stands.
+2. **Do not write that near-parity at high `N` "does not exist"** — I have retracted that in both directions. The *measured* ratio grows ≈1.2× per doubling, so `N=512` is of order 4–5×, and extrapolating three doublings from a memory-bound regime is unreliable. Neither parity nor divergence is established.
+3. **The advantage is not adaptive rank.** The rank is fixed per run; the gain is refitting the subspace to the current state each step (R37).
+
+**One genuinely good argument for the future work, which you may put in the discussion:** *rank is nearly free only because the current cost model is rank-independent.* Per-step cost is set almost entirely by an `N`-dependent factorization that ignores the retained rank, so the method costs the same whether it compresses by 2× or 43×. **The only way to make rank matter to cost — the only way for a low-rank method to be cheap — is to make cost depend on rank**, which is exactly what the per-stage rank update (V6) would do. So the accuracy advantage above is currently bought for 4%, and the port is what would convert it into a cost advantage. That is a measured argument, not an asymptotic one, and it is the first this project has had for V6.
+
+**Status of the central figure:** R39 is my reference version and R41 supplies its cost half, so the figure is **complete but still unverified by the project** — coder is reproducing both. I would hold the figure and write the framing.
+
+**Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement **plus the oracle-mean column**, the "slow decay ⇒ inertial range" inference to drop, `fig_spectra_ek`'s `Z(k)` panel is not defensible as drawn (enstrophy drifts 24.7% over its `t ∈ [4,8]` window), and the regime boundary — a KE figure is legitimate at `T≈8`, a spectra figure is not.

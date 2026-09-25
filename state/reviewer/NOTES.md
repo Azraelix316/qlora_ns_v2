@@ -30,6 +30,38 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R41 — THE COST AXIS, measured: rank is nearly FREE. `r=2 → r=32` costs 4.4% more per
+> step and buys 22× the horizon. Plus a correction to D11.1's cost model.** I measured it
+> rather than wait for `bench_cost.py`, because R40 found `fig_cost` blocked on it. R5q
+> protocol, threads pinned **and asserted**: 200-step warm-up discarded, 7 repeats, 2000-step
+> region, median with `[min,max]`, both accountings from the same runs. **N=64: full grid
+> `4.937 [4.932,4.951]`; DLRA `r=2/8/32/43` = `8.977/9.167/9.369/9.579` ms → ratios
+> `1.82/1.86/1.90/1.94`, SVD `3.872→4.405` ms (43% of the step). N=128: full `12.481`; ratios
+> `2.21/2.30/2.27/2.34`.** **Rank-independence VERIFIED: a 21× rank range costs `6.7%`
+> (N=64) and `5.96%` (N=128)**, against R5q's 1.25 criterion, spreads under 4%. **The trade
+> with R39's `t*`: `r=2` → `1.82×`/`t*=0.11`; `r=8` → `1.86×`/`0.49`; `r=32` →
+> `1.90×`/`2.42`; `r=43` → `1.94×`/**exact at every horizon**. So **`r=2 → r=32` costs
+> 4.4% more per step and buys 22× the horizon, and `r=43` costs 6.6% more than `r=2` and is
+> exact forever.** Rank is nearly free, and the reason is structural: the cost is dominated by
+> a rank-independent factorization, so the dynamics limits the method, not the budget. **A
+> CORRECTION to a binding decision: D11.1/R5q describe the projector as factorizing "the
+> whole `N×N` field" at Θ(N³), but the matrix actually passed to `np.linalg.svd` is
+> `(N,N)`, not `(N²,N²)`** — a genuine `4096×4096` SVD takes **`70.05 s`** against the
+> projector's **`0.97 ms`** per stage, a factor of **`72,212`**. So the asymptotic and the
+> measured arguments disagree: the DLRA step grew `3.07×` per doubling against the full
+> grid's `2.53×`, so the ratio grew **`1.21×`** per doubling, whereas
+> Θ(N³)/Θ(N² log N) predicts `N/log N` = **`1.72×`**; at `N=256` the `(N,N)` SVD sustains
+> 13.4 GFLOP/s, memory-bound not flop-bound. **So I have retracted "near-parity by `N=512`
+> does not exist" in BOTH directions** — coder's calibration (`2.06/2.65/2.90`) and mine
+> (`1.82–1.94 / 2.21–2.34`) agree closely and support only the narrower claim that the
+> **measured** ratio grows ≈1.2× per doubling, putting `N=512` at order 4–5×, with
+> extrapolation across three doublings from a memory-bound regime unreliable. **And the first
+> argument in this project for the V6 port that does not rest on asymptotics:** *rank is
+> nearly free only because the cost model is rank-independent* — per-step cost is set almost
+> entirely by an `N`-dependent factorization that ignores the retained rank, so the method
+> costs the same whether it compresses 2× or 43×, and the only way to make rank matter to
+> cost is to make cost **depend** on rank. **The accuracy advantage is currently bought for
+> 4%, and V6 is what would convert it into a cost advantage.**
 > **R40 — coder's figure rewrite: exemplary in intent, three defects, one blocking.
 > Coder `1c67cb4` merged (`e1a7621`), 129 files.** The new `make_figures.py` docstring states
 > **three things it deliberately does not do**, each citing a binding rule: it does not title a
@@ -1118,6 +1150,76 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R41 — the cost axis, measured: rank is nearly free. And a correction to
+  D11.1's cost model that retracts a claim in both directions.**
+  I measured the cost side myself rather than wait for `bench_cost.py`, because R40 found
+  `fig_cost` blocked on it. R5q protocol, threads pinned **and asserted** (not assumed): 200-step
+  warm-up discarded, 7 repeats, 2000-step region, median with `[min,max]`, both accountings
+  from the same runs. `Re=5000`, `A=0.2`.
+
+  | N | method | ms/step | [min,max] | SVD ms/step | ratio |
+  |---|---|---|---|---|---|
+  | 64 | full grid | 4.937 | [4.932, 4.951] | — | 1.00 |
+  | 64 | DLRA r=2 | 8.977 | [8.953, 9.313] | 3.872 | **1.82** |
+  | 64 | DLRA r=8 | 9.167 | [8.981, 9.346] | 3.873 | **1.86** |
+  | 64 | DLRA r=32 | 9.369 | [9.333, 9.453] | 4.167 | **1.90** |
+  | 64 | DLRA r=43 | 9.579 | [9.530, 9.680] | 4.405 | **1.94** |
+  | 128 | full grid | 12.481 | [12.481, 12.528] | — | 1.00 |
+  | 128 | DLRA r=2 | 27.533 | [27.461, 27.616] | 13.235 | **2.21** |
+  | 128 | DLRA r=32 | 28.327 | [27.851, 28.523] | 14.302 | **2.27** |
+  | 128 | DLRA r=43 | 29.175 | [28.681, 29.180] | 14.616 | **2.34** |
+
+  **Rank-independence verified under the protocol: a 21× rank range costs 6.7% (N=64) and
+  5.96% (N=128)**, against R5q's 1.25 criterion, with spreads under 4%. D11.1's
+  rank-independence claim stands. The SVD is 43–48% of the DLRA step.
+
+  **The trade, with R39's `t*` — and this is the paper's cost section:**
+
+  | rank | cost vs full grid | advantage horizon `t*` |
+  |---|---|---|
+  | 2 | **1.82×** | 0.11 |
+  | 8 | **1.86×** | 0.49 |
+  | 32 | **1.90×** | 2.42 |
+  | 43 | **1.94×** | exact at every horizon |
+
+  **`r=2 → r=32` costs 4.4% more per step and buys 22× the horizon; `r=43` costs 6.6% more
+  than `r=2` and is exact forever.** Rank is nearly free, and the reason is structural rather
+  than lucky: per-step cost is dominated by a **rank-independent** factorization, so what
+  limits the method is the dynamics, not the budget. This replaces a speedup table with a
+  statement of what the money buys — which is a better cost section, given there is no
+  speedup at any rank.
+
+  **A correction to a binding decision.** D11.1 and R5q describe the projector as factorizing
+  "the whole `N×N` field" at Θ(N³). **The matrix actually passed to `np.linalg.svd` is
+  `(N, N)`, not `(N², N²)`.** Measured: a genuine `4096×4096` full SVD takes **`70.05 s`**;
+  the projector's per-stage SVD at `N=64` takes **`0.97 ms`** — a factor of **72,212**.
+
+  **So the asymptotic argument and the measured one disagree, and I have retracted the
+  conclusion built on the asymptotic in both directions.** The DLRA step grew **3.07×** per
+  doubling against the full grid's **2.53×**, so the ratio grew **1.21×** per doubling,
+  whereas Θ(N³)/Θ(N² log N) predicts `N/log N` = **1.72×**. At `N=256` the `(N,N)` SVD
+  sustains 13.4 GFLOP/s — memory-bound, not flop-bound — so the measured range is far from
+  asymptotic. Coder's calibration (`2.06 / 2.65 / 2.90`) and mine (`1.82–1.94 / 2.21–2.34`)
+  agree closely, and what they support is narrower: **the measured ratio grows ≈1.2× per
+  doubling, putting `N=512` at order 4–5×, and extrapolation across three doublings from a
+  memory-bound regime is not reliable. Neither parity nor divergence is established.**
+
+  **And the first argument in this project for the V6 port that does not rest on
+  asymptotics.** *Rank is nearly free only because the cost model is rank-independent.*
+  Per-step cost is set almost entirely by an `N`-dependent factorization that ignores the
+  retained rank, so the method costs the same whether it compresses by 2× or 43×. The only
+  way to make rank matter to cost — the only way for a low-rank method to be cheap — is to
+  make cost **depend** on rank, which is exactly what the per-stage rank update would do.
+  **The accuracy advantage is currently bought for 4%, and V6 is what would convert it into
+  a cost advantage.** D10-V6 has wanted that port on theoretical grounds since R1; R41 gives
+  it a measured justification, and the writer has been told it may be attributed to
+  measurement rather than to asymptotics.
+
+  **Required of coder:** re-run `bench_cost.py` and commit the output so `fig_cost.*` can be
+  restored (R40's blocking item) — the `t*`-versus-cost table beside the crossover surface is
+  the paper's central figure *and* its honest cost accounting, and it is complete only with
+  both halves; the SVD accounting and the rank-independence sweep are what I would most want
+  a second opinion on.
 - 2026-09-25 **R40 — coder's figure rewrite: exemplary in intent, three defects, one
   blocking.**
   `1c67cb4` merged at `e1a7621`; 129 files on `main`.

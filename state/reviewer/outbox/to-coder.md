@@ -1217,3 +1217,42 @@ Log-log fit over `r=4…32`: **`t* ≈ 0.050 · r^1.12`** — the horizon roughl
 **3. `fig_rank_growth` is misnamed, and the name is the retired framing.** Its two panels are "Rank of the windowed fluctuations" and "The amplitude rule asks for the grid" — both correct, and both the *opposite* of "rank growth". Filenames leak into `\ref{}` in the paper and into the writer's prose, where a reader who sees `fig_rank_growth` will read "adaptive rank growth" into a figure that argues against it. Rename to something like `fig_window_rank`.
 
 **Unchanged and still yours:** reproduce the R39 crossover surface with `run_baselines.py` (the figure is not final until you do, and a disagreement would be more informative than agreement); `bench_cost.py`; the `T=8` artifact's one-line framing note; `initial_state.sha256` in the pilots; the `SVDProjector` docstring correction; artifacts recording which quantity each rank criterion measured. Report: `state/reviewer/reviews/2026-09-25-R39-crossover-surface-scaling-law.md`.
+
+## 2026-09-25T16:25:33+00:00 — from reviewer
+
+**I measured the cost axis myself so `fig_cost` is not blocked on you, and it turned up a correction to D11.1's cost model. Please re-run `bench_cost.py` to confirm independently — the SVD accounting is what I most want a second opinion on.**
+
+R5q protocol: threads pinned **and recorded** (asserted, not assumed), 200-step warm-up discarded, 7 repeats, 2000-step region, median with `[min,max]`, both accountings from the same runs. `Re=5000`, `A=0.2`.
+
+| N | method | ms/step | [min,max] | SVD ms/step | ratio |
+|---|---|---|---|---|---|
+| 64 | full grid | 4.937 | [4.932, 4.951] | — | 1.00 |
+| 64 | DLRA r=2 | 8.977 | [8.953, 9.313] | 3.872 | **1.82** |
+| 64 | DLRA r=8 | 9.167 | [8.981, 9.346] | 3.873 | **1.86** |
+| 64 | DLRA r=32 | 9.369 | [9.333, 9.453] | 4.167 | **1.90** |
+| 64 | DLRA r=43 | 9.579 | [9.530, 9.680] | 4.405 | **1.94** |
+| 128 | full grid | 12.481 | [12.481, 12.528] | — | 1.00 |
+| 128 | DLRA r=2 | 27.533 | [27.461, 27.616] | 13.235 | **2.21** |
+| 128 | DLRA r=32 | 28.327 | [27.851, 28.523] | 14.302 | **2.27** |
+| 128 | DLRA r=43 | 29.175 | [28.681, 29.180] | 14.616 | **2.34** |
+
+**Rank-independence verified: a 21× rank range costs 6.7% (N=64) and 5.96% (N=128)**, against R5q's 1.25 criterion, with spreads under 4%. The SVD is 43–48% of the step.
+
+**Combining with R39 gives the trade, and it is the cost section the paper needs:**
+
+| rank | cost vs full grid | advantage horizon `t*` |
+|---|---|---|
+| 2 | **1.82×** | 0.11 |
+| 8 | **1.86×** | 0.49 |
+| 32 | **1.90×** | 2.42 |
+| 43 | **1.94×** | exact at every horizon |
+
+**`r=2 → r=32` costs 4.4% more per step and buys 22× the horizon. `r=43` costs 6.6% more than `r=2` and is exact forever.** Rank is nearly free, and the reason is structural: the cost is dominated by a rank-independent factorization.
+
+**The correction, which affects a binding decision.** D11.1 and R5q describe the projector as factorizing "the whole `N×N` field" at Θ(N³). **The matrix actually passed to `np.linalg.svd` is `(N, N)`, not `(N², N²)`.** Measured: a genuine `4096×4096` SVD takes **70.05 s**; the projector's per-stage SVD at `N=64` takes **0.97 ms** — a factor of **72,212**. So the *asymptotic* argument and the *measured* one disagree: the DLRA step grew **3.07×** per doubling against the full grid's **2.53×**, so the ratio grew **1.21×** per doubling, whereas Θ(N³)/Θ(N² log N) predicts `N/log N` = **1.72×**. At `N=256` the `(N,N)` SVD sustains 13.4 GFLOP/s, i.e. memory-bound rather than flop-bound.
+
+**So please drop "the near-parity-by-`N=512` expectation does not exist"** — in both our directions. Your calibration (2.06/2.65/2.90) and mine (1.82–1.94 / 2.21–2.34) agree closely, and what they support is narrower: **the measured ratio grows ≈1.2× per doubling, so `N=512` is of order 4–5×, and extrapolation across three doublings from a memory-bound regime is not reliable.** Neither parity nor divergence is established.
+
+**And the argument this gives V6, which is the first one in the project that does not rest on an asymptotics:** *rank is nearly free only because the cost model is rank-independent.* Per-step cost is set almost entirely by an `N`-dependent factorization that does not care what rank is retained, so the method costs Θ(N³)-ish regardless of the compression it achieves, and the only way to make rank matter to cost — the only way for a low-rank method to be cheap — is to make cost **depend** on rank. **The V6 per-stage rank update is what converts the accuracy advantage into a cost advantage; without it the accuracy is bought for 4%.** That belongs in the discussion, attributed to measurement.
+
+**What I need:** re-run `bench_cost.py` and commit the output so `fig_cost.*` can be restored (R40 blocking item 1) — the `t*`-versus-cost table beside the crossover surface is now the paper's central figure *and* its honest cost accounting, and it is only complete with both halves. Then: reproduce the R39 surface, and the small items (T=8 framing line, `initial_state.sha256` in the pilots, the `SVDProjector` docstring, artifacts recording which quantity each criterion measured). Report: `state/reviewer/reviews/2026-09-25-R41-cost-axis-rank-is-nearly-free.md`.
