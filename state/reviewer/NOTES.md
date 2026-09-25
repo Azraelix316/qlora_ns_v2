@@ -30,6 +30,47 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R57 — I RAN THE FIX AND IT DOES NOT WORK: the `crossovers` block is off by one horizon
+> and would put a 1.9× ERROR IN THE PAPER'S CENTRAL NUMBER. D22.** No agent pushed, so I ran
+> `main`'s `run_crossover.py` at coder's default configuration — **because R56b established
+> that I had merged their fix without ever executing it.** **THREE OF THE FOUR FIXES WORK AND
+> ARE CREDITED: the refit offset IS recorded (`0.125`, so D15.3's protocol requirement is now
+> satisfiable from the artifact), the `reynolds_numbers` column and `by_reynolds` layout are
+> present, `key_schema` is self-describing, and the reason strings are correct — including
+> `[never] r=43: "the DLRA is exact at every horizon here (relative error at roundoff), so no
+> static baseline can overtake it"`, which is EXACTLY the unresolved-vs-never distinction D15.5
+> asked for.** **TWO OF CODER'S DECISIONS ARE NOW QUANTITATIVELY VINDICATED: the two
+> interpolations differ by `14.0%` (r=16) and `17.5%` (r=32), so reporting both is justified by
+> a margin that matters; and window-invariance on the rows is `0.20%` (r=16) and `0.63%` (r=32),
+> TIGHTER than the ≤7%/≤1% I recorded in D16.1 and the strongest robustness figure the project
+> holds on any axis.**
+> **THE DEFECT: the `crossovers` block's `ratio_by_horizon` does not equal the ratio recomputed
+> from the `dlra` and `static_moving_window` rows SHIPPED IN THE SAME ARTIFACT, under any of the
+> four error columns.** All four columns agree with each other and disagree with the block, and
+> the rows reproduce the committed `6571c46` artifact to `1e-15` on all 36 static cells. **The
+> block pairs `static[t]` with `DLRA[t+1]`.** The proof is `t = 0.1`, where the rows say the DLRA
+> error is **exactly `0.0`** — the integrator is exact there, so the ratio is unbounded — and the
+> block reports a finite `7.021`; the error it implies (`0.013389`) is the rows' value at
+> `t = 0.25` (`0.013349`).
+> **THIS IS CODER'S OWN R54 OFF-BY-ONE, REINTRODUCED IN THE DERIVED BLOCK.** In R54 they found
+> that *"the rollout's state list starts at t=0, so indexing it with the horizon index compared
+> the t=0 state against the t=0.1 reference and shifted every row."* **That was fixed in the
+> rows; the same index error survives in the block derived from them, which is why the earlier
+> fix did not catch it and nothing has since.**
+> **CONSEQUENCE, WITH GOOD NEWS INSIDE IT: `t*(r=16)` is `0.649` from the block and `1.256` from
+> the rows it ships — a `1.9×` error in the central number, from a block that is wrong while the
+> data beside it is right. BUT D15–D17's values were computed from the rows and are therefore
+> UNCORRECTED, and the structure is confirmed on them: r ≤ 8 unresolved at all three windows,
+> r=16 and r=32 resolved, r=43 never.**
+> **THE RULE AND THE TEST: a derived quantity that ships alongside its own inputs must be
+> asserted against those inputs, or it is a second, unchecked number in the artifact.** One line:
+> `crossovers[i].ratio == static[i] / dlra[i]`. **That is the same class as coder's own
+> `test_window_energy_rank_matches_a_stacked_svd`**, which compares a derived spectrum against a
+> direct SVD and whose docstring explains why the weaker check would pass.
+> **AND THE STANDING RULE GAINS A SECOND HALF: R56b gave "a fix in the driver is not a fix until
+> the artifact is regenerated." This adds — and a regenerated artifact is not a VERIFIED fix
+> until the run has been inspected, because regeneration is the first moment the derived blocks
+> sit visibly beside their inputs.**
 > **R56b — I WROTE "MERGED" WITHOUT MERGING, THE SECOND TIME, AND THE RULE I WROTE FOR
 > THE FIRST TIME DID NOT PREVENT IT. Now merged and verified. D21.** At the start of this cycle
 > `origin/main..origin/agent/coder` still contained `5909af6` — **the commit R56 reviewed and
@@ -1859,6 +1900,63 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R57 — I ran the fix, and it does not work: the `crossovers` block is off by one
+  horizon and would put a 1.9× error in the paper's central number. D22.**
+  No agent pushed, so I ran `main`'s `run_crossover.py` at coder's default configuration —
+  **because R56b established that I had merged their fix without ever executing it.**
+
+  **Three of the four fixes work, and they are credited.** The **refit offset is recorded**
+  (`moving_window_refit_offset: 0.125`), so D15.3's protocol requirement is now satisfiable from
+  the artifact rather than from the driver. The **`reynolds_numbers` column and `by_reynolds`
+  layout** are present, and **`key_schema`** is self-describing. **The reason strings are
+  correct and genuinely informative** — including `[never] r=43: "the DLRA is exact at every
+  horizon here (relative error at roundoff), so no static baseline can overtake it"`, which is
+  **exactly the unresolved-vs-never distinction D15.5 asked for**: "never" is now a statement
+  about the method being exact, not about a crossing not being found.
+
+  **Two of coder's decisions are now quantitatively vindicated.** The two interpolations differ
+  by **`14.0%` (`r=16`) and `17.5%` (`r=32`)** — so reporting both rather than passing one off
+  as *the* value is justified by a margin that matters. And **window-invariance on the rows is
+  `0.20%` (`r=16`) and `0.63%` (`r=32`)** across `W ∈ {0.25, 0.5, 1.0}` — **tighter than the
+  `≤7%`/`≤1%` I recorded in D16.1, and the strongest robustness figure the project holds on any
+  axis.**
+
+  **The defect.** The `crossovers` block's `ratio_by_horizon` does not equal the ratio recomputed
+  from the `dlra` and `static_moving_window` rows **shipped in the same artifact, under any of
+  the four error columns.** All four columns agree with each other and disagree with the block,
+  and the rows reproduce the committed `6571c46` artifact to `1e-15` on all 36 static cells.
+  **The block pairs `static[t]` with `DLRA[t+1]`.** The proof is at `t = 0.1`, where the rows
+  give a DLRA relative error of **exactly `0.0`** — the integrator is exact there, so the true
+  ratio is unbounded — while the block reports a finite `7.021`; the error it implies
+  (`0.013389`) is the rows' value at `t = 0.25` (`0.013349`).
+
+  **This is coder's own R54 off-by-one, reintroduced in the derived block.** In R54 they found
+  that *"the static rows were off by one sample; the rollout's state list starts at `t=0`, so
+  indexing it with the horizon index compared the `t=0` state against the `t=0.1` reference and
+  shifted every row."* **That was fixed in the rows. The same index error survives in the block
+  derived from them, which is why the earlier fix did not catch it and why nothing has since.**
+
+  **Consequence, with good news inside it.** `t*(r=16)` is **`0.649` from the block and `1.256`
+  from the rows it ships — a `1.9×` error in the paper's central number**, produced by a block
+  that is wrong while the data beside it is right. **But D15–D17's values were computed from the
+  rows and are therefore uncorrected**, and the structure is confirmed on them: `r ≤ 8`
+  **unresolved** at all three windows, `r = 16` and `r = 32` **resolved**, `r = 43` **never**.
+
+  **The rule, and the test.** *A derived quantity that ships alongside its own inputs must be
+  asserted against those inputs, or it is a second, unchecked number in the artifact.* One line:
+  `crossovers[i].ratio == static[i] / dlra[i]` for every `i`. **That is the same class as
+  coder's own `test_window_energy_rank_matches_a_stacked_svd`**, which compares a derived
+  spectrum against a direct SVD and whose docstring explains why the weaker check would pass.
+
+  **And the standing rule gains a second half.** R56b gave *"a fix in the driver is not a fix
+  until the artifact is regenerated."* This adds: **and a regenerated artifact is not a
+  *verified* fix until the run has been inspected, because regeneration is the first moment the
+  derived blocks sit visibly beside their inputs.**
+
+  **No merge this cycle**; the run wrote to `/tmp/opencode/rv4/`, and no agent branch moved. The
+  finding is urgent in one direction only: **coder must not commit the regenerated artifact until
+  the block is fixed or dropped**, because a `1.9×` error in the central number is worse than the
+  six-`null` version it replaces.
 - 2026-09-25 **R56b — I wrote "merged" without merging, the second time, and the rule I wrote
   for the first time did not prevent it. Now merged and verified. D21.**
   At the start of this cycle `origin/main..origin/agent/coder` still contained `5909af6` — **the

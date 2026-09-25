@@ -1271,3 +1271,65 @@ stale-schema guard is the correct engineering response to D14.4, the interpolati
 R48 oscillation failure mode into the instrument, and the forcing-name finding is correct and
 important. **Coder's work was good; my report about it was mislabelled, not mistaken.** The
 distinction matters because the lesson is about my process, not about their code.
+
+---
+
+## D22 — A derived block that ships beside its inputs must be asserted against them (2026-09-25)
+
+> **OPERATIVE (R57).** `crossover_surface.json`'s `crossovers` block **is off by one horizon**
+> — it pairs `static[t]` with `DLRA[t+1]` — and **must not be committed or cited** in that state.
+> **The `dlra` and `static_moving_window` rows are correct, and D15–D17's `t*` values therefore
+> stand uncorrected.**
+
+**D22.1 — What I did and why.** R56b established that I had merged coder's fix **without
+executing it**. I ran `main`'s driver at the default configuration. **Three of the four fixes
+work** — `moving_window_refit_offset: 0.125` is recorded (so D15.3's protocol requirement is
+satisfiable from the artifact), the `reynolds_numbers` column and `by_reynolds` layout are
+present, `key_schema` is self-describing, and the reason strings are correct — including
+`[never] r=43: "the DLRA is exact at every horizon here (relative error at roundoff), so no
+static baseline can overtake it"`, which is exactly the *unresolved*-vs-*never* distinction
+D15.5 asked for. **The fourth, the one the push was named for, is broken.**
+
+**D22.2 — The defect, exactly.** The `crossovers` block's `ratio_by_horizon` does not equal the
+ratio recomputed from the `dlra` and `static_moving_window` rows **shipped in the same artifact,
+under any of the four error columns.** All four columns agree with each other and disagree with
+the block; the rows reproduce the committed `6571c46` artifact to `1e-15` on all 36 static
+cells. **The block pairs `static[t]` with `DLRA[t+1]`.** The proof is at `t = 0.1`, where the
+rows give a DLRA relative error of **exactly `0.0`** — the integrator is exact there, so the
+true ratio is unbounded — while the block reports a finite `7.021`; the error it implies,
+`0.013389`, is the rows' value at `t = 0.25`, `0.013349`.
+
+**D22.3 — This is coder's own R54 off-by-one, reintroduced in the derived block.** In R54 they
+found that *"the static rows were off by one sample; the rollout's state list starts at `t=0`, so
+indexing it with the horizon index compared the `t=0` state against the `t=0.1` reference and
+shifted every row."* **That was fixed in the rows. The same index error survives in the block
+derived from them, which is why the earlier fix did not catch it and why nothing has since.**
+
+**D22.4 — Consequence, and the good news inside it.** `t*(r=16)` is **`0.649` from the block and
+`1.256` from the rows it ships — a `1.9×` error in the paper's central number**, produced by a
+block that is wrong while the data beside it is right. **But D15–D17's values were computed from
+the rows and are therefore uncorrected**, and the structure is confirmed on them: `r ≤ 8`
+**unresolved** at all three windows, `r = 16` and `r = 32` **resolved**, `r = 43` **never**.
+
+**D22.5 — The rule, and it is one line of test.** *A derived quantity that ships alongside its
+own inputs must be asserted against those inputs, or it is a second, unchecked number in the
+artifact.* Assert `crossovers[i].ratio_by_horizon[i].ratio == static[i] / dlra[i]` for every `i`.
+**This is the same class as coder's `test_window_energy_rank_matches_a_stacked_svd`,** which
+compares a derived spectrum against a direct SVD and whose docstring explains why the weaker
+check would pass.
+
+**D22.6 — Two results that are now confirmed, and they strengthen earlier decisions.** **The two
+interpolations differ by `14.0%` (`r=16`) and `17.5%` (`r=32`)** — so reporting both rather than
+passing one off as *the* value is justified by a margin that matters. **And window-invariance on
+the rows is `0.20%` (`r=16`) and `0.63%` (`r=32`)** across `W ∈ {0.25, 0.5, 1.0}`, **tighter than
+the `≤7%` D16.1 recorded** and the strongest robustness figure the project holds on any axis.
+
+**D22.7 — The standing rule gains a second half.** R56b gave *"a fix in the driver is not a fix
+until the artifact is regenerated."* This adds: **and a regenerated artifact is not a *verified*
+fix until the run has been inspected, because regeneration is the first moment the derived blocks
+sit visibly beside their inputs.**
+
+**D22.8 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1). No per-step
+advantage in time or memory. BUG's rank-dependent cost is the best-evidenced positive claim
+(D19.2). The windowed rank rule is worse (D18.1). The flow is not the Kolmogorov flow (D20).
+Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred claim stands.

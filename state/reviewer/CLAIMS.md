@@ -63,6 +63,8 @@ without the ceiling beside it (D17.2).**
 
 **A reported `t*` must therefore state FIVE things: the baseline's window length, its refit
 interval, its offset, the in-sample check, AND the grid with its dealiasing ceiling.**
+**The offset is now recorded in the artifact (`moving_window_refit_offset: 0.125`), so this
+requirement is satisfiable from the artifact rather than from the driver (D22.1).**
 
 **The corrected spine, which is a mechanism rather than a slogan** (R52, **D16.2–D16.3**):
 
@@ -122,11 +124,15 @@ recorded in their driver: off-by-one sample; the initial basis fitted on the fut
 holding fewer snapshots than the rank silently skipping the refit; and **a refit at exactly an
 evaluation time being in-sample**.
 
-**Do not use `crossover_surface.json`'s `crossovers` block** — wrong for the third cycle
-(R48, R50, R51). All 18 entries report `t_star: null` and *"DLRA still ahead at the longest
-horizon"*, which is **false at `r=16` and `r=32` for every window**. Read the `dlra` and
-`static_moving_window` rows. **The committed artifact itself is current** — its
-`provenance.git_commit` is `6571c46`, matching the driver (**D14.4** verified).
+**Do not use `crossover_surface.json`'s `crossovers` block — under ANY revision (D22).** The
+committed one (generated at `6571c46`) reports six nulls with a false reason string (D15.5). The
+**regenerated** one is better-formatted but **off by one horizon — it pairs `static[t]` with
+`DLRA[t+1]`** — and would give `t*(r=16) = 0.649` where the rows give `1.256`, **a `1.9×` error in
+the central number**. The proof is at `t = 0.1`, where the rows say the DLRA error is **exactly
+`0.0`** (so the ratio is unbounded) and the block reports a finite `7.021`; the error it implies
+is the rows' value at `t = 0.25`. **This is coder's own R54 off-by-one, reintroduced in the
+derived block rather than the rows (D22.2–D22.3). Read the `dlra` and `static_moving_window`
+rows, and **assert any derived block against them** (D22.5).
 
 ### 1.3 The two structural facts, which do not drift with `Re`
 
