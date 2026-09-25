@@ -72,6 +72,39 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5k (independent operator audit of the merged engine). R5 verified
+  the engine by re-running the author's tests and hand-checking the algebra,
+  which has a blind spot by construction: the suite shares any misconception with
+  the code, and every field in it is smooth or band-limited. So I audited the
+  **operators** against references I built myself — a full 2-D spectrum (no rFFT
+  half-spectrum route), integer arithmetic for the 2/3 mask, and an independently
+  manufactured forcing. **18 checks pass**: `lap` and `vorticity` to 2.3e-13,
+  `u == d_y psi` to 1.1e-14, both `inv_lap` conventions to 7.8e-15,
+  `<u, grad psi> == 0` exactly, Parseval exact, the rectangular 2/3 rule exact
+  (`|k| <= floor(N/3)` per direction, Nyquist dropped), dealiasing a no-op for
+  resolved products, the heat semigroup to 5.6e-16, and the **energy identity to
+  6.0e-17** with my own manufactured `zeta`. The dealiasing check has a working
+  positive control (out-of-band amplitude 1.09e+06 undealiased → 1.02e-11
+  dealiased), so it demonstrably does something.
+  **One real finding, non-blocking:** three checks failed with a single root
+  cause *in the engine* — `Grid2D` uses the x-Nyquist wavenumber
+  `kx[N//2] = -N/2` in derivative multipliers, which is not admissible for a
+  real field's x-derivative. At N=32 on a full-band field,
+  `max|v_engine - (-d_x psi)| = 7.48`, and zeroing that wavenumber drops the
+  error to 1.07e-14; for a field with no Nyquist content everything agrees to
+  ~1e-15. Inert in every committed run (dealiasing removes `|k| > floor(N/3)`,
+  IC band-limited), cannot affect the 13 tests, fix is a separate
+  `kx_diff` array plus a full-band test. D9 stands; recorded as a D9 addendum
+  and added to the standing checklist as §1.4's full-band operator test.
+  **Process note recorded:** my first three audit runs reported failures that
+  were *my* errors — wrong `inv_lap` sign expectation, a circular-vs-
+  rectangular mask assumption, and an "independent" curl reference that was
+  itself built through the ambiguous rFFT route (which is how the Nyquist issue
+  surfaced at all). Each time the correct move was to rebuild the reference
+  rather than accept the discrepancy. Second time this cycle a check failed for
+  a reason on my side (the IC-rank error was the first), so the rule is now
+  explicit: when an independent check disagrees with code that already passes
+  its own tests, the first hypothesis to test is the check.
 - 2026-09-25 R5j (integration check + fixed a hazard I created in the governing
   documents). Three things only the integrator would notice.
   **(1) `main` is coherent as a whole:** exported `origin/main` fresh; no

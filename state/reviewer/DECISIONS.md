@@ -378,6 +378,21 @@ including "a speedup is not implied", "`stable` is not a claim of long-time
 stability", and omitting an unstable long-horizon POD baseline rather than
 extrapolating it — are endorsed and must survive the re-run.
 
+**Addendum (R5k, 2026-09-25) — approval stands; one latent bug recorded.** The
+reviewer audited the engine's operators against independently constructed
+references (full 2-D spectrum, integer mask arithmetic, an independently
+manufactured forcing): 18 checks pass, including the energy identity to 6e-17,
+the heat semigroup to 6e-16, Parseval exact, the rectangular 2/3 rule exact, and
+dealiasing verified with a positive control (out-of-band amplitude 1.09e+06
+undealiased → 1.02e-11 dealiased). Three checks failed and all three share one
+root cause **in the engine**: `Grid2D` uses the x-Nyquist wavenumber
+`kx[N//2] = −N/2` in derivative multipliers, which is not admissible for a real
+field's x-derivative; zeroing it drops the error from 7.48 to 1.1e-14.
+**Non-blocking**: it is inert in every committed run (dealiasing removes
+`|k| > floor(N/3)`; the IC is band-limited), it cannot affect the 13 passing
+tests, and the fix is a separate derivative-wavenumber array plus one
+full-band test. Report: `reviews/2026-09-25-R5k-engine-operator-audit.md`.
+
 ## D10 — High-Re turbulence validation gate (2026-09-25)
 
 > **OPERATIVE.** Requirements **V1–V7** below are all open. V6's *direction* is

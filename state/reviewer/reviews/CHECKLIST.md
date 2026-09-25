@@ -84,6 +84,14 @@ instead of the method. These are merge-blocking for any accuracy claim.
       diagnostic must be shown to *detect* a real violation (inject
       `u + ∇φ`, assert it reports O(1)), otherwise the invariant test is
       vacuous.
+- [ ] **(R5k)** **Operator tests on full-band fields.** A suite whose fields are
+      all smooth or band-limited cannot catch an error that only appears at the
+      Nyquist wavenumber. At least one test must use a full-band field and
+      compare the spectral operators against a full 2-D spectrum (no rFFT
+      half-spectrum route), covering `velocity`, `grad`, `lap`, `vorticity` and
+      divergence. The engine currently fails `v == -∂ₓψ` on such a field because
+      `kx[N//2]` is used as a derivative multiplier; see
+      `reviews/2026-09-25-R5k-engine-operator-audit.md`.
 - [ ] **(R5)** Order and energy tests exist for the **reduced** path, not only
       for the full-grid kernel.
 
