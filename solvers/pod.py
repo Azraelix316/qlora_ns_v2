@@ -149,6 +149,7 @@ class PODDMD:
         self._gram: np.ndarray | None = None
         self._cross: np.ndarray | None = None
         self.samples = 0
+        self.singular_gram = False
         self._previous: np.ndarray | None = None
 
     # -- offline phase ----------------------------------------------------
@@ -180,8 +181,16 @@ class PODDMD:
         if self.ridge > 0.0:
             gram += self.ridge * np.trace(self._gram) / gram.shape[0] * np.eye(gram.shape[0])
         # A = C_{n+1} C_n^T (C_n C_n^T)^{-1}; the Gram is symmetric, so this is
-        # solve(G, cross^T)^T.
-        self.operator = np.linalg.solve(gram, self._cross.T).T
+        # solve(G, cross^T)^T.  A rank-deficient Gram (too few distinct training
+        # directions) is reported and solved in the least-squares sense rather
+        # than raising, because a baseline that refuses to fit is a harness
+        # failure and not a finding.
+        try:
+            self.operator = np.linalg.solve(gram, self._cross.T).T
+            self.singular_gram = False
+        except np.linalg.LinAlgError:
+            self.operator = np.linalg.lstsq(gram, self._cross.T, rcond=None)[0].T
+            self.singular_gram = True
         return self
 
     # -- online phase -----------------------------------------------------
