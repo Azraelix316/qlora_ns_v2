@@ -2834,3 +2834,62 @@ my own bookkeeping spent on tasks that were already done — the D35 lesson agai
 never swept.**
 
 **D42.6 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6 and D41.5 stands.
+
+---
+
+## D43 — **MY STANDING INSTRUCTIONS VERIFY CLEAN (12 coder items, 12 writer prohibitions), and my audit METHOD had a boundary gap that would have produced a false retraction** (2026-09-26)
+
+> **OPERATIVE (R78).** **The instruction lists can now be trusted and need no re-verification.** **And
+> the sweep rule gains a structural clause: a file's legitimate withdrawal regions must be known by
+> structure, not by keyword.**
+
+**D43.1 — EVERY STANDING INSTRUCTION I ISSUED FROM MEMORY VERIFIES AS STILL NEEDED.** All of
+`CODER_ORDER.md`'s Tier 3, checked against `origin/main`: **`peak_memory.json` still asserts the
+`1.531 MiB` BUG spread with `rank_independence_resolved: true`** (spreads `[0.578, 1.531]`, flags
+`[True, True]`); **the block is still correct at `t* = 0.649`** and is not a defect; **the energy
+residual is still absent per method** from the baselines artifact; **`error_columns` still documents
+`relative_l2_oracle_mean` as the oracle mean**; **the crossing fixture still splits the two columns**;
+**the corrected surface is still board-only**; **the never-yields rank is still bracketed 32–43**
+(ranks `[2,4,8,16,32,43]`). And the writer's prohibitions: the static-POD qualification is still
+required (**four** `pod` runs diverge and others do not), the forcing is still the single-mode shear,
+the fitted-law bar is still needed. **SO THE ONLY PHANTOM INSTRUCTIONS IN THIS PROJECT ARE THE TWO
+FOUND AND WITHDRAWN IN R77 — `koch2019` AND `temam1977navier` — AND THERE ARE NO OTHERS.**
+
+**D43.2 — AND MY CHECK WAS WRONG FIRST, WHICH IS THE PART THAT MATTERS.** My first pass reported **P1
+"FALSE — no fitted `c·r^p`"** as though the bar were unnecessary. **IT WAS MY BOUNDARY CONDITION, NOT
+THE FILE.** I delimited "operative" as everything before `## 6` and found the R39/R50 laws at lines
+211/214 — **which are §1.1a, headed "Every fitted form is void — and why, which is the useful part."
+They are the VOID-LIST: a table of withdrawn laws each with the reason it is void. That is exactly
+where they belong, and `PAPER_BLUEPRINT.md` §7 is a third such region.**
+
+**D43.3 — SO `CLAIMS.md` HAS TWO LEGITIMATE WITHDRAWAL REGIONS, §1.1a AND §6, AND MY R70 SWEEP KNEW
+ABOUT ONLY ONE.** R70's rule — *"flag any line containing a withdrawn token that does not also contain
+a withdrawal marker"* — **would flag both void-lists if it ran on the fitted-law tokens**, because
+§1.1a's justification column reads *"later found in-sample and starvation-affected"* and *"measured
+on `bc35666`, whose baseline window ends at the evaluation time"* — **NEITHER CONTAINS ANY OF MY
+MARKERS.** **NO FALSE POSITIVE ACTUALLY OCCURRED BECAUSE THE FITTED-LAW TOKENS WERE NEVER IN R70's
+LIST** — they were correctly void-list entries, not operative claims. **IT WAS LUCK.**
+
+**D43.4 — THE REFINED RULE, AND IT IS THE STRUCTURAL VERSION OF D70's: A SWEEP NEEDS TO KNOW WHERE
+THE FILE'S LEGITIMATE WITHDRAWAL REGIONS **ARE**, NOT JUST WHAT A WITHDRAWAL MARKER LOOKS LIKE.** A
+file that catalogues what it has rejected is a **GOOD** practice — `CLAIMS.md` §1.1a and §6, the
+blueprint's §7, `WRITER_ORDER.md` §3 — **and a reviewer auditing such a file MUST DISTINGUISH "this
+number is void, here is why" FROM "this number is my claim" BY STRUCTURE, NOT BY KEYWORD.** **A file
+with one withdrawal region needs a different check from a file with three.** Concretely: **§1.1a
+(void-list with per-entry reasons) and §6 (prohibition list with the barring decision) in
+`CLAIMS.md`; §7 in `PAPER_BLUEPRINT.md`; §3 in `WRITER_ORDER.md`; inline in `CODER_ORDER.md`. A HIT
+INSIDE THOSE REGIONS IS LEGITIMATE BY CONSTRUCTION; A HIT OUTSIDE THEM IS OPERATIVE.**
+
+**D43.5 — AND THE HONEST NOTE: MY CHECK WAS WRONG IN THE DIRECTION THAT WOULD HAVE PRODUCED A *FALSE
+RETRACTION* OF A STANDING BAR. That is the more dangerous direction, because it looks like
+housekeeping. I HAVE CAUGHT SIX REAL ERRORS IN THIS PROJECT AND ONE FALSE ONE, AND THE FALSE ONE WAS
+MINE, IN THE METHOD RATHER THAN THE CONTENT.**
+
+**D43.6 — THE LESSON, AND IT IS THE SECOND-ORDER VERSION OF R77's. R77: measure the files, don't
+trust your own list. R78: WHEN YOU BUILD A MECHANICAL CHECK OVER YOUR OWN PROSE, THE CHECK'S BOUNDARY
+CONDITIONS ARE AS MUCH A PART OF THE FINDING AS THE TOKENS ARE — AND THE FIRST TIME YOU RUN A NEW
+CHECK, EXPECT IT TO BE WRONG IN THE DIRECTION THAT LOOKS LIKE HOUSEKEEPING. A check that returns
+"FALSE" on a bar you know is load-bearing is not a discovery; it is a bug in the check, and the
+cheapest way to tell the difference is to READ THE REGION THE HIT CAME FROM before believing it.**
+
+**D43.7 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5 and D42.6 stands.

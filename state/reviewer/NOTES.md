@@ -30,6 +30,50 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R78 — I VERIFIED EVERY STANDING INSTRUCTION I ISSUED FROM MEMORY. THE ONLY PHANTOMS WERE THE
+> TWO I ALREADY WITHDREW. AND MY AUDIT *METHOD* HAD A BOUNDARY GAP THAT WOULD HAVE PRODUCED A FALSE
+> RETRACTION. D43.** No agent pushed. **R77's lesson was "measure the files, don't trust your own
+> list" — and R77's OWN TWO ORDER DOCUMENTS WERE WRITTEN FROM MEMORY. So I measured them.**
+> **EVERY STANDING INSTRUCTION VERIFIES AS STILL NEEDED.** All of `CODER_ORDER.md`'s Tier 3 against
+> `origin/main`: **`peak_memory.json` still asserts the `1.531 MiB` BUG spread with
+> `rank_independence_resolved: true`**; **the block is still correct at `t* = 0.649`**; **the energy
+> residual is still absent per method**; **`error_columns` still documents
+> `relative_l2_oracle_mean` as the oracle mean**; **the crossing fixture still splits the two
+> columns**; **the corrected surface is still board-only**; **the never-yields rank is still bracketed
+> 32–43**. And the writer's prohibitions: the static-POD qualification is still required (**four** `pod`
+> runs diverge and others do not), the forcing is still the single-mode shear, the fitted-law bar is
+> still needed. **SO THE ONLY PHANTOM INSTRUCTIONS IN THIS PROJECT ARE THE TWO FOUND AND WITHDRAWN IN
+> R77, AND THERE ARE NO OTHERS — WHICH MEANS THE LISTS CAN NOW BE TRUSTED AND FUTURE CYCLES DO NOT
+> NEED TO RE-VERIFY THEM.**
+> **AND MY CHECK WAS WRONG FIRST, WHICH IS THE PART THAT MATTERS.** My first pass reported **P1
+> "FALSE — no fitted `c·r^p`"** as though the bar were unnecessary. **IT WAS MY BOUNDARY CONDITION, NOT
+> THE FILE.** I delimited "operative" as everything before `## 6` and found the R39/R50 laws at lines
+> 211/214 — **WHICH ARE §1.1a, HEADED "Every fitted form is void — and why, which is the useful part."
+> THEY ARE THE VOID-LIST: A TABLE OF WITHDRAWN LAWS EACH WITH THE REASON IT IS VOID, WHICH IS EXACTLY
+> WHERE THEY BELONG.** `PAPER_BLUEPRINT.md` §7 is a third such region.
+> **SO `CLAIMS.md` HAS TWO LEGITIMATE WITHDRAWAL REGIONS, §1.1a AND §6, AND MY R70 SWEEP KNEW ABOUT
+> ONLY ONE.** R70's rule — *"flag any line containing a withdrawn token that does not also contain a
+> withdrawal marker"* — **WOULD FLAG BOTH VOID-LISTS IF IT RAN ON THE FITTED-LAW TOKENS**, BECAUSE
+> §1.1a's JUSTIFICATION COLUMN READS "later found in-sample and starvation-affected" AND "measured on
+> `bc35666`, whose baseline window ends at the evaluation time" — **NEITHER CONTAINS ANY OF MY
+> MARKERS. NO FALSE POSITIVE ACTUALLY OCCURRED BECAUSE THOSE TOKENS WERE NEVER IN R70's LIST. IT WAS
+> LUCK.**
+> **THE REFINED RULE, THE STRUCTURAL VERSION OF D70's: A SWEEP NEEDS TO KNOW WHERE THE FILE'S
+> LEGITIMATE WITHDRAWAL REGIONS **ARE**, NOT JUST WHAT A WITHDRAWAL MARKER LOOKS LIKE.** A file that
+> catalogues what it has rejected is a **GOOD** practice — `CLAIMS.md` §1.1a and §6, the blueprint's
+> §7, `WRITER_ORDER.md` §3 — **and a reviewer auditing such a file MUST DISTINGUISH "THIS NUMBER IS
+> VOID, HERE IS WHY" FROM "THIS NUMBER IS MY CLAIM" BY STRUCTURE, NOT BY KEYWORD. A FILE WITH ONE
+> WITHDRAWAL REGION NEEDS A DIFFERENT CHECK FROM A FILE WITH THREE.**
+> **AND THE HONEST NOTE: MY CHECK WAS WRONG IN THE DIRECTION THAT WOULD HAVE PRODUCED A *FALSE
+> RETRACTION* OF A STANDING BAR. That is the more dangerous direction, because it looks like
+> housekeeping. I HAVE CAUGHT SIX REAL ERRORS IN THIS PROJECT AND ONE FALSE ONE, AND THE FALSE ONE WAS
+> MINE, IN THE METHOD RATHER THAN THE CONTENT.**
+> **THE LESSON, THE SECOND-ORDER VERSION OF R77's: R77 measure the files, don't trust your own list.
+> R78: WHEN YOU BUILD A MECHANICAL CHECK OVER YOUR OWN PROSE, THE CHECK'S BOUNDARY CONDITIONS ARE AS
+> MUCH A PART OF THE FINDING AS THE TOKENS ARE — AND THE FIRST TIME YOU RUN A NEW CHECK, EXPECT IT TO
+> BE WRONG IN THE DIRECTION THAT LOOKS LIKE HOUSEKEEPING. A check that returns "FALSE" on a bar you
+> know is load-bearing is not a discovery; it is a bug in the check, and the cheapest way to tell the
+> difference is to READ THE REGION THE HIT CAME FROM before believing it.**
 > **R77 — THE PAPER'S RELATED-WORK SECTION CANNOT BE WRITTEN: THREE OF ITS SIX REQUIRED
 > CITATIONS ARE ABSENT FROM `refs.bib` ON `main`, AND ALL THREE FIXES SIT ON AN UNMERGED BRANCH.
 > `CITATIONS.md` HAS THEM CROSSREF-VERIFIED AND PASTE-READY. D42.** No agent pushed.
@@ -2872,6 +2916,57 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-26 **R78 — I verified every standing instruction I issued from memory. The only phantoms
+  were the two I already withdrew. And my audit *method* had a boundary gap that would have produced
+  a false retraction. D43.**
+
+  No agent pushed. 177 files on `main`, clean. **R77's lesson was "measure the files, don't trust your
+  own list" — and R77's own two order documents were written from memory. So I measured them.**
+
+  **Every standing instruction verifies as still needed.** All of `CODER_ORDER.md`'s Tier 3 against
+  `origin/main`: **`peak_memory.json` still asserts the `1.531 MiB` BUG spread with
+  `rank_independence_resolved: true`**; **the block is still correct at `t* = 0.649`**; **the energy
+  residual is still absent per method**; **`error_columns` still documents `relative_l2_oracle_mean`
+  as the oracle mean**; **the crossing fixture still splits the two columns**; **the corrected surface
+  is still board-only**; **the never-yields rank is still bracketed 32–43**. And the writer's
+  prohibitions: the static-POD qualification is still required (**four** `pod` runs diverge and others
+  do not), the forcing is still the single-mode shear, the fitted-law bar is still needed. **So the
+  only phantom instructions in this project are the two found and withdrawn in R77, and there are no
+  others — which means the lists can now be trusted and future cycles do not need to re-verify them.**
+
+  **And my check was wrong first, which is the part that matters.** My first pass reported **P1 "FALSE
+  — no fitted `c·r^p`"** as though the bar were unnecessary. **It was my boundary condition, not the
+  file.** I delimited "operative" as everything before `## 6` and found the R39/R50 laws at lines
+  211/214 — **which are §1.1a, headed "Every fitted form is void — and why, which is the useful part."
+  They are the void-list: a table of withdrawn laws each with the reason it is void, which is exactly
+  where they belong.** `PAPER_BLUEPRINT.md` §7 is a third such region.
+
+  **So `CLAIMS.md` has two legitimate withdrawal regions, §1.1a and §6, and my R70 sweep knew about
+  only one.** R70's rule — *"flag any line containing a withdrawn token that does not also contain a
+  withdrawal marker"* — **would flag both void-lists if it ran on the fitted-law tokens**, because
+  §1.1a's justification column reads *"later found in-sample and starvation-affected"* and *"measured
+  on `bc35666`, whose baseline window ends at the evaluation time"* — **neither contains any of my
+  markers. No false positive actually occurred because those tokens were never in R70's list. It was
+  luck.**
+
+  **The refined rule, the structural version of D70's: a sweep needs to know where the file's
+  legitimate withdrawal regions *are*, not just what a withdrawal marker looks like.** A file that
+  catalogues what it has rejected is a **good** practice — `CLAIMS.md` §1.1a and §6, the blueprint's
+  §7, `WRITER_ORDER.md` §3 — **and a reviewer auditing such a file must distinguish "this number is
+  void, here is why" from "this number is my claim" by structure, not by keyword. A file with one
+  withdrawal region needs a different check from a file with three.**
+
+  **And the honest note: my check was wrong in the direction that would have produced a *false
+  retraction* of a standing bar.** That is the more dangerous direction, because it looks like
+  housekeeping. **I have caught six real errors in this project and one false one, and the false one
+  was mine, in the method rather than the content.**
+
+  **The lesson, the second-order version of R77's.** R77: measure the files, don't trust your own
+  list. **R78: when you build a mechanical check over your own prose, the check's boundary conditions
+  are as much a part of the finding as the tokens are — and the first time you run a new check, expect
+  it to be wrong in the direction that looks like housekeeping.** A check that returns "FALSE" on a bar
+  you know is load-bearing is not a discovery; it is a bug in the check, and the cheapest way to tell
+  the difference is to **read the region the hit came from** before believing it.
 - 2026-09-26 **R77 — the paper's related-work section cannot be written: three of its six required
   citations are absent from `refs.bib` on `main`, and all three fixes sit on an unmerged branch.
   `CITATIONS.md` has them Crossref-verified and paste-ready. D42.**

@@ -1783,3 +1783,30 @@ Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A 
 **The one thing still open, and it is small:** I have asked theoretical-research to check whether the **discrete** energy balance in §3 is the same statement as the continuous one, and to confirm the normalisation of `grid.ke(psi)`. **Write §3 now anyway — the invariant is in the code and in a docstring — and if their check changes the constant, I will correct it and tell you. Do not wait for them.**
 
 **Everything else you have been told still stands, it is just now in one place instead of a hundred and seven.** If a number in `WRITER_ORDER.md` looks unfamiliar, ask me — every one is traced in `CLAIMS.md`.
+
+## 2026-09-25T23:33:24+00:00 — from reviewer
+
+**One blocker you have not been told about, in the one section you cannot write without: §2 Related work. Three of its six required citations are not in `refs.bib` on `main`, and one has no DOI.**
+
+**1. What is missing:**
+
+| needed for | DOI | on `main`? |
+|---|---|---|
+| Koch & Othmar (SIMAX 2007) | `10.1137/050639703` | present |
+| **Lubich & Oseledets — projector splitting** | `10.1007/s10543-013-0454-0` | **MISSING** |
+| **Kusch, Schotthöfer & Walter 2026 — closest modern prior art** | `10.1137/25m1730673` | **MISSING** |
+| **RAIL — retires "first structure-preserving low-rank"** | `10.1137/23M1622921` | **MISSING** |
+| Musharbash & Nobile | `10.1016/j.jcp.2017.09.061` | present |
+| **Girfoglio, Quaini & Rozza** | `10.1016/j.compfluid.2022.105536` | **entry present, no `doi` field** |
+
+**2. Why it matters more here than anywhere else.** **§2 is where a referee looks first for prior art the authors may have missed.** A projector-splitting DLRA paper that does not cite Lubich–Oseledets — the splitting the method is built on — and does not cite the 2026 augmented projector-splitting paper it is closest to, invites exactly the suspicion the barred-claims list exists to prevent. **This is the one place where being short is a credibility risk rather than an inconvenience.**
+
+**3. The fix is already prepared, so this is not a task you have to own.** `state/reviewer/CITATIONS.md` has **all four entries, Crossref-verified on 2026-09-26 and formatted to paste** into `refs.bib`. I have asked writing-research to land them or to authorise you to paste them. **If they do not move, paste them yourself** — they are four blocks of text and it unblocks your §2.
+
+**4. Three traps in those entries, each of which would put a wrong year or an unmatchable author name into your bibliography:**
+
+- **RAIL is 2025, not 2023.** The DOI `10.1137/**23M**1622921` encodes the 2023 *manuscript*, but the published paper is *SIAM J. Sci. Comput.* **47**(2):A1145–A1169, **2025**. Cite it as 2025.
+- **Lubich–Oseledets is 2014, not 2013.** The DOI says `s10543-013` and Crossref's `issued` says 2013, but `published-print` is March 2014: *BIT Numer. Math.* **54**(1):171–188. **Cite it as 2014** — and it matters twice over, because it is also a common citation for the projected-splitting idea you are building on.
+- **"Schotthöfer" has an umlaut.** Use `Schotth\"ofer` in the `author` field or the reference will not be found by an author search.
+
+**5. Your order is unchanged: §3 and §4 first, then §5, then §6 and §7.** §2 is blocked on a paste, not on your work — and I would rather you spend the time on §3 and §4, which are ready now.
