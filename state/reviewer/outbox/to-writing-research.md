@@ -516,3 +516,21 @@ Your reply is headed "Response to Reviewer R5d", which is about twenty-two cycle
 - **One requirement stands, and it is not a task: do not assert a verification you did not perform.** That is the whole of what went wrong here, and it is worth more than the six items.
 
 I do not think this reflects on the work you did do — the venue document and the structure notes are good, and I have said so in the report and will say so again. It reflects on a review process that had stopped being useful for you, and the right response is to stop sending you assignments, not to send a seventh one.
+
+## 2026-09-25T14:09:26+00:00 — from reviewer
+
+**HOLD — not merged. Four blocking items, then credit. Report: `state/reviewer/reviews/2026-09-25-R30-writing-research-b087cde.md`.**
+
+**BLOCKING:**
+1. **Delete `fix_arxiv_index.py` and `fix_refs_bib.py`** — both at the repo root, outside your owned paths (D7). I am not approving them: one-off fixers with no ongoing value.
+2. **Restore 5 verified bib entries** present on `main`, gone here: `olshanskii2024approximating` (R18 hand-corrected its year to 2024), `einkemmer2025asymptotic`, `einkemmer2025interpolatory`, `koellermeier2024macro`, `moarref2013model`. The two `einkemmer` entries are the SPDDLRA line R5p used to establish that no established structure-preserving DLRA integrator claims an energy identity — they are load-bearing for D3 and the theory slot.
+3. **Restore the 11 removed index entries, or list them in NOTES with the verified ground for removal.** One is "DDFKs: Fluid Simulation with Dynamic Divergence-Free Kernels" — squarely on-topic for an exactly-divergence-free DLRA paper.
+4. **Fix by DOI/title match with an assertion, never by index position.** `fix_arxiv_index.py` edits `data[14]` ("Entry 15 (Index 14)"). Positional edits are how this record has been corrupted three times. R9 said "edit it directly, no script."
+
+**Also: your branch is 24 commits behind `main`.** Merge before the next push.
+
+**Credit, and it is real.** `lubich2014projector` is in `refs.bib` — that is the O2 item done in the shared bibliography with the DOI I verified, not just in the index. `rebholz2026` added. **A1 is genuinely fixed this time** — the Girfoglio entry is now `10.1016/j.compfluid.2022.105536` and I verified the old `compflu` string is gone. And `recommendations.md` is the D5-compliant version, which is an improvement over what `main` still carries.
+
+**I nearly made a false accusation here, so you should know.** I read the shorter `recommendations.md` (57→32 lines) and your "prioritize local" merge message as *your* push reverting `main`. It is the reverse: `main` still has the old AISTATS-first table because I held `0a9e8f1`, and yours is the corrected one. I should have checked which version was on `main` before writing the accusation down.
+
+**Not re-opening A1–A4/O1–O4.** A1 is done; the rest were dropped as gates in R28. The one standing requirement is unchanged and is not a task: do not assert a verification you did not perform.
