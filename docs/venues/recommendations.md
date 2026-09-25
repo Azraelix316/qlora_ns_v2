@@ -1,48 +1,57 @@
 # Recommended Conference and Journal Shortlist
 
-This document provides a curated list of potential publication venues for the research on **Dynamical Low-Rank Approximation (DLRA) with Structure-Preserving splits for incompressible Navier–Stokes equations**, validated on high-Reynolds-number, forced, turbulent dynamics. 
+This document provides a curated list of potential publication venues for the research on **Dynamical Low-Rank Approximation (DLRA) with Structure-Preserving splits for incompressible Navier–Stokes equations**, validated on high-Reynolds-number, forced, turbulent dynamics.
 
-The shortlist is weighted towards earliest realistic targets (late 2026 to early 2027) and prioritizes accessibility for a researcher in Taiwan (Hybrid/Virtual or Asia-based).
+The shortlist is weighted towards earliest realistic targets and prioritizes accessibility for a researcher in Taiwan (Hybrid/Virtual or Asia-based).
 
 ## Submission Strategy
 
 The strategy follows a dual-track approach:
+
 1.  **Machine Learning Track (Algorithmic Novelty):** Focus on venues that value the mathematical foundations of low-rank approximation and its application to scientific computing (e.g., AISTATS, ICML, NeurIPS).
 2.  **Scientific Computing & Physics Track (Numerical Rigor):** Target journals and conferences that emphasize numerical stability, divergence-freeness, and physical validation in fluid dynamics (e.g., JCP, SIAM SISC, CMAME).
 
-## Top Recommended Venues (Prioritized by Immediacy)
+## Top 15 Recommended Venues
 
-| Rank | Venue Name | Type | Deadline | Relevance | Accessibility (Taiwan/Asia) | URL / Template Notes |
+*Note: Deadlines are estimates based on historical patterns for the 2026/2027 cycle and must be verified via official conference websites before submission.*
+
+| Rank | Venue Name | Type | Deadline (Est.) | Relevance | Accessibility (Taiwan/Asia) | URL / Template Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | 1 | **AISTATS 2027** | Conf | Sep 29, 2026 | High (Math ML) | **High** (Hybrid/Virtual) | [aistats.org](https://aistats.org/) / `aistats2027.sty` |
-| 2 | **ICASSP 2027** | Conf | Sept - Oct 2026 | Medium-High | **Very High** (Asia-based) | [isca-annual.org](https://www.isca-annual.org/) / IEEE Template |
-| 3 | **ACML 2027** | Conf | Late 2026/Early 2027 | High (Regional ML) | **Very High** (Asia-based) | [acml.cc](https://acml.cc/) / ACM Style |
-| 4 | **NeurIPS Workshops** | Workshop | Oct - Nov 2026 | Extremely High | **High** (Hybrid/Virtual) | Follow host conference |
-| 5 | **ICML 2027** | Conf | Jan - Feb 2027 | Highest | **High** (Hybrid/Virtual) | [icml.cc](https://icml.cc/) / `icml2027.sty` |
-| 6 | **NeurIPS 2027** | Conf | May 2027 | Highest | **High** (Hybrid/Virtual) | [neurips.cc](https://neurips.cc/) / `neurips_2027.sty` |
-| 7 | **JCP** | Journal | Rolling | Extremely High | **High** (Open Access) | Elsevier / JCP Template |
-| 8 | **SIAM SISC** | Journal | Rolling | Extremely High | **Medium** (Professional Society) | [siam.org](https://www.siam.org/) / SIAM LaTeX |
-| 9 | **CMAME** | Journal | Rolling | Very High | **High** (Open Access) | Elsevier / CMAME Template |
+| 2 | **ACML 2027** | Conf | Late 2026 | High (Regional ML) | **Very High** (Asia-based) | [acml.cc](https://acml.cc/) / ACM Style |
+| 3 | **NeurIPS Workshops** | Workshop | Oct - Nov 2026 | Extremely High | **High** (Hybrid/Virtual) | Follow host conference |
+| 4 | **ICLR Workshops** | Workshop | Late 2026 | High | **High** (Hybrid/Virtual) | Follow host conference |
+| 5 | **ICML 2027** | Conf | ~Feb 2027 | Highest | **High** (Hybrid/Virtual) | [icml.cc](https://icml.cc/) / `icml2027.sty` |
+| 6 | **NeurIPS 2027** | Conf | ~May 2027 | Highest | **High** (Hybrid/Virtual) | [neurips.cc](https://neurips.cc/) / `neurips_2027.sty` |
+| 7 | **AAAI 2027** | Conf | ~Aug 2026 | High (General AI) | **High** (Hybrid/Virtual) | [aaai.org](https://aaai.org/) / AAAI Template |
+| 8 | **JCP** | Journal | Rolling | Extremely High | **High** (Open Access) | Elsevier / JCP Template |
+| 9 | **SIAM SISC** | Journal | Rolling | Extremely High | **Medium** | [siam.org](https://www.siam.org/) / SIAM LaTeX |
+| 10 | **CMAME** | Journal | Rolling | Very High | **High** (Open Access) | Elsevier / CMAME Template |
+| 11 | **JFM** | Journal | Rolling | Highest (Physics) | **Medium** | [cambridge.org](https://www.cambridge.org/core/journals/journal-of-fluid-mechanics) |
+| 12 | **Physics of Fluids** | Journal | Rolling | Very High | **High** (Open Access) | [aip.org](https://aip.scitation.org/journal/pof) |
+| 13 | **KDD 2027** | Conf | ~Feb 2027 | Medium-High | **High** (Hybrid/Virtual) | [kdd.org](https://www.kdd.org/) / ACM Style |
+| 14 | **IJCAI 2027** | Conf | Variable | High | **Medium** | IJCAI Template |
+| 15 | **ECML PKDD 2027** | Conf | ~Mar 2027 | High | **High** (Hybrid/Virtual) | ACM/Springer Style |
 
 ## Detailed Venue Analysis
 
 ### Machine Learning & SciML Track
+These venues focus on the methodology, especially if we emphasize the adaptive rank and low-rank approximation aspects.
 
-#### **AISTATS / ICML / NeurIPS**
+#### **Premier ML Conferences (ICML, NeurIPS, AAAI)**
 - **Relevance:** These are the premier venues for theoretical and algorithmic advances in machine learning. If our contribution is framed as a new way to perform low-rank approximation on manifolds that preserves physical constraints, these are the ideal targets.
-- **Timing:** AISTATS provides an immediate opportunity (late Sept 2026). ICML/NeurIPS provide high-impact milestones for 2027.
+- **Strategy:** Use these for high-impact milestones if the mathematical novelty is the primary driver.
 
-#### **ICASSP / ACML**
-- **Relevance:** Excellent "bridge" venues. ICASSP is highly regarded in signal processing and systems, while ACML offers a strong regional presence in Asia with significant community engagement.
+#### **ML Workshops (NeurIPS / ICLR)**
+- **Relevance:** Extremely fast way to get eyes on the work and receive feedback from the SciML community before committing to a full conference or journal submission. They are particularly good for "work in progress" results.
 
 ### Scientific Computing & Physics Track
+These venues represent the gold standard for numerical methods applied to physical problems.
 
-#### **Journals (JCP, SIAM SISC, CMAME)**
-- **Relevance:** These journals represent the gold standard for numerical methods applied to physical problems. They require rigorous validation against high-fidelity data (DNS/LES), which is our project's core strength.
-- **Strategy:** Use these as the final destination for a complete, comprehensive manuscript once all benchmarks are finalized.
+#### **High-Impact Journals (JCP, SIAM SISC, CMAME)**
+- **Relevance:** These journals require rigorous validation against high-fidelity data (DNS/LES), which is our project's core strength. They emphasize stability and structure preservation.
 
-### Workshop Track
-#### **NeurIPS / ICLR Workshops**
-- **Relevance:** Extremely fast way to get eyes on the work and receive feedback from the SciML community before committing to a full conference or journal submission.
+#### **Fluid Dynamics Specialists (JFM, Physics of Fluids)**
+- **Relevance:** If the paper's contribution is perceived as primarily a physical insight or a new method for fluid dynamics specifically, these are highly respected.
 
-*Last updated: 2026-09-24 (Revised based on reviewer feedback and verified deadlines)*
+*Last updated: 2026-09-25 (Consolidated and expanded to Top 15)*

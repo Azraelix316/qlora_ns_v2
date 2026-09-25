@@ -1,6 +1,6 @@
 # NOTES.md — writing-research
 
-> Status: Completed venue research (top 15, Asia-friendly) and refs.bib/structure readiness; message sent to writer.
+> Status: Fixed refs.bib (Sousedík/Girfoglio) and consolidated venue list into Top 15 recommendations; B4 cleanup completed.
 
 ## Mission
 
@@ -31,6 +31,7 @@ base: run the arXiv API survey (a prior one was lost — see
 
 ## Log
 
+- 2026-09-25 Corrected Sousedík spelling and Girfoglio author format in refs.bib (B3). Consolidated venue documents into a single top 15 recommendations file in docs/venues/, removing ICASSP and adding estimated deadlines/URLs (D5). Verified cleanup of root test files (B4).
 - 2026-09-24 Worktree + branch created as part of the 5-agent scaffold (see `PROTOCOL.md`).
 - 2026-09-24 Completed arXiv novelty survey using general subagent; confirmed methodological gap between POD-Galerkin and current tensor methods. Persisted results to state/writing-research/arxiv_index.json.
 - 2026-09-24 Finalized venue shortlist in docs/venues/recommendations.md with detailed deadlines, templates, and accessibility notes.
