@@ -182,6 +182,38 @@ high-Reynolds-number forced turbulence with adaptive rank. It is **gated on
 D10-V6 being implemented** — the claim describes work to be done, and must not
 appear in the paper before it is done.
 
+**Status (R5d, 2026-09-25) — FINAL claim form; one prior-art correction.**
+Journal-venue coverage and a read of the two foundational DLRA papers changed
+the position twice. Report:
+`reviews/2026-09-25-R5d-prior-art-map-and-final-claim.md`. Findings:
+
+- Koch & Lubich 2007 (SIMAX, DOI 10.1137/050639703) contains **no** NS example
+  (all 21 pages checked: no "Navier", "Stokes", "vorticity", "advection",
+  "turbulence", "Kolmogorov"); Nonnenmacher & Lubich 2008 (Math. Comput. Simul.,
+  DOI 10.1016/j.matcom.2008.03.007) applies DLRA to latent semantic indexing,
+  image compression and a reaction–diffusion blow-up. Neither touches NS.
+- **Correction:** "no dynamical low-rank method has been applied to
+  incompressible NS" is **false** — Musharbash & Nobile (2018), *Dual
+  Dynamically Orthogonal approximation of incompressible Navier Stokes equations
+  with random boundary conditions*, J. Comput. Phys. 354:135–162,
+  DOI 10.1016/j.jcp.2017.09.061, plus its error analysis (SISC 37(2):A776–A810,
+  DOI 10.1137/140967787). That claim form is **barred**.
+- Structure-preserving/robust low-rank for conservative PDEs is also
+  established elsewhere (RAIL for advection–diffusion, DOI 10.1137/23M1622921;
+  macro-micro for hyperbolic moment equations, DOI 10.1007/s10444-024-10175-y;
+  stability of robust DLRA, DOI 10.1137/21M1446289), so "first
+  structure-preserving low-rank method for conservative PDEs" is **barred**.
+- A second ψ-formulation NS ROM exists and is missing from the survey: Zhang,
+  Xu, Guo & Feng (2024), Phys. Fluids 36(6), DOI 10.1063/5.0202509.
+
+The claim may be stated **only** in the final form recorded in that report
+(existing dynamical low-rank work for incompressible NS = dynamically orthogonal
+approximation for stochastic problems; existing ψ-formulation NS reduced models
+= offline/hybrid; we provide a structure-preserving, exactly divergence-free,
+factorisation-based integrator for the deterministic problem, validated at
+resolved high Re with adaptive rank). It remains gated on D10-V1/V2/V5/V6/V7.
+The report also lists the sixteen verified references the survey must contain.
+
 ## D5 — Venue (2026-09-24): OPEN
 
 Not yet decided. Awaiting the venue shortlist + recommendation from

@@ -31,7 +31,13 @@
 > D10-V6 is a port not a research question, and the novelty claim sharpens to
 > "SPDLRA applied to incompressible NS for the first time"; premise check on the
 > committed long run supports rank ≫ 3 and slow singular-value decay
-> (σ₃₂/σ₁ ≈ 1.5e-3) with rank *dynamics* still pending stationarity.
+> (σ₃₂/σ₁ ≈ 1.5e-3) with rank *dynamics* still pending stationarity. R5d:
+> novelty claim **finally settled with a correction** — Musharbash & Nobile
+> (JCP 2018) already applied dynamically orthogonal approximation to
+> incompressible NS, so "no DLRA for incompressible NS" is barred; the final
+> permitted claim (SP-DLRA machinery applied to *deterministic* incompressible
+> NS + resolved high-Re validation) and sixteen verified references are recorded
+> in D4 and the R5d report.
 
 ## Mission
 
@@ -79,6 +85,38 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5d (novelty claim settled, with a correction that matters).
+  Extended the check past arXiv into journals and then into the *contents* of
+  the foundational papers. Three results: (1) Koch & Lubich 2007 (SIMAX,
+  10.1137/050639703) has **no** NS example — downloaded all 21 pages from the
+  author's site; zero hits for "Navier", "Stokes", "stream function",
+  "vorticity", "advection", "turbulence", "Kolmogorov". Nonnenmacher & Lubich
+  2008 (MCS, 10.1016/j.matcom.2008.03.007) covers latent semantic indexing,
+  image compression and a reaction–diffusion blow-up. Neither touches NS.
+  (2) **Correction: "no dynamical low-rank method for incompressible NS" is
+  false** — Musharbash & Nobile (JCP 354:135–162, 2018,
+  10.1016/j.jcp.2017.09.061) apply dynamically orthogonal approximation to
+  incompressible NS with random boundary conditions, with an error analysis in
+  SISC 37(2):A776–A810 (10.1137/140967787). Found only by chasing a citation
+  inside an unrelated bibliography. That claim form is barred.
+  (3) Structure-preserving/robust low-rank for conservative PDEs is also
+  established elsewhere (RAIL advection–diffusion 10.1137/23M1622921;
+  macro-micro hyperbolic moment equations 10.1007/s10444-024-10175-y;
+  stability of robust DLRA 10.1137/21M1446289; Burgers-with-uncertainty
+  10.1615/int.j.uncertaintyquantification.2022039345), so "first SP low-rank
+  for conservative PDEs" is barred too. Plus a **second** ψ-formulation NS ROM
+  the survey lacks: Zhang et al., Phys. Fluids 36(6), 10.1063/5.0202509.
+  **Final permitted claim** recorded verbatim in D4 and the R5d report: SPDLRA
+  is established for Hamiltonian/kinetic/Vlasov–Poisson/wave equations and
+  robust low-rank for conservative PDEs; for incompressible NS the existing
+  dynamical work is DO approximation for stochastic problems and the existing
+  ψ-formulation models are offline/hybrid; we provide a structure-preserving,
+  exactly divergence-free, factorisation-based integrator for the deterministic
+  problem validated at resolved high Re with adaptive rank. Gated on
+  D10-V1/V2/V5/V6/V7. The report lists the sixteen verified references the
+  survey must contain; all DOIs Crossref-resolved, all arXiv IDs abs-page-read.
+  Process lesson recorded: for a novelty claim the last mile is reading what the
+  prior papers *did*, not what their titles suggest.
 - 2026-09-25 R5c (reviewer homework, again no dependency on pending fixes):
   **V6 answered — SPDLRA is standard execution, not a moonshot.** Searched the
   literature (arXiv all-fields; abs pages read directly) and found the method
