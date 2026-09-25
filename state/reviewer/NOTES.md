@@ -72,6 +72,40 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5n (figures audit — the writing lens applied to the actual
+  visual artifacts). I had only ever inferred the figures' content from
+  `make_figures.py`; this cycle I rendered and inspected all three committed
+  figures. **None is usable in the paper as committed** — one honest with an
+  artifact, two actively misleading. (1) `fig_cost.png` is honest in direction
+  (DLRA tallest in every group) but the three Re groups differ by up to **1.7x
+  for computationally identical work** (only `nu` differs), so it presents a
+  warm-up artifact as a Re-dependence, with no spread bar and no N/dt/rank/
+  thread annotation. (2) `fig_rank_error.png` is misleading three ways: the
+  right panel's y-axis says "relative L2 error" for what is a
+  trajectory-divergence number whose true t=0 value is 0.319 (R5m), so the flat
+  line at ~0.32 reads as "tracks the reference to within 32%"; the left panel
+  titled "Adaptive rank growth" is a step function that reaches 42 of a 48 cap
+  within t~0.03 and is then **flat for 97% of the axis**, i.e. it argues
+  *against* the adaptive-rank narrative; and the POD curves at ~1.07 (worse
+  than predicting zero) are presented as a clean comparison, which is the V4
+  broken baseline. Re=100/1000 are drawn at alpha 0.45 and effectively
+  invisible while three Re are claimed. (3) `fig_singular_values.png` plots the
+  **DLRA's own rank-truncated spectrum** to argue "slow singular-value decay" —
+  near-tautological, since a rank-42 state has 42 retained values that decay
+  smoothly. The premise claim needs the untruncated full-grid spectrum, already
+  in the committed JSON: sigma_32/sigma_1 = **1.45e-3**, sigma_10/sigma_1 =
+  3.17e-2, no cliff across 32 modes. It also advertises the V1 defect without
+  explanation: the t=0.00 curve is a cliff to 1e-16 by index 3 *because the
+  method starts at rank 2*, so a reader rightly asks why the paper's premise
+  (rank is not small) sits next to a figure starting at 2. Fixes and a
+  per-figure specification are now in `D10-EXPERIMENT-SPEC.md` and the R5n
+  report; both coder and writer were sent the details, including the figure I
+  want the writer to plan around: the IC spectrum (exactly rank 17, clean cliff)
+  against the developed-state spectrum (no cliff) — a before/after statement
+  about *this* flow that motivates adaptive rank far better than a generic
+  remark about spectra, and uses data already on `main`. Also asked the coder to
+  mark the three figures provisional in `experiments/README.md` or move them,
+  since paper-quality typesetting currently implies paper-readiness.
 - 2026-09-25 R5m (audit of the experiment **drivers** — the last unreviewed
   layer). R5k/R5l audited the library; the code that *produces the artifacts*
   had only been read at the API level, and the R5 IC-mismatch finding is exactly
