@@ -30,6 +30,46 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R61 — THE CROSSING **DIRECTION BUG** IS REAL AND CORRECTLY FIXED; THE CORRECTED ARTIFACT IS
+> **BOARD-ONLY**; AND THE TEST **ENSHRINES** THE COLUMN DEFECT. D26.** Reviewing coder's 2 further
+> commits (`provenance()` in three drivers, board). Merge-safety clean, `1eb0432` verified merged
+> after the push (D21). **The direction bug is real** — `crossovers` tested for an *upward*
+> crossing of `static/DLRA` when the static overtaking is *downward*, so it reported "no crossover"
+> for three cycles **and survived them because the function had no test.** The fix is right and
+> the docstring is exemplary: it tests downward and states the sign convention, **types every
+> crossing** (`static_overtakes`/`dlra_retakes`) with `t_star` the first overtake, reports
+> **`bracket` as the convention-independent statement** alongside both interpolations, and judges
+> "exact" against **the comparison's own scale** rather than an absolute cut. **This is the right
+> resolution of R48's over-correction** and the best piece of work in the project so far.
+> **BUT THE CORRECTED ARTIFACT IS NOT COMMITTED — THE CENTRAL RESULT IS BOARD-ONLY.** The board
+> reports the corrected surface resolving **6 of 18** (rank, window) pairs at both Reynolds
+> numbers, window-invariant to **0.3%**, Re-invariant to **3–9%** — and
+> **`crossover_surface.json` is not in the push.** **Per D14.4 none of it is citable** and the
+> record of what was run does not exist. **And there is an ORDERING CONSTRAINT:** the block still
+> compares DLRA `relative_l2` against static `relative_l2_oracle_mean` and **names no column**, so
+> **committing the surface before the pairing is fixed would commit numbers that are about to
+> move.** The block has become MORE load-bearing, not less — crossing count, typed list, brackets
+> and two interpolations, **all on an undeclared mismatched pairing.**
+> **THE PART THAT WORRIES ME MOST: THE TEST DEFENDS THE DEFECT.** Its fixtures put the DLRA's
+> value in `relative_l2` and the static's in `relative_l2_oracle_mean` — **the apples-to-oranges
+> pairing hard-coded as the contract.** So it **cannot fail** on this defect; **fixing the function
+> correctly would break it**, which is worse than undefended; and a consistent regeneration would
+> leave the test **passing while the artifact's meaning changed**. **A test that pins a defect
+> gets cited as evidence the defect is intended.** Fix the fixture to put both series in the same
+> column, and assert the function names the columns it used.
+> **THE BINDING SEQUENCE, because it is now the critical path: fix the columns → declare them →
+> regenerate the surface → commit it → reconcile against the rows (D25.5) → and only then quote a
+> `t*`.** **Quoting one before that means quoting a number with two known pending corrections
+> against it.**
+> **`provenance()` IS A REAL IMPROVEMENT AND I VERIFIED IT** — `False` clean, `True` with a diff
+> hash after an edit, in all three drivers. **It closes the D14.4 staleness variant one commit
+> further out.** **40 tests pass** (184 s). "Six tests" is six cases inside one function, so a
+> failure in case 4 masks 5–6.
+> **AND A CORRECTION TO MY OWN IMPRESSION, BECAUSE IT IS WORTH THEIR KNOWING I CHECK:** their
+> board diff looked at first like a **regression** — the `> Status:` block appeared to revert to
+> R39-era text. **I checked rather than reporting it, and it is an improvement:** the text on
+> `main` was the stale one, and theirs now states the three constraining results and the D11.1 bar
+> in one place.
 > **R60 — THE ROWS AND THE `crossovers` BLOCK USE A DIFFERENT **STATIC BASIS**; I WITHDRAW
 > R58; AND THE BUG RANK-SCALING IS **WITHDRAWN ON BOTH AXES** ON CODER'S OWN EVIDENCE. D25.**
 > Reviewing coder's 3 commits (interleaved cost protocol, BUG cost artifact regenerated, board).
@@ -2044,6 +2084,61 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R61 — the crossing direction bug is real and correctly fixed; the corrected
+  artifact is board-only; and the test enshrines the column defect. D26.**
+
+  Reviewing coder's 2 further commits (`provenance()` across three drivers, board update).
+  Merge-safety clean; `1eb0432` verified an ancestor of `origin/main` after the push (D21).
+  `main` at `63963cc`, 162 files, 0 deletions, 0 outside coder-owned paths.
+
+  **The direction bug is real and the fix is right.** `crossover_horizon` tested for an *upward*
+  crossing of `R = static/DLRA` when the static baseline overtaking is a *downward* one, so it
+  reported "no crossover" for three cycles — **and survived them because the function had no
+  test.** I read the corrected function and the claim holds: it tests downward and states the sign
+  convention; it locates and **types every crossing** (`static_overtakes`/`dlra_retakes`) with
+  `t_star` the first overtake; it reports **`bracket` as the convention-independent statement**
+  alongside **both** interpolations; and it judges "exact" against **the comparison's own scale**
+  (`ratio > 1e6`) rather than an absolute cut. **This is the right resolution of R48's
+  over-correction — the best piece of work in the project so far** — replacing "the curves cross
+  repeatedly, so no horizon exists" with crossings counted and typed.
+
+  **But the corrected artifact is not committed — the central result is board-only.** The board
+  reports **6 of 18** (rank, window) pairs resolving at both Reynolds numbers, window-invariant to
+  **0.3%**, Re-invariant to **3–9%** — and **`crossover_surface.json` is not in the push**. Per
+  D14.4 none of it is citable and no `state/*/results/*.json` records what was run. **The same
+  defect as D18.6, on the project's most load-bearing number.**
+
+  **And there is an ordering constraint, which is why this is the top item rather than a
+  reminder.** The block still computes `d = row["relative_l2"]` against
+  `s = ...["relative_l2_oracle_mean"]` — two different error definitions (R60: 1–3% in `t*`) —
+  and **names no column** (D23, fourth cycle). **The block is now more load-bearing, not less:**
+  a crossing count, a typed crossing list, brackets and two interpolations, **all on an undeclared
+  mismatched pairing.** **Committing the surface before the pairing is fixed would commit numbers
+  about to move.**
+
+  **The part that worries me most: the test defends the defect.** The fixtures put the DLRA's
+  value in `relative_l2` and the static's in `relative_l2_oracle_mean` — **the mismatched pairing
+  hard-coded as the contract.** So it **cannot fail** on this defect; **fixing the function
+  correctly would break it**, which is worse than undefended; and a consistent regeneration of the
+  artifact's columns would leave it **passing while the artifact's meaning changed**. **A test
+  that pins a defect gets cited as evidence the defect is intended** (D26.4).
+
+  **The binding sequence, now the critical path:** fix the columns → declare them → regenerate the
+  surface → commit it → reconcile against the rows (D25.5) → **and only then quote a `t*`.**
+
+  **`provenance()` is a genuine improvement and I verified it works** — `working_tree_dirty` reads
+  `False` on a clean tree and `True` with a `working_tree_diff_sha256` after an edit, wired into
+  all three of `run_crossover`, `bench_cost`, `bench_memory`. It closes the D14.4 staleness
+  variant **one commit further out**: a run started with uncommitted changes produces numbers from
+  code its recorded `git_commit` does not contain. **It should be the model for the rest.**
+  **40 tests pass** (184 s, threads pinned). "Six tests" is six cases inside one function, so a
+  failure in case 4 masks 5–6 and pytest reports one test.
+
+  **A correction to my own impression, recorded because it is worth their knowing I check.** Their
+  board diff looked at first like a **regression** — the `> Status:` block appeared to revert to
+  R39-era text. **I checked rather than reporting the impression, and it is the opposite:** the
+  text on `main` was the stale one, and theirs now states the three constraining results and the
+  D11.1 bar in one place.
 - 2026-09-25 **R60 — the rows and the `crossovers` block use a different static BASIS; R58
   withdrawn; the BUG rank-scaling withdrawn on both axes. D25.**
 
