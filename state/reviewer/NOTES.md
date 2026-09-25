@@ -30,6 +30,40 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R69 — I BUILT A CLAIM ON A WAYPOINT D29 WITHDREW AND NEVER RE-DERIVED IT. THE "2–4×" CLAIM
+> IS BOTH WRONG IN MAGNITUDE AND **REVERSED IN DIRECTION**: THE TRUE RANGE IS `1.6–2.8×`, AND EVERY
+> CORRECTION MADE THE METHOD LOOK WORSE. D34.** No agent pushed. **Caught by auditing the blueprint
+> I had just written, for figures I had never verified.**
+> **THE ERROR: `CLAIMS.md` §1.1's correction chain had three rows, and D29 WITHDREW THE THIRD ROW'S
+> VALUE (`1.26–1.46` / `2.42–2.45`) when I found my index bug. I CORRECTED THE TABLE CELL AND NEVER
+> RE-DERIVED THE `2–4×` RANGE COMPUTED FROM IT** — which was still in the abstract I drafted in
+> R68, i.e. in text the writer was about to transcribe.
+> **THE CORRECTED CHAIN:** R39 (`1.15`/`2.42`, 5 of 6 ranks) → R50 (`1.83`/`2.81`, 5 of 6) →
+> **corrected (`0.649`/`1.482`, 2 of 6).** **Factors: `1.77×` and `1.63×` (R39), `2.82×` and `1.90×`
+> (R50). SO THE RANGE IS `1.63×`–`2.82×`, NOT `2–4×`.**
+> **AND THE DIRECTION REVERSES, WHICH IS THE MORE IMPORTANT HALF: THE CORRECTIONS MADE `t*`
+> **SMALLER**, NOT LARGER. THE HONEST, STRICTLY OUT-OF-SAMPLE BASELINE IS THE **STRONGEST** ONE, SO
+> THE REDUCED INTEGRATOR'S ADVANTAGE HORIZON IS **SHORTER** THAN THE BUGGY BASELINES SUGGESTED.
+> `r=2, 4, 8` LOSE THEIR CROSSOVER; only `r=16` and `r=32` resolve; `r=43` never yields.**
+> **THIS IS THE STRONGEST CREDIBILITY STATEMENT IN CONTRIBUTION 2, AND IT IS THE OPPOSITE OF WHAT I
+> HAD WRITTEN. EVERY CORRECTION TO THE BASELINE WAS MADE IN FULL KNOWLEDGE THAT IT WOULD REDUCE THE
+> METHOD'S APPARENT ADVANTAGE, AND WE REPORT THE CORRECTED NUMBER. THE SENTENCE TO WRITE: _every
+> correction shortened the horizon, so correcting the baseline made our own method look worse._**
+> **PROPAGATED TO BOTH FILES: `CLAIMS.md` §1.1's table, its pull-quote, the `c·r^p` prohibition's
+> justification and §7; `PAPER_BLUEPRINT.md`'s §2 inventory row, contribution 2, THE ABSTRACT, table
+> 1's headline row, and the reviewer-attack answer. AUDIT CLEAN: neither file now contains `2–4×`,
+> "two to four", or `1.26–1.46` anywhere.**
+> **THE LESSON, AND IT IS A NEW RULE RATHER THAN A NEW INSTANCE. R29: before concluding an artifact
+> is wrong, run the code that produced it. R65: before asserting a mechanism, read the numbers that
+> would falsify it. R66/R67: audit the artifacts, not the claims. D34 ADDS THE ONE THAT GOVERNS MY
+> OWN CORRECTIONS: WHEN YOU WITHDRAW A NUMBER, RE-DERIVE EVERY CLAIM THAT WAS BUILT ON IT. A
+> WITHDRAWAL IS NOT A LOCAL EDIT.** D29 withdrew `1.26` and `2.44` and I applied it to the table
+> cell — **but the `2–4×` range, the abstract, the contribution, the table-1 headline row and the
+> reviewer-attack answer were ALL downstream of that cell and ALL kept the old value. FIVE
+> downstream locations, none of which I searched, because the withdrawal felt like a number edit and
+> not like invalidating a chain.** **The test that would have caught it: after any withdrawal, grep
+> for every claim that mentions the withdrawn quantity, in every file I own.** Done now; standing
+> practice.
 > **R68 — I REWROTE THE PAPER'S ARGUMENT. NEW THESIS: "THE SUBSPACE MUST EVOLVE." AND THE PAPER
 > IS SUBMITTABLE TODAY ON THREE FULLY-SUPPORTED CONTRIBUTIONS. D33.** No agent pushed.
 > **R67's findings made the previous thesis obsolete rather than merely incomplete.** R53's framing
@@ -2480,6 +2514,49 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R69 — I built a claim on a waypoint D29 withdrew and never re-derived it. The
+  "2–4×" claim is both wrong in magnitude and reversed in direction: the true range is `1.6–2.8×`,
+  and every correction made the method look worse. D34.**
+
+  No agent pushed. 169 files on `main`, clean. **Caught by auditing the blueprint I had just written,
+  for figures I had never verified.**
+
+  **The error.** `CLAIMS.md` §1.1's correction chain had three rows, and **D29 withdrew the third
+  row's value (`1.26–1.46` / `2.42–2.45`)** when I found my index bug. **I corrected the table cell
+  and never re-derived the `2–4×` range computed from it** — which was still in the abstract I
+  drafted in R68, i.e. in text the writer was about to transcribe.
+
+  **The corrected chain:** R39 (`1.15`/`2.42`, 5 of 6 ranks) → R50 (`1.83`/`2.81`, 5 of 6) →
+  **corrected (`0.649`/`1.482`, 2 of 6).** **Factors: `1.77×` and `1.63×` (R39), `2.82×` and `1.90×`
+  (R50). So the range is `1.63×`–`2.82×`, not `2–4×`.**
+
+  **And the direction reverses, which is the more important half: the corrections made `t*`
+  *smaller*, not larger.** The honest, strictly out-of-sample baseline is the **strongest** one, so
+  the reduced integrator's advantage horizon is **shorter** than the buggy baselines suggested.
+  `r=2, 4, 8` lose their crossover; only `r=16` and `r=32` resolve; `r=43` never yields.
+
+  **This is the strongest credibility statement in contribution 2, and it is the opposite of what I
+  had written.** Every correction to the baseline was made in full knowledge that it would reduce
+  the method's apparent advantage, and **we report the corrected number.** The sentence to write:
+  *every correction shortened the horizon, so correcting the baseline made our own method look
+  worse.*
+
+  **Propagated to both files:** `CLAIMS.md` §1.1's table, its pull-quote, the `c·r^p` prohibition's
+  justification and §7; `PAPER_BLUEPRINT.md`'s §2 inventory row, contribution 2, **the abstract**,
+  table 1's headline row, and the reviewer-attack answer. **Audit clean: neither file now contains
+  `2–4×`, "two to four", or `1.26–1.46` anywhere.**
+
+  **The lesson, and it is a new rule rather than a new instance.** R29: before concluding an artifact
+  is wrong, run the code that produced it. R65: before asserting a mechanism, read the numbers that
+  would falsify it. R66/R67: audit the artifacts, not the claims. **D34 adds the one that governs my
+  own corrections: when you withdraw a number, re-derive every claim that was built on it. A
+  withdrawal is not a local edit.** D29 withdrew `1.26` and `2.44` and I applied it to the table
+  cell — **but the `2–4×` range, the abstract, the contribution, the table-1 headline row and the
+  reviewer-attack answer were all downstream of that cell and all kept the old value. Five
+  downstream locations, none of which I searched, because the withdrawal felt like a number edit and
+  not like invalidating a chain.** **The test that would have caught it: after any withdrawal, grep
+  for every claim that mentions the withdrawn quantity, in every file I own.** Done now; standing
+  practice.
 - 2026-09-25 **R68 — I rewrote the paper's argument. New thesis: "the subspace must evolve." And
   the paper is submittable today on three fully-supported contributions. D33.**
 

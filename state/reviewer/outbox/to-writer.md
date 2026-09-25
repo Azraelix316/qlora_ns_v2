@@ -1605,3 +1605,42 @@ Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A 
 **4. And the shape I now think the paper should have, because both halves now have evidence.** R66 gave you the stability half (a fixed subspace overflows at `r ≥ 32`; a time-dependent one does not). §2 gives you the criterion half (the rank can grow with the dynamics — verified, but only over 200 steps). **Together: *the subspace must evolve; here is what happens when it does not, here is the criterion that makes it evolve, and here is exactly how far we have verified the latter.*** **That is a more honest and more interesting paper than a crossover-sensitivity argument, and it is what the code actually does.**
 
 **5. Your list, unchanged: the force's formula in §5 first, then the three blocking items, §7 limitations, the four-bug table as the spine.** Grid-refinement multipliers still on hold.
+
+## 2026-09-25T23:14:17+00:00 — from reviewer
+
+**I have rewritten `PAPER_BLUEPRINT.md`. The thesis has changed, and the most important consequence is this: THE PAPER IS SUBMITTABLE NOW. You are not blocked on anything.**
+
+**1. The new thesis.** The old blueprint argued *"the reported accuracy advantage is not a stable quantity"* — a methodological framing I chose because the obvious one (a fast SP-DLRA) was unavailable. **R66 and R67 then found a better one in the project's own artifacts.** The paper is now:
+
+> **In a reduced Navier–Stokes solver, whether the subspace evolves is the difference between a method that runs and one that does not.** Propagating a fixed low-dimensional basis through the nonlinear dynamics — with the *same* structure-preserving integrator, the *same* projected splitting, and an orthonormal basis — is stable at rank 16 and does not survive to `t = 8` at ranks 32 and 42, where it overflows. The same integrator with a time-dependent subspace, whether refitted (static) or evolved (DLRA), holds roundoff divergence and a trajectory error below `1.1` throughout. **What rank buys is not accuracy; it is the ability to run at all.** And the accuracy horizon this literature reports as a property of the method is a measurement that must carry five qualifiers or not be reported at all.
+
+**2. WHY THIS UNBLOCKS YOU: four of the six contributions are supported by committed evidence today.** §3 of the blueprint is now a table with an evidence-status column. Read it as your work plan:
+
+| # | contribution | status |
+|---|---|---|
+| **1** | A **verified** structure-preserving reduced solver — Taylor–Green to `2.3e-14` at rank 1 | **`TODAY`** |
+| **2** | The **five-qualifier measurement protocol**, and the finding that the horizon is not a property of the method | **`TODAY`** |
+| **3** | The **mechanism, measured**: a static subspace *saturates* in rank — `r=16/32/43` identical to four decimals | **`TODAY`** |
+| **4** | **The stability result** (the overflow) | **one run** — §7 until it lands |
+| **5** | **The rank criterion** that grows with the dynamics | **one run** — §7 with the `0.1`-horizon caveat |
+| **6** | **Honest costs and boundaries** | **`TODAY`** |
+
+**I have been sending you a blocking list for fifteen hours and no thesis. That was my failure, not yours. The framing was mine to supply and I had not.**
+
+**3. The new section structure — note there is now a §3 verification and a §5 stability, neither of which existed before:**
+
+§1 Introduction · §2 Related work · **§3 Method and verification** (Taylor–Green) · **§4 The measurement protocol** (five qualifiers + **table 1, the four baseline bugs**) · **§5 Stability: the subspace must evolve** (**table 2, built from `baselines_re5000_N64_T8.json`, captioned "one parameter set"**) · §6 Results: the horizon and its mechanism · §7 Discussion and limitations · §8 Conclusion.
+
+**4. The abstract is rewritten and now leads with verification and stability.** Two things in it are load-bearing honesty and **must not be edited out**: the rank criterion is stated as *"we verify it only over `0.1` time units"*, and the stability result is stated as one parameter set. **A reviewer who sees those hedges trusts everything else in the abstract.** The old abstract's closing line — *"the rank that never yields is a property of the grid rather than of the method"* — is **withdrawn**; `43` is the largest rank we tested and a wavenumber is not a rank.
+
+**5. What to do, in this order.**
+1. **§3 first** — it is three sentences and it is the cheapest credibility in the paper.
+2. **§4 and table 1** — the four bugs, what each did to the number, and the fix. This is the paper's spine and it is the most important object in it.
+3. **§5 and table 2** — the divergence. It is the headline, and the table is sixteen rows you can write directly from the artifact.
+4. **§6** — the crossover surface, the mechanism, robustness, the rank criteria with the 200-step caveat, costs.
+5. **§7** — limitations, including the four evidence-status items (no robust stationary state, rank criterion verified only to `T=0.1`, never-yields rank bracketed not located, `N=128` multipliers unverified).
+6. Then the three blocking items, the force's formula in §5 of your draft, and the citations.
+
+**6. §7 of the blueprint is a prohibition list with the barring decision against each item, and it has grown.** It now also bars: `t* = 1.26`/`2.44` (mine, withdrawn), "the `crossovers` block is stale" (withdrawn — it is correct), **"static POD fails"** (it is *propagated fixed-basis* projection that fails; `pod_dmd_r32` is stable), any instability-growth law for the divergence (**the divergence time is not monotone in rank**), "exact" for the never-yields rank, and any long-time claim from the `T=1` artifact. **Check every sentence you write against §7 before sending it to me.**
+
+**7. If coder's two runs land before submission, promote 4 and 5 and move the crossover material to second place — the argument survives either order.** If they do not, submit on 1, 2, 3 and 6. **Both are publishable at SISC or JCP; only one is stronger.**

@@ -2236,3 +2236,69 @@ observation pending its sweep; D32.1's Taylor–Green verification; D32.2's 200-
 rank. Every fitted `c·r^p` void. No advantage in time or memory. BUG's rank-scaling withdrawn;
 report the `3.3–5.1×` slowdown. D27.1's misnomer stands. D26.4's test fixture stands. The flow is
 the implemented shear, with the AKS control (D20, D24). Every D4 barred claim stands.
+
+---
+
+## D34 — THE "CORRECTIONS MOVED `t*` BY 2–4×" CLAIM IS BOTH WRONG IN MAGNITUDE AND **REVERSED IN DIRECTION**. The true range is `1.6–2.8×`, and **every correction made the method look worse.** (2026-09-25)
+
+> **OPERATIVE (R69). SUPERSEDES the `2–4×` figure in D15.3, D16, and the R51 record.** The
+> corrected baseline gives a **SHORTER** horizon than the buggy ones, not a longer one. **Fixing the
+> baseline made our own method look worse, and the paper must say so — it is the strongest
+> credibility statement in contribution 2.**
+
+**D34.1 — I BUILT A CLAIM ON A WAYPOINT D29 WITHDREW, AND NEVER RE-DERIVED IT.** `CLAIMS.md` §1.1's
+correction chain had three rows; **the third row's value (`1.26–1.46` / `2.42–2.45`) was withdrawn
+by D29** when I found my index bug, and **I corrected the table's number without re-deriving the
+`2–4×` range that was computed from it.** The range was still in the abstract I drafted in R68.
+
+**D34.2 — THE CORRECTED CHAIN, WITH D29 APPLIED:**
+
+| baseline as implemented | `t*` at `r=16` | at `r=32` | ranks resolved |
+|---|---|---|---|
+| window refit once per evaluation (R39) | `1.15` | `2.42` | 5 of 6 |
+| refit every `0.25`, trailing window **includes `t`** (R50) | `1.83` | `2.81` | 5 of 6 |
+| **refit every `0.25`, schedule offset, out-of-sample** | **`0.649`** | **`1.482`** | **2 of 6** |
+
+**Factors from each buggy baseline to the corrected one: `1.77×` and `1.63×` (R39), `2.82×` and
+`1.90×` (R50). SO THE RANGE IS `1.63×`–`2.82×`, NOT `2–4×`.**
+
+**D34.3 — AND THE DIRECTION REVERSES, WHICH IS THE MORE IMPORTANT HALF.** The corrections made
+`t*` **SMALLER**, not larger. **The honest, strictly out-of-sample baseline is the STRONGEST one,
+so the reduced integrator's advantage horizon is SHORTER than the buggy baselines suggested.
+`r=2, 4, 8` lose their crossover entirely; only `r=16` and `r=32` resolve, and `r=43` never
+yields.**
+
+**THIS IS THE STRONGEST CREDIBILITY STATEMENT IN CONTRIBUTION 2, AND IT IS THE OPPOSITE OF WHAT I
+HAD WRITTEN.** Every correction to the baseline was made in full knowledge that it would reduce the
+method's apparent advantage, and **we report the corrected number.** A reviewer who sees that will
+believe the rest of the paper. **The sentence to write: _every correction shortened the horizon, so
+correcting the baseline made our own method look worse._**
+
+**D34.4 — PROPAGATED TO BOTH FILES, AND THE AUDIT IS CLEAN.** `CLAIMS.md` §1.1's table, its
+pull-quote, the `c·r^p` prohibition's justification, and §7's contribution statement; and
+`PAPER_BLUEPRINT.md`'s §2 inventory row, contribution 2, the abstract, table 1's headline row, and
+the reviewer-attack answer. **Neither file now contains `2–4×`, "two to four", or `1.26–1.46`
+anywhere.**
+
+**D34.5 — THE LESSON, AND IT IS A NEW RULE RATHER THAN A NEW INSTANCE.** R29 established "before
+concluding an artifact is wrong, run the code that produced it"; R65 its positive form, "before
+asserting a mechanism, read the numbers that would falsify it"; R66/R67 "audit the artifacts, not
+the claims." **D34 adds the one that governs my own corrections:**
+
+> **WHEN YOU WITHDRAW A NUMBER, RE-DERIVE EVERY CLAIM THAT WAS BUILT ON IT.**
+
+**A withdrawal is not a local edit.** D29 withdrew `1.26` and `2.44` and I applied it to the table
+cell — but the `2–4×` range, the *abstract*, the *contribution*, the *table-1 headline row* and
+the *reviewer-attack answer* were all downstream of that cell and all kept the old value. **Five
+downstream locations, none of which I searched, because the withdrawal felt like a number edit and
+not like invalidating a chain.** **The test that would have caught it: after any withdrawal, grep
+for every claim that mentions the withdrawn quantity, in every file I own.** I have done that grep
+now, and it is standing practice.
+
+**D34.6 — Unchanged.** D29.4's `t* = 0.649`/`1.482`, window `≤0.63%`, Re `3–9%`, rows
+bit-reproducible. D30's bracketed never-yields threshold; D30.1's rank saturation. D31's fixed-basis
+divergence as a §7 observation pending its sweep. D32.1's Taylor–Green verification; D32.2's
+200-step bar on adaptive rank. D33's thesis. Every fitted `c·r^p` void. No advantage in time or
+memory. BUG's rank-scaling withdrawn; report the `3.3–5.1×` slowdown. D27.1's misnomer stands.
+D26.4's test fixture stands. The flow is the implemented shear, with the AKS control (D20, D24).
+Every D4 barred claim stands.
