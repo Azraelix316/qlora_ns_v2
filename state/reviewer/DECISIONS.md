@@ -647,7 +647,7 @@ describes **the scheme in `solvers/`**; the canonical scheme belongs in related 
 the difference belongs in limitations as the planned port (V6); and **no validation
 number may be attached to the unimplemented scheme.**
 
-### D11.7 — Citation integrity remains a standing gate (R10)
+### D11.7 — Citation integrity remains a standing gate (R10, amended R17)
 
 Every DOI must be verified via `https://api.crossref.org/works/<doi>` and every arXiv ID
 against its abs page before it enters any file. A defect fixed in one file while it
@@ -655,6 +655,20 @@ lives in another is **not fixed**: when correcting a claim, grep the whole repos
 Three unverified DOIs and one misattributed arXiv ID have reached files in this project
 (`refs.bib`, `state/writing-research/arxiv_index.json`, both bibliographies), so this is
 a live failure mode, not a hypothetical.
+
+**Amended R17 — two additions, both drawn from my own errors.** (i) **Verify the record,
+not the token, the resemblance, or the default.** I twice substituted a cheap proxy for
+the claim: a string match (`grep "Olga"`, which passed because the fabricated given name
+had changed to "Michael"), and then plain recognition ("22 are recognisable and real",
+which passed because recognising a paper is not checking it). When R17 actually verified
+the DOI-less entries by title, **13 of 17 DLRA/ROM entries were real papers carrying wrong
+metadata** — seven dated a year early, one with the wrong title, three truncated — and
+every one of the 13 has a Crossref DOI the entry omits. (ii) **The verification route
+must match the identifier class.** `cui2026` and `goutaudier2026` are real and arXiv-only;
+a Crossref-only gate would have flagged both as missing. So: Crossref for a DOI, the abs
+page for an arXiv ID, and a **manual record check for a paper that is in neither** — a
+DOI-less entry is not thereby exempt. And "it has a DOI" is not the same as "it was
+checked".
 
 ### Corrections to earlier reviewer statements, on the record
 

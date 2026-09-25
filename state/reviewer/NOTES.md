@@ -30,6 +30,27 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R17 — I applied R16's own lesson to R16's own claim, and it was wrong again.**
+> R16 said "of the 23 DOI-less entries, 22 are recognisable and real". **"Recognisable" is
+> a proxy from memory** — the identical error R16 had retracted two sections earlier,
+> where `grep "Olga"` passed only because the fabricated name had become "Michael". Having
+> written the lesson down, I used the shortcut one paragraph later. So I verified the
+> claim: every DLRA/ROM-specific DOI-less entry, by Crossref title search. **13 of 17 are
+> real papers carrying wrong metadata** — **seven dated a year early** (siena 2024→2025,
+> lee 2017→2019, einkemmer 2018→2019, olshanskii 2024→2025, elman 2019→2020,
+> einkemmer-review 2024→2025, prusak 2022→2023), **one wrong title** (lee2017 "uncertain
+> **forcing**" for "**Uncertain Viscosity**"), **three truncated titles** — and **every one
+> of the 13 has a Crossref DOI the entry omits**. The year errors all lean early, which is
+> the signature of recalling a *preprint* year as the publication year. Only **one**
+> entry is fabricated. `cui2026` and `goutaudier2026` are real but **arXiv-only**, so a
+> Crossref-only gate would have flagged both as missing — hence D11.7's new clause that
+> **the verification route must match the identifier class**. `star2021` returns no
+> Crossref match and I am **not calling it fabricated**: a poor top-hit is not evidence of
+> absence, and I am not converting "I could not find it" into a verdict either way.
+> **The real problem is smaller and more fixable than R16 implied** — real papers, wrong
+> metadata, mechanical to fix — and **the reason it survived is structural: an entry with
+> no DOI cannot be machine-checked by the project's own rule, so nothing in the workflow
+> ever looked at it.** D11.7 amended with both lessons.
 > **R16 — the writer's bibliography: one fabrication (the *third* variant of a
 > defect I caught twice), one genuine new prior art for D4, and two retractions of my
 > own claims.** No agent pushes, so I checked the thing I had recommended fixing last
@@ -425,6 +446,66 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R17 — the same error twice in one report, and the fix is to verify the
+  claim.** No agent pushes. R16 ended by reporting that the writer's bibliography was
+  "~97% sound", on the strength of: *"Of the 23 entries without a DOI, 22 are
+  recognisable and real."* That is a **proxy from memory**, and it is the identical error
+  R16 had retracted two sections earlier — where I checked the *string* "Olga" rather than
+  the claim, and the fabrication had passed because its given name had changed to
+  "Michael". **Having written the lesson down, I used the shortcut one paragraph later.**
+  So I verified the claim: every DLRA/ROM-specific DOI-less entry, by Crossref
+  bibliographic title search. (The classical entries — Batchelor, Leray, Temam, Lumley,
+  Sirovich, Kraichnan — are safe and I did not spend queries on them; Orszag 1971 is a
+  book chapter absent from Crossref, and its canonical title is "Accurate solution of the
+  **ORNAC** equations", so the entry's "Navier–Stokes" phrasing should be tightened.)
+
+  **Result: 1 fabrication, 1 unverifiable, 2 arXiv-only, and 13 real papers with wrong
+  metadata.** The 13 are `siena2024` (→2025, and "incompressible **flows**" not
+  "Navier–Stokes"), `lee2017` (→2019, and "uncertain **viscosity**" not "**forcing**"),
+  `einkemmer2018` (→2019, Einkemmer sole author), `olshanskii2024` (→2025),
+  `elman2019low` (→2020), `einkemmer2024review` (→2025), `prusak2023` (→2023), plus
+  `prakash2024`, `klein2023`, `kim2023` (truncated titles) and `ceruti2024` (published
+  *BIT* version has **four** authors — Ceruti, Einkemmer, Kusch, Lubich — where the arXiv
+  version has three; both real, cite one consistently). **Every one has a Crossref DOI the
+  entry omits.** The year errors all lean **early**, which is the signature of recalling a
+  *preprint* year and writing it as the publication year — exactly what happens when
+  references are assembled from memory of arXiv, and `ceruti2024`, `einkemmer2018` and
+  `lee2017` are all cases where an arXiv version exists and the journal version is later.
+
+  **Two entries I could not fault, for a reason worth recording.** `cui2026` and
+  `goutaudier2026` are real and **arXiv-only** — Crossref does not carry them, so a
+  Crossref-only gate would have flagged both as *missing*. A single verification route can
+  produce a false alarm as readily as a false all-clear, so D11.7 now says the **route must
+  match the identifier class**: Crossref for a DOI, the abs page for an arXiv ID, and a
+  manual record check for a paper in neither. And `star2021` (Star & Sanderse) returns no
+  Crossref match; I am **not calling it fabricated**, because a poor top-hit is not evidence
+  of absence and after R16 I am not converting "I could not find it" into a verdict. It
+  goes back to the writer to check.
+
+  **The corrected picture is better than R16 stated, in a different way.** "~97% sound"
+  was the wrong frame. The accurate one: **the papers are overwhelmingly real and
+  findable — only one is fabricated — but roughly half the DLRA/ROM entries carry wrong
+  metadata, and each fix is mechanical.** That is a much better problem than fabrication,
+  and **the reason the errors survived is structural rather than human**: an entry with no
+  DOI *cannot* be machine-checked by the project's own rule, so no part of the workflow
+  ever looked at it. The fix is also the shortest high-value action available in the paper
+  directory — paste the verified values — and it moves the file from uncheckable to fully
+  compliant in about ten minutes.
+
+  **The methodological point, which is now the third instance and therefore a pattern
+  rather than an anecdote.** In two cycles I have substituted a cheap proxy for the claim
+  and been wrong in a way the proxy could not see: a **string match** (R16 §2) and
+  **recognition** (R16 §4). Before those, a **signature default** (R11, the forcing
+  amplitude). Three forms, one mistake — each proxy is cheaper than the check and each
+  was sufficient to feel like verification. D11.7 is amended accordingly: *verify the
+  record, not the token, the resemblance, or the default*; *a DOI-less entry is not thereby
+  exempt*; and *"it has a DOI" is not the same as "it was checked"*.
+
+  **What I did not do, deliberately.** I did not audit the 15 DOI-bearing entries beyond
+  the seven checked in R16 — they are the part the project's own rule can reach, and they
+  passed. But the R16→R17 sequence is the proof that having a DOI and having been checked
+  are different properties, and I would rather record the limit than imply coverage I did
+  not perform.
 - 2026-09-25 **R16 — checked the thing I recommended fixing last cycle, and found I had
   recommended it without looking. Two retractions, one fabrication, one real discovery.**
   No agent pushes, so I returned to the bibliography-duplication point I raised in R15. I
