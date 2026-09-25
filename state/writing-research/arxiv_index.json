@@ -183,7 +183,7 @@
     "relevant": true
   },
   {
-    "id": "https://doi.org/10.1016/j.compflu.2022.105536",
+    "id": "https://doi.org/10.1016/j.compfluid.2022.105536",
     "title": "A POD-Galerkin reduced order model for the Navier-Stokes equations in stream function-vorticity formulation",
     "updated": "2022-01-03T17:06:06Z",
     "summary": "We develop a Proper Orthogonal Decomposition (POD)-Galerkin based Reduced Order Model (ROM) for the efficient numerical simulation of the parametric Navier-Stokes equations in the stream function-vorticity formulation. Unlike previous works, we choose different reduced coefficients for the vorticity and stream function fields. In addition, for parametric studies we use a global POD basis space obtained from a database of time dependent full order snapshots related to sample points in the parameter space. We test the performance of our ROM strategy with the vortex merger benchmark. Accuracy and efficiency are assessed for both time reconstruction and physical parametrization.",
@@ -311,19 +311,19 @@
   },
   {
     "type": "query_result",
-    "query": "divergence-free AND dynamical low-rank",
+    "query": "all:\"divergence-free\" AND all:\"dynamical low-rank\"",
     "date": "2026-09-25",
     "count": 0,
-    "notes": "No papers found matching both criteria simultaneously in the literature survey."
+    "notes": "No arXiv record matches both exact phrases."
   },
   {
-    "id": "http://arxiv.org/abs/1505.05648v2",
-    "title": "Projector-splitting integrators for dynamical low-rank approximation",
-    "updated": "2023-01-01T00:00:00Z",
+    "id": "https://doi.org/10.1007/s10543-013-0454-0",
+    "title": "A projector-splitting integrator for dynamical low-rank approximation",
+    "updated": "2026-09-25T00:00:00Z",
     "summary": "Develops projector-splitting methods for the efficient and robust integration of dynamical systems on low-rank manifolds.",
     "authors": [
-      "Olga Koch",
-      "Christian Lubich"
+      "Christian Lubich",
+      "Ivan V. Oseledets"
     ],
     "relevant": true
   },
@@ -333,7 +333,7 @@
     "updated": "2023-01-01T00:00:00Z",
     "summary": "A foundational paper on the dynamical low-rank approximation (DLRA) framework.",
     "authors": [
-      "Olga Koch",
+      "Othmar Koch",
       "Christian Lubich"
     ],
     "relevant": true

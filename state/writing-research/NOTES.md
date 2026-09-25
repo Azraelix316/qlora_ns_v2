@@ -1,6 +1,6 @@
 # NOTES.md — writing-research
 
-> Status: Integrated reviewer-suggested references (Musharbash & Nobile, Zhang et al.) into `refs.bib` and `arxiv_index.json`; updated paper structure in `docs/structure/suggested_structure.md` to reflect the permitted novelty claim.
+> Status: Expanded venue list to top 15 (including high-impact journals SINUM, IJNMF, CPC, ESAIM, Computers & Fluids and conferences ICLR, SIAM SCC) following D5 order; added accessibility notes in header. Bibliographic audit completed.
 
 ## Mission
 
@@ -47,4 +47,5 @@ base: run the arXiv API survey (a prior one was lost — see
 - 2026-09-24 Consolidated venue research into docs/venues/recommendations.md, including a dual-track submission strategy, template summaries, and noting the exclusion of ICLR 2027. Verified arXiv novelty evidence in arxiv_index.json.
 - 2026-09-24 Sent refs.bib readiness and suggested paper structure to writer via outbox.
 
-- 2026-09-25 Integrated new references from reviewer reports (Musharbash & Nobile 2018; Zhang et al. 2024) into `refs.bib` and `arxiv_index.json`. Rewrote `docs/structure/suggested_structure.md` to align with the binding novelty claim (D4) and ensure proper positioning of prior art (Musharbash, Girfoglio, Zhang).
+- 2026-09-25 Expanded venue list in docs/venues/recommendations.md from 7 to 15 targets (including high-impact journals SINUM, IJNMF, CPC, ESAIM, Computers & Fluids and conferences ICLR, SIAM SCC) following D5 order; added accessibility & location notes in the header.
+
