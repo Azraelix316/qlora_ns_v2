@@ -61,7 +61,7 @@ recognised genre. **ICML/NeurIPS are wrong for this** (D5).
 |---|---|
 | **a fixed-basis projected POD run that overflows at `r ≥ 32` where the DLRA does not** — same integrator, same splitting, orthonormal basis (`baselines_re5000_N64_T8.json`; **ONE artifact, D31.3**) | **a sweep confirming it** — `baselines_*.json` contains exactly one file, so **this is a §7 observation today, not a contribution** |
 | **a verified implementation**: full-grid and rank-1 reduced solvers both reproduce the **analytic** Taylor–Green decay to `2.8e-14` / `2.3e-14` over 200 steps (`taylor_green.json`; **fully supported, D32.1**) | a manufactured-solution test at the resolutions or Reynolds numbers studied |
-| **a crossover-horizon protocol** — five required qualifiers — **and the finding that the horizon is not a property of the method** (`t* = 0.649` at `r=16`, `1.482` at `r=32`; window-insensitive to `≤0.63%`, Re-sensitive by `3–9%`, but moved `2–4×` by three baseline corrections; **fully supported**) | a fitted `t*` law — **two resolved ranks cannot support one** |
+| **a crossover-horizon protocol** — five required qualifiers — **and the finding that the horizon is not a property of the method** (`t* = 0.649` at `r=16`, `1.482` at `r=32`; window-insensitive to `≤0.63%`, Re-sensitive by `3–9%`, but moved `1.6–2.8×` by three baseline corrections — **each of which shortened it**; **fully supported**) | a fitted `t*` law — **two resolved ranks cannot support one** |
 | **the mechanism, measured not asserted**: the static baseline **saturates in rank** — `r=16`, `32`, `43` have *identical* static errors to four decimals at every horizon, and the spread across rank is `0.00%` at `t=0.1` (**fully supported, D30.1**) | a **located** never-yields rank — it is **bracketed between 32 and 43** at `N=64`, and `r=85` is untested (D30.4) |
 | **a rank criterion that grows with the dynamics**: rank `17 → 36` at cutoff `1e-6`, `17 → 43` at `1e-8`/`1e-10`, error `1.0–1.7e-4`, stable (`rank_growth_sweep.json`) | **evidence beyond `T = 0.1` (200 steps)** — that is the initial transient, so **"adaptive rank" stays barred (D32.2)** |
 | exact divergence-freeness, `2.3e-14`–`2.0e-13` across every committed run | any per-step **time** advantage — `1.78–2.18×` **slower** |
@@ -80,7 +80,7 @@ run away; put it in §7 now and promote it when the run lands.**
 | # | contribution | status | source |
 |---|---|---|---|
 | **1** | **A verified, structure-preserving reduced solver.** Stream-function form ⇒ exact divergence-freeness; projected splitting with an exact viscous treatment; **verified against the analytic Taylor–Green decay to `2.3e-14` at rank 1**, and divergence at roundoff in every committed run. | **`TODAY`** | D32.1, D-invariant |
-| **2** | **The measurement protocol, and the finding that the crossover horizon is not a property of the method.** `t* = 0.649` (`r=16`) / `1.482` (`r=32`), insensitive to the baseline's *window* (`≤0.63%`) and to `Re` (`3–9%`), but moved **`2–4×`** by three individually reasonable corrections to a sixty-line baseline, which lost half the ranks from resolution. **A reported horizon must carry five things:** window, refit interval, offset, an in-sample check, and the grid with the largest rank tested. | **`TODAY`** | D15–D17, D26, D30.5 |
+| **2** | **The measurement protocol, and the finding that the crossover horizon is not a property of the method.** `t* = 0.649` (`r=16`) / `1.482` (`r=32`), insensitive to the baseline's *window* (`≤0.63%`) and to `Re` (`3–9%`), but moved **`1.6–2.8×`** by three individually reasonable corrections to a sixty-line baseline, which cost it three of six ranks — **and every correction made `t*` SMALLER, so fixing the baseline made our own method look worse (D34).** **A reported horizon must carry five things:** window, refit interval, offset, an in-sample check, and the grid with the largest rank tested. | **`TODAY`** | D15–D17, D26, D30.5 |
 | **3** | **The mechanism, measured: a static subspace saturates in rank.** Above `r ≈ 8`, additional rank buys the static baseline **nothing measurable at any horizon** (`r=16`, `32`, `43` identical to four decimals); the spread across rank is `0.00%` at `t=0.1`. **This is why a horizon exists, and it is what makes (2) mechanistic rather than anecdotal.** | **`TODAY`** | D30.1 |
 | **4** | **The stability result: the subspace must evolve.** A fixed basis propagated through the nonlinearity is stable at `r=16` and **overflows at `r = 32` and `42`** (`7.1e+278`), for both an early and a late window, with the same integrator, splitting and orthonormal basis; the time-dependent subspace holds roundoff divergence and error `< 1.1`. **§7 today; contribution when the sweep lands.** | **`ONE RUN`** — D31.5: `Re ∈ {1000,5000}`, `N ∈ {64,128}`, `T ∈ {8,20,40}`, `r ∈ {16,24,32,42}` | D31 |
 | **5** | **The criterion that makes the subspace evolve, with its horizon stated.** An amplitude criterion grows the rank with the dynamics — `17 → 36` at cutoff `1e-6`, `17 → 43` at `1e-8` — monotonically in the cutoff, at `1.0–1.7e-4` error. **§7 today with the 200-step horizon stated; contribution when it runs to `T = 8` (≈ 2 minutes).** | **`ONE RUN`** — D32.2 | D32.2 |
@@ -123,8 +123,9 @@ second place — the argument survives either order.**
 > monotonically in its threshold, tracking the full grid to `1e-4`, though we verify it only over
 > `0.1` time units. Measuring the accuracy horizon against a refitted static subspace, we find it
 > *insensitive* to the baseline's window (`0.15–0.63%` over a fourfold change) and to Reynolds
-> number (`2.8–8.6%`) but *moved by a factor of two to four* by three successive corrections to a
-> sixty-line baseline — so we argue a reported horizon must carry five things: the baseline's window
+> number (`2.8–8.6%`) but *moved by a factor of `1.6` to `2.8`* by three successive corrections to a
+> sixty-line baseline — **every one of which made the horizon shorter, so correcting the baseline
+> made our own method look worse** — so we argue a reported horizon must carry five things: the baseline's window
 > length, refit interval, offset, an explicit check that no basis contains its evaluation time, and
 > the grid with the largest rank tested. We report the per-step cost (`1.78–2.18×` the full-grid
 > step) and peak memory (`+2.5` to `+3.8 MiB` *above* it) with **no speedup claim**, and we do not
@@ -152,8 +153,9 @@ not remove them.
 **Table 1's rows** (from scratch, and the most important object in the paper): (1) off-by-one
 sample — every row shifted; (2) initial basis fitted on the future — zero error at every rank;
 (3) short window silently skipping the refit — a rank-`r` baseline reduced to rank 1; (4) refit at
-an evaluation time — in-sample error. **Headline row: all three fixes together moved `t*` by 2–4×
-and lost three of six ranks.**
+an evaluation time — in-sample error. **Headline row: all three fixes together moved `t*` down by
+`1.6–2.8×` and cost three of six ranks their crossover — i.e. fixing the baseline made the method
+look worse, not better (D34).**
 
 **Table 2's rows**: method · rank · diverged (and at what `t`) · `max|∇·u|` · final trajectory error.
 **Its caption must say "one parameter set"** (D31.3).
@@ -185,7 +187,7 @@ figure.
 |---|---|
 | *"Your method is 1.8× slower and uses more memory. Why publish it?"* | We do not claim otherwise. **What rank buys is the ability to run**: a fixed basis overflows at `r ≥ 32` where the evolving one holds roundoff divergence. The costs are stated with numbers in §7. |
 | *"One artifact. The divergence could be a bug."* | **Agreed, and it is in §7 as an observation, not a contribution.** It is the same `run_projected` path, the same `model.step(..., projector=)`, and an orthonormal SVD basis, so only the subspace differs. The sweep is running; the sentence gets stronger when it lands. |
-| *"Your crossover depends on the baseline, so it is meaningless."* | **Agreed, and that is contribution 2.** `0.15–0.63%` across a 4× window change, `2.8–8.6%` across `Re`, `2–4×` across changes to its *correctness*. We report all three, and table 1 shows what each correction did. |
+| *"Your crossover depends on the baseline, so it is meaningless."* | **Agreed, and that is contribution 2.** `0.15–0.63%` across a 4× window change, `2.8–8.6%` across `Re`, `1.6–2.8×` across changes to its *correctness* — **and every correction shortened the horizon, so the honest baseline is the one that makes our own method look worst.** Table 1 shows what each correction did. |
 | *"Two data points is not a scaling law."* | **Agreed; we do not fit one.** We report the two values and say why there are only two. |
 | *"Exact divergence-freeness is textbook in a stream-function formulation."* | **Agreed, and we say so.** D4 bars the novelty claim. It is a property we verify against an analytic solution (§3), not one we claim. |
 | *"How do you know the code is right?"* | **§3: both solvers reproduce the analytic Taylor–Green decay to `2.8e-14` and `2.3e-14` at rank 1 over 200 steps.** |

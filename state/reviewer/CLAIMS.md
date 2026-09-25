@@ -142,13 +142,19 @@ interior rank `r=8` is consistently the worst**, so comparing only the endpoints
 ### 1.1 The sensitivity is itself the result, and it is the most publishable finding here
 
 **Three successive, individually reasonable corrections to a 60-line baseline moved `t*` by a
-factor of 2–4 and eliminated three of six ranks** (R51, **D15.3**):
+factor of `1.6–2.8×` and eliminated three of six ranks** (R51, **D15.3**, range **corrected by
+D34**):
 
 | baseline as implemented | `t*` at r=16 | at r=32 | ranks resolved |
 |---|---|---|---|
 | window refit once per evaluation (R39) | 1.15 | 2.42 | 5 of 6 |
 | refit every `0.25`, trailing window **includes `t`** (R50) | 1.83 | 2.81 | 5 of 6 |
-| **refit every `0.25`, schedule offset, out-of-sample** | **1.26–1.46** | **2.42–2.45** | **2 of 6** |
+| **refit every `0.25`, schedule offset, out-of-sample** | **0.649** | **1.482** | **2 of 6** |
+
+> **AND THE DIRECTION MATTERS MORE THAN THE FACTOR.** The corrections made `t*` **SMALLER**, not
+> larger: the honest, strictly out-of-sample baseline is the **strongest** one, so the reduced
+> integrator's advantage horizon is **shorter** than the buggy baselines suggested. **Fixing the
+> baseline made our own method look worse, and we report the corrected number.**
 
 > **The advantage of a reduced integrator over a static subspace is not a stable quantity: it
 > is a function of how well the baseline is implemented. Any published crossover horizon for
@@ -444,7 +450,7 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "slow singular-value decay ⇒ broad inertial range ⇒ hard to compress" | R12: 99% of energy in `r=5`, identical at N=128 and N=256 |
 | "the rank saturates" / "grows without limit" | R29: non-monotone in `N` for `W ≥ 12`, unexplained |
 | a convergence order without naming its rank | R42: order is conditional on rank sufficiency |
-| **any fitted `c·r^p` for the crossover, at any constants** | **void (R51/D15)** — the baseline moved it 2–4× and left only two resolvable ranks. State the two values. |
+| **any fitted `c·r^p` for the crossover, at any constants** | **void (R51/D15)** — the baseline moved it `1.6–2.8×` (D34) and left only two resolvable ranks. State the two values. |
 | `t* ≈ 0.05·r^1.12` (R39) | weak baseline; later found in-sample and starvation-affected |
 | `t* ≈ 0.11·r^0.95` (R50/D14) | measured on a driver whose baseline window **ends at the evaluation time** |
 | "the curves cross repeatedly, so no horizon exists" (R48) | over-correction; an artefact of the starvation bug |
@@ -483,7 +489,7 @@ Everything below is measured, and none of it requires retracting a number:
    buys predictability time, not accuracy**, and the horizon is `≈1.3` at `r=16` and `≈2.4` at
    `r=32` against a correctly implemented baseline.
 2. **That horizon is not a stable quantity, and saying so is the methodological contribution.**
-   Three successive corrections to a 60-line baseline moved it by 2–4× and removed half the
+   Three successive corrections to a 60-line baseline moved it by `1.6–2.8×` (D34) and removed half the
    ranks. **Any published crossover for this class of method should carry FIVE things: the
    baseline's window length, its refit interval, its offset, a check that no basis contains its
    evaluation time, and the grid together with the largest rank tested** (D30.5 — the fifth is
