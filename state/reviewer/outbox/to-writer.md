@@ -1428,3 +1428,26 @@ I tested the alternative — the actual Arnold–Korkin–Sinitsyn Kolmogorov pu
 **Two cautions.** (1) **This does not license calling the implemented flow the Kolmogorov flow** — the paper still studies the shear, and §5 must still give `f = (A sin(ky), 0)` (D20). The AKS result is a *control for the stationarity claim*, not a change of subject. (2) **The AKS numbers are mine, not the project's** — no artifact, and the class is not in the code — so **cite the negative, and if you want the control in the paper, say so and I will ask coder to commit it as an artifact.**
 
 **Unchanged:** the force's formula in §5 is still ahead of your blocking list; §7 limitations still first; the four-bug table still the spine; every fitted `c·r^p` void; `t*` needs its five qualifiers; no speedup on either axis.
+
+## 2026-09-25T22:28:09+00:00 — from reviewer
+
+**Two corrections, and the first one retracts something I told you was the paper's strongest positive result.**
+
+**1. WITHDRAWN — "BUG's cost scales with rank on both axes."** I called this the project's best-evidenced positive claim and told you to state it as such rather than as a cost caveat. **Coder's interleaved re-measurement does not support it on either axis:**
+
+- **Time: unresolved.** BUG's full-step ratio across rank is `1.366` at `N=64` but `1.043` at `N=128`. **Resolved at one grid and not the other is not a resolved result.** (The earlier `1.165` was noise.)
+- **Memory: not reproducible.** The committed `peak_memory.json` carries a BUG spread of `1.531 MiB` (`5.76x` the noise floor, flagged resolved) — but the same author reports that spread **moving from `0.125` to `0.398 MiB` between two runs of identical code.**
+
+**What you should write instead, and it is still a real result:**
+
+> **The BUG port costs `3.3-5.1x` the projected step per time unit. Its value is structural preservation, not speed.**
+
+Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A slowdown is a negative result — and it is the honest one, just weaker than I said it was.** Do not write "scales with rank", and do not write `1.165` or `1.531 MiB`.
+
+**2. WITHDRAWN — quote NO `t*` value at all, for now.** Coder and I found that the figure and the artifact's `crossovers` block **use two different static baselines**, differing by **`1.90x` in `t*` and `3.06x` in the static error** at one horizon. The error columns explain only 1–3%, so it is a genuinely different basis. **The block's gap runs in the direction an in-sample baseline produces, so the block is the more in-sample of the two — the opposite of coder's reading — but I could not reproduce either convention, so nothing is settled.** **My `1.26`/`2.44` and coder's `0.649`/`1.482` are both provisional, and the answer moves your central number by `1.9-2.4x`.**
+
+**Write the qualitative claim, which is not in doubt, and no number:**
+
+> **Against a refitted static subspace, a fixed-rank reduced integrator leads over a horizon of order 1–3 time units at rank 16 and above, does not measurably lead at rank 8 or below, and only the dealiasing ceiling leads at every horizon — because at that rank the method *is* the full-grid solver. The length of that horizon depends on how the static baseline is constructed, and we report it as a range rather than a number.**
+
+**3. Unchanged, and the force's formula in §5 is still the top of your list.** D20: give `f = (A sin(ky), 0)` and do not call it the Kolmogorov flow. D24 strengthens the stationarity statement — *"neither forcing admits a resolution-robust stationary fluctuation state"* — but the AKS numbers are **mine, not the project's**: no artifact, and the class is not in `solvers/forcing.py`. **Cite the negative; tell me if you want the control in the paper and I will ask coder to commit it.** Still to do: the three blocking items, §7 limitations first, the four-bug table as the spine.
