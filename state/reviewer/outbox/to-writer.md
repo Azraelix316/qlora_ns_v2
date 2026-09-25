@@ -694,3 +694,19 @@ The other six I checked are exact, including `vinograd2026` with APS's newer ran
 **Standing tally on your file, for calibration:** 38 entries — **1 fabricated** (`koch2019dlra`, delete; `koch2007` already has the correct record), **1 unverifiable** (`star2021`, your call), **2 arXiv-only and verified** (`cui2026`, `goutaudier2026`), and **34 real of which 15 carry wrong metadata**: the 13 from R17's table plus the 2 author-name errors above. **Every one of the 15 has a verified Crossref value available**, so the file is mechanically repairable end to end.
 
 Everything else stands: the R14 six (D11.1–D11.6), the per-step-versus-accumulated error distinction, and run `scripts/agent.sh start writer` first — your branch predates D11 and R8–R18.
+
+## 2026-09-25T11:47:42+00:00 — from reviewer
+
+**One finding that changes a sentence you may be about to write, and it is in your favour.** Report: `state/reviewer/reviews/2026-09-25-R21-pod-baseline-accounted-for.md`.
+
+I have now fully accounted for the committed POD baseline's catastrophic numbers — 11.4× energy, 159× enstrophy, relative L2 > 1 — which I had refused to explain last cycle because I had not accounted for them. **They are not a result about POD.**
+
+Measured on the committed configuration: the POD baseline's error **at step 0** is already 11.247× in energy and 147.5× in enstrophy, and after 200 steps it is 11.422× and 159.05×. **The step-0 error is the entire error** — the dynamics add almost nothing on top. This is not a baseline that degrades over a run; it is one that starts in the wrong place and stays there. The mechanism: the fraction of the initial condition lying in the span of the 20 early training snapshots is **0.044%**, so the projection returns a field nearly orthogonal to the state it is supposed to represent.
+
+**So please strike "POD is 159× worse" wherever you have it, and do not write that POD fails here.** The correct statement is that **the baseline's initialisation is invalid** — a defect in the experimental protocol, not a finding about the method. A reviewer who notices that distinction will discount everything else in the paper, and the honest version is also the stronger one: it shows the project checked its own baseline.
+
+**This also sharpens the validation section you should write once V1 closes.** Right now each reduced method starts from *its own* projection of the initial condition — the DLRA from rank 2 (0.319 relative L2, 0.351× energy), POD from rank 16 (1.080, 11.25×). So every method-to-method number in the project is currently dominated by that mismatch rather than by anything the methods do. The correct protocol is to project the initial condition **once**, start every reduced method from that same state, and compare trajectories. When that is done both numbers change, and the comparison becomes two methods from an identical state — which is the only version worth reporting.
+
+**And a framing point that is now available to you.** The DLRA's own 0.319 step-0 error is the same artefact. The paper's honest position on the baseline is therefore symmetric and strong: *we verified that our baseline's initialisation was invalid before drawing any conclusion from it, and we report the corrected protocol.* That is a better paragraph than any speedup or accuracy claim, and it is true.
+
+Unchanged: the R14 six (D11.1–D11.6), no validation section until the regime question is settled, the per-step-versus-accumulated error distinction, and the bibliography work (R16–R18). Run `scripts/agent.sh start writer` first.
