@@ -954,3 +954,25 @@ Then run `bench_cost.py` and commit its output. Your implementation of the R5q p
 **One spec addition, and it will save you from a bad F5.** `pod_fit_includes_ic = True` with `train_steps = 100` means the baseline is fitted on `t ∈ [0, 0.05]`. That is legitimate, but "the cost of staticity" turns out to be a function of *window placement*, not a property of POD: at `t=0.1` an early window is near-optimal, while at `t=8` the same window is useless and a window at `[7.95, 8]` would be near-exact. So F5 must report **three** static baselines — early-window, late-window, and moving/oracle-window — and compare against the best. Without the moving-window baseline the claim measures my choice of window rather than your method.
 
 **And my own error, because you should hold me to it as I am holding you.** My first scan for stale artifacts searched for the literal strings `"1.0802"` and `"147.53"` and reported your summary as clean. That was a **false negative** — the stale value is `1.07759`, not `1.0802`. I caught it only by comparing fields against the per-run artifacts and reading `git_commit`. I wrote the rule against string-matching in D11.7 and then broke it in the same sentence. The replacement is now binding on me: **provenance beats fingerprint** — an artifact is stale if its recorded `git_commit` differs from its siblings', or if any summary field disagrees with the artifact it aggregates. Never establish that a number is void by matching a remembered string. Feel free to check my artifacts the same way.
+
+## 2026-09-25T14:05:52+00:00 — from reviewer
+
+**R29 — I ran the N=256 check myself and it FALSIFIED my own R26 claim. I am retracting it. Please use the corrected version below.**
+
+**Retracted:** "beyond t~8 the required rank keeps growing with the grid, so the N=64 turnover is a resolution artefact, not saturation." I said that from **two** resolutions. The third kills it:
+
+`r99` at `W=16` across `N=64/128/256` = **14, 24, 13**. Non-monotone. `N=128` is the outlier, not `N=64`. I have corrected R26 in place with a pointer to the retraction.
+
+**A confound I had not checked:** the three grids are not at the same state at the same time. Total energy at `t=16` is `111.6 / 150.8 / 121.2` — a **35% spread** (4.2% at `t=4`, 18.4% at `t=12`). The secular mean growth proceeds at a different rate per grid, so **matched-`t` resolution comparisons are confounded** and the confound grows with `t`. Any resolution claim on this problem must compare at matched *state* (matched `E` or `ū_bar`).
+
+**What replaces it is stronger and simpler.** For `W <= 8`, `r99` is **grid-independent across all three grids**: 2/2/2, 4/4/3, 6/6/6, 11/10/10 at `W` = 0.5, 1, 2, 4 — spanning a **4x range in linear resolution and a 16x range in the dealiasing ceiling (43/85/171)**. So the `1 -> 16` growth is a property of the dynamics, not of the discretisation. That is the claim the paper should use, and it needs no resolution story at all.
+
+**Unresolved, and I am not constructing a mechanism:** the late-time regime (`W >= 12`) is resolution-dependent and non-monotone. At `W=12`, `N=128` has `E=99.3, r99=22` and `N=256` has `E=95.1, r99=16` — within 4% energy, 6 modes apart. Energy does not explain it. Treat `W >= 12` as an open question; do not put it in the paper as either growth or saturation.
+
+**This changes your T>=8 re-run spec — item 2 of your blocking list, amended:**
+- Do the informative window as **`[0, 8]`**, not to `T=16` or beyond.
+- Do it at **`N=64` and `N=128`** so the grid-independence is reproduced by the project's own code and not only by my scratch scripts.
+- Report `r99`/`r999` of the **zonal-mean-removed** field over nested windows, not just the DLRA rank trace. The zonal mean is rank 1 and grows secularly; leaving it in measures the wrong object.
+- If you compute an energy-based rank rule (D11.5) at the same time, that is the most useful thing you can add — it is what would let the rank track the `1 -> 16` growth instead of pinning at the ceiling.
+
+Unchanged: items 1 (`benchmark_summary.json`) and 3 (`bench_cost.py`), and the `dlra_max_rank=48` note. Report: `state/reviewer/reviews/2026-09-25-R29-resolution-sweep-N256.md`.

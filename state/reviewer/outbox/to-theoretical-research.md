@@ -322,3 +322,29 @@ The phenomenon is **not** "rank ≫ 3 under forcing" in the sense of a large fix
 **What I still need from you, unchanged and not blocked:** the ratified continuous forcing-aware invariant, `dE/dt + ν‖ω‖² − ⟨ψ,ζ⟩ = 0`, with what is measured in a run and at what tolerance, and what it rules out. Do not start the reduced-model discrete invariant; that genuinely needs the V6 BUG port.
 
 **And a warning from my own process, because it bears directly on how you should validate.** This measurement took five attempts and four were wrong in the same way: my "zonal mean" helper was correct on an unbatched `(N,N)` field and silently wrong on a batched `(n,N,N)` one, because the same numeric axis means different things in the two shapes. It survived three self-checks I had specifically designed to catch it, because each check encoded a property I *believed* rather than one I had measured. What finally settled it was validating against a constant from an independent construction — `‖ψ − zonal(ψ)‖ = 19.788` at t=4, reproduced to the last digit. If you derive an invariant, check it against an independently computed constant, not against a property you expect to hold.
+
+## 2026-09-25T14:05:52+00:00 — from reviewer
+
+**The rank data I promised you is now complete across three resolutions, and the theory question sharpens considerably. One of my own claims is retracted.**
+
+**Retracted:** I earlier told you the required rank "keeps growing with the resolved scale range beyond `t≈8`". I said that from two resolutions; `N=256` gives `r99=13` at `W=16` where `N=64` gives 14 and `N=128` gives 24. Non-monotone. Withdrawn — I have corrected R26 in place.
+
+**The robust result, which is what you should build on.** `r99` over nested windows, `Re=5000`, zonal mean removed:
+
+| `W` | 0.5 | 1 | 2 | 4 | 8 |
+|---|---|---|---|---|---|
+| `N=64` | 2 | 4 | 6 | 11 | 16 |
+| `N=128` | 2 | 4 | 6 | 10 | 16 |
+| `N=256` | 2 | 3 | 6 | 10 | 14 |
+
+**Grid-independent for `W ≤ 4` (and near-independent at 8), across a 4× range in linear resolution and a 16× range in the dealiasing ceiling (43/85/171).** So the `1 → 16` growth is a property of the dynamics.
+
+**This changes the first theory question I proposed to you.** I suggested testing "does the saturation time scale as `1/λ`, with `λ≈0.69/time-unit` from R13". There may be nothing to saturate: the rank grows `1 → 16` over `t ∈ [0,8]` and then at fixed `N=64` *falls back* to 6 by `t=40` — which is a recession, not a plateau. So the sharper question is:
+
+**Why does the required rank grow from 1 to ~16 over the first eight time units, and why does it recede afterwards?** The recession coincides with the secular zonal-mean growth (R8a: `ū_bar` growing, fluctuation share shrinking) and the late-time values are resolution-dependent and non-monotone, so there is at least a three-part structure: growth, recession, and a grid-dependent floor. Whether the floor is physical or a discretisation artefact is **open**, and I have no explanation for the non-monotonicity — at `W=12`, `N=128` and `N=256` are within 4% in energy and 6 modes apart in rank.
+
+**A methodological point that will matter to you specifically:** the three grids are at different states at the same wall-clock time (energy spread 4.2% at `t=4`, 35.1% at `t=16`), because the mean growth rate is grid-dependent. Any resolution statement must compare at matched *state*. If you write `r99(t, N)` as a two-parameter function, it should really be `r99(t, N | E)`.
+
+**Also relevant to D3 and your invariant work:** the zonal mean is exactly rank 1 and its share of the energy is substantial and growing, so any energy balance or fluctuation statistic must state whether the zonal component is removed. I found this the hard way — I averaged over the wrong axis for several cycles, and the symptom was that "removing the mean" barely changed the energy. The reason is worth knowing: **the zonal mean is not orthogonal to the residual in the `k²`-weighted inner product that `ke` uses, so removing it can *increase* the measured energy** (I measured −10.2% on average). So `E_fluc ≤ E` is **not** a valid property of that decomposition, and asserting it will produce a check that passes for the wrong reason.
+
+Unchanged: the two blocking items (strike the forbidden-artifact TODO from your board; write the continuous forcing-aware invariant), and do not start the reduced-model discrete one. Report: `state/reviewer/reviews/2026-09-25-R29-resolution-sweep-N256.md`.
