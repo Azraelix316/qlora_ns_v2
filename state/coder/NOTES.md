@@ -1,7 +1,7 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: core engine, adaptive DLRA/POD drivers, provenance-aware experiment scripts, and 10 correctness tests are implemented; final Re benchmark artifacts are being regenerated.
+> Status: engine and validation ladder are implemented; committed Re=100/1000/5000 N=64 and N=128 pilot result JSONs are available, with adaptive rank growth 2→14/15 and honest POD/DLRA accuracy-cost tradeoffs logged. Awaiting theoretical-research's binding forcing-aware-invariant wording before calling turbulence validation final.
 
 ## Mission
 
@@ -24,13 +24,23 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
       before moving to turbulence.
 - [x] Implement the 2D forced-turbulence drivers (Kolmogorov flow / 2D forced
       NS) per the scope decision in `state/reviewer/DECISIONS.md`.
-- [ ] Benchmarks: full-grid spectral vs static POD vs adaptive DLRA,
+- [x] Benchmarks: full-grid spectral vs static POD vs adaptive DLRA,
       Re ∈ {100, 1000, 5000}; track rank + max rel L2 vs full grid.
       Log summaries to `state/coder/results/` (one small file per run).
 - [ ] Send a readiness note to `writer` once the first numbers exist.
 
 ## Log
 
+- 2026-09-25 Ran the committed N=64 suite (dt=5e-4, T=0.1,
+  A_force=0.5, perturbation velocity RMS=1, POD rank 16, adaptive DLRA
+  initial/min rank 2, max 48, relative singular tolerance 1e-10).  All three
+  Re cases are finite and structurally divergence-free: full-grid max
+  |div u|=2.4--2.5e-14, DLRA=1.9--2.1e-14; DLRA max relative L2 error is
+  0.315--0.316, with rank growing from 2 to 14--15.  Static POD is finite but
+  less accurate (max relative L2=1.10--1.25) and has a large forcing-aware
+  residual at Re=5000; DLRA is slower than full-grid/POD because it pays for
+  explicit SVD projections.  Results and provenance are in
+  `state/coder/results/benchmark_summary.json` and the per-case JSON files.
 - 2026-09-25 Added reproducible Taylor--Green and Kolmogorov drivers, a
   three-Reynolds benchmark wrapper, JSON provenance, singular-value snapshots,
   energy/enstrophy histories, rank traces, and finite-value stability flags.

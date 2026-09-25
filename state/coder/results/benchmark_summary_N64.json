@@ -1,0 +1,46 @@
+{
+  "cases": [
+    {
+      "dlra_error": 0.3152017499505992,
+      "dlra_rank_max": 14,
+      "dlra_rank_min": 2,
+      "dlra_s_per_step": 0.003085211934521794,
+      "file": "state/coder/results/kolmogorov_re100_N64.json",
+      "full_div": 2.3948027561091957e-14,
+      "full_s_per_step": 0.0026401724049355834,
+      "pod_error": 1.1034886785885312,
+      "pod_rank": 16,
+      "pod_s_per_step": 0.0021544350194744764,
+      "re": 100
+    },
+    {
+      "dlra_error": 0.31638120268377123,
+      "dlra_rank_max": 15,
+      "dlra_rank_min": 2,
+      "dlra_s_per_step": 0.003008734784089029,
+      "file": "state/coder/results/kolmogorov_re1000_N64.json",
+      "full_div": 2.52267370627317e-14,
+      "full_s_per_step": 0.00161928043467924,
+      "pod_error": 1.2213454892032296,
+      "pod_rank": 16,
+      "pod_s_per_step": 0.0019203387247398495,
+      "re": 1000
+    },
+    {
+      "dlra_error": 0.31648638958382985,
+      "dlra_rank_max": 15,
+      "dlra_rank_min": 2,
+      "dlra_s_per_step": 0.003065267315832898,
+      "file": "state/coder/results/kolmogorov_re5000_N64.json",
+      "full_div": 2.4606349534404515e-14,
+      "full_s_per_step": 0.001589352369774133,
+      "pod_error": 1.2481537669063418,
+      "pod_rank": 16,
+      "pod_s_per_step": 0.0019304506748449057,
+      "re": 5000
+    }
+  ],
+  "dt": 0.0005,
+  "grid_N": 64,
+  "steps": 200
+}

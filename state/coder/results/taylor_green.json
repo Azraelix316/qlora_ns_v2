@@ -1,0 +1,31 @@
+{
+  "case": "taylor_green",
+  "dlra_rank_final": 1,
+  "dlra_rank_max": 1,
+  "dlra_rank_min": 1,
+  "dlra_seconds": 0.5851716340985149,
+  "dlra_seconds_per_step": 0.0029258581704925744,
+  "final_energy": 8.410322089942206,
+  "full_seconds": 0.2605332019738853,
+  "full_seconds_per_step": 0.0013026660098694265,
+  "grid": {
+    "L": 6.283185307179586,
+    "N": 64
+  },
+  "initial_energy": 9.869604401089358,
+  "max_abs_divergence": 1.6288882450711e-14,
+  "max_energy_increase": -0.006730949692846266,
+  "max_relative_l2_error_dlra": 2.237681076251951e-14,
+  "max_relative_l2_error_full": 2.7784685836986202e-14,
+  "max_scaled_energy_balance_residual": 0.000315743137417785,
+  "parameters": {
+    "dt": 0.01,
+    "nsteps": 200,
+    "nu": 0.02,
+    "rank": 1
+  },
+  "provenance": {
+    "driver": "experiments/run_taylor_green.py",
+    "git_commit": "8e45ea164202f725ed03a7bd0dacd467bd647d4e"
+  }
+}
