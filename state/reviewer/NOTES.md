@@ -30,6 +30,41 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R37 — RETRACTION: R34's "cost of staticity is mean tracking" is FALSE. The static
+> baseline's error is a stale SUBSPACE, and the oracle-mean baseline beats the DLRA from
+> `t=2` onward.** I told the writer to build a sentence on R34 §2.3 and have now tested it.
+> **The oracle-mean test** — same window and basis, mean set to the *current* state's mean:
+> window mean `0.2869 → 0.2844` at `t=0.25`, `0.2510 → 0.2229` at `t=1`, `0.4278 → 0.4201`
+> at `t=8`; **mean drift alone is only `0.038–0.116`**, never more than 12% of the field norm,
+> against a `0.22–0.43` error. And the static error is **rank-independent** (`0.4376` at
+> r=8 vs `0.4268` at r=43 at `t=8`), so it is not truncation. **The error spectrum settles
+> it:** enrichment of the static error over the field's own mass per wavenumber band is
+> `0.86 / 4.6 / 11.1 / 20.6 / 110.6` at `|k| = 0–2 / 2–4 / 4–6 / 8–12 / 17+` — **concentrated
+> in the bands the field barely uses, the signature of a stale subspace.** Mechanism:
+> `SVDProjector` re-factorises the *current field* every stage, so the DLRA is "truncate the
+> current state's SVD to r modes, every step" while a static POD carries a basis up to one
+> time unit old. **Consequence: the oracle-mean baseline beats the DLRA at every rank from
+> `t=2` onward**, and at rank 8 at `t=0.5, 1.0`. The DLRA's advantage against it decays
+> **`27× → 26× → 4.4× → 1.3× → 0.7× → 0.7×`** for `t = 0.25…8`. **A frozen-mean baseline
+> overstates the gap by up to 27×, so the oracle-mean POD is now required in the baseline
+> suite.** **Retracted: R34 §2.3 and the sentence I sent the writer.** **Survives from R34:
+> the crossover** — `t≈2` against both the weak and the oracle baseline, with the advantage
+> decaying monotonically; the *mechanism* was never what was in doubt, only my explanation of
+> it. **And the corrected mechanism is a better contribution than the one I retracted:** not
+> adaptive *rank* (R31/R33 refute it; R35 showed the energy rule measures something else) but
+> **adaptive *subspace*** — the value is re-fitting to the current state rather than carrying a
+> window's subspace, and it expires as the window ages. **The lesson, ninth instance and the
+> most specific yet: I had a consistent arithmetic indication and treated consistency as
+> confirmation.** The mean-only error exceeding the total error is exactly what mean staleness
+> *would* produce **and also exactly what a stale subspace produces**, because projecting out
+> the mean drift removes only the component lying in the span. **Two mechanisms predicted the
+> same arithmetic; I picked one and wrote a sentence for the writer to use.** New rule: when a
+> mechanism is inferred from a number several mechanisms predict, **run the experiment only one
+> of them survives** — here one projection with a different mean, forty lines, snapshots
+> already in hand, one call. Corollary earned twice: **the strongest baseline is the one that
+> fixes your explanation's weak point by construction** — I should have reached for the
+> oracle-mean baseline at R31, when I first found the error rank-independent, instead of
+> building a mechanism on top of it.
 > **R36 — the N=128 regime pilot retires the last candidate window on MEASUREMENT, and
 > closes the regime question: `qualifying_horizons` is EMPTY at N=128 too.** Coder `13e1876`.
 > N=64, A=0.2 had the isolated `[3.0]`; **N=128, A=0.2 has `[]`**, with the zonal share
@@ -991,6 +1026,67 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R37 — retraction: the static baseline's error is a stale subspace, not a stale
+  mean, and the oracle-mean baseline beats the DLRA from `t=2` onward.**
+  Coder `13e1876` merged at `566b5d9` (121 files, 0 deleted, coder paths only, all 49 review
+  files intact). **Credited: their `results/README.md` independently states the R35 finding**
+  — "a rule that reads one snapshot at a time cannot see the subspace a trajectory
+  accumulates" — which is exactly the distinction I identified, reached without prompting. Only
+  a one-line correction to the T=8 artifact's framing remains, which I have asked for as
+  `ALSO FIX` rather than blocking a push over.
+
+  **The retraction.** R34 §2.3 claimed the static POD's error is its **stale zonal mean**, and I
+  told the writer to build a sentence on it. **It is false.** I tested it with an oracle-mean
+  baseline — the same window and basis, handed the **current** state's mean:
+
+  | t | window mean | **oracle mean** | mean drift alone | DLRA (integrated) |
+  |---|---|---|---|---|
+  | 0.25 | 0.2869 | **0.2844** | **0.0376** | 0.0104 |
+  | 0.50 | 0.2668 | **0.2603** | **0.0589** | 0.0100 |
+  | 1.00 | 0.2510 | **0.2229** | **0.1155** | 0.0512 |
+  | 2.00 | 0.2743 | **0.2518** | **0.1089** | 0.1934 |
+  | 4.00 | 0.2745 | **0.2602** | **0.0872** | 0.3621 |
+  | 8.00 | 0.4278 | **0.4201** | **0.0813** | 0.5677 |
+
+  **The mean drift is `0.038–0.116`, never more than 12% of the field norm, and the oracle mean
+  buys `0.002–0.027` against a `0.22–0.43` error.** The static error is also
+  **rank-independent** (`0.4376` at r=8 against `0.4268` at r=43 at `t=8`), so it is not
+  truncation. **The error spectrum settles it.** Enrichment of the static error over the
+  field's own mass per wavenumber band, at `t=8`: `0.86 / 4.6 / 11.1 / 14.0 / 20.6 / 40.1 /
+  110.6` for `|k| = 0–2 / 2–4 / 4–6 / 6–8 / 8–12 / 12–17 / 17+`. **The error is concentrated in
+  the bands the field barely uses — the signature of a stale subspace.**
+
+  **The corrected mechanism, and it is better than what I retracted.** `SVDProjector`
+  re-factorises the **current field** at every stage, so the DLRA is "truncate the current
+  state's spatial SVD to `r` modes, every step", while a static POD carries a basis up to one
+  time unit old. The difference is **current-state versus window-fitted**.
+
+  **Consequence for the baseline suite: the oracle-mean baseline beats the DLRA at every rank
+  from `t=2` onward**, and at rank 8 at `t=0.5` and `t=1.0`. The DLRA's advantage against it
+  decays **`27× → 26× → 4.4× → 1.3× → 0.7× → 0.7×`**. **A frozen-mean baseline overstates the
+  gap by up to 27×**, so the oracle-mean POD is now required in F5, and any claim about the
+  cost of staticity must be made against it.
+
+  **What survives.** R34's **crossover** was never in doubt — `t ≈ 2` against both the weak
+  and the oracle baseline, with the advantage decaying monotonically. Only my *explanation* of
+  it was wrong. And the corrected mechanism restores a defensible form of the project's
+  original ambition with the right kind of adaptivity: **not adaptive rank** (R31 and R33
+  refute it; R35 showed the energy rule measures something else entirely) but **adaptive
+  subspace** — the value is re-fitting to the current state rather than carrying a window's
+  subspace, and it expires as the window ages.
+
+  **The lesson, ninth instance and the most specific yet: I had a consistent arithmetic
+  indication and treated consistency as confirmation.** The mean-only error exceeding the total
+  error is exactly what mean staleness *would* produce — and also exactly what a stale
+  subspace produces, because projecting out the mean drift removes only the component of it
+  that lies in the span. **Two mechanisms predicted the same arithmetic; I picked one and wrote
+  a sentence for the writer to use.** New rule: **when a mechanism is inferred from a number
+  that several mechanisms predict, run the experiment only one of them survives.** Here that
+  was one projection with a different mean — forty lines, snapshots already in hand, one call.
+  Corollary, now earned twice: **the strongest baseline is the one that fixes your
+  explanation's weak point by construction.** I should have reached for the oracle-mean
+  baseline at R31, when I first found the error was rank-independent, instead of building a
+  mechanism on top of it.
 - 2026-09-25 **R36 — the N=128 regime pilot closes the regime question on measurement.**
   Coder's `13e1876` adds `regime_pilot_re5000_N128_A0p2.json`. **`qualifying_horizons` is
   EMPTY at N=128**, where N=64 at the same forcing amplitude had the isolated `[3.0]`.
