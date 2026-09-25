@@ -22,7 +22,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("state/coder/results/rank_growth_sweep.json"))
     args = parser.parse_args()
     rows = []
-    for tolerance in (1e-6, 1e-8, 1e-10):
+    for cutoff in (1e-6, 1e-8, 1e-10):
         result = run_case(
             re=args.re,
             N=args.N,
@@ -39,13 +39,13 @@ def main() -> None:
             dlra_rank=2,
             dlra_min_rank=2,
             dlra_max_rank=48,
-            dlra_tolerance=tolerance,
+            dlra_relative_amplitude_cutoff=cutoff,
             dlra_check_every=5,
         )
         dlra = result["dlra"]
         rows.append(
             {
-                "tolerance": tolerance,
+                "relative_amplitude_cutoff": cutoff,
                 "stable": dlra["stable"],
                 "rank_min": dlra["rank_min"],
                 "rank_max": dlra["rank_max"],
@@ -64,16 +64,14 @@ def main() -> None:
             "driver": "experiments/run_rank_growth_sweep.py",
         },
         "parameters": {
-            "N": args.N,
-            "re": args.re,
-            "dt": args.dt,
+            # run_case's own record is the authoritative one (P0 item 5: a
+            # default in a signature is not a record of what was run), so take
+            # it verbatim and add only what is specific to the sweep.
+            **result["parameters"],
             "steps": args.steps,
-            "initial_rank": 2,
-            "min_rank": 2,
-            "max_rank": 48,
-            "check_every": 5,
-            "tolerances": [1e-6, 1e-8, 1e-10],
+            "relative_amplitude_cutoffs": [1e-6, 1e-8, 1e-10],
         },
+        "initial_state": result["initial_state"],
         "rows": rows,
         "interpretation": "The unprojected candidate is inspected at each check; tighter thresholds retain more slowly decaying singular directions and therefore grow rank.",
     }

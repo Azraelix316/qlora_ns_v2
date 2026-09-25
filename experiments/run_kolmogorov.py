@@ -9,6 +9,7 @@ comparison rather than a factored-kernel estimate.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -38,27 +39,86 @@ def make_initial_state(
     perturbation_velocity_rms: float = 0.25,
     cutoff: int = 8,
     seed: int = 20260925,
+    reference_N: int | None = None,
 ) -> np.ndarray:
     """Build a reproducible Kolmogorov shear plus broadband perturbation.
 
     The base stream function is ``-base_speed*cos(y)``, hence
     ``u=base_speed*sin(y), v=0``.  A real random field is spectrally filtered
-    to a resolved low-wavenumber box and normalized by its velocity RMS.  The
-    construction is independent of the reduced rank and is therefore suitable
-    for a fair reference comparison.
+    and normalized by its velocity RMS.  The construction is independent of the
+    reduced rank and is therefore suitable for a fair reference comparison.
+
+    Mask semantics -- ``cutoff`` is a *box half-width in wavenumber*, not a
+    radial cutoff: the filter keeps every mode with ``|k_x| <= cutoff`` **and**
+    ``|k_y| <= cutoff``.  Two consequences are worth stating because they are
+    not guessable from the parameter name:
+
+    * The highest **radial** wavenumber present is the box corner,
+      ``floor(cutoff*sqrt(2))`` -- so cutoff 2, 4, 8 reach |k| = 2, 5, 11, not
+      2, 4, 8.
+    * The real field therefore factors through ``2*cutoff+1`` modes per axis,
+      so its matrix rank is at most ``2*cutoff+1``: cutoff 8 gives exactly
+      rank 17, which is the IC rank the gate records.
+
+    The base shear sits at ``(0,+-1)``, inside the box for any cutoff >= 1, so
+    it adds no rank.  Both facts are pinned by a test.
+
+    ``reference_N`` selects the grid the perturbation is *drawn and normalized
+    on*; its spectrum is then resampled onto ``grid``.  This matters for the
+    two-grid comparison (P0 item 3, "same physical problem across grids"): with
+    the default (``None``) the Gaussian draw has shape ``(N, N)``, so changing
+    ``N`` produces a **different realization** of the same band rather than the
+    same field at two resolutions.  Passing the coarse ``N`` as ``reference_N``
+    makes the finer run the identical continuous field, so the pair differs
+    only in resolution.  Both grids resolve the band exactly (|k| <= cutoff
+    against a ceiling of N/3), so the resampling is exact, not interpolated.
+    The default is unchanged, so every committed fingerprint still refers to
+    the field it was measured on.
     """
     _, Y = np.meshgrid(grid.x, grid.y, indexing="ij")
     base = -float(base_speed) * np.cos(Y)
+    if reference_N is None or int(reference_N) == grid.N:
+        source = grid
+        raw_N = grid.N
+    else:
+        if int(reference_N) < 2 * (cutoff + 1):
+            raise ValueError(
+                f"reference_N={reference_N} does not resolve the |k| <= {cutoff} box"
+            )
+        source = Grid2D(int(reference_N), L=grid.L)
+        raw_N = source.N
     rng = np.random.default_rng(seed)
-    raw = rng.normal(size=(grid.N, grid.N))
-    F = grid.fft(raw)
-    mask = (np.abs(grid.kx)[:, None] <= cutoff) & (
-        np.abs(grid.ky)[None, :] <= cutoff
+    raw = rng.normal(size=(raw_N, raw_N))
+    F = source.fft(raw)
+    mask = (np.abs(source.kx)[:, None] <= cutoff) & (
+        np.abs(source.ky)[None, :] <= cutoff
     )
-    perturbation = grid.ifft(F * mask)
+    F = F * mask
+    # The amplitude is a property of the field, so it is always measured on
+    # the grid the field was drawn on -- never on the resampling grid.
+    u_src, v_src = source.velocity(source.ifft(F))
+    rms = float(np.sqrt(np.mean(u_src * u_src + v_src * v_src)))
+    if source is grid:
+        perturbation = grid.ifft(F)
+    else:
+        # Same coefficients, target grid: L=2*pi makes every wavenumber an
+        # exact integer mode, so this evaluates the identical band-limited
+        # field on the finer grid, with no interpolation error.  Only the
+        # in-box modes exist in the (shorter) source half-spectrum; every
+        # other target coefficient is zero because the field is band-limited.
+        kx_idx = np.rint(grid.kx).astype(int) % source.N
+        ky_idx = np.rint(grid.ky).astype(int)
+        kx_ok = np.abs(grid.kx) <= cutoff
+        ky_ok = grid.ky <= cutoff
+        target = np.zeros((grid.N, grid.N // 2 + 1), dtype=complex)
+        # Unnormalized rfft coefficients of a fixed field scale as N^2, so the
+        # transfer between grids carries that factor explicitly: the inverse
+        # transform divides by the *target* N^2.
+        target[np.ix_(kx_ok, ky_ok)] = (
+            F[np.ix_(kx_idx[kx_ok], ky_idx[ky_ok])] * (grid.N / source.N) ** 2
+        )
+        perturbation = grid.ifft(target)
     perturbation -= np.mean(perturbation)
-    u, v = grid.velocity(perturbation)
-    rms = float(np.sqrt(np.mean(u * u + v * v)))
     if rms > 0.0:
         perturbation *= float(perturbation_velocity_rms) / rms
     state = base + perturbation
@@ -86,22 +146,60 @@ def relative_l2(a: np.ndarray, b: np.ndarray) -> float | None:
     return float(np.linalg.norm(a - b) / denom)
 
 
+def initial_state_fingerprint(grid: Grid2D, initial: np.ndarray, tolerance: float = 1e-10) -> dict:
+    """Fingerprint the shared initial state (P0) for every result artifact.
+
+    Records the SHA-256 of the float64 C-contiguous bytes, the dtype and
+    shape, the numerical rank of the centered field at the working
+    tolerance, and the initial kinetic energy, so any result can be tied
+    back to the exact state all methods start from.
+
+    ``tolerance`` here is a *relative singular-value (amplitude)* threshold on
+    the centered state, used only to state the IC's numerical rank; it is
+    unrelated to the DLRA's ``relative_amplitude_cutoff`` and is not an
+    accuracy criterion for either.
+    """
+    arr = np.ascontiguousarray(initial, dtype=float)
+    payload = {
+        "sha256": hashlib.sha256(arr.tobytes()).hexdigest(),
+        "dtype": arr.dtype.name,
+        "shape": list(arr.shape),
+        "initial_energy": float(grid.ke(initial)),
+    }
+    centered = arr - np.mean(arr)
+    try:
+        values = np.linalg.svd(centered, compute_uv=False)
+        payload["numerical_rank"] = (
+            int(np.sum(values > tolerance * values[0])) if values.size else 0
+        )
+    except np.linalg.LinAlgError:
+        payload["numerical_rank"] = None
+    return payload
+
+
 def finite_or_none(value):
     value = float(value)
     return value if np.isfinite(value) else None
 
 
-def normalized_spectrum(field: np.ndarray, count: int = 32) -> list[float]:
-    """Return a small, JSON-safe normalized singular-value spectrum."""
+def normalized_spectrum(field: np.ndarray, count: int | None = None) -> list[float]:
+    """Return a JSON-safe normalized singular-value spectrum.
+
+    ``count=None`` (the default) records every singular value of the state
+    matrix.  F2 requires the *untruncated* reference spectrum over all
+    resolved modes -- a cap makes the truncation threshold unverifiable -- so
+    the leading-``count`` form is available for compact diagnostics only.
+    """
     if not np.isfinite(field).all():
         return []
     try:
         values = np.linalg.svd(field, compute_uv=False)
     except np.linalg.LinAlgError:
         return []
+    limit = values.size if count is None else min(count, values.size)
     if values.size == 0 or not np.isfinite(values).all() or values[0] <= np.finfo(float).eps:
-        return [0.0 for _ in range(min(count, values.size))]
-    return [float(x) for x in (values[:count] / values[0])]
+        return [0.0 for _ in range(limit)]
+    return [float(x) for x in (values[:limit] / values[0])]
 
 
 def _energy_residual(
@@ -182,13 +280,14 @@ def _run_full(
     train_steps: int,
     snapshot_stride: int,
     compare_stride: int,
+    spectrum_count: int | None = None,
 ) -> dict:
     grid = model.grid
     state = initial.copy()
     training = []
     checkpoints = {0: state.copy()}
     times = [0]
-    spectra = {0: normalized_spectrum(state)}
+    spectra = {0: normalized_spectrum(state, spectrum_count)}
     energy_history = [grid.ke(state)]
     enstrophy_history = [grid.enstrophy(state)]
     max_div = grid.max_div_velocity(state)
@@ -220,7 +319,7 @@ def _run_full(
         if step % compare_stride == 0 or step == nsteps:
             checkpoints[step] = state.copy()
             times.append(step)
-            spectra[step] = normalized_spectrum(state)
+            spectra[step] = normalized_spectrum(state, spectrum_count)
     seconds = time.perf_counter() - start
     stability = _stability_assessment(
         energy_history, enstrophy_history, max_div, max_cfl, unstable_step
@@ -269,15 +368,24 @@ def _run_projected(
     projector: Callable[[np.ndarray], np.ndarray],
     reference_checkpoints: dict,
     rank_history=None,
+    spectrum_count: int | None = None,
 ) -> dict:
     grid = model.grid
     state = projector(initial.copy())
     checkpoints = {0: state.copy()}
-    spectra = {0: normalized_spectrum(state)}
+    spectra = {0: normalized_spectrum(state, spectrum_count)}
     energy_history = [grid.ke(state)]
     enstrophy_history = [grid.enstrophy(state)]
     projection_energy_history = []
     errors = []
+    if 0 in reference_checkpoints:
+        errors.append(
+            {
+                "step": 0,
+                "time": 0.0,
+                "relative_l2": relative_l2(state, reference_checkpoints[0]),
+            }
+        )
     max_div = grid.max_div_velocity(state)
     u0, v0 = grid.velocity(state)
     max_cfl = float(np.max(np.hypot(u0, v0)) * dt / grid.dx)
@@ -318,7 +426,7 @@ def _run_projected(
         max_energy_increase = max(max_energy_increase, grid.ke(state) - old_energy)
         if step % compare_stride == 0 or step == nsteps:
             checkpoints[step] = state.copy()
-            spectra[step] = normalized_spectrum(state)
+            spectra[step] = normalized_spectrum(state, spectrum_count)
             if step in reference_checkpoints:
                 errors.append(
                     {
@@ -395,6 +503,7 @@ def run_case(
     perturbation_velocity_rms: float = 0.25,
     cutoff: int = 8,
     seed: int = 20260925,
+    ic_reference_N: int | None = None,
     train_steps: int = 100,
     snapshot_stride: int = 5,
     compare_stride: int = 10,
@@ -402,8 +511,10 @@ def run_case(
     dlra_rank: int = 4,
     dlra_min_rank: int = 2,
     dlra_max_rank: int = 48,
-    dlra_tolerance: float = 1e-6,
+    dlra_relative_amplitude_cutoff: float = 1e-6,
     dlra_check_every: int = 5,
+    dlra_adapt_initial: bool = True,
+    spectrum_count: int | None = None,
 ) -> dict:
     if re <= 0:
         raise ValueError("Re must be positive")
@@ -417,6 +528,7 @@ def run_case(
         perturbation_velocity_rms=perturbation_velocity_rms,
         cutoff=cutoff,
         seed=seed,
+        reference_N=ic_reference_N,
     )
     full_model = StreamFunctionNS(grid, nu=1.0 / re, forcing=forcing, dealias=True)
     full = _run_full(
@@ -427,6 +539,7 @@ def run_case(
         train_steps,
         snapshot_stride,
         compare_stride,
+        spectrum_count=spectrum_count,
     )
 
     def strip(result):
@@ -455,6 +568,7 @@ def run_case(
                 "perturbation_velocity_rms": perturbation_velocity_rms,
                 "cutoff": cutoff,
                 "seed": seed,
+                "ic_reference_N": ic_reference_N,
                 "train_steps": train_steps,
                 "snapshot_stride": snapshot_stride,
                 "compare_stride": compare_stride,
@@ -462,9 +576,11 @@ def run_case(
                 "dlra_initial_rank": dlra_rank,
                 "dlra_min_rank": dlra_min_rank,
                 "dlra_max_rank": dlra_max_rank,
-                "dlra_tolerance": dlra_tolerance,
+                "dlra_relative_amplitude_cutoff": dlra_relative_amplitude_cutoff,
                 "dlra_check_every": dlra_check_every,
+                "dlra_adapt_initial": dlra_adapt_initial,
             },
+            "initial_state": initial_state_fingerprint(grid, initial),
             "initial_energy": grid.ke(initial),
             "full": strip(full),
             "pod": None,
@@ -473,8 +589,13 @@ def run_case(
         }
 
     fit_start = time.perf_counter()
-    pod = PODGalerkin(grid, pod_rank).fit(full["training"])
+    # P0: the static-POD baseline must start from the same bit-identical IC as
+    # the full-grid and DLRA runs.  Its offline snapshot set therefore includes
+    # t=0, so the IC lies in span(mean, basis) and its L2 projection is exact
+    # (the online state is then the IC itself, not a projected surrogate of it).
+    pod = PODGalerkin(grid, pod_rank).fit([initial] + list(full["training"]))
     fit_seconds = time.perf_counter() - fit_start
+    pod_ic_projection_error = pod.relative_error(initial)
     pod_model = StreamFunctionNS(grid, nu=1.0 / re, forcing=forcing, dealias=True)
     pod_model.track_step_diagnostics = True
     pod_result = _run_projected(
@@ -486,8 +607,10 @@ def run_case(
         pod,
         full["checkpoints"],
         rank_history=[pod.effective_rank()] * (nsteps + 1),
+        spectrum_count=spectrum_count,
     )
     pod_result["fit_seconds"] = fit_seconds
+    pod_result["initial_projection_relative_l2"] = pod_ic_projection_error
     pod_result["offline_plus_online_seconds"] = (
         fit_seconds + pod_result["wall_seconds"]
     )
@@ -500,8 +623,9 @@ def run_case(
         rank=dlra_rank,
         min_rank=dlra_min_rank,
         max_rank=dlra_max_rank,
-        tolerance=dlra_tolerance,
+        relative_amplitude_cutoff=dlra_relative_amplitude_cutoff,
         check_every=dlra_check_every,
+        adapt_initial=dlra_adapt_initial,
     )
     # The stateful driver is used here rather than a static projector so that
     # rank adaptation is exercised and included in the timing.  Keep the
@@ -517,8 +641,14 @@ def run_case(
     dlra_max_full_pde_residual = 0.0
     dlra_max_energy_increase = -np.inf
     dlra_unstable_step = None
-    dlra_errors = []
-    dlra_spectra = {0: normalized_spectrum(dlra_state)}
+    dlra_errors = [
+        {
+            "step": 0,
+            "time": 0.0,
+            "relative_l2": relative_l2(dlra_state, full["checkpoints"][0]),
+        }
+    ]
+    dlra_spectra = {0: normalized_spectrum(dlra_state, spectrum_count)}
     dlra_energy_history = [grid.ke(dlra_state)]
     dlra_enstrophy_history = [grid.enstrophy(dlra_state)]
     dlra_projection_energy_history = []
@@ -564,7 +694,7 @@ def run_case(
             dlra_max_energy_increase, grid.ke(dlra_state) - grid.ke(old)
         )
         if step % compare_stride == 0 or step == nsteps:
-            dlra_spectra[step] = normalized_spectrum(dlra_state)
+            dlra_spectra[step] = normalized_spectrum(dlra_state, spectrum_count)
             if step in full["checkpoints"]:
                 dlra_errors.append(
                     {
@@ -624,6 +754,16 @@ def run_case(
         "initialization_seconds": dlra_init_seconds,
         "offline_plus_online_seconds": dlra_init_seconds + dlra_seconds,
         "wall_seconds_per_step": dlra_seconds / max(nsteps, 1),
+        # Two cost accountings (R5q).  "linear algebra alone" is the measured
+        # time inside the whole-field SVDs, which is rank-independent because
+        # the factorization is of the full N x N field; "full step" is the wall
+        # time above, which also pays the full-grid nonlinear evaluation.  A
+        # linear-algebra win is not a per-step win (D11.1).
+        "linear_algebra_seconds": dlra.projector.svd_seconds,
+        "linear_algebra_calls": int(dlra.projector.svd_calls),
+        "linear_algebra_seconds_per_step": (
+            dlra.projector.svd_seconds / max(nsteps, 1)
+        ),
         "rank_history": [int(x) for x in dlra.rank_history],
         "rank_min": int(min(dlra.rank_history)),
         "rank_max": int(max(dlra.rank_history)),
@@ -648,16 +788,21 @@ def run_case(
             "perturbation_velocity_rms": perturbation_velocity_rms,
             "cutoff": cutoff,
             "seed": seed,
+            "ic_reference_N": ic_reference_N,
             "train_steps": train_steps,
             "snapshot_stride": snapshot_stride,
             "compare_stride": compare_stride,
             "pod_rank": pod.effective_rank(),
+            "pod_fit_includes_ic": True,
+            "spectrum_count": spectrum_count,
             "dlra_initial_rank": dlra_rank,
             "dlra_min_rank": dlra_min_rank,
             "dlra_max_rank": dlra_max_rank,
-            "dlra_tolerance": dlra_tolerance,
+            "dlra_relative_amplitude_cutoff": dlra_relative_amplitude_cutoff,
             "dlra_check_every": dlra_check_every,
+            "dlra_adapt_initial": dlra_adapt_initial,
         },
+        "initial_state": initial_state_fingerprint(grid, initial),
         "initial_energy": grid.ke(initial),
         "full": strip(full),
         "pod": strip(pod_result),
@@ -677,6 +822,14 @@ def main() -> None:
     parser.add_argument("--perturbation-velocity-rms", type=float, default=0.25)
     parser.add_argument("--cutoff", type=int, default=8)
     parser.add_argument("--seed", type=int, default=20260925)
+    parser.add_argument(
+        "--ic-reference-N",
+        type=int,
+        default=None,
+        help="draw and normalize the IC perturbation on this grid and resample\n"
+             "onto --N, so a two-grid comparison holds the identical field\n"
+             "(default: draw on --N itself)",
+    )
     parser.add_argument("--train-steps", type=int, default=100)
     parser.add_argument("--snapshot-stride", type=int, default=5)
     parser.add_argument("--compare-stride", type=int, default=10)
@@ -684,8 +837,25 @@ def main() -> None:
     parser.add_argument("--dlra-rank", type=int, default=4)
     parser.add_argument("--dlra-min-rank", type=int, default=2)
     parser.add_argument("--dlra-max-rank", type=int, default=48)
-    parser.add_argument("--dlra-tolerance", type=float, default=1e-6)
+    parser.add_argument(
+        "--dlra-relative-amplitude-cutoff",
+        type=float,
+        default=1e-6,
+        help="retain singular values above this fraction of s[0]; this is an\n"
+             "amplitude test on singular values, not an accuracy tolerance",
+    )
     parser.add_argument("--dlra-check-every", type=int, default=5)
+    parser.add_argument(
+        "--dlra-adapt-initial",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--spectrum-count",
+        type=int,
+        default=0,
+        help="leading singular values to record per state; 0 records the full spectrum",
+    )
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
     result = run_case(
@@ -698,6 +868,7 @@ def main() -> None:
         perturbation_velocity_rms=args.perturbation_velocity_rms,
         cutoff=args.cutoff,
         seed=args.seed,
+        ic_reference_N=args.ic_reference_N,
         train_steps=args.train_steps,
         snapshot_stride=args.snapshot_stride,
         compare_stride=args.compare_stride,
@@ -705,8 +876,10 @@ def main() -> None:
         dlra_rank=args.dlra_rank,
         dlra_min_rank=args.dlra_min_rank,
         dlra_max_rank=args.dlra_max_rank,
-        dlra_tolerance=args.dlra_tolerance,
+        dlra_relative_amplitude_cutoff=args.dlra_relative_amplitude_cutoff,
         dlra_check_every=args.dlra_check_every,
+        dlra_adapt_initial=args.dlra_adapt_initial,
+        spectrum_count=args.spectrum_count or None,
     )
     output = args.output or Path(f"state/coder/results/kolmogorov_re{args.re}_N{args.N}.json")
     output.parent.mkdir(parents=True, exist_ok=True)

@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from experiments.run_kolmogorov import initial_state_fingerprint
 from solvers import DLRA, Grid2D, StreamFunctionNS, ZeroForcing
 
 
@@ -55,7 +56,7 @@ def run_case(
         rank=rank,
         min_rank=rank,
         max_rank=max(rank, 8),
-        tolerance=1e-10,
+        relative_amplitude_cutoff=1e-10,
         check_every=5,
     )
     full = initial.copy()
@@ -98,7 +99,7 @@ def run_case(
         rank=rank,
         min_rank=rank,
         max_rank=max(rank, 8),
-        tolerance=1e-10,
+        relative_amplitude_cutoff=1e-10,
         check_every=5,
     )
     timing_state = timing_lowrank.initialize(timing_state)
@@ -115,6 +116,7 @@ def run_case(
         },
         "grid": {"N": N, "L": grid.L},
         "parameters": {"nu": nu, "dt": dt, "nsteps": nsteps, "rank": rank},
+        "initial_state": initial_state_fingerprint(grid, initial),
         "initial_energy": grid.ke(initial),
         "final_energy": grid.ke(full),
         "max_relative_l2_error_full": max_full_error,

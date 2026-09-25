@@ -14,6 +14,7 @@ operators, so divergence-freeness is unaffected.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import time
 from typing import Optional
 
 import numpy as np
@@ -34,7 +35,15 @@ class RankStats:
 
 
 class SVDProjector:
-    """Rank-r projector with candidate-stage tracking and rank adaptation."""
+    """Rank-r projector with candidate-stage tracking and rank adaptation.
+
+    Rank selection is an **amplitude** test, not an accuracy criterion: the
+    retained rank counts the singular values above
+    ``relative_amplitude_cutoff * s[0]``.  Because singular values are
+    amplitudes, a cutoff of 1e-6 keeps modes down to an *energy* ratio of
+    1e-12, so the parameter is deliberately not called a tolerance and must not
+    be described as one.
+    """
 
     def __init__(
         self,
@@ -42,7 +51,7 @@ class SVDProjector:
         rank: int = 4,
         min_rank: int = 2,
         max_rank: int = 64,
-        tolerance: float = 1e-6,
+        relative_amplitude_cutoff: float = 1e-6,
     ):
         integer_values = (rank, min_rank, max_rank)
         if any(int(value) != value for value in integer_values):
@@ -51,8 +60,8 @@ class SVDProjector:
             raise ValueError("require 0 < min_rank <= max_rank")
         if not int(min_rank) <= int(rank) <= int(max_rank):
             raise ValueError("rank must lie between min_rank and max_rank")
-        if not 0.0 < float(tolerance) < 1.0:
-            raise ValueError("tolerance must lie in (0,1)")
+        if not 0.0 < float(relative_amplitude_cutoff) < 1.0:
+            raise ValueError("relative_amplitude_cutoff must lie in (0,1)")
         if int(min_rank) > grid.N:
             raise ValueError("min_rank cannot exceed the physical matrix rank")
         self.grid = grid
@@ -60,7 +69,7 @@ class SVDProjector:
         # A square N x N physical field cannot have rank above N.
         self.max_rank = min(int(max_rank), grid.N)
         self.rank = min(int(rank), self.max_rank)
-        self.tolerance = float(tolerance)
+        self.relative_amplitude_cutoff = float(relative_amplitude_cutoff)
         self.last_stats: Optional[RankStats] = None
         self.last_singular_values = np.empty(0, dtype=float)
         self._last_u: Optional[np.ndarray] = None
@@ -68,6 +77,35 @@ class SVDProjector:
         self._last_vh: Optional[np.ndarray] = None
         self._last_centered: Optional[np.ndarray] = None
         self._stage_candidates: dict[str, tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]] = {}
+        # The configured rank, restored by ``reset()`` so a reused projector
+        # cannot start a new run at the rank a previous run adapted to.
+        self.nominal_rank = self.rank
+        # Measured factorization time, for the two cost accountings R5q
+        # requires: linear algebra alone, and the full step.
+        self.svd_seconds = 0.0
+        self.svd_calls = 0
+        self.reset()
+
+    def reset(self) -> None:
+        """Clear every piece of learned state and restore the configured rank.
+
+        A projector carries state across steps: the last SVD, the retained
+        per-stage candidates, the statistics, and an adapted rank.  Reusing one
+        object across runs would let a later run inherit the earlier run's
+        rank, its adaptation schedule, and even a stale stage candidate, so
+        every fresh run must begin from the configured rank with nothing
+        retained.
+        """
+        self.rank = self.nominal_rank
+        self.last_stats = None
+        self.last_singular_values = np.empty(0, dtype=float)
+        self._last_u = None
+        self._last_s = None
+        self._last_vh = None
+        self._last_centered = None
+        self._stage_candidates = {}
+        self.svd_seconds = 0.0
+        self.svd_calls = 0
 
     def _svd(self, field: np.ndarray):
         centered = np.asarray(field, dtype=float)
@@ -78,13 +116,16 @@ class SVDProjector:
         if not np.isfinite(centered).all():
             raise FloatingPointError("cannot SVD-project a non-finite state")
         centered = centered - np.mean(centered)
+        start = time.perf_counter()
         u, s, vh = np.linalg.svd(centered, full_matrices=False)
+        self.svd_seconds += time.perf_counter() - start
+        self.svd_calls += 1
         return centered, u, s, vh
 
     def _target_from_spectrum(self, s: np.ndarray) -> int:
         if s.size == 0 or s[0] <= np.finfo(float).eps:
             return self.min_rank
-        numerical = int(np.count_nonzero(s > self.tolerance * s[0]))
+        numerical = int(np.count_nonzero(s > self.relative_amplitude_cutoff * s[0]))
         return max(self.min_rank, min(self.max_rank, numerical))
 
     def _record_svd(
@@ -102,7 +143,7 @@ class SVDProjector:
         if stage is not None:
             self._stage_candidates[stage] = (centered, u, s, vh)
         numerical = (
-            int(np.count_nonzero(s > self.tolerance * s[0]))
+            int(np.count_nonzero(s > self.relative_amplitude_cutoff * s[0]))
             if s.size and s[0] > 0
             else 0
         )
@@ -156,7 +197,7 @@ class SVDProjector:
         self.rank = self._target_from_spectrum(s)
         self._last_centered, self._last_u, self._last_s, self._last_vh = candidate
         numerical = (
-            int(np.count_nonzero(s > self.tolerance * s[0]))
+            int(np.count_nonzero(s > self.relative_amplitude_cutoff * s[0]))
             if s.size and s[0] > 0
             else 0
         )
@@ -196,7 +237,7 @@ class DLRA:
         rank: int = 4,
         min_rank: int = 2,
         max_rank: int = 64,
-        tolerance: float = 1e-6,
+        relative_amplitude_cutoff: float = 1e-6,
         check_every: int = 5,
         adapt_initial: bool = False,
     ):
@@ -208,7 +249,7 @@ class DLRA:
             rank=rank,
             min_rank=min_rank,
             max_rank=max_rank,
-            tolerance=tolerance,
+            relative_amplitude_cutoff=relative_amplitude_cutoff,
         )
         self.check_every = int(check_every)
         self.adapt_initial = bool(adapt_initial)
@@ -222,10 +263,30 @@ class DLRA:
         return self.projector.rank
 
     def initialize(self, psi: np.ndarray) -> np.ndarray:
+        """Reset all learned state, then project the initial condition.
+
+        ``DLRA`` is reusable: the projector's rank, retained SVD candidates and
+        statistics, the step counter, and the rank/spectrum histories are all
+        cleared here.  Without this a second run would inherit the first run's
+        adapted rank and its adaptation schedule, and could even adapt on a
+        stage candidate left over from the previous run -- a plausible-looking
+        trajectory that is not the one the configuration describes.
+        """
+        self.projector.reset()
+        self.steps = 0
+        self.rank_history = []
+        self.spectrum_history = []
+        self.last_step_info = {}
         field = np.asarray(psi, dtype=float)
         if self.adapt_initial:
-            return self.projector.adapt(field)
-        return self.projector.project(field)
+            projected = self.projector.adapt(field)
+        else:
+            projected = self.projector.project(field)
+        # With an adaptive initialisation the projector's rank may have moved
+        # away from the nominal rank recorded in ``__init__``; keep
+        # ``rank_history`` aligned with the state that was actually returned.
+        self.rank_history = [self.projector.rank]
+        return projected
 
     def _record(self, state: np.ndarray) -> None:
         self.rank_history.append(self.projector.rank)

@@ -137,6 +137,19 @@ instead of the method. These are merge-blocking for any accuracy claim.
       dropped argument, a reused object). A check that disagrees with tested code
       must first be shown to converge or to agree on a case where the answer is
       known; only then is the disagreement evidence.
+- [ ] **(R27) Provenance beats fingerprint — never establish that a number is
+      stale by matching a remembered string.** In R27 I scanned artifacts for the
+      literals `"1.0802"` and `"147.53"` to find void POD values and reported a
+      file as clean; it held `1.07759`. The stale value was found only by
+      comparing each summary field against the per-run artifact it aggregates and
+      by reading `provenance.git_commit`. An artifact is stale if its recorded
+      `git_commit` differs from that of its siblings, or if any summary field
+      disagrees with the artifact it aggregates. This is D11.7 restated as an
+      operational test, after I broke D11.7 in the same review that wrote it.
+- [ ] **(R27) Every summary/aggregate artifact is regenerated in the same pass as
+      the records it aggregates.** `state/coder/results/benchmark_summary.json` was
+      the one file missed by an otherwise complete regeneration, and it is the file
+      a reader opens first.
 
 ### 1.4a Timing methodology (R5q — every timing that reaches the paper)
 
@@ -174,6 +187,37 @@ DLRA/full-grid ratio), so a reviewer cannot reconstruct them.
       the stated sanity limits", not "accurate" or "long-time stable".
 
 ## Lens 2 — Writing
+
+### 1.9 Reviewer communication format (added R28 — binding on the reviewer)
+
+The reviewer's job is to make the next action obvious. Long messages defeat that: the
+agents could not tell what was high priority, and one push in response produced three
+false completion claims because the assignment was buried in prose.
+
+- [ ] **Every agent-facing message leads with a `BLOCKING` list of at most 5 items.**
+      Each item is one or two lines and contains the exact path, string, or command.
+      Nothing explanatory goes above it.
+- [ ] **Items are labelled `BLOCKING` (merge-gating) or `ALSO FIX` (not gating).**
+      An unlabelled request is a request the agent cannot prioritise.
+- [ ] **Each message states what is NOT the agent's problem.** Without this, agents keep
+      re-reading decisions that are already closed, and re-litigate them.
+- [ ] **Credit is explicit and first.** Name what landed and say it was right, before any
+      outstanding item. A review that only lists defects gets defects back.
+- [ ] **Detail goes in a report file, not the message.** The message is the index; the
+      report under `state/reviewer/reviews/` is the argument. Do not inline the argument.
+- [ ] **The first screen of `state/reviewer/outbox/to-<agent>.md` is rewritten every
+      cycle** to reflect the current blockers, so an agent that runs `inbox` after three
+      cycles sees the current state and not a stale one.
+- [ ] **Rewriting an outbox header must not shorten the history.** Outboxes are
+      append-only: replace the leading header, append the *entire* prior body. R28b
+      truncated all four outboxes (996→24, 848→27, 365→24, 566→22 lines) in the same
+      session in which I held another agent's push for doing the same thing, then
+      "restored" them into the wrong worktree and nearly lost them again. The header is
+      replaceable — that is the point of the exercise, and the old ones were stale — but
+      **everything below the `---` is history and must survive verbatim.** Check: the
+      number of `## <timestamp>` blocks must not decrease after any outbox edit. Also
+      confirm *which worktree* you are editing; `state/reviewer/` exists in both the main
+      checkout and `worktrees/reviewer/`, and only the latter is yours to commit from.
 
 ### 2.0 Merge safety (checked by the reviewer before every merge)
 
