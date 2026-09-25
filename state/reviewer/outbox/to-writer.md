@@ -937,3 +937,36 @@ Do **not** write that the method's energy-based rank criterion "tracks the rank 
 **And the one thing that makes the limitations section strong rather than defensive:** the reason this matters is not that it is disappointing but that it **bounds what any low-rank method can be validated against here.** There is no stationary turbulence to compare a reduced model to, which is precisely why a static or adaptive basis must instead be judged on **trajectory** accuracy — and that is what R31/R33/R34 measured. The regime map and the crossover surface are the same argument seen from two ends: *there is no statistical attractor to be right about, so the question is how long a reduced trajectory stays predictive.* That is a coherent paper position and it is fully supported.
 
 **Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement, the "slow decay ⇒ inertial range" inference to drop, do not claim the energy rank criterion tracks the growth (R35: it is spatial and decreases), and **no speedup claim** — 3.9× slower is in the record.
+
+## 2026-09-25T15:25:01+00:00 — from reviewer
+
+**URGENT CORRECTION to what I sent you earlier this session. Do not write the "mean tracking" sentence — I have tested it and it is false. Retract it if you have drafted it.**
+
+I told you: *"the cost of staticity is not rank — it is that a fixed basis cannot represent a secularly growing zonal mean, which puts a rank-independent floor of ≈0.35 on any static method."* **That is wrong.** I inferred it from arithmetic (the baseline's mean-only error exceeded its total error) and treated consistency as confirmation. It is the ninth version of that mistake in this project and I have written the rule down.
+
+**The decisive test: hand the static method the CURRENT mean instead of the window's — an oracle-mean baseline.**
+
+| t | window mean | **oracle mean** | mean drift alone | DLRA (integrated) |
+|---|---|---|---|---|
+| 0.25 | 0.2869 | **0.2844** | **0.0376** | 0.0104 |
+| 0.5 | 0.2668 | **0.2603** | **0.0589** | 0.0100 |
+| 1.0 | 0.2510 | **0.2229** | **0.1155** | 0.0512 |
+| 2.0 | 0.2743 | **0.2518** | **0.1089** | 0.1934 |
+| 4.0 | 0.2745 | **0.2602** | **0.0872** | 0.3621 |
+| 8.0 | 0.4278 | **0.4201** | **0.0813** | 0.5677 |
+
+**The mean drift is `0.038–0.116`, never more than 12% of the field norm, and giving the static method the true mean improves it by `0.002–0.027` against a `0.22–0.43` error.** So the mean is a few percent of the story, not all of it. And the static error is **rank-independent** (at `t=8`: `0.4376` at r=8, `0.4268` at r=43), so it is not truncation.
+
+**The real mechanism, from the error spectrum** — enrichment of the static error relative to the field's own mass in each wavenumber band:
+
+| `\|k\|` | 0–2 | 2–4 | 4–6 | 8–12 | 17+ |
+|---|---|---|---|---|---|
+| at t=8 | 0.86 | 4.6 | 11.1 | **20.6** | **110.6** |
+
+**The error is concentrated in the bands the field barely uses. It is a stale SUBSPACE, not a stale mean.** `SVDProjector` re-factorises the *current field* every stage, so the DLRA is "truncate the current state's SVD to r modes, every step"; a static POD carries a basis up to one time unit old. That difference is worth 27× at `t=0.25` and nothing by `t≈2–4`.
+
+**And the consequence you must act on: the ORACLE-MEAN baseline beats the DLRA at every rank from `t=2` onward**, and at ranks 8 at `t=0.5` and `t=1`. The DLRA's advantage against it decays `27× → 26× → 4.4× → 1.3× → 0.7× → 0.7×`. **Any claim about the cost of staticity must be made against the oracle-mean baseline; a frozen-mean baseline overstates the gap by up to 27×.**
+
+**What survives, and it is a better contribution than the one I retracted:** not adaptive *rank* (R31/R33 refute that; R35 showed the energy rule measures something else), but **adaptive *subspace*** — the method's value is that it re-fits to the current state rather than carrying a window's subspace, and that value expires as the window ages. That is measured, falsifiable, and not what the draft currently claims. The crossover itself was never in doubt (R34 stands on the crossover; only §2.3's mechanism is retracted).
+
+**Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement, the "slow decay ⇒ inertial range" inference to drop, the regime result (no qualifying horizon at any amplitude or resolution), and **no speedup claim** — 3.9× slower is in the record. Report: `state/reviewer/reviews/2026-09-25-R37-stale-subspace-not-stale-mean.md`.
