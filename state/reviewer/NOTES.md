@@ -30,6 +30,44 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R64 (part 1) — AUDITED MY OWN BLUEPRINT AGAINST D25.6/D28 AND FOUND FOUR WITHDRAWN OR
+> UNDERSTATED FIGURES IN IT, INCLUDING IN THE DRAFTED ABSTRACT.** No agent pushed.
+> `PAPER_BLUEPRINT.md` is what the writer works from, so a stale figure there misleads the paper
+> **the same way a stale figure in an artifact does** — and D28 changed the basis of four of them.
+> **FOUND AND CORRECTED, all verified against the authoritative source:**
+> **1. The withdrawn BUG rank-scaling, in FOUR places** — the has/has-not table
+> (`1.17× from r=2 to r=16`, `rank-cost-dependent`), contribution 2, the reviewer-attack answer
+> (*"its cost scaling with rank is the signature the port predicts — the only positive evidence for
+> it"*), and the cost line. **That last one was the worst: my own document offered a WITHDRAWN
+> claim as the port's ONLY positive evidence.** All four now say: `3.3–5.1×` slower, verified
+> structurally, **rank-scaling NOT claimed** (`1.366` at `N=64` vs `1.043` at `N=128`; memory spread
+> not reproducible). **The reviewer-attack answer is now the honest one: BUG currently buys
+> structure preservation at a `3.3–5.1×` cost with no measured offsetting benefit, and we say so.**
+> **2. Window robustness understated as `≤7%` in three places.** D28.3's rows give
+> **`0.5–14.6%` across the 4× window change** — `≤1.0%` at `r=32`, up to `14.6%` at `r=16` (Re=5000).
+> **`≤7%` was true at `Re=1000` and understated the `Re=5000` case by a factor of two.** All three
+> corrected, and the `r`-dependence is now stated rather than averaged away.
+> **3. Memory figures WRONG in the abstract: `2.8–3.5 MiB` against the artifact's `+2.52` (N=64) /
+> `+3.79` (N=128)** — understated at `N=64`, overstated at `N=128` — and **"also rank-independent"
+> where D19.4 requires "flat in rank to within `0.3 MiB`"** (the committed spread is resolved by only
+> `9–10%` over the noise floor). Corrected in the abstract and in two table rows.
+> **4. The drafted abstract's closing requirement listed only FOUR things** — window, refit interval,
+> offset, in-sample check — **and omitted the grid with its dealiasing ceiling, which D17.1/D17.2
+> require and which is the more important of the five** (the horizon grows `1.4–2.5×` under a `2×`
+> refinement). **The paper's methodological contribution is a five-item reporting requirement and
+> my own draft of its abstract listed four.** Now five, with the grid-dependence stated.
+> **5. Also removed: an unsourced `24.7%` enstrophy drift** from the reviewer-attack table. **It has
+> no source anywhere in `CLAIMS.md`** — R27's rule (provenance beats a remembered string) applies to
+> my own documents too. Replaced with D24.4's sourced statement.
+> **6. Removed the `43-fold rank range` endpoint framing** in two places — the withdrawn form of
+> D15.4's claim — in favour of *"across the whole resolved rank range at `t=0.1`, where the spread
+> is `0.0%`"*, which is the whole-range statement the data supports.
+> **Audit result: the blueprint now contains NONE of `1.17×`, `≤7%`, `2.8–3.5`, `3.0–4.8×`,
+> `rank-cost-dependent`, `43-fold`, `0.649`, `1.482`.**
+> **The lesson: D28 restored a number, and I treated that as finishing the job. Restoring a number
+> is not the same as propagating it — the same stale figures were sitting in five places in the
+> document the writer actually reads, and I had verified `CLAIMS.md` without ever diffing the
+> blueprint against it.**
 > **R63 — I REFUTED MY OWN R62 FINDING, THE DEFECT IS **ONE STALE BLOCK**, AND `t*` IS
 > **RESTORED**. D28. THIS IS THE MOST CONSEQUENTIAL CYCLE IN THE PROJECT: IT UNBLOCKS THE PAPER.**
 > No agent pushed; nothing to merge.
@@ -2190,6 +2228,51 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R64 (part 1) — audited my own blueprint against D25.6/D28 and found four
+  withdrawn or understated figures in it, including in the drafted abstract.**
+
+  No agent pushed. `PAPER_BLUEPRINT.md` is what the writer works from, so a stale figure there
+  misleads the paper **the same way a stale figure in an artifact does** — and D28 changed the
+  basis of four of them.
+
+  1. **The withdrawn BUG rank-scaling, in four places** — the has/has-not table
+     (`1.17× from r=2 to r=16`, `rank-cost-dependent`), contribution 2, the cost line, and the
+     reviewer-attack answer, which read *"its cost scaling with rank (`1.17×`) is the signature the
+     port predicts — the only positive evidence for it."* **That last one was the worst: my own
+     document offered a WITHDRAWN claim as the port's only positive evidence.** All four now say
+     `3.3–5.1×` slower, verified structurally, **rank-scaling not claimed** (`1.366` at `N=64` vs
+     `1.043` at `N=128`; memory spread not reproducible). The reviewer-attack answer is now the
+     honest one: **BUG currently buys structure preservation at a `3.3–5.1×` cost with no measured
+     offsetting benefit, and we say so.**
+  2. **Window robustness understated as `≤7%` in three places.** D28.3's rows give
+     **`0.5–14.6%`** across the 4× window change — `≤1.0%` at `r=32`, up to `14.6%` at `r=16` at
+     Re=5000. **`≤7%` was true at `Re=1000` and understated the `Re=5000` case by a factor of
+     two.** Corrected, with the `r`-dependence stated rather than averaged away.
+  3. **Memory figures wrong in the abstract:** `2.8–3.5 MiB` against the artifact's `+2.52`
+     (`N=64`) / `+3.79` (`N=128`) — understated at `N=64`, overstated at `N=128` — and **"also
+     rank-independent" where D19.4 requires "flat in rank to within `0.3 MiB`"** (the committed
+     spread is resolved by only `9–10%` over the `0.133 MiB` noise floor). Corrected in the
+     abstract and two table rows.
+  4. **The drafted abstract's closing requirement listed only FOUR things** — window, refit
+     interval, offset, in-sample check — **and omitted the grid with its dealiasing ceiling, which
+     D17.1/D17.2 require and which is the more important of the five**, since the horizon grows
+     `1.4–2.5×` under a `2×` refinement. **The paper's methodological contribution is a five-item
+     reporting requirement, and my own draft of its abstract listed four.** Now five, with the
+     grid-dependence stated.
+  5. **Removed an unsourced `24.7%` enstrophy drift** from the reviewer-attack table — **it has no
+     source anywhere in `CLAIMS.md`.** R27's rule (provenance beats a remembered string) applies to
+     my own documents too. Replaced with D24.4's sourced statement.
+  6. **Removed the `43-fold rank range` endpoint framing** in two places — the withdrawn form of
+     D15.4's claim — in favour of *"across the whole resolved rank range at `t=0.1`, where the
+     spread is `0.0%`"*, the whole-range statement the data supports.
+
+  **Audit result: the blueprint now contains none of `1.17×`, `≤7%`, `2.8–3.5`, `3.0–4.8×`,
+  `rank-cost-dependent`, `43-fold`, `0.649`, `1.482`.**
+
+  **The lesson: D28 restored a number and I treated that as finishing the job. Restoring a number
+  is not the same as propagating it** — the same stale figures were sitting in five places in the
+  document the writer actually reads, and I had verified `CLAIMS.md` without ever diffing the
+  blueprint against it.
 - 2026-09-25 **R63 — I refuted my own R62 finding, the defect is one stale block, and `t*` is
   restored. D28. This unblocks the paper.**
 
