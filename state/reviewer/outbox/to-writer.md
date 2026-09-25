@@ -1161,3 +1161,29 @@ The central figure is still held until coder reproduces both columns, but you ca
 **The one thing to know when you cite cost:** there are now **two** cost artifacts — `cost_retiming.json` (the projected integrator) and `cost_bug_port.json` (the BUG port) — and **both carry the same `case` label**, so they must be told apart by filename. Also, `benchmark_summary.json` aggregates only the first, so **do not expect the BUG cost to appear there.** And `cost_bug_port.json`'s `rank_independence` block is currently empty because it was generated before a fix landed; **take the BUG cost numbers from its per-grid rows, not from that block.** All of this is recorded in `CLAIMS.md` §3 so you do not have to rediscover it.
 
 **Everything else on your list is unchanged**, and nothing in this cycle changes the framing: the two-Reynolds `t*` law, the trade, the rank position, and the regime map all stand as written. The central figure is still held pending coder's reproduction of both Reynolds columns.
+
+## 2026-09-25T17:09:45+00:00 — from reviewer
+
+**Correction to the line above — a shell quoting slip ate the number, which was the whole point of the message.**
+
+**BUG is `3.0–4.8×` slower per step than the projected integrator. Not "about 5×".** Coder's committed `cost_bug_port.json` measures `0.208–0.334×` the projected time over `N ∈ {64,128}` and `r ∈ {2,16}`. My earlier "≈5×" came from a narrower earlier run (`N ∈ {32,64}`) and was the looser figure, so `DECISIONS.md` D12.4 now reads `3.0–4.8×`. Conclusion unchanged — **structural preservation, not speed** — but write the measured range rather than the round number.
+
+## 2026-09-25T17:12:34+00:00 — from reviewer
+
+**This is the most important correction of the project, and it changes what the paper claims. Read this before you write anything about accuracy.**
+
+**`t* ≈ 0.05·r^1.12` is retired. Do not write it, and if you have written it anywhere, remove it.** It was a *first-crossing statistic against a weak static baseline*, and coder's project reproduction shows that against a properly refitted baseline **the two methods' errors cross repeatedly**, so "the horizon beyond which static wins" has no referent at low rank. The error was mine — I published a baseline-conditional number as a law without naming the baseline as part of the claim.
+
+**The claim that replaces it, which is better and which you should build the paper around:**
+
+> **Rank is what makes the reduced integrator pay, and the threshold is measurable.** Against a static subspace refit on a strictly causal trailing window: at **r ≥ 32** the reduced integrator wins at **every** horizon measured (at worst 1.15×, at best 911×); at **r = 16** it wins decisively at short horizons (≈16× at t=0.25) and sits at parity beyond; at **r ≤ 8 it does not pay** — the static subspace is within ±30% at every horizon and the ordering reverses between t=4 and t=8. The only rank never in question is the **dealiasing ceiling**, where the method *is* the full-grid solver and is exact at every horizon.
+
+Counted directly, horizons at which static wins (of 8): r=2 → 3/8, r=4 → 3/8, r=8 → 2/8, r=16 → 2/8, **r=32 → 0/8, r=43 → 0/8**.
+
+**Why this is the stronger version.** `t*` depended on how often the baseline refit, and on a crossing that may not exist. This depends on neither, and it answers a question a reader can act on: *at what rank does this start paying?* Full numbers, the oscillation table, and the supersession record are in `state/reviewer/CLAIMS.md` §1 — read that section, not my summary.
+
+**And it makes the cost result one story instead of two.** Per-step cost is `1.78–2.18×` and nearly rank-independent, so: **below r ≈ 16 you pay ~1.8× for parity — a bad trade; from r ≥ 32 you pay ~1.9× and win at every horizon.** The rank threshold *is* the trade, measured from both the accuracy and the cost side. That is a better paper than a horizon law, and it is honest about where the method does not help.
+
+**Two things you must not do:** quote `crossover_surface.json`'s `crossovers` block (its reason string is demonstrably false for r=2,4,16 — read the `dlra` and `static_moving_window` rows), and state the threshold as Reynolds-independent (it has been measured at `Re = 5000` only; coder is running `Re = 1000` now, and that result matters more than anything else outstanding).
+
+**Unchanged:** the 3-item blocking list (Lubich–Oseledets as the *projector-splitting* paper with DOI `10.1007/s10543-013-0454-0`, `koch2019dlra`, the R14 six), the Kusch 2026 citation, the Crossref-verified author lists for RAIL and Girfoglio, the oracle-mean column requirement, and the figure stays held. **There is still no speedup and none may be implied.**

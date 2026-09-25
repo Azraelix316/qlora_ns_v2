@@ -745,3 +745,54 @@ engine's reduced step costs the same as a full step, so a long high-`N` timing r
 produce a per-step speedup claim and is declined.** Combined with R41's cost measurement, the
 trade is: **`r=2 → r=32` costs 4.4% more per step and buys 22× the advantage horizon**;
 `r=43` costs 6.6% more than `r=2` and is exact at every horizon.
+
+---
+
+## D13 — The central result is a rank threshold, not a horizon law (2026-09-25)
+
+> **OPERATIVE (R48).** Write **"rank is what makes the reduced integrator pay"**, with the
+> measured threshold in `CLAIMS.md` §1.1. **Do not write `t* ≈ 0.05·r^1.12`, or any
+> "advantage horizon" scaling law.** R39's `t*` is **retired as a law**, and R45's
+> Reynolds-number dependence of that law is **moot with it**.
+
+**D13.1 — The claim, and it replaces the horizon law.** Against a static subspace refit on a
+**strictly causal trailing window** (refit every `0.25`), full-field relative L2, `N=64`,
+`Re=5000`, `A=0.2`: at **`r ≥ 32`** the reduced integrator wins at **every** horizon measured
+(at worst `1.15×`, at best `9.1e2×`); at **`r = 16`** it wins decisively at short horizons
+(`≈16×` at `t = 0.25`) and is at parity beyond; at **`r ≤ 8` it does not pay** — the static
+subspace is within `±30%` at every horizon and **the ordering reverses between `t = 4` and
+`t = 8`**; and the **dealiasing ceiling is exact at every horizon**, by construction.
+
+**D13.2 — Why the horizon law had to go, precisely.** Against a baseline refit only *once per
+evaluation point* (R39) the `static/DLRA` ratio fell monotonically through 1, so a first
+crossing was well defined and `0.050·r^1.12` fit cleanly. **Against a baseline refit every
+`0.25` the same ratio crosses below 1 and comes back above** — at `r = 8` it reads
+`1.42, 1.99, 1.84, 1.21, 0.91, 0.83, 1.09, 1.04`. **There is therefore no single crossover
+horizon at `r ≤ 16`, and "the horizon beyond which a static subspace wins" has no referent
+there.** The law was clean because the baseline was weak, not because the ordering is
+monotone. **I published a baseline-conditional statistic as a law and did not name the
+baseline as part of the claim; that was the error, and it was mine.**
+
+**D13.3 — The new claim is baseline-robust, and was checked against three baselines.** The
+reviewer independently rebuilt a strictly causal trailing-window basis (decomposition
+validated first) and found it **20–120% stronger** than coder's, so coder's baseline is not
+optimistic — if anything it is conservative. **All three baselines agree on the direction:**
+the stronger the static baseline, the smaller the advantage. The threshold in D13.1 is the
+one statement that survives all of them.
+
+**D13.4 — The threshold makes the cost result coherent rather than separate.** Per-step cost
+is `1.78–2.18×` and nearly rank-independent, so **below `r ≈ 16` you pay ~1.8× for parity — a
+bad trade — and from `r ≥ 32` you pay ~1.9× and win at every horizon.** The rank threshold
+*is* the trade, and it is measured from both the accuracy and the cost side.
+
+**D13.5 — The threshold has only been measured at `Re = 5000`.** `crossover_surface.json`'s
+`parameters.re` is `5000.0`. **The `Re = 1000` run is now the highest-value outstanding
+measurement in the project**, because the threshold — not the horizon — is the claim. The
+cached `Re = 1000` trajectory exists, so this is compute, not groundwork.
+
+**D13.6 — `crossover_surface.json`'s `crossovers` block must not be quoted.** It reports
+`t_star: null` with the reason *"DLRA still ahead at the longest horizon"* for all six ranks,
+and **that reason is false for `r = 2, 4, 16`**, whose own surface gives `0.999`, `0.921`,
+`0.820` at `t = 8`. The logic inspects only the final horizon, so it cannot see a crossing
+that reverses. **A `null` with an honest reason is a missing result; a `null` with a false
+reason is a result that will be quoted.**

@@ -24,28 +24,83 @@ recorded here and the earlier figure is struck, not quietly dropped.
 
 ## 1. The paper's central result
 
-### 1.1 The advantage horizon is a power law in rank
+> ### ⚠ `t* ≈ 0.05·r^1.12` IS RETIRED AS A LAW (R48). Do not write it.
+>
+> It was a **first-crossing statistic against a weak static baseline**, and against a properly
+> refitted baseline **the curves cross repeatedly, so "first crossing" is not a well-defined
+> horizon**. Coder's project reproduction found this. The claim that replaces it is
+> **rank-ordered, not horizon-ordered**, and it is in §1.1 below. The `t*` numbers are kept in
+> §1.2 **only** so the record shows what was superseded and why.
 
-> A rank-`r` reduced integrator integrated with a **fixed** rank beats a static subspace of
-> the same rank for **`t* ≈ c · r^p` time units**, with **`c ≈ 0.044–0.051` and
-> `p ≈ 1.1–1.2` over `Re ∈ {1000, 5000}`**, and the only rank that never loses is the
-> dealiasing ceiling, where it is the full-grid solver.
+### 1.1 The claim that holds: **rank is what makes the reduced integrator pay**
+
+> A reduced integrator at **fixed** rank, against a static subspace refit on a **trailing
+> window** (strictly causal, refit every `0.25`), full-field relative L2, `N=64`, `Re=5000`,
+> `A=0.2`:
+>
+> - **`r ≥ 32`: the DLRA wins at every horizon measured** — at worst `1.15×`, at best
+>   `9.1e2×`.
+> - **`r = 16`: wins decisively at short horizons** (`≈16×` at `t = 0.25`) **and sits at
+>   parity beyond.**
+> - **`r ≤ 8`: it does not pay.** The static subspace is within `±30%` at every horizon and
+>   **the ordering is not stable** — it reverses between `t = 4` and `t = 8`.
+> - **The dealiasing ceiling (`r = 43`) is exact at every horizon**, by construction, because
+>   at that rank the method *is* the full-grid solver.
+
+Counted directly, out of the 8 horizons from `t = 0.25` at which the static baseline is better:
 
 | rank | 2 | 4 | 8 | 16 | 32 | 43 |
 |---|---|---|---|---|---|---|
-| `t*` at `Re=5000` | 0.11 | 0.24 | 0.49 | 1.15 | 2.42 | **never (exact)** |
-| `t*` at `Re=1000` | 0.11 | 0.25 | 0.51 | 1.33 | **3.11** | **never (exact)** |
+| horizons static wins | **3/8** | **3/8** | **2/8** | **2/8** | **0/8** | **0/8** |
+| static ÷ DLRA range | `0.57–1.31` | `0.80–1.36` | `0.83–1.99` | `0.91–15.94` | `1.15–911` | `1.9e8–4.5e10` |
 
-Fit over `r = 4…32`: **`0.0509 · r^1.115`** at `Re=5000`, **`0.0435 · r^1.226`** at `Re=1000`.
+Source: `crossover_surface.json`, `bc35666`, R48. Baseline independently rebuilt and verified
+by the reviewer (20–120% *stronger* than coder's, so the direction is not an artefact).
 
-**A 5× change in Reynolds number moves the prefactor 17% and the exponent 10%, and the
-exponent difference is real** (leave-one-out spreads `[1.106,1.146]` and `[1.201,1.302]` do
-not overlap). **The horizon lengthens as `Re` falls** — 3% at `r ≤ 8`, 28% at `r=32`.
-`Re=5000`: `N=64`, `A=0.2`, full-field relative L2 against the full-grid reference, oracle-mean
-moving-window static baseline (`W=1.0`). `t*` is the first crossing of
-`log(dlra / static_oracle)` through zero, log-log interpolated — **that estimator is now
-pinned as code and reproduces R39's published values exactly**, because it previously existed
-only in report prose (R45). Sources: R39, R45.
+**Why this is the better claim.** `t*` depended on the baseline's refit strength, on a crossing
+that may not exist, and answered no question a reader can act on. This does all three better:
+it is baseline-robust, it is a direct reading of the surface, and it answers *at which rank
+does the method start paying?*
+
+**And it makes the cost result coherent instead of separate.** Coder's cost gate puts the
+per-step ratio at `1.78–2.18×`. So **at `r ≤ 8` you pay ~1.8× for parity — a bad trade; at
+`r ≥ 32` you pay ~1.9× and win at every horizon.** The rank threshold is the whole trade.
+
+**Open and untested: the threshold has only been measured at `Re = 5000`.** The artifact's
+`parameters.re` is `5000.0` and there is no second Reynolds number. Since the threshold is now
+the claim, **the `Re = 1000` run matters more than the `t*` reproduction did.**
+
+### 1.2 The oscillation, which is why `t*` is retired
+
+`static ÷ DLRA` by horizon, oracle-mean column. **> 1 means the DLRA is better.**
+
+| `t` | r=2 | r=4 | r=8 | r=16 | r=32 |
+|---|---|---|---|---|---|
+| 0.25 | 0.57 | 0.80 | 1.42 | **15.94** | **911.33** |
+| 0.50 | 1.10 | 1.23 | 1.99 | 8.97 | 194.51 |
+| 1.00 | 1.31 | 1.36 | 1.84 | 5.57 | 48.77 |
+| 2.00 | 1.14 | 1.11 | 1.21 | 2.37 | 9.70 |
+| 3.00 | 0.95 | 0.88 | **0.91** | 1.10 | 2.11 |
+| 4.00 | 0.96 | 0.87 | **0.83** | **0.91** | 1.15 |
+| 6.00 | 1.30 | 1.18 | 1.09 | 1.31 | 1.45 |
+| 8.00 | 1.19 | 1.14 | 1.04 | **0.82** | 1.05 |
+
+**At `r ≤ 16` the ratio crosses below 1 and comes back above.** So there is no single
+crossover horizon, and "the horizon beyond which static wins" has no referent at those ranks.
+
+**The superseded numbers**, kept for the record: `t* = 0.11 / 0.24 / 0.49 / 1.15 / 2.42` at
+`Re = 5000` and `0.11 / 0.25 / 0.51 / 1.33 / 3.11` at `Re = 1000`, fitted
+`0.0509·r^1.115` and `0.0435·r^1.226`. These were measured correctly — the estimator is
+pinned as code and reproduces them exactly — **against a baseline refit only once per
+evaluation point, which is what made the curves monotone and the fit look like a law.** R45's
+Re-dependence result is **moot with them**: the statistic is not well defined against a strong
+baseline. Sources: R39, R45, R48.
+
+**Do not use `crossover_surface.json`'s `crossovers` block.** It reports `t_star: null` and
+the reason *"DLRA still ahead at the longest horizon"* for all six ranks, and **for
+`r = 2, 4, 16` that reason is false** — their own surface gives `0.999`, `0.921`, `0.820` at
+`t = 8`. The logic tests only the final horizon, so it cannot see a crossing that reverses.
+Take the numbers from the `dlra` and `static_moving_window` rows.
 
 **`t*` at `r=2` is not resolved.** `0.11` sits within 10% of the first measured horizon
 `t=0.1` at both Reynolds numbers, so the lowest rank has no *measurable* horizon. The fit is
@@ -75,8 +130,10 @@ mean-tracking explanation was **retracted (R37)** and must not reappear.
 These matter more than the fit, because the paper's argument rests on them:
 
 1. **The dealiasing ceiling never loses.** `r=43` is `0.0000` at every horizon from `t=0.1` to
-   `t=8` at **both** Reynolds numbers, so `t* = ∞` at both. *"The only rank that never loses is
-   the rank at which the method is the full-grid solver"* is Reynolds-independent.
+   `t=8` at **both** Reynolds numbers, and it beats the strongest static baseline by
+   `1.9e8–4.5e10×`. *"The only rank that never loses is the rank at which the method is the
+   full-grid solver"* is the one part of the central result that is Reynolds-independent
+   **and** baseline-independent.
 2. **The static floor does not move with rank.** At `t=0.1` the oracle baseline spans
    `0.3180 → 0.3177` (`Re=5000`) and `0.3178 → 0.3176` (`Re=1000`) across a **43-fold** rank
    range. Source: R45.
@@ -129,12 +186,16 @@ do not write that it grows without limit. Source: R29.
 
 The trade with the horizon, now at both measured Reynolds numbers:
 
-| rank | cost vs full grid | `t*` at `Re=5000` | `t*` at `Re=1000` |
-|---|---|---|---|
-| 2 | **1.82×** | 0.11 — *not resolved* | 0.11 — *not resolved* |
-| 8 | **1.86×** | 0.49 | 0.51 |
-| 32 | **1.90×** | 2.42 | **3.11** |
-| 43 / 64 | **1.94–2.07×** | **exact at every horizon** | **exact at every horizon** |
+| rank | cost vs full grid | does it pay? (§1.1) |
+|---|---|---|
+| 2 | **1.82×** | **no** — parity ±30%, ordering unstable |
+| 8 | **1.86×** | **no** — parity ±30%, ordering unstable |
+| 16 | **1.88×** | **at short horizons only** (`≈16×` at `t=0.25`) |
+| 32 | **1.90×** | **yes — at every horizon**, `1.15×`–`911×` |
+| 43 / 64 | **1.94–2.07×** | **exact at every horizon** |
+
+**The trade is a threshold, not a horizon: below `r ≈ 16` you pay ~1.8× for parity; from
+`r ≥ 32` you pay ~1.9× and win at every horizon.** The `t*` framing is retired — see §1.
 
 **The sentence to write:** *rank is nearly free, because per-step cost is dominated by a
 rank-independent factorization; what limits the method is the dynamics, not the budget.*
@@ -237,6 +298,8 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "slow singular-value decay ⇒ broad inertial range ⇒ hard to compress" | R12: 99% of energy in `r=5`, identical at N=128 and N=256 |
 | "the rank saturates" / "grows without limit" | R29: non-monotone in `N` for `W ≥ 12`, unexplained |
 | a convergence order without naming its rank | R42: order is conditional on rank sufficiency |
+| **`t* ≈ 0.05·r^1.12`, or any "advantage horizon" law** | **retired R48** — a first-crossing statistic against a weak baseline; the curves cross repeatedly against a strong one, so the horizon is not well defined |
+| quoting `crossover_surface.json`'s `crossovers` block | its reason string is **false** for `r = 2, 4, 16`; read the `dlra` / `static_moving_window` rows instead |
 
 ---
 
@@ -244,10 +307,12 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 
 Everything below is measured, and none of it requires retracting a number:
 
-1. **A reduced integrator's accuracy advantage over a static subspace is a power law in
-   rank** — `t* ≈ c · r^p`, `c ≈ 0.044–0.051`, `p ≈ 1.1–1.2` over `Re ∈ {1000, 5000}`, horizon
-   lengthening as `Re` falls — with a cost that is nearly rank-independent, so rank buys
-   horizon rather than speed: `+4.4%` per step buys `22×` the horizon.
+1. **Rank is what makes a reduced integrator pay, and the threshold is measurable.** Against
+   a static subspace refit on a trailing window, `r ≥ 32` wins at every horizon, `r = 16`
+   wins only at short ones, and `r ≤ 8` does not pay at all — while per-step cost is nearly
+   rank-independent (`1.78–2.18×`). **The method's value is therefore a property of the rank
+   chosen, not of the scheme**, and the practical question "at what rank does this start
+   paying?" has a measured answer.
 2. **The limit is structural, not numerical.** A static subspace cannot track a flow whose
    support moves, and its error floor is rank-independent; a refitting integrator can, until
    its own per-step truncation accumulates onto a saturation plateau.
