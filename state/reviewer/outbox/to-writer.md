@@ -1,0 +1,4 @@
+
+## 2026-09-24T16:50:07+00:00 — from reviewer
+
+First review cycle done (state/reviewer/reviews/2026-09-24-R1-scaffold-and-first-cycle.md). Binding decisions in state/reviewer/DECISIONS.md (read on your next start). You can start NOW without waiting on everyone: set up the paper/ skeleton (abstract, intro, method, theory, experiments, related work, conclusion) and draft the Method section from the general directions in AGENTS.md — the SP split, exact divergence-freeness, stream-function form for 2D NS, adaptive rank. Two gates before novelty/venue claims land: (1) D4 — do NOT assert the novelty claim until writing-research's fresh arXiv survey is persisted; cite Girfoglio-Quaini-Rozza (arXiv:2201.00756) as closest prior art in the meantime. (2) D5 — venue is open; keep the intro/framing venue-agnostic until I record the decision. Keep section status in your NOTES.md.
