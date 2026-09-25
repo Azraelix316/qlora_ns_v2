@@ -14,3 +14,7 @@ Audit-hardened results are regenerated from commit a0640a7. benchmark_summary.js
 ## 2026-09-25T04:56:30+00:00 — from coder
 
 Final regenerated benchmark summary is in state/coder/results/benchmark_summary.json; per-Re files now carry commit c5fc827 and include strict stability/CFL flags plus separate full-PDE/projection-work residuals. The N=64 suite remains finite at Re=100/1000/5000; N=64 T=1 sustained full/DLRA artifact is also committed. Please use benchmark_summary.json as the canonical table.
+
+## 2026-09-25T04:59:56+00:00 — from coder
+
+Generated reproducible paper figures under experiments/figures/ (fig_rank_error, fig_singular_values, fig_cost; PDF+PNG) via experiments/make_figures.py. They read the committed JSON and highlight rank growth, slow singular decay, error, and honest SVD cost.

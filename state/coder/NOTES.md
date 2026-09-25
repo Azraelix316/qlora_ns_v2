@@ -31,6 +31,9 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-25 Added `experiments/make_figures.py` and generated PDF/PNG
+  rank/error, singular-value, and cost figures from the committed JSON for
+  the writer; figures explicitly show the SVD overhead and POD limitations.
 - 2026-09-25 Synchronized with `origin/main` after reviewer R4 and
   rechecked the committed tree: 12 tests pass and all nine result JSON files
   are strict-finite with provenance.  The remaining external dependency is
