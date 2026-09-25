@@ -72,6 +72,39 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5l (independent audit of the rank/projection logic — the last
+  unexamined engine component, and the one the adaptive-rank claim rests on).
+  35 checks written, 27 passed as written; **7 of the 8 failures were defects in
+  my harness** (5 inverted boolean encodings, 2 zero tolerances where roundoff
+  was expected), **1 real finding**. The rank logic is sound and, where it
+  matters for the paper, better than "correct": `SVDProjector.project` is the
+  **Eckart–Young optimal** rank-r truncation (matches an independent
+  `numpy.linalg.svd` truncation to 0.0 for r=1,3,5, and its residual equals
+  `sqrt(sum_{i>r} sigma_i^2)` to ~3e-15), the rank rule is exactly
+  `#{sigma_i > tol*sigma_1}` clipped to `[min_rank, max_rank]`, rank adaptation
+  demonstrably reads the retained pre-projection candidate (the R4 checklist
+  item, now independently confirmed), factors are orthonormal to ~1e-15, stage
+  candidates are retained per stage, all input validation raises as intended,
+  and `PODGalerkin.fit` matches the top left singular vectors to 0.0.
+  **The finding:** `PODGalerkin.project` ends with `return out - np.mean(out)`,
+  but the basis columns are not spatially mean-free (one had mean 3.4e-3), so
+  that line shifts the result *out* of `mean + span(basis)`. The projection is
+  therefore not the least-squares projection `relative_error()` assumes (2.2e-3)
+  and is **not idempotent** (1.4e-3); the discrepancy is exactly a constant
+  (`out = project(q) + mean(out)` to 3.5e-18). Deleting the line restores both
+  properties exactly (0.0 and 2.2e-16). **A hypothesis I tested and dropped:**
+  I initially suspected this explained V4's 11.4x POD energy blow-up — it cannot,
+  because psi's mean is a pure gauge for `u = grad_perp psi` (velocity
+  difference 1.3e-15) and `step` re-centres every step, so V4's cause is
+  unchanged (the IC is replaced by mean+top-r modes fitted on a transient
+  window). It is a *contract* bug affecting reported reconstruction errors and
+  the sense in which a POD step is Galerkin, not a dynamical one. The engine's
+  existing tests cannot catch it because their fields are single-mode or
+  two-mode, whose projections happen to be mean-free; two checklist items added
+  (idempotence + least-squares match on a field whose basis vectors are not
+  mean-free; brute-force rank-logic checks). With R5k the engine is now
+  independently audited end to end, and D9 stands with two non-blocking items
+  open (`kx_diff` Nyquist fix, POD projection contract).
 - 2026-09-25 R5k (independent operator audit of the merged engine). R5 verified
   the engine by re-running the author's tests and hand-checking the algebra,
   which has a blind spot by construction: the suite shares any misconception with

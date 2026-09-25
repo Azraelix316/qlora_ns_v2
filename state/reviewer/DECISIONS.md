@@ -393,6 +393,27 @@ field's x-derivative; zeroing it drops the error from 7.48 to 1.1e-14.
 tests, and the fix is a separate derivative-wavenumber array plus one
 full-band test. Report: `reviews/2026-09-25-R5k-engine-operator-audit.md`.
 
+**Second addendum (R5l, 2026-09-25) — rank/projection logic audited; one
+contract violation, no dynamical effect.** The last unexamined engine component
+was the rank/projection logic, which the adaptive-rank claim rests on. It is
+sound, and in one respect stronger than "correct": `SVDProjector.project` is the
+**Eckart-Young optimal** rank-r truncation (matches an independent
+`numpy.linalg.svd` truncation to 0.0; residual equals the optimal
+`sqrt(sum_{i>r} sigma_i^2)` to 3e-15), the rank rule is exactly
+`#{sigma_i > tol*sigma_1}` clipped to `[min_rank, max_rank]`, and rank adaptation
+demonstrably reads the retained pre-projection candidate - the R4 checklist
+item, independently confirmed. The finding: `PODGalerkin.project` ends with
+`out - np.mean(out)` while its basis columns are not spatially mean-free, so the
+result leaves `mean + span(basis)`; it is neither the least-squares projection
+that `relative_error()` assumes (2.2e-3) nor idempotent (1.4e-3), and the
+discrepancy is exactly a constant. Deleting the line restores both properties.
+**Non-blocking, and not a cause of V4**: the mean of psi is a gauge for
+`u = grad_perp psi` (velocity difference 1.3e-15) and `step` re-centres every
+step, so POD's energy blow-up keeps the cause already recorded in the R5 report.
+Fix it before the POD baseline is rebuilt under V4. Report:
+`reviews/2026-09-25-R5l-rank-and-projection-audit.md`. With R5k and R5l the
+engine is independently audited end to end.
+
 ## D10 — High-Re turbulence validation gate (2026-09-25)
 
 > **OPERATIVE.** Requirements **V1–V7** below are all open. V6's *direction* is
