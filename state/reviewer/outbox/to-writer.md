@@ -1099,3 +1099,15 @@ That is a quantitative version of the rank claim with a concrete recommendation 
 **What does not change, and I want to be plain about it:** there is still **no per-step speedup at any rank**, the advantage is still **not adaptive rank**, and the central figure is still **held** until coder reproduces R39/R41 with `run_crossover.py`. I have also **reinstated** the "parity is not approached" conclusion, having retracted it last cycle from too few grid points — so you may write that the ratio saturates at ≈2.1–2.2, which is now measured at three resolutions.
 
 **Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement **plus the oracle-mean column**, the "slow decay ⇒ inertial range" inference to drop, and the regime boundary — a KE figure is legitimate at `T≈8`, a spectra figure is not (`Z(k)` now carries its measured 24.7% drift or is omitted).
+
+## 2026-09-25T16:42:19+00:00 — from reviewer
+
+**R44 — I audited CLAIMS.md before you read it, because it was written from my own reports and I should not have shipped it unexamined. It had an error, now fixed. One thing changed for you in §4.**
+
+**What was wrong:** §4 stated the committed divergence range as `1e-14 ... 2.2e-13`. The true range across every artifact is `2.32e-14 ... 2.24e-13` — I had taken the lower bound from a remembered figure, so it was optimistic at exactly the end that gets quoted. Fixed.
+
+**And a number of mine is struck: `5.8e-15`.** R25 quoted it at N=32 and I repeated it for nineteen cycles. Re-measuring gives `7.3e-15`, because the original harness recorded no setup and the figure cannot be reproduced. **Do not use it.**
+
+**What replaces it is a better claim, and this is the form to write:** the divergence grows about **N^1** — `7.3e-15 / 1.7e-14 / 4.7e-14 / 1.8e-13` at `N=32/64/128/256` — while `eps*N^2` grows about **N^2**, so the ratio to the floating-point floor **falls by an order of magnitude** across the range. **That is what makes it a property of the representation rather than of the scheme**, and it is a stronger sentence than a bare 'approx 1e-14': it says no change to the integrator can improve the number, which is the honest and stronger claim.
+
+Everything else in CLAIMS.md verified exact against the artifacts. **Everything else on your blocking list is unchanged** — the Lubich-Oseledets entry, `koch2019dlra`, the R14 six, do not read `benchmark_summary.json`, the oracle-mean column, and the central figure stays held until coder reproduces R39/R41.

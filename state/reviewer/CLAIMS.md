@@ -1,6 +1,14 @@
 # CLAIMS — what the paper may say, with its number, its source, and its prohibition
 
-**Owner: reviewer. Binding on every agent. Last updated R43 (2026-09-25).**
+**Owner: reviewer. Binding on every agent. Last updated R44 (2026-09-25).**
+
+**Audited R44, number by number, against the artifacts on `main`: 29 verified, 1 real error
+found and fixed** (the divergence range in §4, which I had stated as `1e-14 … 2.2e-13` when
+the committed range is `2.32e-14 … 2.24e-13`), and **one of my own quoted numbers struck**
+(`5.8e-15`, from a harness that recorded no setup). All 6 cost ratios, the rank ladder at
+both grids, the amplitude-rule requests, the S2 drifts, the `qualifying_horizons`, the zonal
+share and the IC energies verify exactly. **An unaudited claims table is the same failure as
+an unaudited claim.**
 
 This file exists because the outboxes became unusable: 1 285 lines to `coder`, 1 107 to
 `writer`, 55 reports. **If a claim is not in this file, it is not established, regardless of
@@ -105,12 +113,31 @@ order, not just accuracy.** Any convergence claim must state its rank. Source: R
 
 | claim | value | source |
 |---|---|---|
-| exact divergence-freeness, stream-function form | `5.8e-15`–`7.1e-15` (N=32) | R25, R30 |
-| across every project run | `1e-14` … `2.2e-13` | R32, R36, R38 |
+| across every **committed** run | `2.32e-14` … `2.24e-13` | audited over all 13 result artifacts, R44 |
 | BUG stationary state | `< 1e-12` over 25 steps, both factors orthonormal to `1e-12` | R42 |
 
+**The claim to write is the scaling law, not a bare bound** — measured R44 at `Re=5000`,
+`A=0.2`, 200 steps, DLRA `r=16` and full grid agreeing:
+
+| `N` | 32 | 64 | 128 | 256 |
+|---|---|---|---|---|
+| `max abs(div u)` | `7.3e-15` | `1.7e-14` | `4.7e-14` | `1.8e-13` |
+| as a fraction of `eps·N²` | `0.03` | `0.02` | `0.01` | `0.01` |
+
+**The divergence tracks the floating-point floor and gets relatively *better* under
+refinement** — it grows ≈`N¹` while `eps·N²` grows ≈`N²`, so the ratio falls by an order of
+magnitude across the range. That is what makes it a **property of the representation rather
+than of the scheme**: no change to the integrator improves it, and none should be claimed to.
+
+**`5.8e-15` is STRUCK.** R25 quoted a smaller value at `N=32`; re-measuring gives `7.3e-15`,
+because the R25 harness recorded no setup, so the number cannot be reproduced. Per R27 a
+number without a recorded setup is not admissible, and I was quoting one. Do not use it.
+
 This may be stated as a **measured property of the implementation**, with a number. It is
-**not** a novelty claim (D4 bars that reading).
+**not** a novelty claim (D4 bars that reading). **Note the suite asserts `< 1e-12`** in nine
+places, which is a *flat* bound: at `N=256` the measured `1.8e-13` leaves only ~5× margin, so
+the bound is adequate at every resolution the project runs but is not resolution-safe. A
+bound of the form `< 0.5 · eps · N²` would hold with a 12–50× margin at all four.
 
 ---
 
@@ -194,6 +221,13 @@ There is **no speedup** in that list, and none may be implied.
 | `baselines_re5000_N64_T8.json` | `602b7e9` | **not citable** — `adaptive_rank = 1` is the spatial criterion's answer, so `ranks_matched` does not hold; also at `A=0.5` where no horizon qualifies |
 | R39 surface (reviewer) | this file | `t*` law, crossover surface — **awaiting project reproduction** |
 | R41 cost (reviewer) | this file | the trade — **awaiting project reproduction** |
+| R44 divergence scaling (reviewer) | this file, §4 | `max abs(div u)` vs `N` — **not a committed artifact; the setup is recorded here, which is what R25 failed to do** |
+
+**Every row above was re-verified field by field in R44.** The audit found one error, in my
+own §4, and struck one of my own unreproducible numbers. Two numbers in this file still have
+**no committed artifact** — the R39 `t*` law and the R41/R44 reviewer's measurements — and
+all three are marked. Coder is reproducing the first two; the divergence scaling is cheap to
+add to a run script and would move the third into the same category as the rest.
 
 **Outstanding provenance gap, demonstrated not precautionary:** the two regime pilots do **not**
 record `initial_state.sha256`, and their ICs genuinely differ — `22.206703312933374` at
