@@ -30,6 +30,37 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R24 — ROOT CAUSE: `PODGalerkin.fit` reshapes its snapshot matrix wrongly, so the
+> "POD baseline" has never computed POD. Fixing it makes the baseline exact — and reveals
+> the experiment is too easy to discriminate anything at t ≤ 0.1.** Found by resolving the
+> contradiction R22 deliberately left open. **The bug:** `X = arr.reshape(N*N, n)` must be
+> `arr.reshape(n, N*N).T`. Because `arr` is snapshot-major, the wrong form gives
+> `X[p,k] = arr.flatten()[n·p+k]` — demonstrated: `X_wrong[0,1] = 1` where it should be
+> 4096. So `self.mean` averages **20 consecutive pixels of one snapshot** (a local spatial
+> blur, not a temporal mean), `centered` is garbage, the SVD factorises a scrambled matrix,
+> and **`self.basis` is not a POD basis.** Every POD number the project has produced is
+> void. **This is the root cause of everything in R20–R23:** the flat rank-independent
+> error, the ~1.0 rel L2, the 11.25×/147.5× step-0 figures, R21's 0.044%, and R22's
+> contradiction (`cos(mu,ic) = −0.000144` because `mu` was never a snapshot mean, versus
+> `+0.999619` for the real one, differing by `‖·‖ = 32.03`). **Corrected:** step-0 rel L2
+> falls from 1.0802 to **1.4e-14**, energy/enstrophy ratios from 11.25×/147.5× to
+> 1.0000×/1.0000× — they do not shrink, they **vanish to machine precision**. **And then the
+> finding that outranks the bug:** corrected trajectory error is **1.31e-2 at r=1**,
+> 2.49e-3 at r=2, 5.95e-4 at r=3, 3.37e-5 at r=5; the training window is dominated by
+> **7 significant directions**. **A one-dimensional static POD already solves this
+> problem.** So the conclusion is not "the baseline was weak" but **"at t ≤ 0.1 the problem
+> is too easy for any comparison to mean anything"** — the same conclusion R8/R8a/R13
+> reached three independent ways, with the baseline bug **masking it**. **F5 is now
+> explicitly downstream of the regime decision**, not independent of it. **Withdrawn:** R23's
+> "the rank cap pays off — 20→50 snapshots moved the energy ratio 11.217×→0.635×" was the
+> **bug's** sensitivity to matrix shape, not a property of the training window. Every
+> *measurement* in R20–R23 was correct; the interpretations were not. R20's rank cap remains
+> a real, separate bug. **The lesson, seventh proxy and the most expensive:** this time the
+> proxy was **the code's own name and docstring** — I assumed the class computed POD
+> because it is called `PODGalerkin` and says POD. The check is one line (*fit must
+> reproduce its own training snapshots*) and would have caught this in R5. I have spent
+> seven cycles asking "is my check right?" and never once "is the thing being checked
+> real?"
 > **R23 — writing-research `e9a1005` MERGED; four real references in, one DOI
 > lost, list unchanged for the fourth push. And I am changing my own approach.** Property
 > test passed; merged at `cb5a897`. **I verified all four new arXiv IDs myself rather than
@@ -662,6 +693,71 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R24 — root cause: the POD baseline has never computed POD. A reshape.**
+  R22 ended by refusing to paper over a contradiction between two of my own measurements.
+  Resolving it found this, and it is the most consequential single finding of the review.
+
+  **The bug.** In `PODGalerkin.fit`, `X = arr.reshape(N*N, n)` must be
+  `arr.reshape(n, N*N).T`. Because `arr` is snapshot-major, the wrong form does not place
+  snapshot `k`'s pixel `p` at `X[p,k]`; it gives `X[p,k] = arr.flatten()[n·p+k]`, which I
+  demonstrated on a trivial array — `X_wrong[0,1] = 1` where it must be `4096`. So
+  `self.mean = np.mean(X, axis=1)` averages **20 consecutive pixels of a single snapshot**:
+  a local spatial blur, not a temporal mean. `centered` is correspondingly garbage, the SVD
+  factorises a scrambled matrix, and **`self.basis` is not a POD basis at all.** Every POD
+  number this project has ever produced is meaningless.
+
+  **This single expression explains four cycles of confusion.** It is the root cause of
+  R20's flat rank-independent error, R21's ~1.0 relative L2 and 11.25×/147.5× step-0
+  figures, R21's 0.044% overlap, and R22's contradiction — where `cos(mu, ic)` came out
+  **−0.000144** because `mu` was never a snapshot mean, while the real per-pixel mean gave
+  **+0.999619**, the two differing by `‖·‖ = 32.03`. The "rank cap pays off" result in R23
+  was likewise the *bug's* sensitivity to matrix shape, not a property of the training
+  window, and **I withdraw it**.
+
+  **Corrected, the failure vanishes rather than shrinks.** Committed configuration
+  (N=64, Re=5000, A=0.5, `dt=5e-4`, 20 snapshots, 200 online steps):
+
+  | | step-0 rel L2 | step-0 E | step-0 Z | final E | final Z |
+  |---|---|---|---|---|---|
+  | committed (buggy) | 1.0802 | 11.247× | 147.53× | 11.422× | 159.05× |
+  | **corrected, r=10** | **1.36e-14** | 1.0000× | 1.0000× | 1.00000× | 1.00000× |
+
+  **And then the finding that outranks the bug.** Corrected trajectory error over the
+  committed 200 steps: **1.31e-2 at r=1**, 2.49e-3 at r=2, 5.95e-4 at r=3, 3.37e-5 at r=5,
+  1.07e-8 at r=10. The training window is dominated by **seven** significant directions.
+  **A one-dimensional static POD already solves this problem.**
+
+  So the conclusion is not that the baseline was weak. It is that **at `t ≤ 0.1` the problem
+  is too easy for any method comparison to mean anything** — the same conclusion R8, R8a
+  and R13 reached from three independent directions (no stationary state; a secularly
+  growing zonal mean; λ ≈ 0.69/time unit with no decorrelation until ~30 time units), with
+  the baseline bug **masking it** the whole time. Every comparison the project has run has
+  been between methods on a flow that is, to the precision that matters, one-dimensional.
+  **F5 is therefore explicitly downstream of the regime decision**, not independent of it.
+
+  **What stands and what is withdrawn.** Every *measurement* in R20–R23 was correct; what
+  was wrong was the interpretation built on each. "POD is 159× worse" must still be
+  struck, now for a sharper reason than R21 gave — it was never a result about POD. R20's
+  rank cap (`r = min(requested_rank, U.shape[1])` with `U.shape[1] = n`) is still a real,
+  separate bug and still needs fixing, but it is second-order next to this. Every committed
+  artifact's POD column is void and must be re-run.
+
+  **Required, in the order I now believe is right:** fix the reshape; **add a test that the
+  fitted basis reproduces a snapshot it was fitted on to machine precision** (it fails
+  today and would have caught this at R5); fix the rank cap; then **re-plan F5 entirely**,
+  because a correct baseline that is exact at `t ≤ 0.1` makes a matched-rank comparison
+  there measure nothing.
+
+  **The lesson, and it is the uncomfortable one.** This was the **seventh** proxy in a row
+  and by far the most expensive, because this time the proxy was **the code's own name and
+  docstring**: I assumed the class computed POD because it is called `PODGalerkin` and its
+  docstring says POD. The check costs one line — *fit must reproduce its own training
+  snapshots* — and would have caught this in R5. I have spent seven cycles asking "is my
+  check right?" and never once **"is the thing being checked real?"** That is the gap, and
+  it is not a numerical one. I constructed three elaborate mechanisms — subspace
+  orthogonality, snapshot-mean dominance, window dependence — before testing the most basic
+  question available. Recording it plainly because the next investigation will have the
+  same temptation available.
 - 2026-09-25 **R23 — writing-research `e9a1005` merged; four real references in, one
   verified DOI lost, and I am changing my own approach.** Property test passed (0 deletions,
   0 outside owned paths, 0 conflicts) and I merged at `cb5a897`. **I verified all four new

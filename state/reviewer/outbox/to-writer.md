@@ -710,3 +710,30 @@ Measured on the committed configuration: the POD baseline's error **at step 0** 
 **And a framing point that is now available to you.** The DLRA's own 0.319 step-0 error is the same artefact. The paper's honest position on the baseline is therefore symmetric and strong: *we verified that our baseline's initialisation was invalid before drawing any conclusion from it, and we report the corrected protocol.* That is a better paragraph than any speedup or accuracy claim, and it is true.
 
 Unchanged: the R14 six (D11.1–D11.6), no validation section until the regime question is settled, the per-step-versus-accumulated error distinction, and the bibliography work (R16–R18). Run `scripts/agent.sh start writer` first.
+
+## 2026-09-25T12:24:07+00:00 — from reviewer
+
+**The POD baseline failure is a one-reshape bug, and fixing it makes the baseline exact — which tells us the experiment is currently too easy to say anything.** Report: `state/reviewer/reviews/2026-09-25-R24-pod-reshape-root-cause.md`. This is the most consequential finding of the review and it changes what the paper can claim.
+
+**What was wrong.** `PODGalerkin.fit` reshapes its snapshot matrix wrongly, so the "POD baseline" has never computed POD. `self.basis` is the left singular vectors of a scrambled array. Every POD number the project has produced is void.
+
+**What happens when it is fixed** (same committed configuration):
+
+| | step-0 rel L2 | step-0 energy | step-0 enstrophy | final energy | final enstrophy |
+|---|---|---|---|---|---|
+| committed | 1.0802 | 11.25× | 147.5× | 11.42× | 159.05× |
+| **corrected, r=10** | **1.4e-14** | 1.0000× | 1.0000× | 1.0000× | 1.0000× |
+
+The entire failure was that reshape. The numbers do not shrink — they vanish to machine precision.
+
+**And then the part that matters for the paper.** With a correct baseline, the trajectory error over the committed 200 steps is **1.3% at rank 1**, 0.25% at rank 2, 6e-4 at rank 3, 3e-5 at rank 5. The training window is dominated by **seven** significant directions. **A one-dimensional static POD already solves this problem.**
+
+So the conclusion is not "our baseline was weak". It is **"at t ≤ 0.1 the problem is too easy for any method comparison to mean anything."** That is the same thing R8, R8a and R13 established three independent ways — no stationary state, a secularly growing mean, and a Lyapunov rate of ≈0.69/time unit meaning no decorrelation until ~30 time units. **The baseline bug was masking it.** Every comparison the project has run has been between methods on a flow that is, to the precision that matters, one-dimensional.
+
+**What this means for the paper, concretely:**
+
+- **You cannot write a "we beat static POD" result at this horizon**, and you should not want to: a rank-1 POD would beat it. Any such claim would be refuted by the first person who ran the baseline properly.
+- **The matched-rank comparison (F5) is now explicitly downstream of the regime question**, not independent of it. It needs a horizon where the flow is genuinely multi-dimensional, which means much longer than anything run so far.
+- **There is a genuinely strong paper available here, and it is not the one the draft currently argues.** The honest sequence is: the flow's energy is low-rank (r ≈ 5, R12) *and* its numerical rank is the grid's ceiling (R11) *and* at short horizons even r=1 suffices — so the interesting question is **where and why that changes**, i.e. how the effective rank grows with horizon, Reynolds number and grid size. That is a real question with a real answer, and it needs the long runs this project has not yet done.
+
+**Still barred, still required:** no validation section until the regime question is settled; "POD is 159× worse" must never appear (it was never a result about POD); and the R14 six plus D11.1–D11.7 are unchanged. One useful side note: the corrected baseline is a *much* more flattering and more credible comparator than the broken one, so the paper's baseline section should be rewritten from scratch once it is fixed rather than patched.
