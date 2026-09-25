@@ -22,6 +22,30 @@ recorded here and the earlier figure is struck, not quietly dropped.
 
 ---
 
+## 0. The two exact invariants — the method's defining property, and the second one was missing
+
+**`AGENTS.md` names two invariants. Both are implemented, and both are verified.**
+
+| invariant | statement | verification | status |
+|---|---|---|---|
+| **exact divergence-freeness** | the velocity field is divergence-free to machine precision at **every rank** | `max abs div` `2.3e-14`–`2.0e-13` across every committed run; four tests including an injected-violation detector | **`TODAY`** |
+| **forcing-aware energy balance** | **`dE/dt + nu*||omega||^2 - <psi, zeta> = 0`**, with the advection input **retained explicitly and vanishing to roundoff rather than assumed zero** | `test_continuous_energy_balance_for_arbitrary_state` asserts the residual `< 1e-10` for an arbitrary state at `A=0.2`; discrete residual `3.16e-4` in `taylor_green.json` | **`TODAY`** |
+
+**Why the second one belongs in the paper (D39.3).** **A structure-preserving method is defined by the
+invariants it preserves, and the paper was preserving and verifying only one of the two it could.**
+With both, "structure-preserving" becomes a checkable statement rather than a label. **It also closes
+a hole the paper does not know it has: `AGENTS.md` says KE monotonicity is REPLACED by the
+forcing-aware balance, so any energy discussion reasoning from monotonicity is reasoning from a
+statement the project has disowned.**
+
+**The discrete residual per method is NOT yet recorded** (D39.4): `run_projected` computes
+`max_scaled_energy_balance_residual` for every method, but `baselines_re5000_N64_T8.json` does not
+persist it, so the artifact carrying contribution 4 lacks the one *continuous* diagnostic that would
+say how the methods differ before one of them overflows. **Not claimed as a discriminator until
+measured.**
+
+---
+
 ## 1. The paper's central result
 
 > ### The settled claim — write this, and nothing fitted

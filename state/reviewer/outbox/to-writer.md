@@ -1722,3 +1722,19 @@ Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A 
 - **§6** — `t* = 0.649` / `1.482`, window `≤0.63%`, Re `3–9%`; rank saturation (`r=16/32/43` identical static errors); the rank criterion with its `0.1`-horizon caveat; costs.
 - **§7** — including the four evidence-status items: no resolution-robust stationary state, rank criterion verified only to `T=0.1`, never-yields rank bracketed not located, `N=128` multipliers unverified.
 - Then the three blocking items, the force's formula, the citations.
+
+## 2026-09-25T23:25:21+00:00 — from reviewer
+
+**One more correction to the figure you will use for §3 and §4, and it is in `fig_crossover` — the central figure. Two of its title strings assert things I withdrew, and I have asked coder to change them. Your captions should match the corrected wording.**
+
+**1. `fig_crossover`'s left panel currently titles the off-axis curve as "$r=43$ (the dealiasing ceiling) is exact and is off this log axis." Both halves are wrong.**
+- **"the dealiasing ceiling"** — `43` is the **largest rank we tested**, and it merely coincides with the 2/3-dealiasing *wavenumber*. The dealiased grid has ~1849 degrees of freedom, so a rank-43 basis is not the full grid.
+- **"is exact"** — its error runs `6.9e-13` to `1.6e-8`. **That is near-roundoff, not zero.** The corrected title reads: *"$r=43$ (the largest rank tested) stays 6–11 orders of magnitude below every static baseline, and is off this log axis."*
+
+**So when you caption or reference this figure, the never-yields rank is "the largest rank tested", and the reason is the order-of-magnitude gap — not the ceiling, and not exactness.** I have barred "the dealiasing ceiling" and "exact" for this in blueprint §7.
+
+**2. Its right panel is currently titled "A static subspace cannot spend rank at short horizons" — which is narrower than its own x-axis.** The panel plots the spread at *all* horizons, and the stronger true statement is saturation: **`r=16`, `r=32` and `r=43` have identical static errors to four decimals at every horizon.** The corrected title: **"A static subspace saturates in rank: `r≥16` buys it nothing, at any horizon."** Use that version in your text — it is the mechanism your §6 should lead with.
+
+**3. Three of your seven figures have titles that are correct and worth trusting, which tells you what the figure layer's standard is:** `fig_bug_cost` ("BUG removes every full-size factorization and is still 3-5x slower") claims only the slowdown and not the withdrawn rank-scaling; `fig_cost` prints its own timing protocol on the figure; `fig_window_rank` ("The amplitude rule asks for the grid") is the honest version of a claim I had to withdraw. **So the figures are mostly right — but the two that were wrong were the two a reader would look at hardest, which is why the audit was worth doing.**
+
+**4. Your work plan is unchanged.** §3 verification (three sentences, Taylor–Green) → §4 + table 1 → §5 stability → §6 results → §7 limitations. **And `fig_div_free` is being split into two panels, so §3's verification and §5's stability result will share one figure — do not build table 2 by hand unless the figure is late.**

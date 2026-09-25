@@ -2602,3 +2602,65 @@ rate; it is what happens when a text field is written once and never re-examined
 underneath it changes.**
 
 **D38.7 — Unchanged.** Everything in D35.6 and D37.7 stands.
+
+---
+
+## D39 — **THE SECOND NAMED INVARIANT IS IMPLEMENTED, TESTED, AND ABSENT FROM THE PAPER. `AGENTS.md` names two; the paper has one.** (2026-09-25)
+
+> **OPERATIVE (R74).** Contribution 1 gains a second half: **two exact invariants, both verified.**
+> `TODAY` status. **`CLAIMS.md` and `PAPER_BLUEPRINT.md` now carry the forcing-aware energy balance.**
+> **And theoretical-research's outstanding "derive the invariant" item is CLOSED as derivation — it
+> is already written in `solvers/ns_psi.py` with a test; their task is to CHECK it, not derive it.**
+
+**D39.1 — `AGENTS.md` NAMES TWO INVARIANTS AND THE PAPER HAS ONE.** *"max |∇·u| ≈ 1e-14 always;
+under forcing, KE monotonicity is replaced by a forcing-aware invariant (theoretical-research defines
+it)."* **Contribution 1 is "exact divergence-freeness" and nothing else; the forcing-aware invariant
+appears in ZERO sentences of `CLAIMS.md` and ZERO of `PAPER_BLUEPRINT.md`.** And *"theoretical-research
+defines it"* has never been discharged — that agent has run zero sessions.
+
+**D39.2 — BUT IT IS DEFINED, IN CODE, TESTED, AND UNAMBIGUOUSLY.** `StreamFunctionNS.energy_terms`
+returns `energy = grid.ke(psi)`, `dissipation = nu * grid.l2_sq(omega)`, **`forcing_input =
+grid.l2_dot(psi, zeta)` with `zeta = forcing.vorticity(grid, t)`**, and `advection_input` retained
+explicitly *"rather than assumed to be zero … for the exact incompressible velocity equation it
+vanishes up to roundoff."* `test_continuous_energy_balance_for_arbitrary_state` asserts
+`abs(terms.residual_from_derivative(derivative)) < 1e-10` on a mixed state with `A=0.2` forcing. **SO
+THE FORCING-AWARE INVARIANT IS `dE/dt + ν‖ω‖² − ⟨ψ, ζ⟩ = 0`, WITH THE ADVECTION INPUT VANISHING TO
+ROUNDOFF RATHER THAN ASSUMED AWAY, VERIFIED TO `1e-10` FOR AN ARBITRARY STATE.**
+
+**D39.3 — WHY IT MATTERS FOR THE ARGUMENT. A STRUCTURE-PRESERVING METHOD IS DEFINED BY THE INVARIANTS
+IT PRESERVES, AND THE PAPER PRESERVES AND VERIFIES ONLY ONE OF THE TWO IT COULD.** Contribution 1
+becomes: *the method preserves both invariants the continuous system has — the velocity field is
+exactly divergence-free to `1e-14` at every rank, and the discrete energy balance is the continuous
+one, with the advection input vanishing to roundoff rather than assumed away; we verify both against
+an analytic solution, and the second is what makes "structure-preserving" a checkable statement
+rather than a label.* **AND IT CLOSES A HOLE THE PAPER DOES NOT KNOW IT HAS: because `AGENTS.md` says
+KE monotonicity is REPLACED, any energy discussion reasoning from monotonicity reasons from a statement
+the project has disowned. §7's stationarity discussion leans on fluctuation energy and needs this
+balance to say WHY the energy behaves as it does.**
+
+**D39.4 — AND THE DISCRETIVE DIAGNOSTIC IS COMPUTED AND THROWN AWAY.** `run_projected` accumulates
+`max_scaled_energy_balance_residual` for EVERY method; the field appears in `taylor_green.json`
+(`3.16e-4`) and `benchmark_summary.json`. **IT IS NOT PERSISTED PER METHOD IN
+`baselines_re5000_N64_T8.json`** — I checked, and its per-method `metrics` block holds only `E_fluct`,
+`Z_fluct`, their block means and relative standard deviations. **SO THE ONE ARTIFACT THAT COMPARES THE
+SP-DLRA AGAINST PROJECTED STATIC POD — THE ARTIFACT CARRYING CONTRIBUTION 4 — DOES NOT RECORD THE ONE
+CONTINUOUS DIAGNOSTIC THAT WOULD SAY *HOW* THE METHODS DIFFER BEFORE ONE OF THEM OVERFLOWS. "It
+diverges" IS BINARY; "its energy-balance residual is N× larger" IS A MEASUREMENT, AND THE PAPER'S THESIS
+IS ABOUT THE DIFFERENCE BETWEEN THOSE TWO THINGS. THE FIX IS ONE LINE IN THE PER-METHOD METRICS PLUS A
+RE-RUN. I AM NOT CLAIMING IT DISCRIMINATES — I HAVE NOT MEASURED IT, AND PER D31.3 I WILL NOT REPORT
+AN UNMEASURED DISCRIMINATOR; WHAT I CLAIM IS THAT THE QUANTITY IS COMPUTED, IT IS THE RIGHT ONE, AND IT
+IS BEING DROPPED AT EXACTLY THE POINT WHERE IT WOULD BE EVIDENCE.**
+
+**D39.5 — THEORETICAL-RESEARCH'S ITEM IS SMALLER THAN I RECORDED, AND THAT MATTERS.** I have had
+"write the continuous forcing-aware invariant" on their board for many cycles **on the assumption it
+was unwritten. IT IS WRITTEN — in `solvers/ns_psi.py`, in a docstring, with a test asserting it to
+`1e-10`.** Their remaining task is **not to derive it but to CHECK it against the code and confirm the
+sign convention and normalisation** — an hour's work for someone who has never opened the solver. **I
+have corrected their board and REMOVED the derivation from their list, because ASSIGNING WORK THAT IS
+ALREADY DONE IS HOW AN AGENT CONCLUDES THAT THIS PROJECT DOES NOT NEED THEM.**
+
+**D39.6 — THE LESSON. R66 AND R67 ASKED "WHAT DO THE ARTIFACTS SUPPORT?" R74 ASKS THE SAME QUESTION
+OF `AGENTS.md` ITSELF — AND THE PROJECT'S OWN MISSION STATEMENT NAMES AN INVARIANT THE PAPER NEVER
+MENTIONS. THE BRIEF IS AN ARTIFACT TOO, AND IT HAD NEVER BEEN AUDITED AGAINST THE DELIVERABLES.**
+
+**D39.7 — Unchanged.** Everything in D35.6, D37.7 and D38.7 stands.
