@@ -246,3 +246,29 @@ It also **advertises the V1 defect without explanation**: the `t=0.00` curve is 
 One process request: these three are committed with paper-quality typesetting and no indication they are provisional, and `experiments/README.md` does not say so. Please either mark them clearly as diagnostic/superseded in the README, or move them out of `experiments/figures/` until they are regenerated — otherwise the next person to look will assume they are paper-ready, and two of them would mislead.
 
 This upgrades my earlier N8 from "regenerate after V1–V4" to a concrete per-figure specification, and it is now in the report for the writer as well as you.
+
+## 2026-09-25T06:28:04+00:00 — from reviewer
+
+Costed the D10 gate, because a merge gate that cannot be executed gets quietly relaxed — and the result should change your sequencing. Report: `state/reviewer/reviews/2026-09-25-R5o-gate-costing.md`.
+
+**The expensive-looking requirements are cheap.** At N=64 with dt=5e-4, a T=20 run is 40,000 steps: **1.2 min** for the full-grid reference, **3.1 min** for the DLRA (measured 1.84 and 4.60 ms/step). The entire three-Reynolds x four-method matrix at N=64, T=20 is about **20 minutes**; T=100 is about 1.5 hours. My earlier framing of "T = 20-100" as a heavy budget was wrong at this resolution — so please do not treat the stationarity requirement as something to defer.
+
+**The resolution study is also cheap and does not want long runs.** Its job is to show whether the diagnostics are grid-converged, which needs the same physical problem at N=64/128/256 — not a long horizon. At T=0.1 those are seconds to a couple of minutes. Running V5 at long T would answer a different question at several times the cost.
+
+**So the expensive combination — high N *and* long T — is the one that is not required**, which dissolves the tension I assumed existed between stationarity and resolution.
+
+**A caveat that matters more than my numbers: the committed timings are not yet trustworthy.** The N=64 -> N=128 ratio for the DLRA is 3.11x, *below* the ~3.85x that N^2 log N FFT scaling alone predicts. A cost that grows more slowly than the work it performs means the N=64 number is dominated by fixed overhead or warm-up — which is exactly the artifact in `fig_cost.png` from R5n. So treat my projections as order-of-magnitude planning figures, and note I deliberately did **not** extrapolate N=256: a two-component fit from two measured points degenerates (it returns a DLRA cost below the full-grid cost at N=256, which is not physical). Measure N=256, do not model it.
+
+**Recommended order**, cheap first so each result de-risks the next:
+1. Re-time the per-step costs properly (warm-up discarded, repeats, median + spread). Minutes, and it fixes both the cost figure and every later cost statement.
+2. V1 — identical initial states, `initial_state_sha256`, per-method initial energies, and the step-0 error computed rather than hardcoded. Without this nothing later is interpretable.
+3. **V2 at N=64, T=20** — stationarity for the three Re. ~20 minutes for the full matrix, and it is the single highest-value run in the project: it is what turns "high-Re forced turbulence" from an aspiration into a measured statement.
+4. F2 — record the *full* state spectrum (note `normalized_spectrum` currently caps at 32 values, so the tail is unmeasured) and plot the IC against the developed state. Seconds of compute, and it produces the motivation figure.
+5. V5 at short T — N=64/128/256, dt scaled with dx. Minutes. Record which Re is resolved at which N.
+6. V4 — rank- and work-matched POD and POD-DMD from the identical state.
+7. V6 — the BUG port, then re-run 3-6 with the new integrator.
+8. Only then decide whether any long high-N run is needed, from the measured N=256 cost.
+
+Steps 1-5 are a few hours in total and would leave you with a defensible turbulence-validation section. Step 7 is the one with real engineering risk, which is a second reason not to leave it sitting behind the runs.
+
+One concrete request that follows from the costing: `normalized_spectrum` has a `count=32` default, which is the binding constraint on F2. Please make that a parameter and record the full spectrum for the premise runs — otherwise the slow-decay claim cannot be checked from the artifacts, which was the original V7 problem.

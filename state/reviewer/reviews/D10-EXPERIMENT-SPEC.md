@@ -181,6 +181,36 @@ others.
   `reviews/2026-09-25-R5c-premise-and-v6-literature.md` and the reviewer's
   message to `coder`; sources are open access.
 
+## Is the gate affordable? Costed order of work (R5o)
+
+A gate that cannot be executed gets quietly relaxed, so the reviewer costed the
+required runs from the committed per-step timings (full 1.84 ms, POD 2.95 ms,
+DLRA 4.60 ms per step at N=64). Full reasoning in
+`reviews/2026-09-25-R5o-gate-costing.md`. Three conclusions that change the
+sequencing:
+
+- **Stationarity is cheap.** T=20 at N=64 is 40,000 steps: ~1.2 min (full) and
+  ~3.1 min (DLRA). The whole three-Re x four-method matrix is ~20 minutes. The
+  stationarity requirement is not a reason to defer anything.
+- **The resolution study does not want long runs.** Its purpose is grid
+  convergence of the diagnostics, which needs the same physical problem at
+  N=64/128/256, not a long horizon; at T=0.1 that is minutes. High N *and* long
+  T together is the expensive combination, and it is not required — which removes
+  the apparent tension between V2 and V5.
+- **The committed timings are not yet trustworthy.** The N=64 -> N=128 DLRA ratio
+  is 3.11x, below the ~3.85x that N^2 log N alone predicts, so the N=64 number
+  is overhead- or warm-up-dominated (the R5n cost-figure artifact). Cost
+  projections are therefore order-of-magnitude planning figures; N=256 must be
+  **measured**, not extrapolated (a two-component fit from two points degenerates
+  and returns a physically impossible ordering).
+
+**Order of work:** (1) re-time properly; (2) V1; (3) V2 at N=64, T=20; (4) F2
+with the full spectrum recorded — `normalized_spectrum` currently caps at 32
+values, which is the binding constraint on the slow-decay claim and must become
+a parameter; (5) V5 at short T; (6) V4; (7) V6, then re-run 3–6 with the new
+integrator; (8) decide any long high-N run from the measured cost. Steps 1–5 are
+a few hours in total.
+
 ## Figures — per-figure requirements (R5n)
 
 The three committed figures were rendered and inspected by the reviewer. **None
