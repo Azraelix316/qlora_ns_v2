@@ -36,6 +36,7 @@ def run_case(
     dt: float = 0.0005,
     final_time: float = 1.0,
     sample_stride: int = 100,
+    history_stride: int = 10,
     rank: int = 2,
     min_rank: int = 2,
     max_rank: int = 48,
@@ -44,6 +45,8 @@ def run_case(
     nsteps = int(round(final_time / dt))
     if nsteps < 1 or abs(nsteps * dt - final_time) > 1e-12:
         raise ValueError("final_time must be an integer multiple of dt")
+    if history_stride < 1:
+        raise ValueError("history_stride must be positive")
     grid = Grid2D(N)
     initial = make_initial_state(
         grid,
@@ -80,6 +83,10 @@ def run_case(
     dlra_max_cfl = float(np.max(np.hypot(u0, v0)) * dt / grid.dx)
     full_residual = 0.0
     dlra_residual = 0.0
+    full_max_energy = full_energy[0]
+    dlra_max_energy = dlra_energy[0]
+    full_max_enstrophy = full_enstrophy[0]
+    dlra_max_enstrophy = dlra_enstrophy[0]
     samples = [{"step": 0, "time": 0.0, "relative_l2": 0.0}]
     full_spectrum = {0: normalized_spectrum(full)}
     dlra_spectrum = {0: normalized_spectrum(reduced)}
@@ -94,18 +101,27 @@ def run_case(
         dlra_projection_increment = float(
             dlra.last_step_info.get("projection_energy_increment", 0.0)
         )
-        dlra_projection_energy.append(dlra_projection_increment)
         if not np.isfinite(full).all():
             unstable["full"] = step
             break
         if not np.isfinite(reduced).all():
             unstable["dlra"] = step
             break
-        full_energy.append(grid.ke(full))
-        dlra_energy.append(grid.ke(reduced))
-        full_enstrophy.append(grid.enstrophy(full))
-        dlra_enstrophy.append(grid.enstrophy(reduced))
-        full_projection_energy.append(0.0)
+        full_energy_now = grid.ke(full)
+        dlra_energy_now = grid.ke(reduced)
+        full_enstrophy_now = grid.enstrophy(full)
+        dlra_enstrophy_now = grid.enstrophy(reduced)
+        full_max_energy = max(full_max_energy, full_energy_now)
+        dlra_max_energy = max(dlra_max_energy, dlra_energy_now)
+        full_max_enstrophy = max(full_max_enstrophy, full_enstrophy_now)
+        dlra_max_enstrophy = max(dlra_max_enstrophy, dlra_enstrophy_now)
+        if step % history_stride == 0 or step == nsteps:
+            full_energy.append(full_energy_now)
+            dlra_energy.append(dlra_energy_now)
+            full_enstrophy.append(full_enstrophy_now)
+            dlra_enstrophy.append(dlra_enstrophy_now)
+            full_projection_energy.append(0.0)
+            dlra_projection_energy.append(dlra_projection_increment)
         u_now, v_now = grid.velocity(full)
         full_max_cfl = max(
             full_max_cfl, float(np.max(np.hypot(u_now, v_now)) * dt / grid.dx)
@@ -143,10 +159,18 @@ def run_case(
             dlra_spectrum[step] = normalized_spectrum(reduced)
     seconds = time.perf_counter() - start
     full_stability = _stability_assessment(
-        full_energy, full_enstrophy, full_div, full_max_cfl, unstable["full"]
+        [full_energy[0], full_max_energy],
+        [full_enstrophy[0], full_max_enstrophy],
+        full_div,
+        full_max_cfl,
+        unstable["full"],
     )
     dlra_stability = _stability_assessment(
-        dlra_energy, dlra_enstrophy, dlra_div, dlra_max_cfl, unstable["dlra"]
+        [dlra_energy[0], dlra_max_energy],
+        [dlra_enstrophy[0], dlra_max_enstrophy],
+        dlra_div,
+        dlra_max_cfl,
+        unstable["dlra"],
     )
     sample_values = [
         item["relative_l2"] for item in samples if item["relative_l2"] is not None
@@ -164,6 +188,7 @@ def run_case(
             "nsteps": nsteps,
             "final_time": final_time,
             "sample_stride": sample_stride,
+            "history_stride": history_stride,
             "initial_rank": rank,
             "min_rank": min_rank,
             "max_rank": max_rank,
@@ -229,6 +254,7 @@ def main() -> None:
     parser.add_argument("--dt", type=float, default=0.0005)
     parser.add_argument("--final-time", type=float, default=1.0)
     parser.add_argument("--sample-stride", type=int, default=100)
+    parser.add_argument("--history-stride", type=int, default=10)
     parser.add_argument("--rank", type=int, default=2)
     parser.add_argument("--min-rank", type=int, default=2)
     parser.add_argument("--max-rank", type=int, default=48)
@@ -245,6 +271,7 @@ def main() -> None:
         args.dt,
         args.final_time,
         args.sample_stride,
+        args.history_stride,
         args.rank,
         args.min_rank,
         args.max_rank,

@@ -14,7 +14,8 @@ static POD-Galerkin, and adaptive SVD-DLRA at a chosen Reynolds number.
 `run_rank_growth_sweep.py` records the rank/error tradeoff as the adaptive
 singular-value threshold is tightened.  `run_long_time.py` provides a
 full-grid/DLRA sustained-time check without the unstable long-horizon POD
-baseline.
+baseline; its histories are sampled by `--history-stride` to keep result
+JSON compact.
 
 Typical commands (from the worktree root, with the project venv):
 
