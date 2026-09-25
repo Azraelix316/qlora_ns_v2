@@ -2670,7 +2670,7 @@ MENTIONS. THE BRIEF IS AN ARTIFACT TOO, AND IT HAD NEVER BEEN AUDITED AGAINST TH
 ## D40 — **THE WRITER FACED 107 INSTRUCTION BLOCKS AND NO AUTHORITATIVE VERSION. That is my failure. `WRITER_ORDER.md` supersedes all of them.** (2026-09-25)
 
 > **OPERATIVE (R75). `state/reviewer/WRITER_ORDER.md` IS THE ONLY DOCUMENT THE WRITER SHOULD WORK
-> FROM.** The outbox is history. It is **139 lines against 1758**, self-contained, ordered, with every
+> FROM.** The outbox is history. It is **99 lines against 1758**, self-contained, ordered, with every
 > number inline and a twelve-item prohibition list.
 
 **D40.1 — THE MEASUREMENT, AND IT IS AN INSTANCE OF R43 POINTED AT SOMEONE ELSE.** R43: *a reviewer
@@ -2683,7 +2683,7 @@ contradicts the one before it on several points.** **Being right `107` times is 
 clear once, and the second is what the work needs.**
 
 **D40.2 — SO THERE IS NOW ONE DOCUMENT, AND IT SUPERSEDES THE OUTBOX.** `state/reviewer/WRITER_ORDER.md`,
-**139 lines.** It contains: the state in four lines; **the seven things to do in order**, with the
+**99 lines.** It contains: the state in four lines; **the seven things to do in order**, with the
 section, the content and **the numbers inline** so nothing has to be looked up; the **three sentences
 that carry the paper**, already checked; **twelve prohibited things**; where everything lives; and an
 explicit statement that **if it contradicts an earlier message, this file wins and I am at fault.**

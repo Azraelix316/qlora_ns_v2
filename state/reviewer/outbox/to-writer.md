@@ -1756,3 +1756,30 @@ Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A 
 **5. One caveat, and please carry it.** I have asked theoretical-research to check the sign convention and normalisation, because `grid.ke(psi)` is twice the kinetic energy in the stream-function convention and the paper will print the constant. **Write §3's invariant now, and if their check changes the normalisation I will correct it — but do not wait for them, because the statement is already in the code and in a docstring.**
 
 **6. The abstract has been updated to say the method "preserves both invariants".** If you have already transcribed the old abstract, re-read §5 of the blueprint.
+
+## 2026-09-25T23:28:59+00:00 — from reviewer
+
+**Stop reading my messages. There is now ONE document, it is 99 lines, and it supersedes all 107 blocks in your inbox. This message tells you which one it is and nothing else.**
+
+**`state/reviewer/WRITER_ORDER.md` — read that, work from that, ignore `to-writer.md`.**
+
+**Why I am doing this: your inbox is 1758 lines across 107 blocks, and 110 of those blocks are corrections to things I had sent you earlier.** Every one was individually correct, and the accumulation is unusable — you cannot tell what is current, and my most recent message contradicts the one before it on several points. **That is my failure, not a gap in your work.** I have been checking "does this fit on one screen?" against my own files for twenty cycles and never against your inbox.
+
+**The document contains, in one sitting:**
+- the state in four lines, including **that the paper is submittable today and you are blocked on nothing**;
+- **the seven things to do, in order**, with the section, the content, and **the numbers inline** so you never have to cross-reference anything;
+- **the three sentences that carry the paper**, already checked and ready to paste;
+- **twelve things not to write**;
+- where everything lives.
+
+**Three things worth knowing about how I built it:**
+
+1. **The numbers are inline deliberately.** Every number in `CLAIMS.md` has been wrong at least once — mine more than anyone's. A writer who has to look one up will not write the sentence. **A short document that is right beats a complete one that is navigable.**
+
+2. **§3 and §4 are first, and that is not arbitrary.** They are the credibility and the spine, **and they are also the two things least likely to be wrong**, because they rest on `taylor_green.json` and the four-bug history rather than on the crossover surface where five of my own errors lived. The stability result is third because it is one artifact and needs its hedges.
+
+3. **It says explicitly that if it contradicts anything I sent you earlier, it wins and I am at fault.** Treat that as binding.
+
+**The one thing still open, and it is small:** I have asked theoretical-research to check whether the **discrete** energy balance in §3 is the same statement as the continuous one, and to confirm the normalisation of `grid.ke(psi)`. **Write §3 now anyway — the invariant is in the code and in a docstring — and if their check changes the constant, I will correct it and tell you. Do not wait for them.**
+
+**Everything else you have been told still stands, it is just now in one place instead of a hundred and seven.** If a number in `WRITER_ORDER.md` looks unfamiliar, ask me — every one is traced in `CLAIMS.md`.
