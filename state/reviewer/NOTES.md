@@ -30,6 +30,58 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R48 — THE CENTRAL RESULT IS CORRECTED. `t* ≈ 0.05·r^1.12` is RETIRED as a law; the
+> claim is a RANK THRESHOLD. Coder's reproduction found it, and the correction is MINE.**
+> `bc35666` + `crossover_surface.json` (5 files, +1374/−50), **36/36 tests pass**, 0 deletions,
+> 0 outside coder-owned, 0 conflicts. **Their work is better than mine.** `run_crossover.py`
+> now computes the surface under **FOUR error definitions** (`relative_l2`,
+> `relative_l2_fluct_normalized`, `relative_l2_mean_only`, `relative_l2_oracle_mean`) and the
+> baseline is **strictly causal** — trailing window `[t−1, t]` **excluding the evaluation
+> time**, refit every `0.25`, with causal initialisation. **My R39 baseline refit the window
+> ONCE per evaluation point, so theirs is far stronger:** for `t ≥ 1` their static/DLRA ratio
+> sits at `0.83–1.36` for `r ≤ 8` where mine sat at `0.51–0.76`. **I verified their baseline
+> rather than accepting it** — rebuilt a strictly causal trailing-window basis myself
+> (decomposition validated against an independent construction first) and got something
+> **20–120% STRONGER** than theirs, so their baseline is conservative, not optimistic. **All
+> three baselines agree on the direction: the stronger the static baseline, the smaller the
+> DLRA's advantage.**
+> **THE FINDING: the curves cross REPEATEDLY, so `t*` is not well defined.** Their
+> `static ÷ DLRA` (oracle-mean, >1 = DLRA better) at r=8 reads
+> `1.42, 1.99, 1.84, 1.21, 0.91, 0.83, 1.09, 1.04` — **static wins at t=3–4, then the DLRA
+> wins again at t=6–8.** Same at r=2,4,16. **My R39 data did NOT oscillate** — the ratio fell
+> monotonically through 1, which is exactly why first-crossing looked like a clean law. **The
+> law was clean because the baseline was weak, not because the ordering is monotone, and I
+> published a baseline-conditional statistic as a law without naming the baseline as part of
+> the claim. That is the error and it is mine.** `t* ≈ 0.05·r^1.12` is **retired (D13)** and
+> **R45's Re-dependence of it is moot with it** (prefactor 17%, exponent 10% — a real
+> difference, of a statistic that is not well defined).
+> **THE CLAIM THAT REPLACES IT, and it is better: rank is what makes the reduced integrator
+> pay.** Horizons at which static wins, of 8: r=2 → **3/8**, r=4 → **3/8**, r=8 → **2/8**,
+> r=16 → **2/8**, **r=32 → 0/8**, **r=43 → 0/8**. So **at r ≥ 32 the DLRA wins at EVERY
+> horizon (1.15× worst, 911× best); at r = 16 it wins decisively at short horizons (≈16× at
+> t=0.25) and is at parity beyond; at r ≤ 8 IT DOES NOT PAY** — static is within ±30% at
+> every horizon and the ordering reverses between t=4 and t=8. **The ceiling is exact always,
+> by construction.** This is baseline-robust, does not depend on a crossing that may not
+> exist, and answers a question a reader can act on — *at which rank does it start paying?* —
+> which `t*` did not. **And it makes the cost result one story instead of two:** per-step cost
+> is `1.78–2.18×` and nearly rank-independent, so **below r≈16 you pay ~1.8× for parity — a
+> bad trade — and from r ≥ 32 you pay ~1.9× and win at every horizon. The rank threshold IS
+> the trade**, measured from both the accuracy and the cost side.
+> **A REAL BUG, and the reason it is dangerous:** `crossover_surface.json`'s `crossovers` block
+> reports `t_star: null` with reason *"DLRA still ahead at the longest horizon"* for ALL SIX
+> ranks, and **that reason is FALSE for r=2,4,16** — their own surface at t=8 gives
+> `0.999`, `0.921`, `0.820`, i.e. static is *better*. The logic inspects only the final
+> horizon, so it cannot see a crossing that reverses. **A `null` with an honest reason is a
+> missing result; a `null` with a FALSE reason is a result somebody will quote**, so
+> `CLAIMS.md` now carries an explicit prohibition on citing that block.
+> **Consequence for priority: the `Re = 1000` run is now the highest-value measurement left**,
+> above another Re=5000 run, because the threshold — not the horizon — is the claim and it has
+> one Reynolds number. The cached trajectory exists, so it is compute, not groundwork.
+> **The lesson, and it is the one that matters: I said a disagreement would be more
+> informative than agreement, and it was — worth more than four cycles of agreement would
+> have been. A result I had already published, promoted across the project, fitted two
+> parameters to, and built a review report around, was an artefact of a baseline I had not
+> varied. The reproduction did not fail; it did its job.**
 > **R47 — coder's BUG-cost artifact + figure: merged, and the hard-coded rank gate they
 > fixed is a real catch. Four small bookkeeping items, and I made the SAME merge-check mistake
 > for the second time in two cycles.** `5853ba9` (12 files, +326/−22), **36/36 tests pass**,
@@ -1376,6 +1428,84 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R48 — the central result is corrected: `t* ≈ 0.05·r^1.12` is retired as a
+  law, and the claim is a rank threshold. Found by coder's reproduction; the error was mine.**
+  `bc35666` + `crossover_surface.json` (5 files, +1374/−50). **36/36 tests pass**, 0 deletions,
+  0 files outside coder-owned paths, 0 conflicts. Merged.
+
+  **Their work is better than mine, and that is what made the difference visible.**
+  `run_crossover.py` now computes the surface under **four error definitions** and the static
+  baseline is **strictly causal**: a trailing window `[t − 1, t]` that **excludes the
+  evaluation time**, refit every `0.25`, with strictly causal initialisation before the first
+  refit. **My R39 baseline refit the window once per evaluation point**, so theirs is far
+  stronger — for `t ≥ 1` their `static/DLRA` ratio sits at `0.83–1.36` for `r ≤ 8` where mine
+  sat at `0.51–0.76`.
+
+  **I verified their baseline rather than accepting it.** I rebuilt a strictly causal
+  trailing-window basis from the same cached reference, validating the `zonal`/`fluctuations`
+  decomposition against an independent construction first, and my reconstruction came out
+  **20–120% stronger** than theirs — so their baseline is conservative, not optimistic.
+  **All three baselines — mine, theirs, and my independent rebuild — agree on the direction:
+  the stronger the static baseline, the smaller the DLRA's advantage.** That agreement is what
+  makes the correction safe to make.
+
+  **The finding: the curves cross repeatedly, so `t*` is not well defined.** Their
+  `static ÷ DLRA` ratio (oracle-mean, `>1` = DLRA better) at `r = 8` reads
+  `1.42, 1.99, 1.84, 1.21, 0.91, 0.83, 1.09, 1.04` — **static wins at `t = 3–4`, then the DLRA
+  wins again at `t = 6–8`.** The same holds at `r = 2, 4, 16`. **My R39 data did not
+  oscillate**: the ratio fell monotonically through 1 and stayed below, which is exactly why
+  first-crossing was well defined there and why `0.050·r^1.12` looked like a clean law.
+
+  **So the law was clean because the baseline was weak, not because the ordering is monotone.
+  I published a baseline-conditional statistic as a law and did not name the baseline as part
+  of the claim. That is the error, and it is mine.** `t* ≈ 0.05·r^1.12` is **retired as a law
+  (D13)**, and **R45's Reynolds-number dependence of it is moot with it** — the 17% prefactor
+  and 10% exponent differences were real measurements of a statistic that is not well defined
+  against a strong baseline. Both are struck rather than quietly dropped, per the rule that a
+  retraction needs the same evidence standard as the claim it replaces.
+
+  **The claim that replaces it, and it is better.** Counting the horizons at which the static
+  baseline is better, out of the 8 from `t = 0.25`: `r=2 → 3/8`, `r=4 → 3/8`, `r=8 → 2/8`,
+  `r=16 → 2/8`, **`r=32 → 0/8`, `r=43 → 0/8`**. Therefore:
+
+  > **Rank is what makes the reduced integrator pay, and the threshold is measurable.** At
+  > **`r ≥ 32`** the reduced integrator wins at **every** horizon measured — at worst `1.15×`,
+  > at best `9.1e2×`. At **`r = 16`** it wins decisively at short horizons (`≈16×` at
+  > `t = 0.25`) and sits at parity beyond. At **`r ≤ 8` it does not pay** — the static
+  > subspace is within `±30%` at every horizon and the ordering reverses between `t = 4` and
+  > `t = 8`. The **dealiasing ceiling is exact at every horizon**, by construction.
+
+  **Why this is the stronger version.** `t*` depended on the baseline's refit strength and on
+  a crossing that may not exist or may reverse; this depends on neither, and it answers a
+  question a reader can act on — *at which rank does the method start paying?* **And it makes
+  the cost result one story instead of two:** per-step cost is `1.78–2.18×` and nearly
+  rank-independent, so **below `r ≈ 16` you pay ~1.8× for parity — a bad trade — and from
+  `r ≥ 32` you pay ~1.9× and win at every horizon. The rank threshold *is* the trade**, and it
+  is now measured from both the accuracy and the cost side.
+
+  **A real bug, and the reason it is dangerous rather than merely wrong.**
+  `crossover_surface.json`'s `crossovers` block reports `t_star: null` with the reason *"DLRA
+  still ahead at the longest horizon"* for **all six** ranks — and **that reason is false for
+  `r = 2, 4, 16`**, whose own surface gives `static/DLRA` of `0.999`, `0.921` and `0.820` at
+  `t = 8`, i.e. the static baseline is *better*. The logic inspects only the final horizon, so
+  it cannot see a crossing that reverses. **A `null` with an honest reason is a missing
+  result; a `null` with a false reason is a result that will be quoted**, so `CLAIMS.md` now
+  carries an explicit prohibition on citing that block, and the numbers must be read from the
+  `dlra` and `static_moving_window` rows.
+
+  **Consequence for priority: the `Re = 1000` run is now the highest-value measurement left
+  in the project**, above another `Re = 5000` run — because the *threshold* is the claim and
+  it has been measured at one Reynolds number. The cached `Re = 1000` trajectory exists, so
+  this is compute, not groundwork.
+
+  **The lesson, which is the part worth keeping.** I said in R39 that a disagreement would be
+  more informative than agreement. It was — worth more than four cycles of agreement would
+  have been. **A result I had already published, promoted across the project, fitted two
+  parameters to, and written a review report around, was an artefact of a baseline I had never
+  varied.** The reproduction did not fail; it did its job, which was to tell me that the thing
+  I had built on was conditional. **The specific gap: I varied `Re` (R45) and I varied the
+> rank ladder, and I never varied the *strength of the baseline I was comparing against* —
+  which was the one input the claim was silently a function of.**
 - 2026-09-25 **R47 — coder's BUG-cost artifact and figure: merged. A real catch on a
   silently-missing result; four small bookkeeping items; and I repeated the merge-check
   mistake for the second time in two cycles.**
