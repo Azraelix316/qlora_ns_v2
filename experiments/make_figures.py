@@ -1,123 +1,313 @@
-"""Generate compact paper figures from the committed coder result JSONs."""
+"""Figures for the paper, generated only from committed artifacts.
+
+Three things this script deliberately does **not** do, each because a binding
+rule forbids it:
+
+* It does not title a rank trace "adaptive rank growth".  The committed runs
+  sit at the dealiasing ceiling, so a trace of 17 -> 43 is the grid, not the
+  dynamics (D11.3).  The rank figure is the *windowed* rank, which is the
+  quantity that is grid-independent.
+* It does not label pointwise L2 as "error".  Once solutions decorrelate it
+  measures phase, not accuracy, so every such axis is labelled trajectory
+  divergence and the accuracy quantities (time-averaged KE/enstrophy, spectra)
+  are shown next to them.
+* It does not plot the singular values of a rank-truncated reduced state as a
+  spectrum.  Such a state has exactly as many values as its rank and decays
+  smoothly by construction; spectra are taken from the full-grid reference
+  (F2, R5).
+
+Every figure records the artifact and commit it came from, so a figure cannot
+outlive the numbers it was drawn from.
+"""
 from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
 import numpy as np
 
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
 ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
 
 
-def load(path: Path) -> dict:
+def load(path: Path) -> dict | None:
+    if not path.exists():
+        print(f"  (missing, skipped: {path.name})")
+        return None
     return json.loads(path.read_text())
+
+
+def git_commit() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip()[:8]
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown"
+
+
+def provenance(results: Path, out: Path, names: list[str]) -> None:
+    lines = ["# Figure provenance", ""]
+    for name in names:
+        path = results / name
+        if path.exists():
+            data = json.loads(path.read_text())
+            lines.append(
+                f"- `{name}` -- commit "
+                f"`{data.get('provenance', {}).get('git_commit', '?')[:8]}`"
+            )
+    lines += ["", f"figures generated at commit `{git_commit()}`", ""]
+    (out / "PROVENANCE.md").write_text("\n".join(lines) + "\n")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--results", type=Path, default=ROOT / "state/coder/results")
-    parser.add_argument("--output-dir", type=Path, default=ROOT / "experiments/figures")
-    args = parser.parse_args()
-    import matplotlib.pyplot as plt
-
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-    plt.rcParams.update(
-        {
-            "font.family": "serif",
-            "font.serif": ["DejaVu Serif"],
-            "font.size": 9,
-            "axes.labelsize": 9,
-            "axes.titlesize": 10,
-            "legend.fontsize": 8,
-            "legend.frameon": False,
-            "figure.dpi": 150,
-            "savefig.dpi": 300,
-            "axes.spines.top": False,
-            "axes.spines.right": False,
-            "axes.grid": True,
-            "grid.alpha": 0.18,
-            "grid.linestyle": "-",
-            "lines.linewidth": 1.6,
-        }
+    parser.add_argument(
+        "--results", type=Path, default=ROOT / "state" / "coder" / "results"
     )
-    colors = {"full": "#264653", "pod": "#8C8C8C", "dlra": "#E76F51", "ref": "#0072B2"}
-    re_files = {
-        re: args.results / f"kolmogorov_re{re}_N64.json" for re in (100, 1000, 5000)
+    parser.add_argument(
+        "--output-dir", type=Path, default=ROOT / "experiments" / "figures"
+    )
+    args = parser.parse_args()
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    R = args.results
+    colors = {"full": "#264653", "pod": "#8C8C8C", "dlra": "#E76F51",
+              "ref": "#0072B2", "a": "#2A9D8F", "b": "#E9C46A"}
+    used: list[str] = []
+
+    plt.rcParams.update({
+        "font.family": "serif", "font.serif": ["DejaVu Serif"], "font.size": 9,
+        "axes.labelsize": 9, "axes.titlesize": 10, "legend.fontsize": 8,
+        "legend.frameon": False, "figure.dpi": 150, "savefig.dpi": 300,
+        "axes.spines.top": False, "axes.spines.right": False,
+        "axes.grid": True, "grid.alpha": 0.18, "lines.linewidth": 1.6,
+    })
+
+    # ---------------------------------------------------------------- figure 1
+    # The premise: windowed rank vs horizon, on the fluctuations, at two grids.
+    # This replaces the old "adaptive rank growth" panel.
+    pilots = {
+        "N=64": load(R / "regime_pilot_re5000_A0p2.json"),
+        "N=128": load(R / "regime_pilot_re5000_N128_A0p2.json"),
     }
-    data = {re: load(path) for re, path in re_files.items()}
+    pilots = {k: v for k, v in pilots.items() if v and v.get("window_rank_table")}
+    if pilots:
+        used += ["regime_pilot_re5000_A0p2.json", "regime_pilot_re5000_N128_A0p2.json"]
+        fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.8))
+        ax = axes[0]
+        for (label, data), style in zip(pilots.items(), (("-", "o"), ("--", "s"))):
+            table = {r["window_end"]: r for r in data["window_rank_table"]}
+            W = sorted(table)
+            ax.plot(W, [table[w]["r99"] for w in W], style[0], marker=style[1],
+                    markersize=3.5, color=colors["a"] if "64" == label[-2:] else colors["b"],
+                    label=f"r99, {label}")
+            ax.plot(W, [table[w]["r999"] for w in W], style[0], marker=style[1],
+                    markersize=3.5, alpha=0.45,
+                    color=colors["a"] if "64" == label[-2:] else colors["b"],
+                    label=f"r999, {label}")
+        ax.set_xlabel("window end $W$")
+        ax.set_ylabel("modes to represent the window")
+        ax.set_title("Rank of the windowed fluctuations")
+        ax.legend(fontsize=7)
+        ax = axes[1]
+        for (label, data), style in zip(pilots.items(), (("-", "o"), ("--", "s"))):
+            table = {r["window_end"]: r for r in data["window_rank_table"]}
+            W = sorted(table)
+            ceiling = 2 * (int(label.split("=")[1]) // 3) + 1
+            ax.plot(W, [table[w]["amp_1e-6"] for w in W], style[0], marker=style[1],
+                    markersize=3.5, label=f"amplitude rule, {label}")
+            ax.axhline(ceiling, color=colors["ref"], linestyle=":", linewidth=1.0)
+            ax.annotate(f"dealias ceiling {ceiling}", (W[0], ceiling),
+                        textcoords="offset points", xytext=(2, 3),
+                        fontsize=6.5, color=colors["ref"])
+        ax.set_yscale("log")
+        ax.set_xlabel("window end $W$")
+        ax.set_ylabel("modes requested (log)")
+        ax.set_title("The amplitude rule asks for the grid")
+        ax.legend(fontsize=7)
+        fig.tight_layout()
+        fig.savefig(args.output_dir / "fig_rank_growth.pdf", bbox_inches="tight")
+        fig.savefig(args.output_dir / "fig_rank_growth.png", bbox_inches="tight")
+        plt.close(fig)
 
-    # Rank and error over the short common horizon.
-    fig, axes = plt.subplots(1, 2, figsize=(6.75, 2.7))
-    ax = axes[0]
-    rank = data[5000]["dlra"]["rank_history"]
-    ax.plot(np.arange(len(rank)) * data[5000]["parameters"]["dt"], rank, color=colors["dlra"], label="adaptive DLRA")
-    ax.set_xlabel("time")
-    ax.set_ylabel("retained rank")
-    ax.set_title("Adaptive rank growth")
-    ax.legend(loc="best")
-    ax = axes[1]
-    for re, result in data.items():
-        for method in ("pod", "dlra"):
-            rows = result[method]["comparison"]
-            ax.plot(
-                [row["time"] for row in rows],
-                [row["relative_l2"] for row in rows],
-                color=colors[method],
-                linestyle="-" if method == "dlra" else "--",
-                alpha=0.9 if re == 5000 else 0.45,
-                label=f"{method.upper()} Re={re}",
-            )
-    ax.set_xlabel("time")
-    ax.set_ylabel("relative $L^2$ error")
-    ax.set_title("Error against full grid")
-    ax.legend(ncol=2, fontsize=6.5)
-    fig.tight_layout()
-    fig.savefig(args.output_dir / "fig_rank_error.pdf", bbox_inches="tight")
-    fig.savefig(args.output_dir / "fig_rank_error.png", bbox_inches="tight")
-    plt.close(fig)
+    # ---------------------------------------------------------------- figure 2
+    # Full-grid state spectrum: the IC cliff against the developed state.
+    # Never the reduced state's spectrum.
+    suite = {re: load(R / f"kolmogorov_re{re}_N64.json") for re in (100, 1000, 5000)}
+    suite = {k: v for k, v in suite.items() if v}
+    if suite:
+        used += [f"kolmogorov_re{re}_N64.json" for re in suite]
+        data = suite[5000]
+        full = data["full"]
+        s_ic = np.asarray(full["singular_values"][0])
+        s_end = np.asarray(full["singular_values"][-1])
+        fig, ax = plt.subplots(figsize=(3.5, 2.7))
+        idx = np.arange(1, s_ic.size + 1)
+        ax.semilogy(idx, s_ic / s_ic[0], color=colors["ref"], label="initial condition ($t=0$)")
+        ax.semilogy(idx, s_end / s_end[0], color=colors["dlra"],
+                    label=f"developed ($t={data['parameters']['final_time']}$)")
+        ax.axvline(17, color=colors["full"], linestyle=":", linewidth=1.0)
+        ax.annotate("IC is exactly rank 17", (17, 1e-2), textcoords="offset points",
+                    xytext=(4, 0), fontsize=7, color=colors["full"])
+        ax.set_xlabel("mode index $r$")
+        ax.set_ylabel(r"$\sigma_r/\sigma_1$")
+        ax.set_title("Full-grid state spectrum (all resolved modes)")
+        ax.legend(fontsize=7)
+        fig.tight_layout()
+        fig.savefig(args.output_dir / "fig_spectrum.pdf", bbox_inches="tight")
+        fig.savefig(args.output_dir / "fig_spectrum.png", bbox_inches="tight")
+        plt.close(fig)
 
-    # Singular-value decay at selected times, normalized by the leading value.
-    fig, ax = plt.subplots(figsize=(3.25, 2.6))
-    result = data[5000]
-    steps = result["dlra"]["singular_value_steps"]
-    for step, color in zip(steps[:: max(1, len(steps) // 4)], ["#264653", "#2A9D8F", "#E9C46A", "#E76F51"]):
-        idx = steps.index(step)
-        values = np.asarray(result["dlra"]["singular_values"][idx])
-        values = values[values > 0]
-        ax.semilogy(np.arange(1, len(values) + 1), values, "o-", ms=2.5, color=color, label=f"t={step * result['parameters']['dt']:.2f}")
-    ax.set_xlabel("singular-value index")
-    ax.set_ylabel(r"$\sigma_i/\sigma_1$")
-    ax.set_title("Slow singular-value decay")
-    ax.legend()
-    fig.tight_layout()
-    fig.savefig(args.output_dir / "fig_singular_values.pdf", bbox_inches="tight")
-    fig.savefig(args.output_dir / "fig_singular_values.png", bbox_inches="tight")
-    plt.close(fig)
+    # ---------------------------------------------------------------- figure 3
+    # Trajectory divergence, labelled as such, with the accuracy quantity
+    # (time-averaged fluctuation KE) beside it.
+    if suite:
+        fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.8))
+        ax = axes[0]
+        for re, result in suite.items():
+            rows = result["dlra"]["comparison"]
+            ax.plot([r["time"] for r in rows], [r["relative_l2"] for r in rows],
+                    color=colors["dlra"], alpha=0.9 if re == 5000 else 0.4,
+                    label=f"DLRA Re={re}")
+            rows = result["pod"]["comparison"]
+            ax.plot([r["time"] for r in rows], [r["relative_l2"] for r in rows],
+                    color=colors["pod"], linestyle="--",
+                    alpha=0.9 if re == 5000 else 0.4, label=f"static POD Re={re}")
+        ax.set_xlabel("time")
+        ax.set_ylabel(r"relative $L^2$")
+        ax.set_title("Trajectory divergence, not error")
+        ax.legend(fontsize=6.5, ncol=2)
+        ax = axes[1]
+        for re, result in suite.items():
+            t = np.arange(len(result["full"]["energy_history"])) * result["parameters"]["dt"]
+            ax.plot(t, result["full"]["energy_history"], color=colors["full"],
+                    alpha=0.9 if re == 5000 else 0.4, label=f"full Re={re}")
+        ax.set_xlabel("time")
+        ax.set_ylabel(r"$E$")
+        ax.set_title(r"Total KE: the zonal mean grows")
+        ax.legend(fontsize=6.5)
+        fig.tight_layout()
+        fig.savefig(args.output_dir / "fig_divergence.pdf", bbox_inches="tight")
+        fig.savefig(args.output_dir / "fig_divergence.png", bbox_inches="tight")
+        plt.close(fig)
 
-    # Cost comparison; include the honest SVD overhead.
-    fig, ax = plt.subplots(figsize=(3.25, 2.6))
-    methods = ["full", "pod", "dlra"]
-    x = np.arange(3)
-    width = 0.24
-    for j, re in enumerate((100, 1000, 5000)):
-        vals = [data[re][m]["wall_seconds_per_step"] * 1e3 for m in methods]
-        bars = ax.bar(x + (j - 1) * width, vals, width, label=f"Re={re}", color=["#264653", "#56B4E9", "#E76F51"][j])
-        for bar, value in zip(bars, vals):
-            ax.text(bar.get_x() + bar.get_width() / 2, value, f"{value:.1f}", ha="center", va="bottom", fontsize=6)
-    ax.set_xticks(x, ["full", "POD", "DLRA"])
-    ax.set_ylabel("ms / step")
-    ax.set_title("Measured cost")
-    ax.legend(ncol=3, fontsize=7)
-    fig.tight_layout()
-    fig.savefig(args.output_dir / "fig_cost.pdf", bbox_inches="tight")
-    fig.savefig(args.output_dir / "fig_cost.png", bbox_inches="tight")
-    plt.close(fig)
+    # ---------------------------------------------------------------- figure 4
+    # Exact divergence-freeness per run, including every baseline.
+    rows = []
+    for re, result in suite.items():
+        for method in ("full", "pod", "dlra"):
+            rows.append((f"{method} Re={re}", result[method]["max_abs_divergence"]))
+    b128 = load(R / "kolmogorov_re5000_N128.json")
+    if b128:
+        used.append("kolmogorov_re5000_N128.json")
+        for method in ("full", "pod", "dlra"):
+            rows.append((f"{method} Re=5000 N=128", b128[method]["max_abs_divergence"]))
+    baselines = load(R / "baselines_re5000_N64_T8.json")
+    if baselines:
+        used.append("baselines_re5000_N64_T8.json")
+        for name, m in baselines["methods"].items():
+            rows.append((name.replace("_", " "), m["max_abs_divergence"]))
+    if rows:
+        fig, ax = plt.subplots(figsize=(6.9, 0.22 * len(rows) + 1.1))
+        names = [r[0] for r in rows]
+        # Linear axis in units of the 1e-14 target: a log axis over four decades
+        # of roundoff is hard to read and its tick locator overflows.
+        values = [float(r[1]) / 1e-14 for r in rows]
+        ax.barh(names, values, color=colors["full"])
+        ax.axvline(1.0, color=colors["dlra"], linestyle="--", linewidth=1.0)
+        ax.annotate("target $10^{-14}$", (1.0, len(rows) - 0.4),
+                    textcoords="offset points", xytext=(4, 0), fontsize=7,
+                    color=colors["dlra"])
+        ax.set_xlabel(r"max $|\nabla\!\cdot u|$ over the run, in units of $10^{-14}$")
+        ax.set_title("Exact divergence-freeness holds for every method")
+        ax.invert_yaxis()
+        fig.tight_layout()
+        fig.savefig(args.output_dir / "fig_div_free.pdf", bbox_inches="tight")
+        fig.savefig(args.output_dir / "fig_div_free.png", bbox_inches="tight")
+        plt.close(fig)
 
-    print(f"wrote figures to {args.output_dir}")
+    # ---------------------------------------------------------------- figure 5
+    # Cost, two accountings, median with spread, annotated with the threading.
+    cost = load(R / "cost_retiming.json")
+    if cost:
+        used.append("cost_retiming.json")
+        grids = [g for g in cost["grids"] if g["N"] in (64, 128, 256)]
+        fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.8))
+        for ax, key, title in (
+            (axes[0], "full_step_ratio_vs_reference", "Full step vs the reference"),
+            (axes[1], "linear_algebra_ratio_vs_reference", "Linear algebra alone"),
+        ):
+            for rank, style in zip(sorted({r["rank"] for g in grids for r in g["rows"]}),
+                                   (("o", "-"), ("s", "--"))):
+                xs = [g["N"] for g in grids
+                      for r in g["rows"] if r["rank"] == rank]
+                ys = [r[key] for g in grids for r in g["rows"] if r["rank"] == rank]
+                if xs:
+                    ax.plot(xs, ys, style[1], marker=style[0], markersize=4,
+                            color=colors["a"] if rank == 2 else colors["b"],
+                            label=f"r={rank}")
+            ax.axhline(1.0, color=colors["ref"], linestyle=":", linewidth=1.0)
+            ax.set_xscale("log", base=2)
+            ax.set_yscale("log", base=2)
+            ax.set_xlabel("$N$")
+            ax.set_ylabel("ratio to full grid")
+            ax.set_title(title)
+            ax.legend(fontsize=7)
+        threads = cost["environment"]["thread_settings"]
+        fig.suptitle(
+            "median of "
+            f"{grids[0]['repeats']} repeats over {grids[0]['steps_per_repeat']} steps; "
+            + ", ".join(f"{k.split('_')[0]}={v}" for k, v in threads.items() if v),
+            fontsize=6.5, y=1.02,
+        )
+        fig.tight_layout()
+        fig.savefig(args.output_dir / "fig_cost.pdf", bbox_inches="tight")
+        fig.savefig(args.output_dir / "fig_cost.png", bbox_inches="tight")
+        plt.close(fig)
+
+    # ---------------------------------------------------------------- figure 6
+    # Isotropic spectra of the fluctuations, time-averaged over a window.
+    spec_source = None
+    for name in ("regime_pilot_re5000_A0p5.json", "regime_pilot_re5000_A0p2.json"):
+        data = load(R / name)
+        if data and data.get("windowed_spectra"):
+            spec_source = (name, data)
+            used.append(name)
+            break
+    if spec_source:
+        name, data = spec_source
+        entry = next(iter(data["windowed_spectra"].values()))
+        k = np.asarray(entry["k"], dtype=float)
+        e = np.asarray(entry["E_fluct"], dtype=float)
+        z = np.asarray(entry["Z_fluct"], dtype=float)
+        ok = k <= entry["dealias_resolved_k_max"]
+        fig, ax = plt.subplots(figsize=(3.6, 2.7))
+        ax.semilogy(k[ok], e[ok] / max(e.max(), 1e-300), color=colors["a"],
+                    label=r"$E(k)$")
+        ax.semilogy(k[ok], z[ok] / max(z.max(), 1e-300), color=colors["b"],
+                    label=r"$Z(k)$")
+        ax.axvline(entry["dealias_resolved_k_max"], color=colors["full"],
+                   linestyle=":", linewidth=1.0)
+        ax.annotate("dealiased range", (entry["dealias_resolved_k_max"], 1e-3),
+                    textcoords="offset points", xytext=(-46, 0), fontsize=7,
+                    color=colors["full"])
+        ax.set_xlabel("isotropic wavenumber $k$")
+        ax.set_ylabel("normalised, time-averaged")
+        ax.set_title(r"Fluctuation spectra $\psi'=\psi-\overline{\psi}$")
+        ax.legend(fontsize=7)
+        fig.tight_layout()
+        fig.savefig(args.output_dir / "fig_spectra_ek.pdf", bbox_inches="tight")
+        fig.savefig(args.output_dir / "fig_spectra_ek.png", bbox_inches="tight")
+        plt.close(fig)
+
+    provenance(R, args.output_dir, sorted(set(used)))
+    print(f"figures written to {args.output_dir}")
 
 
 if __name__ == "__main__":
