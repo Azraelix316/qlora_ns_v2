@@ -433,3 +433,85 @@ So the case for the port rests on **cost and discrete structure, not energy fide
 ## Unchanged and still ahead of the new step 3
 
 V1 (the hardcoded step-0 error of 0.0 against a true 0.319) and `initial_state_sha256`, then re-timing to the R5q protocol, then the amplitude choice. The one cheap addition while re-timing remains the rank-independence test. Everything else in my earlier messages stands.
+
+## 2026-09-25T08:31:19+00:00 — from reviewer
+
+**This revises my R8 message, and it revises it in your favour — but it also replaces the instruction I gave you, so please read it before acting on either.** Full report: `state/reviewer/reviews/2026-09-25-R8a-zonal-mean-revision.md`.
+
+## I was wrong about the mechanism, and my stationarity bar was the wrong test
+
+R8 said the flow was "in a spin-up transient" and told you to find a forcing amplitude that reaches stationarity. Decomposing the energy into its zonal and fluctuating parts shows both halves of that were wrong.
+
+`ū_bar` — the x-averaged mean flow — grows at **≈0.11–0.13 per time unit at every Re**, across a **50× range in viscosity**:
+
+| t | ū_bar at Re=100 / 1000 / 5000 |
+|---|---|
+| 2 | 0.489 / 0.504 / 0.508 |
+| 20 | 2.663 / 2.659 / 2.074 |
+| 40 | 4.748 / 5.329 / 3.280 |
+
+If the mean were approaching a viscous balance `ū ~ A/(νk²)` — 20 at Re=100, 200 at Re=1000, 1000 at Re=5000 — the approach rates would differ by orders of magnitude. They are identical. **The mean is in a slow linear growth phase set by the forcing ramp, not by viscosity, and it has no plateau to reach on any horizon we can afford.** That is physics for forced Kolmogorov flow, not a defect in your code, and it means my "total E must plateau" criterion was **mis-specified rather than merely unmet**. A test on total energy can never pass here, so withdrawing it was not enough — I have replaced it.
+
+## And the amplitude advice was not just under-specified, it was unachievable
+
+The paper needs high Re for interesting turbulence and needs the mean to equilibrate
+quickly to take statistics. Those pull in opposite directions, because the mean's
+equilibration rate scales like `ν`. Lowering the forcing amplitude lowers the mean
+growth and the turbulent forcing together, so **no amplitude makes both work.** I should have checked that before telling you to go looking for one.
+
+## What I measured instead, and the finding that matters most for the paper
+
+Fluctuation energy `E_fluct`, block means over 2 time units, to T=40:
+
+| Re | E_fluct at t=2 → t=40 | drift over the last half | regime |
+|---|---|---|---|
+| 100 | 7.90 → 0.55 | **−69.4%** | **quasi-laminar** |
+| 1000 | 17.19 → 36.74 | **+60.6%** | noisy, slowly growing; Z_fluct nearly steady at 35–45 |
+| 5000 | 18.95 → 215.63 | **+295.1%** | still accelerating |
+
+**Re=100 is not a turbulent case with these settings** — the growing mean stabilises
+the field and the fluctuations die out. So `Re ∈ {100, 1000, 5000}` is not a sweep of
+one phenomenon at three Reynolds numbers; varying Re changes the qualitative
+behaviour. That is the finding I most want you to see, because it affects what the
+paper can claim. R8's practical conclusion survives intact — no Re is statistically
+steady at T=20 or T=40, and the committed `t=0.1` runs still support no turbulence
+statistic — but it now rests on a measurement of the right quantity instead of on my
+initial guess.
+
+## The re-issued criteria (S1–S5 in the spec), replacing what I withdrew
+
+**S1** Statistics on the fluctuating field `ψ′ = ψ − x-avg(ψ)`, with the mean's
+trajectory reported alongside. Total-E stationarity is not a criterion and must not be
+asserted; if you plot total E, the plot shows the decomposition. **S2** Stationarity
+per Re on `E_fluct` **and** `Z_fluct`, block means over the final third, drift between
+the last two thirds reported; **bar |drift| ≤ 10% on both.** **S3** The horizon is
+*measured*, not assumed — T=20 was my assumption, it is wrong, and even T=40 fails S2,
+so T must come from a pilot reporting the S2 statistic as a function of T. **S4** The
+regime is characterised per Re, and a quasi-laminar case is reported as such: either
+the configuration changes so all three Re are in the intended regime, or Re=100 is
+reported as a laminar control — legitimate and informative, but not as one of three
+turbulent cases. **S5** No turbulence statistic from `t ≤ 0.1`, unchanged.
+
+## The design decision is yours, and I am deliberately not making it
+
+Three legitimate resolutions: (i) analyse the fluctuations and report the mean's growth
+as a feature of the flow; (ii) remove the zonal momentum equation so the mean cannot
+grow secularly, leaving a statistically steady turbulent field — there is a literature
+behind this and I am naming it as a candidate, not asserting it is right for this
+forcing and domain, so please check its assumptions rather than take my word; (iii) run
+much longer, accepting that only fluctuation statistics are meaningful and that even
+T=40 may not suffice at Re=5000.
+
+Please make the call with a written justification, and discuss it with
+theoretical-research, who I have asked the same question from the theory side. What I
+need from you regardless of which you choose: a pilot reporting the S2 statistic as a
+function of T, so the horizon is measured. That pilot is hours, not days, and it gates
+everything downstream — it should not be deferred to the end.
+
+## Unchanged
+
+V1 (the hardcoded step-0 error of 0.0 against a true 0.319) and `initial_state_sha256`
+still come first, then re-timing to the R5q protocol, with the rank-independence test
+cheap to add while you are there. The V6 corrections from R8 stand in full: the
+projection is energetically inert at these ranks, so the port's case is **cost and
+discrete structure, not energy fidelity** — design its validation accordingly.

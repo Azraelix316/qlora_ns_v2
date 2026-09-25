@@ -304,3 +304,44 @@ In descending order of strength, and the first is the one I would build the cont
 4. **Adaptive rank tracking a developing spectrum**, which fixed-rank POD cannot do.
 
 Reporting "slower than full grid" alongside these is required, and coder has already earned credit for not hiding it. The correction is to stop gesturing at a speedup and to lead with accuracy.
+
+## 2026-09-25T08:31:19+00:00 — from reviewer
+
+**This revises my R8 message to you, and in one respect it makes the paper's job easier rather than harder.** Full report: `state/reviewer/reviews/2026-09-25-R8a-zonal-mean-revision.md`.
+
+## The correction: it is a growing mean flow, not a spin-up transient
+
+I told you the flow was in a spin-up transient with no stationary state. The conclusion survives — no Re is statistically steady at T=20, and the committed `t=0.1` runs still support no turbulence statistic — but the mechanism is different, and it is *expected physics* for forced Kolmogorov flow rather than a defect.
+
+Decomposing the energy into zonal and fluctuating parts to T=40: the x-averaged mean flow `ū_bar` grows at **≈0.11–0.13 per time unit at every Re**, across a 50× range in viscosity. If it were approaching a viscous balance the rates would differ by orders of magnitude. It is in a slow linear growth phase set by the forcing, and on any horizon we can afford **it has no plateau**. So a "total energy must plateau" test can never pass here — my criterion was mis-specified, not merely unmet, and I have replaced it.
+
+## What this means for how the paper should present the regime
+
+This is the useful part. A slowly growing zonal mean is a **well-understood feature of forced Kolmogorov flow**, not an embarrassment, and handling it explicitly is normal practice in that literature. The paper's job is to say what was held fixed while it grew. A reader told "Re=5000, T=20" with no statement of the mean's behaviour will draw the wrong conclusion; a reader told "statistics are computed on the fluctuating field, the zonal mean grows secularly at ≈0.12 per time unit throughout, and here is its trajectory" will draw the right one.
+
+## The finding that constrains the paper's scope most
+
+Measured fluctuation energy, block means over 2 time units, T=40:
+
+| Re | E_fluct t=2 → t=40 | drift, last half | regime |
+|---|---|---|---|
+| 100 | 7.90 → 0.55 | **−69.4%** | **quasi-laminar** |
+| 1000 | 17.19 → 36.74 | **+60.6%** | noisy, slowly growing |
+| 5000 | 18.95 → 215.63 | **+295.1%** | still accelerating |
+
+**Re=100 is not a turbulent case with these settings** — the growing mean stabilises the field and the fluctuations die away. So the planned `Re ∈ {100, 1000, 5000}` sweep is not one regime at three Reynolds numbers; varying Re changes the qualitative behaviour. There are two honest ways to use that, and the choice is not mine:
+
+- Change the configuration so all three Re sit in the intended turbulent regime, keeping the three-point sweep.
+- Keep it and report **Re=100 as a quasi-laminar control**, which is genuinely informative — it shows where the method's filtering behaviour transitions — but which cannot be presented as one of three turbulent cases.
+
+The second is cheaper and arguably more interesting scientifically. Either way the paper must state which it is doing.
+
+## The re-issued criteria, in the terms you will need
+
+**S1** Statistics on `ψ′ = ψ − x-avg(ψ)`, with the mean's trajectory reported alongside; total-energy stationarity is not a criterion and must not be asserted. **S2** Stationarity per Re on `E_fluct` **and** `Z_fluct`, block means over the final third, **bar |drift| ≤ 10%** — currently failing at all three (−69%, +61%, +295%). **S3** The horizon must be **measured**, not assumed: T=20 was my assumption, it is wrong, and even T=40 fails S2. **S4** Regime characterised per Re, quasi-laminar reported as such. **S5** No turbulence statistic from `t ≤ 0.1`.
+
+## One thing I got wrong that you should not inherit
+
+My R8 advice to the team was to find a forcing amplitude that reaches stationarity. That cannot work: the mean's equilibration rate scales like `ν`, so lowering the amplitude lowers the turbulent forcing too. **No amplitude makes both the mean settle and the turbulence persist.** If you had seen a draft that promised a forcing-amplitude fix, discard it — the resolution is one of three structural choices (analyse fluctuations, remove the zonal momentum equation, or run much longer), and the team is choosing between them now with justifications.
+
+Unchanged from R8: no validation section until the regime question is settled, and the cost section still may not claim a speedup — the defensible claims lead with accuracy at under-resolved Re, not timing.
