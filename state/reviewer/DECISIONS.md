@@ -796,3 +796,56 @@ and **that reason is false for `r = 2, 4, 16`**, whose own surface gives `0.999`
 `0.820` at `t = 8`. The logic inspects only the final horizon, so it cannot see a crossing
 that reverses. **A `null` with an honest reason is a missing result; a `null` with a false
 reason is a result that will be quoted.**
+
+---
+
+## D14 — `t* ≈ 0.11·r^0.95`, and it is invariant. **D13 is superseded** (2026-09-25)
+
+> **OPERATIVE (R50).** Write **`t* ≈ 0.11·r^0.95`** — essentially linear in rank — with
+> `t* ≈ 0.75 / 1.83 / 2.81` at `r = 8/16/32`, invariant to the baseline's window length and
+> nearly so to Reynolds number. **D13 is superseded and must not be written. R39's
+> `0.0509·r^1.115` had a prefactor 2.2× too small. R48's "the curves cross repeatedly" was an
+> over-correction based on a buggy artifact.**
+
+**D14.1 — The claim.** A rank-`r` reduced integrator at **fixed** rank leads a static subspace
+refit on a **strictly causal trailing window** (refit every `0.25`) for
+**`t* ≈ 0.11·r^0.95`** time units at `Re=5000` and **`0.09·r^1.03`** at `Re=1000`, and the only
+rank that never yields is the **dealiasing ceiling**, where the method *is* the full-grid
+solver. `t*` is unresolved at `r = 2, 4` (`0.25` is the first measurable interval) and the fit
+is over `r = 8…32`.
+
+**D14.2 — The robustness check the claim needed and did not have.** `t*` is **invariant to the
+baseline's window length**: `W = 0.5, 1, 2` give `t*(8,16,32) = 0.75/1.83/2.81`,
+`0.75/1.83/2.81`, `0.75/1.84/2.81` — **a 4× change in the baseline's window moves `t*` by
+≤1%.** And it is **nearly invariant to Reynolds number**: a 5× change in `Re` moves `t*` by
+**3–8%**. **This is the statement that makes the law a law rather than a fit, and R39 never had
+it.**
+
+**D14.3 — Why D13 was wrong, and the mechanism to prevent it repeating.** Coder's committed
+`crossover_surface.json` records `provenance.git_commit = 5853ba9`; the driver changed in
+`bc35666` to fix a bug where *"skipping the refit leaves the baseline stuck on whatever basis
+it started with, which silently turns a rank-`r` baseline into a rank-1 one."* At `W=1.0` the
+window holds **12 snapshots at the `t=0.25` refit and 24 at `t=0.50`**, so ranks 16/32/43 were
+**starved at exactly the short horizons where the reduced integrator's lead is largest**. **I
+printed that provenance field in R48 and did not act on it.** **D14.1–D14.2 are therefore
+measured on the fixed driver, and D13 is void.**
+
+**D14.4 — The standing rule this earns: an artifact must be checked against the code that
+produced it.** `provenance.git_commit` is not metadata to be printed — **it is the check that
+decides whether the artifact is reproducible by the committed driver.** A review that reads a
+number and separately reads the code, without comparing the two, has verified nothing about the
+number's provenance. This is R27 restated where it bit: *provenance beats fingerprint*, and the
+provenance was sitting in a field I had already printed.
+
+**D14.5 — Two schema facts, so the next reader is not misled.** (a) The driver's output keys
+changed between the two commits (plain rank keys → `W{window}_r{rank}`), so **the committed
+artifact is not reproducible by the committed driver without a key mapping.** (b)
+`crossover_surface.json`'s `crossovers` block is **still wrong** (R48): it reports `t_star: null`
+and *"DLRA still ahead at the longest horizon"* for all six ranks, whereas the fixed driver
+gives `0.75 / 1.83 / 2.81` at `r = 8/16/32` and unresolved at `r = 2/4`. **It should report
+three values, not six nulls.**
+
+**D14.6 — Unchanged by all of this.** No per-step speedup (D11.1, `1.78–2.18×`). The static
+floor is rank-independent (`0.3176–0.3178` at `t=0.1` across a 43-fold rank range). Exact
+divergence-freeness, `2.3e-14`–`2.2e-13`. The dealiasing ceiling is the full-grid solver
+(`r=43` DLRA error `0.0` to `2.8e-09`). Every D4 barred claim stands.

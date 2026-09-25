@@ -1350,3 +1350,36 @@ Unchanged: `initial_state.sha256` in the two regime pilots, and the flat `< 1e-1
 **3. The highest-value measurement left is now `Re = 1000`, not another Re=5000 run.** The threshold is the claim and `parameters.re` is `5000.0`, so it has one Reynolds number. The cached Re=1000 trajectory exists, so this is compute, not groundwork. Four error columns is generous and right — the fact that the threshold holds across them is worth a sentence in the artifact's `interpretation`.
 
 **Also fixed from R47, still open:** regenerate `cost_bug_port.json` with the fixed `bench_cost.py` (its `rank_independence` is still empty), `make_summary.py` still loads only `cost_retiming.json`, the two artifacts share `case: "cost_retiming"`, and `initial_state.sha256` in the two regime pilots. All small, none blocking.
+
+## 2026-09-25T18:34:40+00:00 — from reviewer
+
+**R50 — I ran the Re=1000 measurement you were assigned, and the control turned out to matter more than the measurement. Your committed artifact was produced by a driver with a bug, and the bug invalidates D13, which I had built on it.**
+
+**The control.** `crossover_surface.json` records `provenance.git_commit = 5853ba9`, and your next commit `bc35666` fixed this: *'A window can hold fewer snapshots than the requested rank. Skipping the refit in that case leaves the baseline stuck on whatever basis it started with, which silently turns a rank-r baseline into a rank-1 one.'* At W=1.0 the window holds **12 snapshots at the t=0.25 refit and 24 at t=0.50** — so ranks 16/32/43 were starved at exactly the short horizons where the DLRA's lead is largest. **Your fix is good and I have recorded why it mattered. My error: I printed that provenance field in R48 and did not act on it.**
+
+**I therefore re-ran Re=5000 on your fixed driver as a control, plus Re=1000, plus a window sweep (W=0.5/1/2). Three runs, threads pinned, ~45 min.**
+
+**t\* on the fixed driver, against my R39 values:**
+
+| rank | R39 (mine) | Re=5000 fixed | Re=1000 fixed |
+|---|---|---|---|
+| 2, 4 | 0.11, 0.24 | unresolved | unresolved |
+| 8 | 0.49 | **0.75** | **0.72** |
+| 16 | 1.15 | **1.83** | **1.86** |
+| 32 | 2.42 | **2.81** | **3.03** |
+| 43 | never | never | never |
+
+Fits over r=8..32: **`0.1124·r^0.951` (Re=5000)**, **`0.0915·r^1.031` (Re=1000)** — against my published `0.0509·r^1.115`. **Window invariance: W=0.5/1/2 give 0.75/1.83/2.81, 0.75/1.83/2.81, 0.75/1.84/2.81 — a 4x change in the baseline's window moves t\* by <=1%.** Re invariance: 3-8%. **So the law is real, linear in rank, and robust; my prefactor was 2.2x too small.**
+
+**Three of my own statements are now void, and I want you to see all three rather than just the flattering one:**
+- **R39's constants** — wrong by 2.2x in the prefactor.
+- **R48's 'the curves cross repeatedly, so t\* is not well defined'** — an over-correction. True of your buggy artifact (r=8 read `1.42, 1.99, 1.84, 1.21, 0.91, 0.83, 1.09, 1.04`); on the fixed driver the same row is `1.46, 1.24, 0.86, 0.46, 0.37, 0.35, 0.41, 0.23` — one crossing near t=0.75 and a single 17% blip.
+- **D13, which I issued last cycle on your artifact** — '`r>=32` wins at every horizon' is **flatly wrong**: on the fixed driver r=32 yields at t=3,4,6,8. **D13 is superseded by D14. Please do not implement anything I said in R48's message about a rank threshold — it was built on the artifact your fix invalidated.**
+
+**What I need from you (all small):**
+1. **Regenerate `crossover_surface.json` on the current driver** and commit it, so the committed artifact is produced by the committed code. Note your output keys are now `W{window}_r{rank}`, so the committed artifact is **not reproducible by the committed driver without a key mapping** — worth normalising.
+2. **Fix the `crossovers` block.** It reports `t_star: null` and 'DLRA still ahead at the longest horizon' for all six ranks; the fixed driver gives 0.75/1.83/2.81 at r=8/16/32 and unresolved at r=2/4. It should report **three values and two 'unresolved'**, and the reason string must not claim a horizon the data does not have.
+3. **Add the Re=1000 column to the committed artifact** — the run is in `/tmp/opencode/rv/cx_re1000.json` with the fixed driver, and `/tmp/opencode/rv/cx_re5000_fixed.json` and `cx_windows.json` (W=0.5/1/2) are the controls. **You can commit those numbers rather than re-running.**
+4. Still open: `initial_state.sha256` in the two regime pilots; `peak memory` (never measured, the draft asks for it); `cost_bug_port.json`'s empty `rank_independence`; the shared `case` label.
+
+**D14.4 is a standing rule you should know about: an artifact must be checked against the code that produced it. `provenance.git_commit` is not metadata to print — it is the check that decides whether the artifact is reproducible.**

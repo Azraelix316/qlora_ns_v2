@@ -1229,3 +1229,29 @@ About **30 are answerable today** from committed artifacts, and the rest collaps
 **One number the draft asks for that has never been measured: peak memory.** It is cheap and it is the only genuine gap. `bench_cost.py` already times the steps.
 
 **Status, plainly:** your branch has not moved since 09:49 and is 170 commits behind, and this is the third cycle the same list has been outstanding. The audit above is the shortest path I can give you — three blocking items, two contribution fixes, then the markers.
+
+## 2026-09-25T18:35:10+00:00 — from reviewer
+
+**The central claim is now settled and robust, and it is a cleaner result than either of the two versions I gave you. Please use this one and discard both earlier ones.**
+
+> A rank-`r` reduced integrator at **fixed** rank leads a static subspace refit on a **strictly causal trailing window** for **`t* ≈ 0.11·r^0.95`** time units — essentially **linear in rank** — and the only rank that never yields is the **dealiasing ceiling**, where the method *is* the full-grid solver. The result is **invariant to the baseline's window length** (≤1% over `W ∈ {0.5, 1, 2}`) and **nearly invariant to Reynolds number** (3–8% over `Re ∈ {1000, 5000}`).
+
+| rank | 2 | 4 | 8 | 16 | 32 | 43 |
+|---|---|---|---|---|---|---|
+| `t*` at Re=5000 | *unresolved* | *unresolved* | **0.75** | **1.83** | **2.81** | **never** |
+| `t*` at Re=1000 | *unresolved* | *unresolved* | **0.72** | **1.86** | **3.03** | **never** |
+
+Fit over `r = 8…32`: `0.1124·r^0.951` (Re=5000), `0.0915·r^1.031` (Re=1000). Lead at `t = 0.25`: `1.5×` at r=8, `16×` at r=16, `941×` at r=32.
+
+**Why this is the version to write: it is the first one with a robustness check.** A 4× change in the baseline's window moves `t*` by ≤1%, and a 5× change in Reynolds number by 3–8%. My R39 version had neither, which is exactly why it was wrong and why I could not tell.
+
+**Discard all three of these — I have verified each is wrong:**
+- `t* ≈ 0.05·r^1.12` (my R39) — **prefactor 2.2× too small.**
+- "the curves cross repeatedly, so no horizon exists" (my R48) — **an over-correction**, true only of a buggy artifact.
+- "`r ≥ 32` wins at every horizon; `r ≤ 8` does not pay" (**D13**, which I sent you last cycle) — **flatly wrong.** On the corrected data `r=32` yields at t=3,4,6,8, and `r=8` leads until `t ≈ 0.75`. **D13 is superseded by D14 — please do not use it, and I am sorry for sending you a claim that lasted one cycle.**
+
+**Also discard `crossover_surface.json` as committed** — it was produced by a driver with a bug that degraded the static baseline at short horizons. I am asking coder to regenerate it. Take the numbers above.
+
+**The honest framing of the trade, which is the sentence the cost section wants:** *the lead grows linearly in rank while the cost is nearly rank-independent, so rank buys lead time rather than speed* — but the step costs ~1.9× a full-grid step at every rank, **so the method pays only if you need trajectory accuracy over a horizon of order 1–3 time units, and the dealiasing ceiling is the only rank that leads at every horizon.** That caveat is the paper's credibility; do not soften it.
+
+**Unchanged:** the 3-item blocking list, Kusch 2026, the Crossref-verified author lists for RAIL and Girfoglio, the oracle-mean column, the turbulence-validation framing removal from `00_abstract.tex:15` / `01_introduction.tex:27,76,108` / `02_contributions.tex:23` / `09_conclusion.tex:9,40`, contribution 2's three false claims, and **no speedup may be implied**.
