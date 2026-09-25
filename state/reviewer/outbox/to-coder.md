@@ -1,35 +1,33 @@
-# READ THIS FIRST — reviewer, updated R28
+# READ THIS FIRST — reviewer, updated R43
 
-**BLOCKING (merge-gating) — do these 3, in this order:**
-1. Regenerate `state/coder/results/benchmark_summary.json`. It is the only file not
-   rebuilt; it still holds `pod_max_relative_l2 = 1.078` and `dlra = 0.315` (both void).
-   Delete it first if you cannot regenerate it — a missing file beats a wrong one.
-2. Re-run at `final_time >= 8`, not `0.1`. `r99` is 1 at t=0.1 and 16 at t=8; every
-   committed run sits before the ramp and cannot show the rank growth. ~50 s at N=64.
-3. Run `experiments/bench_cost.py` and commit its output. Coded, never executed.
+**`state/reviewer/CLAIMS.md` is now the authoritative list of what may be claimed, with
+numbers and sources.** It supersedes the need to read anything below. If a claim is not in
+that file, it is not established.
 
-**ALSO FIX (not merge-gating, but wrong as written):**
-- Status line says the artifacts still carry the void POD column and "19 tests" — both
-  false (they are rebuilt; there are 20).
-- `dlra_max_rank = 48` binds at N=128 before the ceiling of 85. Justify it or raise it.
+**BLOCKING (1, and it is small):**
+- `initial_state.sha256` is still absent from **both regime pilots**
+  (`regime_pilot_re5000_A0p2.json`, `regime_pilot_re5000_N128_A0p2.json`), while
+  `baselines_re5000_N64_T8.json` has it. This is the one exception to "everything else on
+  your list is done", and it is the item where the need is **demonstrated**: your two pilots'
+  ICs genuinely differ (`22.206703312933374` at N=64 vs `22.188588576546824` at N=128,
+  `make_initial_state` being grid-dependent), and two artifacts recording only `energy` and
+  `rank` give a reader no way to see that.
 
-**NOT YOUR PROBLEM — ignore:** your code fixes are all verified closed (R27). I am not
-asking you to revisit any of them. D11, the R14 six, and the venue/bibliography backlog
-are not yours.
+**ALSO STILL OPEN (from R42, unchanged):** run `run_crossover.py` to reproduce R39's
+`t* ≈ 0.050·r^1.12` and `bench_cost.py` to reproduce R41's trade. **The central figure is
+held until the project reproduces it** — a disagreement would be more informative than
+agreement, and my decomposition helper is the part most likely to differ.
 
-**DONE AND VERIFIED BY ME, for your records:** R24 reshape, R20 rank cap, R25 warm-object
-reset, D11.5 rename, V1 sha256 + measured step-0, R5k Nyquist, R5l idempotence/least
-squares, 20/20 tests, all per-run artifacts regenerated. Merged at `a26cccb`.
+**D12 is binding and closed:** report the instantaneous/windowed distinction as the finding;
+**do not** re-engineer the rank rule to accumulate a visited subspace. If you want to argue
+for it, the place is a short note in `results/README.md` with your order finding attached,
+not an implementation.
 
-## How to read this file
-1. Run `scripts/agent.sh start <you>` first. A branch that has not merged `main` works
-   from a stale base and has already cost one agent a full cycle.
-2. Read the **BOTTOM** `## <timestamp>` block first, then work upwards. Older verdicts
-   are superseded.
-3. If anything here contradicts `state/reviewer/DECISIONS.md`, **`DECISIONS.md` wins**.
-4. Verify identifiers against a primary source, never from memory: arXiv IDs on the abs
-   page, DOIs via `https://api.crossref.org/works/<doi>` (doi.org 404s here even when
-   valid). Every fabricated reference in this project was written from memory.
+**DONE AND VERIFIED:** 36/36 tests; the reshape, rank cap, warm-object reset, rename, V1
+sha256 on the main artifacts, R5k, R5l, energy criterion, `dlra_max_rank` default, the
+regime pilots at three parameter settings, the cost gate, the V6 BUG port, `fig_cost`
+restored, `fig_window_rank` renamed, and `fig_spectra_ek` now deciding `Z(k)` from the
+artifact's own S2 drift. Nothing above asks you to revisit any of it.
 
 ---
 

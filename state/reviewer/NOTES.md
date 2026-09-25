@@ -30,6 +30,25 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R43 — PROCESS FIX, and the artifact I should have built twenty cycles ago:
+> `state/reviewer/CLAIMS.md`.** My outboxes had become unusable — **1 285 lines to `coder`,
+> 1 107 to `writer`**, 55 reports — and the writer's draft has been frozen for twelve hours
+> with no way to see that a single file now contains the paper's entire content. **The volume
+> is a failure mode I created**, and the user having to point at it twice is the cost. So the
+> fix is one authoritative file: **every claim the paper may make, with its measured value, its
+> source artifact and commit, the figure that backs it, and — for the retracted ones — the
+> retraction.** §1 the central result (`t* ≈ 0.050·r^1.12`) and why it is clean; §2 the two
+> rank quantities and their opposite directions, with coder's sharper grid-independent vs
+> grid-tracking formulation adopted over mine; §3 cost, the trade, BUG, and the
+  order-is-conditional-on-rank finding; §4 the invariants, which are the one solid thing;
+> §5 the regime map with the enstrophy/energy split and both figure consequences; §6 **fourteen
+> prohibited claims** with the reason for each; §7 the defensible contribution in one
+> paragraph; §8 a provenance index that marks `baselines_re5000_N64_T8.json` **not citable**
+> and flags the pilots' missing `initial_state.sha256` as a *demonstrated* gap (their ICs
+  genuinely differ, `22.2067` vs `22.1886`). **All four outbox headers rewritten to lead with
+  it**, with history preserved and verified (39/42/14/20 blocks, no truncation). **The rule
+  this earns: a reviewer who cannot fit the current state on one screen has failed at the
+  reviewer's job, whatever the reports say.**
 > **R42 — coder's cost gate + the V6 BUG port, and binding decision D12. Merged
 > (`dc77412`). Also: my R41 retraction was ITSELF an over-correction.** Coder `6ea5c96`
 > (5 commits, 24 files, +1837/−53), **36/36 tests pass** in my venv. **The cost gate
@@ -1205,6 +1224,45 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R43 — the artifact I should have built twenty cycles ago:
+  `state/reviewer/CLAIMS.md`, after two rounds of the user telling me the process was
+  producing bureaucracy the agents could not act on.**
+  My outboxes had become unusable: **1 285 lines to `coder`, 1 107 to `writer`**, alongside
+  55 reports. The writer's draft has been frozen for twelve hours, and no agent could see that
+  a single file now contains the paper's entire measured content. **The volume is a failure
+  mode I created** — I sent a new essay each cycle instead of maintaining one current
+  document, so "current state" existed only as the top of a thousand-line file that nobody
+  re-read. The user naming it twice is the cost of my not noticing.
+
+  **The fix is one authoritative file: `state/reviewer/CLAIMS.md`** — every claim the paper
+  may make, with its measured value, its source artifact and commit, the figure backing it,
+  and for the retracted ones the retraction itself. Eight sections: **§1** the central result
+  (`t* ≈ 0.050·r^1.12`) and the two facts that make it clean (a rank-independent static floor
+  of ≈0.30, and a reduced error that falls with rank because it refits each step); **§2** the
+  two rank quantities and their **opposite** directions, carrying coder's sharper formulation
+  — `r99` measures the dynamics and is grid-independent, the amplitude rule measures the
+  discretisation at `4.0×`/`4.2×` the ceilings — adopted over my weaker phrasing, with the
+  unexplained non-monotonicity for `W ≥ 12` marked open; **§3** cost, the trade
+  (`+4.4%` per step buys `22×` the horizon), BUG's structural-not-speed value, and
+  order-is-conditional-on-rank; **§4** the invariants, the one solid thing; **§5** the regime
+  map with the enstrophy/energy split and **both figure consequences**; **§6 fourteen
+  prohibited claims**, each with its reason, including the two I retracted myself (mean
+  tracking, near-parity) and the one I reinstated; **§7** the defensible contribution in one
+  paragraph, explicitly noting there is no speedup in it; **§8** a provenance index marking
+  `baselines_re5000_N64_T8.json` **not citable** and recording the pilots' missing
+  `initial_state.sha256` as a **demonstrated** gap rather than a precaution.
+
+  **All four outbox headers rewritten to lead with it**, each naming the file as the
+  authoritative source and stating that a claim absent from it is not established regardless
+  of what any report or message says. **History preserved and verified individually: 39 / 42 /
+  14 / 20 message blocks, no truncation** — the R28b line-count rule applied to my own edit
+  this time.
+
+  **The rule this earns, and it is about the reviewer's job rather than the agents':** *a
+  reviewer who cannot fit the current state onto one screen has failed at the reviewer's job,
+  whatever the reports contain.* The reports stay long — they are the auditable record of my
+  reasoning — but the *current state* must be one file, and the outbox must be a pointer to it
+  rather than a chronological substitute for it.
 - 2026-09-25 **R42 — cost gate, V6 BUG port, and binding decision D12. And my R41
   retraction was itself an over-correction.**
   Coder `6ea5c96` (5 commits, 24 files, +1837/−53) **merged at `dc77412`**; 136 files on
