@@ -119,10 +119,13 @@ def run_to(
     dt: float,
     final_time: float,
     sample_every: int,
+    keep_snapshots: bool = True,
 ) -> dict:
     state = initial.copy()
     times = [0.0]
     history = [fluctuation_terms(grid, state)]
+    snapshots = [state.copy()] if keep_snapshots else []
+    ranks = [rank_spectrum(state)]
     max_div = grid.max_div_velocity(state)
     u0, v0 = grid.velocity(state)
     max_cfl = float(np.max(np.hypot(u0, v0)) * dt / grid.dx)
@@ -136,17 +139,95 @@ def run_to(
         if step % sample_every == 0 or step == nsteps:
             times.append(step * dt)
             history.append(fluctuation_terms(grid, state))
+            ranks.append(rank_spectrum(state))
+            if keep_snapshots:
+                snapshots.append(state.copy())
         if step % (50 * sample_every) == 0:
             u, v = grid.velocity(state)
             max_cfl = max(max_cfl, float(np.max(np.hypot(u, v)) * dt / grid.dx))
     return {
         "times": times,
         "history": history,
+        "snapshots": snapshots,
+        "ranks": ranks,
         "max_abs_divergence": max_div,
         "max_cfl": max_cfl,
         "wall_seconds": time.perf_counter() - start,
         "nsteps": nsteps,
     }
+
+
+def rank_for_energy(s: np.ndarray, fraction: float) -> int:
+    """Modes needed to carry ``fraction`` of the energy (the r99-style rank)."""
+    if s.size == 0 or s[0] <= 0.0:
+        return 0
+    energy = np.cumsum(s.astype(float) ** 2)
+    total = energy[-1]
+    if total <= 0.0:
+        return 0
+    return int(min(np.searchsorted(energy, fraction * total) + 1, s.size))
+
+
+def rank_for_amplitude(s: np.ndarray, cutoff: float) -> int:
+    """Modes above ``cutoff * s[0]`` -- the implemented historical rule."""
+    if s.size == 0 or s[0] <= 0.0:
+        return 0
+    return int(np.count_nonzero(s > cutoff * s[0]))
+
+
+def rank_spectrum(state: np.ndarray) -> dict:
+    """Both rank criteria for one state, on the fluctuations and in total."""
+    out = {}
+    for tag, field in (
+        ("fluct", fluctuations(state)),
+        ("total", state - np.mean(state)),
+    ):
+        s = np.linalg.svd(field, compute_uv=False)
+        out[tag] = {
+            "r99": rank_for_energy(s, 0.99),
+            "r999": rank_for_energy(s, 0.999),
+            "amp_1e-6": rank_for_amplitude(s, 1e-6),
+            "amp_1e-8": rank_for_amplitude(s, 1e-8),
+            "amp_1e-10": rank_for_amplitude(s, 1e-10),
+            "sigma_1": float(s[0]) if s.size else 0.0,
+        }
+    return out
+
+
+def window_rank_table(
+    snapshots: list[np.ndarray], horizons: list[float], times: list[float]
+) -> list[dict]:
+    """R26's table, computed here: modes needed to represent the window [0, W].
+
+    This is *not* the instantaneous rank of a state.  It is the number of modes
+    a POD basis fitted on every snapshot from t=0 to t=W needs to carry the
+    requested energy fraction of that window's fluctuations -- how many modes
+    the dynamics of the window actually occupies.  R26 measured this growing
+    1 -> 16 over the first eight time units and grid-independently; reproducing
+    it from this code is the cross-check, and the amplitude column beside it is
+    the same table's demonstration that the historical rule cannot see it.
+    """
+    table = []
+    for W in horizons:
+        cols = [
+            fluctuations(s).reshape(-1)
+            for t, s in zip(times, snapshots)
+            if t <= W + 1e-12
+        ]
+        if len(cols) < 2:
+            continue
+        X = np.stack(cols, axis=1)
+        centered = X - X.mean(axis=1)[:, None]
+        s = np.linalg.svd(centered, compute_uv=False)
+        table.append({
+            "window_end": W,
+            "snapshots": len(cols),
+            "r99": rank_for_energy(s, 0.99),
+            "r999": rank_for_energy(s, 0.999),
+            "amp_1e-6": rank_for_amplitude(s, 1e-6),
+            "amp_1e-10": rank_for_amplitude(s, 1e-10),
+        })
+    return table
 
 
 def windowed_spectra(
@@ -220,6 +301,11 @@ def main() -> None:
     parser.add_argument("--cutoff", type=int, default=8)
     parser.add_argument("--seed", type=int, default=20260925)
     parser.add_argument(
+        "--rank-horizons", type=float, nargs="*", default=None,
+        help="window ends for the rank-vs-horizon table (default: a ladder "
+             "through 8, where the growth happens)",
+    )
+    parser.add_argument(
         "--spectra-at", type=float, nargs="*", default=None,
         help="horizons at which to also accumulate windowed E(k)/Z(k) "
              "(default: the largest horizon)",
@@ -233,6 +319,15 @@ def main() -> None:
         raise SystemExit("S2 requires block means of at least 2 time units")
     horizons = sorted(args.horizons)
     spectra_at = sorted(args.spectra_at) if args.spectra_at else [horizons[-1]]
+    # The rank ladder is finer than the S2 ladder on purpose: the rank question
+    # is where the growth happens (the first few time units), which is exactly
+    # where S2 has too little record to say anything.
+    rank_horizons = sorted(
+        set(args.rank_horizons) | {h for h in horizons if h <= 8.0}
+    ) if args.rank_horizons else sorted(
+        {0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 6.0, 8.0}
+        | {h for h in horizons if h <= 8.0}
+    )
 
     grid = Grid2D(args.N)
     # dt scales with dx so the CFL number is held fixed across grids (P0 item 4).
@@ -274,8 +369,10 @@ def main() -> None:
             "S2_energy_fluct_drift": d_e["drift"],
             "S2_enstrophy_fluct_drift": d_z["drift"],
             "S2_passes": bool(passes),
-            "S2_energy_block_means": d_e["block_means"],
-            "S2_enstrophy_block_means": d_z["block_means"],
+            "S2_energy_block_means": d_e.get("block_means", []),
+            "S2_enstrophy_block_means": d_z.get("block_means", []),
+            "S2_energy_drift_note": d_e.get("reason"),
+            "S2_enstrophy_drift_note": d_z.get("reason"),
             "final_energy_total": e_t[-1],
             "final_energy_fluct": e_f[-1],
             "final_enstrophy_fluct": z_f[-1],
@@ -284,6 +381,9 @@ def main() -> None:
                 e_z[-1] / e_t[-1] if e_t[-1] > 0 else None
             ),
             "samples": len(times),
+            # Instantaneous rank of the state at t=T under both criteria, so the
+            # trajectory's rank and the window's rank can be compared.
+            "rank_at_end": rec["ranks"][-1],
         })
         if T in spectra_at:
             print(f"regime pilot: windowed spectra at T={T} ...", flush=True)
@@ -291,6 +391,21 @@ def main() -> None:
             spectra[str(T)] = windowed_spectra(
                 grid, model, initial, dt, window_start, T, args.sample_every
             )
+
+    # R26's measurement, reproduced here: how many modes the window [0, W]
+    # needs, for a ladder of W.  Built from the longest run's snapshots.
+    if rows and rec is not None:
+        print("regime pilot: window rank table ...", flush=True)
+        # Only windows the longest run actually covered: a rank entry for a
+        # horizon past the record would silently be fitted to a shorter window
+        # and look like saturation.
+        longest = rec["times"][-1]
+        usable = [W for W in rank_horizons if W <= longest + 1e-12]
+        rank_table = window_rank_table(rec["snapshots"], usable, rec["times"])
+        instantaneous = [
+            {"time": t, **ranks["fluct"]}
+            for t, ranks in zip(rec["times"], rec["ranks"])
+        ]
 
     qualifying = [r["final_time"] for r in rows if r["S2_passes"]]
     output = {
@@ -304,6 +419,7 @@ def main() -> None:
             "N": args.N,
             "dt": dt,
             "horizons": horizons,
+            "rank_horizons": rank_horizons,
             "block_time": args.block_time,
             "spectra_at": spectra_at,
             "sample_every": args.sample_every,
@@ -325,6 +441,8 @@ def main() -> None:
         },
         "rows": rows,
         "windowed_spectra": spectra,
+        "window_rank_table": rank_table,
+        "instantaneous_rank_series": instantaneous,
         "qualifying_horizons": qualifying,
         "interpretation": (
             "S1: every statistic here is computed on psi' = psi - x-avg(psi); the "
