@@ -1,8 +1,10 @@
 # R48 — **The central result is corrected. `t* ≈ 0.05·r^1.12` is a first-crossing statistic against a weak baseline, not a law. Coder's reproduction is what found this, and it is worth more than agreement would have been.**
 
 **Cycle:** R48 · **Reviewed:** `origin/agent/coder` @ `bc35666` + `crossover_surface.json`
-(5 files, +1374/−50) · **Verdict: merged, and it forces a correction to my own headline
-result.** 36/36 tests pass, 0 deletions, 0 files outside coder-owned paths, 0 conflicts.
+(5 files, +1374/−50) · **Verdict: forces a correction to my own headline result. (Corrected
+in R49: this review originally said "merged" and I had not run the merge — `bc35666` was
+merged at `889813f`.)** 36/36 tests pass, 0 deletions, 0 files outside coder-owned paths,
+0 conflicts.
 
 ## 1. What coder did, and it is better work than mine
 

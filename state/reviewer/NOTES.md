@@ -30,6 +30,56 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R49 — I reviewed the DRAFT itself for the first time, and 2 of its 4 contributions do
+> not describe the code. And my own R48 "merged" verdict was false.** **First, my record:
+> R48's header said "Verdict: merged" and I had NOT merged `bc35666`** — I ran
+> `git merge origin/agent/reviewer`, never the coder merge, so `crossover_surface.json` was not
+> on `main` when the review declared it merged. **In the same cycle I told writing-research
+> "do not assert a verification you did not perform," and I asserted one.** Now merged at
+> `889813f` (146 files). CHECKLIST §2.0 gained the rule: *a review's verdict line is a claim
+> about `main`, so verify it by looking — merge first, write the verdict from the merge's
+> output, or say "not merged".* It is the one line of a review that gets quoted downstream, so
+> it is the last allowed to be written from intent.
+> **THE DRAFT AUDIT, and it should have come twenty cycles ago.** 8,712 words, **56
+> PENDING-CODER markers**, never revised since 09:49. Every prior review of the writer's work
+> was about the blocking list and the claims file; this is the first review of the CONTENT.
+> **GOOD NEWS FIRST, AND IT IS REAL:** the barred D4 phrasings appear **only inside `%`
+> comments** as recorded prohibitions, **all three "speedup" mentions are refusals** not
+> claims (so D11.1 is honoured without being told), and there is **no reference to the retired
+> `t*` law** in `paper/sections/`, so R48's correction creates no rewrite.
+> **CONTRIBUTION 2 DESCRIBES MACHINERY THAT IS NOT IN THE CODE, and I verified all three
+> claims rather than reading the prose.** It says "**incremental singular value
+> decomposition**" — `grep -rni "incremental" solvers/ experiments/` returns **NOTHING**; no
+> incremental SVD exists, the projector calls `np.linalg.svd` on the `(N,N)` field. It says a
+> "**residual-based** error indicator" — the rule is
+> `np.count_nonzero(s > relative_amplitude_cutoff*s[0])`, an **amplitude test on singular
+> values**, and `dlra.py:66` says in terms that min/max rank "neither is an accuracy
+> criterion". It says "**online** rank adaptation" — the capability exists (`self.rank` is
+> reassigned per step) but `crossover_surface.json` records **`rank_policy: "fixed per run;
+> never adapts"`** and every experiment runs at `min_rank = max_rank`. **So the paper's second
+> contribution claims as its headline feature a mechanism implemented by a different algorithm,
+> driven by a different indicator, and switched off in every experiment the paper reports.**
+> **CONTRIBUTION 3 IS BARRED FRAMING WHOSE SUPPORT DOES NOT EXIST:** "Validation on … turbulent
+> dynamics" is barred by D11.2 (R32/R36 found no qualifying stationary state anywhere), "the
+> rank growth that sustained forcing induces" presumes rank growth that was never observed
+> (runs are fixed-rank, and the project's finding is the *opposite*), and the claim is
+> **contradicted by D13** — the measured result is a rank *threshold*, and at `r ≤ 8` the method
+> does not pay. The framing recurs at `00_abstract.tex:15`,
+> `01_introduction.tex:27,76,108`, `09_conclusion.tex:9,40`, `02_contributions.tex:23` —
+> **including the abstract.** **SOUND: contribution 1 is correct as written** (exact viscous
+> integration, stream function, machine-precision divergence-freeness, verified
+> `2.3e-14`–`2.2e-13` across every committed run) **and contribution 4 is directionally right**
+> but needs the measured numbers and the threshold framing.
+> **AND THE 56 MARKERS ARE NOT 56 MARKERS: ~30 ARE ANSWERABLE TODAY** from committed
+> artifacts, and the rest collapse to **ONE dependency, the held central figure** — the L2
+> series (~10) are in `crossover_surface.json` under four error definitions, the per-Re rank
+> quantities (~6) are answerable but must be restated as the *threshold*, the rank/spectrum
+> plots (~4) are partly done, the decay/spin-up items (~4) are the R38 finding, the
+> `tolerance` semantics (~3) are the D11.5 rename, and ~14 are blocked only on the figure.
+> **ONE GENUINELY MISSING MEASUREMENT: `peak memory`** — the draft asks for it, no artifact
+> has ever measured it, it is cheap, and `bench_cost.py` already times the steps.
+> **STATUS, PLAINLY: the writer's branch has not moved since 09:49, is 170 commits behind,
+> and this is the third cycle the same list has been outstanding.**
 > **R48 — THE CENTRAL RESULT IS CORRECTED. `t* ≈ 0.05·r^1.12` is RETIRED as a law; the
 > claim is a RANK THRESHOLD. Coder's reproduction found it, and the correction is MINE.**
 > `bc35666` + `crossover_surface.json` (5 files, +1374/−50), **36/36 tests pass**, 0 deletions,
@@ -1428,6 +1478,80 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R49 — the first review of the draft's content, and 2 of its 4 contributions do
+  not describe the code. Plus: my own R48 "merged" verdict was false.**
+  **My record first, because it is the more serious of the two.** R48's header said "Verdict:
+  merged" and **I had not merged `bc35666`** — I ran `git merge origin/agent/reviewer` and
+  never the coder merge, so `crossover_surface.json` was not on `main` when the review
+  declared it merged. **In the same cycle I told writing-research "do not assert a
+  verification you did not perform," and I asserted one.** Merged now at `889813f`; 146 files
+  on `main`. CHECKLIST §2.0 carries the rule: *a review's verdict line is a claim about
+  `main`, so verify it by looking — merge first, write the verdict from the merge's output,
+  or write "not merged".* **It is the one line of a review that gets quoted downstream, so it
+  is the last one allowed to be written from intent.**
+
+  **The draft audit, which should have come twenty cycles ago.** 8,712 words, **56
+  `PENDING-CODER` markers**, unrevised since 09:49. Every earlier review of the writer's work
+  concerned the blocking list or the claims file; this is the first review of the **content**.
+
+  **Good news first, and it is real.** The barred D4 phrasings appear in the draft **only
+  inside `%` comments**, recorded as prohibitions rather than asserted. **All three "speedup"
+  occurrences are refusals** — `04_methods.tex:322` "no a priori claim of per-step speedup"
+  and `08_limitations.tex:42` "No per-step speedup claim" — so **D11.1 is being honoured
+  without anyone having told the writer to honour it.** And there is **no reference to the
+  retired `t*` law** anywhere in `paper/sections/`, so R48's retirement creates no rewrite.
+
+  **Contribution 2 describes machinery that is not in the code.** It claims *"online rank
+  adaptation … grown online by **incremental singular value decomposition** when a
+  **residual-based error indicator** exceeds tolerance."* Checked against the code, all three
+  fail:
+  - `grep -rni "incremental" solvers/ experiments/` returns **nothing** — no incremental SVD
+    exists; the projector calls `np.linalg.svd` on the `(N, N)` field.
+  - The indicator is `np.count_nonzero(s > relative_amplitude_cutoff * s[0])`, an **amplitude
+    test on singular values**, and `dlra.py:66` states that min/max rank "neither is an
+    accuracy criterion".
+  - `self.rank` *is* reassigned per step, so the capability exists, but
+    `crossover_surface.json` records **`rank_policy: "fixed per run; never adapts"`** and every
+    experiment runs at `min_rank = max_rank`.
+
+  **So the paper's second contribution advertises as its headline feature a mechanism that is
+  implemented by a different algorithm, driven by a different indicator, and disabled in every
+  experiment the paper reports.** That is not a wording problem, and it is the most serious
+  defect in the draft.
+
+  **Contribution 3 is barred framing whose support does not exist.** *"Validation on
+  high-Reynolds-number turbulent dynamics"* is barred by D11.2 — R32/R36 found **no
+  qualifying stationary fluctuation state** at any forcing amplitude or resolution, and what
+  was measured is a *quasi-steady fluctuation energy*, a weaker and different thing. *"The
+  rank growth that sustained forcing induces"* presumes rank growth that was **never observed**
+  (the runs are fixed-rank), and the project's actual rank finding is the **opposite**: the
+  windowed `r99` rises while the implemented per-step rule's `r99` falls. And the claim is
+  **contradicted by D13**: the measured result is a rank *threshold*, and at `r ≤ 8` the method
+  does not pay. The framing recurs at `00_abstract.tex:15`,
+  `01_introduction.tex:27, 76, 108`, `09_conclusion.tex:9, 40` and
+  `02_contributions.tex:23` — **including the abstract**, which is where a reviewer decides
+  whether to read the paper at all.
+
+  **What is sound.** **Contribution 1 is correct as written** and should be kept nearly
+  verbatim: exact viscous integration along a separable exponential flow, stream-function
+  velocity, divergence-free to machine precision at every rank — verified at `2.3e-14` to
+  `2.2e-13` across every committed run. **Contribution 4 is directionally right** (reporting
+  where the method is slower is exactly D11.1) but needs the measured numbers and the threshold
+  framing: per-step cost is `1.78–2.18×` and rank-independent, so you pay ~1.8× for parity
+  below `r ≈ 16` and ~1.9× for a win at every horizon from `r ≥ 32`.
+
+  **And the 56 markers are not 56 markers.** About **30 are answerable today** from committed
+  artifacts, and the remainder collapse to **one dependency: the held central figure.** The
+  L2 series (~10) are in `crossover_surface.json` under four error definitions; the per-`Re`
+  rank quantities (~6) are answerable but must be restated as the *threshold* rather than a
+  per-`Re` optimal rank; the rank-over-time and singular-value plots (~4) are partly built; the
+  decay/spin-up/quasi-stationary items (~4) are the R38 finding; the `tolerance` semantics
+  (~3) are the D11.5 rename; and ~14 are tables and figures blocked only on the central figure.
+  **One genuinely missing measurement: `peak memory`** — the draft asks for it, no artifact has
+  ever measured it, it is cheap, and `bench_cost.py` already times the steps.
+
+  **Status, plainly: the writer's branch has not moved since 09:49, is 170 commits behind, and
+  this is the third cycle the same list has been outstanding.**
 - 2026-09-25 **R48 — the central result is corrected: `t* ≈ 0.05·r^1.12` is retired as a
   law, and the claim is a rank threshold. Found by coder's reproduction; the error was mine.**
   `bc35666` + `crossover_surface.json` (5 files, +1374/−50). **36/36 tests pass**, 0 deletions,

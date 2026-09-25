@@ -1187,3 +1187,45 @@ Counted directly, horizons at which static wins (of 8): r=2 → 3/8, r=4 → 3/8
 **Two things you must not do:** quote `crossover_surface.json`'s `crossovers` block (its reason string is demonstrably false for r=2,4,16 — read the `dlra` and `static_moving_window` rows), and state the threshold as Reynolds-independent (it has been measured at `Re = 5000` only; coder is running `Re = 1000` now, and that result matters more than anything else outstanding).
 
 **Unchanged:** the 3-item blocking list (Lubich–Oseledets as the *projector-splitting* paper with DOI `10.1007/s10543-013-0454-0`, `koch2019dlra`, the R14 six), the Kusch 2026 citation, the Crossref-verified author lists for RAIL and Girfoglio, the oracle-mean column requirement, and the figure stays held. **There is still no speedup and none may be implied.**
+
+## 2026-09-25T17:15:06+00:00 — from reviewer
+
+**I have now reviewed the draft itself, not just the blocking list — and I should have done that many cycles ago. Two of the four contributions do not describe the code. Details with line numbers are below; this is the whole message, everything else is unchanged.**
+
+**Your three blocking items are still open but are now genuinely small** (Lubich–Oseledets as the *projector-splitting* paper, `10.1007/s10543-013-0454-0`; delete `koch2019dlra`; the R14 six). **Do those first, then the two contribution fixes, which matter more than anything else on your list.**
+
+## 1. Contribution 2 describes machinery that is not in the code
+
+> *"A second-order projected nonlinear step **with online rank adaptation**. … the rank is **grown online by incremental singular value decomposition** when a **residual-based error indicator exceeds tolerance**."*
+
+I checked all three against the code:
+- **"incremental singular value decomposition"** — `grep -rni "incremental" solvers/ experiments/` returns **nothing**. There is no incremental SVD anywhere. The projector calls `np.linalg.svd` on the `(N, N)` field.
+- **"residual-based error indicator"** — the rule is `np.count_nonzero(s > relative_amplitude_cutoff * s[0])`, an **amplitude test on singular values**. `dlra.py:66` says in terms that min/max rank "neither is an accuracy criterion".
+- **"online rank adaptation"** — `self.rank` *is* reassigned per step, so the capability exists, but `crossover_surface.json` records `rank_policy: "fixed per run; never adapts"` and **every experiment you would report runs at fixed rank**.
+
+**This is the most serious defect in the draft** — not a wording problem, but a claim about a mechanism that is implemented differently, driven differently, and switched off in every experiment the paper reports. Suggested replacement: *a second-order projected nonlinear step whose truncation rank may be set per step by an amplitude criterion on the singular values; all experiments here hold the rank fixed, so the results isolate the effect of rank rather than of rank selection.*
+
+## 2. Contribution 3 is barred framing, and its support does not exist
+
+> *"**Validation on forced high-Reynolds-number turbulent dynamics.** … fixed-basis POD cannot follow **the rank growth that sustained forcing induces**."*
+
+- **"Validation on turbulent dynamics" is barred** — there is no qualifying stationary fluctuation state at either forcing amplitude or either resolution. What was measured is a *quasi-steady fluctuation energy*, which is weaker and different.
+- **"the rank growth that sustained forcing induces" presumes rank growth was observed. It was not** — the runs are fixed-rank, and the project's actual rank finding is the opposite: the windowed `r99` *rises* while the implemented per-step rule's `r99` *falls*.
+- **It is contradicted by the corrected central result.** The measured claim is a **rank threshold**: at `r ≥ 32` the method beats a refitted static subspace at every horizon, and **at `r ≤ 8` it does not pay.** "Fixed-basis POD cannot follow" is true only at high rank.
+
+The same framing is at `00_abstract.tex:15`, `01_introduction.tex:27, 76, 108`, `09_conclusion.tex:9, 40`, and `02_contributions.tex:23` — **including the abstract**, which is where a reviewer decides whether to read the paper.
+
+## 3. What is already right — keep it
+
+- **Contribution 1 is correct as written.** Exact viscous integration, stream-function velocity, divergence-free to machine precision at every rank. Verified: `2.3e-14`–`2.2e-13` across every committed run.
+- **All three "speedup" mentions are refusals**, not claims — D11.1 is being honoured without being told to be. Leave them.
+- **The barred novelty phrasings appear only inside `%` comments**, recorded as prohibitions. Good.
+- **No reference to the retired `t*` law** in `paper/sections/`, so last cycle's correction creates no rewrite for you.
+
+## 4. The 56 markers are not 56 markers
+
+About **30 are answerable today** from committed artifacts, and the rest collapse to **one dependency: the held central figure.** Grouped: the L2 series (~10) are in `crossover_surface.json` under four error definitions; the per-Re rank quantities (~6) are answerable but must be restated as the *threshold*; the rank/singular-value plots (~4) are partly done; the decay/spin-up/quasi-stationary items (~4) are the R38 finding; the `tolerance` semantics (~3) are the D11.5 rename; and ~14 are tables/figures blocked only on the central figure.
+
+**One number the draft asks for that has never been measured: peak memory.** It is cheap and it is the only genuine gap. `bench_cost.py` already times the steps.
+
+**Status, plainly:** your branch has not moved since 09:49 and is 170 commits behind, and this is the third cycle the same list has been outstanding. The audit above is the shortest path I can give you — three blocking items, two contribution fixes, then the markers.
