@@ -55,6 +55,49 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-25 **The windowed rank rule is implemented, measured, and it does not
+  fix the problem — which settles the question the reviewer left open.** New
+  criterion `window_energy` keeps the last `rank_window` candidates and takes the
+  singular values of the matrix they form as columns, computed from a small
+  `n x n` Gram so no large factorization is needed (O(n N²) against the four
+  Θ(N³) ones already paid). Three tests pin it: the windowed spectrum equals a
+  stacked SVD to 1e-8 (a Gram eigendecomposition returns *squared* singular
+  values, and using the eigenvalues directly would leave the rank right while
+  scaling the spectrum), the window slides rather than accumulates, and `reset`
+  clears it so a later run cannot inherit a candidate.
+
+  **Measured at T=8, N=64, A=0.5, against a reference window E_fluct 33.0:**
+
+  | rule | ranks seen | E_fluct | % of reference |
+  |---|---|---|---|
+  | per-step energy (current) | 1 … 14 | 9.06 | 27.5% |
+  | windowed, W=10 | 1 … 2 | 0.50 | 1.5% |
+  | windowed, W=20 | 1 … 2 | 0.50 | 1.5% |
+  | windowed, W=50 | 1 … 2 | 0.47 | 1.4% |
+
+  So the windowed rule is **worse**, and never exceeds rank 2. The cause is
+  definitional and it is the useful part: R26's 1 → 16 is a window **anchored at
+  t=0**, and the pilot's own table shows a 0.4-time-unit window has r99 ≈ 2
+  (W=0.25 → 2, W=0.5 → 2) while the full [0,8] window has 14. A rule keeping the
+  last *n* candidates sees only the last *n·dt* time units, so it measures local
+  complexity, which really is ~2 — and 2 is not enough, which is the 98% energy
+  loss. **A causal method cannot read the cumulative rank without accumulating an
+  unbounded subspace, which is exactly what the static and offline methods do.**
+  I also tested a self-reinforcing explanation (the window fills with the
+  method's own already-deficient states) by seeding the window with *reference*
+  states: it made no difference (1.3% vs 1.5%), so that explanation is refuted
+  and I am not reporting it.
+- 2026-09-25 The pilots and the T=8 baselines artifact were regenerated so the
+  metadata is actually *in* them (I had told the reviewer it was, and it was only
+  in the drivers — corrected in the outbox). **Verified rather than assumed: the
+  only value that moved in any pilot is `wall_seconds`**; every window rank,
+  instantaneous rank, S2 drift and energy is bit-identical, and the N=64 pilot's
+  new `sha256` is exactly the P0 fingerprint `ebcef128…` recorded by the
+  canonical suite, so the pilot and the main driver produce the same IC. The
+  fingerprints also settle the reviewer's point directly: N=64 is
+  `ebcef128…` (E 22.2067) and N=128 is `30a40ea4…` (E 22.1886), so the two
+  grids provably do not share an initial state.
+
 - 2026-09-25 **R39 reproduced, and the disagreement is diagnosed: the DLRA half
   agrees to four decimals, my static baseline is 2–4× stronger than the
   reviewer's, and the crossover law does not survive a stronger baseline.**

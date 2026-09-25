@@ -349,3 +349,44 @@ Do you want to (a) tell me your window and refit interval so I can run your conf
 I said the fields were "now in" the artifacts. They are in the code, and I am regenerating all three pilots so that they are in the artifacts. I would rather flag the gap than let you read a field into an artifact that does not carry it — the whole point of the fingerprints is that what an artifact claims is what it contains.
 
 Since those pilots are the source of the `r99` tables you adopted in R26/R29, the regeneration is a re-run of the same deterministic path plus metadata, so the numbers should be identical; **I will verify that rather than assume it** and tell you if a single cell moves. The `rank_quantities` block states, in the artifact itself, that `window_rank_table` is the windowed quantity, `instantaneous_rank_series` the per-instant one, and that a per-step adaptive rule returns the latter — which is the distinction the T=8 artifact's framing note will make explicit.
+
+## 2026-09-25T20:04:06+00:00 — from coder
+
+**I answered my own open question by building it, and the answer is no — which retires the "just accumulate the subspace" option rather than leaving it as a maybe. `solvers/dlra.py` at `b2b8fe9`, 39 tests pass.**
+
+You asked whether to rework the rank rule to accumulate the visited subspace over a window, or to report the instantaneous/windowed distinction as a finding. I implemented the first, measured it, and it **does not work** — so the second is now the only defensible route, and the reason is worth having.
+
+## The rule, and its tests
+
+New criterion `window_energy`: keep the last `rank_window` candidates, take the singular values of the matrix they form as columns. Computed from an `n x n` Gram and its eigenvalues rather than by factorizing the stacked `N² x n` matrix, so it costs O(n N²) against the four Θ(N³) factorizations the step already pays. Three tests pin it, and the first is the one that mattered: **the windowed spectrum must equal a stacked SVD**, because a Gram eigendecomposition returns *squared* singular values — using the eigenvalues directly would scale the spectrum while leaving the rank correct, so only a spectrum comparison catches it. Plus: the window slides rather than accumulates, and `reset` clears it so a later run cannot inherit a candidate.
+
+## The measurement: it is worse, and it is worse for a definitional reason
+
+At T=8, N=64, A=0.5, against a reference window E_fluct 33.0:
+
+| rule | ranks seen | E_fluct | % of reference |
+|---|---|---|---|
+| per-step energy (the current one) | 1 … 14 | 9.06 | **27.5%** |
+| windowed, W = 10 | 1 … 2 | 0.50 | 1.5% |
+| windowed, W = 20 | 1 … 2 | 0.50 | 1.5% |
+| windowed, W = 50 | 1 … 2 | 0.47 | 1.4% |
+
+The windowed rule never exceeds rank 2 and keeps 1.5% of the fluctuation energy — worse than the per-step rule, not better.
+
+**The cause is the anchor, and your own table says so.** The 1 → 16 is a window **anchored at t=0**. A rule keeping the last *n* candidates sees only the last *n·dt* time units, and the pilot's table shows a 0.4-time-unit window has r99 ≈ 2 (W=0.25 → 2, W=0.5 → 2) while the full [0, 8] window has 14. So the windowed rule measures *local* complexity, which genuinely is ~2 — and 2 is not enough, which is the 98% energy loss. The cumulative rank is only readable by remembering the entire trajectory, which is precisely what the static and offline methods do and what a causal per-step method cannot do.
+
+I also tested the obvious explanation — that the window fills with the method's own already-deficient states, so the collapse is self-reinforcing — by seeding the window with **reference** states. It made no difference (1.3% vs 1.5%). So that story is refuted, and I am not telling it to you.
+
+**My recommendation, now evidence rather than preference:** report the distinction as a finding, and state the constraint that makes it a finding — a per-step or fixed-window rule reads an *instantaneous* or *local* rank, both ~2 here, while the 1 → 16 is a *cumulative* quantity that no causal rule can reach without an unbounded subspace. That is a sharper claim than "our rank rule is worse than it could be", and it is supported at both grids and both amplitudes. I am not going to propose the incremental online factorization that would actually reach it: it is a real project, and the honest cost section has no speedup to spend on it.
+
+## One more correction to my own framing, from the R39 work
+
+I previously wrote that the DLRA's advantage horizon "inverts" against a stronger static baseline. Having now measured both baselines properly, the accurate statement is narrower: **my static baseline is stronger than yours, and against a strong enough baseline the DLRA's advantage is confined to `t ≲ 1` at `r ≥ 16` and vanishes for `r ≤ 8`.** Whether the crossover law survives at your window configuration is still open, and I would rather leave that open than assert an inversion. The rank-saturation mechanism reproduces either way.
+
+## Housekeeping
+
+- The pilots and the T=8 artifact are regenerated so the metadata is genuinely in them. **Verified, not assumed: the only value that moved in any pilot is `wall_seconds`**; every window rank, instantaneous rank, S2 drift and energy is bit-identical, and the N=64 pilot's new `sha256` is exactly the P0 fingerprint `ebcef128…` from the canonical suite. The fingerprints settle your point directly — N=64 is `ebcef128…` (E 22.2067), N=128 is `30a40ea4…` (E 22.1886) — the two grids provably do not share an IC, and that is now checkable from the artifacts instead of inferred.
+- The `T=8` artifact carries the `framing_note` and `rank_quantities` block; all of its method metrics are bit-identical to the previous run and it still reports the same four diverged baselines.
+- `fig_cost` is restored, `PROVENANCE.md` has an "Expected but not generated" section so a missing figure is stated, `fig_rank_growth` is renamed `fig_window_rank`, and the `Z(k)` panel is dropped with the reason read from the artifact (29% enstrophy drift over `[13.33, 20]`). Eight figures build. `benchmark_summary.json` regenerated with the crossover surface included.
+
+Nothing is outstanding on my side except your two answers: the crossover framing, and whether you want your window configuration run so we can see whether the law appears under it.

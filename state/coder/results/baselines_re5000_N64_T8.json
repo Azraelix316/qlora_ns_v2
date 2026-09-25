@@ -6,6 +6,7 @@
     "pod_late_r32",
     "pod_late_r42"
   ],
+  "framing_note": "The adaptive rank reported here is a per-step SPATIAL rank: the dimension the candidate field needs at one stage, which is what an adaptive rule can return. It is NOT the windowed rank (the modes a trajectory sweeps through over a window, which grows 1 -> 16 over [0, 8] and is grid-independent) and the two must not be compared or interchanged. On this case the rule selected rank 1, and the matched-rank baselines are run at that rank so the comparison isolates adaptivity from rank.",
   "initial_state": {
     "dtype": "float64",
     "initial_energy": 22.206703312933374,
@@ -546,7 +547,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 114.21705753006972
+      "wall_seconds": 269.55455459002405
     },
     "dlra_fixed_r1": {
       "accuracy_metrics_valid": true,
@@ -1075,7 +1076,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 93.99321176717058
+      "wall_seconds": 1916.951077341102
     },
     "dlra_fixed_r16": {
       "accuracy_metrics_valid": true,
@@ -1604,7 +1605,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 97.79691372904927
+      "wall_seconds": 98.79359627398662
     },
     "dlra_fixed_r32": {
       "accuracy_metrics_valid": true,
@@ -2133,7 +2134,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 104.57847423292696
+      "wall_seconds": 104.67908425885253
     },
     "dlra_fixed_r42": {
       "accuracy_metrics_valid": true,
@@ -2662,7 +2663,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 108.24650760996155
+      "wall_seconds": 108.41579134087078
     },
     "full_grid": {
       "accuracy_metrics_valid": true,
@@ -3210,7 +3211,7 @@
       "diverged_at_time": null,
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.8834010524830029,
-      "fit_seconds": 6.491690874099731e-05,
+      "fit_seconds": 6.957887671887875e-05,
       "max_abs_divergence": 2.2648549702353193e-14,
       "max_trajectory_divergence": 0.883478154111058,
       "metrics": {
@@ -3406,7 +3407,7 @@
       "rank_requested": 1,
       "ridge": 0.0,
       "role": "dynamic data-driven baseline at a matched rank; it does no PDE work per step, so its cost is reported per operator application as well as per step",
-      "seconds_per_application": 0.0008429895504377782,
+      "seconds_per_application": 0.0009444793438888154,
       "steps_per_application": 100,
       "training_pairs": 56,
       "training_steps": 5700,
@@ -3736,7 +3737,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 0.13487776508554816,
+      "wall_seconds": 0.15111565007828176,
       "window": "early"
     },
     "pod_dmd_r16": {
@@ -3748,7 +3749,7 @@
       "diverged_at_time": null,
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.8056549009968295,
-      "fit_seconds": 7.022800855338573e-05,
+      "fit_seconds": 7.916707545518875e-05,
       "max_abs_divergence": 3.907985046680551e-14,
       "max_trajectory_divergence": 0.9000700325016758,
       "metrics": {
@@ -3944,7 +3945,7 @@
       "rank_requested": 16,
       "ridge": 0.0,
       "role": "dynamic data-driven baseline at a matched rank; it does no PDE work per step, so its cost is reported per operator application as well as per step",
-      "seconds_per_application": 0.0008522892254404724,
+      "seconds_per_application": 0.0014763435625354759,
       "steps_per_application": 100,
       "training_pairs": 56,
       "training_steps": 5700,
@@ -4274,7 +4275,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 0.13636566302739084,
+      "wall_seconds": 0.23621432413347065,
       "window": "early"
     },
     "pod_dmd_r32": {
@@ -4286,7 +4287,7 @@
       "diverged_at_time": null,
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 60.694156570094535,
-      "fit_seconds": 8.646491914987564e-05,
+      "fit_seconds": 9.512505494058132e-05,
       "max_abs_divergence": 1.0459189070388675e-11,
       "max_trajectory_divergence": 76.51473962264755,
       "metrics": {
@@ -4482,7 +4483,7 @@
       "rank_requested": 32,
       "ridge": 0.0,
       "role": "dynamic data-driven baseline at a matched rank; it does no PDE work per step, so its cost is reported per operator application as well as per step",
-      "seconds_per_application": 0.0008661853615194559,
+      "seconds_per_application": 0.0015272099815774709,
       "steps_per_application": 100,
       "training_pairs": 56,
       "training_steps": 5700,
@@ -4812,7 +4813,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 0.1385890378151089,
+      "wall_seconds": 0.2443532010074705,
       "window": "early"
     },
     "pod_dmd_r42": {
@@ -4824,7 +4825,7 @@
       "diverged_at_time": null,
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.7183272398904665,
-      "fit_seconds": 0.00012851599603891373,
+      "fit_seconds": 0.00013286294415593147,
       "max_abs_divergence": 3.552713678800501e-14,
       "max_trajectory_divergence": 0.8771412344438722,
       "metrics": {
@@ -5020,7 +5021,7 @@
       "rank_requested": 42,
       "ridge": 0.0,
       "role": "dynamic data-driven baseline at a matched rank; it does no PDE work per step, so its cost is reported per operator application as well as per step",
-      "seconds_per_application": 0.0008835847562295385,
+      "seconds_per_application": 0.0013394162495387718,
       "steps_per_application": 100,
       "training_pairs": 56,
       "training_steps": 5700,
@@ -5350,7 +5351,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 0.14137328090146184,
+      "wall_seconds": 0.21430619503371418,
       "window": "early"
     },
     "pod_early_r1": {
@@ -5882,7 +5883,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 35.72500836593099,
+      "wall_seconds": 38.415444616926834,
       "window": "early",
       "window_end": 2.8,
       "window_snapshots": 57,
@@ -6417,7 +6418,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 42.306186796864495,
+      "wall_seconds": 64.27963664988056,
       "window": "early",
       "window_end": 2.8,
       "window_snapshots": 57,
@@ -6902,7 +6903,7 @@
           "time": 6.9
         }
       ],
-      "wall_seconds": 39.30850968998857,
+      "wall_seconds": 64.15201779804192,
       "window": "early",
       "window_end": 2.8,
       "window_snapshots": 57,
@@ -7333,7 +7334,7 @@
           "time": 5.7
         }
       ],
-      "wall_seconds": 34.12612204696052,
+      "wall_seconds": 54.29197601904161,
       "window": "early",
       "window_end": 2.8,
       "window_snapshots": 57,
@@ -7868,7 +7869,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 37.06297347787768,
+      "wall_seconds": 38.842292176093906,
       "window": "late",
       "window_end": 8.0,
       "window_snapshots": 57,
@@ -8403,7 +8404,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 42.68512489297427,
+      "wall_seconds": 70.82099559507333,
       "window": "late",
       "window_end": 8.0,
       "window_snapshots": 57,
@@ -8826,7 +8827,7 @@
           "time": 5.5
         }
       ],
-      "wall_seconds": 30.648564415983856,
+      "wall_seconds": 51.51950091891922,
       "window": "late",
       "window_end": 8.0,
       "window_snapshots": 57,
@@ -9321,7 +9322,7 @@
           "time": 7.1000000000000005
         }
       ],
-      "wall_seconds": 41.73417880688794,
+      "wall_seconds": 67.1019212580286,
       "window": "late",
       "window_end": 8.0,
       "window_snapshots": 57,
@@ -9856,7 +9857,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 38.535524010891095
+      "wall_seconds": 65.5878669610247
     }
   },
   "parameters": {
@@ -9899,7 +9900,11 @@
   },
   "provenance": {
     "driver": "experiments/run_baselines.py",
-    "git_commit": "602b7e9a713c4497f9b5a9e74149a8131e6a1e77"
+    "git_commit": "1c9d032a22bb3851f96de9ea077c77d42c5da35b"
+  },
+  "rank_quantities": {
+    "adaptive_rank": "per-step spatial rank from the rank_criterion below, applied to one candidate field per check",
+    "windowed_rank": "not measured here; see regime_pilot_*.json -> window_rank_table"
   },
   "reference": {
     "E_fluct": [
