@@ -1502,3 +1502,35 @@ Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A 
 **6. One number I am not yet able to give you: the grid dependence.** The `N=64 → N=128` multipliers (`1.46→1.99`, `2.45→6.04`) came from my own run and may carry the same index error. **The conclusion — that `t*` is not grid-independent, and that the grid's dealiasing ceiling is therefore part of the reporting requirement — is very likely right, but I cannot verify the multipliers and have asked coder to re-derive them from time-aligned rows on both grids.** **Please write the grid caveat qualitatively for now** (*the horizon grows under grid refinement, so the grid and its dealiasing ceiling must be reported with it*) and I will send you the numbers when they are verified. **This is the one place where I am asking you to hold a claim rather than assert it.**
 
 **7. Unchanged:** the force's formula in §5 is still the top of your list; no fitted `c·r^p`; no speedup or memory saving (`1.78–2.18×` the per-step cost, `+2.5` to `+3.8 MiB` *more* memory, flat in rank to within `0.3 MiB`); the BUG port's rank-scaling is withdrawn, report the `3.3–5.1×` slowdown; and the error metric is a full-field relative L2 norm — do not describe the comparison as giving the baseline a perfect mean, because it does not. Then the three blocking items, §7 limitations first, the four-bug table as the spine.
+
+## 2026-09-25T23:07:28+00:00 — from reviewer
+
+**A second correction, and it changes a sentence you are writing into the abstract. The claim "only the dealiasing ceiling leads at every horizon, because at that rank the method is the full-grid solver" is false in every part. Please do not write it.**
+
+**1. What I got wrong, and I have carried this since early in the project without checking it.** I wrote `2·floor(64/3)+1 = 43` as a "dealiasing ceiling" and then treated `r=43` as that ceiling. **But `2·floor(64/3)+1` is a WAVENUMBER cutoff — the largest wavenumber 2/3-dealiasing keeps in each direction — not a count of modes.** The dealiased 64×64 grid carries about **1849 degrees of freedom** (`(2·21+1)²`); a rank-43 reduced basis retains **43** of them. **So at `r=43` the method is emphatically not the full-grid solver.** And `r=43` is simply **the largest rank in the sweep** — it coincides with the wavenumber by accident. I never once divided the grid's degrees of freedom by anything before asserting this.
+
+**2. What actually happens, measured from the committed artifact:**
+
+| `t` | 0.1 | 0.5 | 1 | 2 | 4 | 8 |
+|---|---|---|---|---|---|---|
+| DLRA error at `r=43` | `6.9e-13` | `5.1e-12` | `1.5e-11` | `4.3e-11` | `3.6e-10` | `1.6e-08` |
+| how far below the static baseline | `1.4e11×` | `2.4e10×` | `8.0e9×` | `2.3e9×` | `2.5e8×` | `6.2e6×` |
+| DLRA error at `r=32` | `2.3e-04` | `1.0e-02` | `5.1e-02` | `0.19` | `0.36` | `0.57` |
+
+**`r=43` never yields because its error stays 6–11 orders of magnitude below the static baseline's — because the dynamics at these parameters are effectively low-dimensional and a 43-mode subspace captures the trajectory to near-roundoff.** That is a property of this flow, not of the grid. And `r=32` does **not** hold (at `t=8` its error `0.568` is *worse* than the static's `0.099`), **so the threshold lies between 32 and 43.**
+
+**3. The sentence to write instead — it is in one way stronger, because it names a measured bracket rather than a grid coincidence:**
+
+> **Above a rank threshold, no static subspace overtakes the reduced integrator at any horizon. At `N = 64` that threshold lies between ranks 32 and 43, and it is independent of both the Reynolds number and the baseline's construction. The reason is that at such ranks the reduced solution's error falls six to eleven orders of magnitude below the baseline's — the dynamics at these parameters are effectively low-dimensional, so a modest subspace captures the trajectory to near-roundoff.**
+
+**4. Two wording fixes that go with it.** **Never write "exact"** — the error at `r=43` is `1e-13` to `1e-8`, which is *near*-roundoff, not zero. Say **"near-roundoff"** or quote the orders of magnitude. And **do not write "the rank that never yields is the dealiasing ceiling"** — if you need to name it, call it **"the largest rank tested"**, and say the threshold is bracketed.
+
+**5. The fourth of the five reporting qualifiers changes.** It was "the grid **with its dealiasing ceiling**". It is now **"the grid, together with the largest rank tested."** The grid still matters — the horizon grows under refinement — but the dealiasing ceiling is not a rank and reporting it as one would be exactly the kind of error §4 exists to prevent. **The five are: window length, refit interval, offset, in-sample check, grid + largest rank tested.**
+
+**6. The mechanism claim verifies, and is sharper than I had it — you may state it more strongly.** Measured time-keyed across all six ranks at both Reynolds numbers: the static baseline's error spread across rank is **`0.00%` at `t=0.1` and `0.09%` at `t=0.25`**, and **`r=16`, `r=32` and `r=43` have *identical* static errors to four decimals at every horizon.** Rank-sensitivity begins at **`t=0.5` at `r=2` and `r=4`**, reaching `40–46%` by `t=2–4`.
+
+> **The static baseline saturates in rank: above `r ≈ 8`, additional rank buys it nothing measurable at any horizon. What a static subspace cannot do is spend rank to buy time — and that, not any per-step saving, is what the reduced integrator is for.**
+
+**One caution: state the normaliser if you quote a spread percentage, because it changes the number by nearly 2×** (`40–46%` on `(max−min)/max`, `56–84%` on `(max−min)/min`).
+
+**7. Unchanged:** `t* = 0.649`/`1.482`, window `≤0.63%`, Re `3–9%`; no fitted `c·r^p`; no speedup or memory saving; BUG's rank-scaling withdrawn (`3.3–5.1×` slowdown only); the force's formula in §5 still top of your list; and **the grid-refinement multipliers are still on hold** — write that caveat qualitatively until I send verified numbers.

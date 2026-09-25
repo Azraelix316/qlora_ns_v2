@@ -1921,3 +1921,82 @@ interval, offset, in-sample check, grid + dealiasing ceiling). Every fitted `c·
 advantage in time or memory. BUG's rank-scaling withdrawn on both axes; report the `3.3–5.1×`
 slowdown (D25.6/D25.7). The windowed rank rule is worse (D18.1). D27.1's misnomer stands. The flow
 is the implemented shear, with the AKS control (D20, D24). Every D4 barred claim stands.
+
+---
+
+## D30 — **`r=43` is the LARGEST RANK TESTED, not the dealiasing ceiling.** The "at that rank the method is the full-grid solver" clause is FALSE and is withdrawn from the abstract (2026-09-25)
+
+> **OPERATIVE (R65).** **The never-yields rank is BRACKETED between 32 and 43 at `N=64`, not
+> identified with the dealiasing ceiling.** Report **"the grid, and the largest rank tested"** —
+> **not** "the grid with its dealiasing ceiling" (D17.2 withdrawn). **The mechanism claim verifies
+> and is sharper than recorded: the static baseline SATURATES in rank — `r ≥ 16` gives *identical*
+> static error at every horizon.**
+
+**D30.1 — THE MECHANISM CLAIM VERIFIES, AND IS SHARPER THAN `CLAIMS.md` SAID.** Computed from the
+committed artifact across all six tested ranks, time-keyed, both normalisers: the spread across rank
+is **`0.00%` at `t=0.1` and `0.09%` at `t=0.25`** (both Re), with rank-sensitivity appearing at
+**`t=0.5` at `r=2` and `r=4`**, then at `r=8` at `t=1.0` — **not "from `t ≈ 1`" as D16.2 said.**
+**The real mechanism is SATURATION, not short-horizon flatness: `r=16`, `r=32` and `r=43` have
+*identical* static errors to four decimals at every horizon.** Above `r ≈ 8`, additional rank buys
+the static subspace **nothing at all**, across the whole range. **And the normaliser must be stated,
+because it changes the number by nearly 2×: `45.8%` vs `84.4%` at Re=1000, `t=4`**
+(`(max−min)/max` vs `(max−min)/min`).**
+
+**D30.2 — THE CEILING CLAIM IS A CATEGORY CONFUSION BETWEEN A WAVENUMBER AND A MODE COUNT, AND IT
+IS IN THE ABSTRACT.** The claim as it stands in the abstract, contribution 2, the has/has-not table
+and the blueprint: *"only the dealiasing ceiling leads at every horizon, because at that rank the
+method **is** the full-grid solver."* **Every part is wrong.**
+
+| | |
+|---|---|
+| `dealias_ceiling` in the artifact | `43` |
+| what `2·floor(64/3)+1 = 43` **is** | the maximum **wavenumber** retained by 2/3 dealiasing, **per direction** |
+| dof on the dealiased 64×64 grid | `(2·21+1)² = 1849` (real field ≈ 925) |
+| a rank-43 POD | retains **43** of those — **not the full grid** |
+| ranks tested | `[2, 4, 8, 16, 32, 43]` — **43 is simply the largest** |
+
+**`r=43` equals the dealiasing wavenumber BY COINCIDENCE.** **This is the project's recurring error
+family — "a criterion's name names a fraction, not a quantity" — applied to a grid cutoff read as
+a rank.** The artifact's own schema invited it: a field named `dealias_ceiling`, valued `43`, beside
+a `ranks` list ending at `43`. **That is a defect in the schema, not only in my reading** — the
+field should be renamed to what it is or removed (D30.5).
+
+**D30.3 — AND THE REAL REASON `r=43` NEVER YIELDS IS VISIBLE, AND HAS NOTHING TO DO WITH THE GRID.**
+Its error is `6.9e-13` at `t=0.1` rising to `1.6e-08` at `t=8` — **`6–11` orders of magnitude
+below the static baseline's `~0.1`** (ratio `1.4e11` down to `6.2e6`). **It never yields because the
+dynamics at these parameters are effectively low-dimensional and a 43-mode subspace captures the
+trajectory to near-roundoff.** **"Exact" must also be softened: the error is `1e-13`–`1e-8`, not
+zero.** `r=32`, by contrast, reaches `0.568` at `t=8` — *worse* than the static's `0.099` — so **the
+threshold between 32 and 43 is sharp.**
+
+**D30.4 — THE HONEST STATEMENT, which is different and in one way STRONGER.** *There is a rank above
+which no static subspace can overtake the reduced integrator at any horizon, and at `N=64` that rank
+lies between 32 and 43. It is not tied to the grid's dealiasing: `43` is the largest rank we ran and
+happens to coincide with the 2/3-dealiasing wavenumber `2·floor(64/3)+1`, which is a wavenumber and
+not a mode count; the dealiased 64×64 grid carries about 1849 degrees of freedom, so a rank-43
+subspace is not the full-grid solver.* **Stronger** because it names a threshold between two
+*measured* ranks rather than a grid coincidence; **weaker** because it is a bracketing statement.
+**THE ONE-LINE TEST: run `r ∈ {40, 48, 64, 85}` at `N=64`. If `r=64` also never yields, the
+threshold is between 32 and 64 and `43` has no privileged status at all.**
+
+**D30.5 — D17.2 WITHDRAWN, and D17.1's requirement CHANGED.** D17.2 said *"the rank that never
+yields is a statement about the grid; at `N=128`, `r=43` is half the ceiling and does yield."* **That
+reasoning is the wavenumber/rank confusion, and its `N=128` half is UNTESTED — `r=85` appears in no
+artifact.** **The grid still belongs in a reported `t*`** (`t*` grows under refinement), **but
+"the grid with its dealiasing ceiling" must become "the grid, and the largest rank tested."** That
+was the **fourth** of the five required qualifiers and the one I was most confident in. **And the
+`dealias_ceiling` field should be renamed to what it is (a wavenumber cutoff) or dropped** — a
+schema that makes the conflation easy will make it again.
+
+**D30.6 — THE LESSON, AND IT IS R64's RULE IN ITS POSITIVE FORM.** **Before concluding an artifact
+is wrong, run the code that produced it (D29.8). The positive form: before ASSERTING a mechanism,
+read the numbers that would falsify it.** I carried *"at that rank the method is the full-grid
+solver"* through the abstract, three blueprint sections and two review cycles since R17, and in
+that time **never once divided the dealiased grid's degrees of freedom by anything. The check was
+one subtraction.**
+
+**D30.7 — Unchanged.** D29.4's `t* = 0.649`/`1.482`, window `≤0.63%`, Re `3–9%`, rows
+bit-reproducible. D29.7's `N=128` multipliers still suspect. Every fitted `c·r^p` void. No advantage
+in time or memory. BUG's rank-scaling withdrawn on both axes; report the `3.3–5.1×` slowdown
+(D25.6/D25.7). D27.1's `relative_l2_oracle_mean` misnomer stands. D26.4's test fixture stands. The
+flow is the implemented shear, with the AKS control (D20, D24). Every D4 barred claim stands.

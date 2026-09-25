@@ -68,7 +68,8 @@ are wrong for this** and were already excluded by D5.
    `1.4–2.5×` under a 2× grid refinement**, and half the ranks lost resolvability. **The two
    things it is sensitive to are the two a reader is least likely to check.** Reported with the
    baseline's window, refit interval, offset, an explicit in-sample check, and the grid with its
-   dealiasing ceiling. *(The contribution.)*
+   **largest rank tested**. *(The contribution. D30.5: NOT the "dealiasing ceiling" — that is a
+   wavenumber, and `r=43` is merely the largest rank we ran.)*
 3. **The mechanism**: a static subspace cannot spend rank at short horizons — `0.0%` of error
    reduction across the **whole** resolved rank range at `t=0.1`, where the spread is `0.0%` — and
    that fixed number is what the reduced
@@ -93,7 +94,7 @@ are wrong for this** and were already excluded by D5.
 | **1 Introduction** | The problem: DLRA papers report a crossover against "a static POD baseline" without stating the baseline's window, refit interval, or whether the basis contains the evaluation time. We built the method, then found the number moved. | D15.3, R51 | — |
 | **2 Related work** | Cite and **distinguish**: Koch–Othmar (SIMAX 2007, `10.1137/050639703`); Lubich–Oseledets, *projector splitting* (`10.1007/s10543-013-0454-0`); **Kusch–Schotthöfer–Walter 2026** (`10.1137/25m1730673`) — the closest modern prior art, cite it; Musharbash–Nobile (refutes "no DLRA NS solver"); Girfoglio–Quaini–Rozza (refutes "first exactly divergence-free"); RAIL + Goutaudier (refute "first structure-preserving low-rank"). | D4, D16 | — |
 | **3 Method** | Stream function ⇒ exact divergence-freeness. Projected splitting: exact viscous, projected nonlinear. Rank set per step by an amplitude criterion; **all experiments fix it**. Second order, **conditional on sufficient rank**. | D12.3, R42 | `fig_div_free` |
-| **4 The measurement protocol** | **The methodological section, and the paper's spine.** What a reported `t*` must state: **five** things — the baseline's window length, its refit interval, its offset, an in-sample check, **and the grid with its dealiasing ceiling**. The four bugs we found, each with the symptom it produced. | **D15.3, D16.3, D16.5, D17.4** | table of the four bugs |
+| **4 The measurement protocol** | **The methodological section, and the paper's spine.** What a reported `t*` must state: **five** things — the baseline's window length, its refit interval, its offset, an in-sample check, **and the grid together with the largest rank tested**. The four bugs we found, each with the symptom it produced. | **D15.3, D16.3, D16.5, D30.5** | table of the four bugs |
 | **5 Results** | 5.1 the crossover surface; 5.2 the short-horizon floor; 5.3 robustness to window and Re; 5.4 the sensitivity across baseline corrections; 5.5 rank criteria; 5.6 costs and boundaries. | D14–D16 | `fig_crossover`, `fig_window_rank`, `fig_cost`, `fig_spectra_ek`, `fig_divergence`, `fig_bug_cost` |
 | **6 Discussion** | Second order is conditional on rank, so an under-selecting rule costs *order*, not just accuracy. Rank buys lead time, not speed. Where the method does not help: `r ≤ 8`, and both cost axes. | D12.3, D16.4 | — |
 | **7 Limitations** | No stationary state exists ⇒ no turbulence validation. Two resolved ranks ⇒ no fitted exponent. `t*` is baseline-conditional by construction. Single grid family. The BUG port's cost case does not survive. | R32, R36, R38, D15.2, D12.4 | — |
@@ -118,7 +119,8 @@ are wrong for this** and were already excluded by D5.
 > `+3.8 MiB` at `N=128` *above* the full-grid step, flat in rank to within `0.3 MiB`) without a
 > speedup claim. We take from this the practical requirement that a reported crossover horizon
 > carry **five** things: the baseline's window length, its refit interval, its offset, an explicit
-> check that no basis contains its evaluation time, **and the grid with its dealiasing ceiling** —
+> check that no basis contains its evaluation time, **and the grid with the largest rank
+> tested** —
 > because the horizon grows by `1.4–2.5×` under a `2×` refinement, and the rank that never yields
 > is a property of the grid rather than of the method.
 

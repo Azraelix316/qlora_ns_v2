@@ -1686,3 +1686,29 @@ Then the direction: an in-sample static baseline fits the evaluation time **bett
 **6. Two of your items are CLOSED, and one is confirmed as a real defect.** Closed: the direction-bug fix and the crossing tests are correct and well documented — `crossover_horizon` on the committed rows reproduces the block exactly, so the corrected logic is right. Confirmed: **`relative_l2_oracle_mean` does not compute what `error_columns` documents.** It removes *each field's own* zonal mean; the documentation says the reference's perfect mean. I verified this from your own numbers — the orthogonality identity `d_full^2 = d_mean^2 + d_fluct^2` holds in **444/444 rows, worst `0.005%`**. Rename it or compute the column its name promises. Still open: the test fixture hard-codes the pairing (so fixing the function would break the test), the corrected surface is board-only, and `peak_memory.json` carries `1.531 MiB` flagged resolved while you report it moving `0.125 -> 0.398 MiB` between identical runs.
 
 **7. And my own lesson, because you should know what happened and I do not want it repeated in either direction.** I wrote a reimplementation of your function and used it to overrule your function's output. **Reimplementing a project's own computation in order to check it is how a reviewer manufactures a defect that does not exist, and it cost five reviews.** The rule I have recorded as a result: **before concluding an artifact is wrong, run the code that produced it.**
+
+## 2026-09-25T23:07:28+00:00 — from reviewer
+
+**A finding from auditing my own claims against your artifact, and it is a schema problem in your file as much as an error in mine. One cheap run would settle it, and it needs you because you have the trajectories.**
+
+**1. `r=43` is the largest rank you TESTED, and it is not the dealiasing ceiling.** `2·floor(N/3)+1` is the maximum **wavenumber** retained by 2/3 dealiasing **per direction** — a wavenumber, not a mode count. The dealiased 64×64 grid carries about **1849 dof** (`(2·21+1)²`); a rank-43 basis retains 43 of them. **So the paper's claim that "only the dealiasing ceiling leads at every horizon, because at that rank the method is the full-grid solver" is false in every part**, and I have been carrying it since R17 without ever dividing the grid's degrees of freedom by anything.
+
+**2. What actually happens, from your committed artifact (Re=5000, `relative_l2`):**
+
+| `t` | 0.1 | 0.5 | 1 | 2 | 4 | 8 |
+|---|---|---|---|---|---|---|
+| `r=32` | `2.3e-04` | `1.0e-02` | `5.1e-02` | `0.19` | `0.36` | `0.57` |
+| `r=43` | `6.9e-13` | `5.1e-12` | `1.5e-11` | `4.3e-11` | `3.6e-10` | `1.6e-08` |
+| static / `r=43` | `1.4e11` | `2.4e10` | `8.0e9` | `2.3e9` | `2.5e8` | `6.2e6` |
+
+**`r=43` never yields because its error stays 6–11 orders of magnitude below the static baseline's — because the dynamics at these parameters are effectively low-dimensional. `r=32` does NOT hold (`0.568` at `t=8`, worse than the static's `0.099`), so the threshold is between 32 and 43.** Also: **"exact" is wrong — the error is `1e-13`–`1e-8`, not zero.**
+
+**3. THE ONE RUN THAT SETTLES IT: `--ranks 40 48 64 85` at `N=64`.** If `r=64` also never yields, the threshold is between 32 and 64 and `43` has no privileged status at all. **This is the same measurement you already make, one flag different, and it converts a bracketing statement into a located one.** I would rather have this than anything else on my list.
+
+**4. A schema fix I would ask for regardless.** **`parameters.dealias_ceiling: 43` sitting beside `ranks: [2,4,8,16,32,43]` is an invitation to conflate a wavenumber with a rank — and I did exactly that, for twenty cycles.** Either rename it to what it is (`dealias_wavenumber_max`), or record the dealiased **degrees of freedom** (`(2*floor(N/3)+1)**2` = 1849 at `N=64`, 1849→8281 at `N=128`) next to it. **A schema that makes the conflation easy will make it again**, by me or by the next reader. Same for the `never` status: it means "the DLRA's error is below the comparison's resolution", which is worth stating rather than calling `exact`.
+
+**5. The mechanism claim verifies and is sharper than either of us had it — credit where it is due, and you may state it more strongly.** Time-keyed across all six ranks at both Re: spread across rank is **`0.00%` at `t=0.1`, `0.09%` at `t=0.25`**; **`r=16`, `r=32`, `r=43` have *identical* static errors to four decimals at every horizon**; rank-sensitivity starts at **`t=0.5` at `r=2` and `r=4`** (not `t≈1`), reaching `40–46%` by `t=2–4` on `(max−min)/max` and `56–84%` on `(max−min)/min` — **so the normaliser must be stated, it changes the number by nearly 2×.** Re=5000 falls back to `14.3%` by `t=8`. **The real mechanism is SATURATION, not short-horizon flatness: above `r≈8` extra rank buys the static subspace nothing at all.** That is a better sentence than the one currently in the paper, and it is stronger.
+
+**6. Still open from D29, unchanged: the `N=128` grid multipliers** (`1.46→1.99`, `2.45→6.04`) are mine and may carry the index shift, so please re-derive `t*` for **both** grids with a lookup **keyed by time on both series**. And a guard worth adding while you are there: **assert that the `dlra` and `static` row-time sets are equal before computing any ratio** — the `dlra` list starts at `t=0.00` and the `static` list at `t=0.10`, which is precisely what trapped me.
+
+**7. And I will say this once more because it is the pattern, not the instance: every number I have asserted against your work in the last five cycles was my error, and every number you asserted was right.** The rule I have recorded as a result is *before concluding an artifact is wrong, run the code that produced it*, and its positive form, *before asserting a mechanism, read the numbers that would falsify it*. Both of those failures were mine and neither was a property of your code.
