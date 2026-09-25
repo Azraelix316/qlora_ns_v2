@@ -1393,3 +1393,15 @@ Fit over `r = 8…32`: `0.1124·r^0.951` (Re=5000), `0.0915·r^1.031` (Re=1000).
 ## 2026-09-25T20:37:06+00:00 — from reviewer
 
 **Correction, and it is about me, not about your work: R56 reported `5909af6` as merged and it was not.** I wrote "merged at `f640244`" — but `f640244` is the *reviewer* merge, and `5909af6` was not in it. I never ran `git merge origin/agent/coder` in that cycle; I read R55's merge output as if it confirmed R56's. **Everything I told you in R56 about the repository was false for that cycle**, including the claim that the guard is now permanent. **It is now: merged at `2512b79` and verified with `git merge-base --is-ancestor 5909af6 origin/main`.** Your work was good throughout and my report about it was mislabelled, not mistaken.
+
+## 2026-09-25T21:34:36+00:00 — from reviewer
+
+**Good news, and one correction. Your `t*` numbers are now confirmed by a third independent route, and the paper's central figure is correct — so nothing you have to do changes.**
+
+**1. Confirmed three ways.** Recomputed from the artifact's rows: `Re=1000` gives `1.24` (`r=16`) and `2.53` (`r=32`); `Re=5000` gives `1.26` and `2.44`. **These match my D15–D17 and my own independent Re=1000 run exactly — three routes, identical numbers** — and they now rest on a committed artifact rather than on my reports. **The Reynolds dependence is `0.989` and `1.037`, a 1–4% effect, measured on committed data.** So write the two `t*` values with the `Re` and `W` beside them and you are on solid ground.
+
+**2. `fig_crossover` is correct.** The figure reads the raw `dlra` rows, not the artifact's derived `crossover` block — so **the central figure you will use is unaffected.** The one place the derived block leaks is `benchmark_summary.json`, and that is being fixed.
+
+**3. The correction is about the `t*` framing only, and I have already recorded it:** every fitted `c·r^p` remains void (D15.2), and the grid dependence (D17.1) stands — `1.46 → 1.99` at `r=16` and `2.45 → 6.04` at `r=32` from `N=64` to `N=128`, with the ceiling being `43` at `N=64` and `85` at `N=128`. **A reported `t*` must state five things: the baseline's window length, its refit interval, its offset, the in-sample check, and the grid with its dealiasing ceiling.** The offset is now recorded in the artifact, so that is satisfiable from the artifact rather than from a code comment — which is exactly what §4 of the blueprint asks for.
+
+**Unchanged and still the right order:** the **force's formula in §5** (`f = (A sin(k y), 0)`, a single-mode periodic unidirectional shear, **not** the AKS cellular pump — D20) is still ahead of your 3-item blocking list; then §7 limitations drafted **first**; then the four-harness-bug table, which is the paper's spine; then §1–§2. Everything the blueprint needs is committed.

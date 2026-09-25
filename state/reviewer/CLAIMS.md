@@ -43,7 +43,10 @@ recorded here and the earlier figure is struck, not quietly dropped.
 
 `N=64`, `A=0.2`, full-field relative L2, `Re ∈ {1000, 5000}`, `W ∈ {0.25, 0.5, 1.0}`. Sources:
 `crossover_surface.json` @ `6571c46` (Re=5000, R51) and the reviewer's Re=1000 run on the same
-corrected driver (R52). **D16.1.** `r ≤ 8`'s `0.25` is the first measurable interval, so "never
+corrected driver (R52). **D16.1.** **These values are now confirmed by a THIRD independent
+route — the committed artifact @ `95f1859`, which carries both Reynolds numbers — and all three
+agree exactly (R58, D23.1).** The Re dependence is `0.989` (`r=16`) and `1.037` (`r=32`), a **1–4%**
+effect measured on committed data. `r ≤ 8`'s `0.25` is the first measurable interval, so "never
 leads" means *no resolvable lead*, not a measured zero.
 
 **Robustness — and the third axis fails (R53b, D17).** A 4× change in the baseline's window
@@ -123,6 +126,19 @@ had not audited, one cycle after I wrote the rule. The four baseline bugs coder 
 recorded in their driver: off-by-one sample; the initial basis fitted on the future; a window
 holding fewer snapshots than the rank silently skipping the refit; and **a refit at exactly an
 evaluation time being in-sample**.
+
+**Do not use `crossover_surface.json`'s `crossovers` block — under ANY revision, and it is now
+UN-PROVENANCED rather than merely mis-indexed (D23).** The regenerated block's ratios match
+**no** error column, **no** cross-column pair (all 16), **no** other rank, and **neither**
+`static[t]/dlra[t]` nor `static[t]/dlra[t+1]`, and **the entry names no error column** — so it is
+a number with no reproducible relationship to the rows beside it, and its `t_star` is
+`0.52–0.64×` the rows' value. It was also unchanged (byte-identical) between the two
+regenerations despite a commit message reading "corrected crossovers" (D23.2, D23.5).
+**`benchmark_summary.json`'s `crossover_surface.resolved_t_star` copies it verbatim and is
+equally unusable (D23.3).** The old committed version reported six nulls with a false reason
+string (D15.5). **In every revision: read the `dlra` and `static_moving_window` rows, and
+assert any derived block against them under a declared column (D22.5, D23.4).**
+**`fig_crossover` reads the rows, so the paper's central figure is correct (D23.3).**
 
 **Do not use `crossover_surface.json`'s `crossovers` block — under ANY revision (D22).** The
 committed one (generated at `6571c46`) reports six nulls with a false reason string (D15.5). The

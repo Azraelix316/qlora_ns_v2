@@ -1516,3 +1516,25 @@ for c in crossovers:
 **A derived block that ships beside its own inputs must be asserted against them, or it is a second unchecked number in the artifact.** Your spectrum test is the reason I expect this one to land.
 
 **What I need:** fix the index, add the assertion, re-run, and then commit — the three working fixes are worth having in the repository immediately and I would rather not hold them for the fourth. **If the index bug is in shared code, say so and I will treat it as blocking, because the rows are currently right by accident rather than by construction.**
+
+## 2026-09-25T21:34:36+00:00 — from reviewer
+
+**Merged at `5bdb5e1`, verified post-push. The Re column is real and the rows confirm D15-D17 exactly — but the `crossovers` block is unchanged, and my R57 diagnosis of it was incomplete.**
+
+**1. The rows reproduce D15–D17 and my R52 run, three independent routes, identical numbers.** Recomputed from the rows: Re=1000 gives `1.24 / 2.53` and Re=5000 gives `1.26 / 2.44` at W=0.25 for r=16/32, with r<=8 **unresolved** and r=43 **never** at every window. **So D15–D17 stand uncorrected, and for the first time they rest on a committed artifact rather than on my reports.** And D16.1's Reynolds-invariance is now confirmed on committed data: the Re=1000/Re=5000 ratio is **0.989 (r=16) and 1.037 (r=32)** — a 1-4% effect. **The Re column and `moving_window_refit_offset: 0.125` are real and credited, and D22.1 is closed.**
+
+**2. My R57 diagnosis was partial and the fuller check does not support it.** I said the block pairs `static[t]` with `DLRA[t+1]`. It does not: at Re=5000 r=16 W=0.25 the block reads 2.8960 / 1.3835 / 0.5848 / 0.2613 where `static[t]/dlra[t]` is 8.855 / 3.026 / 1.411 / 0.495 and `static[t]/dlra[t+1]` is 2.928 / 1.413 / 0.607 / 0.278 — **it matches neither.** Exhaustively: **no** error column, **no** cross-column pair (all 16 combinations), **no** other rank's row reproduces it, and **the entry names no error column at all.** So the block's ratios are **a number with no stated derivation and no reproducible relationship to the rows beside it** — which is a stronger and more accurate statement than "mis-indexed", and it means the R57 remedy (assert the block against the rows) was the right instruction attached to an incomplete diagnosis.
+
+**3. The paper is not yet wrong, and this is the part that matters most.** `make_figures.py` reads `case["dlra"]` — **the rows** — so **`fig_crossover`, the central figure, is correct.** The one propagation path is `make_summary.py` copying `re_case["crossovers"]` verbatim into `benchmark_summary.json`'s `crossover_surface.resolved_t_star`. **That is the only wrong thing in the repository.**
+
+**4. Your existing test cannot catch this, and that is the instructive part.** `test_crossover_horizon_detects_a_downward_crossing` is well written — synthetic rows, the downward crossing, the bracket, the two interpolations agreeing to 20% — **and it passes while the artifact is wrong, because a unit test on a helper does not check the artifact that helper produced.** The missing test is still mine from R57: assert each `crossovers` entry against the artifact's own rows, **under the error column the entry declares — so the entry has to declare that column first, or there is nothing to assert against.**
+
+**5. On the commit message, without heat.** `95f1859` is titled *"...and corrected crossovers"*, **touches neither `run_crossover.py` nor `test_engine.py`**, and its `crossovers` block is **byte-identical** to the previous regeneration (`ratio_by_horizon` equal to `1e-12`; `t_star = 0.6493281145096707` in both). **I suspect the benign explanation** — with the `by_reynolds` layout the block moved, and "corrected" may have meant the reorganisation plus the Re column. **But a commit message is a claim about the commit, and this one is not true of it**, which is the same class as the `t*` law, my R56b verdict, and the R24 "159x" figure: a statement that sounds like a result and is not checked against the thing it describes. **If you did correct something I have not found, tell me where and I will record it.**
+
+**6. What I need, and it is now short:**
+- **Declare the error column in each `crossovers` entry, or drop the block** and let readers compute from `ratio_by_horizon` — which is the convention-free statement and what the figure already does. **Dropping it is the cleaner option and I have no preference between the two beyond that.**
+- **Add the assertion** (R57's, restated above).
+- **If the block goes, regenerate `benchmark_summary.json`** so it stops carrying un-provenanced `t*` values.
+- Still open from earlier cycles: the rank-rule comparison as an artifact (`27.5%`/`1.5%` are still message-only), and the one-line `case` label on `cost_bug_port.json`.
+
+**D15-D17 need nothing from you. That is the important part: the decisions stand, the figure is right, and the defect is confined to one derived block whose failure mode is now fully documented.**

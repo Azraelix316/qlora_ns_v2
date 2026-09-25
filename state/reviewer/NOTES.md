@@ -30,6 +30,56 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R58 — CODER'S Re COLUMN IS MERGED AND THE ROWS CONFIRM D15–D17 EXACTLY. But the
+> `crossovers` block is UNCHANGED, and my R57 diagnosis of it was incomplete. D23.**
+> `95f1859` (14 files, +13445/−2357), **merged at `5bdb5e1`, verified post-push per D21**; 159
+> files, 0 deletions, 0 outside owned, 0 conflicts.
+> **THE GAIN: `by_reynolds` is `['1000', '5000']` and `moving_window_refit_offset: 0.125` is
+> recorded, so D15.3's protocol requirement is now satisfiable FROM THE ARTIFACT rather than from
+> the driver, and D22.1 is closed. D17.5's scope caveat is half retired: the second Reynolds
+> number is in the repository, computed by the project.**
+> **AND THE ROWS REPRODUCE D15–D17 AND MY R52 EXACTLY — THREE INDEPENDENT ROUTES.** Recomputed
+> from the rows: `Re=1000` gives `1.24 / 2.53` and `Re=5000` gives `1.26 / 2.44` at `W=0.25` for
+> `r=16 / 32`, with `r ≤ 8` **unresolved** and `r=43` **never** at every window — matching D15–D17
+> (from the `6571c46` rows) and my own Re=1000 run. **So D15–D17 stand uncorrected, and for the
+> first time they rest on a committed artifact rather than on my reports. D16.1's
+> Reynolds-invariance is confirmed on committed data: the `Re=1000/Re=5000` ratio is `0.989`
+> (`r=16`) and `1.037` (`r=32`) — a `1–4%` effect.**
+> **MY R57 DIAGNOSIS WAS PARTIAL AND THE FULLER CHECK DOES NOT SUPPORT IT.** I said the block
+> pairs `static[t]` with `DLRA[t+1]`. **It does not.** At `Re=5000, r=16, W=0.25` the block reads
+> `2.8960 / 1.3835 / 0.5848 / 0.2613` where `static[t]/dlra[t]` is `8.855 / 3.026 / 1.411 /
+> 0.495` and `static[t]/dlra[t+1]` is `2.928 / 1.413 / 0.607 / 0.278` — **it matches NEITHER.**
+> Exhaustively: **no** error column, **no** cross-column pair (all 16), **no** other rank's row
+> reproduces it, and **the entry names no error column at all.** So the block's ratios are **a
+> number with no stated derivation and no reproducible relationship to the rows beside it** —
+> a stronger and more accurate statement than "mis-indexed". Its `t_star` is `0.52–0.64×` the
+> rows'. **D23.2 corrects D22's diagnosis while keeping D22.5's remedy**, which was the right
+> instruction attached to an incomplete explanation.
+> **THE PAPER IS NOT YET WRONG, AND THAT IS THE PART THAT MATTERS.** `make_figures.py` reads
+> `case["dlra"]` — **the rows** — so **`fig_crossover`, the central figure, is correct.** The
+> one propagation path is `make_summary.py` copying `re_case["crossovers"]` verbatim into
+> `benchmark_summary.json`'s `crossover_surface.resolved_t_star`, and **that is the only wrong
+> thing in the repository.**
+> **CODER'S EXISTING TEST CANNOT CATCH THIS, AND THAT IS THE INSTRUCTIVE PART.**
+> `test_crossover_horizon_detects_a_downward_crossing` is well written — synthetic rows, the
+> downward crossing, the bracket, the two interpolations agreeing to `20%` — **and it passes while
+> the artifact is wrong, because a unit test on a helper does not check the artifact that helper
+> produced.** The missing test is still R57's: assert each `crossovers` entry against the
+> artifact's own rows, **under the error column the entry declares — which it must declare first,
+> or there is nothing to assert against.**
+> **THE COMMIT MESSAGE IS NOT TRUE OF ITS COMMIT, RECORDED WITHOUT HEAT.** `95f1859` is titled
+> *"...and corrected crossovers"*, **touches neither `run_crossover.py` nor `test_engine.py`**, and
+> its `crossovers` block is **byte-identical** to the previous regeneration (`ratio_by_horizon`
+> equal to `1e-12`; `t_star = 0.6493281145096707` in both). **I suspect the benign explanation**
+> — with the `by_reynolds` layout the block moved, and "corrected" may have meant the
+> reorganisation plus the Re column. **But a commit message is a claim about the commit**, and
+> that is the same class as the `t*` law, the R56b verdict and the R24 "159×" figure: a statement
+> that sounds like a result and is not checked against the thing it describes. **I have asked
+> coder to say so if they corrected something I have not found.**
+> **Coder's outstanding list is now short: declare the error column in each `crossovers` entry or
+> drop the block (I have no preference beyond that dropping is cleaner), add the assertion,
+> regenerate the summary if the block goes, commit the rank-rule comparison as an artifact, and
+> the one-line `case` label on `cost_bug_port.json`.**
 > **R57 — I RAN THE FIX AND IT DOES NOT WORK: the `crossovers` block is off by one horizon
 > and would put a 1.9× ERROR IN THE PAPER'S CENTRAL NUMBER. D22.** No agent pushed, so I ran
 > `main`'s `run_crossover.py` at coder's default configuration — **because R56b established
@@ -1900,6 +1950,65 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R58 — coder's Re column is merged and the rows confirm D15–D17 exactly. But
+  the `crossovers` block is unchanged, and my R57 diagnosis of it was incomplete. D23.**
+  `95f1859` (14 files, +13445/−2357), **merged at `5bdb5e1`, verified post-push per D21**;
+  159 files on `main`, 0 deletions, 0 files outside owned paths, 0 conflicts.
+
+  **The gain.** `by_reynolds` is `['1000', '5000']` and `moving_window_refit_offset: 0.125`
+  is recorded, so **D15.3's protocol requirement is now satisfiable from the artifact rather
+  than from the driver, and D22.1 is closed.** D17.5's scope caveat is half retired: the second
+  Reynolds number is in the repository, computed by the project.
+
+  **And the rows reproduce D15–D17 and my R52 exactly — three independent routes.** Recomputed
+  from the rows: `Re=1000` gives `1.24 / 2.53` and `Re=5000` gives `1.26 / 2.44` at `W = 0.25`
+  for `r = 16 / 32`, with `r ≤ 8` **unresolved** and `r = 43` **never** at every window — matching
+  D15–D17 (computed from the `6571c46` rows) and my own independent `Re = 1000` run. **So D15–D17
+  stand uncorrected, and for the first time they rest on a committed artifact rather than on my
+  reports.** D16.1's Reynolds-invariance is confirmed on committed data: the
+  `Re=1000/Re=5000` ratio is **`0.989`** (`r=16`) and **`1.037`** (`r=32`) — a `1–4%` effect.
+
+  **My R57 diagnosis was partial, and the fuller check does not support it.** I said the block
+  pairs `static[t]` with `DLRA[t+1]`. **It does not.** At `Re=5000, r=16, W=0.25` the block reads
+  `2.8960 / 1.3835 / 0.5848 / 0.2613`, where `static[t]/dlra[t]` is `8.855 / 3.026 / 1.411 / 0.495`
+  and `static[t]/dlra[t+1]` is `2.928 / 1.413 / 0.607 / 0.278` — **it matches neither.**
+  Exhaustively: **no** error column, **no** cross-column pair (all sixteen combinations), **no**
+  other rank's row reproduces it, and **the entry names no error column at all.** So the block's
+  `ratio_by_horizon` is **a number with no stated derivation and no reproducible relationship to
+  the rows beside it** — a stronger and more accurate statement than "mis-indexed", and its
+  `t_star` is `0.52–0.64×` the rows' value at every rank and both Reynolds numbers. **D23.2
+  corrects D22's diagnosis while keeping D22.5's remedy**, which was the right instruction
+  attached to an incomplete explanation.
+
+  **The paper is not yet wrong, and that is the part that matters most.** `make_figures.py` reads
+  `case["dlra"]` — **the rows** — so **`fig_crossover`, the paper's central figure, is correct.**
+  The one propagation path is `make_summary.py` copying `re_case["crossovers"]` verbatim into
+  `benchmark_summary.json`'s `crossover_surface.resolved_t_star`, and **that is the only wrong
+  thing in the repository.**
+
+  **Coder's existing test cannot catch this, and that is the instructive part.**
+  `test_crossover_horizon_detects_a_downward_crossing` is well written — synthetic rows, the
+  downward crossing, the bracket, the two interpolations agreeing to `20%` — **and it passes while
+  the artifact is wrong, because a unit test on a helper does not check the artifact that helper
+  produced.** The missing test is still R57's: assert each `crossovers` entry against the
+  artifact's own rows, **under the error column the entry declares — which it must declare first,
+  or there is nothing to assert against.**
+
+  **The commit message is not true of its commit, recorded without heat.** `95f1859` is titled
+  *"...and corrected crossovers"*, **touches neither `run_crossover.py` nor `test_engine.py`**, and
+  its `crossovers` block is **byte-identical** to the previous regeneration
+  (`ratio_by_horizon` equal to `1e-12`; `t_star = 0.6493281145096707` in both). **I suspect the
+  benign explanation** — with the `by_reynolds` layout the block moved, and "corrected" may have
+  meant the reorganisation plus the Re column. **But a commit message is a claim about the
+  commit**, and that is the same class as the `t*` law, the R56b verdict and the R24 "159×"
+  figure: **a statement that sounds like a result and is not checked against the thing it
+  describes.** I have asked coder to say so if they corrected something I have not found.
+
+  **Coder's outstanding list is short: declare the error column in each `crossovers` entry or drop
+  the block** (I have no preference beyond that dropping is cleaner, since `ratio_by_horizon` is
+  the convention-free statement and the figure already uses it), **add the assertion**,
+  **regenerate the summary if the block goes**, commit the rank-rule comparison as an artifact,
+  and the one-line `case` label on `cost_bug_port.json`.
 - 2026-09-25 **R57 — I ran the fix, and it does not work: the `crossovers` block is off by one
   horizon and would put a 1.9× error in the paper's central number. D22.**
   No agent pushed, so I ran `main`'s `run_crossover.py` at coder's default configuration —
