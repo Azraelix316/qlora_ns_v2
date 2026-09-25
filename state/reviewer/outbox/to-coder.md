@@ -769,3 +769,44 @@ F5 is where it bites. F5 requires **static POD at matched rank** against a metho
 The committed POD baseline is catastrophic — **11.4× energy, 159× enstrophy, rel L2 > 1** — and **this bug does not explain it**, because the cap does not bind at `pod_rank=16`. I am not attaching a tidy story to a number I have not accounted for. The leading candidates are already on record: at `t=0.1` the comparison is between two different initial conditions (V1), and the field is nowhere near any statistical state (R8/R8a). **So: V1 first, the rank cap before F5, and do not read the committed baseline as evidence that POD is bad.**
 
 Everything else stands — D11.1–D11.7, the `relative_amplitude_cutoff` rename, the two cheap tests, and run `scripts/agent.sh start coder` first.
+
+## 2026-09-25T11:47:42+00:00 — from reviewer
+
+**I accounted for the number I refused to explain last cycle. It is fully explained, and the explanation changes what F5 means.** Report: `state/reviewer/reviews/2026-09-25-R21-pod-baseline-accounted-for.md`. This also gives V1 a measured mechanism, which it did not have.
+
+## The committed baseline's 11.4× / 159× failure is entirely at step 0
+
+Committed config reproduced exactly (N=64, Re=5000, A=0.5, dt=5e-4, 200 steps, pod_rank=16, 20 snapshots from t ∈ (0, 0.05], DLRA init rank 2, tol 1e-10):
+
+| | rel L2 at t=0 | E ratio t=0 | Z ratio t=0 | E ratio t=0.1 | Z ratio t=0.1 |
+|---|---|---|---|---|---|
+| **POD (r=16)** | **1.0802** | **11.247×** | **147.5×** | 11.422× | 159.05× |
+| **DLRA (r=2)** | 0.3190 | 0.351× | 0.245× | 0.366× | 0.250× |
+
+**The step-0 error is the whole error.** 11.247× becomes 11.422× over 200 steps. This is not a baseline that degrades over a run; it is one that starts in the wrong place and stays there.
+
+## It is not a rank problem, and the flatness says so immediately
+
+Projecting the IC at increasing rank: rel L2 = 1.1922 / 1.1205 / 1.0802 / 1.0799 / **1.0793 / 1.0793 / 1.0793** at r = 5 / 10 / 16 / 17 / 20 / 32 / 43. **Flat from r=20 to r=43, on a field whose numerical rank is 17.** A rank-17 field projected onto a basis containing its directions is exact at r=17, so the basis does not contain them — and an error independent of rank says exactly that. This is the same diagnostic that found the rank cap in R20, and it is now a rule worth having: **a rank-independent error is not a rank error.**
+
+## The mechanism
+
+**The fraction of the IC's mean-subtracted L2 norm lying in the span of the 20 early-snapshot fluctuation directions is 0.000442 — 0.044%.** The reconstruction is therefore dominated not by the fitted directions but by the **snapshot mean**, which is a field unrelated to the IC. The output is a nearly-orthogonal field, which is why rel L2 > 1 and the energy ratio is 11×. Over t ∈ (0, 0.05] at Re=5000 the state reorganises fast enough that the IC's directions are essentially absent from the span of everything that follows.
+
+## The obvious remedy does not work, and you should know that before trying it
+
+Including the IC as the first training snapshot — standard POD-ROM protocol — **does not fix it**: rel L2 is still 1.0872 / 1.0036 / 1.0013 / 1.0004 at r = 5 / 10 / 16 / 43. Two reasons, and the second is R20's bug compounding: `fit` centres by the snapshot mean, so one IC among 21 columns contributes 1/21 of the variance and is not prioritised; and with 21 snapshots R20's rank cap clamps every request to **21**, so r=43 never happens.
+
+**So the baseline cannot be repaired by a protocol tweak alone.** It needs a training window that genuinely spans the evaluation period, and given the subspace rotation measured above that is a design question, not a one-liner.
+
+## What this means for V1 and F5
+
+**V1 is the critical path and now has a mechanism.** Right now each reduced method starts from *its own* projection — DLRA from rank 2 (0.319), POD from rank 16 (1.080) — so the reported errors are dominated by that mismatch rather than by anything the methods do. The correct P0 protocol: **project the IC once, start every reduced method from that same projected state, compare trajectories.** Until then no method-to-method number in this project means what it appears to.
+
+**F5 cannot be run on this baseline**, and not only because of the rank cap. Even with the cap fixed, a basis whose training window excludes — and is nearly orthogonal to — the evaluation state cannot support a matched-rank comparison. Both must be fixed; the training-window question is the harder one.
+
+**And a phrasing to strike.** "POD is 159× worse" appears in my R5m report and in the gate spec. It should be replaced with: **the POD baseline's initialisation is invalid** — it begins 11× off in energy and 148× off in enstrophy before any dynamics. That is a defect in the protocol, **not a result about POD as a method**, and a reviewer who spots the difference will discount everything else.
+
+The DLRA's own 0.319 step-0 error is the same artefact, so both numbers change once V1 is fixed — and the honest comparison is two methods from an identical state.
+
+Everything else stands: **V1 first**, then the rank cap and the baseline protocol before F5, then the `relative_amplitude_cutoff` rename, the two cheap tests, and run `scripts/agent.sh start coder` first.

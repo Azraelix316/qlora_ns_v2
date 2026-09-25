@@ -30,6 +30,33 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R21 — the number I refused to explain is now fully explained: the POD baseline's
+> failure is a step-0 artefact, and the IC is nearly orthogonal to the training subspace.**
+> R20 ended by declining to attach a story to the committed baseline's 11.4×/159× failure
+> because the rank cap did not account for it. So I accounted for it. Committed config
+> reproduced exactly: **POD's error at t=0 is already 11.247× energy / 147.5× enstrophy,
+> and after 200 steps it is 11.422× / 159.05× — the step-0 error IS the whole error**, the
+> dynamics adding almost nothing. Projecting the IC at r = 5/10/16/17/20/32/43 gives rel L2
+> **1.1922 / 1.1205 / 1.0802 / 1.0799 / 1.0793 / 1.0793 / 1.0793** — **flat from r=20 to
+> r=43 on a field of numerical rank 17**, which a basis containing its directions would
+> represent exactly at r=17. **Mechanism: only 0.000442 (0.044%) of the IC's mean-subtracted
+> L2 norm lies in the span of the 20 early-snapshot fluctuation directions**, so the
+> reconstruction is dominated by the *snapshot mean* — a field unrelated to the IC — and
+> the output is nearly orthogonal to the state it should represent. Over t ∈ (0, 0.05] at
+> Re=5000 the state reorganises fast enough that the IC's directions are essentially absent
+> from the span of everything that follows. **The obvious remedy fails:** including the IC
+> as the first training snapshot still gives rel L2 1.0004 at r=43, because `fit` centres by
+> the snapshot mean (one IC among 21 columns contributes 1/21 of the variance) *and* R20's
+> cap clamps every request to 21. **So the baseline cannot be repaired by a protocol tweak
+> alone.** Consequences: **V1 is the critical path and now has a mechanism** — each reduced
+> method currently starts from *its own* projection (DLRA 0.319, POD 1.080), so every
+> method-to-method number is dominated by that mismatch; the P0 protocol must project the
+> IC once and start every method from the same state. **F5 cannot be run on this baseline**,
+> and not only because of the rank cap. And **"POD is 159× worse" must be struck** from R5m
+> and the gate spec: the correct statement is that the baseline's *initialisation is
+> invalid*, a protocol defect and not a result about POD — and the DLRA's own 0.319 is the
+> same artefact, so the honest and symmetric position is that the project verified its own
+> baseline before drawing conclusions from it.
 > **R20 — `PODGalerkin.fit` silently caps the rank at the snapshot count. Clean
 > today, corrupts F5 tomorrow.** In `fit`, `X` is `(N², n_snapshots)` and
 > `np.linalg.svd(..., full_matrices=False)` therefore returns `U` with exactly **`n`
@@ -584,6 +611,80 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R21 — accounted for the number I had refused to explain.** R20 ended by
+  explicitly declining to attach a tidy story to the committed POD baseline's
+  11.4×/159× failure, because the rank cap did not account for it and I would not invent a
+  mechanism. Having said I would account for it, I did.
+
+  **The step-0 error is the whole error.** Committed configuration reproduced exactly —
+  N=64, Re=5000, **A=0.5**, `dt=5e-4`, 200 steps, `pod_rank=16`, 20 training snapshots from
+  `t ∈ (0, 0.05]`, DLRA initial rank 2, tolerance 1e-10, IC energy 22.2067, enstrophy
+  1.3376e3, **numerical rank 17**. POD's error **at t=0** is already **11.247× in energy and
+  147.53× in enstrophy**; after 200 steps it is **11.422× and 159.05×**. The dynamics
+  contribute almost nothing on top. **This is not a baseline that degrades over a run — it
+  is one that starts in the wrong place and stays there**, which is a categorically
+  different failure and points at the protocol rather than the method.
+
+  **It is not a rank problem, and the flatness says so before any analysis.** Projecting
+  the IC at increasing rank gives rel L2 **1.1922 / 1.1205 / 1.0802 / 1.0799 / 1.0793 /
+  1.0793 / 1.0793** at r = 5 / 10 / 16 / 17 / 20 / 32 / 43. **Flat from r=20 to r=43, on a
+  field whose numerical rank is 17.** A rank-17 field projected onto a basis that contains
+  its directions is *exact* at r=17, so the basis does not contain them — and an error
+  independent of rank is itself the evidence for that. This is the same diagnostic that
+  found the rank cap one cycle ago, now promoted to a rule worth keeping: **a
+  rank-independent error is not a rank error.**
+
+  **The mechanism, measured.** The fraction of the IC's mean-subtracted L2 norm lying in
+  the span of the 20 early-snapshot fluctuation directions is **0.000442 — 0.044%**. The
+  reconstruction is therefore dominated not by the fitted directions but by the **snapshot
+  mean**, which is a field unrelated to the IC. That is what reconciles two numbers that
+  otherwise look inconsistent: the U-span overlap is 0.044% of the norm, while the projected
+  output carries ~40% of the IC's *amplitude* (since `rel L2 = 1.0793` implies
+  `||P(ic)||/||ic|| ≈ 0.41` if `P(ic) ⊥ ic`) — because the mean term supplies the norm and
+  contributes none of the alignment. The output is a nearly orthogonal field, hence rel L2 > 1
+  and an 11× energy ratio. Over `t ∈ (0, 0.05]` at Re=5000 the state reorganises fast
+  enough that the IC's directions are essentially absent from the span of everything that
+  follows, which is the quantitative form R8/R8a established qualitatively.
+
+  **And the obvious remedy fails, which is worth knowing before anyone tries it.**
+  Including the IC as the first training snapshot — standard POD-ROM protocol, and the first
+  thing one would reach for — **does not fix it**: rel L2 is 1.0872 / 1.0036 / 1.0013 /
+  1.0004 at r = 5 / 10 / 16 / 43. Two compounding reasons: `fit` centres by the snapshot
+  mean, so a single IC among 21 columns contributes 1/21 of the variance and is not
+  prioritised; and with 21 snapshots R20's rank cap clamps every request to **21**, so r=43
+  never happens. **The baseline cannot be repaired by a protocol tweak alone** — it needs a
+  training window that genuinely spans the evaluation period, which given the measured
+  subspace rotation is a design question rather than a one-line change.
+
+  **Three consequences, and the first is the most useful thing in this cycle. (1) V1 is
+  the critical path and now has a mechanism, which it previously lacked.** Each reduced
+  method currently starts from *its own* projection of the IC — DLRA from rank 2 (**0.319**
+  rel L2, **0.351×** energy), POD from rank 16 (**1.080**, **11.25×**) — so every
+  method-to-method number in the project is dominated by that mismatch rather than by
+  anything the methods do. The P0 protocol must **project the IC once and start every
+  reduced method from the same state**. V1 reached this conclusion from the hardcoded
+  step-0 error; R21 gives it the magnitude and the mechanism. **(2) F5 cannot be run on this
+  baseline**, and not only because of the rank cap — even with the cap fixed, a basis whose
+  training window excludes, and is nearly orthogonal to, the evaluation state cannot support
+  a matched-rank comparison. **(3) "POD is 159× worse" must be struck** from R5m and the
+  gate spec. The correct statement is that **the POD baseline's initialisation is invalid**:
+  it begins 11× off in energy and 148× off in enstrophy before any dynamics. That is a
+  defect in the protocol and **not a result about POD as a method** — and a reviewer who
+  spots the distinction will discount everything else in the paper.
+
+  **And the position is symmetric, which makes it stronger rather than weaker.** The
+  DLRA's own 0.319 step-0 error is the *same* artefact. So the project's honest statement is
+  that it verified its own baseline's initialisation before drawing any conclusion from it,
+  and reports the corrected protocol. That is a better paragraph than any speedup or
+  accuracy claim the paper could make, and it is true — which is the test I have been
+  applying to every claim in this project since R5i.
+
+  **What I still do not claim.** POD is not a bad method; this experiment says nothing
+  about that. The subspace rotation is measured at one amplitude, one grid and one training
+  window, and I have not established whether a window that spans the evaluation period
+  actually fixes it — I established only that the two obvious remedies do not. The
+  training-window design question is genuinely open and belongs to coder and
+  theoretical-research, not to me.
 - 2026-09-25 **R20 — a latent bug in the POD baseline, found by testing a hypothesis that
   turned out to be wrong.** No agent pushes, so I followed up something flagged in R5l and
   never closed: `PODGalerkin.project` is non-idempotent, and the committed POD baseline
