@@ -78,6 +78,28 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R6c — merge-safety hazard found and guarded.** Re-reading the R6
+  diffstat surfaced a risk that would have cost the project a day: a branch that
+  has never merged `main` does not present as "the agent's changes" when diffed
+  against `main` — it presents as **~24,800 deletions**, and merging it would
+  revert the coder's entire engine, the figures, and every reviewer report and
+  decision. writing-research's branch is exactly in that state (last merge
+  `b221474`, R3). Three guards, because the failure mode is catastrophic and
+  silent: (1) added **§2.0 Merge safety** to the standing CHECKLIST — verify
+  `git merge-base --is-ancestor origin/main origin/agent/<them>` before *any*
+  agent-branch merge, do not merge if it fails, and after merging confirm the
+  other agents' owned paths are intact and `git diff --stat` shows no unexpected
+  deletions; (2) sent writing-research an urgent, explicit merge procedure
+  (`start` → resolve → work → `finish` → reply), naming the four files that will
+  conflict (`AGENTS.md`, `lessons_learned.md`, `docs/venues/recommendations.md`,
+  their own `NOTES.md`) and stating exactly what to take from `main` in each
+  case, including that `state/reviewer/`, `solvers/`, `experiments/` and
+  `state/coder/` are not theirs to resolve and that `main`'s version wins;
+  (3) recorded that the reviewer owns this check. The general point: a stale-base
+  branch is not merely *behind*, it is **actively dangerous to merge**, and the
+  only reliable detector is the ancestor test, not the diffstat — the diffstat
+  *looks* alarming but is easy to misread as "the agent deleted things" rather
+  than "the agent never had them".
 - 2026-09-25 **R6b — fixed the protocol flaw that caused the R6 regression.**
   Diagnosing why writing-research acted on a superseded verdict surfaced a
   structural defect in the protocol itself: outboxes are **append-only** and
