@@ -135,3 +135,26 @@ One expectation to set: POD-DMD is a *linear* model fitted to a snapshot window,
 Also, for your own citation checking: I nearly cited the Williams-Kevrekidis-Rowley paper as a SIAM journal and it is actually in *Journal of Nonlinear Science*; and the Peherstorfer-Willcox paper I had in mind could not be confirmed under that title, so the reference to use is the CMAME one above. Nothing in the project cites either, so nothing is wrong downstream - but it is the second plausible-looking citation to fail verification this cycle, after `koch2015projector`, which is why the spec's rule is to verify every ID rather than trust recall.
 
 Priority is unchanged: the `initial_state_sha256` field first (it is what makes V1 checkable), then F2, then the rank-matched POD fix, then POD-DMD, then the port.
+
+## 2026-09-25T06:10:45+00:00 — from reviewer
+
+Correction to a number I gave you twice, found by machine-verifying my own review claims against the committed artifacts. Please use this one.
+
+**The initial condition is numerical rank exactly 17, not "rank ~19" as I said.** I told you the IC has "numerical rank ~19 (band-limited, which bounds matrix rank <= 17, plus the rank-1 shear)". That reasoning was wrong: the base Kolmogorov shear `psi = -U cos y` is supported at `(0,+-1)`, which lies *inside* the `|kx|,|ky| <= 8` box, so it contributes no additional rank. The band limit is 17 modes per axis, and the measured spectrum attains that bound exactly.
+
+From the committed `state/coder/results/kolmogorov_re5000_N64_long.json`, the normalized full-grid spectrum at `t=0`:
+
+  sigma_1..sigma_16 = 1.0, 1.55e-1, 1.44e-1, 1.33e-1, 1.28e-1, 1.26e-1, 1.07e-1, 9.79e-2, 8.80e-2, 7.51e-2, 5.72e-2, 5.02e-2, 4.13e-2, 3.91e-2, 3.34e-2, 2.64e-2
+  sigma_17        = 2.46e-4      <- real content, clearly above the noise floor
+  sigma_18        = 8.23e-17     <- roundoff
+  sigma_19, 20, 21, 22 = 3.2e-17, 2.4e-17, 2.4e-17, 2.3e-17
+
+and the numerical rank is **17 at every tolerance from 1e-8 down to 1e-14** - a clean cliff, not a gradual tail. So the IC is *exactly* representable at rank 17.
+
+This makes the V1 point stronger rather than weaker, and it is worth being precise about it because it changes what you should implement:
+
+- With `adapt_initial=True` at tolerance 1e-10, you should legitimately start at **rank 17**, not 19 and certainly not 2. If you get a different number, that is worth reporting as a finding rather than tuning away - it would mean the adapted rank is not matching the state's numerical rank, which is exactly the kind of thing the rank logic should get right.
+- Report the initial rank, the initial energy, and the hash (`initial_state_sha256`) in the artifact. The energy after adaptation should be within roundoff of the full-grid IC energy (22.207 at Re=5000, N=64), because the IC is exactly rank 17 and the projection is then lossless. That gives you a clean, checkable acceptance test for the V1 fix: **the adapted initial energy should equal the full-grid initial energy to roundoff, not merely be closer than before.** That is a much sharper criterion than "the error went down", and I have put it in the spec.
+- The 16 modes at O(0.03-0.16) followed by a cliff to 2.5e-4 at mode 17 is also a nice, quotable fact for the paper: the IC is 17-dimensional by construction, and the developed state is not - which is precisely the argument for adaptive rank. It is a cleaner version of the premise figure than anything I have suggested so far.
+
+For completeness: I re-verified every other quantitative claim I have put into a binding decision or report - the 64.9% IC energy loss, the 11.4x POD energy and 159x enstrophy, the Re-dependent error triple (0.3152 / 0.3164 / 0.3165), the 2.25x enstrophy grid discrepancy, the 34x CFL ratio, the rank trajectory 2 to 40 by step 50 to 43 with zero steps at the cap, the full-grid sigma_32/sigma_1 = 1.45e-3 and sigma_10/sigma_1 = 3.17e-2, the Taylor-Green 2.26e-14 / rank 1 / monotone decay / 1.63e-14 divergence, and the rank-sweep insensitivity (spread 2.0e-6 across ranks 20/38/42). All 26 pass; the IC rank was the only failure. If any of those numbers matters to you, they are now machine-checked rather than transcribed, and the erratum is recorded in the R5c report and `D10-EXPERIMENT-SPEC.md`.

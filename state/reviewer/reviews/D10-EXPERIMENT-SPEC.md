@@ -32,10 +32,26 @@ first because everything else depends on it.
    shape). The reviewer can then compare hashes across artifacts. This one field
    would have caught the current 65% energy loss immediately.
 2. **Report the IC's numerical rank** at the working tolerance. The current IC
-   has numerical rank ≈19 (band-limited to |k_x|,|k_y| ≤ 8, which bounds matrix
-   rank by 17, plus the rank-1 shear; the full-grid spectrum confirms σ₂₀ ≈ 2e-17).
-   If a method cannot represent the IC at its own tolerance, that fact is part
-   of its result, not a hidden initialisation detail.
+   is **exactly rank 17**, verified 2026-09-25 from the committed long run: the
+   normalized full-grid spectrum at `t=0` has sigma_16 = 2.6e-2, sigma_17 =
+   2.5e-4, sigma_18 = 8.2e-17, and the numerical rank is 17 at every tolerance
+   from 1e-8 to 1e-14. That matches the band limit exactly — the field is
+   supported on |k_x|,|k_y| <= 8, which is 17 modes per axis, so it factors
+   through the 17 resolved modes in each direction and its matrix rank is bounded
+   by 17. (The base Kolmogorov shear `psi = -U cos y` has support at `(0,+-1)`,
+   *inside* that box, so it adds no rank; an earlier reviewer note that said
+   "17 + 1 for the shear = 19" was wrong and is corrected here.) The consequence
+   for V1 is stronger than "low-rank": the IC is **exactly representable at rank
+   17**, so an adaptive integrator at any sane tolerance should capture it at
+   initialization, and the current 65% energy loss is unambiguously a harness
+   choice. If a method cannot represent the IC at its own tolerance, that is
+   part of its result, not a hidden initialisation detail.
+   **Acceptance test for the V1 fix:** because the IC is exactly rank 17, a
+   rank-adaptive initialisation at tolerance 1e-10 should recover the full-grid
+   initial energy (22.207 at Re=5000, N=64) **to roundoff** — the projection is
+   then lossless. This is a far sharper criterion than "the error went down",
+   and it should be the check the reviewer applies first. Record the initial
+   rank, the initial energy, and `initial_state_sha256` in every artifact.
 3. **Same physical problem across grids.** For a two-grid comparison, hold the
    IC's spectral content, the final time, and the method settings fixed; scale
    `dt` with `dx`; change only `N`.
@@ -174,7 +190,7 @@ others.
   long-time stable.
 - An energy-balance residual with the measured projection work subtracted is an
   accounting identity, not a structure-preservation result.
-- A rank-2 start on a rank-19 IC throws away 65% of the energy before `t=0`.
+- A rank-2 start on a rank-17 IC throws away 65% of the energy before `t=0`.
 - An SVD of the truncated state will always look like it has slow decay.
 - Comparing a reduced method at rank 42 against a baseline at rank 16.
 - Comparing only against *static* POD: a scicomp reviewer will ask why DMD /

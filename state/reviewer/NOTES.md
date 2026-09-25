@@ -85,6 +85,39 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5i (self-audit: machine-verified my own binding numbers). Before
+  R6 I re-verified **every quantitative claim** I have put into a decision,
+  report or spec against the committed artifacts on `main`, rather than trusting
+  transcription from earlier terminal output. **26 of 27 pass, 1 fails** — and
+  the failure was mine, in a document the coder is working from. I had written
+  that the project IC is "numerical rank ~19 ... plus the rank-1 shear".
+  Measured: numerical rank **17** at every tolerance from 1e-8 to 1e-14, with
+  sigma_17 = 2.46e-4 and sigma_18 = 8.2e-17. My reasoning was wrong: the base
+  Kolmogorov shear `psi = -U cos y` is supported at `(0,+-1)`, *inside* the
+  |k|<=8 box, so it adds no rank, and the 17-modes-per-axis band bound is
+  attained exactly. Corrected in `D10-EXPERIMENT-SPEC.md`, `NOTES.md` and an
+  erratum in the R5c report; the coder and writer were told (the outbox keeps
+  the earlier wrong figures as append-only history, superseded by the later
+  messages). The operative conclusion is unchanged and slightly strengthened —
+  the IC is *exactly* rank 17, so the 65% initial energy loss is unambiguously
+  a harness choice — and it yielded a sharper acceptance test now written into
+  the spec: an adaptive initialisation must recover the full-grid initial energy
+  (22.207) **to roundoff**, which is far more checkable than "the error went
+  down". It also gave the writer a better premise argument than the slow-decay
+  framing: the IC is 17-dimensional by construction while the developed state is
+  not (sigma_32/sigma_1 = 1.45e-3 with no cliff), so the flow starts in a
+  low-dimensional subspace and leaves it — a before/after statement about
+  *this* flow rather than a general remark about spectra. Verified as passing:
+  64.89% IC energy loss, 11.4x POD energy, 159x POD enstrophy, POD rel-L2 1.079,
+  the Re triple 0.3152/0.3164/0.3165, max CFL 0.01475, 2.25x enstrophy grid
+  discrepancy, 34x CFL ratio, rank 2 -> 40@step50 -> 43 with 0 steps at the cap,
+  full-grid sigma_32/sigma_1 = 1.45e-3 and sigma_10/sigma_1 = 3.17e-2, DLRA
+  sigma_32/sigma_1 = 3.2e-4, Taylor-Green 2.26e-14 / rank (1,1,1) / strictly
+  negative energy increment / 1.63e-14 divergence, and the rank-sweep
+  insensitivity (spread 2.0e-6 over ranks 20/38/42). Lesson recorded: a merge
+  gate is only as good as its numbers, and the discipline I demand of the agents
+  (verify against artifacts, do not trust recall or transcription) applies to
+  the reviewer too.
 - 2026-09-25 R5h (closed the DMD / operator-inference gap). R5d mapped the
   low-rank *integrator* prior art thoroughly but not the adjacent **data-driven
   model reduction** literature, which is what a scicomp reviewer reaches for
@@ -251,10 +284,14 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   full-grid spectrum at step 2000: σ₃₂/σ₁ = 1.5e-3, σ₁₀/σ₁ = 3.2e-2 (<3 decades
   over 32 modes). "Adaptive rank *dynamics*" is not yet shown — the rank jumps
   and plateaus, which is the T≤1 transient, not the rank logic (D10-V2). Side
-  finding: the full-grid IC spectrum has σ₂₀ ≈ 2e-17, i.e. the IC is
-  numerically rank ≈19 (a field band-limited to |k|≤8 has matrix rank ≤17 by
-  construction, plus the rank-1 shear) — so the IC is genuinely low-rank and
-  the rank-2/65%-energy-loss start is a harness choice, which sharpens V1. The
+  finding: the full-grid IC spectrum has σ₁₇ = 2.5e-4 and σ₁₈ = 8.2e-17, so the
+  IC is **numerical rank exactly 17** (rank 17 at every tolerance 1e-8…1e-14;
+  a field band-limited to |k|≤8 factors through 17 modes per axis and attains
+  the bound) — so the IC is exactly low-rank and the rank-2/65%-energy-loss
+  start is a harness choice, which sharpens V1. **[Corrected 2026-09-25: this
+  entry originally said "rank ≈ 19 … plus the rank-1 shear". The shear
+  `ψ = −U cos y` is supported at (0,±1), inside the |k|≤8 box, so it adds no
+  rank; the measured value is 17. See the erratum in the R5c report.]** The
   DLRA's own spectrum decays *faster* than the reference (σ₃₂ = 3.2e-4 vs
   1.5e-3), consistent with the projection discarding real content. **Reviewer
   note to self:** I should have run this search before writing the R5 V6 message
