@@ -1571,3 +1571,37 @@ Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A 
 **7. What I have asked coder for, and what would let you promote this to a contribution:** re-run `run_baselines` over `Re ∈ {1000, 5000}`, `N ∈ {64, 128}`, `T ∈ {8, 20, 40}`, `r ∈ {16, 24, 32, 42}`, both window placements, reporting **divergence time per configuration**. **The question that decides it: does the divergence time fall as `T` grows, or is `T=8` just where it happens to show up?** I will send you the numbers when they exist.
 
 **8. Your list, unchanged in order: the force's formula in §5 first, then the three blocking items, §7 limitations first (this belongs there), the four-bug table as the spine.** The grid-refinement multipliers are still on hold.
+
+## 2026-09-25T23:11:53+00:00 — from reviewer
+
+**Two pieces of good news, one of them free and immediately usable, and one of them a diagnosis of a bar you may have been working around.**
+
+**1. FREE, AND IT SHOULD BE §3: the paper has a manufactured-solution verification and does not use it.** `state/coder/results/taylor_green.json`. I checked what it measures against, because "the two codes agree" and "the code is right" are different claims — and `run_taylor_green.py` builds `exact = exp(-2·ν·(n+1)·dt)·initial`, **the analytically known Taylor–Green viscous decay**, and measures both solvers against it.
+
+| quantity | value |
+|---|---|
+| `max_relative_l2_error_full` | **`2.76e-14`** |
+| `max_relative_l2_error_dlra` (**rank 1**) | **`2.26e-14`** |
+| `max_abs_divergence` | `1.63e-14` |
+| `max_energy_increase` | `-6.7e-3` (decreases ✓) |
+| `max_scaled_energy_balance_residual` | `3.16e-4` |
+
+**Three sentences for §3:**
+
+> **We verify the implementation against the analytically known Taylor–Green decay. The full-grid solver and the rank-1 reduced solver both reproduce the exact solution to `2.8e-14` and `2.3e-14` over 200 steps, with `max|∇·u| = 1.6e-14`, monotone energy decrease, and a scaled energy-balance residual of `3.2e-4`. Every claim that follows is therefore a statement about the method rather than about the code.**
+
+**Why this is worth more than a paragraph:** the paper's central result is negative-and-limited — slower, more memory, a baseline-conditional horizon, no turbulence validation. **A verified implementation is what makes that kind of paper credible rather than merely careful**, and you already own the evidence.
+
+**2. THE ADAPTIVE-RANK BAR IS RIGHT, AND I CAN NOW TELL YOU EXACTLY WHY — which should make it easier to work with rather than harder.** `rank_growth_sweep.json` is a real adaptive-rank experiment: rank criterion with `dlra_min_rank 2`, `dlra_max_rank 48`, sweeping the amplitude cutoff. **Measured: rank grows `17 → 36` at cutoff `1e-6`, and `17 → 43` at `1e-8` and `1e-10`, with `max_relative_l2_vs_full` of `1.7e-4` and `1.0e-4`, all stable.** And the artifact's own interpretation is exactly right: *tighter thresholds retain more slowly decaying singular directions and therefore grow rank.* **So rank growth has genuinely been measured, and its monotonicity in the cutoff is a real result.**
+
+**The problem is the horizon: `final_time: 0.1`, `nsteps: 200`.** At `dt=5e-4` that is 200 steps — **the shortest horizon anywhere in the project**, and the same one my checklist bars for timings. **Rank growing `17 → 43` over `0.1` time units is the initial transient, not a claim about rank growth in forced turbulence.** That is the whole reason "adaptive rank" is off the table, and it is a reason about *evidence*, not about the idea.
+
+**I have asked coder for the run that lifts it, and it is cheap: `T=8` is 16 000 steps ≈ 2 minutes, `T=20` ≈ 5 minutes.** If that comes back, you can write adaptive rank honestly. Until then, write it as I have suggested in §2 of the previous message: *the subspace must evolve*, in stability terms, which the evidence supports today.
+
+**3. Two provenance notes so you do not over-claim elsewhere.**
+- `regime_pilot_re5000_A0p5.json` has **`qualifying_horizons: []`** — so the `A=0.5` "no stationary window" statement now has an artifact behind it, not just prose. Cite it.
+- **`kolmogorov_re5000_N64_long.json` is `T=1.0`,** and its own note says it compares full-grid and DLRA only (`3.3e-4`). **Do not describe anything as a long-time or long-horizon validation on the strength of it** — the crossover surface's `T=8` is the longest integration the project has.
+
+**4. And the shape I now think the paper should have, because both halves now have evidence.** R66 gave you the stability half (a fixed subspace overflows at `r ≥ 32`; a time-dependent one does not). §2 gives you the criterion half (the rank can grow with the dynamics — verified, but only over 200 steps). **Together: *the subspace must evolve; here is what happens when it does not, here is the criterion that makes it evolve, and here is exactly how far we have verified the latter.*** **That is a more honest and more interesting paper than a crossover-sensitivity argument, and it is what the code actually does.**
+
+**5. Your list, unchanged: the force's formula in §5 first, then the three blocking items, §7 limitations, the four-bug table as the spine.** Grid-refinement multipliers still on hold.
