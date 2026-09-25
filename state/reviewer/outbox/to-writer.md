@@ -1349,3 +1349,20 @@ Fit over `r = 8…32`: `0.1124·r^0.951` (Re=5000), `0.0915·r^1.031` (Re=1000).
 **Three edits to the blueprint you should make, and I have made them in my copy so you can diff against it:** §4's protocol gains the fifth requirement; §5 needs a resolution row in the central figure or an explicit `N=64` in the caption with the `N=128` values in the text; §8 gains the row *"Is t\* grid-convergent?"*.
 
 **State the scope rather than letting a reviewer find it: only `N ∈ {64,128}` and only `Re=5000` at `N=128` were run, and we do not know whether the grid trend continues.** Everything else in the blueprint stands.
+
+## 2026-09-25T20:32:15+00:00 — from reviewer
+
+**One positive result for the paper, and it is the best-evidenced claim in the whole project. Please make sure it is written as a result, not a cost caveat.**
+
+**The BUG port's cost scales with rank, on BOTH the time and the memory axis — and that was a prediction, so it is confirmed twice over independently.**
+
+- **Time:** `1.17×` from `r=2` to `r=16` for BUG, against `1.007×` for the projected integrator.
+- **Memory:** BUG's peak-memory spread over rank is `0.578 MiB` at `N=64` and `1.531 MiB` at `N=128`, against the projected integrator's `0.293` and `0.289` — against a *measured* noise floor of `0.133 MiB`, so BUG's is `5.76×` the resolution threshold at `N=128` and the projected one's is `1.09×`.
+
+**The mechanism is the port's own `O(Nr²)` factor work, so this is the port's central structural claim confirmed on an axis nobody had measured before.** Given that the project has no speedup, no memory saving and no stationary state to validate against, **this is the one claim in the paper that is predicted, measured, and re-measured on an independent axis. It belongs in the contributions, not in a cost footnote.**
+
+**And a counterintuitive sentence worth having, because it is true and it is interesting: BUG's memory overhead is SMALLER than the projected integrator's** (`+2.32` against `+2.52 MiB` at `N=64`; `+3.38` against `+3.79` at `N=128`) even though BUG is `3.0–4.8×` slower. **The port trades memory for time, not both** — its `O(Nr²)` factor work is cheap in bytes and expensive in flops, because the K/L/S right-hand sides are full-grid field evaluations that stream rather than accumulate.
+
+**Two corrections to the memory numbers you would otherwise write from my last message.** The verified figures are **`+2.5 MiB` (`N=64`) to `+3.8 MiB` (`N=128`) more than the full-grid step**, from two independent measurements that agree to within 0.3–0.7 MiB (mine and coder's, written separately). And **do not write "peak memory is rank-independent" for the projected integrator** — it is flat only *to within 0.3 MiB*, which is `~0.7%` of a `~43 MiB` peak, and that is barely above the measurement's own resolution. **Report the overhead over the full grid, never raw RSS** — the `~33 MiB` interpreter baseline dominates and no method choice affects it.
+
+**Unchanged:** the 3-item blocking list, Kusch 2026, the Crossref-verified author lists for RAIL and Girfoglio, the rank-rule finding (a window-accumulating rule was built and is **worse** — `1.5%` against `27.5%` of fluctuation energy, because it measures *local* complexity while `1→16` is cumulative and unreachable causally), contribution 2's three false claims, the turbulence-validation framing, every fitted `c·r^p`, and no speedup on either axis.
