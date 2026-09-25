@@ -37,12 +37,37 @@ class RankStats:
 class SVDProjector:
     """Rank-r projector with candidate-stage tracking and rank adaptation.
 
-    Rank selection is an **amplitude** test, not an accuracy criterion: the
-    retained rank counts the singular values above
-    ``relative_amplitude_cutoff * s[0]``.  Because singular values are
-    amplitudes, a cutoff of 1e-6 keeps modes down to an *energy* ratio of
-    1e-12, so the parameter is deliberately not called a tolerance and must not
-    be described as one.
+    Rank selection offers two criteria, and which one is used is recorded in
+    every artifact because the choice decides what the rank trace can see:
+
+    ``rank_criterion="amplitude"`` (the historical default) counts modes above
+    ``relative_amplitude_cutoff * s[0]``.  It is an amplitude test, so 1e-6 is
+    an energy ratio of 1e-12, and in practice it selects the grid's dealiasing
+    ceiling: the dealiased candidate has a nine-order cliff at the band edge and
+    no further significant modes, so the retained rank is the grid's, not the
+    dynamics'.
+
+    ``rank_criterion="energy"`` keeps the smallest r with
+    ``sum(s[:r]**2)/sum(s**2) >= energy_fraction`` -- the r99-style rule.  This
+    is the criterion that can *track* the state: on forced 2-D NS the rank
+    needed for 99% of fluctuation energy grows by about a factor of sixteen
+    over the first eight time units, and it is grid-independent over that
+    range, while the amplitude rule sits at the ceiling throughout and cannot
+    see any of it.
+
+    Both are clamped to ``[min_rank, max_rank]``.  Neither is an accuracy
+    criterion: they say how many modes to keep, not how close the result is.
+
+    **Cost model, as implemented (this is today's behaviour, not a design
+    goal).** ``_svd`` factorizes the **whole N x N field** at four stage
+    boundaries per step, so per-step cost is Theta(N^3) and
+    **rank-independent**: r=2 and r=64 cost the same, because the truncated
+    reconstruction only changes which *columns* of an already-computed
+    factorization are used.  The V6 port (per-stage rank update) is expected to
+    **invert** this property, and two tests pin it so the change is visible as
+    a test failing rather than as a claim in prose: ``test_full_field_svd_is_rank_independent``
+    (the factorization must return the full N-value spectrum for any rank) and
+    ``test_svd_call_count_per_step`` (four whole-field factorizations per step).
     """
 
     def __init__(
@@ -52,6 +77,8 @@ class SVDProjector:
         min_rank: int = 2,
         max_rank: int = 64,
         relative_amplitude_cutoff: float = 1e-6,
+        rank_criterion: str = "amplitude",
+        energy_fraction: float = 0.99,
     ):
         integer_values = (rank, min_rank, max_rank)
         if any(int(value) != value for value in integer_values):
@@ -62,6 +89,10 @@ class SVDProjector:
             raise ValueError("rank must lie between min_rank and max_rank")
         if not 0.0 < float(relative_amplitude_cutoff) < 1.0:
             raise ValueError("relative_amplitude_cutoff must lie in (0,1)")
+        if rank_criterion not in ("amplitude", "energy"):
+            raise ValueError("rank_criterion must be 'amplitude' or 'energy'")
+        if not 0.0 < float(energy_fraction) < 1.0:
+            raise ValueError("energy_fraction must lie in (0,1)")
         if int(min_rank) > grid.N:
             raise ValueError("min_rank cannot exceed the physical matrix rank")
         self.grid = grid
@@ -70,6 +101,8 @@ class SVDProjector:
         self.max_rank = min(int(max_rank), grid.N)
         self.rank = min(int(rank), self.max_rank)
         self.relative_amplitude_cutoff = float(relative_amplitude_cutoff)
+        self.rank_criterion = rank_criterion
+        self.energy_fraction = float(energy_fraction)
         self.last_stats: Optional[RankStats] = None
         self.last_singular_values = np.empty(0, dtype=float)
         self._last_u: Optional[np.ndarray] = None
@@ -107,6 +140,15 @@ class SVDProjector:
         self.svd_seconds = 0.0
         self.svd_calls = 0
 
+    def reset_counters_only(self) -> None:
+        """Zero the measured factorization time without touching the rank.
+
+        Used when a caller projects once to obtain a starting state and then
+        wants the per-step cost of the steps alone.
+        """
+        self.svd_seconds = 0.0
+        self.svd_calls = 0
+
     def _svd(self, field: np.ndarray):
         centered = np.asarray(field, dtype=float)
         if centered.shape != (self.grid.N, self.grid.N):
@@ -123,9 +165,23 @@ class SVDProjector:
         return centered, u, s, vh
 
     def _target_from_spectrum(self, s: np.ndarray) -> int:
+        """Retained rank for the configured criterion, clipped to the bounds."""
         if s.size == 0 or s[0] <= np.finfo(float).eps:
             return self.min_rank
-        numerical = int(np.count_nonzero(s > self.relative_amplitude_cutoff * s[0]))
+        if self.rank_criterion == "energy":
+            # Smallest r whose leading energy fraction reaches the target.  The
+            # cumulative sum is taken in descending order, so this is the
+            # Eckart--Young rank for the requested energy fraction.
+            energy = np.cumsum(s.astype(float) ** 2)
+            total = energy[-1]
+            if total <= 0.0:
+                return self.min_rank
+            reached = int(np.searchsorted(energy, self.energy_fraction * total) + 1)
+            numerical = min(reached, s.size)
+        else:
+            numerical = int(
+                np.count_nonzero(s > self.relative_amplitude_cutoff * s[0])
+            )
         return max(self.min_rank, min(self.max_rank, numerical))
 
     def _record_svd(
@@ -238,6 +294,8 @@ class DLRA:
         min_rank: int = 2,
         max_rank: int = 64,
         relative_amplitude_cutoff: float = 1e-6,
+        rank_criterion: str = "amplitude",
+        energy_fraction: float = 0.99,
         check_every: int = 5,
         adapt_initial: bool = False,
     ):
@@ -250,6 +308,8 @@ class DLRA:
             min_rank=min_rank,
             max_rank=max_rank,
             relative_amplitude_cutoff=relative_amplitude_cutoff,
+            rank_criterion=rank_criterion,
+            energy_fraction=energy_fraction,
         )
         self.check_every = int(check_every)
         self.adapt_initial = bool(adapt_initial)

@@ -512,6 +512,8 @@ def run_case(
     dlra_min_rank: int = 2,
     dlra_max_rank: int = 48,
     dlra_relative_amplitude_cutoff: float = 1e-6,
+    dlra_rank_criterion: str = "amplitude",
+    dlra_energy_fraction: float = 0.99,
     dlra_check_every: int = 5,
     dlra_adapt_initial: bool = True,
     spectrum_count: int | None = None,
@@ -577,6 +579,9 @@ def run_case(
                 "dlra_min_rank": dlra_min_rank,
                 "dlra_max_rank": dlra_max_rank,
                 "dlra_relative_amplitude_cutoff": dlra_relative_amplitude_cutoff,
+                "dlra_rank_criterion": dlra_rank_criterion,
+                "dlra_energy_fraction": dlra_energy_fraction,
+                "dealias_rank_ceiling": 2 * (N // 3) + 1,
                 "dlra_check_every": dlra_check_every,
                 "dlra_adapt_initial": dlra_adapt_initial,
             },
@@ -624,6 +629,8 @@ def run_case(
         min_rank=dlra_min_rank,
         max_rank=dlra_max_rank,
         relative_amplitude_cutoff=dlra_relative_amplitude_cutoff,
+        rank_criterion=dlra_rank_criterion,
+        energy_fraction=dlra_energy_fraction,
         check_every=dlra_check_every,
         adapt_initial=dlra_adapt_initial,
     )
@@ -836,13 +843,33 @@ def main() -> None:
     parser.add_argument("--pod-rank", type=int, default=12)
     parser.add_argument("--dlra-rank", type=int, default=4)
     parser.add_argument("--dlra-min-rank", type=int, default=2)
-    parser.add_argument("--dlra-max-rank", type=int, default=48)
+    parser.add_argument(
+        "--dlra-max-rank",
+        type=int,
+        default=0,
+        help="largest retained rank; 0 selects the grid's dealiasing ceiling "
+             "2*floor(N/3)+1, so the cap cannot bind before the physics does",
+    )
     parser.add_argument(
         "--dlra-relative-amplitude-cutoff",
         type=float,
         default=1e-6,
         help="retain singular values above this fraction of s[0]; this is an\n"
              "amplitude test on singular values, not an accuracy tolerance",
+    )
+    parser.add_argument(
+        "--rank-criterion",
+        choices=("amplitude", "energy"),
+        default="amplitude",
+        help="amplitude: count modes above relative_amplitude_cutoff*s[0] "
+             "(historical default; sits at the dealias ceiling). energy: "
+             "smallest rank reaching --energy-fraction of the energy (r99).",
+    )
+    parser.add_argument(
+        "--energy-fraction",
+        type=float,
+        default=0.99,
+        help="target energy fraction when --rank-criterion energy",
     )
     parser.add_argument("--dlra-check-every", type=int, default=5)
     parser.add_argument(
@@ -875,8 +902,10 @@ def main() -> None:
         pod_rank=args.pod_rank,
         dlra_rank=args.dlra_rank,
         dlra_min_rank=args.dlra_min_rank,
-        dlra_max_rank=args.dlra_max_rank,
+        dlra_max_rank=args.dlra_max_rank or 2 * (N // 3) + 1,
         dlra_relative_amplitude_cutoff=args.dlra_relative_amplitude_cutoff,
+        dlra_rank_criterion=args.rank_criterion,
+        dlra_energy_fraction=args.energy_fraction,
         dlra_check_every=args.dlra_check_every,
         dlra_adapt_initial=args.dlra_adapt_initial,
         spectrum_count=args.spectrum_count or None,

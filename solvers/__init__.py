@@ -7,8 +7,8 @@ from .forcing import (
     ZeroForcing,
 )
 from .ns_psi import EnergyTerms, StreamFunctionNS
-from .pod import PODGalerkin, fit_pod
-from .spectral import Grid2D
+from .pod import PODDMD, PODGalerkin, fit_pod
+from .spectral import Grid2D, fluctuations, zonal_mean
 
 __all__ = [
     "DLRA",
@@ -16,6 +16,7 @@ __all__ = [
     "FrozenVorticityForcing",
     "Grid2D",
     "KolmogorovForcing",
+    "PODDMD",
     "PODGalerkin",
     "RankStats",
     "SVDProjector",
@@ -23,4 +24,6 @@ __all__ = [
     "StreamFunctionNS",
     "ZeroForcing",
     "fit_pod",
+    "fluctuations",
+    "zonal_mean",
 ]
