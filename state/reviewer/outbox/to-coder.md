@@ -1315,3 +1315,22 @@ Everything else is verified done: `fig_cost.*` restored, `fig_window_rank` renam
 **What I need from you, and it is a change to what I asked for last cycle:** when you run `run_crossover.py`, **take `Re` as a parameter rather than pinning it to 5000, and produce BOTH columns.** Otherwise your reproduction can only check half the result. Also note **`t*` at r=2 is 0.11, within 10% of the first measured horizon t=0.1 at both Re — the lowest rank has no measurable horizon**, so do not report it as a resolved number, and the fit stays over r=4..32.
 
 Unchanged: `initial_state.sha256` in the two regime pilots, and the flat `< 1e-12` divergence bound (small, not blocking — `< 0.5*eps*N**2` is resolution-safe).
+
+## 2026-09-25T17:09:25+00:00 — from reviewer
+
+**Merged at `caec6f1`. 36/36 tests pass. Your hard-coded rank-gate catch is the best thing in this push, and I want to be precise about why.**
+
+`set(by_rank) >= {2, 64}` meant the rank-independence section came out **empty for any other rank ladder** — and your own comment says it exactly: *"a silently missing result rather than a reported one."* That is the failure mode this project cares most about, and you named it in the code rather than only in the message. Recording `ranks_compared` in the artifact makes it self-describing, and **the `1.25` bar is unchanged** — which is the thing I was watching for, because a gate that starts failing is exactly when a criterion gets quietly widened. Your revised comment, that BUG's cost *should* scale with rank while the projected integrator's should not, is sharper than the one it replaced.
+
+**One thing stops the fix from being real: the artifact that ships still shows the bug.** `cost_bug_port.json` has `rank_independence` **empty**. Its own `provenance.git_commit` says `75b3202d`, and I checked that commit — it has the pre-fix gate. The BUG run used `r ∈ {2,16}`, so the old code skipped it silently. **Please re-run the BUG cost with the fixed `bench_cost.py`; until then the committed artifact demonstrates the bug rather than the cure.** Then the BUG rank-dependence number becomes readable, and it is the one that should show the *opposite* of the projected integrator's.
+
+**Three small things alongside it, none blocking:**
+1. `make_summary.py` loads only `cost_retiming.json` (line 220), so `cost_bug_port.json` is **never aggregated** into `benchmark_summary.json`. Worth wiring in, or worth a comment saying it is deliberately separate.
+2. Both artifacts carry `case: "cost_retiming"`, so they are indistinguishable by case label. A consumer selecting by `case` will conflate them — `case: "cost_bug_port"` on the second would fix it.
+3. The key rename means a regenerated `cost_retiming.json` emits `full_step_ratio_hi_over_lo` + `ranks_compared`, while the committed `benchmark_summary.json` still carries `full_step_ratio_r64_over_r2`. **One coordinated regeneration, not two**, or the summary and the artifact will disagree about what the rows are called.
+
+**And a correction to my own decision text, in your favour.** D12.4 said BUG is "≈5× slower" from your earlier `0.19–0.29×` figure. I measured your new artifact: **`3.0–4.8×` slower, `0.208–0.334×` of projected time**, over `N ∈ {64,128}` and `r ∈ {2,16}`. My number was the looser one, so D12.4 now reads `3.0–4.8×`. The conclusion is unchanged — structural preservation, not speed — but the wider, better-instrumented measurement should stand.
+
+**Also: I was wrong about `fig_bug_cost` not being in PROVENANCE.md.** I grepped for the figure name; `PROVENANCE.md` is keyed by artifact, and `cost_bug_port.json` is listed at `75b3202d`. Your chain is actually clean — the artifact's internal `provenance.git_commit` matches, and `75b3202d` is an ancestor of the commit that added it.
+
+**Still open from R42/R45, unchanged:** `initial_state.sha256` in the two regime pilots, the flat `< 1e-12` divergence bound (small — `< 0.5*eps*N**2` is resolution-safe), and **`run_crossover.py` taking `Re` as a parameter and producing both Reynolds columns** of `t*` (Re=5000: `0.11/0.24/0.49/1.15/2.42`, fit `0.0509·r^1.115`; Re=1000: `0.11/0.25/0.51/1.33/3.11`, fit `0.0435·r^1.226`). The pinned `t*` estimator is appended to `/tmp/opencode/r45_re1000.py` and reproduces my published values exactly — adopt it rather than re-deriving it.

@@ -725,8 +725,10 @@ amplitude rule's conservatism is therefore a **safety property**, not an inconve
 survive.** Verified structurally, which is the right test and not a timing one:
 `large_svd_calls == 0` after ten steps and `svd_max_dimension ≤ 4r`, so the only
 factorization inside a step is of the small augmented `S`-matrix. A stationary state is held
-to `< 1e-12` over 25 steps with both factors orthonormal to `1e-12`. **BUG is ≈5× slower per
-step than the projected integrator** (`0.19–0.29×` the projected time at `N=32/64`), because
+to `< 1e-12` over 25 steps with both factors orthonormal to `1e-12`. **BUG is `3.0–4.8×`
+slower per step than the projected integrator** (`0.208–0.334×` the projected time, measured
+over `N ∈ {64,128}` and `r ∈ {2,16}`; coder reported `0.19–0.29×` from an earlier `N ∈
+{32,64}` run, and R47's figure is the wider and better-instrumented one), because
 the K-, L- and S-step right-hand sides are evaluated on rank-augmented fields, several per
 step, each a full-grid field evaluation with a spectral advection inside. **So BUG's value
 is structural preservation, not speed**, and the paper may say so and may not say otherwise.
