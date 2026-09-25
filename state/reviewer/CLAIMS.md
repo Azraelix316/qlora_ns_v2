@@ -35,7 +35,8 @@ recorded here and the earlier figure is struck, not quietly dropped.
 |---|---|---|---|---|---|---|
 | `t*` at `Re=5000` | 0.11 | 0.24 | 0.49 | 1.15 | 2.42 | **never (exact)** |
 | `t*` at `Re=1000` | 0.11 | 0.25 | 0.51 | 1.33 | **3.11** | **never (exact)** |
-| fit | — | \multicolumn{5}{c}{`0.0509 · r^1.115` (`Re=5000`)} \multicolumn{2}{c}{`0.0435 · r^1.226` (`Re=1000`)} | — |
+
+Fit over `r = 4…32`: **`0.0509 · r^1.115`** at `Re=5000`, **`0.0435 · r^1.226`** at `Re=1000`.
 
 **A 5× change in Reynolds number moves the prefactor 17% and the exponent 10%, and the
 exponent difference is real** (leave-one-out spreads `[1.106,1.146]` and `[1.201,1.302]` do
@@ -215,6 +216,7 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "no DLRA incompressible-NS solver exists" | Musharbash & Nobile, `10.1016/j.jcp.2017.09.061` (D4) |
 | "first exactly divergence-free NS solver" | Girfoglio–Quaini–Rozza, `10.1016/j.compfluid.2022.105536` (D4) |
 | "first structure-preserving low-rank for conservative PDEs" | RAIL, `10.1137/23M1622921`; Goutaudier arXiv:2606.30469 (D4, R16) |
+| "first projector-splitting integrator for DLRA" | **Kusch, Schotthöfer & Walter, SIMODS 8(3):820–849, 2026, `10.1137/25m1730673`** — the closest modern prior art on projector splitting, found by writing-research in R46. It targets DLRA *training* rather than a conservative PDE, so it does not refute the project's framing — but it is the reference a reviewer will raise, so **cite it and distinguish it**. |
 | "to our knowledge" on arXiv evidence alone | D4 |
 | "turbulent dynamics", "high-Re turbulence validation" | D11.2, closed by R32/R36 |
 | "adaptive rank growth", "adaptive rank beats static" | D11.3, D12; R31, R33, R35 |

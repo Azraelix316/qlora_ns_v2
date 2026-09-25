@@ -30,6 +30,51 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R46 — writing-research's 2nd push: ALL FOUR R30 blockers addressed and verified, and
+> five citation defects found — two of them on the two references that REFUTE barred novelty
+> claims. Held, and I am recording that I do not expect D7 to be completed on this branch.**
+> Their commit `1b3616a` touches **4 files, all within their ownership**. **First, a correction
+> to my own check: my initial diff of this push reported 55 files touching `solvers/`,
+> `experiments/` and `state/reviewer/` — that was my error, `git diff A..B` compares two
+> TREES and their merge-base is `4eb9188` from 12:10, so it swept in everything `main` gained
+> since. The correct command is `git show --stat <commit>`, and the property my §2.0 gate
+> actually asks for — 0 files modified outside owned paths — PASSES.** That is the same
+> two-dot/three-dot trap that made me mis-read a figure in R30, and I made it again.
+> **THE PROGRESS IS REAL AND IT IS WHAT I BLOCKED ON FOR TWO CYCLES:** all five deleted bib
+> entries restored (including the two load-bearing einkemmer entries), the index back to **40
+> entries with 10 restored and NONE missing**, DDFKs restored, RAIL's DOI in the index, and the
+> positional `data[14]` edits **gone**. **THE FIVE CITATION DEFECTS, each verified against
+> Crossref:** (1) **`10.1137/130931857` returns 404, unregistered** — it is on
+> `lubich2014dynamical`, which is *"Dynamical low-rank approximation of matrix-valued
+> functions"*, a DIFFERENT paper from the one this project needs (Lubich & Oseledets,
+> *"A projector-splitting integrator for DLRA"*, BIT 54(1):171-188, `10.1007/s10543-013-0454-0`,
+> which I have verified resolves), and that projector-splitting entry **still does not exist**
+> in `refs.bib`; (2) **`nakao2025rail` has a malformed author field** — Crossref gives *Joseph
+> Nakao; Jing-Mei Qiu; Lukas Einkemmer*, theirs reads `{Nakao and Qiu and Einkemmer, Lukas}`
+> with no given names for the first two — **and this is the reference that refutes "first
+> structure-preserving low-rank for conservative PDEs"**, so its author list is load-bearing;
+> (3) **`girfoglio2022` has NO DOI** (it is `10.1016/j.compfluid.2022.105536`, verified) —
+> **and this is the reference that refutes "first exactly divergence-free NS solver"**, so the
+> single most checkable point in D4's evidence chain is unverifiable as recorded; (4) their
+> merge would **drop `temam1977navier`** (Temam 1977, *Navier–Stokes: Theory and Numerical
+> Analysis*), which is in `main` and not in theirs — their rule *"skip any entry whose title is
+> already present"* kept their versions and dropped main's, i.e. it ran the wrong way; (5) the
+> two root-level scripts (D7), **not on `main`** and would land with this merge, and this is
+> the **third cycle** I have asked. **I am recording plainly that I do not expect D7 to be
+> completed on this branch**, per the R28 commitment — better that than a fourth optimistic
+> re-ask. **And the most valuable thing they found, which was in their index and not in mine:
+> Kusch, Schotthofer & Walter 2026, *"An Augmented Backward-Corrected Projector Splitting
+> Integrator for Dynamical Low-Rank Training"*, SIMODS 8(3):820-849, `10.1137/25m1730673`,
+> VERIFIED — the closest modern prior art on projector splitting this project has found.** It
+> targets DLRA *training* rather than a conservative PDE so it does not refute the framing, but
+> it is the reference a reviewer will raise. Now barred-claim material in `CLAIMS.md` §6, and
+> the writer has been told to cite it and distinguish it. **Why held rather than merged:** all
+> seven items are mechanical and small, but **two sit on the references that refute the barred
+> novelty claims** and one of those has no DOI at all, so merging would put an unresolvable DOI
+> and a malformed author list into the paper's most load-bearing citations to save one cycle.
+> **Merge safety: 8 conflicts, all in `state/reviewer/*` and one coder artifact, every one
+> stale on their side and resolving unambiguously to `--ours`; 0 files outside owned paths; held
+> on CONTENT, not on conflicts.**
 > **R45 — is `t* ≈ 0.05·r^1.12` a LAW or a one-point fit? SUBSTANTIALLY A LAW, and I
 > found a provenance failure inside my own central result while checking.** R39 measured the
 > crossover at **one** Reynolds number, which is the first thing a reviewer asks. The
@@ -1290,6 +1335,77 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R46 — writing-research's second push: all four R30 blockers addressed and
+  verified; five citation defects found, two of them on the references that refute barred
+  novelty claims. Held, and I do not expect D7 to be completed on this branch.**
+  `1b3616a`: **4 files, all within their ownership**.
+
+  **First, a correction to my own check.** My initial diff of this push reported **55 files**
+  touching `solvers/`, `experiments/` and `state/reviewer/`. **That was my error** —
+  `git diff A..B` compares two *trees*, and their merge-base is `4eb9188` from 12:10, so the
+  diff swept in everything `main` gained since. The correct command is
+  `git show --stat <commit>`, and the property my §2.0 gate actually asks for — **0 files
+  modified outside owned paths** — **passes**. This is the same two-dot/three-dot trap that
+  made me mis-read a figure in R30, and I walked into it again a few cycles later. The
+  discipline that catches it is the one already written down: verify the *property*, not the
+  token.
+
+  **The progress is real, and it is exactly what I blocked on for two cycles.** All five
+  deleted bib entries restored (including the two load-bearing einkemmer entries), the index
+  back to **40 entries with 10 restored and none missing**, DDFKs restored, RAIL's DOI in the
+  index, and the positional `data[14]` edits **gone**.
+
+  **The five citation defects, each verified against Crossref:**
+  1. **`10.1137/130931857` returns HTTP 404 — unregistered.** It is carried by
+     `lubich2014dynamical`, whose title is *"Dynamical low-rank approximation of matrix-valued
+     functions"*, SIAM J. Matrix Anal. Appl. 35(1):25–46 — a **different paper** from the one
+     this project needs. The citable record is Lubich & Oseledets, *"A projector-splitting
+     integrator for dynamical low-rank approximation"*, BIT Numer. Math. 54(1):171–188, 2014,
+     **`10.1007/s10543-013-0454-0`** (verified to resolve) — **and that entry still does not
+     exist in `refs.bib`**, which is also the writer's blocking item #1.
+  2. **`nakao2025rail` has a malformed author field.** Crossref gives *Joseph Nakao; Jing-Mei
+     Qiu; Lukas Einkemmer*; the entry reads `{Nakao and Qiu and Einkemmer, Lukas}`, with no
+     given names for the first two, and the issue number `2` is missing. **This is the
+     reference that refutes "first structure-preserving low-rank for conservative PDEs", so
+     its author list is load-bearing.**
+  3. **`girfoglio2022` has no DOI.** Crossref confirms it exactly: Girfoglio, Quaini & Rozza,
+     *"A POD-Galerkin reduced order model for the Navier–Stokes equations in stream
+     function-vorticity formulation"*, Computers & Fluids 244:105536, 2022,
+     **`10.1016/j.compfluid.2022.105536`**. **This is the reference that refutes "first exactly
+     divergence-free NS solver"** — so the most checkable point in D4's evidence chain is
+     currently unverifiable as recorded.
+  4. **Their merge would drop `temam1977navier`** (Temam 1977, *Navier–Stokes Equations:
+     Theory and Numerical Analysis*) — in `main`'s `refs.bib`, absent from theirs. Their rule
+     *"skip any entry whose title is already present in `refs.bib`"* kept **their** versions
+     and dropped **main's**, so it ran the wrong way.
+  5. **The two root-level scripts (D7).** Not on `main` — I checked — and they would land with
+     this merge. **Third cycle asked.**
+
+  **The most valuable thing they found, which was in their index and not in mine: Kusch,
+  Schotthöfer & Walter 2026**, *"An Augmented Backward-Corrected Projector Splitting Integrator
+  for Dynamical Low-Rank Training"*, SIAM J. Math. Data Sci. 8(3):820–849,
+  **`10.1137/25m1730673`**, verified. **That is the closest modern prior art on projector
+  splitting this project has found.** It targets DLRA *training* rather than a conservative PDE,
+  so it does not refute the framing — but it is the reference a reviewer will raise, and it
+  should have been in my own evidence map since it exists. Now recorded as a barred claim in
+  `CLAIMS.md` §6 ("first projector-splitting integrator for DLRA"), and the writer has been
+  told to cite it and distinguish it. **A reminder this cycle supplied: the most valuable
+  finding in a review cycle can arrive *in the branch under review*, not from my own
+  measurement.** I nearly filed this push as "blocked, five defects" without noticing that it
+  also contained the single most important citation find of the cycle.
+
+  **Why held rather than merged.** All seven items are mechanical and small, but **two of them
+  sit on the references that refute the barred novelty claims, and one of those has no DOI at
+  all.** Merging would put an unresolvable DOI and a malformed author list into the paper's
+  most load-bearing citations, to save one cycle.
+
+  **And, per the R28 commitment: I am recording plainly that I do not expect D7 to be
+  completed on this branch.** Better that than a fourth optimistic re-ask. The other five items
+  are new this cycle and are not a repeat.
+
+  **Merge safety:** 8 conflicts, all in `state/reviewer/*` plus one coder artifact, every one
+  stale on their side and resolving unambiguously to `--ours`. **0 files modified outside owned
+  paths.** Held on **content**, not on conflicts.
 - 2026-09-25 **R45 — `t*` measured at a second Reynolds number: the law survives with a
   weak, characterisable dependence. And a provenance failure inside my own central result.**
   R39 measured the crossover at **one** Reynolds number, which is the first thing a reviewer
