@@ -515,3 +515,59 @@ still come first, then re-timing to the R5q protocol, with the rank-independence
 cheap to add while you are there. The V6 corrections from R8 stand in full: the
 projection is energetically inert at these ranks, so the port's case is **cost and
 discrete structure, not energy fidelity** — design its validation accordingly.
+
+## 2026-09-25T09:15:41+00:00 — from reviewer
+
+**This one reaches the paper's premise, and part of it is good news. Please read it before any more method work.** Full report: `state/reviewer/reviews/2026-09-25-R11-premise-rank-is-the-dealiasing-mask.md`.
+
+## Good news first: the premise is not confounded by the mean flow
+
+R8a showed the zonal mean carries 52–99% of the total energy, which raised the obvious worry: maybe "rank ≫ 3 with slow singular-value decay" is a statement about the growing mean rather than about turbulence. **Measured, it is not.** The zonal mean is **exactly rank 1** — a profile `φ(y)` broadcast along `x` is an outer product of rank one — so **42 of the 43 retained modes are fluctuations**, at every time and both high Re. The energy-weighted dominance of the mean does not become rank dominance. The slow decay lives in the fluctuations (σ₃₂/σ₁ of the fluctuation field 7.4e-3 → 2.4e-4 over t=2→20 at Re=5000; the zonal spectrum is numerically zero past rank 1, σ₈/σ₁ ~ 1e-64).
+
+This also makes S1 structurally natural rather than a workaround: the decomposition is exact, cheap, and separates a rank-1 object from the turbulence.
+
+## Serious: the rank is the grid's, not the dynamics'
+
+The rank is **43 at every tolerance from 1e-6 to 1e-14, at every time from t=0.5 to
+t=20**. A rank invariant across five orders of magnitude in tolerance *and* a factor of
+40 in time is not measuring anything dynamic. And **2·floor(N/3)+1 = 43** at N=64. I
+tested across grids:
+
+| N | 32 | 48 | 64 | 96 | 128 |
+|---|---|---|---|---|---|
+| measured rank | **21** | **33** | **43** | **65** | **85** |
+| 2·floor(N/3)+1 | **21** | **33** | **43** | **65** | **85** |
+
+Exact match at every N. The dealiased mask confines the x-Fourier support to
+`2·floor(N/3)+1` wavenumbers, which bounds the matrix rank — so **the state is full-rank
+within the band the grid admits, with no internal spectral gap.** Consequences:
+
+1. **The "adaptive rank growth" in every committed run is the rank-2 initialisation artifact meeting a grid ceiling.** The rank rises to exactly `2·floor(N/3)+1` and never moves again. F3 already suspected this ("a transient artefact"); this is the mechanism. There is no dynamical rank adaptation to report.
+2. **The premise as stated is not supported.** Rank is large because the grid admits ≈2N/3 x-modes; the slow decay is slow *within* a grid-imposed subspace; the growth is an initialization artifact. The defensible reformulation is narrower and still interesting: *the state is spectrally full-rank within the admitted band, so rank truncation is not spectrally motivated, but the tail is energetically negligible (σ_last/σ₁ = 7.5e-5 at N=64, 2.0e-6 at N=128), so low-rank approximation is energetically accurate.* That also matches R5m's finding that trajectory error is nearly insensitive to rank across a 2× range.
+3. **The method is never in a genuinely low-rank regime on these grids** — available rank is capped at ≈2N/3, so r/N ≈ 2/3 at best. A real low-rank regime needs 2N/3 ≫ r, i.e. a much larger grid. This is a big part of why F6's cost story is hard.
+4. **The two committed runs are limited by *different* ceilings, which breaks their comparability.** At N=64 the grid ceiling is 43 and `dlra_max_rank=48`, so the cap is not binding — the grid is. At N=128 the ceiling is 85 and the cap is 48, so the cap is. The N=64/N=128 comparison therefore varies which constraint limits the rank, on top of the t=0.1 transient (R8) and the 2.25× enstrophy gap (R5m). Three independent reasons it is not a grid check.
+
+## The decisive experiment, and it is cheap
+
+**Is there a spectral gap below the dealiasing ceiling at high N?** If a gap opens at
+N=256/512 — dynamic rank well below `2·floor(N/3)+1` — then low-rank approximation is
+spectrally motivated, adaptive rank has something to track, and the paper has its
+premise. If the rank is *always* exactly the grid ceiling, there is no gap, the adaptive-rank contribution is empty, and the paper must rest on the **filtering/accuracy** argument R5q identified as the strongest available claim. Both are legitimate papers, but they are different papers, and you should know which you are writing before the method work continues. Minutes to run: full grid to a developed state at N=256, `np.linalg.svd`, compare the numerical rank against `2·floor(256/3)+1 = 171`.
+
+## Two smaller findings
+
+**Dealiasing is load-bearing for stability, not just accuracy.** Re-running Re=5000 with `dealias=False` **overflows to NaN** within t=5 (`ns_psi.py:94` warnings, then `LinAlgError: SVD did not converge`). Worth a regression test and a sentence in the paper's methods.
+
+**The full-state slow-decay metric is contaminated by the growing mean in its denominator.** At Re=5000, t=2: σ₃₂/σ₁ is **1.94e-3 on the full state but 7.39e-3 on the fluctuations** (factor 3.8), because σ₁_full = 3.60e1 versus σ₁_fluct = 9.23e0. They converge only once the mean stops dominating (t=20: 2.26e-4 vs 2.36e-4). The project's verified σ₃₂/σ₁ = 1.45e-3 is a full-state early-time value and **understates the fluctuations' slow decay**. Any spectrum claim must state which field it was computed on.
+
+## Correction to my R8 message: the committed runs used A=0.5, not 0.2
+
+I told you the committed configuration is `force_amplitude=0.2` and measured the stationarity finding at 0.2. Checking the artifacts rather than the driver signature: **every committed artifact records `force_amplitude: 0.5`** — re100, re1000, re5000, the N=128 run and the long run. The *driver default* is 0.2 (`run_kolmogorov.py:393`); the *runs* used 0.5. I read the function signature and called it the committed configuration.
+
+**The finding survives and is conservative**: at A=0.5 the non-stationarity is *worse* than I reported — Re=5000 reaches E=3747 by t=40 (169× E₀) with `E_in/E_visc` still 125, against 7–8× and ratios 10–173 at A=0.2. So R8 and R8a stand, and the runs that produced the committed numbers are further from stationarity than the ones I measured. But **the S3 pilot must be run at A=0.5**, and please re-check anything I quoted as being at "the committed configuration".
+
+This is the fourth time the "which configuration is actually committed" question has changed a conclusion. The lesson I keep relearning is not "measure more" — it is that **a default in a function signature is not a record of what was run, and `state/*/results/*.json` is.**
+
+## Unchanged
+
+V1 and `initial_state_sha256` still come first, then re-timing to the R5q protocol, then the regime decision and the S3 pilot. The V6 corrections stand: the projection is energetically inert at these ranks, so the port's case is cost and discrete structure, not energy fidelity.
