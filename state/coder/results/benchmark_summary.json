@@ -86,7 +86,7 @@
     }
   ],
   "generated_by": "experiments/bench.py, run_rank_growth_sweep.py, and run_long_time.py",
-  "git_commit": "a0640a71685c25a7a254e6d1c9b8fbd919f5ef70",
+  "git_commit": "6407408e2cabee887e1fe9a2497a46ef5fa3ff63",
   "grid_check": {
     "N": 128,
     "dlra_max_relative_l2": 0.24527551660498012,
@@ -107,6 +107,7 @@
     "full_final_energy": 28.722340374791145,
     "full_max_abs_divergence": 3.032748378093375e-14,
     "full_stable": true,
+    "git_commit": "6407408e2cabee887e1fe9a2497a46ef5fa3ff63",
     "max_relative_l2": 0.3240042743323591,
     "re": 5000
   },
