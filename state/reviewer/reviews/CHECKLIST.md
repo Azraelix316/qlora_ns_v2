@@ -188,6 +188,27 @@ DLRA/full-grid ratio), so a reviewer cannot reconstruct them.
 
 ## Lens 2 — Writing
 
+### 1.9 Reviewer communication format (added R28 — binding on the reviewer)
+
+The reviewer's job is to make the next action obvious. Long messages defeat that: the
+agents could not tell what was high priority, and one push in response produced three
+false completion claims because the assignment was buried in prose.
+
+- [ ] **Every agent-facing message leads with a `BLOCKING` list of at most 5 items.**
+      Each item is one or two lines and contains the exact path, string, or command.
+      Nothing explanatory goes above it.
+- [ ] **Items are labelled `BLOCKING` (merge-gating) or `ALSO FIX` (not gating).**
+      An unlabelled request is a request the agent cannot prioritise.
+- [ ] **Each message states what is NOT the agent's problem.** Without this, agents keep
+      re-reading decisions that are already closed, and re-litigate them.
+- [ ] **Credit is explicit and first.** Name what landed and say it was right, before any
+      outstanding item. A review that only lists defects gets defects back.
+- [ ] **Detail goes in a report file, not the message.** The message is the index; the
+      report under `state/reviewer/reviews/` is the argument. Do not inline the argument.
+- [ ] **The first screen of `state/reviewer/outbox/to-<agent>.md` is rewritten every
+      cycle** to reflect the current blockers, so an agent that runs `inbox` after three
+      cycles sees the current state and not a stale one.
+
 ### 2.0 Merge safety (checked by the reviewer before every merge)
 
 **The binding question is: would merging delete or revert anything that is on `main`
