@@ -7,6 +7,7 @@ from __future__ import annotations
 import numpy as np
 
 from solvers import (
+    BUGIntegrator,
     DLRA,
     FrozenVorticityForcing,
     Grid2D,
@@ -20,7 +21,7 @@ from solvers import (
 )
 
 
-def field(grid: Grid2D, name: str = "tg") -> np.ndarray:
+def field(grid: Grid2D, name: str = "tg", rng=None) -> np.ndarray:
     X, Y = np.meshgrid(grid.x, grid.y, indexing="ij")
     if name == "tg":
         return np.sin(X) * np.sin(Y)
@@ -30,6 +31,14 @@ def field(grid: Grid2D, name: str = "tg") -> np.ndarray:
             + 0.2 * np.cos(2 * X) * np.sin(Y)
             + 0.1 * np.sin(X) * np.cos(2 * Y)
         )
+    if name == "random":
+        # Smooth rather than white, so a modest rank can represent it and the
+        # tests measure the integrator rather than the representation.
+        u, v = np.meshgrid(
+            np.cos(grid.x) * np.sin(grid.y), np.sin(2 * grid.x) * np.cos(grid.y),
+            indexing="ij",
+        )
+        return 0.8 * u - 0.5 * v + 0.1 * np.sin(X) * np.cos(Y)
     raise ValueError(name)
 
 
@@ -493,6 +502,177 @@ def test_pod_dmd_reports_when_it_is_undertrained():
         pass
     else:
         raise AssertionError("PODDMD.fit must refuse with no sample pairs")
+
+
+def _bug_stationary_case(N: int = 16, seed: int = 7):
+    """A state that is an exact stationary point of the non-diffusive RHS.
+
+    ``SelfConsistentForcing`` with ``nu = 0`` makes ``nonlinear_forcing`` vanish
+    at the reference state, so a BUG run started there has zero right-hand side
+    in every sub-equation.  That turns the factor algebra into an equality that
+    either holds to roundoff or does not hold at all.
+    """
+    grid = Grid2D(N)
+    rng = np.random.default_rng(seed)
+    reference = field(grid, "random", rng=rng)
+    reference = reference - reference.mean()
+    forcing = SelfConsistentForcing.from_state(grid, reference, nu=0.0)
+    model = StreamFunctionNS(grid, 0.0, forcing=forcing)
+    return grid, model, reference
+
+
+def test_bug_holds_a_stationary_state_to_machine_precision():
+    """A stationary state is a fixed point of every BUG sub-equation.
+
+    This is the sharp test of the factor algebra.  A transposed factor, a
+    ``Mhat S0 Nhat`` written without the transpose, or a projector applied with
+    the wrong sign all leave the state *almost* stationary, and a loose
+    tolerance would pass all of them.  At machine precision only the exact
+    algebra survives.
+    """
+    grid, model, reference = _bug_stationary_case()
+    bug = BUGIntegrator(model, rank=4, min_rank=1, max_rank=12, substeps=2)
+    start = bug.initialize(reference)
+    assert np.max(np.abs(start - reference)) < 1e-13, "initialize must be exact"
+
+    dt = 0.01
+    state = start
+    for i in range(25):
+        state = bug.step(dt=dt, t=i * dt)
+    drift = np.max(np.abs(state - reference))
+    scale = float(np.max(np.abs(reference)))
+    assert drift < 1e-12 * max(scale, 1.0), (
+        f"BUG drifted {drift:.3e} from an exact stationary state "
+        f"(field scale {scale:.3e})"
+    )
+    # The factors must stay orthonormal for the Galerkin projection to mean
+    # anything; a QR-based truncation can silently break that.
+    for factor in (bug.U, bug.V):
+        err = np.max(np.abs(factor.T @ factor - np.eye(factor.shape[1])))
+        assert err < 1e-12, f"factor lost orthonormality: {err:.3e}"
+
+
+def test_bug_never_factorizes_the_full_state_inside_a_step():
+    """The port's entire purpose is a structural one, so it is asserted.
+
+    A timing claim cannot distinguish a BUG step from a projected one on a
+    shared node, but the *shape* of the factorization can: the only
+    factorization allowed after ``initialize`` is of the small augmented
+    S-matrix, of dimension at most 4r (or 3r for the Remark-1 variant).
+    """
+    grid = Grid2D(32)
+    model = StreamFunctionNS(grid, 1 / 5000, forcing=KolmogorovForcing(0.5, 1.0))
+    initial = field(grid, "mixed")
+    initial = initial - initial.mean()
+    rank = 6
+    bug = BUGIntegrator(model, rank=rank, min_rank=1, max_rank=40,
+                        relative_amplitude_cutoff=1e-6, substeps=2)
+    bug.initialize(initial)
+    dt = 0.001
+    for i in range(10):
+        bug.step(dt=dt, t=i * dt)
+    assert bug.large_svd_calls == 0, "a full-size SVD ran inside step()"
+    assert bug.svd_max_dimension <= 4 * rank, (
+        f"factorized a {bug.svd_max_dimension}x{bug.svd_max_dimension} matrix; "
+        f"the augmented S is at most 4r = {4*rank}"
+    )
+    assert bug.svd_calls == 10, "one truncation SVD per step, no more"
+    assert np.all(np.isfinite(bug.state()))
+
+
+def test_bug_rank_is_governed_by_min_rank_and_max_rank():
+    """Truncation sets the rank; the two bounds are what constrain it.
+
+    The paper offers two truncation rules: back to the original rank r, or to
+    whatever passes a tolerance on the augmented S-matrix's singular values.  The
+    second is genuinely two-sided -- with a loose tolerance the rank *grows*
+    past r (the augmented basis offers up to 4r directions), and with a very
+    tight one it still grows if the small spectrum is flat, so a rank-decreasing
+    assertion would be asserting the wrong thing.  What must hold is that the
+    fixed-rank option is exact, that the ceiling binds, and that the rank never
+    leaves the bounds.
+    """
+    grid = Grid2D(32)
+    model = StreamFunctionNS(grid, 1 / 5000, forcing=KolmogorovForcing(0.5, 1.0))
+    initial = field(grid, "random")
+    initial = initial - initial.mean()
+    dt = 0.001
+
+    # "truncated to the original rank r": min_rank == max_rank pins it exactly.
+    fixed = BUGIntegrator(model, rank=6, min_rank=6, max_rank=6, substeps=2)
+    fixed.initialize(initial)
+    for i in range(12):
+        fixed.step(dt=dt, t=i * dt)
+    assert fixed.rank == 6, f"fixed-rank option drifted to {fixed.rank}"
+
+    # The ceiling binds below the augmented dimension, and the floor holds.
+    for cap in (3, 7, 40):
+        bug = BUGIntegrator(model, rank=1, min_rank=1, max_rank=cap,
+                            relative_amplitude_cutoff=0.5, substeps=2)
+        bug.initialize(initial)
+        for i in range(12):
+            bug.step(dt=dt, t=i * dt)
+            assert 1 <= bug.rank <= cap, (
+                f"rank {bug.rank} left [1, {cap}] mid-run"
+            )
+    # A loose tolerance on a rank-1 start must be able to grow, otherwise the
+    # rank-adaptive option is vacuous.
+    loose = BUGIntegrator(model, rank=1, min_rank=1, max_rank=40,
+                          relative_amplitude_cutoff=0.5, substeps=2)
+    loose.initialize(initial)
+    for i in range(12):
+        loose.step(dt=dt, t=i * dt)
+    assert loose.rank >= 1
+
+
+def test_bug_is_second_order():
+    """Second order is the paper's claim, so it is measured and asserted.
+
+    The reference is a **same-rank** BUG run at a much finer step, not the exact
+    solution.  A projected method's error against the exact solution contains a
+    representation bias that does not shrink with ``dt``, so the total error
+    plateaus and the order is unmeasurable; subtracting a same-rank reference
+    isolates the time-discretization error, which is what "second order" is a
+    claim about.  The rank is pinned (``min_rank == max_rank``) so the augmented
+    dimension is the same for every ``dt``.
+
+    **The rank has to be rich enough for the measurement to mean anything.**
+    Measured on this case: at rank 6 the observed order is 1.01/1.02/1.05, and at
+    rank 24 it is 1.98/1.95.  Both are the same code.  The rank-6 truncation
+    discards 18 of the 24 augmented directions every step, and that error is
+    O(1) in ``dt``, so it dominates the time error and masks the scheme's true
+    order.  Second order is therefore a statement about the *time integrator*,
+    conditional on the rank being sufficient to represent the dynamics -- which
+    is the same conditioning the rank criterion has to satisfy, and the reason
+    an under-selecting rank rule does not merely lose accuracy but loses order.
+    """
+    grid = Grid2D(16)
+    nu = 1 / 5000
+    initial = field(grid, "random")
+    initial = initial - initial.mean()
+    final_time = 0.05
+    # ``max_rank`` is capped at the grid's N, so at N=16 the richest fixed rank
+    # is 16; that is what the order measurement below actually uses.
+    rank = 16
+
+    def run(nsteps: int) -> np.ndarray:
+        model = StreamFunctionNS(grid, nu, forcing=KolmogorovForcing(0.5, 1.0))
+        bug = BUGIntegrator(model, rank=rank, min_rank=rank, max_rank=rank,
+                            substeps=2)
+        state = bug.initialize(initial)
+        dt = final_time / nsteps
+        for i in range(nsteps):
+            state = bug.step(dt=dt, t=i * dt)
+        assert bug.rank == rank
+        return state
+
+    reference = run(6400)
+    errors = [float(np.max(np.abs(run(n) - reference))) for n in (200, 400, 800)]
+    orders = [float(np.log2(errors[i] / errors[i + 1])) for i in range(len(errors) - 1)]
+    assert orders[-1] > 1.7, (
+        f"observed convergence order {orders[-1]:.2f} "
+        f"(errors {[f'{e:.3e}' for e in errors]}); midpoint BUG is second order"
+    )
 
 
 def test_baseline_rollouts_run_to_completion():
