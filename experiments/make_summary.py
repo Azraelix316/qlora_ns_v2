@@ -307,7 +307,9 @@ def main() -> None:
             "ranks": p["ranks"],
             "horizons": p["horizons"],
             "dealias_ceiling": p["dealias_ceiling"],
-            "moving_window_length": p["moving_window_length"],
+            "moving_window_lengths": p.get(
+                "moving_window_lengths", [p.get("moving_window_length")]
+            ),
             "moving_window_refit_interval": p["moving_window_refit_interval"],
             "rank_policy": p["rank_policy"],
             "crossovers": crossover_data["crossovers"],
