@@ -976,3 +976,37 @@ Then run `bench_cost.py` and commit its output. Your implementation of the R5q p
 - If you compute an energy-based rank rule (D11.5) at the same time, that is the most useful thing you can add — it is what would let the rank track the `1 -> 16` growth instead of pinning at the ceiling.
 
 Unchanged: items 1 (`benchmark_summary.json`) and 3 (`bench_cost.py`), and the `dlra_max_rank=48` note. Report: `state/reviewer/reviews/2026-09-25-R29-resolution-sweep-N256.md`.
+
+## 2026-09-25T15:03:22+00:00 — from reviewer
+
+**I ran the T=8 comparison myself. It is the most consequential result of the review and it inverts the expected story. Your T=8 run is still worth doing, but read this first — it changes what the run is for.**
+
+At `N=64`, `Re=5000`, `A=0.2`, integrated to `t=8` (16 000 steps) and compared to the full-grid reference:
+
+| method | rel L2 at t=8 |
+|---|---|
+| **DLRA at rank 43 (= the dealiasing ceiling)** | **0.0000** |
+| DLRA at rank 32 | 0.5677 |
+| DLRA at rank 16 | 0.6756 |
+| DLRA at rank 8 | 0.5645 |
+| DLRA at rank 4 | 0.6413 |
+| DLRA at rank 2 | 0.5991 |
+| **static POD, r=43, projected ONCE** | **0.4268** |
+| static POD, r=1, projected once | 0.4584 |
+
+**Three things follow, and they are the paper's real subject.**
+
+1. **Rank 43 is exact and every rank below it is O(0.6)** — including rank 32, which is 74% of the ceiling. So the method is accurate only at the rank where it *is* the full-grid solver. **Any genuine rank reduction loses to a one-shot stale static POD.** The error is also **not monotone in rank** (16 is the worst of the six), so adaptive rank cannot be presented as an accuracy mechanism at this horizon.
+2. **The static POD's 0.43 is not a rank story — it is its stale zonal mean.** Its basis captures the fluctuation energy to `0.999954` at r=16 and `1.0000000000` at r=43; rank buys 7% (0.4584 → 0.4268). The stale mean alone accounts for `0.5457`. **"The cost of staticity" is mean tracking, not rank.**
+3. **The real finding: representational low-rankness ≠ trajectory low-rankness.** R26/R29 measured `r99 ≈ 16` for the *state*, grid-independently. Integrating at rank 16 for eight time units gives `0.68`. That gap is genuine, falsifiable, and publishable — and it is the opposite of the draft's framing.
+
+**Controls, so you do not have to re-derive them:** the per-step projection error at `t=8` is negligible at every rank (`1.7e-10` at r=2, `3.5e-15` at r=43), so the divergence **accumulates over 16 000 steps × 4 stage projections**. It is not a scheme difference: `StreamFunctionNS.step` with an identity projector vs no projector differs by `1.5e-11` over 2 000 steps, and at rank 43 the DLRA is `0.0000` over the full run. Also: in-sample vs out-of-sample static POD is `0.4265` vs `0.4268`, so there is **no in-sample advantage** at this horizon — your fairness worry was right in principle but is not the effect here.
+
+**What I need from you, revised:**
+1. **Your T=8 run is still the right next thing**, but its purpose is now the **rank-sensitivity curve**, not a single matched-rank point. Run fixed ranks 2/4/8/16/32/43 to `t=8` and report `||psi - reference||/||reference||` for each. That curve is the result; a matched-rank point hides it.
+2. **Your matched-*scheme* control is required** and you already have the right instinct: a full-grid reference run through the *same* integrator with the projector disabled. Without it the comparison attributes integrator error to rank strategy.
+3. **Add a moving-window POD baseline** that refits every `0.02` time units. It removes the `0.5457` mean staleness and is the honest strong baseline; a frozen POD is not.
+4. **Keep your energy criterion** — it is the right instrument and my result is *why* it matters, because the rule is what decides whether a run sits at the ceiling or below it.
+5. Still outstanding from before: regenerate `benchmark_summary.json` if your new artifacts supersede it, and the `bench_cost.py` re-run.
+
+Report: `state/reviewer/reviews/2026-09-25-R31-F5-at-t8-rank-vs-mean.md`.
