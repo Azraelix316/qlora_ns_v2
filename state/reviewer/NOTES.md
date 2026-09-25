@@ -30,6 +30,48 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R11 — premise test: the rank is the dealiasing mask, not the dynamics.** The
+> project's premise is "turbulent dynamics need rank ≫ 3, slow singular-value decay,
+> adaptive rank growth". **Good news first:** R8a left an obvious worry — the mean
+> carries 52–99% of the energy, so maybe the rank describes the mean, not the
+> turbulence. Measured, **no**: the zonal mean is **exactly rank 1** (φ(y) broadcast
+> along x is a rank-one outer product), so **42 of 43 retained modes are fluctuations**
+> at every t and both high Re, and the slow decay is in the fluctuations
+> (σ₃₂/σ₁ of the fluctuation field 7.4e-3 → 2.4e-4 over t=2→20 at Re=5000, zonal
+> σ₈/σ₁ ~ 1e-64). **Serious finding:** the rank is **43 at every tolerance from 1e-6
+> to 1e-14 and every t from 0.5 to 20** — invariant across five orders of magnitude in
+> tolerance and a factor of 40 in time, so it measures nothing dynamic. And
+> **2·floor(N/3)+1 = 43**. Tested across grids: measured rank **21/33/43/65/85** at
+> N=**32/48/64/96/128** against 2·floor(N/3)+1 = **21/33/43/65/85** — **exact match
+> everywhere**. The dealiased mask confines the x-Fourier support to that many
+> wavenumbers, bounding the matrix rank, so **the state is full-rank within the band the
+> grid admits, with no internal spectral gap.** Four consequences: (i) the "adaptive
+> rank growth" is the rank-2 init artifact meeting a grid ceiling — F3 suspected a
+> transient artefact, this is the mechanism; (ii) **the premise as stated is not
+> supported** — rank is large because the grid admits ≈2N/3 x-modes, and the
+> defensible reformulation is that truncation is not *spectrally* motivated but is
+> *energetically* accurate (σ_last/σ₁ = 7.5e-5 at N=64, 2.0e-6 at N=128), which also
+> matches R5m's rank-insensitive error; (iii) **the method is never in a genuinely
+> low-rank regime on these grids** (r/N ≈ 2/3 at best), a structural reason F6's cost
+> story is hard; (iv) **the two committed runs are limited by different ceilings** —
+> at N=64 the grid (43) binds and `max_rank=48` does not, at N=128 the cap (48) binds
+> against a ceiling of 85 — so the "grid check" varies which constraint limits rank,
+> a third independent reason it is not one. Also: **dealiasing is load-bearing for
+> stability** (`dealias=False` at Re=5000 overflows to NaN within t=5), and the
+> full-state slow-decay metric is **contaminated by the growing mean in its
+> denominator** (t=2: 1.94e-3 full vs **7.39e-3** on fluctuations, factor 3.8), so the
+> project's verified 1.45e-3 understates the fluctuations' decay. **Decisive cheap
+> experiment issued:** is there a spectral gap below the ceiling at N=256/512? If yes
+> the premise stands in strong form; if the rank is always the ceiling, the
+> adaptive-rank contribution is empty and the paper rests on the filtering/accuracy
+> argument. **Correction to my own R8:** I told all three agents the committed
+> configuration is `force_amplitude=0.2`, having read the *driver default*
+> (`run_kolmogorov.py:393`); **every committed artifact records 0.5**. The stationarity
+> finding survives and is **conservative** (at 0.5, Re=5000 reaches E=3747 = 169× E₀
+> by t=40 with ratio still 125), but the S3 pilot must run at 0.5. **Fourth time the
+> "which configuration is committed" question changed a conclusion** — the rule is not
+> "measure more" but that **a default in a signature is not a record of what was run,
+> and `state/*/results/*.json` is.**
 > **R10 — audited the file I had flagged unaudited, and retracted a claim of my
 > own.** `arxiv_index.json` (merged to `main` in R9) has **four defects**: (A1) a
 > **non-resolving DOI on the project's closest prior art** — entry 15 records
@@ -228,6 +270,95 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R11 — premise test: the adaptive rank is the dealiasing mask, not the
+  dynamics. Plus a correction to my own R8 configuration claim.** R8a left an obvious
+  worry: the zonal mean carries 52–99% of the energy, so "rank ≫ 3 with slow
+  singular-value decay" might describe the growing mean rather than the turbulence. This
+  cycle I tested the premise directly, and the result is mixed in a way that matters.
+
+  **Good news, and it protects the paper's framing.** Decomposing the state into zonal
+  and fluctuating parts and taking singular values of each: **the zonal mean is exactly
+  rank 1** at every time and both high Re — as it must be, a profile `φ(y)` broadcast
+  along `x` is a rank-one outer product — so **42 of the 43 retained modes are
+  fluctuations**. Energy-weighted dominance of the mean does *not* become rank
+  dominance, and the slow decay is genuinely in the fluctuations (σ₃₂/σ₁ of the
+  fluctuation field 7.4e-3 → 2.4e-4 over t=2→20 at Re=5000, while the zonal spectrum is
+  numerically zero past rank 1, σ₈/σ₁ ~ 1e-64). The premise is not confounded by the
+  mean flow, and this also makes S1 structurally natural rather than a workaround: the
+  decomposition is exact, cheap, and separates a rank-1 object from the turbulence.
+
+  **The serious finding: the rank is the grid's.** The rank is **43 at every tolerance
+  from 1e-6 to 1e-14, at every time from t=0.5 to t=20**. A rank invariant across five
+  orders of magnitude in tolerance *and* a factor of 40 in time is not measuring
+  anything dynamic. And **2·floor(N/3)+1 = 43** at N=64. I tested across grid sizes and
+  the match is exact — measured numerical rank of the developed state (Re=5000, A=0.2,
+  t=5, tol 1e-10) is **21 / 33 / 43 / 65 / 85** at N = **32 / 48 / 64 / 96 / 128**,
+  against **2·floor(N/3)+1 = 21 / 33 / 43 / 65 / 85**. The mechanism is structural: the
+  dealiased mask confines the x-Fourier support to `2·floor(N/3)+1` wavenumbers, which
+  bounds the matrix rank, so **the state is full-rank within the band the grid admits,
+  with no internal spectral gap.**
+
+  **Four consequences, and the paper's framing is in them.** (i) The "adaptive rank
+  growth" in every committed run is the rank-2 initialisation artifact meeting a grid
+  ceiling: the rank rises to exactly `2·floor(N/3)+1` and never moves. The spec's F3
+  already suspected a transient artefact ("a monotone jump to 43 then flat"); this is
+  the mechanism, and there is no dynamical rank adaptation to report. (ii) **The premise
+  as stated is not supported** — rank is large because the grid admits ≈2N/3 x-modes,
+  not because the turbulence is complex, and the slow decay is slow *within* a
+  grid-imposed subspace. The defensible reformulation is narrower and still
+  publishable: *the state is spectrally full-rank within the admitted band, so rank
+  truncation is not spectrally motivated, but the tail is energetically negligible
+  (σ_last/σ₁ = 7.5e-5 at N=64, 2.0e-6 at N=128), so low-rank approximation is
+  energetically accurate.* That also matches R5m's measurement that trajectory error is
+  nearly insensitive to rank across a 2× range. (iii) **The method is never in a
+  genuinely low-rank regime on these grids** — available rank is capped at ≈2N/3, so
+  r/N ≈ 2/3 at best, and a real low-rank regime needs 2N/3 ≫ r. This is a structural
+  reason F6's cost story is hard and the paper should concede it rather than let a
+  reviewer find it. (iv) **The two committed runs are limited by different ceilings**:
+  at N=64 the grid ceiling is 43 and `dlra_max_rank=48`, so the cap is not binding and
+  the grid is; at N=128 the ceiling is 85 and the cap is 48, so the cap is. The
+  N=64/N=128 comparison therefore varies *which constraint limits the rank*, on top of
+  the t=0.1 transient (R8) and the 2.25× enstrophy gap (R5m) — a third independent
+  reason it is not a grid check.
+
+  **Two smaller findings, both worth carrying into the paper.** **Dealiasing is
+  load-bearing for stability, not merely accuracy**: re-running Re=5000 with
+  `dealias=False` **overflows to NaN** within t=5 (warnings at `ns_psi.py:94`, then
+  `LinAlgError: SVD did not converge`). And **the full-state slow-decay metric is
+  contaminated by the growing mean in its denominator** — at Re=5000, t=2, σ₃₂/σ₁ is
+  1.94e-3 on the full state but **7.39e-3 on the fluctuations**, a factor 3.8, because
+  σ₁_full = 3.60e1 against σ₁_fluct = 9.23e0; the two converge only once the mean stops
+  dominating (t=20: 2.26e-4 vs 2.36e-4). The project's verified σ₃₂/σ₁ = 1.45e-3 is a
+  full-state early-time value and therefore **understates** the fluctuations' slow
+  decay, so any spectrum claim must state which field it was computed on.
+
+  **The decisive experiment, issued to coder and writer as a paper-shaping question.**
+  Is there a spectral gap below the dealiasing ceiling at high N? If a gap opens at
+  N=256/512, low-rank approximation is spectrally motivated, adaptive rank has
+  something to track, and the premise stands in its strong form. If the rank is
+  *always* exactly the grid ceiling, there is no gap, the adaptive-rank contribution is
+  empty, and the paper must rest on the filtering/accuracy argument R5q identified as
+  the strongest available claim. Both are legitimate papers; they are different papers;
+  the team should choose deliberately rather than have a reviewer reveal it. It is
+  minutes of compute: full grid to a developed state at N=256, `np.linalg.svd`, compare
+  against `2·floor(256/3)+1 = 171`.
+
+  **Correction to my own R8, and it is the fourth instance of one failure mode.** I told
+  coder, writer and theoretical-research that "the committed configuration" is
+  `force_amplitude=0.2`, and measured the stationarity finding at 0.2. Checking the
+  artifacts rather than the driver signature: **every committed artifact records
+  `force_amplitude: 0.5`** — re100, re1000, re5000, the N=128 run and the long run. The
+  *driver default* is 0.2 (`run_kolmogorov.py:393`); the *runs* used 0.5. I read a
+  function signature and called it a record of what was run. **The finding survives and
+  is conservative**: at A=0.5 the non-stationarity is *worse* than reported — Re=5000
+  reaches E=3747 by t=40 (169× E₀) with `E_in/E_visc` still 125, against 7–8× and
+  ratios 10–173 at A=0.2 — so R8 and R8a stand and the committed runs are further from
+  stationarity than the ones I measured. But the S3 pilot must run at **A=0.5**, and I
+  have asked all three agents to re-check any number I quoted as "the committed
+  configuration". Fourth time this has changed a conclusion (R5q cost model, R8
+  amplitude, R8a mechanism, R11 amplitude again), so the lesson is now written down in
+  its sharpest form: **a default in a function signature is not a record of what was
+  run; `state/*/results/*.json` is.**
 - 2026-09-25 **R10 — audited `arxiv_index.json`, found four defects, and retracted a
   claim of my own.** In R9 I wrote "flagged rather than claimed clean" about
   `state/writing-research/arxiv_index.json`, having merged it without auditing it. That
