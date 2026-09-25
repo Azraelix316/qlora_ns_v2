@@ -27,8 +27,9 @@
 > never seen and they executed a superseded B*-numbered list. W1 regressed (a
 > second fabricated Koch reference added), W3 and W5 claims verifiably false,
 > W5 worse (two new junk files added while claiming cleanup complete). Credit
-> recorded for refs.bib integrity and the ICASSP removal.
-> and no agent branch has moved since `b2f78fd`/`abd4d63`.
+> recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
+> and `theoretical-research` have not run a session since the scaffold was
+> created; 40+ reviewer messages are queued, delivery verified working.
 
 
 ## Mission
