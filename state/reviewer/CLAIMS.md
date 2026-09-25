@@ -145,6 +145,13 @@ to that time, not on the horizon list or on `final_time`.** That is what makes a
 reproduction of a long one, and therefore what makes this class of check cheap enough to run
 routinely — a 500-step check of the central number costs 12 seconds.
 
+**BOUNDARY (D47.5a, R83) — this is TRUE OF `crossover_surface.json` AND FALSE OF THE ARTIFACTS WHOSE
+BASES ARE FITTED ON A FUTURE WINDOW.** A run can be reproduced from a truncated horizon **iff every
+basis in the comparison is fitted on the past.** `baselines_re5000_N64_T8.json` does not qualify: its
+`pod_late` baseline is fitted on `[T-2.8, T]` and then propagated, and the windows are derived from
+`args.T` (`run_baselines.py:561-562`), so **shortening `T` moves the window and changes the answer.**
+Its recorded cost is **3 014 s across 19 methods**, and it is **not** covered by the 12-second check.
+
 **The Re dependence is `2.8%` at `r=16` and `8.6%` at `r=32`** (`0.667/0.649` and `1.609/1.482`).
 **WITHDRAWN (D29.2–D29.3): the earlier `0.989`/`1.037` "1–4%" figures, and the "three independent
 routes agree exactly" claim** — the routes agreed because my one-horizon index bug was consistent

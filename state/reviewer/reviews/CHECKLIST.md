@@ -274,9 +274,12 @@ no cycle behind it is an item nobody has tested.**
 - [ ] **(R82) For the artifact the paper's thesis rests on: has the code at its OWN RECORDED COMMIT
       been run, rather than the artifact being fingerprinted or reasoned about?** `git archive <commit>
       | tar -x -C tmp` gives a tree with **no `.git`, so uncommitted code is impossible**; run its
-      driver and compare. 500 steps = 12 s, because the rows are **path-independent** (D47.5) — do
-      not read `final_time: 8.0` as the cost of checking. **A `working_tree_dirty: false` field is a
-      recorded assertion, not a verification.**
+      driver and compare. **First check the basis is fitted on the PAST** (D47.5a): if it is, 500
+      steps = 12 s, because the rows are path-independent (D47.5), and do not read `final_time: 8.0`
+      as the cost. **If any baseline's window is derived from `T` or lies in the future, there is NO
+      cheap reproduction** — `baselines_re5000_N64_T8.json` costs its recorded 3 014 s / 19 methods, and
+      **is therefore NOT covered by this item; say so rather than assuming it is.**
+      **A `working_tree_dirty: false` field is a recorded assertion, not a verification.**
 - [ ] **(R81) Did this cycle open each agent's most recent commit and read what it CONTAINS?**
       **A commit count is a receipt, not a delivery.** `rev-list --count` read `1 ahead` for a dozen
       cycles while a complete 1 281-line paper sat unread on the writer's branch (D46.1).

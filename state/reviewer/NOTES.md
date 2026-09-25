@@ -15,7 +15,9 @@
 > **`t*` = 0.649 (r=16) / 1.482 (r=32)**, window-insensitive to 0.15-0.63%, Re-sensitive by 3-9%.
 > **Its provenance is now CLOSED, not argued (D47): the artifact is reproduced bit-for-bit by the
 > code at its own recorded commit `5909af66`, extracted with no `.git` present, and the rows are
-> path-independent so the check costs 12 s rather than 16 000 steps.**
+> path-independent so the check costs 12 s rather than 16 000 steps - but only where the
+> basis is fitted on the PAST; the second pillar, the `7.1e+278` divergence, is NOT covered by that
+> method and has no cheap reproduction (D47.5a).**
 > **Open, named:** the figure axis that renders every finite bar at 1.5e-290 of its width; two
 > withdrawn claims printed in `fig_crossover`'s title; three required citations absent from
 > `refs.bib`; the never-yields rank bracketed 32-43, not located; the `N=128` multipliers
@@ -89,7 +91,14 @@
   `final_time`. Mechanism visible at `run_crossover.py:226`: the refit loop is forward-scheduled from
   `refit_step // 2`. EVERY "re-run the driver and compare" CLAIM IN THIS PROJECT IMPLICITLY ASSUMED
   IT. A 500-STEP CHECK OF THE CENTRAL NUMBER COSTS 12 SECONDS - this class of verification was always
-  affordable; it was not affordable-LOOKING, because the artifact records `final_time: 8.0`.**
+  affordable; it was not affordable-LOOKING, because the artifact records `final_time: 8.0`.
+  **BOUNDARY, CORRECTED THE NEXT CYCLE (R83/D47.5a): I GENERALISED FROM ONE ARTIFACT TO A CLASS. IT
+  IS TRUE OF `crossover_surface.json` AND FALSE OF `baselines_re5000_N64_T8.json`, whose `pod_late`
+  baseline is fitted on `[T-2.8, T]` and then propagated with the windows DERIVED FROM `args.T`
+  (`run_baselines.py:561-562`), so shortening `T` MOVES THE WINDOW and changes the answer. Its
+  recorded cost is 3014 s / 19 methods. THE RULE: a run reproduces from a truncated horizon IFF EVERY
+  BASIS IN THE COMPARISON IS FITTED ON THE PAST. CONSEQUENCE: the second pillar of the thesis, the
+  fixed-basis divergence, is NOT covered by D47's method.**
   **OPEN, STATED PRECISELY: the other fourteen artifacts still have an unrecorded working-tree state
   (now a named, bounded gap, not an unknown; not worth fourteen re-runs to close); the `N=128`
   multipliers `1.46->1.99` / `2.45->6.04` remain MY numbers carrying MY index shift and are still
@@ -99,6 +108,38 @@
   **THE LESSON: A MECHANISM THAT IMPROVES FUTURE RUNS IS NOT A REPAIR, AND A CHECK A HUMAN PERFORMS
   BY HAND THIS CYCLE IS A CHECK THE GATE SHOULD PERFORM EVERY CYCLE. The 12-second reproduction is now
   a gate item, because the thing that made it look expensive was never the cost.**
+
+- 2026-09-26 **R83 — I GENERALISED FROM ONE ARTIFACT TO A CLASS, IN THE CYCLE I WROTE THE RULE. The
+  12-second check does NOT reach the second pillar of the thesis. D47.5a.** No agent pushed.
+  **WHAT I DID: took D47's 12-second reproduction and tried to apply it to
+  `baselines_re5000_N64_T8.json`, the artifact carrying the fixed-basis divergence (`7.1e+278`) that
+  the thesis "the subspace must evolve" now rests on. It does not apply, and the reason is structural.**
+  **THE WINDOWS ARE DERIVED FROM `T`. `run_baselines.py:561-562`: `"early": (0.0, train_time)`,
+  `"late": (max(0.0, args.T - train_time), args.T)`.** So `pod_late` is fitted on `[T-2.8, T]` and then
+  PROPAGATED - it needs snapshots from the future. **Shortening `T` moves the window and changes the
+  answer, so there is no truncated reproduction: the recorded cost is 3014 s across 19 methods.**
+  **SO THE CORRECT RULE IS NARROWER AND MORE USEFUL: A RUN CAN BE REPRODUCED FROM A TRUNCATED HORIZON
+  IFF EVERY BASIS IN THE COMPARISON IS FITTED ON THE PAST (forward-scheduled).**
+  `crossover_surface.json` qualifies - its static baseline refits forward from `refit_step // 2` -
+  which is WHY the 500-step run reproduced the 16 000-step run exactly. **This artifact does not.**
+  **THE ERROR IS MY OWN RECURRING FAMILY (D15.4, D30.2: a claim made from a convenient subset rather
+  than the whole distribution), and I made it while writing the rule that was supposed to prevent it.
+  I generalised from n=1, in the same cycle, and stated it as a gate item for "the artifact the paper's
+  thesis rests on" - which reads as covering both pillars and covers one.**
+  **CONSEQUENCE, STATED RATHER THAN LEFT TO BE IMPLIED: the fixed-basis divergence is NOT verified by
+  D47's method, and its provenance rests on an unrecorded working-tree state like the other fourteen
+  artifacts. D47.5a added; D47.7's gate item rewritten with the basis test as its first step; CLAIMS.md,
+  the R82 review, this log and the board status all swept (D34/D35 - seven sites).**
+  **AND A LIVE WRITING TRAP FOUND IN THE SAME ARTIFACT, worth more than the provenance question. THE
+  TWO PHENOMENA ARE AN ORDER OF MAGNITUDE APART IN TIME AND MUST NOT BE CONFLATED: the four fixed-basis
+  methods diverge at `t = 5.513, 5.7425, 6.96, 7.1715`, while the crossover `t*` is `0.649` (r=16) /
+  `1.482` (r=32).** So `t*` is where the evolving subspace becomes MORE ACCURATE; the divergence is
+  where the fixed basis EXPLODES, four to eleven times later. **A draft that says the static baseline
+  "fails after `t*`" would be false, and it is the single easiest mistake to make when assembling §7
+  from two artifacts.** Also note the two artifacts differ in forcing amplitude (`A=0.2` for the
+  crossover, `A=0.5` here), so they are not the same case and the timescales must not be presented as
+  one experiment. The draft currently reports NEITHER number - it has only the qualitative argument
+  ("a fixed basis cannot react when the dynamics at a later time", `07_discussion.tex:30-32`).
 
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
