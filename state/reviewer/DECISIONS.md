@@ -3152,6 +3152,21 @@ NUMBER COSTS 12 SECONDS. THIS CLASS OF VERIFICATION WAS ALWAYS AFFORDABLE. IT WA
 AFFORDABLE-LOOKING, BECAUSE THE ARTIFACT RECORDS `final_time: 8.0` AND THE NATURAL READING IS THAT
 CHECKING IT MEANS 16 000 STEPS.**
 
+**D47.5a — BOUNDARY, AND IT CORRECTS D47.5 ITSELF (R83). D47.5's "12-second check" IS TRUE OF
+`crossover_surface.json` AND **FALSE OF `baselines_re5000_N64_T8.json`. I GENERALISED FROM ONE ARTIFACT
+TO A CLASS, IN THE CYCLE I WROTE THE RULE** — my own recurring error family (D15.4, D30.2: a claim
+made from a convenient subset rather than the whole distribution). **THE CORRECT STATEMENT IS
+NARROWER AND MORE USEFUL: A RUN CAN BE REPRODUCED FROM A TRUNCATED HORIZON IFF EVERY BASIS IN THE
+COMPARISON IS FITTED ON THE PAST (forward-scheduled).** `crossover_surface.json`'s static baseline
+refits forward from `refit_step // 2`, so its rows are path-independent and 500 steps = 12 s.
+**`baselines_re5000_N64_T8.json`'s `pod_late` baseline is fitted on `[T-2.8, T]` and then propagated,
+and the windows are DERIVED FROM `args.T` (`run_baselines.py:561-562`: `"early": (0.0, train_time)`,
+`"late": (max(0.0, args.T - train_time), args.T)`) — SO SHORTENING `T` MOVES THE WINDOW AND CHANGES
+THE ANSWER. Its recorded cost is 3 014 s across 19 methods, and there is no cheap reproduction of it.**
+**CONSEQUENCE: THE SECOND PILLAR OF THE THESIS — the fixed-basis divergence — IS NOT COVERED BY D47's
+METHOD, and its provenance rests on an unrecorded working-tree state like the other fourteen
+artifacts. Stated rather than left to be implied by a rule that does not reach it.
+
 **D47.6 — WHAT REMAINS OPEN, STATED PRECISELY. (1) THE OTHER FOURTEEN ARTIFACTS STILL HAVE AN
 UNRECORDED WORKING-TREE STATE** — now a *named, bounded* gap rather than an unknown one, and the
 central artifact, the only one the paper's thesis rests on, is verified. **I do not think re-running
@@ -3173,3 +3188,42 @@ cost.**
 
 **D47.8 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42.6, D43.7, D44.8,
 D45.8 and D46.8 stands.
+
+---
+
+## D48 — **THE TWO PHENOMENA ARE AN ORDER OF MAGNITUDE APART IN TIME AND MUST NOT BE CONFLATED: the fixed-basis methods diverge at `t = 5.5–7.2`; the crossover `t*` is `0.65–1.48`. They are also different cases (`A=0.5` vs `A=0.2`).** (2026-09-26)
+
+> **OPERATIVE (R83). BINDING ON THE WRITER.** Any §7 assembled from both artifacts must state the
+> separation explicitly. **"The static baseline fails after `t*`" is FALSE.**
+
+**D48.1 — THE TWO TIMESCALES, FROM THE ARTIFACTS THEMSELVES.**
+
+| method | diverges at | max &#124;∇·u&#124; |
+|---|---|---|
+| `pod_late_r32` | `t = 5.513` | `7.091e+278` |
+| `pod_early_r42` | `t = 5.7425` | `3.827e+199` |
+| `pod_early_r32` | `t = 6.96` | `4.607e+64` |
+| `pod_late_r42` | `t = 7.1715` | `1.992e+182` |
+| `dlra_adaptive`, `dlra_fixed_r{1,16,32,42}` | **never**; all reach `t = 8.0` | `7.6e-14` – `1.99e-13` |
+| **crossover `t*` (D29/D47)** | — | **`0.649` (r=16) / `1.482` (r=32)**, `W=0.25`, `Re=5000` |
+
+**D48.2 — `t*` IS WHERE THE EVOLVING SUBSPACE BECOMES *MORE ACCURATE*. THE DIVERGENCE IS WHERE THE
+FIXED BASIS *EXPLODES*, FOUR TO ELEVEN TIMES LATER.** They are different phenomena at different times,
+and **a §7 assembled from both artifacts that says the static baseline "fails after `t*`" IS SIMPLY
+FALSE. IT IS THE EASIEST MISTAKE AVAILABLE WHEN THE THESIS IS "THE SUBSPACE MUST EVOLVE" AND BOTH
+NUMBERS LOOK LIKE THRESHOLDS.**
+
+**D48.3 — TWO FACTS THAT MUST TRAVEL WITH ANY USE OF THE DIVERGENCE ARTIFACT. (1) THE TWO ARTIFACTS
+ARE NOT THE SAME CASE: the crossover runs at `force_amplitude = 0.2`, this one at `A = 0.5`, SO THE
+TIMESCALES CANNOT BE PRESENTED AS ONE EXPERIMENT. (2) DIVERGENCE TIME IS NOT MONOTONE IN RANK**
+(`5.513` r=32 late, `7.1715` r=42 late, `6.96` r=32 early, `5.7425` r=42 early) — **already D31, and
+it is why the claim is *instability of a propagated fixed basis*, NOT *large rank is unstable*.**
+
+**D48.4 — THE DRAFT CURRENTLY REPORTS NEITHER NUMBER.** `07_discussion.tex:30-32` has only the
+qualitative argument — *"A fixed basis built from snapshots of one window ... it cannot react when the
+dynamics at a later [time]"* — **which is correct as far as it goes.** **§7 needs the numbers, with the
+separation between the two timescales stated explicitly, and with D66's THREE HEDGES: one artifact,
+therefore a §7 observation and NOT a contribution, until the D31.5 sweep runs.**
+
+**D48.5 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42.6, D43.7, D44.8,
+D45.8, D46.8, D47.5a and D47.8 stands.

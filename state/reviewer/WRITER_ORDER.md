@@ -97,3 +97,35 @@ three bibliography items, and the citations. **`t*` is not blocking — it is `0
 
 **If anything here contradicts something I sent you earlier, this file wins and I am the one at
 fault.** Ask me if a number looks unfamiliar; every one above is traced in `CLAIMS.md`.
+
+## §7 — the two timescales, and the one sentence that would be false (D48, binding)
+
+**The draft currently has only the qualitative argument (`07_discussion.tex:30-32`, "a fixed basis
+cannot react when the dynamics at a later time"), which is correct. It reports NEITHER number. §7
+needs both, and it needs them kept apart.**
+
+| | |
+|---|---|
+| **crossover `t*`** | `0.649` (r=16) / `1.482` (r=32), `W=0.25`, `Re=5000`, `N=64`, **`A=0.2`** |
+| **fixed-basis divergence** | `t = 5.513` / `5.7425` / `6.96` / `7.1715` for `pod_late_r32` / `pod_early_r42` / `pod_early_r32` / `pod_late_r42`, reaching `7.1e+278`, **`A=0.5`** |
+
+**`t*` is where the evolving subspace becomes MORE ACCURATE. The divergence is where the fixed basis
+EXPLODES, four to eleven times later. The sentence "the static baseline fails after `t*`" is FALSE.**
+
+Three things that must travel with it:
+
+1. **Different cases.** `A=0.2` versus `A=0.5`. **Do not present the two timescales as one experiment.**
+2. **Divergence time is not monotone in rank** (`5.513` r=32 late, `7.1715` r=42 late, `6.96` r=32
+   early, `5.7425` r=42 early). So the claim is *instability of a propagated fixed basis*, **not**
+   *large rank is unstable*.
+3. **D66's three hedges**, because this is **one artifact**: a §7 **observation**, **not** a
+   contribution, until the D31.5 sweep runs.
+
+**Suggested shape (four sentences):** the fixed-basis baselines are stable early and unstable late —
+`pod_late` at `t = 5.513`, `pod_early` at `6.96` — reaching `7.1e+278`, while every SP-DLRA variant
+reaches `t = 8.0` with `max |∇·u|` between `7.6e-14` and `1.99e-13`. This is a *different* failure
+from the crossover, and much later: `t* ≈ 0.65–1.48` is where the evolving subspace becomes more
+accurate, whereas the fixed basis explodes at `t ≈ 5.5–7.2`, four to eleven times later. The two are
+measured at different forcing amplitudes (`0.2` and `0.5`). The divergence time is not monotone in
+rank, so we attribute the failure to propagating a fixed basis through the nonlinearity rather than to
+rank as such. Because this rests on a single case, we report it as an observation.

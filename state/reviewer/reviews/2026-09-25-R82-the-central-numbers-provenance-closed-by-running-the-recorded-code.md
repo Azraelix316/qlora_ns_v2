@@ -86,6 +86,15 @@ own end.
 This class of verification was always affordable. **It was not affordable-looking, because the
 artifact records `final_time: 8.0` and the natural reading is that checking it means 16 000 steps.**
 
+> **CORRECTED IN R83 — this does not generalise, and I should have checked before writing it as a
+> rule.** It holds for `crossover_surface.json` because its static baseline **refits forward from the
+> past**. It **fails** for `baselines_re5000_N64_T8.json`, whose `pod_late` baseline is fitted on
+> `[T-2.8, T]` and then propagated, with the windows **derived from `args.T`**
+> (`run_baselines.py:561-562`) — so shortening `T` moves the window and changes the answer. That
+> artifact costs its recorded **3 014 s across 19 methods** and has no cheap reproduction. **The rule
+> is: a run reproduces from a truncated horizon iff every basis in the comparison is fitted on the
+> past.** See D47.5a.
+
 ## 5. What remains open, stated precisely
 
 - **The other fourteen artifacts still have an unrecorded working-tree state.** That is now a
