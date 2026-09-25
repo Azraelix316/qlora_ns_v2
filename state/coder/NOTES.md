@@ -1,23 +1,31 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: every item on the reviewer's queue is done and reported. The R5q cost
-> gate is complete (full-step ratio saturates at ≈2.1 and never reaches parity,
-> so the long high-N run is declined); the V6 midpoint-BUG port is implemented
-> from the primary text and verified by a machine-precision stationary-state
-> test, a structural no-full-factorization assertion, and a measured second
-> order of 1.98/1.95; R26/R29's windowed rank is reproduced with project code at
-> N=64 and N=128 (r99 = 16 on both at W=8, while the amplitude rule asks 174 and
-> 357); S2 passes at no affordable horizon; and F5 at T=8 is reported as not
-> favouring the proposed method. 36 tests pass, six figures build from
-> artifacts, and `benchmark_summary.json` is generated. **Two results that
-> constrain the paper rather than support it:** the per-step rank rule reads one
-> state at a time so it cannot track the windowed rank (adaptive rank 1, 17% of
-> the fluctuation energy), and the BUG port is ~5× *slower* per step than the
-> projected integrator, so its cost argument does not hold here. **Open
-> question put to the reviewer:** rework the rank rule to accumulate the visited
-> subspace over a window, or report the instantaneous/windowed distinction as a
-> finding. No per-step speedup may be claimed (D11.1) — none is available.
+> Status: every item on the reviewer's queue is done and reported, including
+> R39 — reproduced, and the disagreement diagnosed rather than papered over. The
+> DLRA half of the crossover surface agrees with the reviewer's to four decimals
+> at 8 of 9 horizons; my static baseline is 2–4× stronger than theirs at every
+> window I swept, and with it **there is no crossover at all**, so
+> `t* ≈ 0.050·r^1.12` does not reproduce. The mechanism underneath it does: the
+> static error is flat in rank (21× rank buys 2%) while the DLRA's falls from
+> 0.599 to 1.6e-8, which supports "rank buys predictability time, not accuracy"
+> and not the exponent. The reviewer has been asked to either supply their
+> window configuration or accept the mechanism without the law. The R5q cost
+> gate is complete (full-step ratio saturates at ≈2.1, never reaching parity, so
+> the long high-N run is declined); the V6 midpoint-BUG port is implemented from
+> the primary text, verified by a machine-precision stationary-state test, a
+> structural no-full-factorization assertion, and a measured second order of
+> 1.98/1.95, and measured at **3–5× slower** per step than the projected
+> integrator. R26/R29's windowed rank reproduces with project code at N=64 and
+> N=128; S2 passes at no affordable horizon; F5 at T=8 does not favour the
+> proposed method. 36 tests pass, eight figures build from artifacts, and
+> `benchmark_summary.json` is generated. **Four results that constrain the paper
+> rather than support it:** the per-step rank rule reads one state at a time and
+> so cannot track the windowed rank (adaptive rank 1, 17% of the fluctuation
+> energy); second order is conditional on the rank (1.98 at rank 16, 1.01 at
+> rank 6, because truncation error is O(1) in dt); the BUG port's cost argument
+> does not hold here; and the crossover law inverts against a strong baseline.
+> No per-step speedup may be claimed (D11.1) — none is available.
 
 ## Mission
 
@@ -46,6 +54,42 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 - [x] Send a readiness note to `writer` once the first numbers exist.
 
 ## Log
+
+- 2026-09-25 **R39 reproduced, and the disagreement is diagnosed: the DLRA half
+  agrees to four decimals, my static baseline is 2–4× stronger than the
+  reviewer's, and the crossover law does not survive a stronger baseline.**
+  All 54 DLRA cells agree at 8 of 9 horizons to the fourth decimal (only
+  `t=0.25` differs, at `r=43` only, and their row is non-monotone there so it is
+  probably a sampling offset). Sweeping the static window over 0.25/0.5/1.0 with
+  a 0.25 refit, my oracle-mean error is 0.09–0.16 against their 0.22–0.43. With
+  my baseline the static method is *below* the DLRA at almost every (rank,
+  horizon), so `t*` is undefined for all 18 (rank, window) pairs: the DLRA wins
+  only at `t ≲ 1` for `r ≥ 16` and never for `r ≤ 8`. **The mechanism survives
+  and the law does not:** the static error is flat in rank (r=2 → 0.101,
+  r=43 → 0.099 at `t=8`, a 21× rank range buying 2%) while the DLRA's falls from
+  0.599 to 1.6e-8, so "rank buys predictability time, not accuracy" is
+  supported and `t* ≈ 0.050·r^1.12` is not, on my numbers. Put to the reviewer:
+  run their window configuration, or keep the mechanism and drop the exponent. I
+  will not write the exponent on numbers that do not support it.
+- 2026-09-25 **A fourth harness bug, subtler than the other three: a refit
+  scheduled at exactly an evaluation time is in-sample.** Seven of the nine
+  horizons are multiples of the 0.25 refit interval, so each coincided with a
+  refit whose trailing window contained it, and the baseline was partly scored on
+  data it had seen. Refits are now offset by half an interval, so every
+  evaluation is at least `interval/2` beyond anything any basis could have seen.
+  This is the one that most plausibly explains part of the gap with the
+  reviewer's baseline, and it is flagged to them.
+- 2026-09-25 Reviewer's other items closed: `fig_cost` restored now the cost
+  artifact landed, with an **"Expected but not generated"** section in
+  `PROVENANCE.md` so a figure can never vanish silently again (their point 1, and
+  it is right — an absence is not a record); `fig_rank_growth` → `fig_window_rank`
+  (their point 3, the filename was the retired framing); the `Z(k)` panel dropped
+  with the reason **read from the artifact** rather than hardcoded (enstrophy
+  drifts 29% over `[13.33, 20]`, outside the S2 bar), `E(k)` kept with its window
+  and its measured 3% drift printed on the figure (their point 2). The four small
+  items — `framing_note` on the T=8 artifact, `rank_quantities` blocks,
+  `initial_state.sha256` in the pilots, and the `SVDProjector` docstring that no
+  longer claims the per-step rule tracks the sixteenfold growth.
 
 - 2026-09-25 **The crossover surface driver, and three bugs in it found before
   it produced anything.** (1) The static rows were **off by one sample** — the
