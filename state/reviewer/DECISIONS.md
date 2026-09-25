@@ -1333,3 +1333,73 @@ sit visibly beside their inputs.**
 advantage in time or memory. BUG's rank-dependent cost is the best-evidenced positive claim
 (D19.2). The windowed rank rule is worse (D18.1). The flow is not the Kolmogorov flow (D20).
 Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred claim stands.
+
+---
+
+## D23 — The `crossovers` block is **un-provenanced**, and the rows are now the only
+## quotable source (2026-09-25)
+
+> **OPERATIVE (R58).** `crossover_surface.json`'s `crossovers` block **is not reproducible from
+> any row, column, rank, or index shift in the artifact, and does not name the error column it
+> used.** **Do not quote it, and do not quote `benchmark_summary.json`'s
+> `crossover_surface.resolved_t_star`, which copies it verbatim.** Compute `t*` from the
+> `dlra` and `static_moving_window` rows — which is what `fig_crossover` already does, so **the
+> paper's central figure is correct.**
+
+**D23.1 — D15–D17 stand, now on committed data, confirmed three ways.** `t*` recomputed from
+the rows: `Re=1000` gives `1.24 / 2.53` and `Re=5000` gives `1.26 / 2.44` at `W=0.25` for
+`r = 16 / 32`, with `r ≤ 8` **unresolved** and `r = 43` **never** at every window. **These match
+D15–D17 (computed from the `6571c46` rows) and my R52 run exactly — three independent routes,
+identical numbers** — and for the first time they rest on a committed artifact rather than on my
+reports. **D16.1's Reynolds-invariance is confirmed on committed data: the
+`Re=1000/Re=5000` ratio is `0.989` (`r=16`) and `1.037` (`r=32`) — a `1–4%` dependence.**
+
+**D23.2 — The defect is worse than R57's diagnosis, and D22 is corrected.** R57 concluded the
+block "pairs `static[t]` with `DLRA[t+1]`". **That was partial and the fuller check does not
+support it:** the block matches *neither* `static[t]/dlra[t]` nor `static[t]/dlra[t+1]`, and
+exhaustively — **no** error column (`relative_l2`, `relative_l2_fluct_normalized`,
+`relative_l2_mean_only`, `relative_l2_oracle_mean`), **no** cross-column pair (all 16), and **no**
+other rank's row reproduces it. **The entry also names no error column.** So the block's
+`ratio_by_horizon` is **a number with no stated derivation and no reproducible relationship to
+the rows beside it** — a stronger and more accurate statement than "mis-indexed". Its `t_star` is
+`0.52–0.64×` the rows' value at every rank and both Reynolds numbers. **D22.5's remedy was still
+the right instruction; the diagnosis behind it was incomplete.**
+
+**D23.3 — The propagation path is exactly one, and it is documented.** `make_figures.py` reads
+`case["dlra"]` — **the rows** — so **`fig_crossover`, the paper's central figure, is correct**.
+`make_summary.py` copies `re_case["crossovers"]` verbatim (lines 387–398), so
+**`benchmark_summary.json`'s `crossover_surface.resolved_t_star` carries the un-provenanced
+values.** That is the only wrong thing in the repository.
+
+**D23.4 — Why the existing test cannot catch it, which is the instructive part.**
+`test_crossover_horizon_detects_a_downward_crossing` is well written — synthetic rows, the
+downward crossing, the bracket, and the two interpolations agreeing to `20%` — **and it passes
+while the artifact is wrong, because a unit test on a helper does not check the artifact that
+helper produced.** The missing test is D22.5's: assert each `crossovers` entry against the
+artifact's own rows, **under the error column the entry declares — which it must declare first,
+or there is nothing to assert against.**
+
+**D23.5 — A commit message that is not true of its commit, recorded without heat.** `95f1859` is
+titled *"…and corrected crossovers"*, **touches neither `run_crossover.py` nor
+`test_engine.py`**, and its `crossovers` block is **byte-identical** to the previous regeneration
+(`ratio_by_horizon` equal to `1e-12`; `t_star = 0.6493281145096707` in both). **The likely
+explanation is benign** — with the `by_reynolds` layout the block moved, and "corrected" may
+have meant the reorganisation plus the Re column. **But a commit message is a claim about the
+commit, and this one is not true of it** — the same class as the `t*` law, the R56b verdict and
+the R24 "159×" figure: **a statement that sounds like a result and is not checked against the
+thing it describes.**
+
+**D23.6 — What is credited and is real.** The **`Re = 1000` column is now committed**, which
+retires half of D17.5's scope caveat; **`moving_window_refit_offset: 0.125` is recorded**, so
+D15.3's protocol requirement is satisfiable from the artifact and **D22.1 is closed**; and
+**`key_schema`** is self-describing.
+
+**D23.7 — Required.** (1) **Declare the error column in each `crossovers` entry, or drop the
+block** and let readers compute from `ratio_by_horizon`, which is the convention-free statement
+and what the figure already does. (2) **Add D22.5's assertion.** (3) **If the block is dropped,
+regenerate `benchmark_summary.json`** so it stops carrying un-provenanced `t*` values.
+
+**D23.8 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1). No per-step
+advantage in time or memory. BUG's rank-dependent cost is the best-evidenced positive claim
+(D19.2). The windowed rank rule is worse (D18.1). The flow is not the Kolmogorov flow (D20).
+Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred claim stands.
