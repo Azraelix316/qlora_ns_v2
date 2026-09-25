@@ -30,6 +30,59 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R56 — THE BEST PUSH YET, AND IT CONTAINS A FINDING I SHOULD HAVE CAUGHT TWENTY CYCLES
+> AGO: THE FLOW IS NOT THE KOLMOGOROV FLOW, AND THE PAPER NAMES IT SEVEN TIMES WITHOUT EVER
+> STATING THE FORCE. D20.** `5909af6` (3 files, +215/−2241), **merged at `f640244`; 157 files,
+> 0 deletions, 0 outside owned, 0 conflicts.**
+> **THE BEST ENGINEERING IN THE PROJECT, AND IT ANSWERS TWO CYCLES OF MY COMPLAINTS. (a) The
+> stale-schema guard cites D14.4 BY NAME in the code** and emits `status: "stale_schema"` with
+> the reason, the regenerating command, and the stale artifact's `git_commit` — so **the
+> repository now says "this artifact is stale" permanently instead of relying on a reviewer to
+> notice.** I have written twice that a fix in the driver is not a fix in the repository;
+> **coder has made the repository enforce it, which is better engineering than the
+> reviewer-driven version of the rule.** (b) **The interpolation is now an INSTRUMENT, not a
+> convention:** `t_star_loglog` AND `t_star_linear` because *"they differ, so both are reported
+> rather than one being passed off as the value"*, plus a `bracket` called *"the
+> convention-independent statement"*, plus `status: "resolved"` kept apart from `never`, plus
+> **multiple-crossing detection** — *"a `t*` that silently ignored a second crossing would be a
+> statement about the first of several events."* **That clause is the oscillation failure mode
+> I found in R48. I diagnosed it in prose, from a buggy artifact, and turned it into a revision
+> of the central claim; coder put it in the instrument, so the next person cannot repeat my
+> error. That is the correct place for that lesson and I got the place wrong.**
+> **THE FINDING: THE FLOW IS NOT THE KOLMOGOROV FLOW.** Coder wrote the caveat into
+> `benchmark_summary.json`'s `forcing_name_caveat`; **I verified it against the code and it is
+> correct.** `solvers/forcing.py`'s module docstring gives `f = (A sin(k y), 0)`, curl
+> `zeta = -A k cos(k y)` — a single resolved Fourier mode, divergence-free because
+> `d_x f_x = 0` — and calls itself *"the periodic analogue of the usual Kolmogorov body-force
+> driver."* **The AKS flow is `u = (U sin(αy), -U α sin(αx) cos(αy))`: a cellular pump with a
+> steady lattice of convection cells and the classical Vinograd–Cullen–Clark stability
+> boundary. Different flow, different dynamics.** The naming is genuinely ambiguous in the
+> literature — a periodic unidirectional shear is itself often called a Kolmogorov (shear) flow
+> — so this is a hazard rather than a blunder, **but CHECKLIST 1.3 asks that the forcing match
+> what the name claims and it does not.**
+> **WHERE IT LIVES, AND WHY IT SURVIVED: seven mentions across four draft sections** — *"single-
+> mode Kolmogorov forcing"*, *"the system possesses the Kolmogorov equilibrium"*, *"forced
+> Kolmogorov-flow runs"*, a figure caption, and the Vinograd–Cullen–Clark citation — **and the
+> draft NEVER STATES THE FORCE'S FORMULA, which is why the error is invisible from the paper
+> alone. I asserted "Kolmogorov flow" in six of my own review reports (10 mentions) without ever
+> opening `forcing.py`**: I reviewed a claim the paper makes about itself, in the paper, and did
+> not check it against the code. The standing fix is now written into D20.2: *a paper's
+> description of its own setup is a claim about the code, and is verified against the code.*
+> **AND IT CONNECT TO A FINDING OF MINE THAT IT WEAKENS, WHICH I WANT RECORDED AS SUCH.** I had
+> read "there is no stationary fluctuation state" as a fact about the *flow*, and used it to bar
+> turbulence framing (D11.2). **But the AKS Kolmogorov flow _does_ have a well-known steady
+> cellular state, so the absence here is not evidence about Kolmogorov flow — it is what one
+> should expect from a periodic shear, which has no such attractor.** R32/R36/R38 stand as
+> measurements of this forcing; **the attribution was mine and it was too strong (D20.3).**
+> **ONLY ONE OPTION IS FEASIBLE, AND IT COSTS SOMETHING.** Implementing the AKS pump would
+> **invalidate every measurement in the project.** So D20.4 is: describe the flow accurately
+> instead of changing it — the setup section must give the formula, the cellular-flow literature
+> is dropped or explicitly distinguished, and "no stationary state" is re-attributed to the
+> forcing. **That costs the paper its recognisability, and I have recorded it as a trade rather
+> than a free fix, with the note that a reviewer should be told about it rather than discover
+> it. I have also told coder that if changing the forcing is cheap I will re-open it, because I
+> have assumed it is not and I would rather be corrected.**
+> `CLAIMS.md` gained **§3a** (what the setup actually is) and four prohibited phrasings.
 > **R55 — CODER'S PEAK-MEMORY BENCHMARK IS BETTER THAN MINE, AGREES WITH IT, AND IT MAKES
 > THE BUG PORT THE PROJECT'S BEST-EVIDENCED POSITIVE CLAIM. D19.** `dfd1a0b` (3 files, +994),
 > **merged at `46834c4`; 156 files, 0 deletions, 0 outside owned, 0 conflicts.**
@@ -1773,6 +1826,73 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R56 — the best push yet, and it contains a finding I should have caught twenty
+  cycles ago: the flow is not the Kolmogorov flow, and the paper names it seven times without
+  ever stating the force. D20.**
+  `5909af6` (3 files, +215/−2241), **merged at `f640244`**; 157 files on `main`, 0 deletions,
+  0 files outside owned paths, 0 conflicts.
+
+  **The best engineering in the project, and it answers two cycles of my complaining.**
+  1. **The stale-schema guard cites D14.4 by name in the code** and emits
+     `status: "stale_schema"` with the reason, the regenerating command, and the stale
+     artifact's `git_commit` — so **the repository now says "this artifact is stale"
+     permanently instead of relying on a reviewer to notice.** I have written twice that a fix
+     in the driver is not a fix in the repository; **coder has made the repository enforce it,
+     which is better engineering than the reviewer-driven version of the rule.**
+  2. **The interpolation is now an instrument, not a convention:** `t_star_loglog` **and**
+     `t_star_linear`, reported together because *"they differ, so both are reported rather than
+     one being passed off as the value"*; a `bracket` called *"the convention-independent
+     statement"*; `status: "resolved"` kept deliberately apart from `never`; and
+     **multiple-crossing detection** — *"a `t*` that silently ignored a second crossing would be
+     a statement about the first of several events."* **That clause is the oscillation failure
+     mode I found in R48. I diagnosed it in prose, from a buggy artifact, and turned it into a
+     revision of the central claim; coder put it into the instrument, so the next person cannot
+     repeat my error. That is the correct place for the lesson and I got the place wrong.**
+
+  **The finding: the flow is not the Kolmogorov flow.** Coder wrote it into
+  `benchmark_summary.json` as a `forcing_name_caveat`; **I verified it against the code and it
+  is correct.** `solvers/forcing.py`'s module docstring gives `f = (A sin(k y), 0)`, curl
+  `zeta = -A k cos(k y)` — a single resolved Fourier mode, divergence-free because `d_x f_x = 0`
+  — and calls itself *"the periodic analogue of the usual Kolmogorov body-force driver."* **The
+  Arnold–Korkin–Sinitsyn flow is `u = (U sin(αy), -U α sin(αx) cos(αy))`: a cellular pump with
+  a steady lattice of convection cells and the classical Vinograd–Cullen–Clark stability
+  boundary. Different flow, different dynamics.** The naming is genuinely ambiguous in the
+  literature — a periodic unidirectional shear is itself often called a Kolmogorov (shear) flow
+  in the mixing and Boussinesq-instability literature — so this is a real hazard rather than a
+  blunder, **but CHECKLIST 1.3 asks that the forcing match what the name claims and it does
+  not.**
+
+  **Where the error lives, and why it survived: seven mentions across four draft sections** —
+  *"single-mode Kolmogorov forcing"*, *"the system possesses the Kolmogorov equilibrium"*,
+  *"forced Kolmogorov-flow runs"*, a figure caption, and the Vinograd–Cullen–Clark citation —
+  **and the draft never states the force's formula anywhere, which is why the error is invisible
+  from the paper alone. I asserted "Kolmogorov flow" in six of my own review reports (10
+  mentions) without ever opening `solvers/forcing.py`**: I reviewed a claim the paper makes about
+  itself, in the paper, and did not check it against the code. **The standing fix is now D20.2:
+  a paper's description of its own setup is a claim about the code, and is verified against the
+  code.**
+
+  **And it connects to a finding of mine that it weakens, recorded as such.** I had read *"there
+  is no statistically steady fluctuation state"* as a fact about the **flow**, and used it to bar
+  turbulence framing under D11.2. **But the AKS Kolmogorov flow _does_ have a well-known steady
+  cellular state, and the literature the draft cites is precisely about it. So the absence here
+  is not evidence about Kolmogorov flow at all — it is what one should expect from a periodic
+  unidirectional shear, which has no steady cellular attractor.** R32/R36/R38 stand as
+  measurements **of this forcing**; the attribution was mine and it was too strong (D20.3).
+
+  **Only one option is feasible, and it costs something.** Implementing the AKS pump would
+  **invalidate every measurement in the project**, since all of it was run on a single-mode
+  shear. So D20.4 is: **describe the flow accurately rather than change it** — the setup section
+  must give the formula, the cellular-flow literature is dropped or explicitly distinguished, and
+  "no stationary state" is re-attributed to the forcing. **That costs the paper its
+  recognisability, which is a real trade, and I have recorded it as a trade rather than a free
+  fix, with the instruction that a reviewer should be told about it rather than discover it. I
+  have also told coder that if changing the forcing is cheap I will re-open D20.4, because I
+  have assumed it is not and would rather be corrected than left with a wrong assumption.**
+
+  `CLAIMS.md` gained **§3a** (what the setup actually is) and four prohibited phrasings.
+  `benchmark_summary.json` shrank by 2 241 lines because the summary no longer duplicates the
+  surfaces, and gained the `peak_memory` block with its `git_commit`.
 - 2026-09-25 **R55 — coder's peak-memory benchmark is better than mine, agrees with it, and
   it makes the BUG port the project's best-evidenced positive claim. D19.**
   `dfd1a0b` (3 files, +994), **merged at `46834c4`**; 156 files on `main`, 0 deletions,

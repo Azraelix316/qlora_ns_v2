@@ -235,6 +235,27 @@ order, not just accuracy.** Any convergence claim must state its rank. Source: R
 
 ---
 
+## 3a. The setup, and what it actually is (D20 — read this before describing the flow)
+
+> **The forcing is `f = (A sin(k y), 0)`: a single-mode periodic unidirectional shear, whose
+> curl is `zeta = -A k cos(k y)`. It is NOT the Arnold–Korkin–Sinitsyn Kolmogorov cellular
+> pump.** The naming is genuinely ambiguous in the literature, but **the paper must not call
+> this the Kolmogorov flow without stating the formula**, and the draft currently never does.
+
+| do not write | why |
+|---|---|
+| "Kolmogorov flow" as a description of this setup | D20.1 — the forcing is a unidirectional shear; the AKS flow is a cellular pump with a steady state and the Vinograd–Cullen–Clark boundary |
+| "the system possesses the Kolmogorov equilibrium" | D20.1 — that equilibrium belongs to the AKS pump, not to this force |
+| "classification of Kolmogorov flow of Vinograd, Cullen, and Clark" as applying here | D20.1 — that classification is about the AKS cellular flow |
+| "there is no statistically steady fluctuation state" **as a property of the flow** | **D20.3 — it is a property of the forcing.** The AKS flow *has* a steady cellular state; a periodic shear has no such attractor, so its absence is expected and is not evidence about Kolmogorov flow |
+
+**What the paper studies:** forced 2-D incompressible NS with a **single-mode periodic
+unidirectional shear**, `A ∈ {0.2, 0.5}`, `Re ∈ {100, 1000, 5000}`, `N ∈ {64, 128}`. **The
+implementation of the true AKS pump would invalidate every measurement in the project**, so the
+resolution is to describe the flow accurately, not to change it (D20.4).
+
+---
+
 ## 4. Invariants — the one thing that is solid
 
 | claim | value | source |
@@ -279,8 +300,9 @@ bound of the form `< 0.5 · eps · N²` would hold with a 12–50× margin at al
 The `T=3` window vanished under resolution refinement while the trend strengthened — noise,
 not physics. **No qualifying horizon in any cell.** Sources: R32, R36.
 
-**Sharper, and what to write:** the flow reaches a **quasi-steady fluctuation energy** while
-continuing to **redistribute across scales**. At `N=128, A=0.2`: `T=4` gives E `8.79%` (inside
+**Sharper, and what to write** — and note the attribution, which D20.3 requires: this is a
+property of **this forcing**, not of the Kolmogorov flow. The flow reaches a **quasi-steady
+fluctuation energy** while continuing to **redistribute across scales**. At `N=128, A=0.2`: `T=4` gives E `8.79%` (inside
 the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 
 **Consequences, both binding on figures:**
@@ -303,6 +325,9 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "first projector-splitting integrator for DLRA" | **Kusch, Schotthöfer & Walter, SIMODS 8(3):820–849, 2026, `10.1137/25m1730673`** — the closest modern prior art on projector splitting, found by writing-research in R46. It targets DLRA *training* rather than a conservative PDE, so it does not refute the project's framing — but it is the reference a reviewer will raise, so **cite it and distinguish it**. |
 | "to our knowledge" on arXiv evidence alone | D4 |
 | "turbulent dynamics", "high-Re turbulence validation" | D11.2, closed by R32/R36 |
+| **"Kolmogorov flow"** as a name for this setup | **D20.1** — the force is a unidirectional shear `f=(A sin ky,0)`, not the AKS cellular pump. State the formula |
+| "the Kolmogorov equilibrium", "Vinograd–Cullen–Clark classification" | **D20.1** — those describe the AKS flow |
+| "no stationary state" attributed to the **flow** rather than the **forcing** | **D20.3** — the AKS flow has a steady cellular state, so the absence is expected here and is not evidence about Kolmogorov flow |
 | "adaptive rank growth", "adaptive rank beats static" | D11.3, D12; R31, R33, R35 |
 | "the cost of staticity is mean tracking" | **retracted R37** — it is a stale *subspace* |
 | any per-step **speedup** | D11.1; 1.78–2.18× slower at every rank measured |

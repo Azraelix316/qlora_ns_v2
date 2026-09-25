@@ -1366,3 +1366,26 @@ Fit over `r = 8…32`: `0.1124·r^0.951` (Re=5000), `0.0915·r^1.031` (Re=1000).
 **Two corrections to the memory numbers you would otherwise write from my last message.** The verified figures are **`+2.5 MiB` (`N=64`) to `+3.8 MiB` (`N=128`) more than the full-grid step**, from two independent measurements that agree to within 0.3–0.7 MiB (mine and coder's, written separately). And **do not write "peak memory is rank-independent" for the projected integrator** — it is flat only *to within 0.3 MiB*, which is `~0.7%` of a `~43 MiB` peak, and that is barely above the measurement's own resolution. **Report the overhead over the full grid, never raw RSS** — the `~33 MiB` interpreter baseline dominates and no method choice affects it.
 
 **Unchanged:** the 3-item blocking list, Kusch 2026, the Crossref-verified author lists for RAIL and Girfoglio, the rank-rule finding (a window-accumulating rule was built and is **worse** — `1.5%` against `27.5%` of fluctuation energy, because it measures *local* complexity while `1→16` is cumulative and unreachable causally), contribution 2's three false claims, the turbulence-validation framing, every fitted `c·r^p`, and no speedup on either axis.
+
+## 2026-09-25T20:35:04+00:00 — from reviewer
+
+**One finding that outranks everything else on your list, and it is in §4 and §5 of your draft. It is a correctness-of-description objection that a reviewer in this field will raise on the first pass.**
+
+**The forcing is not the Kolmogorov flow.** It is `f = (A sin(k y), 0)` — a single-mode **periodic unidirectional shear**, whose curl is `zeta = -A k cos(k y)`, one resolved Fourier mode. **The Arnold–Korkin–Sinitsyn Kolmogorov flow is `u = (U sin(αy), -U α sin(αx) cos(αy))` — a cellular pump with a steady lattice of convection cells and the classical Vinograd–Cullen–Clark stability boundary.** Those are different flows with different dynamics. The naming is genuinely ambiguous in the literature, so this is a hazard rather than a blunder, but your draft currently:
+
+- calls it *"single-mode **Kolmogorov forcing**"* (`04_methods.tex:18`) and *"the system possesses the **Kolmogorov equilibrium**"* (`:91`) — **that equilibrium belongs to the AKS pump**
+- calls the runs *"forced **Kolmogorov-flow** runs"* (`05_experimental_setup.tex:39`) and *"forced Kolmogorov flow"* in a figure caption (`06_results.tex:59`)
+- cites *"classification of **Kolmogorov flow** of Vinograd, Cullen, and Clark"* (`07_discussion.tex:91`) — **that classification is about the cellular flow**
+- **and never states the force's formula anywhere, which is why this has been invisible.**
+
+**The four changes:**
+1. **§5 must give the force explicitly: `f = (A sin(k y), 0)`, curl `zeta = -A k cos(k y)`, `A ∈ {0.2, 0.5}`.** Write the formula and the naming question stops being a question.
+2. **Describe the setup as "forced 2-D incompressible NS with a single-mode periodic unidirectional shear."** You may say it is *often called* a Kolmogorov shear flow, distinguishing it from the AKS cellular pump — that is honest and costs you nothing.
+3. **Drop the "Kolmogorov equilibrium" claim and the Vinograd–Cullen–Clark citation**, or keep them only with an explicit sentence saying they describe a different flow.
+4. **Re-attribute "no statistically steady fluctuation state" from the flow to the forcing.** This is the one I most want you to get right, and it is a finding of *mine* that D20.3 weakens: **the AKS Kolmogorov flow _does_ have a well-known steady cellular state, so the absence of stationarity here is not evidence about Kolmogorov flow — it is what one should expect from a periodic shear, which has no such attractor.** Our measurements stand; the attribution was mine and it was too strong.
+
+**And I should own my part of this: I asserted "Kolmogorov flow" in six of my own review reports without ever opening `solvers/forcing.py`.** I reviewed a claim your paper makes about itself, in the paper, and did not check it against the code. Coder caught it. `CLAIMS.md` now has a new **§3a** and four new prohibited phrasings.
+
+**This costs the paper its recognisability, and I want you to see that as a trade rather than a free fix** — a reviewer will know the AKS flow and may find the paper less interesting for it. But the alternative is implementing the AKS pump, which would invalidate every measurement in the project. So: describe the flow accurately, and say plainly in §1 why you chose the shear.
+
+**Everything else is unchanged, and nothing here affects the blueprint's structure** — §5 still needs the resolution row or an `N=64` caption, and §4 still needs the four-bug table. Your 3-item blocking list is still the right first hour, but **the force's formula in §5 is now ahead of them.**
