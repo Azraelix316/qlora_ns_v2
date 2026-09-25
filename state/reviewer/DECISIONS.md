@@ -1725,3 +1725,103 @@ quantity IS before asking how it was computed.**
 rank-scaling withdrawn on both axes; report the `3.3–5.1×` slowdown (D25.6/D25.7). The windowed
 rank rule is worse (D18.1). The flow is the implemented shear, with the AKS control (D20, D24).
 Every D4 barred claim stands.
+
+---
+
+## D28 — **R62 IS WITHDRAWN**; the static rows *are* reproducible; the defect is **one stale block**; and `t*` is **restored** (2026-09-25)
+
+> **OPERATIVE (R63).** **D27.3, D27.4 and D27.5 are WITHDRAWN. D27.1 (the misnomer) STANDS. The
+> paper's central number is defensible again: `t* ≈ 1.26` (`r=16`) / `≈ 2.44` (`r=32`) from the
+> ROWS, with D17's five qualifiers. The `crossovers` block must be recomputed from those rows or
+> dropped; its values are stale and must not be quoted. The figure is correct as built.**
+
+**D28.1 — R62's CENTRAL FINDING IS WITHDRAWN. The cause was my own harness.** The driver's
+row-construction site (`run_crossover.py`, ~line 14) does, before the rollout:
+
+```python
+initial_projector = PODGalerkin(grid, 1).fit([initial])
+```
+
+**The baseline is held on a rank-1 projector fitted to the IC until the first refit at
+`t = 0.125`.** My R62 reproduction omitted it, so my baseline ran **unprojected** from `t = 0` to
+`t = 0.125` — which *is* the reference trajectory. **That is exactly why my `t = 0.1` error was
+`0.000000`**, and it is the whole basis of R62's "a baseline 9.4% wrong where it is provably exact
+is not measuring trajectory error."
+
+**D28.2 — The rows DO reproduce, and they are strictly out-of-sample.** With `initial_projector`
+supplied: **exact at `t = 0.1`** (`0.103424` and `0.094010`, six digits, both columns) and
+**within `1–4%` at the other eight horizons** — consistent with run-to-run difference in the
+reference trajectory over a nonlinear run to `t = 8`, not with a different quantity. **The static
+rows are a genuine propagated, refitted, trailing-window static-POD baseline**, out-of-sample at
+every horizon: the IC projector is fitted at `t = 0` and first used at `t = 0.1`, and every later
+refit's window ends half an interval before the evaluation time. **D15's out-of-sample claim
+holds. The floor hypothesis is REFUTED. Coder's in-sample hypothesis is REFUTED, not merely
+unsupported.**
+
+**D28.3 — THE DEFECT IS LOCALIZED EXACTLY, AND NOT BY MY REPRODUCTION.** Applying the
+**committed** `crossover_horizon` pairing to the **committed** rows — exact arithmetic, no run:
+
+| Re | `r` | rows give | block says | ratio |
+|---|---|---|---|---|
+| 1000 | 16 | `1.222` / `1.224` / `1.304` | `0.667` / `0.667` / `0.668` | `0.51–0.55×` |
+| 1000 | 32 | `2.508` / `2.495` / `2.503` | `1.609` / `1.604` / `1.606` | `0.64×` |
+| 5000 | 16 | `1.235` / `1.242` / `1.415` | `0.649` / `0.650` / `0.651` | `0.46–0.53×` |
+| 5000 | 32 | `2.417` / `2.394` / `2.427` | `1.482` / `1.474` / `1.483` | `0.61–0.62×` |
+| both | 2, 4, 8, 43 | *no crossing* (24 entries) | *no crossing* | **all agree** |
+
+**Every entry that resolves disagrees by a consistent factor; every entry that does not resolve
+agrees. So the block is a DIFFERENT QUANTITY, not a different computation of these rows.**
+
+**D28.4 — THE ONE-LINE SIGNATURE: the block is WINDOW-INDEPENDENT and the rows are
+WINDOW-DEPENDENT.** The block's `t*` is flat across a **4× change in window length** (`0.667 /
+0.667 / 0.668` at Re=1000 `r=16`; `0.649 / 0.650 / 0.651` at Re=5000 `r=16` — `0.3%`), while the
+rows' `t*` genuinely moves (`1.235 → 1.415` at Re=5000 `r=16`, `15%`). **A quantity that does not
+vary with the window cannot have been computed from window-specific baselines. The artifact's two
+halves come from different code versions: the rows are current and verified, the block is stale.**
+
+**D28.5 — RESTORED.** **`fig_crossover` reads the rows, so the central figure is CORRECT — no
+figure work needed.** **D15–D17's `t*` stand:** the current code on the committed rows gives
+**`1.235` (`r=16`) and `2.417` (`r=32`)** at `W=0.25`, Re=5000, matching the recorded `1.26`/`2.44`
+to interpolation convention and window-dependent as D17.1 requires. **Coder's `0.649`/`1.482` and
+the "window-invariant to 0.3%" claim are dropped — a robustness claim that exists only because the
+quantity is window-independent is worse than no claim.**
+
+**D28.6 — WHAT STILL STANDS.** **D27.1 (the misnomer) is untouched:** `relative_l2_oracle_mean`
+removes **each field's own** zonal mean while `error_columns` documents it as the reference's
+perfect mean; verified by the orthogonality identity in **444/444 rows, worst `0.005%`**, which
+**depends on no reproduction**; worth `1–3%` in `t*`. **D26.4 stands:** the crossing test's
+fixtures still hard-code the mismatched pairing, so fixing the function would break the test.
+
+**D28.7 — THE REPAIR IS ONE LINE AND NEEDS NO RE-RUN.**
+`crossover_horizon(dlra_rows, static_rows)` on the **already-committed** rows yields the correct
+window-dependent `t*`. **Recompute the block from the artifact's own rows, or drop it.** Then:
+declare the columns in the block's output; fix the test fixture; resolve D27.1; **then** quote a
+`t*`. **D25.5's "quote no `t*`" narrows to "do not quote the BLOCK's `t*`" — the rows' `t*` is
+quotable now, with D17's five qualifiers.**
+
+**D28.8 — A CAVEAT I WILL NOT PAPER OVER.** My reproduction is `1/9` exact and `8/9` within
+`1–4%`. **The localization in D28.3 is exact arithmetic and does not depend on it**, but **no one
+has demonstrated bit-level reproducibility of a static row**, and the `1–4%` should be attributed
+to reference-trajectory run-to-run difference rather than assumed away.
+
+**D28.9 — THE LESSON, AND IT IS THE THIRD INSTANCE OF ONE ERROR.** **R59: a cost assumption left
+untested. R62: a question left to coder. R63: a conclusion — "not reproducible" — drawn from my own
+broken reproduction and propagated into a binding decision (D27) and a message to two agents.**
+**All three are one shape: a claim made from a run I had not verified, in place of the
+verification.** R62's was the worst, because it was **confident, table-backed and wrong.** **A
+table of failures is not evidence of a floor; it is evidence that my harness was wrong.** The
+one-line check that would have caught it — *what does the driver do before the first refit?* — was
+in a file I had already opened twice.
+
+**THE STANDING RULE THIS EARNS: a reproduction attempt that fails must record what the harness did
+differently from the driver, BEFORE any conclusion is drawn from the failure.** R62 recorded three
+routes and **zero** harness differences. **And: when three routes all disagree with a committed
+artifact, suspect the harness before the artifact** — especially when the artifact passes its own
+internal identity check to five digits, which I had verified and did not follow. **An artifact
+consistent to `0.005%` is not a corrupted artifact.**
+
+**D28.10 — Unchanged.** Every fitted `c·r^p` void. `t*` is grid-dependent (D17.1) and must carry
+its five qualifiers (window, refit interval, offset, in-sample check, grid + dealiasing ceiling).
+No advantage in time or memory. BUG's rank-scaling withdrawn on both axes; report the `3.3–5.1×`
+slowdown (D25.6/D25.7). The windowed rank rule is worse (D18.1). The flow is the implemented
+shear, with the AKS control (D20, D24). Every D4 barred claim stands.

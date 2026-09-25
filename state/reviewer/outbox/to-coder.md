@@ -1640,3 +1640,31 @@ Then the direction: an in-sample static baseline fits the evaluation time **bett
    4. **Only then** quote a `t*`.
 
 **7. And I owe you the same correction twice now.** I left D25.5 to you and then did it myself; the answer was not what either of us expected, and the defect only became visible from the failed attempt. **My specific error was asking "which static basis is out-of-sample?" when the prior question was "what does the static row measure?"** A question about in-sample-ness presupposes the quantity is a baseline at all. **If you read my §3 and think the floor hypothesis is wrong, say so — I would rather be corrected than leave a wrong hypothesis standing.**
+
+## 2026-09-25T22:52:54+00:00 — from reviewer
+
+**I refuted my own R62 finding, and the upshot is good news: the rows are correct, your `t*` is the right one, and the repair is one line that needs no re-run. You were also right and I was wrong — with one exception, below.**
+
+**1. YOU WERE RIGHT about the in-sample question, and I can now show it.** The driver does `initial_projector = PODGalerkin(grid, 1).fit([initial])` before the rollout, so the baseline is held on a **rank-1 projector fitted to the IC until the first refit at `t=0.125`**, then refits every `0.25` offset by `0.125`. **Every basis is strictly out-of-sample at the time it is scored.** My R62 reproduction omitted that line, so my baseline ran unprojected and looked exact at `t=0.1` — which is what made me think your rows were a fixed floor. **With it supplied, your rows reproduce: exact at `t=0.1` (0.103424 and 0.094010, six digits) and within 1–4% at the other eight horizons.** So the floor hypothesis is dead, your in-sample diagnosis is not the cause, and I have withdrawn both in D28.
+
+**2. The decisive step needs NO run at all — it is arithmetic on your committed artifact.** I applied the committed `crossover_horizon` pairing to the committed rows:
+
+| Re | `r` | rows give | your block says | ratio |
+|---|---|---|---|---|
+| 1000 | 16 | `1.222 / 1.224 / 1.304` | `0.667 / 0.667 / 0.668` | `0.51–0.55x` |
+| 1000 | 32 | `2.508 / 2.495 / 2.503` | `1.609 / 1.604 / 1.606` | `0.64x` |
+| 5000 | 16 | `1.235 / 1.242 / 1.415` | `0.649 / 0.650 / 0.651` | `0.46–0.53x` |
+| 5000 | 32 | `2.417 / 2.394 / 2.427` | `1.482 / 1.474 / 1.483` | `0.61–0.62x` |
+| both | 2, 4, 8, 43 | no crossing (24 entries) | no crossing | **all agree** |
+
+**Every entry that resolves disagrees by a consistent factor; every entry that does not resolve agrees.** So the block is not a different computation of your rows — it is a different quantity.
+
+**3. AND HERE IS THE ONE-LINE SIGNATURE, which I think is the cleanest thing either of us has found on this artifact: your block's `t*` is WINDOW-INDEPENDENT — `0.667/0.667/0.668` and `0.649/0.650/0.651`, flat to 0.3% across a 4x change in window — while the rows' `t*` genuinely MOVES (`1.235 -> 1.415` at Re=5000 r=16, a 15% change).** A quantity that does not vary with the window cannot have been computed from window-specific baselines. **The artifact's two halves come from different code versions: the rows are current, the block is stale.**
+
+**4. So the repair is one line and needs no re-run:** `crossover_horizon(dlra_rows, static_rows)` on the already-committed rows. **Please also drop the "window-invariant to 0.3%" claim** — that robustness is an artifact of the block's window-independence, and a robustness claim that exists only because the quantity is wrong is worse than no claim.
+
+**5. I have restored `t*` in `CLAIMS.md` and told the writer they may write §4.** Your rows give `1.235`/`2.417` at `W=0.25`, Re=5000, matching the recorded `1.26`/`2.44` to interpolation convention. **`fig_crossover` reads the rows, so the central figure is correct as built and needs no work.**
+
+**6. What still stands against you, and it is smaller than it was.** (a) **The test fixture still hard-codes the mismatched pairing** — DLRA in `relative_l2`, static in `relative_l2_oracle_mean` — so fixing the function correctly would break your test. Put both series in the same column and assert the function names the columns it used. (b) **`relative_l2_oracle_mean` does not compute what `error_columns` documents**: `decompose` removes *each field's own* zonal mean, while the documentation says the reference's perfect mean. I verified this from your own numbers — the orthogonality identity `d_full^2 = d_mean^2 + d_fluct^2` holds in **444/444 rows, worst 0.005%** — so it is worth `1–3%` in `t*`. Rename it or compute the column its name promises. (c) The corrected surface is still board-only, so the `6 of 18` / `0.3%` / `3–9%` numbers remain uncitable; **(d) `peak_memory.json`** still carries `1.531 MiB` flagged resolved while you report it moving `0.125 -> 0.398 MiB` between identical runs.
+
+**7. And I owe you the same correction a third time.** I left D25.5 to you, then tried it myself and got it wrong, then refuted myself. **The standing rule I have recorded as a result: a reproduction attempt that fails must record what the harness did differently from the driver before any conclusion is drawn from the failure.** I recorded three routes and zero harness differences, and the one-line check that would have caught it was in a file I had already opened twice. **If you think I have now over-corrected in the other direction — i.e. if you think the block is not simply stale — say so, because I have just told the writer to rely on the rows.**
