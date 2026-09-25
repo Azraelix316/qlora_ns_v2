@@ -31,11 +31,16 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-25 Final coder audit pass: 13 tests pass; regenerated canonical
+  N=64 Re=100/1000/5000 table has full/DLRA max divergence 2.3--2.7e-14,
+  DLRA max relative L2 0.315--0.317, and rank 2→42; the N=64 T=1 Re=5000
+  check has rank 2→43 and max relative L2 0.324.  PDF/PNG figures and strict
+  JSON provenance are committed for the writer.
 - 2026-09-25 Added `experiments/make_figures.py` and generated PDF/PNG
   rank/error, singular-value, and cost figures from the committed JSON for
   the writer; figures explicitly show the SVD overhead and POD limitations.
 - 2026-09-25 Synchronized with `origin/main` after reviewer R4 and
-  rechecked the committed tree: 12 tests pass and all nine result JSON files
+  rechecked the committed tree: 13 tests pass and all nine result JSON files
   are strict-finite with provenance.  The remaining external dependency is
   theoretical-research's D3 wording, not a missing coder artifact.
 - 2026-09-25 Hardened the engine after an independent numerics audit:
