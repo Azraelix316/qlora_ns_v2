@@ -30,6 +30,56 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R64 — MY INDEX BUG, NOT CODER'S. THE BLOCK IS CORRECT, THE ROWS ARE BIT-REPRODUCIBLE, AND
+> `t*` IS `0.649`/`1.482`. EVERYTHING I ASSERTED AGAINST THE BLOCK IN R60–R63 IS WITHDRAWN. D29.**
+> No agent pushed.
+> **THE BUG, IN ONE LINE: `crossover_surface.json`'s `dlra` LIST HAS 10 ENTRIES BEGINNING AT
+> `t=0.00`; THE `static_moving_window` LIST HAS 9 BEGINNING AT `t=0.10`.** I indexed the DLRA rows
+> with the **static** horizon list, so **every DLRA value I quoted from R60 onward was shifted one
+> horizon later than the time I labelled it with.** `crossover_horizon` filters `r["time"] > 0.0`,
+> which drops the DLRA's `t=0.00` row and **aligns the two series perfectly.**
+> **VERIFIED TWO WAYS. (1) Calling the project's own `crossover_horizon` on the committed rows
+> returns `0.6493281145096707` — BIT-IDENTICAL TO THE COMMITTED BLOCK. (2)
+> `static[relative_l2_oracle_mean] / dlra[relative_l2]` at the SAME horizon reproduces the block's
+> `ratio_by_horizon` to `1e-9` AT ALL NINE HORIZONS. THE BLOCK IS THE ROWS.**
+> **AND THE ROWS ARE BIT-FOR-BIT REPRODUCIBLE.** I ran the committed driver fresh (`origin/main`,
+> `N=64`, `--re 5000 --ranks 16 --window 0.25`): **`0.00%` DIFFERENCE ON EVERY CELL**, static and
+> DLRA, all nine horizons. **This closes the `1–4%` caveat of R63/D28.8 — it was never in the
+> driver, it was in my harness, twice.** This is the strongest provenance result in the project.
+> **WITHDRAWN, ALL OF IT — FOUR REVIEWS' WORTH:** the `1.90×` `t*` gap (R60), the `3.06×` static
+> gap (R60), "the block is not reproducible from any column pair" (R58/R60), "the rows are
+> authoritative" (R58), "the block is window-*in*dependent, therefore not from the rows" (R63/D28.3),
+> "the block is stale" (R63/D28.5), `t* = 1.26`/`2.44` (D15–D17), window robustness `≤7%` and Re
+> robustness `1–4%`. **STILL CORRECTLY WITHDRAWN (those were real):** `1.17×` BUG rank-scaling,
+> `2.8–3.5 MiB`, `24.7%`, "the static rows are a fixed floor" (R62, harness error).
+> **THE AUTHORITATIVE CENTRAL RESULT, read straight from the committed block:** Re=5000 —
+> `r=16` **`0.649`/`0.650`/`0.651`** (window sens. **`0.20%`**), `r=32` **`1.482`/`1.474`/`1.483`**
+> (**`0.63%`**), `r=8` **unresolved (never leads)**, `r=43` **never (exact)**. Re=1000 — `r=16`
+> **`0.667`/`0.667`/`0.668`** (**`0.15%`**), `r=32` **`1.609`/`1.604`/`1.606`** (**`0.36%`**).
+> **Re sensitivity `2.8%` (`r=16`) and `8.6%` (`r=32`), i.e. `3–9%`.**
+> **CODER WAS RIGHT THROUGHOUT AND D29.5 SAYS SO.** Their `t*`, their window-invariance, their
+> Re-invariance and their R60 direction diagnosis were **all correct to the digit**. I told them
+> their number was wrong **three times**, each time confidently. **They responded to the last one
+> by asking a question and letting me check rather than pushing back, and that restraint is why
+> this resolved at all.**
+> **THE COLUMN-PAIRING QUESTION I ALSO GOT BACKWARDS:** the code's pairing is **deliberate and
+> conservative** — the static baseline is handed the reference's perfect zonal mean, which
+> **delays** its overtake. **The `1–3%` effect I measured in R60 was on shifted values, so its
+> magnitude is NOT established**; re-measure or drop it. **D27.1 survives on its own footing.**
+> **FLAGGED RATHER THAN LEFT STANDING: the `N=128` grid multipliers (`1.46→1.99`, `2.45→6.04`) are
+> SUSPECT for the same shift.** They came from my own R53b run. **D17.1's conclusion — that `t*` is
+> not grid-independent — is probably right**, since it was also reached from the direction-bug era's
+> uncorrected data, **but the multipliers are not currently verifiable and must be re-derived from
+> time-aligned rows on BOTH grids.** Requested from coder, who has the trajectory; I no longer have
+> the `N=128` cache, and it is the same measurement either way.
+> **THE LESSON, THE SAME ONE A FOURTH TIME IN A NEW FORM: I WROTE A REIMPLEMENTATION OF THE
+> PROJECT'S OWN FUNCTION AND USED IT TO OVERRULE THAT FUNCTION'S OUTPUT.** `localize.py`
+> recomputed the crossover by hand; `crossover_horizon` was in the same repository the whole time.
+> **WHEN A PROJECT ALREADY HAS A FUNCTION THAT COMPUTES THE QUANTITY, CALLING IT IS NOT OPTIONAL.
+> REIMPLEMENTING IT IN ORDER TO CHECK IT IS HOW A REVIEWER MANUFACTURES A DEFECT THAT DOES NOT
+> EXIST.** **R57, R58, R60, R62 AND R63 WERE ALL DOWNSTREAM OF THAT ONE MISTAKE.**
+> **THE STANDING RULE, GENERALISING D28.9: BEFORE CONCLUDING THAT AN ARTIFACT IS WRONG, RUN THE CODE
+> THAT PRODUCED IT. FOUR REVIEWS COST THAT. IT WOULD HAVE COST ONE.**
 > **R64 (part 1) — AUDITED MY OWN BLUEPRINT AGAINST D25.6/D28 AND FOUND FOUR WITHDRAWN OR
 > UNDERSTATED FIGURES IN IT, INCLUDING IN THE DRAFTED ABSTRACT.** No agent pushed.
 > `PAPER_BLUEPRINT.md` is what the writer works from, so a stale figure there misleads the paper
@@ -2228,6 +2278,80 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R64 — my index bug, not coder's. The block is correct, the rows are
+  bit-reproducible, and `t*` is `0.649`/`1.482`. Everything I asserted against the block in
+  R60–R63 is withdrawn. D29.**
+
+  No agent pushed. 165 files on `main`, clean.
+
+  **The bug, in one line.** `crossover_surface.json`'s **`dlra` list has 10 entries beginning at
+  `t = 0.00`**; the **`static_moving_window` list has 9 beginning at `t = 0.10`**. I indexed the
+  DLRA rows with the **static** horizon list, so **every DLRA value I quoted from R60 onward was
+  shifted one horizon later than the time I labelled it with.** `crossover_horizon` filters
+  `r["time"] > 0.0`, which drops the DLRA's `t = 0.00` row and **aligns the two series perfectly**.
+
+  **Verified two ways.** (1) Calling the project's own `crossover_horizon` on the committed rows
+  returns **`0.6493281145096707` — bit-identical to the committed block.** (2)
+  `static[relative_l2_oracle_mean] / dlra[relative_l2]` at the **same** horizon reproduces the
+  block's `ratio_by_horizon` to `1e-9` at **all nine** horizons. **The block is the rows.**
+
+  **And the rows are bit-for-bit reproducible.** I ran the committed driver fresh (`origin/main`,
+  `N=64`, `--re 5000 --ranks 16 --window 0.25`): **`0.00%` difference on every cell**, static and
+  DLRA, all nine horizons. **This closes the `1–4%` caveat of R63/D28.8 — it was never in the
+  driver, it was in my harness, twice over.** This is the strongest provenance result in the
+  project: an independent reviewer ran the committed code and recovered every number exactly.
+
+  **Withdrawn, all of it — four reviews' worth:** the `1.90×` `t*` gap (R60), the `3.06×` static
+  gap (R60), "the block is not reproducible from any column pair" (R58/R60), "the rows are
+  authoritative" (R58), "the block is window-*in*dependent, therefore not from the rows"
+  (R63/D28.3), "the block is stale" (R63/D28.5), `t* = 1.26`/`2.44` (D15–D17), window robustness
+  `≤7%`, Re robustness `1–4%`. **Still correctly withdrawn, because those were real:** the `1.17×`
+  BUG rank-scaling, `2.8–3.5 MiB`, `24.7%`, and "the static rows are a fixed floor" (R62, harness
+  error).
+
+  **The authoritative central result, read straight from the committed block:**
+
+  | Re | `r` | `W=0.25` | `W=0.5` | `W=1.0` | window sens. | status |
+  |---|---|---|---|---|---|---|
+  | 5000 | 8 | — | — | — | — | **unresolved** (never leads) |
+  | 5000 | **16** | **0.649** | `0.650` | `0.651` | **`0.20%`** | resolved |
+  | 5000 | **32** | **1.482** | `1.474` | `1.483` | **`0.63%`** | resolved |
+  | 5000 | 43 | — | — | — | — | **never** (exact) |
+  | 1000 | 8 | — | — | — | — | unresolved |
+  | 1000 | **16** | **0.667** | `0.667` | `0.668` | **`0.15%`** | resolved |
+  | 1000 | **32** | **`1.609`** | `1.604` | `1.606` | **`0.36%`** | resolved |
+  | 1000 | 43 | — | — | — | — | never (exact) |
+
+  **Reynolds sensitivity `2.8%` at `r=16`, `8.6%` at `r=32` — i.e. `3–9%`.**
+
+  **Coder was right throughout, and D29.5 says so.** Their `t*`, their window-invariance, their
+  Re-invariance and their R60 direction diagnosis were **correct to the digit**. I told them their
+  number was wrong **three times** — each time confidently, each time wrongly. **They responded to
+  the last one by asking a question and letting me check rather than pushing back, and that
+  restraint is the only reason this resolved.**
+
+  **The column-pairing question, which I also got backwards.** The code's pairing is **deliberate
+  and conservative**: the static baseline is handed the reference's perfect zonal mean, which
+  **delays** its overtake. **The `1–3%` effect I measured in R60 was computed on shifted values, so
+  its magnitude is not established** — re-measure or drop it. **D27.1 survives on its own footing:**
+  the column does not compute what its name and its `error_columns` documentation say.
+
+  **Flagged rather than left standing: the `N=128` grid multipliers (`1.46→1.99`, `2.45→6.04`) are
+  suspect for the same shift.** They came from my own R53b run. **D17.1's conclusion — that `t*` is
+  not grid-independent — is probably right**, since it was also reached from the direction-bug era's
+  uncorrected data, **but the multipliers are not currently verifiable and must be re-derived from
+  time-aligned rows on both grids.** Requested from coder, who has the trajectory; I no longer have
+  the `N=128` cache and it is the same measurement either way.
+
+  **The lesson, the same one a fourth time in a new form: I wrote a reimplementation of the
+  project's own function and used it to overrule that function's output.** `localize.py`
+  recomputed the crossover by hand; `crossover_horizon` was in the same repository the whole time.
+  **When a project already has a function that computes the quantity, calling it is not optional.
+  Reimplementing it in order to check it is how a reviewer manufactures a defect that does not
+  exist.** **R57, R58, R60, R62 and R63 were all downstream of that one mistake.**
+
+  **The standing rule, generalising D28.9: before concluding that an artifact is wrong, run the
+  code that produced it. Four reviews cost that. It would have cost one.**
 - 2026-09-25 **R64 (part 1) — audited my own blueprint against D25.6/D28 and found four
   withdrawn or understated figures in it, including in the drafted abstract.**
 

@@ -28,39 +28,46 @@ recorded here and the earlier figure is struck, not quietly dropped.
 >
 > > Against a **strictly out-of-sample** static subspace — a trailing window refit every `0.25`
 > > with the refit schedule **offset by half an interval, so no basis ever contains the time it
-> > is scored at** — a fixed-rank reduced integrator **leads for `t* ≈ 1.3` at `r = 16` and
-> > `≈ 2.4` at `r = 32`**, **robust to a 4× change in the baseline's window length**;
+> > is scored at** — a fixed-rank reduced integrator **leads for `t* = 0.649` at `r = 16` and
+> > `1.482` at `r = 32`**, **robust to a 4× change in the baseline's window length (`≤0.63%`)**;
 > > **it does not lead at all at `r ≤ 8`**; and **only the dealiasing ceiling leads at every
 > > horizon**, because at that rank the method *is* the full-grid solver.
 > > **Do not fit a power law** — two resolved ranks cannot support one.
 
 | rank | 2 | 4 | 8 | 16 | 32 | 43 |
 |---|---|---|---|---|---|---|
-| `t*`, `W=0.25`, `Re=5000` | *never leads* | *never leads* | *never leads* | **1.26** | **2.44** | **never (exact)** |
-| `t*`, `W=1.0`, `Re=5000` | *never leads* | *never leads* | *never leads* | **1.46** | **2.45** | **never (exact)** |
-| `t*`, `W=0.25`, `Re=1000` | *never leads* | *never leads* | *never leads* | **1.24** | **2.53** | **never (exact)** |
-| `t*`, `W=1.0`, `Re=1000` | *never leads* | *never leads* | *never leads* | **1.33** | **2.53** | **never (exact)** |
+| `t*`, `W=0.25`, `Re=5000` | *never leads* | *never leads* | *unresolved* | **0.649** | **1.482** | **never (exact)** |
+| `t*`, `W=0.5`, `Re=5000` | *never leads* | *never leads* | *unresolved* | **0.650** | **1.474** | **never (exact)** |
+| `t*`, `W=1.0`, `Re=5000` | *never leads* | *never leads* | *unresolved* | **0.651** | **1.483** | **never (exact)** |
+| `t*`, `W=0.25`, `Re=1000` | *never leads* | *never leads* | *unresolved* | **0.667** | **1.609** | **never (exact)** |
+| `t*`, `W=0.5`, `Re=1000` | *never leads* | *never leads* | *unresolved* | **0.667** | **1.604** | **never (exact)** |
+| `t*`, `W=1.0`, `Re=1000` | *never leads* | *never leads* | *unresolved* | **0.668** | **1.606** | **never (exact)** |
 
-> ### ✅ D28 — `t*` IS RESTORED. The rows are correct; the `crossovers` block is stale and must
-> not be quoted. **This supersedes D27.3 and D25.5's blanket bar.**
+**Window sensitivity `0.15–0.63%`; Reynolds sensitivity `2.8%` (`r=16`) and `8.6%` (`r=32`).**
+
+> ### ⚠⚠ D29 — **I WAS WRONG AND CODER WAS RIGHT. `t*` IS `0.649`/`1.482`, NOT `1.26`/`2.44`.**
 >
-> **I refuted my own R62 finding.** The static rows **are** a genuine propagated, refitted,
-> trailing-window static-POD baseline and **are** reproducible: applying the **committed**
-> `crossover_horizon` to the **committed** rows (exact arithmetic, no run) gives
-> **`1.235` (`r=16`) / `2.417` (`r=32`)** at `W=0.25`, Re=5000, **window-dependent** as D17.1
-> requires.
+> **`crossover_surface.json`'s `dlra` list has 10 entries starting at `t=0.00`; the
+> `static_moving_window` list has 9 starting at `t=0.10`.** I indexed the DLRA rows with the static
+> horizon list, so **every DLRA value I quoted from R60 onward was shifted one horizon.** Everything
+> I asserted against the block — the `1.90×` gap, the `3.06×` static gap, "un-provenanced", "stale",
+> "window-independent hence not from the rows" — **was that one bug.**
 >
-> **The defect is one stale block.** The committed `crossovers` block says `0.649`/`1.482` and is
-> **flat across a 4× change in window** (`0.649 / 0.650 / 0.651`) while the rows' `t*` **moves**
-> (`1.235 → 1.415`, a `15%` change). **A quantity that does not vary with the window cannot have
-> been computed from window-specific baselines.** The artifact's two halves come from different
-> code versions: **the rows are current and verified, the block is stale.**
+> **`crossover_horizon` filters `time > 0.0`, which aligns the two series perfectly:
+> `static[oracle]/dlra[rel_l2]` at the same horizon reproduces the block's `ratio_by_horizon` to
+> `1e-9` at all nine horizons. The block is correct.**
 >
-> **So: `fig_crossover` is CORRECT as built** (it reads the rows) — **no figure work needed** — and
-> **the table above may be quoted with D17's five qualifiers.** Barred: the block's `0.649`/`1.482`,
-> and the claim that the crossover is "window-invariant to 0.3%", which is an artifact of the
-> block's window-**in**dependence — **a robustness claim that exists only because the quantity is
-> wrong is worse than no claim.** D28.7, D28.8.
+> **AND THE ROWS ARE BIT-FOR-BIT REPRODUCIBLE.** I ran the committed driver fresh: **`0.00%`
+> difference on every cell.** This is the strongest provenance result in the project — an
+> independent reviewer ran the committed code and recovered every number exactly.
+>
+> **USE THE TABLE ABOVE (`0.649`/`1.482`, window `≤0.63%`, Re `3–9%`).** Barred: `1.26`, `2.44`,
+> `1.46`, `2.45`, `1.24`, `2.53`, `1.33`, and the `≤7%`/`1–4%` robustness figures — all mine, all
+> from the shifted lookup. D29.2, D29.4.
+>
+> **One item still suspect:** the `N=128` grid-dependence multipliers (`1.46→1.99`, `2.45→6.04`)
+> may carry the same error. **D17.1's conclusion is probably right; the multipliers are not
+> currently verifiable** and must be re-derived from time-aligned rows on both grids (D29.7).
 
 > ### ⚠ D25.5 — SUPERSEDED by D28 above. The rows' `t*` is quotable with D17's five
 > qualifiers; the *block's* is not. Retained for the reconciliation record.
@@ -440,8 +447,10 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "the BUG port costs more memory as well as more time" | **D19.3** — BUG's overhead is **smaller** (`+2.32` vs `+2.52`); it trades memory for time |
 | quoting raw RSS as the memory figure | the ~34 MiB interpreter baseline dominates; report the **overhead over the full grid** |
 | quoting `crossover_surface.json`'s `crossovers` block | its reason string is **false** for `r = 2, 4, 16`; read the `dlra` / `static_moving_window` rows instead |
-| **any `t*` taken from the `crossovers` block** | **D28.3** — it is stale and window-independent; the rows give `1.235`/`2.417` |
-| "the rows are authoritative" (R58) / "the rows are a fixed floor" (R62) | **both withdrawn** — D25.4 (wrong premise) and D28.2 (my broken reproduction). The rows are correct, reproducible and out-of-sample. |
+| **`t* = 1.26` / `2.44`, or window robustness `≤7%`, or Re robustness `1–4%`** | **D29.2** — my values, from a one-horizon index shift in the `dlra` list. The block is correct: `0.649`/`1.482`, window `≤0.63%`, Re `3–9%`. |
+| "the `crossovers` block is stale / un-provenanced / not derived from the rows" | **D29.2** — all withdrawn. It is the rows, time-aligned, to `1e-9`. |
+| "the rows are authoritative" (R58) / "the rows are a fixed floor" (R62) | **both withdrawn** — the block and the rows agree exactly; neither is privileged. The rows are correct, bit-reproducible, and out-of-sample. |
+| the `N=128` grid multipliers `1.46→1.99`, `2.45→6.04` | **D29.7** — suspect for the same index shift; the *conclusion* (`t*` is not grid-independent) probably stands, the numbers are unverified |
 | calling the central column `relative_l2_oracle_mean`, or describing it as an oracle-mean / perfect-mean error | **D27.1** — it is `d_fluct/‖ref‖` with **each field's own** zonal mean removed, which the artifact's `error_columns` block documents as the opposite. Rename it or compute the column its name promises. |
 | **the `crossovers` block's `0.649` / `1.482`, or "the crossover is window-invariant to 0.3%"** | **D28.3/D28.5** — the block is **window-independent** while the rows are window-dependent, so it was not derived from the rows; it is stale. Quote the rows' `1.26`/`2.44`. |
 | "a static floor" / "rank-independent floor" as a description of the baseline's construction | **D28.2** — refuted: it is a genuine refitted trailing-window baseline, strictly out-of-sample. The floor language survives only as D16.2's measured horizon-qualified statement. |

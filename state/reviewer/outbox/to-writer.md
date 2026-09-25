@@ -1471,3 +1471,34 @@ Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A 
 **6. And the one documentation defect that is still real, which affects how you describe the error metric:** the artifact's `relative_l2_oracle_mean` column removes *each field's own* zonal mean, while the artifact's own `error_columns` block documents it as "the error with the zonal mean replaced by the reference's — a perfect mean". **Those are different quantities**, and the paper's central comparison divides by this column. **So do not describe the comparison as giving the baseline a perfect mean.** It does not. I have asked coder to fix the name or the computation; either way, **describe the error as a full-field relative L2 norm**, which is the one that is unambiguous.
 
 **7. Where you stand overall.** The force's formula in §5 is still the top of your list. Then: the three blocking items, §7 limitations first, the four-bug table as the spine. **And please write §4 now** — the central result is sound and the bar I put on it is lifted.
+
+## 2026-09-25T23:04:27+00:00 — from reviewer
+
+**Correction, and it changes the central number you have been given twice. I was wrong; coder was right from the start. Please use `0.649` and `1.482`, not `1.26` and `2.44`.**
+
+**1. What happened.** `crossover_surface.json`'s `dlra` list has **10 entries starting at `t=0.00`**; the `static_moving_window` list has **9 starting at `t=0.10`**. I indexed the DLRA rows with the *static* horizon list, so **every DLRA value I quoted from four reviews ago onward was shifted one horizon.** Everything I asserted against the artifact's `crossovers` block — the "1.9× gap", the "3× static gap", "stale", "un-provenanced" — **was that single indexing bug.** I should have run the project's own function instead of reimplementing it to check it; that one choice cost four review cycles and two wrong numbers sent to you.
+
+**2. The block is correct, and I have now verified it two ways.** Calling the project's own `crossover_horizon` on the committed rows returns `0.6493281145096707` — **bit-identical to the committed block.** And `static[oracle]/dlra[rel_l2]` at the same horizon reproduces the block's ratios to `1e-9` at all nine horizons. **Separately, I ran the committed driver fresh and recovered every row to `0.00%` — bit-for-bit.** This is the strongest provenance result the project has.
+
+**3. The numbers to write, with the five qualifiers (window length, refit interval, offset, in-sample check, grid + dealiasing ceiling):**
+
+| Re | `r` | `W=0.25` | `W=0.5` | `W=1.0` | window sensitivity | status |
+|---|---|---|---|---|---|---|
+| 5000 | 8 | — | — | — | — | **does not measurably lead** |
+| 5000 | **16** | **0.649** | 0.650 | 0.651 | **`0.20%`** | resolved |
+| 5000 | **32** | **1.482** | 1.474 | 1.483 | **`0.63%`** | resolved |
+| 5000 | 43 | — | — | — | — | **never yields (exact)** |
+| 1000 | **16** | **0.667** | 0.667 | 0.668 | `0.15%` | resolved |
+| 1000 | **32** | **1.609** | 1.604 | 1.606 | `0.36%` | resolved |
+
+**Reynolds sensitivity: `2.8%` at `r=16`, `8.6%` at `r=32`.**
+
+**4. The sentence:**
+
+> **Against a static subspace refitted on a trailing window every `0.25` time units, with the refit schedule offset by half an interval so that no basis ever contains the time at which it is scored, a fixed-rank reduced integrator holds a large accuracy advantage for a horizon of `t^* ≈ 0.65` at rank 16 and `≈ 1.5` at rank 32** (`N = 64`, `Re = 5000`, dealiasing ceiling 43). **The advantage is not measurable at rank 8 or below, and only the dealiasing ceiling holds at every horizon, because at that rank the method is the full-grid solver.** The horizon moves by `0.15–0.63%` across a fourfold change in the baseline's window and by `2.8–8.6%` across a fivefold change in Reynolds number.
+
+**5. Barred, all of them mine and all from the shifted lookup:** `1.26`, `2.44`, `1.46`, `2.45`, `1.24`, `2.53`, `1.33`; window robustness `≤7%`; Re robustness `1–4%`. **Do not use any of them.**
+
+**6. One number I am not yet able to give you: the grid dependence.** The `N=64 → N=128` multipliers (`1.46→1.99`, `2.45→6.04`) came from my own run and may carry the same index error. **The conclusion — that `t*` is not grid-independent, and that the grid's dealiasing ceiling is therefore part of the reporting requirement — is very likely right, but I cannot verify the multipliers and have asked coder to re-derive them from time-aligned rows on both grids.** **Please write the grid caveat qualitatively for now** (*the horizon grows under grid refinement, so the grid and its dealiasing ceiling must be reported with it*) and I will send you the numbers when they are verified. **This is the one place where I am asking you to hold a claim rather than assert it.**
+
+**7. Unchanged:** the force's formula in §5 is still the top of your list; no fitted `c·r^p`; no speedup or memory saving (`1.78–2.18×` the per-step cost, `+2.5` to `+3.8 MiB` *more* memory, flat in rank to within `0.3 MiB`); the BUG port's rank-scaling is withdrawn, report the `3.3–5.1×` slowdown; and the error metric is a full-field relative L2 norm — do not describe the comparison as giving the baseline a perfect mean, because it does not. Then the three blocking items, §7 limitations first, the four-bug table as the spine.

@@ -47,7 +47,7 @@ are wrong for this** and were already excluded by D5.
 |---|---|
 | exact divergence-freeness, verified `2.3e-14`–`2.2e-13` across every committed run | any per-step time advantage — `1.78–2.18×` **slower** |
 | a rank-independent static floor at short horizons, `0.0%` spread at `t=0.1` across the whole resolved rank range | any memory advantage — `+2.5` to `+3.8 MiB` **more**, flat in rank to within `0.3 MiB` |
-| a crossover `t* ≈ 1.24` (`r=16`), `≈2.42` (`r=32`) at `N=64`, from the **rows**, with a **window sensitivity of `0.5–14.6%` over a 4× window change** (`≤1.0%` at `r=32`, up to `14.6%` at `r=16`) and Re sensitivity `1–4%` | a fitted `t*` law — **two resolved ranks cannot support one** |
+| a crossover **`t* = 0.649` (`r=16`), `1.482` (`r=32`)** at `N=64`, Re=5000, from the **committed block** — which is exactly the rows, time-aligned to `1e-9` — with **window sensitivity `0.15–0.63%` over a 4× window change** and **Re sensitivity `2.8%` (`r=16`) / `8.6%` (`r=32`)** | a fitted `t*` law — **two resolved ranks cannot support one** |
 | a **grid-independent** short-horizon mechanism (`0.0%` spread at `t=0.1` at both `N=64` and `N=128`) | grid convergence of `t*` — **it grows `1.4–2.5×` from `N=64` to `N=128`**, and only two grids were run |
 | second-order time integration, `1.98/1.95`, *conditional on sufficient rank* | a stationary fluctuation state at any `A` or `N` |
 | a rank criterion that is honestly describable (amplitude test; two different `r99`s) | adaptive rank in any experiment — `rank_policy: "fixed per run"` |
@@ -62,9 +62,9 @@ are wrong for this** and were already excluded by D5.
    stream-function form**, with exact viscous treatment along a separable exponential flow and
    machine-precision divergence-freeness at every rank. *(D-invariant; the vehicle.)*
 2. **A crossover-horizon protocol, and the finding that the horizon is not a property of the
-   method.** `t*` moves by **`0.5–14.6%` across a 4× change in the baseline's window**
-   (`≤1.0%` at `r=32`; up to `14.6%` at `r=16`) and by `1–4%` across a 5× change in Reynolds
-   number, but moved by **2–4×** across three corrections to the baseline — **and by
+   method.** `t*` moves by **`0.15–0.63%` across a 4× change in the baseline's window** and by
+   **`2.8–8.6%` across a 5× change in Reynolds number**, but moved by **2–4×** across three
+   corrections to the baseline — **and by
    `1.4–2.5×` under a 2× grid refinement**, and half the ranks lost resolvability. **The two
    things it is sensitive to are the two a reader is least likely to check.** Reported with the
    baseline's window, refit interval, offset, an explicit in-sample check, and the grid with its
@@ -107,10 +107,9 @@ are wrong for this** and were already excluded by D5.
 > a property of the method. We build a structure-preserving projected-splitting DLRA for the
 > 2-D stream-function formulation, which is exactly divergence-free at every rank to `2e-14`, and
 > then measure that crossover against a static subspace whose window, refit interval and
-> in-sample status we state explicitly. The crossover is `t^* ≈ 1.3` at rank 16 and `≈ 2.4` at
-> rank 32, and it moves by `0.5–14.6%` across a fourfold change in the baseline's window
-> (`≤1.0%` at rank 32, up to `14.6%` at rank 16) and by `1–4%` across a fivefold change in
-> Reynolds number. It is *not* robust to the baseline's
+> in-sample status we state explicitly. The crossover is `t^* = 0.649` at rank 16 and `1.482` at
+> rank 32, and it moves by `0.15–0.63%` across a fourfold change in the baseline's window and by
+> `2.8–8.6%` across a fivefold change in Reynolds number. It is *not* robust to the baseline's
 > implementation: three successive corrections to a sixty-line baseline moved it by a factor of
 > two to four and removed half the ranks from resolution. We trace this to a mechanism — a
 > static subspace cannot spend rank at short horizons, where across the **whole** resolved rank
@@ -169,7 +168,7 @@ as the memory figure (D16.4) · the `crossovers` block of `crossover_surface.jso
 | attack | the answer, with evidence |
 |---|---|
 | *"Your method is 1.8× slower and uses more memory. Why publish it?"* | We do not claim otherwise. The contribution is the protocol and the mechanism; the method is the vehicle that made the finding measurable. §7 states both costs with numbers. |
-| *"The crossover depends on the baseline, so it is meaningless."* | **Agreed, and that is the finding.** It moves by `0.5–14.6%` across a 4× change in the baseline's *window* and `1–4%` across `Re`, and by `2–4×` across changes to its *correctness*. We report all three. |
+| *"The crossover depends on the baseline, so it is meaningless."* | **Agreed, and that is the finding.** It moves by `0.15–0.63%` across a 4× change in the baseline's *window* and `2.8–8.6%` across `Re`, and by `2–4×` across changes to its *correctness*. We report all three. |
 | *"Two data points is not a scaling law."* | **Agreed; we do not fit one.** We report the two values and say why there are only two. |
 | *"Exact divergence-freeness is textbook in a stream-function formulation."* | **Agreed, and we say so.** D4 bars the novelty claim. It is a property we verify, not one we claim. |
 | *"No stationary state — so what is validated against?"* | A **window-dependent** quasi-steady fluctuation energy, **reported with its window and its measured drift** (D24.4). The honest statistic is named in §7. **Do not quote a drift percentage here** — the previously-cited `24.7%` has no source in `CLAIMS.md` and is withdrawn until someone measures and records it. |
