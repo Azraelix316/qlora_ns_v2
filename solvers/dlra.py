@@ -215,6 +215,7 @@ class DLRA:
         self.steps = 0
         self.rank_history: list[int] = [self.projector.rank]
         self.spectrum_history: list[np.ndarray] = []
+        self.last_step_info: dict = {}
 
     @property
     def rank(self) -> int:
