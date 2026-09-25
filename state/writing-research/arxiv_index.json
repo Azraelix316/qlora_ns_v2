@@ -317,13 +317,13 @@
     "notes": "No papers found matching both criteria simultaneously in the literature survey."
   },
   {
-    "id": "http://arxiv.org/abs/1505.05648v2",
-    "title": "Projector-splitting integrators for dynamical low-rank approximation",
-    "updated": "2023-01-01T00:00:00Z",
-    "summary": "Develops projector-splitting methods for the efficient and robust integration of dynamical systems on low-rank manifolds.",
+    "id": "https://doi.org/10.1007/s10543-013-0454-0",
+    "title": "A projector-splitting integrator for dynamical low-rank approximation",
+    "updated": "2013-01-01T00:00:00Z",
+    "summary": "Proposes a projector-splitting scheme to integrate dynamical systems on low-rank manifolds, ensuring stability and efficiency.",
     "authors": [
-      "Olga Koch",
-      "Christian Lubich"
+      "Christian Lubich",
+      "Stefan Oseledets"
     ],
     "relevant": true
   },
@@ -333,7 +333,7 @@
     "updated": "2023-01-01T00:00:00Z",
     "summary": "A foundational paper on the dynamical low-rank approximation (DLRA) framework.",
     "authors": [
-      "Olga Koch",
+      "Othmar Koch",
       "Christian Lubich"
     ],
     "relevant": true

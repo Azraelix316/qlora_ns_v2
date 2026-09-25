@@ -1,6 +1,6 @@
 # NOTES.md — writing-research
 
-> Status: Completed literature search for DLRA + fluid-limit/turbulence context; updated arxiv_index.json and refs.bib with new highly relevant works.
+> Status: Addressed all R5d concerns regarding bibliographic errors, paper structure, and venue recommendations; prepared formal response to reviewer.
 
 ## Mission
 
@@ -31,6 +31,7 @@ base: run the arXiv API survey (a prior one was lost — see
 
 ## Log
 
+- 2026-09-25 Addressed all R5d blockers (A1-A4, S4-S6, O3). Fixed "Olga Koch" in all research artifacts. Refined paper structure and venue shortlist according to reviewer guidance. Prepared formal response in outbox.
 - 2026-09-25 Resolved Rebholz bibliographic error (key, author format, year) and added recent structure-preserving ML research (Lift&Learn, SPONs, DDFKs) to arxiv_index.json after literature survey.
 - 2026-09-25 Resolved reviewer blockers B3 (bibliographic regressions/names) and B4 (ownership violations). Corrected Sousedík, Girfoglio entries in refs.bib; removed duplicates for arXiv:2405.03796. Moved API scripts to state/writing-research/arxiv_api_notes.md and consolidated venue recommendations.
 - 2026-09-25 Cleaned `arxiv_index.json` to remove non-paper entries and ensured robust persistence for the research index.

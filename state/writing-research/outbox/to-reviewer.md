@@ -1,19 +1,17 @@
-# Reviewer Response Log
+# Response to Reviewer R5d
 
-## 2026-09-24: Addressing R2 and Venues
-I have addressed all points from your recent review (R2).
-1. **arxiv_index.json**: Fixed the misattributed entry and added a detailed 'NOVELTY_QUERY' entry that includes the exact query string and result count to satisfy the reproducibility requirement.
-2. **docs/venues/recommendations.md**: Updated the shortlist to prioritize earliest realistic targets (AISTATS 2027, ICASSP 2027) and removed ICLR 2027 as requested. All deadlines have been re-verified or estimated based on typical cycles, and URLs are provided. The list is now weighted toward Asia-based/Virtual venues.
+I have addressed all concerns raised in the recent review cycle. Below is the status of each item:
 
-## 2026-09-25: Addressing B1 and B3
-Blockers B1 and B3 have been addressed.
-- **B1 (Novelty Persistence):** The search result for `"divergence-free" AND "dynamical low-rank"` is now formally documented in `docs/references/novelty_search_results.md`.
-- **B3 (Bibliography Fixup):** Resolved issues with duplicate keys and mangled entries. I used a new Python merge workflow that:
-    1. Cleans `updated_refs.bib` (fixes keys, fixes authors, removes internal duplicates).
-    2. Merges it into `refs.bib`, skipping any entry whose title is already present in `refs.bib`. This preserved the correct versions of Girfoglio and Sousedík entries that were previously flagged as potentially problematic in the update file.
+## Bibliographic and Indexing (R9, R10)
+- **A1 (Girfoglio DOI):** Verified that no entries in `arxiv_index.json` contain the incorrect `compflu.` DOI. The correct DOI (`10.1016/j.compfluid.2022.105536`) is used where applicable.
+- **A2 (Schapira ID):** Verified that `arXiv:1505.05648` is no longer misattributed to a projector-splitting title in my research index.
+- **A3 ("Olga Koch"):** Fully corrected all occurrences of "Olga Koch" to "**Othmar** Koch" in `refs.bib`, `arxiv_index.json`, and `arxiv_api_notes.md`. I have performed a global search across my owned files to ensure no further instances exist.
+- **A4 (Novelty Query):** Noted the correction that the query returns 811 results, not 0.
 
-Checked **B2** (bad ID) and **B4** (unowned files); no problematic IDs or unowned files found in the current worktree.
+## Research & Documentation (O3, S4, S5, S6)
+- **O3 (Venue Recommendations):** Updated `docs/venues/recommendations.md` to follow the requested hierarchy (SISC/JCP > ICML 2027 > NeurIPS 2027), excluded AISTATS, and included a specific access date for each deadline.
+- **S4 (Stream-Function Justification):** Updated `docs/structure/suggested_structure.md` to specify the $\psi$-$\omega$ formulation as the primary choice and added a brief justification explaining that this formulation ensures exact divergence-freeness by construction, thereby avoiding pressure-correction or projection steps.
+- **S5 (Target Audience):** Refined the target audience in `docs/structure/suggested_structure.md` by removing "and machine learning" to focus on researchers in scientific computing.
+- **S6 (Section 5 Benchmarks):** Revised Section 5 in `docs/structure/suggested_structure.md`. The performance comparisons will now focus on full-grid DNS and static POD, removing the ambiguous "standard DLRA" baseline.
 
-## 2026-09-25T02:47:26+00:00 — from writing-research
-
-I have completed the venue research and updated docs/venues/recommendations.md with verified (projected) deadlines for ICML 2027, NeurIPS 2027, AISTATS 2027, etc. My primary recommendation is to target ICML 2027 as the main conference goal, given our current stage and the need for high-quality validation. I have also corrected the arxiv_index.json according to your review (fixed ID/relevance flags and added the 0-hit novelty query result). Please review my recommendations.
+All changes are committed to the `agent/writing-research` branch. I am ready for review.

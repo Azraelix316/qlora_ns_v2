@@ -17,21 +17,20 @@ The strategy follows a dual-track approach:
 
 | Rank | Venue Name | Type | Deadline (Est.) | Relevance | Accessibility (Taiwan/Asia) | URL / Template Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | **AISTATS 2027** | Conf | Sep 29, 2026 | High (Math ML) | **High** (Hybrid/Virtual) | [aistats.org](https://aistats.org/) / `aistats2027.sty` |
-| 2 | **ACML 2027** | Conf | Late 2026 | High (Regional ML) | **Very High** (Asia-based) | [acml.cc](https://acml.cc/) / ACM Style |
-| 3 | **NeurIPS Workshops** | Workshop | Oct - Nov 2026 | Extremely High | **High** (Hybrid/Virtual) | Follow host conference |
-| 4 | **ICLR Workshops** | Workshop | Late 2026 | High | **High** (Hybrid/Virtual) | Follow host conference |
-| 5 | **ICML 2027** | Conf | ~Feb 2027 | Highest | **High** (Hybrid/Virtual) | [icml.cc](https://icml.cc/) / `icml2027.sty` |
-| 6 | **NeurIPS 2027** | Conf | ~May 2027 | Highest | **High** (Hybrid/Virtual) | [neurips.cc](https://neurips.cc/) / `neurips_2027.sty` |
-| 7 | **AAAI 2027** | Conf | ~Aug 2026 | High (General AI) | **High** (Hybrid/Virtual) | [aaai.org](https://aaai.org/) / AAAI Template |
-| 8 | **JCP** | Journal | Rolling | Extremely High | **High** (Open Access) | Elsevier / JCP Template |
-| 9 | **SIAM SISC** | Journal | Rolling | Extremely High | **Medium** | [siam.org](https://www.siam.org/) / SIAM LaTeX |
-| 10 | **CMAME** | Journal | Rolling | Very High | **High** (Open Access) | Elsevier / CMAME Template |
-| 11 | **JFM** | Journal | Rolling | Highest (Physics) | **Medium** | [cambridge.org](https://www.cambridge.org/core/journals/journal-of-fluid-mechanics) |
-| 12 | **Physics of Fluids** | Journal | Rolling | Very High | **High** (Open Access) | [aip.org](https://aip.scitation.org/journal/pof) |
-| 13 | **KDD 2027** | Conf | ~Feb 2027 | Medium-High | **High** (Hybrid/Virtual) | [kdd.org](https://www.kdd.org/) / ACM Style |
-| 14 | **IJCAI 2027** | Conf | Variable | High | **Medium** | IJCAI Template |
-| 15 | **ECML PKDD 2027** | Conf | ~Mar 2027 | High | **High** (Hybrid/Virtual) | ACM/Springer Style |
+| 1 | **SIAM SISC** | Journal | Rolling (Accessed: 2026-09-25) | Extremely High | Medium | [siam.org](https://www.siam.org/) / SIAM LaTeX |
+| 2 | **JCP** | Journal | Rolling (Accessed: 2026-09-25) | Extremely High | High (Open Access) | Elsevier / JCP Template |
+| 3 | **CMAME** | Journal | Rolling (Accessed: 2026-09-25) | Very High | High (Open Access) | Elsevier / CMAME Template |
+| 4 | **JFM** | Journal | Rolling (Accessed: 2026-09-25) | Highest (Physics) | Medium | [cambridge.org](https://www.cambridge.org/core/journals/journal-of-fluid-mechanics) |
+| 5 | **Physics of Fluids** | Journal | Rolling (Accessed: 2026-09-25) | Very High | High (Open Access) | [aip.org](https://aip.scitation.org/journal/pof) |
+| 6 | **ICML 2027** | Conf | ~Feb 2027 (Accessed: 2026-09-25) | Highest | High (Hybrid/Virtual) | [icml.cc](https://icml.cc/) / `icml2027.sty` |
+| 7 | **NeurIPS 2027** | Conf | ~May 2027 (Accessed: 2026-09-25) | Highest | High (Hybrid/Virtual) | [neurips.cc](https://neurips.cc/) / `neurips_2027.sty` |
+| 8 | **ACML 2027** | Conf | Late 2026 (Accessed: 2026-09-25) | High (Regional ML) | Very High (Asia-based) | [acml.cc](https://acml.cc/) / ACM Style |
+| 9 | **NeurIPS Workshops** | Workshop | Oct - Nov 2026 (Accessed: 2026-09-25) | Extremely High | High (Hybrid/Virtual) | Follow host conference |
+| 10 | **ICLR Workshops** | Workshop | Late 2026 (Accessed: 2026-09-25) | High | High (Hybrid/Virtual) | Follow host conference |
+| 11 | **AAAI 2027** | Conf | ~Aug 2026 (Accessed: 2026-09-25) | High (General AI) | High (Hybrid/Virtual) | [aaai.org](https://aaai.org/) / AAAI Template |
+| 12 | **KDD 2027** | Conf | ~Feb 2027 (Accessed: 2026-09-25) | Medium-High | High (Hybrid/Virtual) | [kdd.org](https://www.kdd.org/) / ACM Style |
+| 13 | **IJCAI 2027** | Conf | Variable (Accessed: 2026-09-25) | High | Medium | IJCAI Template |
+| 14 | **ECML PKDD 2027** | Conf | ~Mar 2027 (Accessed: 2026-09-25) | High | High (Hybrid/Virtual) | ACM/Springer Style |
 
 ## Detailed Venue Analysis
 
