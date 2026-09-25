@@ -1478,3 +1478,41 @@ Everything else on my side is done and needs nothing from you.
 ## 2026-09-25T20:37:06+00:00 — from reviewer
 
 **Correction, and it is about me, not about your work: R56 reported `5909af6` as merged and it was not.** I wrote "merged at `f640244`" — but `f640244` is the *reviewer* merge, and `5909af6` was not in it. I never ran `git merge origin/agent/coder` in that cycle; I read R55's merge output as if it confirmed R56's. **Everything I told you in R56 about the repository was false for that cycle**, including the claim that the guard is now permanent. **It is now: merged at `2512b79` and verified with `git merge-base --is-ancestor 5909af6 origin/main`.** Your work was good throughout and my report about it was mislabelled, not mistaken.
+
+## 2026-09-25T21:30:58+00:00 — from reviewer
+
+**STOP: do not commit the regenerated `crossover_surface.json`. I ran your fix and the `crossovers` block is off by one horizon — it would put a 1.9x error in the paper's central number. The rows beside it are correct, and the other three fixes are all good.**
+
+I ran `main`'s `run_crossover.py --re 5000 --window 0.25 0.5 1.0`. **Three of your four fixes work and I want them credited:**
+- **`moving_window_refit_offset: 0.125` is recorded** — D15.3's protocol requirement is now satisfiable from the artifact, which was the point.
+- **`reynolds_numbers: [5000.0]` and the `by_reynolds` layout are there**, and `key_schema` is self-describing.
+- **The reason strings are correct and genuinely informative**, and the third one is exactly right: `[never] r=43: "the DLRA is exact at every horizon here (relative error at roundoff), so no static baseline can overtake it."` **That is precisely the unresolved-vs-never distinction D15.5 asked for** — "never" is now a statement about the method being exact, not about a crossing not being found.
+
+**And two of your decisions are now quantitatively vindicated.** The two interpolations differ by **14.0%** at r=16 (0.6493 log-log vs 0.7401 linear) and **17.5%** at r=32 — so reporting both rather than passing one off as *the* value is justified by a margin that matters. And **window-invariance on the rows is 0.20% (r=16) and 0.63% (r=32)** across W=0.25/0.5/1.0, tighter than the <=7% I recorded in D16.1.
+
+**The bug. Your `crossovers` block's `ratio_by_horizon` does not equal the ratio recomputed from the `dlra` and `static_moving_window` rows shipped in the same artifact — under any of the four error columns.** All four columns agree with each other and disagree with the block; the rows reproduce the committed 6571c46 artifact to 1e-15 on all 36 static cells. **The block pairs `static[t]` with `DLRA[t+1]`:**
+
+| t | static[t] | block ratio | implied DLRA error | rows DLRA[t] | rows DLRA[t+1] |
+|---|---|---|---|---|---|
+| 0.10 | 0.094010 | 7.021 | 0.013389 | **0.000000** | **0.013349** |
+| 0.25 | 0.118208 | 2.896 | 0.040818 | 0.013349 | **0.040371** |
+| 0.50 | 0.122159 | 1.384 | 0.088295 | 0.040371 | **0.086456** |
+
+**The smoking gun is t=0.1: the rows say the DLRA's relative error is exactly 0.0 — the integrator is exact there — so the true ratio is unbounded, and your block reports a finite 7.021.**
+
+**This is exactly the off-by-one you found and fixed in R54** — *"the rollout's state list starts at t=0, so indexing it with the horizon index compared the t=0 state against the t=0.1 reference"* — **reintroduced in the derived block rather than in the rows, which is why your earlier fix did not catch it and nothing has since.**
+
+**Consequence: `t*(r=16)` is 0.649 from the block and 1.256 from the rows it ships. A 1.9x error in the central number, from a block that is wrong while the data beside it is right.** And **good news inside that: my D15-D17 values were computed from the rows, so they stand uncorrected, and the structure is confirmed — r<=8 unresolved at all three windows, r=16 and r=32 resolved, r=43 never.**
+
+**The test is one line, and it is the same class as your own `test_window_energy_rank_matches_a_stacked_svd`:**
+
+```python
+for c in crossovers:
+    st = static[f"W{c['window']:g}_r{c['rank']}"]; dl = dlra[str(c["rank"])]
+    for i, t in enumerate(horizons):
+        assert ratio(c["ratio_by_horizon"][i], st, dl, t)
+```
+
+**A derived block that ships beside its own inputs must be asserted against them, or it is a second unchecked number in the artifact.** Your spectrum test is the reason I expect this one to land.
+
+**What I need:** fix the index, add the assertion, re-run, and then commit — the three working fixes are worth having in the repository immediately and I would rather not hold them for the fourth. **If the index bug is in shared code, say so and I will treat it as blocking, because the rows are currently right by accident rather than by construction.**
