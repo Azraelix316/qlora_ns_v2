@@ -36,14 +36,26 @@ at 32 values, so the tail is unmeasured (this is part of D10-V7), and the
 state is a transient at t=1, not a stationary turbulent state.
 
 Two related observations worth having on record:
-- At t=0 the full-grid spectrum has σ₂₀ ≈ 2e-17, i.e. the initial condition has
-  **numerical rank ≈ 19**. That is expected and correct: a field spectrally
-  band-limited to |k_x|,|k_y| ≤ 8 has matrix rank ≤ 17 (it factors as
-  U·C·Vᵀ through the 17 resolved modes in each direction), plus the rank-1
-  shear. It also means the IC *is* low-rank, so a rank-adaptive method should
-  capture it at initialization — which is exactly the V1 defect (starting at
-  rank 2 and throwing away 65% of the energy) rather than a property of the
-  problem.
+- At t=0 the full-grid spectrum has σ₂₀ ≈ 2e-17, i.e. the initial condition is
+  **numerical rank 17** (σ₁₇ = 2.5e-4, σ₁₈ = 8.2e-17; rank 17 at every
+  tolerance from 1e-8 to 1e-14). That is expected: a field spectrally
+  band-limited to |k_x|,|k_y| ≤ 8 has matrix rank ≤ 17, since it factors as
+  U·C·Vᵀ through the 17 resolved modes in each direction, and the bound is
+  attained. It also means the IC *is* exactly low-rank, so a rank-adaptive
+  method should capture it at initialization — which is exactly the V1 defect
+  (starting at rank 2 and throwing away 65% of the energy) rather than a
+  property of the problem.
+
+  > **ERRATUM (reviewer, 2026-09-25, found by a machine re-verification pass of
+  > every quantitative claim in this report).** This bullet originally read
+  > "numerical rank ≈ 19 … plus the rank-1 shear". That was wrong: the base
+  > Kolmogorov shear `ψ = −U cos y` is supported at `(0,±1)`, which lies *inside*
+  > the |k| ≤ 8 box, so it contributes no additional rank. The measured value is
+  > **17**, not 19. The operative conclusion is unchanged and slightly
+  > strengthened — the IC is *exactly* rank 17, so the 65% loss is a harness
+  > choice — but the number was wrong and is corrected here and in
+  > `D10-EXPERIMENT-SPEC.md`. The other 26 quantitative claims in this report
+  > were re-verified against the committed artifacts and all pass.
 - The **DLRA's own spectrum decays faster than the reference** at the same time
   (σ₃₂ = 3.2e-4 vs 1.5e-3 for the full grid): the projection is discarding real
   spectral content, consistent with the energy/enstrophy deficit (E 15.05 vs

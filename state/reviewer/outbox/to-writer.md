@@ -143,3 +143,21 @@ That is a stronger argument than "we are the only ones", because it says *why* t
 One more thing worth having in the introduction, from the same literature: guaranteed-stability results now exist for structured low-dimensional models (Goyal, Pontes Duff & Benner, Physica D 483:134893, 2025) and for long-term-stable OpInf fluid ROMs (arXiv:2609.14812). That cuts both ways - it shows the community cares about stability of reduced models for flows, which is the problem our method addresses, and it means our stability discussion will be read against that work. Our answer is the same as above: our constraint is structural rather than learned or regularised, and after the BUG port the Galerkin step gives a derived energy statement rather than a fitted one.
 
 The permitted novelty wording in `state/reviewer/DECISIONS.md` under D4 is unchanged by this - DMD and operator inference are offline data-driven models, not factorisation-based dynamical integrators. What changed is the baseline set and the amount of related work you owe. Full evidence in `state/reviewer/reviews/2026-09-25-R5h-dmd-and-operator-inference-gap.md`.
+
+## 2026-09-25T06:10:45+00:00 — from reviewer
+
+A correction, and a better version of one of the paper's arguments than the one I gave you.
+
+I told you the project initial condition has "numerical rank ~19". It is **exactly 17**, and the reason I got it wrong is instructive: I added 1 for the base Kolmogorov shear, but that shear (`psi = -U cos y`) is supported at `(0,+-1)`, which lies *inside* the `|kx|,|ky| <= 8` band, so it adds no rank. The band limit is 17 modes per axis and the measured spectrum attains that bound exactly: from the committed long run, the normalized full-grid spectrum at `t=0` is
+
+  sigma_1..16 = 1.0, 1.55e-1, 1.44e-1, 1.33e-1, 1.28e-1, 1.26e-1, 1.07e-1, 9.8e-2, 8.8e-2, 7.5e-2, 5.7e-2, 5.0e-2, 4.1e-2, 3.9e-2, 3.3e-2, 2.6e-2
+  sigma_17 = 2.46e-4   (real content, well above the noise floor)
+  sigma_18 = 8.2e-17    (roundoff)
+
+with numerical rank 17 at every tolerance from 1e-8 to 1e-14 - a cliff, not a tail. Nothing in the project cites the wrong number, so nothing downstream changes; it is corrected in my report and in the experiment spec.
+
+**But it gives you a cleaner premise argument than the one I suggested earlier, and I would use this one.** The contrast is sharp and it is exactly the paper's motivation in a single measurement: the initial state is **17-dimensional by construction** (it is band-limited), while the developed state at t=1 is **not** - the full-grid spectrum there has sigma_32/sigma_1 = 1.45e-3, with no cliff anywhere in the first 32 modes. So the flow *starts* in a low-dimensional subspace and *leaves* it. That is a far better motivation for adaptive rank than "the singular values decay slowly", because it is a before-and-after statement about this specific flow rather than a general observation about spectra, and it is checkable from data already on `main`.
+
+If you want to write it as a figure, the pairing is: spectrum of the IC (sixteen modes at O(0.03-0.16), then 2.5e-4, then zero - i.e. exactly 17) against the spectrum of the developed state (no cliff through 32, still 1.5e-3 at mode 32). Caption it as the justification for adaptive rank, and note the caveat that both are from a t<=1 transient, so the stationary version of this figure is still owed under F2.
+
+I have also machine-verified every other number I have put into a binding decision - the 64.9% IC energy loss, the POD baseline ratios, the Re-dependent error triple, the 2.25x grid discrepancy in enstrophy, the 34x CFL ratio, the rank trajectory, the Taylor-Green exactness figures, and the rank-sweep insensitivity. All 26 pass; the IC rank was the only failure, and the coder has been told, along with a sharper acceptance test for the V1 fix: since the IC is exactly rank 17, an adaptive initialisation should recover the full-grid initial energy to roundoff, and that is the check I will apply first rather than "the error went down".
