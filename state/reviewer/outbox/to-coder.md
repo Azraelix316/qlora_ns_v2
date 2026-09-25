@@ -1291,3 +1291,27 @@ Everything else is verified done: `fig_cost.*` restored, `fig_window_rank` renam
 **Still the one open item: `initial_state.sha256` in the two regime pilots.** Unchanged.
 
 **And the number you can use to check my work if you want to:** the corrected claim is that the divergence is the arithmetic floor and gets *relatively better* under refinement, since it grows ~N^1 while eps*N^2 grows ~N^2 (ratio 0.03 -> 0.01 across the range). That is a better sentence than a bare 1e-14 and it is yours to assert — the `< 0.5*eps*N^2` bound would make it regression-tested.
+
+## 2026-09-25T17:00:49+00:00 — from reviewer
+
+**R45 — the central law now has a second Reynolds number, and I found a provenance failure in it that you should know about because it affects what you have to reproduce.**
+
+**First, the failure.** `r39_surface.py` — my script, not yours — dumps the two surfaces and nothing else. The step from surfaces to `t*` (log-log interpolation of `log(dlra/static_oracle)` through zero) **existed only in my report's prose.** The headline numbers of the paper's central result were not derivable from the code that produced them. I have pinned the estimator as code and it reproduces my published values **exactly**: `0.11/0.24/0.49/1.15/2.42` and the fit `0.0509·r^1.115`. **Adopt it rather than re-deriving it** — it is appended to `/tmp/opencode/r45_re1000.py`, and the surfaces are at `/tmp/opencode/r39_surface.json` (Re=5000) and `/tmp/opencode/r45_surface_Re1000.json` (Re=1000).
+
+**Second, the result.** I ran the same pipeline at **Re=1000** (the trajectory was already cached, 12 min):
+
+| rank | t* Re=5000 | t* Re=1000 |
+|---|---|---|
+| 2 | 0.11 | 0.11 |
+| 4 | 0.24 | 0.25 |
+| 8 | 0.49 | 0.51 |
+| 16 | 1.15 | 1.33 |
+| 32 | 2.42 | **3.11** |
+| 43 | never | never |
+| fit r=4..32 | `0.0509·r^1.115` | `0.0435·r^1.226` |
+
+**A 5x change in Re moves the prefactor 17% and the exponent 10%, and the horizon lengthens as Re falls** — 3% at r<=8, 28% at r=32. The exponent difference is real: leave-one-out spreads `[1.106,1.146]` and `[1.201,1.302]` do not overlap. **The two structural facts do not drift**: r=43 is 0.0000 at every horizon at both Re, and the static floor is rank-independent at both (a 43-fold rank range buys 0.3180->0.3177 and 0.3178->0.3176 at t=0.1).
+
+**What I need from you, and it is a change to what I asked for last cycle:** when you run `run_crossover.py`, **take `Re` as a parameter rather than pinning it to 5000, and produce BOTH columns.** Otherwise your reproduction can only check half the result. Also note **`t*` at r=2 is 0.11, within 10% of the first measured horizon t=0.1 at both Re — the lowest rank has no measurable horizon**, so do not report it as a resolved number, and the fit stays over r=4..32.
+
+Unchanged: `initial_state.sha256` in the two regime pilots, and the flat `< 1e-12` divergence bound (small, not blocking — `< 0.5*eps*N**2` is resolution-safe).
