@@ -409,11 +409,17 @@
     ],
     "final_energy": 15.05079270797578,
     "final_enstrophy": 323.7192819763028,
+    "forcing_aware_invariant": {
+      "formula": "dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv> - projection_energy_increment/dt",
+      "max_scaled_residual": 0.0029680148342062546,
+      "status": "projected_discrete_balance_with_projection_work"
+    },
     "max_abs_divergence": 2.1576522860064266e-14,
     "max_cfl": 0.014191315449842713,
     "max_relative_energy": 1.9306240648750572,
     "max_relative_enstrophy": 1.0000358922697958,
     "max_scaled_energy_balance_residual": 0.0029680148342062546,
+    "max_scaled_full_pde_energy_residual": 0.001665114947529269,
     "projection_energy_history": [
       -2.7533531010703882e-14,
       1.1546319456101628e-14,
@@ -3780,11 +3786,17 @@
     ],
     "final_energy": 28.722340374791145,
     "final_enstrophy": 1274.4797055285114,
+    "forcing_aware_invariant": {
+      "formula": "dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv>",
+      "max_scaled_residual": 0.00025885138557000837,
+      "status": "full_grid_pde_balance"
+    },
     "max_abs_divergence": 3.032748378093375e-14,
     "max_cfl": 0.016224696440788455,
     "max_relative_energy": 1.2934085699277573,
     "max_relative_enstrophy": 1.0,
     "max_scaled_energy_balance_residual": 0.00025885138557000837,
+    "max_scaled_full_pde_energy_residual": 0.00025885138557000837,
     "projection_energy_history": [
       0.0,
       0.0,
@@ -4761,7 +4773,7 @@
   },
   "provenance": {
     "driver": "experiments/run_long_time.py",
-    "git_commit": "6407408e2cabee887e1fe9a2497a46ef5fa3ff63"
+    "git_commit": "6d0c11e15a5641668bc5c8d8c26bf91d6aa298f1"
   },
   "reynolds": 5000,
   "samples": [
@@ -4871,5 +4883,5 @@
       "time": 1.0
     }
   ],
-  "wall_seconds": 15.201634293189272
+  "wall_seconds": 14.579969408921897
 }
