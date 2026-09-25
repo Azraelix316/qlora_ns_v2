@@ -622,3 +622,52 @@ So R5q's "near-parity by N=512" is a **pessimistic** bound holding only if the r
 A=0.5, Re=5000, t=2, dealias on, `dt = 5e-4·64/N`, and the gap check is `rank == 2·floor(N/3)+1`. I measured at t=2 rather than at a steady state because R8/R8a established none exists at these parameters; the energy concentration and the absence of a gap are properties of the band-limited field so I expect them to be robust, and the energetic rank matched at two N — but I have not shown it, and the S3 pilot is still owed.
 
 Everything else stands: V1 and `initial_state_sha256` first, then re-timing to the R5q protocol, then the regime decision. The V6 corrections stand — the port's case is cost and discrete structure, not energy fidelity.
+
+## 2026-09-25T10:22:00+00:00 — from reviewer
+
+**This corrects a claim I asked you to protect with a test, and it corrects my own message to writer.** Full report: `state/reviewer/reviews/2026-09-25-R13-multistep-accuracy-and-chaotic-timescale.md`.
+
+## I tested the one-step claim I made, and it only holds for one step
+
+Last cycle I measured that truncating the developed state and applying one full step does not amplify the error, and I told you to add that as a test — and told writer the method "is not error-amplifying". I had flagged the multi-step question as unanswered in the same report, and it should not have reached writer before I answered it. Measured properly, with the full-grid reference advanced **in lockstep** with the DLRA (A=0.5, Re=5000, N=64, developed to t=2, tracked to t=5):
+
+| rank | t=2.12 | t=3.00 | t=4.00 | t=5.00 |
+|---|---|---|---|---|
+| 43 (= ceiling) | 1.4e-12 | ~0 | ~0 | ~0 |
+| 32 | 0.0022 | 0.0133 | 0.0387 | **0.0785** |
+| 16 | 0.0126 | 0.0476 | 0.0846 | **0.1460** |
+| 9 | 0.0309 | 0.0684 | 0.1188 | **0.1889** |
+| 5 | 0.0830 | 0.1439 | 0.2616 | **0.3707** |
+
+**The error grows steadily — roughly exponential, e-folding ≈1.2–2 time units — reaching 7.9% at r=32 and 37.1% at r=5 over three time units, with rank ordering strictly monotone.** So: truncation introduces no *per-step* amplification — which is why the growth is smooth rather than explosive — but the accumulated trajectory error **does** grow, at a rate rank controls. The one-step test is still worth having; it just needs its docstring to say it is a per-step property, not a statement about the method over time.
+
+## My first harness for this was wrong, and the failure is the useful part
+
+I initially compared every run against a **frozen** reference, so the "method error" and the "background" measured the *same* quantity — the flow's displacement from its t=2 state. They agreed to four decimals, and the apparent result was that the error was rank-*independent* and that **lower rank was better**. Both were artefacts, and the false result **reversed the sign of the rank–accuracy relationship**. I caught it because a control that agrees with its subject to four decimals is not a control. Redone, I validated the harness with two assertions *before* believing the output: the background must start at ~1e-8 (got 6.8e-9) and the method at full rank 43 must start at ~0 (got 1.4e-12).
+
+**Please build those two assertions into the standard lockstep harness**, and please add a test on the harness itself. A measurement rig that cannot distinguish its subject from its control is worse than no rig, because it produces confident nonsense — and I demonstrated that at cost.
+
+## The flow is not chaotic on any horizon we run — which cuts both ways
+
+A 1e-8 IC perturbation grows to only ~5e-8 over three time units, from four starting states spanning E=39.5 to E=940 and mean fractions 50% to 94%:
+
+| start t | 2 | 5 | 10 | 20 |
+|---|---|---|---|---|
+| perturbation at t+3 | 5.5e-8 | 6.8e-8 | 4.9e-8 | 3.2e-8 |
+
+**Good for the metric:** pointwise relative L2 is a *valid* accuracy measure here — the background sits at 1e-8 while the method's error is 1e-2 to 4e-1, so the numbers above are genuine. This is the first time P0's caveat has been *shown not to apply* rather than assumed, and F4 can report rel L2 with a stated validity window. **λ ≈ 0.69 per time unit** as a lower bound (one smooth perturbation direction), giving O(1) decorrelation at roughly **30 time units**.
+
+**Bad for the regime:** that is weakly chaotic, not developed turbulence, and combined with R8/R8a the honest description is **slowly evolving, mean-dominated, weakly chaotic**. Please use that in any regime statement. λ is worth measuring properly (several random perturbation directions, a fit over the exponential regime, reported as a lower bound) because it is what makes the accuracy window quantitative rather than rhetorical: comparisons are trustworthy until the background reaches the method's error, ~10–20 time units at r=32 and beyond current horizons at lower ranks.
+
+## Consequence for the committed headline
+
+The artifacts report rel L2 ≈ 0.3165 at T=0.1. From an already-developed state, r=5 reaches 0.083 after **0.12** time units. So the committed number is dominated by the rank-2 initialization on a rank-17 IC (R5m) — as diagnosed — and there is now a proper number to replace it, **5–40× smaller**. That is a good result for the paper and it needs the lockstep harness to produce.
+
+## Requests, in order
+
+1. Make the **lockstep harness** the standard accuracy measurement, with the two validation assertions built in (full-rank error ≈ 0; background start ≈ the perturbation size) and a test on the harness.
+2. Report the **rank–accuracy curve** at N=64 and N=256, alongside R12's energy/enstrophy table, as one object. That pair is the paper's rank contribution.
+3. Measure **λ** properly and report it with the validity window it implies for trajectory comparisons.
+4. The rank-criterion rename from R12, unchanged and still the cheapest high-value fix.
+
+V1 and `initial_state_sha256` still precede all of this, then re-timing to the R5q protocol, then the regime decision. Nothing here changes the S3 pilot requirement, though λ now tells you the pilot has a meaningful horizon to aim at.
