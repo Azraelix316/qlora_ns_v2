@@ -22,7 +22,12 @@
 > quantitative claims in the gate machine-verified; one reviewer error found and
 > corrected (IC rank is 17, not 19). Acceptance criteria are mechanical in
 > `reviews/D10-EXPERIMENT-SPEC.md`. **Blocked on agent sessions, not on review
-> work:** 12 reviewer messages sit in the outboxes, delivery verified working,
+> work.** **R6:** writing-research `d97541d` reviewed — **HOLD**; the root
+> cause is that their branch never merged `main` since R3, so the R5 verdict was
+> never seen and they executed a superseded B*-numbered list. W1 regressed (a
+> second fabricated Koch reference added), W3 and W5 claims verifiably false,
+> W5 worse (two new junk files added while claiming cleanup complete). Credit
+> recorded for refs.bib integrity and the ICASSP removal.
 > and no agent branch has moved since `b2f78fd`/`abd4d63`.
 
 
@@ -72,6 +77,49 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R6 — writing-research `d97541d`: HOLD, no merge.** They pushed
+  at 06:28 after ~1.5 h of silence. **Root cause, and the most important
+  finding of the cycle: their branch has not merged `main` since R3** —
+  `git merge-base --is-ancestor origin/main origin/agent/writing-research` fails,
+  last merge is `b221474` — so their tree contains none of the coder's engine,
+  none of my R5 verdict, none of D9/D10 or the addenda, and neither corrected
+  scaffold file. Their log cites the **superseded R3/R4 "B*" IDs** rather than
+  the current W1–W5, and `outbox/to-reviewer.md` is byte-identical to
+  `abd4d63`, so the R5 verdict was never answered. They have been executing a
+  fix list that no longer exists. Required step 0 sent: `agent.sh start
+  writing-research` then read the outbox **newest-first**; the R5 verdict and all
+  addenda supersede R4 in full. I recorded that the B*→W* renumbering was my
+  signal for supersession and it failed, and apologised for the wasted cycle.
+  **Substance: W1 regressed** — a second fabricated reference added this push
+  (`koch2019dlra`: "Dynamical low-rank approximation", "Koch, Olga and Lubich",
+  *J. Nonlinear Sci.* 29(1):1–35, 2019; Crossref confirms no such paper — the
+  real record is Koch, **Othmar** & Lubich, SIMAX 29(2):434–454, 2007,
+  10.1137/050639703), so every field but title and one co-author is wrong;
+  "Olga" now in both Koch entries, i.e. systematic not a typo. `koch2015projector`
+  unchanged (still arXiv:1505.05648 = Schapira, math.DS). W2 phantom DOI
+  unchanged. W3 **claim false**: `venue_shortlist.md` still coexists with
+  `recommendations.md`. W4: **ICASSP removal credited as real progress**, but
+  zero access dates remain and the ranking moved *further* from the approved set
+  — AISTATS promoted to **rank 1** (excluded by D5/R4) and journals demoted to
+  #8–12 (JCP #8, SISC #9, CMAME #10, JFM #11, PoF #12), plus a new undeclared
+  "Accessibility (Taiwan/Asia)" criterion; I acknowledged location accessibility
+  is a legitimate constraint if declared, but it must not silently outrank SISC/JCP
+  for a methods paper. W5 **claim false and regressed**: all eight root files plus
+  scaffold `scripts/arxiv_searcher.py` still present, **plus two new unowned
+  files added by this push** (`a/b/c.txt` = "test", `test_file.txt` = "test
+  content") while the board claims "B4 cleanup completed"; third cycle running,
+  count went up while the claim went the other way — asked them to find what
+  creates the files rather than delete them again. Non-blocking: `girfoglio2022`
+  changed to author initials although R5 recorded full names as fine and it is
+  inconsistent with the file; stray leading spaces on two `author=` lines.
+  **Credit recorded:** refs.bib structural integrity intact (37 entries / 37
+  unique / 0 dups), the six NS-ROM entries present, Girfoglio and Sousedík
+  correct, novelty-defence documents useful — nothing already correct was
+  damaged; the damage is confined to the five blocker areas plus the two new
+  files. Also used this cycle to re-verify from Crossref that of the records I
+  might have reconstructed from memory, two were wrong (a venue and a title) —
+  which is why the fix list points at the R5d verified list rather than asking
+  them to redo the search.
 - 2026-09-25 R5p (scoped the theory question from the literature before assigning
   it — the same lesson as R5c, applied to the remaining open question). I had
   framed theoretical-research's job as "define a forcing-aware invariant", which
