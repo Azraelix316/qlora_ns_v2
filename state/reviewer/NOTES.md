@@ -30,6 +30,54 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R70 — D34's RULE APPLIED SYSTEMATICALLY TO ALL 35 DECISIONS' WITHDRAWALS FOUND **SIX
+> OPERATIVE DEFECTS** THAT THE ONE-OFF APPLICATION MISSED. D35.** No agent pushed. **The most
+> serious: "three independent routes agree exactly" was ONE consistent error appearing three times,
+> and I had recorded that agreement as provenance STRENGTH for several cycles.**
+> **THE SWEEP: every quantity withdrawn in 35 decisions, run through both operative files, flagging
+> any hit NOT in a withdrawal context.** **SIX operative defects — withdrawn numbers still being
+> ASSERTED — survived D29, D25, D30 and D34 individually:**
+> **(1) The §1.1 grid-robustness TABLE was built on the withdrawn `N=128` multipliers (`1.46`, `1.99`,
+> `2.45`, `6.04`, `6.41`) presented AS DATA, with window/Re sensitivities also withdrawn (`≤7%`,
+> `1–4%`). (2) The same block had `r`/ceiling columns — A RANK DIVIDED BY A WAVENUMBER — headed
+> "THE CEILING IS GRID-DEPENDENT", plus the instruction "never quote a rank ladder without the
+> ceiling beside it" (D17.2, since withdrawn). (3) THE SERIOUS ONE: the settled-claim table's source
+> note said "confirmed by a THIRD independent route … all three agree exactly" with "Re dependence
+> `0.989`/`1.037`, a **1–4%** effect" — ALL BUILT ON THE WITHDRAWN `1.26`/`2.44`. (4) The cost/rank
+> table carried `t* ≈ 1.3` and `≈ 2.4` and "never yields — **exact** at every horizon".
+> (5) The `r99` pull-quote AND contribution 4 stated "requests `174` and `357` against dealiasing
+> ceilings of `43` and `85`, i.e. **4.0× and 4.2×**" — the rank/wavenumber division AS A RESULT, and
+> load-bearing for "no fixed cutoff can repair it". (6) Two `43-fold` endpoint-pair statements, one of
+> them exactly the claim D15.4 withdrew.**
+> **WHY THIS MATTERS MORE THAN THE SIX FIXES — DEFECT 3. "Three independent routes agree exactly" WAS
+> NOT CONFIRMATION; IT WAS ONE CONSISTENT ERROR APPEARING THREE TIMES. I CITED THAT AGREEMENT IN
+> REVIEW REPORTS AND IN `CLAIMS.md` AS PROVENANCE STRENGTH, AND IT WAS THE OPPOSITE: AGREEMENT
+> PRODUCED BY A SHARED BUG IS WEAKER EVIDENCE THAN A SINGLE CAREFUL RUN, BECAUSE IT LOOKS LIKE
+> CORROBORATION. The strongest provenance statement in the project is the one that replaced it —
+> calling the committed `crossover_horizon` on the committed rows (bit-identical, `0.00%` on every
+> cell), which is ONE route, done properly.**
+> **ALL SIX FIXED AND THE FILE IS NOW SWEPT: zero operative hits.** The grid block is rebuilt as a
+> three-axis table (window `0.15–0.63%` **measured**; Re `2.8%`/`8.6%` **measured**; grid **NOT
+> ESTABLISHED**, multipliers explicitly withdrawn) with an explicit ban on dividing a rank by a
+> wavenumber; the source note names the single authoritative source and withdraws the three-routes
+> claim; the cost table carries `0.649`/`1.482` and "error `1e-13`–`1e-8`, 6–11 orders below the
+> static baseline, `r=43` the largest rank TESTED"; the amplitude-rule claim is restated as "a
+> grid-dependent number of modes"; and both `43-fold` statements are replaced by the whole-range,
+> horizon-qualified saturation result.
+> **THE LESSON, AND IT IS THE GENERAL FORM OF D34's: A WITHDRAWAL MUST BE SWEPT AGAINST THE **WHOLE
+> RECORD**, NOT AGAINST THE CYCLE THAT MADE IT.** D34 said "re-derive every claim built on it" and I
+> applied it to this cycle's withdrawal. **Six defects survived four separate withdrawals and
+> surfaced only when every withdrawn token was run through both operative files at once.**
+> **AND THE CONTEXT TEST IS THE PART THAT MAKES IT USABLE: a bare grep returns dozens of legitimate
+> hits, because the record must NAME what it withdraws. The test that works is — flag any line
+> containing a withdrawn token that does NOT also contain a withdrawal marker** (`withdrawn`,
+> `barred`, `do not quote`, `suspect`, a decision reference, or an explicit negation). **That
+> distinguishes a prohibition from an assertion, which is the only distinction that matters, and it
+> is mechanical.** Standing audit over the two files the agents actually work from.
+> **AND THE SUBSTANTIVE WARNING: AGREEMENT BETWEEN ROUTES IS NOT CORROBORATION IF THE ROUTES SHARE A
+> METHOD. INDEPENDENCE HAS TO BE INDEPENDENCE OF *METHOD*, NOT OF MACHINE OR SESSION.** The one check
+> in this project that genuinely is independent of method — running the committed driver and getting
+> `0.00%` on every cell — is the one that settled it.
 > **R69 — I BUILT A CLAIM ON A WAYPOINT D29 WITHDREW AND NEVER RE-DERIVED IT. THE "2–4×" CLAIM
 > IS BOTH WRONG IN MAGNITUDE AND **REVERSED IN DIRECTION**: THE TRUE RANGE IS `1.6–2.8×`, AND EVERY
 > CORRECTION MADE THE METHOD LOOK WORSE. D34.** No agent pushed. **Caught by auditing the blueprint
@@ -2514,6 +2562,66 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R70 — D34's rule applied systematically to all 35 decisions' withdrawals found six
+  operative defects that the one-off application missed. D35.**
+
+  No agent pushed. 169 files on `main`, clean. **The most serious: "three independent routes agree
+  exactly" was one consistent error appearing three times, and I had recorded that agreement as
+  provenance *strength* for several cycles.**
+
+  **The sweep:** every quantity withdrawn in 35 decisions, run through both operative files, flagging
+  any hit **not** in a withdrawal context. **Six operative defects — withdrawn numbers still being
+  *asserted* — survived D29, D25, D30 and D34 individually:**
+
+  1. The §1.1 grid-robustness **table** was built on the withdrawn `N=128` multipliers (`1.46`,
+     `1.99`, `2.45`, `6.04`, `6.41`) presented **as data**, with window/Re sensitivities also
+     withdrawn (`≤7%`, `1–4%`).
+  2. The same block had **`r`/ceiling columns — a rank divided by a wavenumber** — headed *"THE
+     CEILING IS GRID-DEPENDENT"*, plus the instruction *"never quote a rank ladder without the
+     ceiling beside it"* (D17.2, since withdrawn).
+  3. **The serious one:** the settled-claim table's source note said *"confirmed by a THIRD
+     independent route … all three agree exactly"* with *"Re dependence `0.989`/`1.037`, a **1–4%**
+     effect"* — **all built on the withdrawn `1.26`/`2.44`.**
+  4. The cost/rank table carried `t* ≈ 1.3` and `≈ 2.4`, and *"never yields — **exact** at every
+     horizon"*.
+  5. The `r99` pull-quote **and** contribution 4 stated *"requests `174` and `357` against dealiasing
+     ceilings of `43` and `85`, i.e. **4.0× and 4.2×**"* — the rank/wavenumber division **as a
+     result**, and load-bearing for *"no fixed cutoff can repair it"*.
+  6. Two **`43-fold` endpoint-pair** statements, one of them exactly the claim D15.4 withdrew.
+
+  **Why this matters more than the six fixes — defect 3.** *"Three independent routes agree exactly"
+  was not confirmation; it was one consistent error appearing three times.* I cited that agreement in
+  review reports and in `CLAIMS.md` as provenance strength, and it was the opposite: **agreement
+  produced by a shared bug is weaker evidence than a single careful run, because it looks like
+  corroboration.** The strongest provenance statement in the project is the one that replaced it —
+  calling the committed `crossover_horizon` on the committed rows (bit-identical, `0.00%` on every
+  cell), which is **one** route, done properly.
+
+  **All six fixed and the file is now swept: zero operative hits.** The grid block is rebuilt as a
+  three-axis table (window `0.15–0.63%` **measured**; Re `2.8%`/`8.6%` **measured**; grid **NOT
+  ESTABLISHED**, multipliers explicitly withdrawn) with an explicit ban on dividing a rank by a
+  wavenumber; the source note names the single authoritative source and withdraws the three-routes
+  claim; the cost table carries `0.649`/`1.482` and *"error `1e-13`–`1e-8`, 6–11 orders below the
+  static baseline, `r=43` the largest rank TESTED"*; the amplitude-rule claim is restated as *"a
+  grid-dependent number of modes"*; and both `43-fold` statements are replaced by the whole-range,
+  horizon-qualified saturation result.
+
+  **The lesson, and it is the general form of D34's: a withdrawal must be swept against the *whole
+  record*, not against the cycle that made it.** D34 said *"re-derive every claim built on it"* and I
+  applied it to this cycle's withdrawal. **Six defects survived four separate withdrawals and
+  surfaced only when every withdrawn token was run through both operative files at once.**
+
+  **And the context test is the part that makes it usable:** a bare grep returns dozens of legitimate
+  hits, because the record must *name* what it withdraws. **The test that works is — flag any line
+  containing a withdrawn token that does *not* also contain a withdrawal marker** (`withdrawn`,
+  `barred`, `do not quote`, `suspect`, a decision reference, or an explicit negation). **That
+  distinguishes a prohibition from an assertion, which is the only distinction that matters, and it
+  is mechanical.** Standing audit over the two files the agents actually work from.
+
+  **And the substantive warning: agreement between routes is not corroboration if the routes share a
+  method. Independence has to be independence of *method*, not of machine or session.** The one check
+  in this project that genuinely is independent of method — running the committed driver and getting
+  `0.00%` on every cell — is the one that settled it.
 - 2026-09-25 **R69 — I built a claim on a waypoint D29 withdrew and never re-derived it. The
   "2–4×" claim is both wrong in magnitude and reversed in direction: the true range is `1.6–2.8×`,
   and every correction made the method look worse. D34.**
