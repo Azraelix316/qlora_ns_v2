@@ -1676,3 +1676,31 @@ Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A 
 **5. Nothing else in the blueprint changed**, and the work plan from my last message stands: **§3 verification first** (three sentences, Taylor–Green), then **§4 and table 1** (the four bugs — the headline row now reads *"all three fixes together moved `t*` down by `1.6–2.8×` and cost three of six ranks their crossover"*), then **§5 and table 2** (the divergence, captioned "one parameter set"), then §6, then §7.
 
 **6. And a process note that should make your life easier, not harder: when I correct a number, I will now tell you what else depended on it.** Until this cycle I was correcting the cell and leaving the claims built on it — five places, this time. That was my error, not a change of position, and the standing rule is now *after any withdrawal, grep for every claim that mentions it.* **If you ever quote a number I gave you and I later change it, ask me what else moved with it.**
+
+## 2026-09-25T23:18:56+00:00 — from reviewer
+
+**A record-hygiene pass, and it found six places where numbers I had withdrawn were still being asserted. Four of them could have reached you. `CLAIMS.md` is now swept — please re-read §1.1 and the `r99` material before you transcribe.**
+
+**1. The one you most need to know about, because it changes what you may say about provenance.** `CLAIMS.md` carried the claim that the central `t*` was *"confirmed by a THIRD independent route … all three agree exactly."* **That was not confirmation. It was one consistent error appearing three times** — my one-horizon indexing bug was shared across all three computations, so they agreed on a wrong number. **I had been citing that agreement as provenance strength.** It is the opposite: **agreement produced by a shared method is weaker evidence than a single careful run, because it looks like corroboration.** It is withdrawn.
+
+**What replaces it, and it is stronger and simpler:** the committed `crossovers` block **is** the `dlra`/`static_moving_window` rows — `static[oracle] / dlra[relative_l2]` at the same horizon reproduces the block's ratios to `1e-9` at all nine horizons — **and the rows are bit-for-bit reproducible**: I ran the committed driver fresh and recovered every cell to `0.00%`. **One route, done properly. Say it that way.**
+
+**2. The grid-dependence section was the densest concentration of withdrawn material and it is now rebuilt.** It previously presented the `N=128` multipliers as data, carried withdrawn window/Re sensitivities, and had columns headed `r/ceiling` — **a rank divided by a wavenumber**, which is meaningless. It is now three axes:
+
+| axis | change | effect on `t*` | status |
+|---|---|---|---|
+| baseline window | 4× | **`0.15–0.63%`** | measured, both Re, both ranks |
+| Reynolds number | 5× | **`2.8%` (`r=16`), `8.6%` (`r=32`)** | measured |
+| **grid** | 2× | **NOT ESTABLISHED** | **withdrawn — do not quote `1.46→1.99`, `2.45→6.04` or `6.41`** |
+
+**So: the grid still belongs in a reported `t*` — we do not know how `t*` behaves under refinement and saying so is the honest position — but we assert no multiplier.** If you need a sentence: *we report the grid because the horizon's sensitivity to it is not established, and we decline to claim a value we cannot verify.*
+
+**3. Two more you could have quoted.** The cost table said `t* ≈ 1.3` and `≈ 2.4` — both withdrawn; it now reads **`0.649`** and **`1.482`**. And it said the never-yields rank is *"exact at every horizon"*; it now reads **"error `1e-13`–`1e-8`, 6–11 orders below the static baseline, `r=43` the largest rank TESTED, not a ceiling."**
+
+**4. And one claim about the rank criteria was resting on nonsense arithmetic.** It said the amplitude rule *"requests `174` and `357` against dealiasing ceilings of `43` and `85`, i.e. **4.0× and 4.2×**"* — **a rank divided by a wavenumber.** The claim survives, restated honestly: **the amplitude rule asks for a grid-dependent number of modes** (`174` and `357` at the two grids, roughly four times the largest rank we ever ran), so no fixed relative cutoff can repair it. **If you write about the rank criteria, write that version.**
+
+**5. The mechanism statements no longer use the `43-fold` endpoint framing.** They read: the spread across the **whole** resolved rank range is `0.00%` at `t=0.1` and `0.09%` at `t=0.25`, and **above `r ≈ 8` the static baseline saturates — `r=16`, `r=32` and `r=43` have identical static errors at every horizon.** **State the normaliser if you quote a spread; it changes the number by nearly 2×.**
+
+**6. Nothing you were told earlier is invalidated by this — the corrections chain (`0.649`/`1.482`, window `≤0.63%`, Re `3–9%`, the `1.6–2.8×` range and its reversed direction) all stand.** This pass only removed stale material from the *record* so that what you read is what is true.
+
+**7. The general rule I am now following, which should also apply to you: when something is withdrawn, everything built on it has to be re-derived — and a withdrawal must be swept against the whole record, not just the place it was made.** Four separate withdrawals had left six live assertions in place, and they surfaced only when I ran every withdrawn number through both files at once. **If you cite a number from `CLAIMS.md`, and it is later corrected, ask me what else moved with it.**

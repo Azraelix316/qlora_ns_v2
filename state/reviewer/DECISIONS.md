@@ -2371,3 +2371,86 @@ divergence as a §7 observation pending its sweep. D32.1's Taylor–Green verifi
 No advantage in time or memory. BUG's rank-scaling withdrawn; report the `3.3–5.1×` slowdown.
 D27.1's misnomer stands. D26.4's test fixture stands. The flow is the implemented shear, with the AKS
 control (D20, D24). Every D4 barred claim stands.
+
+---
+
+## D36 — **40 component tests, 0 artifact tests.** Five cheap tests would have prevented five consecutive cycles of reviewer error (2026-09-25)
+
+> **OPERATIVE (R71).** **T1 and T2 are not hygiene — they are the reason this project spent five
+> reviewer cycles on a number that was correct all along.** Both are ~15 lines, run against
+> committed files, and require **no compute**.
+
+**D36.1 — THE COVERAGE IS GOOD WHERE IT IS.** The 40 tests cover forcing and its curl, exact
+diffusion and Taylor–Green, the continuous energy balance and its residual, midpoint order, POD as a
+Galerkin baseline and its centering, DMD against a linear system and its under-training report, the
+BUG port's stationary state / no-full-factorization guarantee / rank bounds / order, four rank
+criteria against brute force, divergence diagnostics including an injected violation, spectral
+isotropy, operator agreement with the full 2-D spectrum, and second order in `dt`. **Several are the
+right kind — `divergence_diagnostic_detects_an_injected_violation`,
+`bug_never_factorizes_the_full_state_inside_a_step`, `pod_refuses_to_clamp_the_requested_rank` assert
+properties that could otherwise fail silently.** **This is a well-tested library and the tests are
+the project's strongest asset.**
+
+**D36.2 — AND NOT ONE TEST READS A COMMITTED ARTIFACT.** `component/unit tests: 40`;
+`tests reading state/coder/results/*.json: 0`. **The four `t_star` mentions are the SYNTHETIC
+crossing fixtures, which R61 found ENSHRINES the column-pairing defect rather than catching it.**
+
+**D36.3 — SO THE PAPER'S LOAD-BEARING CLAIMS ARE MAPPED LIKE THIS.** **Tested:** exact
+divergence-freeness (four tests), BUG's structural guarantees and order (four), second order, the
+rank criteria (four, against brute force). **UNTESTED: `t* = 0.649`/`1.482`; that the `crossovers`
+block is derivable from the rows; that the `dlra` and `static` rows share a time set; that the
+static baseline saturates in rank; that a fixed-basis POD run diverges at `r ≥ 32` where the DLRA
+does not; that the rows are reproducible.** **SIX OF THE PAPER'S LOAD-BEARING CLAIMS HAVE NO TEST,
+AND EVERY SERIOUS ERROR I HAVE MADE IN THIS PROJECT — the stale block, the off-by-one, the `1.90×`
+phantom gap, the floor hypothesis, the wavenumber-as-rank conflation — WAS IN THE ARTIFACT LAYER,
+WHICH HAS NO TESTS.**
+
+**D36.4 — THE FIVE TESTS, SPECIFIED, ALL CHEAP BECAUSE THE ARTIFACTS ARE COMMITTED.**
+
+> **T1 — the committed block is derivable from the committed rows. THE SINGLE MOST VALUABLE MISSING
+> TEST IN THE PROJECT.** Load `crossover_surface.json`; for every `re` and every entry in
+> `crossovers`, call `crossover_horizon(br["dlra"][str(c["rank"])],
+> br["static_moving_window"][f"W{c['window']:g}_r{c['rank']}"])` and assert `out["t_star"] ==
+> pytest.approx(c["t_star"], rel=1e-9, abs=1e-12)`. **THIS ONE TEST WOULD HAVE CAUGHT D23, D28.3,
+> D28.5 AND MY INDEX BUG — four of my five errors, on consecutive days, in about fifteen lines.**
+
+> **T2 — the two row lists share a time set. One line, and the guard against my specific error.**
+> For every `static_moving_window` key `W{w}_r{r}`, assert
+> `{x["time"] for x in br["dlra"][r]} - {0.0} == {x["time"] for x in rows}`. **The `dlra` list
+> begins at `t=0.0` and the `static` list at `t=0.10`; that asymmetry is a trap for anyone who
+> indexes the two by position. THE DRIVER SHOULD ASSERT IT TOO, before computing any ratio — the bug
+> belongs in production code, not only in the test suite.**
+
+> **T3 — the static baseline saturates in rank.** The mechanism the paper now leads with, as a
+> property assertion on the committed artifact: at `t=0.1` the static error is equal to three
+> decimals at `r=16`, `32`, `43`, and the spread across the whole resolved range is `< 0.1%`.
+
+> **T4 — the stability result, RECORDED rather than asserted.** The honest form, because the
+> divergence threshold could legitimately move: record whether each fixed-basis run in
+> `baselines_*.json` diverged, and **fail only if the recorded value changes**, so a change in the
+> physics is noticed rather than silently absorbed. Plus the claim that matters and is a clean
+> assertion: **the SP-DLRA does not diverge at any rank in that artifact** — contribution 4's
+> evidence.
+
+> **T5 — `dealias_ceiling` AND the largest rank tested are recorded SEPARATELY.** A schema test, and
+> the only one that prevents the wavenumber/rank conflation recurring: the artifact must carry both
+> `dealias_wavenumber_max` (or whatever it is renamed) **and** `largest_rank_tested`, and a test
+> asserts both keys exist. **TWENTY CYCLES OF MY ERROR CAME FROM A SCHEMA THAT MADE THE CONFLATION
+> EASY; THE FIX IS TO MAKE THE SCHEMA FORBID IT.**
+
+**D36.5 — WHAT IT DOES AND DOES NOT MEAN.** **It does NOT mean the results are wrong** — the rows are
+bit-for-bit reproducible (D29.3) and I verified them by running the committed driver. **It means the
+paper's results are currently UNFALSIFIABLE BY THE PROJECT'S OWN TEST SUITE.** A reader, a
+collaborator or a future contributor has no way to detect a corrupted or stale artifact except by
+re-deriving it by hand — which is exactly what I had to do, and exactly what I did wrongly for five
+cycles. **T1 AND T2 ARE THE REASON THIS PROJECT SPENT FIVE REVIEWER CYCLES ON A NUMBER THAT WAS
+CORRECT ALL ALONG.**
+
+**D36.6 — THE LESSON, AND IT IS R70's ONE LEVEL DOWN.** R70: *audit the artifacts, not the claims.*
+**This is the same lesson one level down: THE ARTIFACTS HAVE NO TESTS, SO AUDITING THEM IS MANUAL,
+SLOW, AND — AS FIVE CYCLES DEMONSTRATE — ERROR-PRONE.** **Generalised: IF A REVIEWER HAS TO
+REIMPLEMENT CODE TO CHECK A CLAIM, THE PROJECT SHOULD BE PROVIDING THAT REIMPLEMENTATION AS A TEST.
+THE REVIEWER'S MANUAL CHECK IS THE TEST THAT WAS NEVER WRITTEN.** I am the standing example:
+`localize.py` was me reimplementing `crossover_horizon`, and it was wrong for five cycles.
+
+**D36.7 — Unchanged.** Everything in D35.6 stands.
