@@ -165,6 +165,23 @@ arXiv-only coverage is not sufficient for a "to our knowledge" claim. D4 stays
 **OPEN** pending the W1–W5 citation-integrity fixes and that journal-venue
 extension.
 
+**Status (R5c, 2026-09-25) — claim sharpened by the method literature.** SPDLRA
+is an established line — Hamiltonian systems (arXiv:2007.13153, 2008.07427,
+2308.16547), stochastic Vlasov–Poisson (arXiv:2608.00397), elastic guided waves
+(arXiv:2606.30469), kinetic simulations (review arXiv:2412.05912) — and the
+reviewer's R5b searches found **no application to the incompressible
+Navier–Stokes equations**. That is a far better position than the
+divergence-free framing, because the gap is created by an existing, active field
+of work rather than by a property that is textbook in 2-D. The claim may be
+stated in the form recorded in
+`reviews/2026-09-25-R5c-premise-and-v6-literature.md`: structure-preserving DLRA
+is established across those domains and, to the best of our knowledge, has not
+been applied to incompressible NS; we provide such an application, with exact
+divergence-freeness by representation and validation on resolved
+high-Reynolds-number forced turbulence with adaptive rank. It is **gated on
+D10-V6 being implemented** — the claim describes work to be done, and must not
+appear in the paper before it is done.
+
 ## D5 — Venue (2026-09-24): OPEN
 
 Not yet decided. Awaiting the venue shortlist + recommendation from
@@ -336,6 +353,22 @@ are closed and re-verified by the reviewer. Report
   neither "DLRA" nor demonstrably "structure-preserving"** (four full `N x N`
   SVDs per step; energy systematically lost), regardless of how well it is
   tested. The paper's title claim depends on this.
+
+  **Direction settled (R5c, 2026-09-25); implementation path specified.** The
+  reviewer established that structure-preserving DLRA is an established line and
+  that the required integrator family already exists: the **BUG (basis-update &
+  Galerkin) integrators**, in particular the rank-adaptive robust second-order
+  midpoint-rule construction of Ceruti–Einkemmer–Kusch–Lubich
+  (arXiv:2402.08607) and Ceruti–Kusch–Lubich (arXiv:2104.05247), with
+  high-order extensions in Hauck–Kusch–Schotthöfer (arXiv:2608.27749). Report
+  `reviews/2026-09-25-R5c-premise-and-v6-literature.md`. V6 is therefore **not
+  a research question but a port**: replace the per-step full SVD by a QR /
+  CholeskyQR basis update, Galerkin-project in the span of old and new bases,
+  then truncate to tolerance, keeping the factorisation in Fourier space so
+  truncation is mode-aware. This is the only acceptable route to keeping the
+  "SP-DLRA" claim; the alternative (reframe as a rank-projected integrator) is
+  retained as the fallback if the port cannot be made to work, and the choice
+  must be recorded before any paper text commits to either.
 - **V7** — real turbulence diagnostics: isotropic energy/enstrophy spectra
   `E(k)`, `Z(k)` of the full-grid reference over all resolved wavenumbers,
   time-averaged after stationarity, plus the untruncated state singular-value
