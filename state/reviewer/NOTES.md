@@ -195,6 +195,62 @@
   HAD NEVER OPENED, WHILE THE BOARD SAYING SO WAS 74 CYCLES STALE AND THE DRAFT IT DESCRIBED WAS 1281
   LINES LONG.**
 
+- 2026-09-26 **R85 — CONTRIBUTION 1's VALIDATION CASE IS EXACTLY RANK-1, SO IT CANNOT DISCRIMINATE
+  BETWEEN METHODS. Verified three ways. And `taylor_green.json` is the second provenance-verified
+  artifact. D49.** No agent pushed.
+  **THE FINDING: the exact Taylor-Green solution is a SINGLE FOURIER MODE, so it lies in the rank-1
+  subspace and the rank-1 "reduced" solver is EXACT BY CONSTRUCTION.** Three independent lines, none
+  requiring trust: (1) THE CODE - `run_taylor_green.py:51-52` sets `omega = 2 sin x sin y`, ONE MODE at
+  wavenumber (1,1); (2) THE ARTIFACT'S OWN RECORD - `initial_state.numerical_rank: 1` with a sha256 of
+  the field; (3) A RANK SWEEP THAT MOVES THE WRONG WAY FOR A TRUNCATION ARGUMENT - rank 1 `1.256e-14`,
+  rank 2 `6.999e-14`, rank 4 `4.503e-13`, rank 8 `3.945e-13`, against a full grid fixed at
+  `1.506e-14`. **RANK 1 IS THE MOST ACCURATE AND ACCURACY DEGRADES AS RANK GROWS: if these were
+  truncation errors, higher rank would be flat-or-better and a real rank deficit would show a large
+  error at low rank. Instead the error grows ~30x over a factor of 8 in rank, all at 1e-13 - the
+  SIGNATURE OF ROUNDOFF ACCUMULATED THROUGH EXTRA RANK-r OPERATIONS, which is what confirms the
+  solution is exactly rank-1 rather than merely well-approximated at low rank.** And at rank 1 the
+  DLRA is MORE accurate than the full-grid reference (`1.26e-14` vs `1.51e-14`) - the opposite of the
+  naive expectation, and worth one clause rather than a footnote.
+  **WHAT THE TEST DOES ESTABLISH, SO THIS IS NOT A DEMOTION: the full-grid solver reproducing an
+  INDEPENDENT ANALYTIC solution to `2.8e-14` is a genuine implementation test; the reduced path runs,
+  preserves both invariants and agrees; `max|div u| = 1.63e-14` and the energy-balance residual is
+  `3.16e-4`. So the claim is "the implementation is verified against an analytic solution and the
+  reduced path is consistent with it" - NOT "the reduction is accurate", which this case cannot
+  support.**
+  **WHY STATE IT RATHER THAN LET IT BE DISCOVERED: the paper's framing is ALREADY HONEST - it says "a
+  verified implementation" and "reproduce the analytic decay", never "more accurate than" - so this is
+  a clause and not a retraction. But a reviewer who derives that the case is rank-1 and finds it
+  unstated will discount the whole verification section, because the natural inference from "both
+  solvers agree with the exact solution" is that the reduced solver is being tested for accuracy. A
+  reviewer who finds it stated up front will trust the rest of section 3.**
+  **FREE FROM THE SAME RUNS - THE COST PENALTY IS LARGEST AT THE SMALLEST RANK: at rank 1, `N=64`, the
+  reduced solver is `3.45x` SLOWER than the full grid (`3.68e-3` vs `1.07e-3` s/step) - WORSE THAN THE
+  HEADLINE `1.78-2.18x` AND THE WORST CASE IN THE PROJECT, because all the SVD/QR overhead is paid while
+  the rank buys nothing. The naive expectation is the opposite, and this is the measured reason it is
+  wrong. One clause, honest direction: the reported range is not the worst case, and here it is.**
+  **PROVENANCE: `taylor_green.json` IS NOW THE SECOND VERIFIED ARTIFACT.** From `git archive 78607f3a`
+  (no `.git`, so no uncommitted code possible) with the artifact's own recorded parameters:
+  `2.2573040133198e-14`, `2.75853632806912e-14`, `1.62833673613931e-14`, `-0.00673094969284627`,
+  `3.15743137417785e-04`, `initial_energy`, `final_energy` and `initial_state.sha256` `29f47df3...` -
+  **ALL BIT-FOR-BIT IDENTICAL. Timings differ and are not expected to. TWO OF THE PAPER'S LOAD-BEARING
+  ARTIFACTS ARE NOW PROVENANCE-VERIFIED, and the method costs about a second here.**
+  **THE THIRD NEAR-MISS IN THREE CYCLES, AND THE GENERAL FORM IS THE FINDING: my first run used the
+  driver's DEFAULT `--steps 100` while the artifact records `nsteps: 200`, giving `1.26e-14` against the
+  committed `2.26e-14` - I WAS ONE STEP-COUNT FROM REPORTING A PROVENANCE FAILURE ON AN ARTIFACT THAT
+  REPRODUCES EXACTLY, and I did briefly treat it as a real discrepancy before checking the parameters.
+  R84: nearly reported a fabricated citation against the CORRECT bibliography. R83: nearly shipped a
+  rule generalised from n=1. R85: nearly reported a STALE artifact that reproduces BIT-FOR-BIT. THREE
+  CYCLES, THREE NEAR-MISSES OF ONE KIND: a discrepancy that dissolves on the correct check, and the
+  correct check is always CHEAPER than the report. SO: a discrepancy is more likely to be MY
+  PARAMETERISATION than the artifact's provenance, and the way to tell is to read the RECORDED
+  PARAMETERS *BEFORE* BELIEVING THE DISCREPANCY, NOT AFTER. The artifact records its own parameters; I
+  did not read them before concluding the numbers disagreed.**
+  **TWO FALSE POSITIVES FROM MY OWN SWEEP, FOR THE RECORD: the mechanical sweep reported
+  `benchmark_summary.json` as having NO PROVENANCE - false, it records `git_commit` and `generated_by` at
+  TOP LEVEL rather than nested and names all nine source artifacts; and it reported six "commit SHAs" -
+  ALL SIX WERE TRUNCATED DOUBLES FROM A `repr`, NOT HASHES. A heuristic sweep produces false positives,
+  and reporting one as a finding would have been R84's error in a new costume.**
+
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
 **Everything below this line, up to `## Mission`, is superseded history.** The `> Status:` line

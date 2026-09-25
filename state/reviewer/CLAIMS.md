@@ -29,6 +29,7 @@ recorded here and the earlier figure is struck, not quietly dropped.
 | invariant | statement | verification | status |
 |---|---|---|---|
 | **exact divergence-freeness** | the velocity field is divergence-free to machine precision at **every rank** | `max abs div` `2.3e-14`–`2.0e-13` across every committed run; four tests including an injected-violation detector | **`TODAY`** |
+| **Taylor–Green scope (D49)** | the analytic case is a **single Fourier mode** (`numerical_rank: 1`), so the rank-1 solver is **exact by construction**; it verifies the code and both invariants, **not** the accuracy of the reduction. At rank 1 DLRA `1.26e-14` vs full `1.51e-14`; the error **grows** to `3.9e-13` at rank 8 (roundoff, not truncation). **Provenance verified** bit-for-bit from `78607f3a`. |
 | **forcing-aware energy balance** | **`dE/dt + nu*||omega||^2 - <psi, zeta> = 0`**, with the advection input **retained explicitly and vanishing to roundoff rather than assumed zero** | `test_continuous_energy_balance_for_arbitrary_state` asserts the residual `< 1e-10` for an arbitrary state at `A=0.2`; discrete residual `3.16e-4` in `taylor_green.json` | **`TODAY`** |
 
 **Why the second one belongs in the paper (D39.3).** **A structure-preserving method is defined by the
