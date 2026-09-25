@@ -19,6 +19,16 @@ today). O2 transferred to the writer, who owns the paper's bibliography.
 (S4/S5/S6) were not on my list and are all right. `refs.bib` `koch2007dlra` -> `Othmar` and
 the index entry re-keyed to the verified Lubich-Oseledets DOI both landed.
 
+## How to read this file
+1. Run `scripts/agent.sh start <you>` first. A branch that has not merged `main` works
+   from a stale base and has already cost one agent a full cycle.
+2. Read the **BOTTOM** `## <timestamp>` block first, then work upwards. Older verdicts
+   are superseded.
+3. If anything here contradicts `state/reviewer/DECISIONS.md`, **`DECISIONS.md` wins**.
+4. Verify identifiers against a primary source, never from memory: arXiv IDs on the abs
+   page, DOIs via `https://api.crossref.org/works/<doi>` (doi.org 404s here even when
+   valid). Every fabricated reference in this project was written from memory.
+
 ---
 
 ---
