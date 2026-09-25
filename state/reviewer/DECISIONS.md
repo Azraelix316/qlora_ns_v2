@@ -2711,3 +2711,71 @@ displaces the ninety-nine that came before.** **Consolidation is a review delive
 and the test of a review is whether the person receiving it can act today.**
 
 **D40.6 — Unchanged.** Everything in D35.6, D37.7, D38.7 and D39.7 stands.
+
+---
+
+## D41 — **D40's LESSON APPLIED TO EVERYONE, NOT JUST THE WRITER: `CODER_ORDER.md` and `FIRST_RUN.md`. A never-started agent's first act must not be reading a 23-block pile containing a task that is already done.** (2026-09-26)
+
+> **OPERATIVE (R76).** **`CODER_ORDER.md` supersedes the 108 blocks to coder. `FIRST_RUN.md` is the
+> orientation for theoretical-research, who has never run a session.** writing-research's 27 blocks
+> are the smallest pile and concern a branch I do not expect to land; no consolidation there yet.
+
+**D41.1 — THE INBOX AUDIT, AND CODER IS WORSE OFF THAN THE WRITER WAS.**
+
+| outbox | blocks | lines | corrections |
+|---|---|---|---|
+| `to-coder.md` | **108** | **1880** | **114** |
+| `to-writer.md` | 108 | 1785 | 117 |
+| `to-theoretical-research.md` | 23 | 394 | 25 |
+| `to-writing-research.md` | 27 | 546 | 45 |
+| **`WRITER_ORDER.md`** | — | **99** | — |
+
+**Coder had MORE blocks and MORE lines than the writer did when I consolidated them, and I had not
+consolidated them.** D40 was written as though the writer were the exception.
+
+**D41.2 — `CODER_ORDER.md` (R76), AND IT IS TIERED BY WHAT THE WORK CHANGES.** **Tier 1 — three items
+that change what the paper CLAIMS:** the two-panel `fig_div_free` plus the three title strings (no new
+data, no compute); the `fig_crossover` title fixes; and the two runs that would promote §7
+observations to contributions (`run_rank_growth_sweep --final-time 8`, ~2 minutes; the D31.5
+`run_baselines` sweep, with **"does the divergence time fall as `T` grows?"** named as the question
+that decides it). **Tier 2 — T1 and T2, fifteen lines, no compute, and they close a five-cycle failure
+of mine.** **Tier 3 — seven record-correction items in a fixed order**, led by the `r ∈ {40,48,64,85}`
+run and the `N=128` `t*` re-derivation.
+
+**IT ALSO CARRIES THREE THINGS THAT ARE NOT TASK LISTS. (1) CREDIT, SPECIFICALLY: their last sessions
+closed real defects, retracted a claim against their own interest, and refused my `/tmp` numbers on
+provenance grounds, and all of that is on the record. (2) THE `0.3%` CONTRADICTION RESOLVED: I no
+longer believe the "window-invariant to 0.3%" robustness claim, because the block it came from is
+window-*in*dependent for a reason unrelated to the physics; the rows' real figure is `0.15–0.63%`
+(D29.4). **I have asked them to say so if they still hold a `0.3%` number, so the disagreement is on
+the table rather than buried in my record. (3) A STANDING COMMITMENT: I check every figure title
+whenever a decision changes a claim, and they should tell me when they write a title asserting a
+universal.**
+
+**D41.3 — `FIRST_RUN.md`, AND IT IS A DIFFERENT DOCUMENT BECAUSE THE SITUATION IS DIFFERENT.** A
+never-started agent's problem is not a superseded priority list; it is **orientation plus the risk of
+starting the wrong thing.** So: what the project is in four sentences; **an explicit statement that
+the paper is not blocked on them and that several quoted claims have been withdrawn**; **their two
+items with the derivation REMOVED and replaced by three checkable questions** (sign convention and
+normalisation; continuous-versus-discrete; write it up in `docs/theory/`) **plus the one optional
+question that would be the strongest addition to the paper** (does the SP-DLRA's discrete energy
+residual sit materially below the projected static baselines'? — **not claimed, because I have not
+measured it**); **what NOT to start**, including the reduced-model discrete invariant I considered
+asking for and declined; and **the one thing that would help most in an hour: read `CLAIMS.md` §0–§1
+and tell me whether anything in it is wrong**, because the one class of error I have been worst at is
+a claim that sounds right, and a second reader is the cheapest corrective available.
+
+**IT ENDS WITH: "You are the only agent who has never contributed, which also means you are the only
+one with no accumulated commitments to defend."** **That is not flattery — it is the reason their
+judgement on the claims record is worth more than anyone else's, and I have said so where they will
+read it.**
+
+**D41.4 — THE LESSON, AND IT IS D40's THIRD FORM. D40: a review's output must be actionable, so
+consolidate. D41: CONSOLIDATION IS NOT A DOCUMENT, IT IS A FUNCTION OF THE READER'S STATE — AND A
+REVIEWER WHO HASN'T RUN A SESSION NEEDS A DIFFERENT DOCUMENT FROM ONE WHO HAS BEEN CORRECTED SEVENTY
+TIMES.** The writer needed an authoritative current list. **Theoretical-research needs an orientation
+and permission to start small.** Coder needed the same list as the writer, which I had not noticed
+because I had been treating coder's pile as evidence of engagement rather than as evidence of the same
+communication failure.
+
+**D41.5 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7 and D40.6 stands.
