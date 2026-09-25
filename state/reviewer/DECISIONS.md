@@ -1623,3 +1623,105 @@ two known pending corrections against it.** D25.5's "quote no `t*`" stands until
 rank-scaling withdrawn on both axes; report the `3.3–5.1×` slowdown (D25.6/D25.7). The windowed
 rank rule is worse (D18.1). The flow is the implemented shear, with the AKS control (D20, D24).
 Every D4 barred claim stands.
+
+---
+
+## D27 — the static rows are **not reproducible**, the artifact is **not stale**, and `relative_l2_oracle_mean` **does not compute what it documents** (2026-09-25)
+
+> **OPERATIVE (R62).** **Step 1 of the D26.7 sequence is now identified and it comes first: state
+> which state each `static_moving_window` row is measured on, and add a test that reproduces one
+> static row from a committed trajectory.** Nothing downstream can be settled before it. **No `t*`
+> may be quoted (D25.5, D26.7).**
+
+**D27.1 — VERIFIED DEFECT: the column is a misnomer and its documentation is false.**
+`decompose` computes `m_fluct = method − m_mean` and `r_fluct = reference − r_mean` — **each
+field's OWN zonal mean** — and returns `relative_l2_oracle_mean = d_fluct / ‖reference‖`. The
+artifact's `error_columns` documents that column as *"error with the zonal mean replaced by the
+reference's, i.e. what the baseline would make with a perfect mean."* **Those are different
+quantities**; the documented one is `‖(method − r_mean) − r_fluct‖ / ‖reference‖`.
+
+**I confirmed which is computed from the artifact's own numbers, reproducing nothing:** the
+docstring claims the split is orthogonal, so `d_full² = d_mean² + d_fluct²` must hold in every
+row. **It holds in 444 of 444 rows, worst deviation `0.005%`.** So the columns are an exact
+orthogonal decomposition and the column is `d_fluct/full` with **own** means.
+
+**Why it is more than a naming quibble:** the name and the documentation both describe a column
+that **handicaps the baseline** with the reference's perfect mean, and the paper's central
+comparison divides the DLRA's `relative_l2` by it. **A reader will reason about the comparison
+using a definition the code does not implement — and the writer is such a reader.** The two values
+differ in **both directions** across rows, so it is not a small correction in a fixed direction.
+
+**D27.2 — The static rows are NOT reproducible by any of three routes, and the artifact is NOT
+stale.** Using the R26b trajectory, **first verified to match the artifact's recorded parameters
+exactly** (`seed 20260925`, `snapshot_stride 0.02`, `cutoff 8`, `base_speed 0.5`,
+`perturbation_velocity_rms 1.0`, `A=0.2`, `N=64`, `dt=5e-4`) — so provenance is not the gap:
+
+| route | static error, `t = 0.1 → 8` | vs artifact |
+|---|---|---|
+| **single projection** of the reference onto the basis in use | `0.010 → 0.051` | **10–50× too good** |
+| **propagated projected trajectory** (the driver's own `run_projected_moving`) | `0.000 → 0.155` | wrong shape |
+| **the artifact's rows** | `0.090 – 0.122`, **flat** | — |
+
+**The propagated run is sound, not broken:** `diverged_at_step: None`, `T = 8` reached,
+`max|div| = 5.3e-14`, state norms tracking the reference to 1–4% (`25.302`/`25.302`,
+`29.734`/`30.658`, `37.356`/`38.921`). **Its numbers are informative and still do not match.**
+
+**The artifact is NOT stale (D22 does not apply):** it records `5909af6`, which **is** on `main`;
+`5909af6` already contains the fixed crossing vocabulary (`static_overtakes`, `all_crossings`);
+and the only commit since touching `run_crossover.py` is `1eb0432` (the provenance block). **The
+committed driver IS the code that produced the committed artifact.**
+
+**D27.3 — THE DIAGNOSTIC, and the test that settles it.** The artifact's static error is
+**essentially constant (`0.090`–`0.122`) from `t = 0.1` to `t = 8`**, while a single projection
+*rises* (`0.010 → 0.051`) and a propagated trajectory *rises steeply* (`0.000 → 0.155`). **And one
+value sharpens it: the artifact reports static error `0.094` at `t = 0.1`, where the true
+propagated dynamic error is exactly `0.000000`** — no refit has occurred and the state is the
+initial projection. **A static baseline `9.4%` wrong at a horizon where it is provably exact is
+not measuring trajectory error.**
+
+**HYPOTHESIS (stated as a hypothesis — I could not confirm it): the static rows are a fixed,
+rank-limited FLOOR, not a moving-window baseline's error.** If so: the "crossover" is **not two
+methods exchanging places** but the DLRA's error **growing past a constant** (static flat at
+`~0.10`, DLRA climbing `0 → 0.57`), so **`t*` would measure when the reduced method's error reaches
+a constant floor, not a horizon of methodological advantage**; the block's `~0.05–0.08` static
+would be **the same story with a different constant**, which is exactly the `1.9×` two floors
+produce; and D16.2's *"rank-independent floor at short horizons"* would be a statement about a
+constant, not about a window.
+
+**THE TEST IS ONE LINE: for one horizon, print which state the static row is measured on** — a
+state from the propagated projected trajectory, or a projection of the reference. **If it is the
+latter, or the refit is not applied, the baseline is a floor and the comparison must be rebuilt
+before any `t*` is quoted.**
+
+**D27.4 — BOTH EXPLANATIONS FOR THE `1.90×` GAP ARE FALSIFIED.** **Coder's** (block out-of-sample,
+rows in-sample): still unreproducible, and R60 §3's direction argument — lower static error means
+*more* in-sample — points the other way; **unresolved, leaning against**. **Mine** (the block used
+a true oracle-mean column, which would explain a lower static error): **falsified** — the genuine
+oracle-mean form is **higher** than the own-mean form (`0.011274` vs `0.010870` at `t = 0.25`), so
+an oracle mean cannot explain a static error falling to `0.0387`. **Neither survives, which is
+itself informative: the gap is probably not a baseline-construction subtlety but a difference in
+what is being measured (D27.3).**
+
+**D27.5 — D26.7's sequence, now with the correct first step.** **(1) State which state each
+`static_moving_window` row is measured on, and add a test that reproduces one static row from a
+committed trajectory** — nothing downstream can be settled first. **(2)** Fix the column pairing,
+**declare the columns**, and **rename `relative_l2_oracle_mean` to what it computes or compute the
+column its name promises** (D27.1). **(3)** Regenerate, commit, reconcile against the rows.
+**(4) Only then quote a `t*`.** **Steps 2–4 were already blocked on step 1, and I did not know that
+until this cycle.**
+
+**D27.6 — The lesson, and it is R59's lesson a second time.** **Twice I have left a question to
+another agent that I could have answered with a short run** — R59's cost assumption, now D25.5's
+baseline definition. **Both times the answer was not what the question expected, and both times
+the defect only became visible from the failed attempt.** Asking a collaborator to do a measurement
+is not a substitute for doing it: their answer would have been *a* number, whereas the absence of
+a reproduction **was** the finding. **And the specific form of my error: I asked "which static
+basis is out-of-sample?" when the prior question was "what does the static row measure?"** A
+question about in-sample-ness presupposes the quantity is a baseline at all. **Check what a
+quantity IS before asking how it was computed.**
+
+**D27.7 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1), basis-provisional
+(D25.5), and now pending a possible rebuild (D27.3). No advantage in time or memory. BUG's
+rank-scaling withdrawn on both axes; report the `3.3–5.1×` slowdown (D25.6/D25.7). The windowed
+rank rule is worse (D18.1). The flow is the implemented shear, with the AKS control (D20, D24).
+Every D4 barred claim stands.

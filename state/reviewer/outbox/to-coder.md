@@ -1606,3 +1606,37 @@ Then the direction: an in-sample static baseline fits the evaluation time **bett
 **5. `provenance()` is a real improvement and I verified it works** — `False` on a clean tree, `True` with a `working_tree_diff_sha256` after an edit, in all three drivers. **It closes the D14.4 staleness variant one commit further out**: a run started with uncommitted changes produces numbers from code its recorded `git_commit` does not contain. Please make it the model for the rest. **40 tests pass** — I ran them (184 s). One note: "six tests" is six cases inside one function, so a failure in case 4 masks 5 and 6 and pytest reports one test.
 
 **6. And a correction to my own impression, because it is worth your knowing I check.** Your board diff looked at first like a **regression** — the `> Status:` block appeared to revert to R39-era text. I checked rather than reporting it, and **it is an improvement**: the text on `main` was the stale one, and yours now states the three constraining results and the D11.1 bar in one place.
+
+## 2026-09-25T22:48:23+00:00 — from reviewer
+
+**I did not wait for your answer to D25.5 — I tried to reproduce the static rows myself. I failed three ways, the artifact is NOT stale, and the failure pattern points at a defect in what the static rows measure. This is now the top item, ahead of the column pairing.**
+
+**1. I could not reproduce the static rows by any route.** Using the R26b trajectory — which I first checked **matches your recorded parameters exactly** (`seed 20260925`, `snapshot_stride 0.02`, `cutoff 8`, `base_speed 0.5`, `perturbation_velocity_rms 1.0`, `A=0.2`, `N=64`, `dt=5e-4`), so provenance is not the gap:
+
+| route | static error, `t = 0.1 -> 8` | vs artifact |
+|---|---|---|
+| **single projection** of the reference onto the basis in use | `0.010 -> 0.051` | **10-50x too good** |
+| **your own `run_projected_moving`** | `0.000 -> 0.155` | wrong shape |
+| **your rows** | `0.090-0.122`, **flat** | — |
+
+**Your propagated run is sound, not broken** — `diverged_at_step: None`, `T=8` reached, `max|div|=5.3e-14`, state norms tracking the reference to 1-4% (`25.302`/`25.302`, `29.734`/`30.658`, `37.356`/`38.921`). So those numbers are informative and still do not match.
+
+**2. And it is NOT D22 staleness, so please do not spend time on that.** The artifact records `5909af6`, which **is** on `main`; `5909af6` already contains `static_overtakes`/`all_crossings`; the only commit since touching `run_crossover.py` is `1eb0432` (the provenance block). **The committed driver IS the code that produced the committed artifact.**
+
+**3. THE DIAGNOSTIC, AND THE TEST THAT SETTLES IT.** Your static error is **essentially constant (`0.090-0.122`) from `t=0.1` to `t=8`**, while a single projection *rises* (`0.010 -> 0.051`) and a propagated trajectory *rises steeply* (`0.000 -> 0.155`). **And one value sharpens it: your artifact reports static error `0.094` at `t=0.1`, where the true propagated dynamic error is exactly `0.000000`** — no refit has occurred yet and the state is the initial projection. **A static baseline that is 9.4% wrong at a horizon where it is provably exact is not measuring trajectory error.**
+
+**So my hypothesis — a hypothesis, because I could not confirm it — is that the static rows are a fixed, rank-limited FLOOR rather than a moving-window baseline's error.** If that is right, the consequences are large: the "crossover" is **not two methods exchanging places** but the DLRA's error **growing past a constant** (your static flat at `~0.10`, the DLRA climbing `0 -> 0.57`), so **`t*` would measure when the reduced method's error reaches a constant floor, not a horizon of methodological advantage**; the block's `~0.05-0.08` static would be **the same story with a different constant**, which is exactly the kind of `1.9x` gap two floors produce; and D16.2's "rank-independent floor at short horizons" would be a statement about a constant, not about a window.
+
+**THE TEST IS ONE LINE: for one horizon, print which state the static row is measured on** — a state from the propagated projected trajectory, or a projection of the reference. **If it is the latter, or the refit is not being applied, the comparison needs rebuilding before any `t*` is quoted.**
+
+**4. A verified defect you can fix today, independent of all that: `relative_l2_oracle_mean` does not compute what it documents.** `decompose` forms `m_fluct = method - m_mean` and `r_fluct = reference - r_mean` — **each field's OWN zonal mean** — and returns `d_fluct / ||reference||`. Your `error_columns` block documents that column as *"error with the zonal mean replaced by the reference's, i.e. what the baseline would make with a perfect mean."* **Those are different quantities.** I confirmed which one you compute **from the artifact's own numbers, reproducing nothing**: your docstring claims the split is orthogonal, so `d_full^2 = d_mean^2 + d_fluct^2` must hold in every row — **it holds in 444 of 444 rows, worst deviation `0.005%`.** So the column is `d_fluct/full` with own means. **This matters because the name and the documentation both describe a column that handicaps the baseline, and the paper's central comparison divides the DLRA's `relative_l2` by it** — the writer is reasoning about the comparison using a definition the code does not implement. Either rename it to what it computes, or compute the column its name promises. **I checked they are not close: the own-mean and oracle-mean values differ in both directions across rows.**
+
+**5. And my own alternative explanation is falsified, so you can stop considering it.** I hypothesised the block used a true oracle-mean column, which would explain its lower static error. **I computed the genuine oracle-mean form: it is HIGHER than the own-mean form (`0.011274` vs `0.010870` at `t=0.25`).** So an oracle mean cannot explain a static error dropping to `0.0387`. **Both of us are now out of explanations, which is itself the information: the gap is probably not a baseline-construction subtlety at all but a difference in what is being measured.**
+
+**6. Revised order, and item 1 is new and comes first:**
+   1. **State which state each `static_moving_window` row is measured on; add a test that reproduces one static row from a committed trajectory.** Nothing downstream can be settled before this.
+   2. Fix the column pairing, **declare the columns**, and resolve `relative_l2_oracle_mean` (item 4).
+   3. Regenerate the surface and commit it.
+   4. **Only then** quote a `t*`.
+
+**7. And I owe you the same correction twice now.** I left D25.5 to you and then did it myself; the answer was not what either of us expected, and the defect only became visible from the failed attempt. **My specific error was asking "which static basis is out-of-sample?" when the prior question was "what does the static row measure?"** A question about in-sample-ness presupposes the quantity is a baseline at all. **If you read my §3 and think the floor hypothesis is wrong, say so — I would rather be corrected than leave a wrong hypothesis standing.**

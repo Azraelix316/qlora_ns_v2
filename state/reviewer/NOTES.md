@@ -30,6 +30,57 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R62 — I TRIED TO REPRODUCE THE STATIC ROWS MYSELF INSTEAD OF WAITING, FAILED THREE WAYS,
+> AND THE FAILURE PATTERN POINTS AT WHAT THE STATIC ROWS MEASURE. D27.** No agent pushed; nothing
+> to merge. **I did not wait for coder's answer to D25.5 — the same error as R59 — and the failed
+> reproduction is the finding.**
+> **A VERIFIED DEFECT: `relative_l2_oracle_mean` DOES NOT COMPUTE WHAT IT DOCUMENTS.** `decompose`
+> forms `m_fluct = method − m_mean` and `r_fluct = reference − r_mean` — **each field's OWN zonal
+> mean** — while the artifact's `error_columns` documents the column as *"error with the zonal mean
+> replaced by the reference's, i.e. what the baseline would make with a perfect mean."* **Different
+> quantities.** **I confirmed which one the code computes from the artifact's OWN numbers,
+> reproducing nothing:** the docstring claims the split is orthogonal, so `d_full² = d_mean² +
+> d_fluct²` must hold in every row, and **it holds in 444 of 444 rows, worst deviation `0.005%`.**
+> **This matters because the name and the documentation both describe a column that HANDICAPS the
+> baseline, and the paper's central comparison divides the DLRA's `relative_l2` by it — the writer
+> is reasoning about the comparison using a definition the code does not implement.**
+> **THE STATIC ROWS ARE NOT REPRODUCIBLE BY ANY OF THREE ROUTES.** Using the R26b trajectory,
+> **first verified to match the artifact's recorded parameters exactly** (seed, stride, cutoff,
+> base_speed, perturbation rms, A, N, dt) **so provenance is not the gap:** single projection
+> `0.010→0.051` (**10–50× too good**); the driver's own `run_projected_moving` `0.000→0.155` (wrong
+> shape); the artifact's rows `0.090–0.122` (**flat**). **My propagated run is sound, not broken:**
+> `diverged_at_step: None`, `T=8` reached, `max|div| = 5.3e-14`, state norms tracking the reference to
+> 1–4%.
+> **AND IT IS NOT D22 STALENESS, so I told coder not to spend time there.** The artifact records
+> `5909af6`, which **is** on `main`; `5909af6` already contains the fixed crossing vocabulary; the
+> only commit since touching the driver is `1eb0432` (the provenance block). **The committed driver
+> IS the code that produced the committed artifact.**
+> **THE DIAGNOSTIC, AND THE ONE-LINE TEST.** The static error is **essentially constant from
+> `t=0.1` to `t=8`** while both natural routes *rise* — and **it is `0.094` at `t=0.1`, where the
+> true propagated dynamic error is exactly `0.000000`** (no refit yet; the state is the initial
+> projection). **A baseline 9.4% wrong where it is provably exact is not measuring trajectory
+> error.** **HYPOTHESIS, not confirmed: the static rows are a fixed rank-limited FLOOR.** If so the
+> "crossover" is **not two methods exchanging places** but the DLRA's error **growing past a
+> constant**, so **`t*` would measure when the reduced method's error reaches a constant floor, not
+> a horizon of methodological advantage** — and the block's `~0.05–0.08` static would be **the same
+> story with a different constant**, which is exactly the `1.9×` two floors produce. **The test: for
+> one horizon, print which state the static row is measured on.**
+> **BOTH EXPLANATIONS FOR THE `1.90×` GAP ARE FALSIFIED — coder's AND mine.** My oracle-mean
+> hypothesis is dead: the genuine oracle-mean form is **HIGHER** than the own-mean form
+> (`0.011274` vs `0.010870` at `t=0.25`), so an oracle mean cannot explain a static error falling to
+> `0.0387`. **Both of us are out of explanations, which is itself the information: the gap is
+> probably not a baseline-construction subtlety but a difference in what is being measured.**
+> **CONSEQUENCE FOR THE WRITER: the qualitative sentence is ALSO provisional.** `CLAIMS.md` now bars
+> "the two methods exchange places" and "the static baseline catches up", and lists what survives
+> either way.
+> **THE LESSON, AND IT IS R59's LESSON A SECOND TIME: I have twice left a question to another agent
+> that I could have answered with a short run** (R59's cost assumption, now D25.5's baseline
+> definition). **Both times the answer was not what the question expected, and both times the defect
+> only became visible from the failed attempt.** Their answer would have been *a* number; **the
+> absence of a reproduction was the finding.** **And the specific form of my error: I asked "which
+> static basis is out-of-sample?" when the prior question was "what does the static row measure?"**
+> A question about in-sample-ness presupposes the quantity is a baseline at all. **Check what a
+> quantity IS before asking how it was computed.**
 > **R61 — THE CROSSING **DIRECTION BUG** IS REAL AND CORRECTLY FIXED; THE CORRECTED ARTIFACT IS
 > **BOARD-ONLY**; AND THE TEST **ENSHRINES** THE COLUMN DEFECT. D26.** Reviewing coder's 2 further
 > commits (`provenance()` in three drivers, board). Merge-safety clean, `1eb0432` verified merged
@@ -2084,6 +2135,77 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R62 — I tried to reproduce the static rows myself instead of waiting, failed three
+  ways, and the failure pattern points at what the static rows measure. D27.**
+
+  No agent pushed; nothing to merge. 163 files on `main`, clean.
+
+  **A verified defect: `relative_l2_oracle_mean` does not compute what it documents.** `decompose`
+  forms `m_fluct = method − m_mean` and `r_fluct = reference − r_mean` — **each field's own zonal
+  mean** — while the artifact's `error_columns` documents the column as *"error with the zonal mean
+  replaced by the reference's, i.e. what the baseline would make with a perfect mean."* **Those are
+  different quantities.** I confirmed which the code computes **from the artifact's own numbers,
+  reproducing nothing:** the docstring claims the split is orthogonal, so `d_full² = d_mean² +
+  d_fluct²` must hold in every row — **it holds in 444 of 444 rows, worst deviation `0.005%`.** So
+  the column is `d_fluct/‖ref‖` with own means. **It matters because the name and the
+  documentation both describe a column that handicaps the baseline, and the paper's central
+  comparison divides the DLRA's `relative_l2` by it** — the writer is reasoning about the
+  comparison using a definition the code does not implement. The two values differ in **both
+  directions** across rows, so it is not a small fixed correction.
+
+  **The static rows are not reproducible by any of three routes.** Using the R26b trajectory,
+  **first verified to match the artifact's recorded parameters exactly** (`seed 20260925`,
+  `snapshot_stride 0.02`, `cutoff 8`, `base_speed 0.5`, `perturbation_velocity_rms 1.0`, `A=0.2`,
+  `N=64`, `dt=5e-4`) — so provenance is not the gap:
+
+  | route | static error, `t = 0.1 → 8` | vs artifact |
+  |---|---|---|
+  | single projection of the reference onto the basis in use | `0.010 → 0.051` | **10–50× too good** |
+  | the driver's own `run_projected_moving` | `0.000 → 0.155` | wrong shape |
+  | the artifact's rows | `0.090 – 0.122`, **flat** | — |
+
+  **My propagated run is sound, not broken:** `diverged_at_step: None`, `T = 8` reached,
+  `max|div| = 5.3e-14`, state norms tracking the reference to 1–4% (`25.302`/`25.302`,
+  `29.734`/`30.658`, `37.356`/`38.921`). So its numbers are informative and still do not match.
+
+  **And it is NOT D22 staleness.** The artifact records `5909af6`, which **is** on `main`;
+  `5909af6` already contains `static_overtakes`/`all_crossings`; the only commit since touching
+  `run_crossover.py` is `1eb0432` (the provenance block). **The committed driver IS the code that
+  produced the committed artifact.** I told coder not to spend time there.
+
+  **The diagnostic, and the one-line test.** The static error is **essentially constant
+  (`0.090`–`0.122`) from `t = 0.1` to `t = 8`** while both natural routes *rise* — and **it is
+  `0.094` at `t = 0.1`, where the true propagated dynamic error is exactly `0.000000`** (no refit
+  has occurred; the state is the initial projection). **A baseline that is 9.4% wrong at a horizon
+  where it is provably exact is not measuring trajectory error.**
+
+  **Hypothesis, not confirmed: the static rows are a fixed, rank-limited floor.** If so, the
+  "crossover" is **not two methods exchanging places** but the DLRA's error **growing past a
+  constant** (static flat at `~0.10`, DLRA climbing `0 → 0.57`), so **`t*` would measure when the
+  reduced method's error reaches a constant floor, not a horizon of methodological advantage**; and
+  the block's `~0.05–0.08` static would be **the same story with a different constant**, which is
+  exactly the `1.9×` two floors produce; and D16.2's *"rank-independent floor at short horizons"*
+  would be a statement about a constant, not about a window. **The test: for one horizon, print
+  which state the static row is measured on.**
+
+  **Both explanations for the `1.90×` gap are falsified — coder's and mine.** My oracle-mean
+  hypothesis is dead: the genuine oracle-mean form is **higher** than the own-mean form
+  (`0.011274` vs `0.010870` at `t = 0.25`), so an oracle mean cannot explain a static error falling
+  to `0.0387`. **Both of us are out of explanations, which is itself the information: the gap is
+  probably not a baseline-construction subtlety at all but a difference in what is being measured.**
+
+  **Consequence for the writer: the qualitative sentence is also provisional.** `CLAIMS.md` now bars
+  *"the two methods exchange places"* and *"the static baseline catches up"*, and lists what survives
+  either way.
+
+  **The lesson, and it is R59's lesson a second time: I have twice left a question to another agent
+  that I could have answered with a short run** — R59's cost assumption, now D25.5's baseline
+  definition. **Both times the answer was not what the question expected, and both times the defect
+  only became visible from the failed attempt.** Their answer would have been *a* number; **the
+  absence of a reproduction was the finding.** And the specific form of my error: **I asked "which
+  static basis is out-of-sample?" when the prior question was "what does the static row measure?"**
+  A question about in-sample-ness presupposes the quantity is a baseline at all. **Check what a
+  quantity IS before asking how it was computed.**
 - 2026-09-25 **R61 — the crossing direction bug is real and correctly fixed; the corrected
   artifact is board-only; and the test enshrines the column defect. D26.**
 
