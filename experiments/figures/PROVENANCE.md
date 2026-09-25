@@ -14,5 +14,5 @@
 
 - **fig_spectra_ek: $Z(k)$ panel** -- fluctuation enstrophy drifts 29% over the averaging window [13.3333, 20], outside the 10% S2 bar, so a time-averaged $Z(k)$ there would average a moving quantity
 
-figures generated at commit `bedbfeec`
+figures generated at commit `6ea5c968`
 
