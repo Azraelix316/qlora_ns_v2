@@ -447,40 +447,44 @@ def main() -> None:
             "`crossover_surface.json` is absent, so the advantage horizon is "
             "unmeasured",
         ))
+    elif "by_reynolds" not in xover:
+        skipped.append((
+            "fig_crossover",
+            "`crossover_surface.json` predates the `by_reynolds` layout, so it "
+            "cannot be read by this driver; regenerate it with run_crossover.py",
+        ))
     else:
         used.append("crossover_surface.json")
-        ranks = sorted(int(r) for r in xover["dlra"])
+        by_re = xover["by_reynolds"]
+        primary = list(by_re)[0]
+        case = by_re[primary]
+        ranks = sorted(int(r) for r in case["dlra"])
         windows = xover["parameters"].get("moving_window_lengths") or [1.0]
         fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.9))
         ax = axes[0]
         cmap = plt.get_cmap("viridis")
-        # A rank whose DLRA error is at roundoff is *exact*; on a log axis it
-        # would stretch the range over twelve decades and flatten every other
-        # curve.  It is excluded here and named in the title, rather than left to
-        # distort the panel or silently dropped.
         all_errors = [
             row["relative_l2"]
             for r in ranks
-            for row in xover["dlra"][str(r)] if row["time"] > 0
+            for row in case["dlra"][str(r)] if row["time"] > 0
         ]
         scale = max(all_errors) if all_errors else 1.0
         # "Exact" is judged against the scale of the other curves, not against
         # an absolute constant: the ceiling rank's error is ~1e-8 while the
-        # others are O(0.1), so a fixed 1e-10 cut would call it inexact and put
-        # it back on the log axis.
+        # others are O(0.1), so a fixed 1e-10 cut would call it inexact and put it
+        # back on the log axis.
         exact = [
             r for r in ranks
-            if max(row["relative_l2"] for row in xover["dlra"][str(r)] if row["time"] > 0)
-            < 1e-6 * scale
+            if max(row["relative_l2"] for row in case["dlra"][str(r)]
+                   if row["time"] > 0) < 1e-6 * scale
         ]
         plotted = [r for r in ranks if r not in exact]
         for i, rank in enumerate(ranks):
             if rank in exact:
                 continue
             shade = cmap(i / max(len(ranks) - 1, 1))
-            dl = [r for r in xover["dlra"][str(rank)] if r["time"] > 0]
-            key = f"W{windows[0]:g}_r{rank}"
-            st = xover["static_moving_window"].get(key)
+            dl = [r for r in case["dlra"][str(rank)] if r["time"] > 0]
+            st = case["static_moving_window"].get(f"W{windows[0]:g}_r{rank}")
             if st is None:
                 continue
             ax.plot([r["time"] for r in dl], [r["relative_l2"] for r in dl],
@@ -497,12 +501,12 @@ def main() -> None:
         ys = [
             row["relative_l2"]
             for rank in plotted
-            for row in xover["dlra"][str(rank)] if row["time"] > 0
+            for row in case["dlra"][str(rank)] if row["time"] > 0
         ]
         ys += [
             row["relative_l2_oracle_mean"]
             for rank in plotted
-            for row in xover["static_moving_window"][f"W{windows[0]:g}_r{rank}"]
+            for row in case["static_moving_window"][f"W{windows[0]:g}_r{rank}"]
         ]
         if ys:
             ax.set_ylim(min(ys) / 2.0, max(ys) * 2.0)
@@ -516,38 +520,41 @@ def main() -> None:
         ax.set_ylabel("relative $L^2$ against the full grid")
         ax.set_title(title, fontsize=8.5)
         ax.legend(fontsize=6.5, loc="lower right")
+
+        # The right panel is the corrected claim, not the endpoint comparison.
+        # How much the static error can be improved by rank, *as a function of
+        # the horizon*, for every Reynolds number measured.  A single endpoint
+        # pair understates this by a factor of several and hides that the spread
+        # is essentially zero at short horizons and largest from t ~ 1.
         ax = axes[1]
-        # The static baseline's error against rank, at the longest horizon: this
-        # is the quantity the "rank buys predictability, not accuracy" claim
-        # rests on, and it is the part that reproduces.
-        final_t = max(r["time"] for r in xover["dlra"][str(ranks[0])])
-        for W in windows:
-            xs, ys = [], []
-            for rank in ranks:
-                st = xover["static_moving_window"].get(f"W{W:g}_r{rank}")
-                if not st:
+        for j, (re_key, re_case) in enumerate(sorted(by_re.items())):
+            spread_t, spread_v = [], []
+            for i, h in enumerate(xover["parameters"]["horizons"]):
+                vals = []
+                for rank in plotted:
+                    st = re_case["static_moving_window"].get(
+                        f"W{windows[0]:g}_r{rank}"
+                    )
+                    if st and i < len(st):
+                        vals.append(st[i]["relative_l2_oracle_mean"])
+                if len(vals) < 2:
                     continue
-                row = min(st, key=lambda r: abs(r["time"] - final_t))
-                xs.append(rank)
-                ys.append(row["relative_l2_oracle_mean"])
-            if xs:
-                ax.semilogx(xs, ys, "o-", markersize=4, linewidth=1.2,
-                            color=colors["dlra"] if W == windows[0] else colors["b"],
-                            alpha=1.0 if W == windows[0] else 0.6,
-                            label=f"static, $W={W:g}$")
-        for i, rank in enumerate(ranks):
-            dl = [r for r in xover["dlra"][str(rank)] if r["time"] > 0]
-            ax.semilogx([rank], [max(dl[-1]["relative_l2"], 1e-3)], "s", markersize=3.5,
-                        color=cmap(i / max(len(ranks) - 1, 1)))
-        ax.plot([], [], linestyle="none", marker="s", markersize=3.5,
-                color=colors["full"], label="DLRA (one per rank)")
-        ax.set_xticks(ranks)
-        ax.set_xticklabels([str(r) for r in ranks])
-        ax.minorticks_off()
-        ax.set_xlabel("rank $r$")
-        ax.set_ylabel(f"relative $L^2$ at $t={final_t:g}$")
-        ax.set_title("The static floor barely moves with rank", fontsize=9)
-        ax.legend(fontsize=6.0, loc="upper right")
+                spread_t.append(h)
+                spread_v.append(100.0 * (max(vals) - min(vals)) / min(vals))
+            if spread_t:
+                ax.semilogx(spread_t, spread_v, "o-", markersize=3.5,
+                            linewidth=1.3,
+                            color=colors["dlra"] if j == 0 else colors["ref"],
+                            label=f"static, Re={re_key}")
+        ax.axhline(10.0, color=colors["full"], linestyle=":", linewidth=1.0)
+        ax.annotate("10%", (ax.get_xlim()[0], 10.0), textcoords="offset points",
+                    xytext=(2, 2), fontsize=6.5, color=colors["full"])
+        ax.set_xlabel("time $t$")
+        ax.set_ylabel("spread of the static error across ranks (%)")
+        ax.set_title(
+            "A static subspace cannot spend rank\nat short horizons", fontsize=9
+        )
+        ax.legend(fontsize=6.5, loc="upper left")
         fig.tight_layout()
         fig.savefig(args.output_dir / "fig_crossover.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_crossover.png", bbox_inches="tight")
