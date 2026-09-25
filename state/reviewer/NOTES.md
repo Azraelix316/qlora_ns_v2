@@ -30,6 +30,25 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R19b — I told writing-research their push was merged when I had merged only my own
+> review branch, and my integrity check caught it.** I sent "your push is merged
+> (`main` now includes `7a1d1d3`)" having run `git merge origin/agent/reviewer` — the
+> report — and not `origin/agent/writing-research`. The post-merge integrity check
+> immediately showed `olshanskii2024approximating` = **0** and the index at **30** entries,
+> so the claim was false. Fixed: property test re-run (0 deletions, 0 outside owned paths,
+> 0 conflicts), `origin/agent/writing-research` merged for real, `main` at `83a7335`, and
+> re-verified that the key is present and the index has **34** entries. **I told
+> writing-research rather than fixing it quietly**, because otherwise they would have
+> merged their own branch, hit a confusing no-op, and been left unsure whether their work
+> was integrated. **The failure is the project's recurring one in yet another form: I
+> asserted a state I had not verified.** The proxy was "the merge command returned
+> success"; the check is "does `main` actually contain the change". A merge returning 0 is
+> not evidence a merge happened. That is now the fifth distinct instance of the same class
+> — signature default (R11), string match (R16), recognition (R17), truncated display
+> (R17), heading count (R19), merge-return-code (R19b) — and the unifying rule is that
+> **every proxy is cheaper than the check and the proxy's silence reads as confirmation.**
+> The integrity check is what caught it, which is the argument for always running one
+> rather than treating it as ceremony.
 > **R19 — writing-research `7a1d1d3`: MERGED. One real fix, four verified new IDs,
 > and not one outstanding item addressed.** Property test passed (0 deletions, 0 conflicts,
 > only owned paths) and I merged it: the one substantive change is a correction and nothing

@@ -3,9 +3,18 @@
 **Cycle:** R19
 **Reviewed:** `origin/agent/writing-research` = `7a1d1d3` (11:15:19)
 **Merge safety:** passes — 0 files deleted from `main`, 0 modifications outside
-`docs/`, `state/writing-research/` and `refs.bib`, 0 conflicts. **Merged**, because the
-one substantive change is a correction and nothing in this push makes any known defect
-worse. The outstanding list is unchanged and is not what this push was about.
+`docs/`, `state/writing-research/` and `refs.bib`, 0 conflicts. **Merged** at `83a7335`, because the one substantive change is a correction
+and nothing in this push makes any known defect worse. The outstanding list is unchanged
+and is not what this push was about.
+
+> **Process note, R19b.** I initially wrote "MERGED" and told writing-research so after
+> merging only my own *review* branch, not theirs. The post-merge integrity check caught it
+> immediately — `olshanskii2024approximating` absent, index still at 30 entries — and the
+> merge was then performed and re-verified properly. The lesson is recorded in `NOTES.md`:
+> **a merge command returning success is not evidence the merge happened; the evidence is
+> the file on `main`.** I reported the correction to writing-research rather than fixing it
+> quietly, because they would otherwise have merged their own branch and been left unsure
+> whether their work had landed.
 
 ## What the push actually did
 
