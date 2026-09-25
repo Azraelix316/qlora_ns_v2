@@ -85,6 +85,29 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5e (critical-path de-risking while agents are between runs).
+  Read the BUG paper the coder must port (arXiv:2402.08607, open-access HTML
+  confirmed at arxiv.org/html/2402.08607; arXiv:2104.05247 likewise) and sent
+  the coder the §2 algorithm verbatim — projected ODE and tangent projection
+  `P_r(Y)Z = Z V Vᵀ − U Uᵀ Z V Vᵀ + U Uᵀ Z`; K-step `K̇=F(t,KV₀ᵀ)V₀`,
+  `K(t₀)=U₀S₀`; `Û=orth(U₀,K(t₁))` by QR, `M̂=ÛᵀU₀`; L-step
+  `L̇=F(t,U₀Lᵀ)ᵀU₀`, `L(t₀)=V₀S₀ᵀ`; `V̂=orth(V₀,L(t₁))`, `N̂=V̂ᵀV₀`; S-step
+  `Ŝ=ÛᵀF(t,ÛŜV̂ᵀ)V̂`, `Ŝ(t₀)=M̂S₀N̂ᵀ`; then truncation by **SVD of the small
+  r̂×r̂ Ŝ** — the decisive cost difference from the current four full N×N SVDs
+  per step. Second order = first-order BUG half-step + Galerkin update with an
+  augmented basis; their step-rejection criterion allows arbitrary rank growth
+  from rank 1. Sent two expectation corrections: (i) **robustness is not the
+  win** — the current projector never divides by a small singular value either,
+  so the honest claims are cost, the augmented-basis Galerkin step (the
+  mathematically meaningful change and the plausible route to a structure
+  property), and second order with rank adaptivity; claiming a robustness
+  improvement over our own code would not survive review. (ii) At N=64 with
+  r≈43 the cost win may not appear (r comparable to N), so cost must be reported
+  at N=128/256 with an explicit crossover statement. Also suggested a sharp new
+  test: `SelfConsistentForcing` gives a stationary state, so a BUG run from a
+  rank-representable start should hold it to machine precision — any wrong
+  K/L/S-step or truncation destroys it immediately. Noted their §5.1 heat
+  equation is the natural anchor for our exact heat semigroup.
 - 2026-09-25 R5d (novelty claim settled, with a correction that matters).
   Extended the check past arXiv into journals and then into the *contents* of
   the foundational papers. Three results: (1) Koch & Lubich 2007 (SIMAX,

@@ -65,3 +65,38 @@ Why this is worth your time beyond the title: it likely fixes three of my V-item
 - Your DLRA spectrum decays faster than the reference (sigma_32 = 3.2e-4 vs 1.5e-3), consistent with the projection discarding real content. Useful diagnostic to keep.
 
 Two asks: (a) when you plan the V1 fix, note the IC is rank ~19, so `adapt_initial` at 1e-10 would legitimately start you near 19 - report that honestly rather than hiding it behind a rank-2 start; (b) if the BUG port turns out to be blocked for a concrete technical reason, tell me in the outbox *before* you spend a long time on it, and I will consider the honest-reframing fallback. Otherwise sequence stays as sent: V1, V4, V5, V2/V7, then V6/V3.
+
+## 2026-09-25T05:59:59+00:00 — from reviewer
+
+De-risking the critical path: I read the BUG paper so you don't have to reconstruct it, and there are two things in it that change how you should implement and report the port.
+
+**The sources are open access, so implement from the primary text, not from my summaries.** arXiv:2402.08607 (Ceruti, Einkemmer, Kusch, Lubich, "A robust second-order low-rank BUG integrator based on the midpoint rule") has full-text HTML at https://arxiv.org/html/2402.08607 and arXiv:2104.05247 at https://arxiv.org/html/2104.05247. Section layout of the first: 1 Introduction, 2 Recap: the augmented BUG integrator, 3 A midpoint BUG integrator, 4 Robust second-order error bound, 5 Numerical experiments (5.1 heat equation, 5.2 discrete Schrödinger, 5.3 Vlasov-Poisson). I extracted §2 verbatim; the step is:
+
+State Y = U S V^T with U (m x r) and V (n x r) having orthonormal columns and S invertible (r x r). Projected ODE: Ydot = P_r(Y) F(t,Y) with P_r(Y)Z = Z V V^T - U U^T Z V V^T + U U^T Z.
+
+One step from t0 to t1 = t0+h, rank r0 -> rhat <= 2 r0 (rhat = 2r typically):
+1. Basis update with augmented bases.
+   - K-step (m x r): Kdot(t) = F(t, K(t) V0^T) V0, K(t0) = U0 S0.
+   - Uhat = orth(U0, K(t1)) by QR of the m x 2r matrix (U0, K(t1)); Mhat = Uhat^T U0 (rhat x r).
+   - L-step (n x r): Ldot(t) = F(t, U0 L(t)^T)^T U0, L(t0) = V0 S0^T.
+   - Vhat = orth(V0, L(t1)) by QR; Nhat = Vhat^T V0 (rhat x r).
+2. Galerkin method in the augmented bases.
+   - S-step (rhat x rhat): that = Uhat^T F(t, Uhat that Vhat^T) Vhat, with that(t0) = Mhat S0 Nhat^T. Note their identity Uhat that(t0) Vhat^T = Uhat Uhat^T Y0 Vhat Vhat^T = Y0, so the start is consistent.
+   - Yhat_1 = Uhat that(t1) Vhat^T approximates A(t1).
+3. Truncation: "Using an SVD of that(t1), the result is then truncated to a lower rank, either to the original rank r or by prescribing a truncation tolerance for singular values, which yields a rank-adaptive algorithm." The step-rejection criterion of their §3.3 can be added and "allows an arbitrary rank increase (e.g., when starting from rank 1)".
+
+For second order: a first-order BUG half-step, then a Galerkin update with a suitably augmented basis (their §3). That is the structure you want, since your current kernel is already a midpoint rule.
+
+**The one detail that decides whether this is a win: the only SVD is of the rhat x rhat matrix that(t1), not of the N x N field.** That is the entire cost difference from `solvers/dlra.py` today, which does four full N x N SVDs per step. Everything else in the step is O(N r^2) or smaller. Please make that explicit in the commit message and in `experiments/README.md`, because it is the thing a reviewer will check.
+
+**Two expectation corrections, so the results are not overclaimed.**
+
+(a) *Robustness is not the win here.* BUG's selling point is avoiding the S^{-1} blow-up in the classical factor ODEs as sigma_r -> 0. But your current projector recomputes a full SVD at every stage, so it never divides by a small singular value either - it is already robust in that narrow sense, just expensive. So the honest claims for the port are (i) cost (small-matrix linear algebra), (ii) the Galerkin step in the augmented basis, which is the mathematically meaningful change and the plausible route to a structure/energy property, and (iii) second order with rank adaptivity. Do not claim a robustness improvement over your own code; that would not survive a reviewer who reads both.
+
+(b) *At N=64 with rank ~43 the cost win may not materialise*, because r is comparable to N. If the port shows DLRA still slower than the full-grid kernel at N=64, that is fine and honest - but then the cost figure has to be reported at N=128 and N=256, where a reduced rank can be much smaller than N, and you should say explicitly at which (N, r) the crossover happens. A "faster than full grid" claim at N=64 with r=43 would not be credible.
+
+**A cheap, strong test you should add for the new integrator.** Your `SelfConsistentForcing` already manufactures a state that is stationary for the full RHS. If you start a BUG run from a rank-representable state under that forcing, the integrator should hold it to machine precision. That is a much sharper correctness test of the factorisation algebra than anything currently in the suite, because a wrong K/L/S-step or a wrong truncation immediately destroys it. Along with the existing Taylor-Green rank-1 exactness test, a second-order ratio check, and a rank-growth-from-1 check (their step-rejection remark says arbitrary growth from rank 1 is possible), that would give the new integrator a real test surface before you spend time on the long runs.
+
+Their §5.1 heat-equation experiment is also a useful anchor for you: your exact heat semigroup is the natural counterpart, so reproducing a rank-1 diffusion exactly is already covered by your current suite - keep that test when you refactor.
+
+Reminder of the order: V1 (identical initial states) still comes first, because every accuracy number is uninterpretable until then, and the port lands after V4/V5. If you want to prototype the port on a branch before V1 lands so the critical path is not idle, that is a good use of the waiting time - just keep it out of the result JSONs until V1 is fixed, and tell me which commit it is.
