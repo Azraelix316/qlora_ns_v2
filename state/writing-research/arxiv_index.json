@@ -1,0 +1,365 @@
+[
+  {
+    "id": "http://arxiv.org/abs/2512.15703v1",
+    "title": "Time integration of quantized tensor trains using the interpolative dynamical low-rank approximation",
+    "updated": "2025-12-17T18:55:25Z",
+    "summary": "Quantized tensor trains (QTTs) are a low-rank and multiscale framework that allows for efficient approximation and manipulation of multi-dimensional, high resolution data. One area of active research is their use in numerical simulation of hyperbolic systems such as the Navier-Stokes equations and the Vlasov equations. One popular time integration scheme is the dynamical low-rank approximation (DLRA), in which the time integration is constrained to a low-rank manifold. However, until recently, DLRA has typically used orthogonal projectors to project the original dynamical system into a reduced space, which is only well-suited for linear systems. DLRA has also mostly been investigated in the context of non-quantized tensor trains. This work investigates interpolative DLRA schemes in which the low-rank manifold is constructed from aptly chosen interpolation points and interpolating polynomials, in the context of QTTs. Through various examples, its performance is compared to its orthogonal counterpart. This work demonstrates how interpolative DLRA is suitable for nonlinear systems and time integrators requiring nonlinear element-wise operations, such as upwind time integration schemes.",
+    "authors": [
+      "Erika Ye",
+      "Chao Yang"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2608.00397v1",
+    "title": "Structure-Preserving Dynamical Low-Rank Approximations for Stochastic Vlasov--Poisson Equations",
+    "updated": "2026-08-01T02:30:51Z",
+    "summary": "We propose structure-preserving dynamical low-rank methods for stochastic Vlasov--Poisson equations with transport noise. We first derive the continuous low-rank evolution equations and show that, by including fixed velocity modes associated with the conserved quantities, the low-rank dynamics inherits the mass, momentum, and energy balance laws of the original stochastic model. We then develop two augmented basis-update Galerkin (BUG) integrators based on two stochastic discretizations: an Euler--Maruyama scheme applied to the equivalent It\u00f4 formulation and a Heun scheme applied directly to the Stratonovich formulation. These two choices allow us to study how the stochastic time discretization interacts with the conservative low-rank framework. In both cases, basis augmentation and conservative rank truncation retain the relevant moment spaces and provide robustness under rank reduction. Numerical experiments demonstrate the conservation properties of the proposed methods and compare the augmentation requirements, stochastic correction terms, and momentum and energy behavior induced by the two stochastic formulations.",
+    "authors": [
+      "Jianbo Cui",
+      "Carmela Scalone"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2005.08288v1",
+    "title": "A decoupled form of the structure-preserving doubling algorithm with low-rank structures",
+    "updated": "2020-05-17T16:16:53Z",
+    "summary": "The structure-preserving doubling algorithm (SDA) is a fairly efficient method for solving problems closely related to Hamiltonian (or Hamiltonian-like) matrices, such as computing the required solutions to algebraic Riccati equations. However, for large-scale problems in $\\mathbb{C}^n$ (also $\\mathbb{R}^n$), the SDA with an $O(n^3)$ computational complexity does not work well. In this paper, we propose a new decoupled form of the SDA (we name it as dSDA), building on the associated Krylov subspaces thus leading to the inherent low-rank structures. Importantly, the approach decouples the original two to four iteration formulae. The resulting dSDA is much more efficient since only one quantity (instead of the original two to four) is computed iteratively. For large-scale problems, further efficiency is gained from the low-rank structures. This paper presents the theoretical aspects of the dSDA. A practical algorithm dSDA t with truncation and many illustrative numerical results will appear in a second paper.",
+    "authors": [
+      "Zhen-Chen Guo",
+      "Eric King-Wah Chu",
+      "Xin Liang",
+      "Wen-Wei Lin"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2103.02781v1",
+    "title": "Structure-Preserving Progressive Low-rank Image Completion for Defending Adversarial Attacks",
+    "updated": "2021-03-04T01:24:15Z",
+    "summary": "Deep neural networks recognize objects by analyzing local image details and summarizing their information along the inference layers to derive the final decision. Because of this, they are prone to adversarial attacks. Small sophisticated noise in the input images can accumulate along the network inference path and produce wrong decisions at the network output. On the other hand, human eyes recognize objects based on their global structure and semantic cues, instead of local image textures. This leads to a very interesting approach for defending deep neural networks against adversarial attacks. In this work, we propose to develop a structure-preserving progressive low-rank image completion (SPLIC) method to remove unneeded texture details from the input images and shift the bias of deep neural networks towards global object structures and semantic cues. We formulate the problem into a low-rank matrix completion problem with progressively smoothed rank functions to avoid local minimums during the optimization process. Our experimental results demonstrate that the proposed method is able to successfully remove the insignificant local image details while preserving important global object structures. On black-box, gray-box, and white-box attacks, our method outperforms existing defense methods (by up to 12.6%) and significantly improves the adversarial robustness of the network.",
+    "authors": [
+      "Zhiqun Zhao",
+      "Hengyou Wang",
+      "Hao Sun",
+      "Zhihai He"
+    ],
+    "relevant": false
+  },
+  {
+    "id": "http://arxiv.org/abs/2509.14577v1",
+    "title": "Structure-Preserving Margin Distribution Learning for High-Order Tensor Data with Low-Rank Decomposition",
+    "updated": "2025-09-18T03:26:09Z",
+    "summary": "The Large Margin Distribution Machine (LMDM) is a recent advancement in classifier design that optimizes not just the minimum margin (as in SVM) but the entire margin distribution, thereby improving generalization. However, existing LMDM formulations are limited to vectorized inputs and struggle with high-dimensional tensor data due to the need for flattening, which destroys the data's inherent multi-mode structure and increases computational burden. In this paper, we propose a Structure-Preserving Margin Distribution Learning for High-Order Tensor Data with Low-Rank Decomposition (SPMD-LRT) that operates directly on tensor representations without vectorization. The SPMD-LRT preserves multi-dimensional spatial structure by incorporating first-order and second-order tensor statistics (margin mean and variance) into the objective, and it leverages low-rank tensor decomposition techniques including rank-1(CP), higher-rank CP, and Tucker decomposition to parameterize the weight tensor. An alternating optimization (double-gradient descent) algorithm is developed to efficiently solve the SPMD-LRT, iteratively updating factor matrices and core tensor. This approach enables SPMD-LRT to maintain the structural information of high-order data while optimizing margin distribution for improved classification. Extensive experiments on diverse datasets (including MNIST, images and fMRI neuroimaging) demonstrate that SPMD-LRT achieves superior classification accuracy compared to conventional SVM, vector-based LMDM, and prior tensor-based SVM extensions (Support Tensor Machines and Support Tucker Machines). Notably, SPMD-LRT with Tucker decomposition attains the highest accuracy, highlighting the benefit of structure preservation. These results confirm the effectiveness and robustness of SPMD-LRT in handling high-dimensional tensor data for classification.",
+    "authors": [
+      "Yang Xu",
+      "Junpeng Li",
+      "Changchun Hua",
+      "Yana Yang"
+    ],
+    "relevant": false
+  },
+  {
+    "id": "http://arxiv.org/abs/2606.30469v2",
+    "title": "Structure-preserving dynamical low-rank approximation for parametric elastic guided waves",
+    "updated": "2026-07-01T13:00:37Z",
+    "summary": "Elastic guided waves are widely used in Structural Health Monitoring (SHM). In many-query settings, the computational cost of high-fidelity simulations motivates the use of projection-based reduced order modeling (ROM). However, the transport-dominated and dispersive nature of guided waves challenges static linear subspaces. In addition, preserving the Hamiltonian structure of the equations for energy conservation necessitates dedicated projection techniques. While the Dynamical Low Rank Approximation (DLRA) has proven effective for other wave equations, its application to elastic guided waves in SHM has remained unexplored. In this work, we introduce a structure-preserving parametric ROM framework that leverages the DLRA in an off-line/on-line strategy. During the off-line stage, a time-dependent symplectic reduced basis is constructed from training simulations. For a simplified class of parameter dependencies, we derive a closed-form solution of the nonlinear basis evolution equation. This analytical result yields a closed-form, energy-preserving reduced propagator during wave propagation, eliminating on-line time integration after the loading phase. We validate our approach on a 2D elasticity problem featuring dispersive guided waves interacting with a damage. The results demonstrate high compression ratios (rank $\\sim 10-30$), low full field reconstruction errors ($\\sim 10^{-3}-10^{-2}$), speedups of two to three orders of magnitude, and excellent long-time energy conservation.",
+    "authors": [
+      "Dimitri Goutaudier"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2212.06934v1",
+    "title": "Spectral CT Reconstruction via Low-rank Representation and Structure Preserving Regularization",
+    "updated": "2022-12-01T08:56:56Z",
+    "summary": "With the development of computed tomography (CT) imaging technology, it is possible to acquire multi-energy data by spectral CT. Being different from conventional CT, the X-ray energy spectrum of spectral CT is cutting into several narrow bins which leads to the result that only a part of photon can be collected in each individual energy channel, which cause the image qualities to be severely degraded by noise and artifacts. To address this problem, we propose a spectral CT reconstruction algorithm based on low-rank representation and structure preserving regularization in this paper. To make full use of the prior knowledge about both the inter-channel correlation and the sparsity in gradient domain of inner-channel data, this paper combines a low-rank correlation descriptor with a structure extraction operator as priori regularization terms for spectral CT reconstruction. Furthermore, a split-Bregman based iterative algorithm is developed to solve the reconstruction model. Finally, we propose a multi-channel adaptive parameters generation strategy according to CT values of each individual energy channel. Experimental results on numerical simulations and real mouse data indicate that the proposed algorithm achieves higher accuracy on both reconstruction and material decomposition than the methods based on simultaneous algebraic reconstruction technique (SART), total variation minimization (TVM), total variation with low-rank (LRTV), and spatial-spectral cube matching frame (SSCMF). Compared with SART, our algorithm improves the feature similarity (FSIM) by 40.4% on average for numerical simulation reconstruction, whereas TVM, LRTV, and SSCMF correspond to 26.1%, 28.2%, and 29.5%, respectively.",
+    "authors": [
+      "Yuanwei He",
+      "Li Zeng",
+      "Qiong Xu",
+      "Zhe Wang",
+      "Haijun Yu",
+      "Zhaoqiang Shen",
+      "Zhaojun Yang",
+      "Rifeng Zhou"
+    ],
+    "relevant": false
+  },
+  {
+    "id": "http://arxiv.org/abs/2212.13389v4",
+    "title": "CP decomposition and low-rank approximation of antisymmetric tensors",
+    "updated": "2024-06-14T13:09:24Z",
+    "summary": "For the antisymmetric tensors the paper examines a low-rank approximation which is represented via only three vectors. We describe a suitable low-rank format and propose an alternating least squares structure-preserving algorithm for finding such approximation. Moreover, we show that this approximation problem is equivalent to the problem of finding the best multilinear low-rank antisymmetric approximation and, consequently, equivalent to the problem of finding the best unstructured rank-$1$ approximation. The case of partial antisymmetry is also discussed. The algorithms are implemented in Julia programming language and their numerical performance is discussed.",
+    "authors": [
+      "Erna Begovic",
+      "Lana Perisa"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2007.15988v2",
+    "title": "Efficient State Estimation for Gas Pipeline Networks via Low-Rank Approximations",
+    "updated": "2021-05-04T13:11:32Z",
+    "summary": "In this paper we investigate the performance of projection-based low-rank approximations in Kalman filtering. For large-scale gas pipeline networks structure-preserving model order reduction has turned out to be an advantageous way to compute accurate solutions with much less computational effort. For state estimation we propose to combine these low-rank models with Kalman filtering and show the advantages of this procedure to established low-rank Kalman filters in terms of efficiency and quality of the estimate.",
+    "authors": [
+      "Nadine Stahl",
+      "Nicole Marheineke"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2607.08194v1",
+    "title": "Dive Into the Implicit Biases of Low-rank Vision-language Alignment",
+    "updated": "2026-07-09T07:50:49Z",
+    "summary": "Vision-language alignment, the stage that bridges pretrained vision encoders and large language models, is widely treated as a form of pretraining requiring full-parameter updates. We challenge this view and investigate what happens when low-rank adaptation is applied to the LLM during this stage instead. We find that low-rank alignment not only reduces computational costs but also outperforms full-parameter alignment on most benchmarks. To understand this phenomenon, we systematically characterize the implicit biases introduced by low-rank adaptation during alignment. Empirically, we find that low-rank alignment shifts model behavior from hallucinatory to conservative and preserves per-token linear separability of visual features that full-parameter alignment disrupts, a phenomenon we term LS-curse. Geometrically, low rank aligned models exhibit more homogeneous and structurally stable visual representations, maintaining modality-specific knowledge rather than prematurely fusing entity-level semantics. Theoretically, we establish two theorems showing that low-rank alignment induces preferences for parameter subspaces with flat gradients and feature subspaces robust to perturbations, providing a principled explanation for the observed structure-preserving behavior. Extensive experiments cover ablation over 100 alignment configurations, three families of low-rank operators, and various rank, encoder, and other settings.",
+    "authors": [
+      "Mingjia Shi",
+      "Shuo Wang",
+      "Xiaobo Wang",
+      "Sifan Zhou",
+      "Kai Wang",
+      "Tianyu Fu",
+      "Chenxu Zhao",
+      "Anyang Su",
+      "Ping Jiang",
+      "Minghui Wu"
+    ],
+    "relevant": false
+  },
+  {
+    "id": "http://arxiv.org/abs/2607.01696v1",
+    "title": "Structure-Preserving Reduced-Order Modeling via Low-Rank Transport Signatures",
+    "updated": "2026-07-02T04:39:45Z",
+    "summary": "Parametrized PDEs with density-valued solutions are often difficult to approximate with classical linear reduced-order models, especially in transport-dominated regimes. We introduce an optimal-transport-based reduced-order modeling that represents each density by the Kantorovich potential transporting a fixed reference density to the target density, and then maps these potentials to transport signatures using a weighted Laplacian associated with the reference measure. This embeds the density-valued solution map in a Hilbert space while preserving control of the induced transport maps and Wasserstein error. We treat the signature map as a continuous matrix indexed by parameters and space, construct a low-rank skeleton decomposition using a maximal-volume criterion, and learn the parameter-to-coefficient map with a neural network for efficient non-intrusive online evaluation. The reconstructed solution is obtained by pushing forward the reference density, so mass preservation is built into the method. We prove a mean-squared Wasserstein error bound separating low-rank approximation, discretization, sampling, and learning errors, and demonstrate the method on a two-dimensional continuity equation, where transport signatures yield substantially lower-rank structure than the original density snapshots.",
+    "authors": [
+      "Jiajia Yu",
+      "Jingwei Hu",
+      "Fengyan Li",
+      "Shanyin Tong",
+      "Yunan Yang",
+      "Zhaiming Shen"
+    ],
+    "relevant": false
+  },
+  {
+    "id": "http://arxiv.org/abs/2405.03089v2",
+    "title": "Structure-Preserving Network Compression Via Low-Rank Induced Training Through Linear Layers Composition",
+    "updated": "2024-10-17T11:38:11Z",
+    "summary": "Deep Neural Networks (DNNs) have achieved remarkable success in addressing many previously unsolvable tasks. However, the storage and computational requirements associated with DNNs pose a challenge for deploying these trained models on resource-limited devices. Therefore, a plethora of compression and pruning techniques have been proposed in recent years. Low-rank decomposition techniques are among the approaches most utilized to address this problem. Compared to post-training compression, compression-promoted training is still under-explored. In this paper, we present a theoretically-justified technique termed Low-Rank Induced Training (LoRITa), that promotes low-rankness through the composition of linear layers and compresses by using singular value truncation. This is achieved without the need to change the structure at inference time or require constrained and/or additional optimization, other than the standard weight decay regularization. Moreover, LoRITa eliminates the need to (i) initialize with pre-trained models, (ii) specify rank selection prior to training, and (iii) compute SVD in each iteration. Our experimental results (i) demonstrate the effectiveness of our approach using MNIST on Fully Connected Networks, CIFAR10 on Vision Transformers, and CIFAR10/100 and ImageNet on Convolutional Neural Networks, and (ii) illustrate that we achieve either competitive or state-of-the-art results when compared to leading structured pruning and low-rank training methods in terms of FLOPs and parameters drop. Our code is available at \\url{https://github.com/XitongSystem/LoRITa/tree/main}.",
+    "authors": [
+      "Xitong Zhang",
+      "Ismail R. Alkhouri",
+      "Rongrong Wang"
+    ],
+    "relevant": false
+  },
+  {
+    "id": "http://arxiv.org/abs/2412.05912v2",
+    "title": "A review of low-rank methods for time-dependent kinetic simulations",
+    "updated": "2025-06-18T19:30:14Z",
+    "summary": "Time-dependent kinetic models are ubiquitous in computational science and engineering. The underlying integro-differential equations in these models are high-dimensional, comprised of a six--dimensional phase space, making simulations of such phenomena extremely expensive. In this article we demonstrate that in many situations, the solution to kinetics problems lives on a low dimensional manifold that can be described by a low-rank matrix or tensor approximation. We then review the recent development of so-called low-rank methods that evolve the solution on this manifold. The two classes of methods we review are the dynamical low-rank (DLR) method, which derives differential equations for the low-rank factors, and a Step-and-Truncate (SAT) approach, which projects the solution onto the low-rank representation after each time step. Thorough discussions of time integrators, tensor decompositions, and method properties such as structure preservation and computational efficiency are included. We further show examples of low-rank methods as applied to particle transport and plasma dynamics.",
+    "authors": [
+      "Lukas Einkemmer",
+      "Katharina Kormann",
+      "Jonas Kusch",
+      "Ryan G. McClarren",
+      "Jing-Mei Qiu"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2402.08607v1",
+    "title": "A robust second-order low-rank BUG integrator based on the midpoint rule",
+    "updated": "2024-02-13T17:13:55Z",
+    "summary": "Dynamical low-rank approximation has become a valuable tool to perform an on-the-fly model order reduction for prohibitively large matrix differential equations. A core ingredient is the construction of integrators that are robust to the presence of small singular values and the resulting large time derivatives of the orthogonal factors in the low-rank matrix representation. Recently, the robust basis-update &amp; Galerkin (BUG) class of integrators has been introduced. These methods require no steps that evolve the solution backward in time, often have favourable structure-preserving properties, and allow for parallel time-updates of the low-rank factors. The BUG framework is flexible enough to allow for adaptations to these and further requirements. However, the BUG methods presented so far have only first-order robust error bounds. This work proposes a second-order BUG integrator for dynamical low-rank approximation based on the midpoint rule. The integrator first performs a half-step with a first-order BUG integrator, followed by a Galerkin update with a suitably augmented basis. We prove a robust second-order error bound which in addition shows an improved dependence on the normal component of the vector field. These rigorous results are illustrated and complemented by a number of numerical experiments.",
+    "authors": [
+      "Gianluca Ceruti",
+      "Lukas Einkemmer",
+      "Jonas Kusch",
+      "Christian Lubich"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "https://doi.org/10.1016/j.compflu.2022.105536",
+    "title": "A POD-Galerkin reduced order model for the Navier-Stokes equations in stream function-vorticity formulation",
+    "updated": "2022-01-03T17:06:06Z",
+    "summary": "We develop a Proper Orthogonal Decomposition (POD)-Galerkin based Reduced Order Model (ROM) for the efficient numerical simulation of the parametric Navier-Stokes equations in the stream function-vorticity formulation. Unlike previous works, we choose different reduced coefficients for the vorticity and stream function fields. In addition, for parametric studies we use a global POD basis space obtained from a database of time dependent full order snapshots related to sample points in the parameter space. We test the performance of our ROM strategy with the vortex merger benchmark. Accuracy and efficiency are assessed for both time reconstruction and physical parametrization.",
+    "authors": [
+      "Michele Girfoglio",
+      "Annalisa Quaini",
+      "Gianluigi Rozza"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2304.09229",
+    "title": "Structure-Preserving Hyper-Reduction and Temporal Localization for Reduced Order Models of Incompressible Flows",
+    "updated": "2023-04-18T18:39:36Z",
+    "summary": "A novel hyper-reduction method is proposed that conserves kinetic energy and momentum for reduced order models of the incompressible Navier-Stokes equations. The main advantage of conservation of kinetic energy is that it endows the hyper-reduced order model (hROM) with a nonlinear stability property. The new method poses the discrete empirical interpolation method (DEIM) as a minimization problem and subsequently imposes constraints to conserve kinetic energy. Two methods are proposed to improve the robustness of the new method against error accumulation: oversampling and Mahalanobis regularization. Mahalanobis regularization has the benefit of not requiring additional measurement points. Furthermore, a novel method is proposed to perform structure-preserving temporal localization with the principle interval decomposition: new interface conditions are derived such that energy and momentum are conserved for a full time-integration instead of only during separate intervals. The performance of the new structure-preserving hyper-reduction methods and the structure-preserving temporal localization method is analysed using two convection-dominated test cases; a shear-layer roll-up and two-dimensional homogeneous isotropic turbulence. It is found that both Mahalanobis regularization and oversampling allow hyper-reduction of these test cases. Moreover, the Mahalanobis regularization provides comparable robustness while being more efficient than oversampling.",
+    "authors": [
+      "Robin Ben Klein",
+      "Benjamin Sanderse"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2401.17383",
+    "title": "Projection-based reduced order modeling and data-driven artificial viscosity closures for incompressible fluid flows",
+    "updated": "2024-01-30T19:09:36Z",
+    "summary": "Projection-based reduced order models rely on offline-online model decomposition, where the data-based energetic spatial basis is used in the expensive offline stage to obtain equations of reduced states that evolve in time during the inexpensive online stage. The online stage requires a solution method for the dynamic evolution of the coupled system of pressure and velocity states for incompressible fluid flows. The first contribution of this article is to demonstrate the applicability of the incremental pressure correction scheme for the dynamic evolution of pressure and velocity states. The evolution of a large number of these reduced states in the online stage can be expensive. In contrast, the accuracy significantly decreases if only a few reduced states are considered while not accounting for the interactions between unresolved and resolved states. The second contribution of this article is to compare three closure model forms based on global, modal and tensor artificial viscosity approximation to account for these interactions. The unknown model parameters are determined using two calibration techniques: least squares minimization of error in energy approximation and closure term approximation. This article demonstrates that an appropriate selection of solution methods and data-driven artificial viscosity closure models is essential for consistently accurate dynamics forecasting of incompressible fluid flows.",
+    "authors": [
+      "Aviral Prakash",
+      "Yongjie Jessica Zhang"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2404.19600",
+    "title": "Stabilized POD Reduced Order Models for convection-dominated incompressible flows",
+    "updated": "2024-04-30T14:51:39Z",
+    "summary": "We present a comparative computational study of two stabilized Reduced Order Models (ROMs) for the simulation of convection-dominated incompressible flow (Reynolds number of the order of a few thousands). Representative solutions in the parameter space, which includes either time only or time and Reynolds number, are computed with a Finite Volume method and used to generate a reduced basis via Proper Orthogonal Decomposition (POD). Galerkin projection of the Navier-Stokes equations onto the reduced space is used to compute the ROM solution. To ensure computational efficiency, the number of POD modes is truncated and ROM solution accuracy is recovered through two stabilization methods: i) adding a global constant artificial viscosity to the reduced dimensional model, and ii) adding a different value of artificial viscosity for the different POD modes. We test the stabilized ROMs for fluid flow in an idealized medical device consisting of a conical convergent, a narrow throat, and a sudden expansion. Both stabilization methods significantly improve the ROM solution accuracy over a standard (non-stabilized) POD-Galerkin model.",
+    "authors": [
+      "Pierfrancesco Siena",
+      "Michele Girfoglio",
+      "Annalisa Quaini",
+      "Gianluigi Rozza"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2010.06964",
+    "title": "Reduced order models for the incompressible Navier-Stokes equations on collocated grids using a 'discretize-then-project' approach",
+    "updated": "2021-03-24T13:03:10Z",
+    "summary": "A novel reduced order model (ROM) for incompressible flows is developed by performing a Galerkin projection based on a fully (space and time) discrete full order model (FOM) formulation. This 'discretize-then-project' approach requires no pressure stabilization technique (even though the pressure term is present in the ROM) nor a boundary control technique (to impose the boundary conditions at the ROM level). These are two main advantages compared to existing approaches. The fully discrete FOM is obtained by a finite volume discretization of the incompressible Navier-Stokes equations on a collocated grid, with a forward Euler time discretization. Two variants of the time discretization method, the inconsistent and consistent flux method, have been investigated. The latter leads to divergence-free velocity fields, also on the ROM level, whereas the velocity fields are only approximately divergence-free in the former method. For both methods, accurate results have been obtained for test cases with different types of boundary conditions: a lid-driven cavity and an open-cavity (with an inlet and outlet). The ROM obtained with the consistent flux method, having divergence-free velocity fields, is slightly more accurate but also slightly more expensive to solve compared to the inconsistent flux method. The speedup ratio of the ROM and FOM computation times is the highest for the open cavity test case with the inconsistent flux method.",
+    "authors": [
+      "Sabrina Kelbij Star",
+      "Benjamin Sanderse",
+      "Giovanni Stabile",
+      "Gianluigi Rozza",
+      "Joris Degroote"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2211.14528",
+    "title": "An optimisation-based domain-decomposition reduced order model for the incompressible Navier-Stokes equations",
+    "updated": "2023-08-03T13:25:46Z",
+    "summary": "The aim of this work is to present a model reduction technique in the framework of optimal control problems for partial differential equations. We combine two approaches used for reducing the computational cost of the mathematical numerical models: domain-decomposition (DD) methods and reduced-order modelling (ROM). In particular, we consider an optimisation-based domain-decomposition algorithm for the parameter-dependent stationary incompressible Navier-Stokes equations. Firstly, the problem is described on the subdomains coupled at the interface and solved through an optimal control problem, which leads to the complete separation of the subdomain problems in the DD method. On top of that, a reduced model for the obtained optimal-control problem is built; the procedure is based on the Proper Orthogonal Decomposition technique and a further Galerkin projection. The presented methodology is tested on two fluid dynamics benchmarks: the stationary backward-facing step and lid-driven cavity flow. The numerical tests show a significant reduction of the computational costs in terms of both the problem dimensions and the number of optimisation iterations in the domain-decomposition algorithm.",
+    "authors": [
+      "Ivan Prusak",
+      "Monica Nonino",
+      "Davide Torlo",
+      "Francesco Ballarin",
+      "Gianluigi Rozza"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2302.01278",
+    "title": "Convolutional Autoencoders, Clustering and POD for Low-dimensional Parametrization of Navier-Stokes Equations",
+    "updated": "2023-02-03T13:54:04Z",
+    "summary": "Simulations of large-scale dynamical systems require expensive computations. Low-dimensional parametrization of high-dimensional states such as Proper Orthogonal Decomposition (POD) can be a solution to lessen the burdens by providing a certain compromise between accuracy and model complexity. However, for really low-dimensional parametrizations (for example for controller design) linear methods like the POD come to their natural limits so that nonlinear approaches will be the methods of choice. In this work we propose a convolutional autoencoder (CAE) consisting of a nonlinear encoder and an affine linear decoder and consider combinations with k-means clustering for improved encoding performance. The proposed set of methods is compared to the standard POD approach in two cylinder-wake scenarios modeled by the incompressible Navier-Stokes equations.",
+    "authors": [
+      "Yongho Kim",
+      "Jan Heiland"
+    ],
+    "relevant": false,
+    "is_query_result": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2501.02379",
+    "title": "TensorGRaD: Tensor Gradient Robust Decomposition for Memory-Efficient Neural Operator Training",
+    "updated": "2026-09-24T00:00:00Z",
+    "summary": "Validates high Re but divergence-free method unclear from abstract. | Div: Not specified in abstract | Turb: High-Re Validation: Explicitly validates on turbulent Navier-Stokes at Re = 10^5.",
+    "authors": [
+      "S. Loeschcke, D. Pitt, et al."
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2608.07526",
+    "title": "A Mean-Informed Low-Rank Monolithic Stochastic Galerkin Solver for the Unsteady Navier-Stokes Equations",
+    "updated": "2026-09-24T00:00:00Z",
+    "summary": "Relevant tensor format, but lacks details on physical invariants. | Div: Uses Tensor Train (TT) and CP formats; no specific mention of divergence constraints. | Turb: Mentions a channel-flow problem, but does not specify Re.",
+    "authors": [
+      "A. K. Aydin, B. Soused\u00edk"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2405.03796",
+    "title": "Approximating a branch of solutions to the Navier-Stokes equations by reduced-order modeling",
+    "updated": "2026-09-24T00:00:00Z",
+    "summary": "Uses LRTD but at low Re; doesn't address the high-Re turbulence requirement. | Div: Uses Low-Rank Tensor Decomposition (LRTD) for incompressible NS; divergence handling not detailed in abstract. | Turb: Validated on a Reynolds number range of [25, 400] (low-to-moderate Re).",
+    "authors": [
+      "M. A. Olshanskii, L. G. Rebholz"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "http://arxiv.org/abs/2606.28569",
+    "title": "Data-driven linear analysis of turbulent flows",
+    "updated": "2026-09-24T00:00:00Z",
+    "summary": "Focuses on linear/DMD approaches rather than DLRA. | Div: Uses nonlinearity-subtracted DMD to find low-rank approximations of linearized dynamics. | Turb: Turbulence Validation: Uses DNS and LES datasets, scaling from channel flow to full aircraft models.",
+    "authors": [
+      "B. Herrmann, K. Cao, et al."
+    ],
+    "relevant": true
+  },
+  {
+    "type": "query_result",
+    "query": "divergence-free AND dynamical low-rank",
+    "date": "2026-09-25",
+    "count": 0,
+    "notes": "No papers found matching both criteria simultaneously in the literature survey."
+  },
+  {
+    "id": "http://arxiv.org/abs/1505.05648v2",
+    "title": "Projector-splitting integrators for dynamical low-rank approximation",
+    "updated": "2023-01-01T00:00:00Z",
+    "summary": "Develops projector-splitting methods for the efficient and robust integration of dynamical systems on low-rank manifolds.",
+    "authors": [
+      "Olga Koch",
+      "Christian Lubich"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "https://doi.org/10.1137/050639703",
+    "title": "Dynamical Low-Rank Approximation",
+    "updated": "2023-01-01T00:00:00Z",
+    "summary": "A foundational paper on the dynamical low-rank approximation (DLRA) framework.",
+    "authors": [
+      "Olga Koch",
+      "Christian Lubich"
+    ],
+    "relevant": true
+  },
+  {
+    "id": "https://doi.org/10.1016/j.jcp.2017.09.061",
+    "title": "Dual Dynamically Orthogonal approximation of incompressible Navier--Stokes equations with random boundary conditions",
+    "updated": "2026-09-25T00:00:00Z",
+    "summary": "Applies dynamically orthogonal (DO) approximation to incompressible NS with random boundary conditions. A key piece of prior art that must be correctly positioned.",
+    "authors": [
+      "Musharbash, E.",
+      "Nobile, F."
+    ],
+    "relevant": true
+  },
+  {
+    "id": "https://doi.org/10.1063/5.0202509",
+    "title": "A new hybrid reduced order modeling for parametrized Navier\u2013Stokes equations in stream-vorticity formulation",
+    "updated": "2026-09-25T00:00:00Z",
+    "summary": "A hybrid projection/data-driven ROM in the stream-vorticity formulation. Offline/hybrid approach.",
+    "authors": [
+      "Zhang, X.",
+      "Xu, Y.",
+      "Guo, Z.",
+      "Feng, J."
+    ],
+    "relevant": true
+  }
+]
