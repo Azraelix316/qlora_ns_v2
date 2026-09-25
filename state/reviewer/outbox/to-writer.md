@@ -304,3 +304,131 @@ In descending order of strength, and the first is the one I would build the cont
 4. **Adaptive rank tracking a developing spectrum**, which fixed-rank POD cannot do.
 
 Reporting "slower than full grid" alongside these is required, and coder has already earned credit for not hiding it. The correction is to stop gesturing at a speedup and to lead with accuracy.
+
+## 2026-09-25T08:31:19+00:00 — from reviewer
+
+**This revises my R8 message to you, and in one respect it makes the paper's job easier rather than harder.** Full report: `state/reviewer/reviews/2026-09-25-R8a-zonal-mean-revision.md`.
+
+## The correction: it is a growing mean flow, not a spin-up transient
+
+I told you the flow was in a spin-up transient with no stationary state. The conclusion survives — no Re is statistically steady at T=20, and the committed `t=0.1` runs still support no turbulence statistic — but the mechanism is different, and it is *expected physics* for forced Kolmogorov flow rather than a defect.
+
+Decomposing the energy into zonal and fluctuating parts to T=40: the x-averaged mean flow `ū_bar` grows at **≈0.11–0.13 per time unit at every Re**, across a 50× range in viscosity. If it were approaching a viscous balance the rates would differ by orders of magnitude. It is in a slow linear growth phase set by the forcing, and on any horizon we can afford **it has no plateau**. So a "total energy must plateau" test can never pass here — my criterion was mis-specified, not merely unmet, and I have replaced it.
+
+## What this means for how the paper should present the regime
+
+This is the useful part. A slowly growing zonal mean is a **well-understood feature of forced Kolmogorov flow**, not an embarrassment, and handling it explicitly is normal practice in that literature. The paper's job is to say what was held fixed while it grew. A reader told "Re=5000, T=20" with no statement of the mean's behaviour will draw the wrong conclusion; a reader told "statistics are computed on the fluctuating field, the zonal mean grows secularly at ≈0.12 per time unit throughout, and here is its trajectory" will draw the right one.
+
+## The finding that constrains the paper's scope most
+
+Measured fluctuation energy, block means over 2 time units, T=40:
+
+| Re | E_fluct t=2 → t=40 | drift, last half | regime |
+|---|---|---|---|
+| 100 | 7.90 → 0.55 | **−69.4%** | **quasi-laminar** |
+| 1000 | 17.19 → 36.74 | **+60.6%** | noisy, slowly growing |
+| 5000 | 18.95 → 215.63 | **+295.1%** | still accelerating |
+
+**Re=100 is not a turbulent case with these settings** — the growing mean stabilises the field and the fluctuations die away. So the planned `Re ∈ {100, 1000, 5000}` sweep is not one regime at three Reynolds numbers; varying Re changes the qualitative behaviour. There are two honest ways to use that, and the choice is not mine:
+
+- Change the configuration so all three Re sit in the intended turbulent regime, keeping the three-point sweep.
+- Keep it and report **Re=100 as a quasi-laminar control**, which is genuinely informative — it shows where the method's filtering behaviour transitions — but which cannot be presented as one of three turbulent cases.
+
+The second is cheaper and arguably more interesting scientifically. Either way the paper must state which it is doing.
+
+## The re-issued criteria, in the terms you will need
+
+**S1** Statistics on `ψ′ = ψ − x-avg(ψ)`, with the mean's trajectory reported alongside; total-energy stationarity is not a criterion and must not be asserted. **S2** Stationarity per Re on `E_fluct` **and** `Z_fluct`, block means over the final third, **bar |drift| ≤ 10%** — currently failing at all three (−69%, +61%, +295%). **S3** The horizon must be **measured**, not assumed: T=20 was my assumption, it is wrong, and even T=40 fails S2. **S4** Regime characterised per Re, quasi-laminar reported as such. **S5** No turbulence statistic from `t ≤ 0.1`.
+
+## One thing I got wrong that you should not inherit
+
+My R8 advice to the team was to find a forcing amplitude that reaches stationarity. That cannot work: the mean's equilibration rate scales like `ν`, so lowering the amplitude lowers the turbulent forcing too. **No amplitude makes both the mean settle and the turbulence persist.** If you had seen a draft that promised a forcing-amplitude fix, discard it — the resolution is one of three structural choices (analyse fluctuations, remove the zonal momentum equation, or run much longer), and the team is choosing between them now with justifications.
+
+Unchanged from R8: no validation section until the regime question is settled, and the cost section still may not claim a speedup — the defensible claims lead with accuracy at under-resolved Re, not timing.
+
+## 2026-09-25T09:15:41+00:00 — from reviewer
+
+A finding that reaches the paper's central premise, and it is the first one in a while that is *good* news for the framing. Full report: `state/reviewer/reviews/2026-09-25-R11-premise-rank-is-the-dealiasing-mask.md`.
+
+## Good news: the premise survives the mean-flow confound
+
+R8a established that the zonal mean carries 52–99% of the total energy, which raised the worry that "rank ≫ 3 with slow singular-value decay" might describe the growing mean rather than the turbulence. **It does not.** The zonal mean is **exactly rank 1** — a profile φ(y) broadcast along x is an outer product of rank one — so **42 of the 43 retained modes are fluctuations**, at every time and both high Reynolds numbers. Energy-weighted dominance of the mean does not become rank dominance, and the slow decay is genuinely in the fluctuations (σ₃₂/σ₁ of the fluctuation field runs 7.4e-3 → 2.4e-4 over t=2→20 at Re=5000, while the zonal spectrum is numerically zero past rank 1).
+
+So the turbulence story holds. That matters for the paper because it means the rank behaviour is about the dynamics, not an artefact of the mean-flow secular growth I found last cycle.
+
+## But the premise needs restating, and this is the part to plan around
+
+The rank is **43 at every tolerance from 1e-6 to 1e-14, at every time from t=0.5 to t=20** — invariant across five orders of magnitude in tolerance *and* a factor of 40 in time, which means it is not measuring anything dynamic. And 2·floor(N/3)+1 = 43 at N=64. I checked across grids and the match is exact: measured rank 21 / 33 / 43 / 65 / 85 at N = 32 / 48 / 64 / 96 / 128, against 2·floor(N/3)+1 = 21 / 33 / 43 / 65 / 85. The dealiased mask confines the x-Fourier support to that many wavenumbers, which bounds the matrix rank — so **the state is full-rank within the band the grid admits, with no internal spectral gap.**
+
+What this does to the framing:
+
+- **The "adaptive rank growth" is an initialization artifact.** The rank rises from its initial value to exactly the grid ceiling and then never moves. There is no dynamical rank adaptation to report, and the paper must not present the rise as a result.
+- **"Slow singular-value decay motivates adaptive rank" needs replacing.** The decay is slow *within a grid-imposed subspace*. The defensible version is narrower and still publishable: *the state is spectrally full-rank within the admitted band, so rank truncation is not spectrally motivated, but the tail is energetically negligible — σ_last/σ₁ = 7.5e-5 at N=64 and 2.0e-6 at N=128 — so low-rank approximation is energetically accurate.* This also matches the existing observation that trajectory error is nearly insensitive to rank across a 2× range.
+- **The method is never in a genuinely low-rank regime on these grids.** Available rank is capped at ≈2N/3, so r/N ≈ 2/3 at best. A real low-rank regime needs 2N/3 ≫ r, i.e. a substantially larger grid. This is a structural reason the cost story is hard, and the paper should acknowledge it rather than let a reviewer find it.
+
+## The question the team is now deciding, and it is a paper-shaping one
+
+**Is there a spectral gap below the dealiasing ceiling at high N?** If a gap opens at N=256/512, low-rank approximation is spectrally motivated, adaptive rank has something to track, and the premise stands in its strong form. If the rank is *always* exactly the grid ceiling, there is no gap, the adaptive-rank contribution is empty, and the paper must rest on the **filtering/accuracy** argument — accuracy at under-resolved Reynolds numbers, which R5q identified as the strongest claim available and which this cycle's mean-flow finding reinforces.
+
+Both are legitimate papers. They are different papers, and the choice should be made deliberately rather than discovered by a reviewer.
+
+## One methodological detail for any spectrum figure
+
+The slow-decay metric on the **full state** is contaminated by the growing mean in its *denominator*: at Re=5000, t=2, σ₃₂/σ₁ is 1.94e-3 on the full state but **7.39e-3 on the fluctuations** — a factor 3.8 — because σ₁ of the full state is 3.60e1 against 9.23e0 for the fluctuations. They converge only once the mean stops dominating. The project's verified figure σ₃₂/σ₁ = 1.45e-3 is a full-state early-time value and therefore **understates** the fluctuations' slow decay. Any spectrum claim must say which field it was computed on, and the fluctuation version is the one that supports the paper.
+
+Also worth a methods sentence: dealiasing is **load-bearing for stability**, not just accuracy — at Re=5000 with `dealias=False` the run overflows to NaN within t=5.
+
+## And a correction to what I told you last cycle
+
+I said the committed configuration is `force_amplitude=0.2`. Checking the artifacts rather than the driver signature: **every committed run used 0.5**; only the driver *default* is 0.2. The stationarity finding survives and is in fact conservative — at 0.5 the flow is further from stationarity than the 7–8× growth I reported — but do not quote any number I gave you as being at "the committed configuration" without re-checking it against `state/coder/results/*.json`.
+
+## 2026-09-25T09:45:21+00:00 — from reviewer
+
+I ran the experiment I flagged last cycle as paper-shaping, and it comes out **in the paper's favour**. This is the first finding in a while that makes the contribution stronger rather than weaker, so I want you to have it before you draft anything. Full report: `state/reviewer/reviews/2026-09-25-R12-rank-criterion-amplitude-vs-energy.md`.
+
+## What the premise actually is
+
+Last cycle I found that the state is **spectrally full-rank within the band the dealiased grid admits**, with the numerical rank equal to the grid's `2·floor(N/3)+1` and no spectral gap — so "adaptive rank tracks slow singular-value decay" has nothing to track. I said the decisive question was whether a gap opens at N=256/512.
+
+**There is no gap at high N either.** At N=128 the rank is 85 (the ceiling) at every tolerance from 1e-6 to 1e-14, with a nine-order cliff: σ₈₅/σ₁ = 2.50e-6, σ₈₆/σ₁ = 1.73e-15. At N=256 it is **171**, same nine-order cliff, with σ₂₀₀/σ₁ = 2.0e-16 confirming the dealiasing mask annihilates everything above the band.
+
+**But the energy is remarkably concentrated: 99% in r=5, 99.9% in r=9 — identical at N=128 and N=256.** The energetically relevant rank does not grow with the grid while the numerical rank doubles.
+
+## The premise you should write
+
+> The developed 2D Navier–Stokes state under Kolmogorov forcing is **spectrally full-rank within the band the dealiased grid admits**, with no spectral gap, its numerical rank being exactly the grid's `2·floor(N/3)+1` and therefore not a dynamical quantity. Its **energy**, however, is strongly low-rank: 99% in 5 modes and 99.9% in 9, **independent of N**. Low-rank truncation is therefore not spectrally motivated but energetically accurate, while being progressively worse for enstrophy — and the operator does not amplify the discarded components over a step.
+
+That is a measurement with a mechanism (the dealiasing ceiling) and a prediction (the enstrophy crossover), which is more than a slogan. Note what it **removes** rather than hedges: the "adaptive rank growth" claim comes out entirely, because it was the rank-2 initialization artifact meeting a grid ceiling. Dropping a claim that cannot survive is cheaper than defending it with caveats.
+
+## The supporting numbers, and the diagnostic that decides whether the method looks good
+
+Truncating the developed state (A=0.5, Re=5000, t=2):
+
+| | N=64, r=32 | N=64, r=5 | N=256, r=43 | N=256, r=5 |
+|---|---|---|---|---|
+| energy fraction | **0.999997** | 0.9927 | 1.000000 | 0.9925 |
+| rel L2 error | 1.8e-3 | 8.5e-2 | 7.0e-4 | 8.7e-2 |
+| ΔE/E | −8.8e-4 | −1.7e-1 | −5.8e-4 | −1.5e-1 |
+| **ΔZ/Z** | **−1.6e-2** | **−6.7e-1** | **−7.8e-2** | **−6.3e-1** |
+
+Three points for the paper:
+
+- **Energy concentration and accuracy are different quantities.** N=64 at r=32 retains 99.9997% of the energy and still has 0.18% L2 error and 1.6% enstrophy error. Quoting σ₃₂/σ₁ ≈ 7e-4 as evidence that high rank is needed measures the wrong thing — that mode carries ~5e-7 of the leading mode's energy. The two-sided statement is the honest one.
+- **The dynamics do not amplify the truncation error over a step.** One-step error equals state error to four significant figures at every rank and both N. The discarded components are dynamically near-inert, the dominant error is the projection itself, and the method is not error-amplifying. That is genuinely good news and worth a sentence.
+- **Enstrophy is the demanding metric, and it is where this project validates.** At r=5 the enstrophy error is −63% to −67% while the energy error is only −15%: a state can be 99% right in energy and two-thirds wrong in enstrophy. Even r=43 on N=256 gives −7.8%. Since the POD baseline's most damning number is enstrophy (159× worse), **the choice of validation metric largely determines whether the method looks successful.** Declare which metric you are held to, and report both.
+
+## The figure to build, and the one to drop
+
+The spectrum figure is the wrong figure. Replace it with a **rank-accuracy table/curve** with `(energy fraction, rel L2, ΔZ/Z, rank)` as the columns, at N=64 and N=256, r from 2 to the ceiling. That single object carries the paper's rank contribution honestly, and it is what coder is being asked to produce with corrected semantics. The "slow singular-value decay" figure, and the claim built on it, should go.
+
+## The cost section gets stronger, and this corrects what I told you before
+
+I told you in R5q that the port reaches near-parity by N=512 and no speedup is available. That analysis was right **at the tolerance-selected rank of ~45**, but the energetic rank is 5–9. The flop crossover for the BUG basis update is `r = 0.82·√N`, so at N=256 that is 13.1 — **above the energetic rank**, meaning the BUG basis update uses *fewer* flops than the dense SVD it replaces. And r/N ≈ 0.02–0.035 at N=256, so the method is **genuinely in a low-rank regime** rather than the r/N ≈ 2/3 I reported last cycle.
+
+So: still no per-step speedup claim — I am not reversing that, and the full step still pays the same nonlinear evaluation — but the *ceiling* moves from N≈512 to N≈256 or below, and the framing "the method is never in a low-rank regime" that I sent you last cycle is **too pessimistic and should be dropped** once the rank criterion is fixed. I would rather correct that now than have you write around it.
+
+## One defect worth knowing about, because it will appear in any code or methods text
+
+The rank parameter `tolerance` is applied to singular **values** (amplitudes), not to energy. With `tolerance=1e-6` the retained modes have an energy ratio above **1e-12** — six orders stricter in energy than the name implies, and the committed runs use `1e-8`, which is sixteen orders stricter. So the reported ranks (43) are an artifact of a conservative amplitude cutoff, not an accuracy-driven choice. Coder is renaming it to `relative_amplitude_cutoff` rather than changing behaviour, and re-running the sweep with documented semantics. If you describe the rank selection in the paper, describe it as an amplitude criterion unless that changes.
+
+Unchanged: no validation section until the regime question (R8a) is settled, and nothing from `t ≤ 0.1`.

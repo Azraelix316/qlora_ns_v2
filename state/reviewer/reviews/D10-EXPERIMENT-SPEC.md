@@ -113,28 +113,52 @@ hidden). *Closes V2 (partly).*
 **F4 — Validation against the reference, at each Re.**
 Re ∈ {100, 1000, 5000}, per the P0 metric order.
 
-> **STATIONARITY CLAUSE SUSPENDED BY R8 — DO NOT RUN F4 UNTIL RE-ISSUED.**
-> The bar below ("a fluctuating plateau in E and Z before statistics are taken") is
-> **not achievable at the committed parameters.** Measured full-grid, A=0.2, N=64,
-> T=20: E grows 6.9–8.1× over the initial energy and the mean energy over the final
-> 20% of the run is still **+35% to +49%** above the prior 20%, with
-> `E_in/E_visc` = 10 / 82 / 173 at Re = 100 / 1000 / 5000. The trajectory has not begun
-> to turn over, so no plateau exists at T=20 and the operational test below cannot be
-> satisfied. T=20 is **withdrawn as a target**, not relaxed: a coder following this
-> clause literally would burn a day on a matrix that fails a criterion that was never
-> satisfiable, or would quietly relax the criterion and report a transient as
-> stationary. I will re-issue this clause against a *measured* forcing amplitude and
-> re-cost it then. Evidence and reasoning:
-> `reviews/2026-09-25-R8-no-stationary-state.md`.
+> **STATIONARITY CLAUSE RE-ISSUED BY R8a — READ R8 AND R8a BEFORE F4.**
+> **Why the original bar was withdrawn.** R8 measured the committed configuration
+> (full grid, A=0.2, N=64, dt=5e-4) to T=20 and found no plateau: E grows 6.9–8.1×
+> with +35% to +49% drift in mean energy over the final 20% of the run, and
+> `E_in/E_visc` = 10 / 82 / 173 at Re = 100 / 1000 / 5000. I suspended the original
+> "fluctuating plateau in E and Z" bar as unsatisfiable.
 >
-> **Consequences already binding, pending re-issue:** no turbulence statistic
-> (spectra, time-averaged E/Z, singular-value decay) may be reported from the
-> committed `final_time: 0.1` runs, which are pure spin-up transients; and the
-> full-grid reference must itself be stationary before it can adjudicate a reduced
-> model at all.
+> **R8a's correction — the bar was also mis-specified, and the mechanism was a growing
+> zonal mean rather than a spin-up transient.** Decomposing E into zonal and
+> fluctuating parts to T=40: `ū_bar` grows at ≈0.11–0.13 per time unit at **every** Re
+> across a 50× range in ν, so the mean is not yet viscosity-limited and has no
+> plateau to reach. Total-E stationarity is therefore the **wrong test** for forced
+> Kolmogorov flow, not merely an unmet one. Measured on the fluctuations, no Re is
+> stationary at T=20 or T=40 (E_fluct drift −69% / +61% / +295% at Re = 100 / 1000 /
+> 5000), and **Re=100 is quasi-laminar by t=40** — so the three Reynolds numbers are
+> not one regime at three Re, and Re=100 is not a turbulent case with these settings.
+>
+> **The re-issued criteria, which replace the withdrawn bar and are mechanical:**
+> **S1** statistics are computed on `ψ′ = ψ − x-avg(ψ)`, with the zonal mean's
+> trajectory reported alongside; total-E stationarity is not a criterion and must not
+> be asserted. **S2** stationarity is shown per Re on `E_fluct` **and** `Z_fluct`, by
+> block means (≥2 time units) over the final third, reporting drift between the last
+> two thirds; **bar |drift| ≤ 10% on both** — currently failing at every Re.
+> **S3** the horizon is *measured*, not assumed: T=20 was my assumption and it is
+> wrong, and even T=40 fails S2, so T must be chosen from a pilot reporting the S2
+> statistic as a function of T. **S4** the regime is characterised per Re and a
+> quasi-laminar case is reported as such — either the configuration changes so all
+> three Re are in the intended regime, or Re=100 is reported as a laminar control,
+> which is legitimate but cannot be presented as one of three turbulent cases.
+> **S5** no turbulence statistic from `t ≤ 0.1` (unchanged).
+>
+> **Open design decision, deliberately not imposed by me:** high Re (needed for
+> interesting turbulence) and fast mean equilibration (needed to take statistics) pull
+> in opposite directions, since the mean's equilibration rate scales like ν. Lowering
+> the forcing amplitude lowers the mean growth and the turbulent forcing together, so
+> **amplitude tuning alone cannot resolve it.** The choice among (i) analysing
+> fluctuations and reporting the mean's growth as a feature, (ii) removing the zonal
+> momentum equation so the mean cannot grow secularly, and (iii) running much longer, is
+> coder's and theoretical-research's to make with a justification. Evidence:
+> `reviews/2026-09-25-R8-no-stationary-state.md`,
+> `reviews/2026-09-25-R8a-zonal-mean-revision.md`.
 
-**Bar (to be re-issued):** runs reach a fluctuating plateau in E and Z before
-statistics are taken (operationally:
+**F4 — Validation against the reference, at each Re.**
+Re ∈ {100, 1000, 5000}, per the P0 metric order, **under S1–S5 above**. **Bar (to be
+re-issued):** runs reach a fluctuating plateau in E and Z before statistics are
+taken (operationally:
 relative standard deviation of E over the final quarter of the run below ~5%);
 the three Re are actually distinguished (they must not produce near-identical
 trajectories, which is what happens now); results reported at N where the
@@ -266,16 +290,21 @@ artifact*; warm-up discarded; ≥7 repeats; median plus spread; and a timed regi
 dominates process start-up — at `dt=5e-4` that means **≥2000 steps, not the 200 the
 committed runs used**. A timing that does not meet this is not a measurement.
 
-**Order of work:** (1) re-time properly, to the R5q protocol; (2) V1; (3) **R8:
-choose a forcing amplitude that actually reaches stationarity on N=64, with a
-one-paragraph physical justification, and re-issue the F4 stationarity clause —
-this now precedes every other item, because F4 and everything downstream of it are
-blocked on it**; (4) V2 at N=64, T=20; (5) F2
+**Order of work:** (1) re-time properly, to the R5q protocol; (2) V1; (3) **R8a:
+resolve the stationarity design decision** — the choice among analysing fluctuations,
+removing the zonal momentum equation, or running much longer, made with a written
+justification, plus a pilot reporting the S2 statistic as a function of T so the
+horizon is measured rather than assumed. This precedes everything else because F4 and
+all statistics downstream of it are blocked on it, and because **amplitude tuning
+alone cannot resolve it** (the mean's equilibration rate scales like ν, so lowering the
+forcing lowers the turbulent forcing too); (4) V2 at the T chosen in (3); (5) F2
 with the full spectrum recorded — `normalized_spectrum` currently caps at 32
 values, which is the binding constraint on the slow-decay claim and must become
 a parameter; (6) V5 at short T; (7) V4; (8) V6, then re-run 4–7 with the new
-integrator; (9) decide any long high-N run from the measured cost. Steps 1–2 and 4–6
-are a few hours in total. **Added at R5q, and cheap enough to do during step 1:** a
+integrator; (9) decide any long high-N run from the measured cost. Steps 1–2, 5–6 are
+a few hours; step 3's pilot is hours, not days, but it **gates the rest** and must not
+be skipped or deferred to the end. **Added at R5q, and cheap enough to do during step 1:**
+a
 test asserting that per-step cost is currently *rank-independent* (`r=2` versus
 `r=64` within 1.25×), with a docstring saying this is today's behaviour and that V6
 must invert it — so the port's improvement shows up as a test going from pass to fail

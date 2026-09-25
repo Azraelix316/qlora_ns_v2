@@ -30,6 +30,162 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R12 — ran R11's own experiment rather than delegating it: the premise is
+> recoverable, and a mislabelled parameter was costing us the cost story.** No spectral
+> gap at high N either (N=128 → rank **85** = ceiling, N=256 → **171**, both at every
+> tol 1e-6…1e-14, with a **nine-order cliff** at the ceiling: σ₈₅/σ₁=2.50e-6 →
+> σ₈₆/σ₁=1.73e-15; σ₁₇₁/σ₁=1.28e-7 → σ₁₇₂/σ₁=9.73e-16; σ₂₀₀/σ₁=2.0e-16), confirming
+> R11 at high N. **But 99% of energy is in r=5 and 99.9% in r=9, identical at N=128 and
+> N=256** — the energetic rank does not grow with the grid. **The defect:
+> `_target_from_spectrum` tests `s > tolerance*s[0]` on singular VALUES, so
+> `tolerance=1e-6` is an *energy* ratio of 1e-12 — six orders stricter than the name
+> implies, and the committed `1e-8` is sixteen** — which is why runs select r=43 when
+> r=5 carries 99% of the energy. A parameter whose name misdescribes its behaviour is
+> misread by everyone, including me. **Three pictures of the same truncation disagree:**
+> energy 0.999997 at N=64 r=32 yet rel L2 1.8e-3 and **ΔZ/Z −1.6e-2**; at r=5 energy
+> error −1.7e-1 but **enstrophy error −6.7e-1**; at N=256 r=43 still **ΔZ/Z −7.8e-2**.
+> **The dynamics do not amplify truncation over a step** (one-step error = state error to
+> 4 s.f. at every rank, both N) — good news, and now a requested test. **Enstrophy is
+> the demanding metric and is where this project validates** (R5m: POD 159× worse), so
+> the validation metric largely decides whether the method looks good — the paper must
+> declare which. **Reframed premise (defensible, with a mechanism and a prediction):**
+> spectrally full-rank within the dealiased band, no gap, numerical rank = the grid's
+> ceiling and not dynamical; energy strongly low-rank at r≈5, N-independent; truncation
+> energetically accurate but progressively worse for enstrophy; no one-step error
+> amplification. The "adaptive rank growth" claim is **removed**, not hedged. **It also
+> corrects R5q and my own R11 pessimism:** R5q's near-parity-by-N=512 holds only at the
+> tolerance-selected r≈45; the BUG flop crossover is `r=0.82·√N` = 13.1 at N=256, which
+> is **above** the energetic rank 5–9, so the BUG basis update uses **fewer** flops than
+> the dense SVD at r≈5–9, and r/N ≈ 0.02–0.035 — a **genuinely low-rank regime**. First
+> finding in several cycles that *strengthens* the cost argument, and it came from fixing
+> a mislabelled parameter. Told writer to drop "the method is never in a low-rank regime"
+> and that the cost ceiling moves from N≈512 to N≈256 or below — while the no-speedup
+> claim stands.
+> **R11 — premise test: the rank is the dealiasing mask, not the dynamics.** The
+> project's premise is "turbulent dynamics need rank ≫ 3, slow singular-value decay,
+> adaptive rank growth". **Good news first:** R8a left an obvious worry — the mean
+> carries 52–99% of the energy, so maybe the rank describes the mean, not the
+> turbulence. Measured, **no**: the zonal mean is **exactly rank 1** (φ(y) broadcast
+> along x is a rank-one outer product), so **42 of 43 retained modes are fluctuations**
+> at every t and both high Re, and the slow decay is in the fluctuations
+> (σ₃₂/σ₁ of the fluctuation field 7.4e-3 → 2.4e-4 over t=2→20 at Re=5000, zonal
+> σ₈/σ₁ ~ 1e-64). **Serious finding:** the rank is **43 at every tolerance from 1e-6
+> to 1e-14 and every t from 0.5 to 20** — invariant across five orders of magnitude in
+> tolerance and a factor of 40 in time, so it measures nothing dynamic. And
+> **2·floor(N/3)+1 = 43**. Tested across grids: measured rank **21/33/43/65/85** at
+> N=**32/48/64/96/128** against 2·floor(N/3)+1 = **21/33/43/65/85** — **exact match
+> everywhere**. The dealiased mask confines the x-Fourier support to that many
+> wavenumbers, bounding the matrix rank, so **the state is full-rank within the band the
+> grid admits, with no internal spectral gap.** Four consequences: (i) the "adaptive
+> rank growth" is the rank-2 init artifact meeting a grid ceiling — F3 suspected a
+> transient artefact, this is the mechanism; (ii) **the premise as stated is not
+> supported** — rank is large because the grid admits ≈2N/3 x-modes, and the
+> defensible reformulation is that truncation is not *spectrally* motivated but is
+> *energetically* accurate (σ_last/σ₁ = 7.5e-5 at N=64, 2.0e-6 at N=128), which also
+> matches R5m's rank-insensitive error; (iii) **the method is never in a genuinely
+> low-rank regime on these grids** (r/N ≈ 2/3 at best), a structural reason F6's cost
+> story is hard; (iv) **the two committed runs are limited by different ceilings** —
+> at N=64 the grid (43) binds and `max_rank=48` does not, at N=128 the cap (48) binds
+> against a ceiling of 85 — so the "grid check" varies which constraint limits rank,
+> a third independent reason it is not one. Also: **dealiasing is load-bearing for
+> stability** (`dealias=False` at Re=5000 overflows to NaN within t=5), and the
+> full-state slow-decay metric is **contaminated by the growing mean in its
+> denominator** (t=2: 1.94e-3 full vs **7.39e-3** on fluctuations, factor 3.8), so the
+> project's verified 1.45e-3 understates the fluctuations' decay. **Decisive cheap
+> experiment issued:** is there a spectral gap below the ceiling at N=256/512? If yes
+> the premise stands in strong form; if the rank is always the ceiling, the
+> adaptive-rank contribution is empty and the paper rests on the filtering/accuracy
+> argument. **Correction to my own R8:** I told all three agents the committed
+> configuration is `force_amplitude=0.2`, having read the *driver default*
+> (`run_kolmogorov.py:393`); **every committed artifact records 0.5**. The stationarity
+> finding survives and is **conservative** (at 0.5, Re=5000 reaches E=3747 = 169× E₀
+> by t=40 with ratio still 125), but the S3 pilot must run at 0.5. **Fourth time the
+> "which configuration is committed" question changed a conclusion** — the rule is not
+> "measure more" but that **a default in a signature is not a record of what was run,
+> and `state/*/results/*.json` is.**
+> **R10 — audited the file I had flagged unaudited, and retracted a claim of my
+> own.** `arxiv_index.json` (merged to `main` in R9) has **four defects**: (A1) a
+> **non-resolving DOI on the project's closest prior art** — entry 15 records
+> `10.1016/j.compflu.2022.105536`, Crossref returns **404**; correct is
+> **`10.1016/j.compfluid.2022.105536`** (`compfluid`, not `compflu`), confirmed by title
+> search at score 87.2. It is a **transcription error of a DOI I had already supplied
+> twice** in my outbox; I checked my own records (`lessons_learned.md`, outbox, R5d) and
+> they are correct, and `refs.bib` does not carry this DOI at all, so the defect is
+> confined to the evidence artifact. (A2) entry 27 pairs `arXiv:1505.05648` with the
+> projector-splitting title; verified via the arXiv API that 1505.05648 is **Barbara
+> Schapira on horospherical foliations, math.DS** — the R7 misattribution, deleted from
+> `refs.bib` in R9 but **left in the index**, so the error now lives in the one artifact
+> meant to be the reproducible record. (A3) "Olga Koch" is in entry 28 as well as
+> `refs.bib` — my R9 fix list named only one file. (A4) the persisted novelty query is
+> **not reproducible**: entry 26 records `query: "divergence-free AND dynamical
+> low-rank"`, `count: 0`, but that string returns **811** results as written (arXiv
+> matches bare words loosely); the 0 belongs to the properly formed
+> `all:"divergence-free" AND all:"dynamical low-rank"`, and even that is weak evidence
+> since D4 already bars "to our knowledge" on arXiv alone. Three of four DOI-identified
+> records verify exactly; **~25 arXiv-identified entries not individually verified this
+> cycle — flagged, not implied clean.** **Retraction:** in R8a I asserted option (ii)
+> (remove the zonal momentum equation) was "a real transformation with a literature
+> behind it". **I could not verify it exists** — three targeted searches returned
+> geophysical zonal-flow and unrelated material; nearest verified result is Šonbek,
+> *JAMS* 4(3):423–449 (1991), the 2D NSE decay exponent, which is about *unforced*
+> decay and does not establish the transformation. My hedge ("check the assumptions
+> rather than take my word") was right in form but a hedge on a false claim is still a
+> false claim, and two agents were about to act on it — retracted, and option (ii) is
+> now costed as **open research**. Recommendation changed accordingly to option (i) on
+> measured evidence (the mean carries 52–99% of total energy and grows at a
+> `ν`-independent rate, so fluctuation variables are the natural ones). **Pattern, now
+> seen four times:** fixing a defect in one file while it lives in another is not a fix —
+> the audit must cover every artifact holding the claim.
+> **R9 — writing-research `4086485`: MERGED to `main` (`aaa6e0c`).** First agent
+> branch merged since coder's engine in R5, and the first writing-research work to
+> reach `main`. **Ran `start` and merged `main`** after three pushes on an R3 base —
+> the behaviour change asked for since R6c. **All eight junk files gone** (verified
+> individually, then confirmed absent from `main`), including the 339-line
+> `combined_scripts.tmp` and the 187-line `old_refs.bib` build hazard, and
+> `scripts/arxiv_searcher.py` — an unowned file in the **scaffold** `scripts/` path,
+> which is mine; deleting one's own clutter out of a path one does not own cleared a D7
+> violation that survived three cycles, and I credited it. **`refs.bib` repaired and
+> parsing** (214/214 braces, zero suspicious lines by depth-walk) **without** the string
+> surgery that caused the damage. **Fabricated Koch entries replaced** by one correct
+> record — `koch2007dlra`, SIMAX 29(2):434–454 (2007), DOI 10.1137/050639703, every
+> field matching Crossref. **All three DOIs verify**, including a new
+> `10.1063/5.0202509` (Zhang/Xu/Guo/Feng, *Physics of Fluids* 36(6) 2024) checked this
+> session. **I merged despite the ancestry check failing**, because I tested the rule's
+> purpose rather than its letter: 0 files deleted from `main`, 0 modified outside their
+> owned paths, 0 conflicts, 79→88 files post-merge, all 19 key paths present. **Rewrote
+> CHECKLIST §2.0** so the *property* test binds and the ancestry test is advisory — a
+> proxy too strict to distinguish "stale but safe" from "dangerous" will block a
+> legitimate merge, and an agent that cannot land clean work stops doing the work.
+> **Four items left:** the venue doc is untouched and is the only one with substance
+> (D5 order, one access date per deadline); `koch2007dlra` still says "Koch, Olga"
+> (one word, must be Othmar); the Lubich–Oseledets projector-splitting record is absent
+> (needed for the V6 port); and still no reply in their outbox. Not flagged as clean:
+> `arxiv_index.json`, modified this commit and unaudited.
+> **R8a — revision of R8: the mechanism is a growing zonal mean, not a spin-up
+> transient, and my stationarity criterion was the wrong test.** R8's *conclusion*
+> survives (no Re stationary at T=20 or T=40; committed t=0.1 runs still support no
+> turbulence statistic) but its reasoning did not, and a conclusion reached by wrong
+> reasoning is one that should not be trusted until re-derived. Measured to T=40:
+> `ū_bar` grows at **≈0.11–0.13 per time unit at every Re across a 50× viscosity
+> range**, so the mean is *not* approaching a viscous balance (which would separate
+> the trajectories by orders of magnitude) and **has no plateau on any affordable
+> horizon** — physics for forced Kolmogorov flow, not a defect. Hence total-E
+> stationarity is **mis-specified, not merely unmet**, and I replaced it with S1–S5
+> (statistics on `ψ′ = ψ − x-avg(ψ)`; stationarity per Re on `E_fluct` **and**
+> `Z_fluct`, bar |drift| ≤ 10%; horizon **measured** not assumed; regime characterised
+> per Re; nothing from t ≤ 0.1). **Biggest new finding: Re=100 is quasi-laminar**
+> (`E_fluct` 7.90 → 0.55, drift **−69%**), so the planned Re sweep is **not one regime
+> at three Re** — varying Re changes the qualitative behaviour, and Re=100 cannot be
+> presented as one of three turbulent cases. At Re=1000 `E_fluct` drifts +61%; at
+> Re=5000 +295%. **My R8 advice was also unachievable:** the mean's equilibration rate
+> scales like ν while the turbulent forcing does not, so lowering the amplitude lowers
+> both — **no amplitude fixes this**. Replaced with three structural options
+> (fluctuation analysis / remove the zonal momentum equation / run much longer) and
+> **deliberately left undecided** for coder and theoretical-research to choose with a
+> justification. Pattern now recorded explicitly: the first explanation of a
+> surprising result is the one to check hardest, because it is the one I did not have
+> to work for — third time in two cycles (R5q cost model, R8 amplitude, R8a
+> mechanism).
 > **R8 — the most consequential finding of the review: the forced problem has no
 > stationary state at the committed parameters.** Full grid, N=64, dt=5e-4, the
 > driver's default `force_amplitude=0.2`, T=20: E grows **6.9–8.1×** and is still
@@ -145,6 +301,435 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R12 — I ran my own experiment instead of delegating it, and it found a
+  defect that was costing the project its cost story.** R11 ended by issuing a
+  paper-shaping question and calling it "minutes of compute". Leaving it open when I
+  could answer it in minutes would have been the same delegation failure I had been
+  criticising, so I ran it. The result is the first finding in several cycles that makes
+  the contribution *stronger* rather than weaker.
+
+  **R11's question answered: no spectral gap at high N either.** Full grid, Re=5000,
+  **A=0.5** (the amplitude the committed artifacts actually use, per R11's correction),
+  t=2, dealias on. N=128: numerical rank **85** = `2·floor(128/3)+1` at every tolerance
+  from 1e-6 to 1e-14, with a **nine-order cliff** (σ₈₅/σ₁ = 2.50e-6 → σ₈₆/σ₁ = 1.73e-15).
+  N=256: rank **171** = the ceiling, same nine-order cliff (σ₁₇₁/σ₁ = 1.28e-7 →
+  σ₁₇₂/σ₁ = 9.73e-16), and σ₂₀₀/σ₁ = 2.0e-16 confirming the dealiasing mask annihilates
+  everything above the band. So the state is spectrally full-rank within the admitted
+  band at every N tested, there is no gap for adaptive rank to exploit, and R11's
+  conclusion holds at high N.
+
+  **But the energy is remarkably concentrated, and N-independent.** Cumulative
+  singular-value energy: **99% in r=5, 99.9% in r=9 — identical at N=128 and N=256.**
+  The energetically relevant rank does not grow with the grid while the numerical rank
+  doubles with it. That is a precise, non-obvious and genuinely interesting object.
+
+  **The defect, and it is a real one.** `SVDProjector._target_from_spectrum`
+  (`solvers/dlra.py:87`) is `count_nonzero(s > self.tolerance * s[0])` — a test on
+  singular **values**, i.e. amplitudes. With `tolerance=1e-6` the retained modes satisfy
+  an **energy** ratio above **1e-12**: six orders of magnitude stricter than the name
+  implies, and the committed runs use `1e-8`, which is *sixteen* orders stricter in
+  energy. So the method has not been selecting a rank for accuracy at all — it has been
+  selecting a rank eight to sixteen orders more conservatively than its own parameter
+  advertises, which is exactly why the runs choose r=43 when r=5 already carries 99% of
+  the energy. I recorded this as a **correctness-and-clarity defect rather than a tuning
+  preference**, because a parameter whose name misdescribes its behaviour will be
+  misread by everyone who touches it, and I have now been one of those people for
+  several cycles. My recommendation to coder was to **rename rather than change
+  behaviour** (`relative_amplitude_cutoff`) — the smaller change and the more honest
+  one — and to document in the docstring and the artifact field which quantity the
+  tolerance applies to.
+
+  **Three pictures of the same truncation, and they disagree.** Truncating the developed
+  state and measuring energy retained, relative L2, the error after one full step of the
+  nonlinear operator, and kinetic/enstrophy-relative errors. N=64, r=32: energy
+  fraction **0.999997**, rel L2 1.8e-3, ΔE/E −8.8e-4, **ΔZ/Z −1.6e-2**. N=64, r=5:
+  energy 0.9927, ΔE/E −1.7e-1, **ΔZ/Z −6.7e-1**. N=256, r=43: energy 1.000000, rel L2
+  7.0e-4, **ΔZ/Z −7.8e-2**. Three conclusions. **(i) Energy concentration and accuracy
+  are different quantities** — a state can retain 99.9997% of its energy and still carry
+  0.18% L2 and 1.6% enstrophy error, so quoting σ₃₂/σ₁ ≈ 7e-4 as evidence that high rank
+  is needed measures the wrong thing (that mode carries ~5e-7 of the leading mode's
+  energy). **(ii) The dynamics do not amplify the truncation error over a step**: the
+  one-step error equals the state error to four significant figures at every rank and
+  both N (1.816e-3 vs 1.816e-3 at N=64 r=32), so the discarded components are
+  dynamically near-inert, the dominant error is the projection itself, and the method is
+  not error-amplifying. That is good news, it explains the well-behaved reduced runs, and
+  I asked coder to protect it with a test. **(iii) Enstrophy is the demanding metric and
+  is where this project actually validates** — at r=5 the enstrophy error is −63% to
+  −67% while the energy error is only −15%, so a state can be 99% right in energy and
+  two-thirds wrong in enstrophy; and since R5m established POD's most damning number is
+  enstrophy (159× worse), **the choice of validation metric largely determines whether
+  the method looks successful.** The paper must declare which metric it is held to and
+  report both.
+
+  **The reframed premise, which is defensible and more interesting than the one it
+  replaces.** The developed state is spectrally full-rank within the band the dealiased
+  grid admits, with no spectral gap, its numerical rank being exactly the grid's
+  `2·floor(N/3)+1` and therefore not a dynamical quantity; its *energy* is strongly
+  low-rank, 99% in 5 modes and 99.9% in 9, independent of N; low-rank truncation is
+  therefore not spectrally motivated but energetically accurate while being
+  progressively worse for enstrophy; and the operator does not amplify the discarded
+  components. That has a measurement, a mechanism (the dealiasing ceiling) and a
+  prediction (the enstrophy crossover). It also **removes** the "adaptive rank growth"
+  claim outright rather than hedging it, which is cheaper than defending it.
+
+  **It corrects R5q and my own R11 pessimism, and I sent that correction explicitly.**
+  R5q concluded the BUG port reaches near-parity by N=512 at r≈45, with the flop
+  crossover at `r = 0.82·√N`. That analysis is correct **at the tolerance-selected
+  rank**, but the energetic rank is 5–9: at N=256, `0.82·√256 = 13.1` lies **above** the
+  energetic rank, so the BUG basis-update QR uses **fewer** flops than the dense SVD it
+  replaces; at N=512 the margin is wider still; and r/N ≈ 0.02–0.035 at N=256, so the
+  method is **genuinely in a low-rank regime** rather than the r/N ≈ 2/3 I reported in
+  R11. So R5q's ceiling is a **pessimistic bound that holds only if the rank stays at
+  43**, and I told writer to drop "the method is never in a low-rank regime" and that the
+  cost crossover moves to N≈256 or below. The **no-per-step-speedup claim is not
+  reversed** — both methods still pay the same nonlinear evaluation — and I said so
+  explicitly. The general observation, which I think is the most useful thing in this
+  cycle: **the cost argument was weak because of a mislabelled parameter, not because
+  the method is expensive.** Four cycles of reviewer effort have gone into establishing
+  that this method cannot beat the full grid per step, and the reason the ceiling sat at
+  N=512 rather than N=256 was a name on a number.
+
+  **Limits I recorded rather than glossed.** I measured the developed state at **t=2**,
+  not at a steady state, because R8/R8a established none exists at these parameters on
+  these grids. The absence of a gap and the energy concentration are both properties of
+  the band-limited field so I expect them to be robust — and the energetic rank matched
+  at two N, which is some evidence — but I have not shown it and the S3 pilot is still
+  owed. The one-step non-amplification result is **one** step; whether error is
+  eventually contracting over many steps is a harder question I have not addressed. All
+  numbers single-node, threads pinned, A=0.5, Re=5000; the ratios are the portable part.
+- 2026-09-25 **R11 — premise test: the adaptive rank is the dealiasing mask, not the
+  dynamics. Plus a correction to my own R8 configuration claim.** R8a left an obvious
+  worry: the zonal mean carries 52–99% of the energy, so "rank ≫ 3 with slow
+  singular-value decay" might describe the growing mean rather than the turbulence. This
+  cycle I tested the premise directly, and the result is mixed in a way that matters.
+
+  **Good news, and it protects the paper's framing.** Decomposing the state into zonal
+  and fluctuating parts and taking singular values of each: **the zonal mean is exactly
+  rank 1** at every time and both high Re — as it must be, a profile `φ(y)` broadcast
+  along `x` is a rank-one outer product — so **42 of the 43 retained modes are
+  fluctuations**. Energy-weighted dominance of the mean does *not* become rank
+  dominance, and the slow decay is genuinely in the fluctuations (σ₃₂/σ₁ of the
+  fluctuation field 7.4e-3 → 2.4e-4 over t=2→20 at Re=5000, while the zonal spectrum is
+  numerically zero past rank 1, σ₈/σ₁ ~ 1e-64). The premise is not confounded by the
+  mean flow, and this also makes S1 structurally natural rather than a workaround: the
+  decomposition is exact, cheap, and separates a rank-1 object from the turbulence.
+
+  **The serious finding: the rank is the grid's.** The rank is **43 at every tolerance
+  from 1e-6 to 1e-14, at every time from t=0.5 to t=20**. A rank invariant across five
+  orders of magnitude in tolerance *and* a factor of 40 in time is not measuring
+  anything dynamic. And **2·floor(N/3)+1 = 43** at N=64. I tested across grid sizes and
+  the match is exact — measured numerical rank of the developed state (Re=5000, A=0.2,
+  t=5, tol 1e-10) is **21 / 33 / 43 / 65 / 85** at N = **32 / 48 / 64 / 96 / 128**,
+  against **2·floor(N/3)+1 = 21 / 33 / 43 / 65 / 85**. The mechanism is structural: the
+  dealiased mask confines the x-Fourier support to `2·floor(N/3)+1` wavenumbers, which
+  bounds the matrix rank, so **the state is full-rank within the band the grid admits,
+  with no internal spectral gap.**
+
+  **Four consequences, and the paper's framing is in them.** (i) The "adaptive rank
+  growth" in every committed run is the rank-2 initialisation artifact meeting a grid
+  ceiling: the rank rises to exactly `2·floor(N/3)+1` and never moves. The spec's F3
+  already suspected a transient artefact ("a monotone jump to 43 then flat"); this is
+  the mechanism, and there is no dynamical rank adaptation to report. (ii) **The premise
+  as stated is not supported** — rank is large because the grid admits ≈2N/3 x-modes,
+  not because the turbulence is complex, and the slow decay is slow *within* a
+  grid-imposed subspace. The defensible reformulation is narrower and still
+  publishable: *the state is spectrally full-rank within the admitted band, so rank
+  truncation is not spectrally motivated, but the tail is energetically negligible
+  (σ_last/σ₁ = 7.5e-5 at N=64, 2.0e-6 at N=128), so low-rank approximation is
+  energetically accurate.* That also matches R5m's measurement that trajectory error is
+  nearly insensitive to rank across a 2× range. (iii) **The method is never in a
+  genuinely low-rank regime on these grids** — available rank is capped at ≈2N/3, so
+  r/N ≈ 2/3 at best, and a real low-rank regime needs 2N/3 ≫ r. This is a structural
+  reason F6's cost story is hard and the paper should concede it rather than let a
+  reviewer find it. (iv) **The two committed runs are limited by different ceilings**:
+  at N=64 the grid ceiling is 43 and `dlra_max_rank=48`, so the cap is not binding and
+  the grid is; at N=128 the ceiling is 85 and the cap is 48, so the cap is. The
+  N=64/N=128 comparison therefore varies *which constraint limits the rank*, on top of
+  the t=0.1 transient (R8) and the 2.25× enstrophy gap (R5m) — a third independent
+  reason it is not a grid check.
+
+  **Two smaller findings, both worth carrying into the paper.** **Dealiasing is
+  load-bearing for stability, not merely accuracy**: re-running Re=5000 with
+  `dealias=False` **overflows to NaN** within t=5 (warnings at `ns_psi.py:94`, then
+  `LinAlgError: SVD did not converge`). And **the full-state slow-decay metric is
+  contaminated by the growing mean in its denominator** — at Re=5000, t=2, σ₃₂/σ₁ is
+  1.94e-3 on the full state but **7.39e-3 on the fluctuations**, a factor 3.8, because
+  σ₁_full = 3.60e1 against σ₁_fluct = 9.23e0; the two converge only once the mean stops
+  dominating (t=20: 2.26e-4 vs 2.36e-4). The project's verified σ₃₂/σ₁ = 1.45e-3 is a
+  full-state early-time value and therefore **understates** the fluctuations' slow
+  decay, so any spectrum claim must state which field it was computed on.
+
+  **The decisive experiment, issued to coder and writer as a paper-shaping question.**
+  Is there a spectral gap below the dealiasing ceiling at high N? If a gap opens at
+  N=256/512, low-rank approximation is spectrally motivated, adaptive rank has
+  something to track, and the premise stands in its strong form. If the rank is
+  *always* exactly the grid ceiling, there is no gap, the adaptive-rank contribution is
+  empty, and the paper must rest on the filtering/accuracy argument R5q identified as
+  the strongest available claim. Both are legitimate papers; they are different papers;
+  the team should choose deliberately rather than have a reviewer reveal it. It is
+  minutes of compute: full grid to a developed state at N=256, `np.linalg.svd`, compare
+  against `2·floor(256/3)+1 = 171`.
+
+  **Correction to my own R8, and it is the fourth instance of one failure mode.** I told
+  coder, writer and theoretical-research that "the committed configuration" is
+  `force_amplitude=0.2`, and measured the stationarity finding at 0.2. Checking the
+  artifacts rather than the driver signature: **every committed artifact records
+  `force_amplitude: 0.5`** — re100, re1000, re5000, the N=128 run and the long run. The
+  *driver default* is 0.2 (`run_kolmogorov.py:393`); the *runs* used 0.5. I read a
+  function signature and called it a record of what was run. **The finding survives and
+  is conservative**: at A=0.5 the non-stationarity is *worse* than reported — Re=5000
+  reaches E=3747 by t=40 (169× E₀) with `E_in/E_visc` still 125, against 7–8× and
+  ratios 10–173 at A=0.2 — so R8 and R8a stand and the committed runs are further from
+  stationarity than the ones I measured. But the S3 pilot must run at **A=0.5**, and I
+  have asked all three agents to re-check any number I quoted as "the committed
+  configuration". Fourth time this has changed a conclusion (R5q cost model, R8
+  amplitude, R8a mechanism, R11 amplitude again), so the lesson is now written down in
+  its sharpest form: **a default in a function signature is not a record of what was
+  run; `state/*/results/*.json` is.**
+- 2026-09-25 **R10 — audited `arxiv_index.json`, found four defects, and retracted a
+  claim of my own.** In R9 I wrote "flagged rather than claimed clean" about
+  `state/writing-research/arxiv_index.json`, having merged it without auditing it. That
+  was the right instinct and the audit justified it.
+
+  **A1, the one that matters: a non-resolving DOI on the project's closest prior art.**
+  Entry 15 records `https://doi.org/10.1016/j.compflu.2022.105536` for Girfoglio,
+  Quaini & Rozza. **Crossref returns HTTP 404.** The correct DOI is
+  **`10.1016/j.compfluid.2022.105536`** — journal abbreviation `compfluid`, not
+  `compflu` — confirmed by bibliographic title search (score 87.2, *Computers & Fluids*
+  244:105536, 2022, correct author list). Three things make this more than a typo. It is
+  the paper D4 uses to refute "first exactly divergence-free NS solver". It is the record
+  whose *only* identifier is a DOI that does not resolve, so nothing in the entry can be
+  checked from the entry. And it is a **transcription error of a DOI I had already
+  handed over** — my outbox gives the correct string twice (once when I told them to
+  cite the journal version rather than only the arXiv preprint, once in the sixteen
+  verified references the survey must contain). Per the discipline I have applied to
+  every fabricated reference in this project, I checked **my own** records rather than
+  assuming: `lessons_learned.md:45`, my outbox lines 243 and 251, and the R5d report
+  lines 63 and 126 all carry the correct `compfluid` form. `refs.bib` does not carry
+  this DOI at all (it cites arXiv:2201.00756), so the defect is confined to the
+  evidence artifact. This is the second time an unverified DOI has reached a file in
+  this project, and had I trusted the index because it was already merged, a
+  non-resolving DOI on the closest prior art would have shipped.
+
+  **A2: the R7 misattribution is still in the index.** Entry 27 pairs `arXiv:1505.05648`
+  with "Projector-splitting integrators for dynamical low-rank approximation". Verified
+  against the arXiv API this session: **1505.05648 is Barbara Schapira, "A short proof of
+  unique ergodicity of horospherical foliations on infinite volume hyperbolic manifolds",
+  math.DS, 2015-05-21** — unrelated in every respect. writing-research correctly deleted
+  the `refs.bib` copy in R9, but **left the index untouched**, so the error migrated into
+  the one artifact whose entire purpose is to be the reproducible record of the survey.
+  This is the worst fabrication mode precisely because it survives a skim.
+
+  **A3: "Olga Koch" is in the index as well.** Entry 28 lists
+  `['Olga Koch', 'Christian Lubich']` where Crossref says **Othmar Koch**. My R9 fix list
+  named only `refs.bib`, so the correction could not reach this file — the same
+  one-artifact-at-a-time error as A2, and the clearest evidence of the pattern below.
+
+  **A4: the persisted novelty query is not reproducible and overstates its own result.**
+  Entry 26 records `query: "divergence-free AND dynamical low-rank"`, `count: 0`, with
+  notes claiming "no papers found matching both criteria simultaneously". Measured just
+  now: **the query as written returns 811 results** (the arXiv API matches bare words
+  loosely), while the properly formed `all:"divergence-free" AND all:"dynamical
+  low-rank"` returns 0. The recorded count belongs to a *different* query than the
+  recorded string, so anyone re-running the survey as written gets 811 and cannot
+  reproduce the 0. And the 0 is weak evidence in any case: arXiv's scicomp coverage is
+  partial and D4 already bars "to our knowledge" resting on arXiv alone. I required the
+  interpretation be bounded to "no arXiv record matches both exact phrases" and never
+  "no paper does".
+
+  **What is clean, and what I did not check.** Three of the four DOI-identified records
+  verify exactly (`10.1137/050639703`, `10.1016/j.jcp.2017.09.061`, `10.1063/5.0202509`).
+  Bibliographic metadata for entries 15/29/30 is correct; only entry 15's DOI string is
+  wrong. Recording DOI-identified rather than arXiv-identified entries is a legitimate
+  schema choice, and the `query_result` versus reference distinction is sensible. I did
+  **not** verify each of the ~25 arXiv-identified entries against its abs page this
+  cycle — structural parse only — and I said so in the report rather than letting the
+  audit's completeness imply more than it has.
+
+  **Retraction — my own unverified literature claim.** In R8a I offered three resolutions
+  for the stationarity problem and wrote of option (ii), removing the zonal momentum
+  equation, that "this is a real transformation with a literature behind it." **I could
+  not verify that.** Three targeted searches returned geophysical zonal-flow papers,
+  generic Navier–Stokes material, and — because of unrelated September 2026 news — the
+  existence-and-smoothness discussion; no reference for the technique in 2D NSE
+  surfaced. The nearest verified result is Šonbek, "Lower bounds of rates of decay for
+  solutions of the Navier–Stokes equations", *J. Amer. Math. Soc.* 4(3):423–449 (1991),
+  the Fujita-type exponent for 2D NSE — about *unforced* decay, consistent with the slow
+  relaxation I measured, but not establishing the transformation. So I retracted it. My
+  hedge in the coder message ("check the assumptions rather than take my word") was right
+  in form, and it remains the operative instruction, but **a hedge attached to a false
+  factual claim is still a false claim**, and two agents were positioned to act on it.
+  I also changed my recommendation on the evidence: option (i), analysing the
+  fluctuations, because the mean carries **52–99% of total energy** and grows at a
+  `ν`-independent rate, which makes fluctuation variables the natural ones rather than a
+  workaround.
+
+  **Pattern, now seen four times, and recorded as the lesson of this cycle.** R6b:
+  headers prepended to outboxes because the *same* hazard lived in `DECISIONS.md`. R5j:
+  operative-text blocks in `DECISIONS.md` for the same reason. R9: the venue document
+  held open while the bibliography was fixed. R10: the Koch name, the Schapira
+  misattribution and the Girfoglio DOI each fixed (or attempted) in **one** artifact
+  while living in another. **Fixing a defect in one file while it lives in another is
+  not a fix.** The audit has to cover every artifact that holds the claim, not the one
+  that was complained about — and the tell is always the same: a fix list that names
+  files instead of claims.
+- 2026-09-25 **R9 — writing-research `4086485` MERGED to `main`, and I had to rewrite
+  my own merge rule to do it honestly.** A push arrived at 08:09, *after* my R7 verdict,
+  so unlike `bdfb02d` this was work done with the review visible.
+
+  **Merge safety, and a rule I had to correct.** `git merge-base --is-ancestor
+  origin/main origin/agent/writing-research` **fails** — their branch is based on
+  `main@8d4098c`, four merges behind. My own `CHECKLIST.md` §2.0 said do not merge in
+  that case, having written it in R6c after finding a branch that would have reverted
+  ~24,800 lines. Rather than obey the letter of a rule I wrote three cycles ago, I tested
+  its **purpose**: files their branch deletes from `main` = **0**; files modified outside
+  their owned paths = **0**; `git merge-tree` conflicts = **0**. The catastrophic case
+  §2.0 exists for is *provably absent* — they had merged `main` as of `8d4098c`, which
+  already contained the engine and the review record, and they touched nothing but
+  `refs.bib`, `docs/` and `state/writing-research/`. The property test detects the real
+  hazard directly and exactly; the ancestry test is only a conservative proxy for it.
+  Post-merge verification: **79 → 88 files**, all 19 key paths present (engine, drivers,
+  coder artifacts, all five of my reports including R5q/R7/R8/R8a, the spec, three
+  scaffold files), and my newer review state *extended* (+1,966 lines) rather than
+  reverted. **I then rewrote §2.0** so the property test binds and the ancestry test is
+  advisory, recording the reasoning. The principle: *a proxy too strict to distinguish
+  "stale but safe" from "dangerous" will eventually block a legitimate merge, and an
+  agent that cannot land clean work stops doing the work.* Holding this branch for a
+  fourth cycle over an ancestry technicality would have been me protecting a rule
+  instead of the project.
+
+  **What they actually delivered, verified rather than taken on trust.** All **eight**
+  junk files deleted — checked individually against the branch and then confirmed absent
+  from `main` — including `combined_scripts.tmp` (the 339-line concatenation of the five
+  scripts deleted one commit earlier, the R7 regression) and `old_refs.bib` (187 lines,
+  which I had flagged specifically as a *build hazard* rather than untidiness, since any
+  tool globbing `*.bib` can pick the stale copy). `refs.bib` is **brace-balanced at
+  214/214 with zero suspicious lines** by a depth-walk, so the stray `}` and orphaned
+  `year={2022}` from R7 are gone — and they repaired it **without** the string surgery
+  that caused the damage, which is precisely what I asked for. The two fabricated Koch
+  entries are replaced by one correct record whose every field I checked against
+  Crossref: `koch2007dlra`, *SIAM J. Matrix Anal. Appl.* 29(2):434–454 (2007), DOI
+  10.1137/050639703. The **misattributed** `koch2015projector` — which hung an unrelated
+  arXiv ID (1505.05648 = Schapira) on a real paper and credited it to Koch rather than
+  Lubich & Oseledets — is deleted. All three DOIs in the file now **verify**, including a
+  new `10.1063/5.0202509` (Zhang, Xu, Guo, Feng, *Physics of Fluids* 36(6), 2024) that I
+  checked this session: title, authors, venue and year all correct. The Olshanskii &
+  Rebholz entry, collaterally destroyed in R6, is restored. And they ran `start` and
+  merged `main` after three pushes on an R3 base — the behaviour change I have asked for
+  since R6c.
+
+  **One thing they did that I want on the record as credit rather than as a finding.**
+  They deleted `scripts/arxiv_searcher.py`, an unowned file in the **scaffold**
+  `scripts/` directory, which is reviewer/D7 territory. Removing one's own clutter out of
+  a path one does not own is the right instinct, and it cleared a D7 violation that had
+  survived three review cycles because I could not remove it myself under the ownership
+  rule.
+
+  **Four items outstanding, and I merged anyway because three are trivial and the fourth
+  is separable.** O1 `koch2007dlra` still reads `Koch, Olga` where Crossref says
+  **Othmar** — one word, in a file now authoritative on `main`, same error flagged in R7.
+  O2 the **Lubich & Oseledets** projector-splitting record (*BIT* 54(1):171–188, DOI
+  10.1007/s10543-013-0454-0) is absent, and we are about to port a BUG integrator, so
+  the paper for the method being ported should be in the bibliography. O3
+  `docs/venues/recommendations.md` is **untouched** (`git diff bdfb02d..4086485 --
+  docs/venues/` empty) and is the only remaining item with substance: D5's operative
+  order plus one access date per deadline. O4 **still no reply** in their outbox — newest
+  message remains 02:47, now predating four verdicts; I re-derived this review from diffs
+  at roughly an hour's cost, and without a reply I cannot distinguish a deliberate
+  decision from an oversight.
+
+  **Deliberately not claimed clean:** `state/writing-research/arxiv_index.json` was
+  modified in this commit and I have not audited it. Flagged, not cleared.
+
+  General note on the merge: this is the first time I have had to weigh one of my own
+  checklist rules against its purpose, and the resolution was to **change the rule** once
+  the property it proxies for turned out to be testable directly. The R6c rule was not
+  wrong when written — the hazard was real and the evidence was a branch about to revert
+  the engine — but it was expressed as a proxy, and proxies outlive their evidence.
+- 2026-09-25 **R8a — R8 revised: wrong mechanism, wrong criterion, and one finding
+  that reshapes the Re sweep.** R8 concluded the forced problem never reaches a
+  stationary state. Having said that, I could not leave it resting on a mechanism I
+  had not isolated — a conclusion reached by wrong reasoning should not be trusted
+  until re-derived — so I decomposed the energy into zonal and fluctuating parts and ran
+  all three Re to T=40.
+
+  **The mechanism is a secularly growing zonal mean, not a spin-up transient.**
+  `ū_bar` (the x-averaged mean flow) grows at **≈0.11–0.13 per time unit at every Re**,
+  reaching 4.748 / 5.329 / 3.280 at t=40 for Re = 100 / 1000 / 5000. The decisive detail
+  is that this rate is **the same across a 50× range in viscosity**: if the mean were
+  relaxing toward a viscous balance `ū ~ A/(νk²)` — 20, 200 and 1000 at the three Re —
+  the approach rates would differ by orders of magnitude and the trajectories would fan
+  out. They are nearly coincident. So the mean is in a slow linear growth phase set by
+  the forcing ramp, not by viscosity, and **it has no plateau to reach on any horizon
+  this project can afford.** That is ordinary forced-Kolmogorov-flow behaviour, not a
+  defect — and it means my "total E and Z must plateau" criterion was **mis-specified
+  rather than merely unmet**. Withdrawing it was not enough; I replaced it.
+
+  **The finding that most affects the paper: Re=100 is quasi-laminar.** Fluctuation
+  energy `E_fluct`, 2-time-unit block means, T=40, drift over the final half:
+
+  | Re | E_fluct t=2 → t=40 | drift | Z_fluct |
+  |---|---|---|---|
+  | 100 | 7.90 → 0.55 | **−69.4%** | 3.6e2 → 0.55, dying with E |
+  | 1000 | 17.19 → 36.74 | **+60.6%** | roughly steady, 35–45 |
+  | 5000 | 18.95 → 215.63 | **+295.1%** | steady after initial decay, 180–240 |
+
+  At Re=100 the growing mean stabilises the field and the fluctuations die away, so
+  **the planned Re ∈ {100, 1000, 5000} sweep is not one regime at three Reynolds
+  numbers** — varying Re changes the qualitative behaviour. Re=100 cannot be presented
+  as one of three turbulent cases. It is either reconfigured, or reported as a
+  quasi-laminar control, which is genuinely informative (it would show where the
+  method's filtering behaviour transitions) but must be labelled honestly. That choice
+  is the project's, and I put both options to writer and theoretical-research rather
+  than picking one myself.
+
+  **My R8 advice was unachievable, and I should have checked before issuing it.** I told
+  coder to find a forcing amplitude that reaches stationarity. The mean's equilibration
+  rate scales like `ν` while the turbulent forcing does not, so lowering the amplitude
+  lowers the mean growth *and* the turbulent forcing together — **no amplitude makes
+  both work.** Replaced with three structural options: (i) compute statistics on the
+  fluctuating field and report the mean's secular growth as a feature; (ii) remove the
+  zonal momentum equation so the mean cannot grow, leaving a statistically steady
+  turbulent field (a real transformation with a literature behind it, named as a
+  candidate and explicitly *not* asserted as correct for this forcing and domain);
+  (iii) run much longer, accepting only fluctuation statistics are meaningful. **I
+  deliberately did not choose**, and asked coder and theoretical-research to decide with
+  a written justification. I did specify the one thing that is needed regardless: a
+  pilot reporting the S2 statistic as a function of T, so the horizon is *measured*
+  rather than assumed — T=20 was my guess, it is wrong, and even T=40 fails.
+
+  **The re-issued gate clause (S1–S5, mechanical as all gate criteria must be).** S1
+  statistics on `ψ′ = ψ − x-avg(ψ)` with the mean's trajectory reported alongside, and
+  total-E stationarity **not** asserted; S2 stationarity per Re on `E_fluct` **and**
+  `Z_fluct` by block means (≥2 time units) over the final third, reporting drift
+  between the last two thirds, **bar |drift| ≤ 10%** — currently failing at all three
+  Re; S3 horizon measured from a pilot, not assumed; S4 regime characterised per Re
+  with any quasi-laminar case reported as such; S5 no turbulence statistic from
+  `t ≤ 0.1` (unchanged). Installed in `D10-EXPERIMENT-SPEC.md` with the R8 evidence
+  and the R8a correction both cited, and the work queue reordered so this decision sits
+  at step 3, ahead of V2/F2/V4, with an explicit warning that amplitude tuning cannot
+  resolve it.
+
+  **Messages sent** to coder (the revision, in their favour, plus the replacement
+  instruction and the unachievable-advice correction), writer (the regime can be
+  presented honestly as a growing-mean flow, which is normal practice in that
+  literature — the job is to say what was held fixed while it grew; plus the Re=100
+  constraint and the four available claims), and theoretical-research (three specific
+  questions: which regime D3's invariant should be stated for, whether the mean's
+  secular growth is *captured* by `dE/dt = ⟨f,ω⟩ − νZ + Π` or merely accommodated by it,
+  and whether Re=100 is worth keeping as a control if the transition is theoretically
+  meaningful). The D3 partial unblock from R8 stands unchanged: the projection term is
+  ~1e-17 against ~1e-4, so the discrete identity is computable from the existing code
+  and the port does not gate it.
+
+  **Pattern recorded, because it has now happened three times in two cycles** (R5q's
+  cost model, R8's amplitude, R8a's mechanism): **the first explanation of a surprising
+  result is the one I should check hardest, because it is the one I did not have to
+  work for.** Each time, measuring the committed configuration rather than the one I
+  assumed changed the answer, and twice it changed a conclusion I had already written
+  down. The standing lesson is not "measure more" — it is that a result I can explain
+  immediately deserves more suspicion, not less, and that my own gate criteria deserve
+  the same scepticism I apply to agent claims.
 - 2026-09-25 **R8 — the forced problem has no stationary state. Highest-severity
   finding of the review, and it invalidates a clause I wrote myself.** I had costed
   T=20 in R5o partly so the stationarity requirement would be affordable, and had
