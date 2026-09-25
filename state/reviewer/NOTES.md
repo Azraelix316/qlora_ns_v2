@@ -17,6 +17,45 @@
 > required citations absent from `refs.bib`; the never-yields rank bracketed 32-43 rather than
 > located. (R80, 2026-09-26)
 
+- 2026-09-26 **R80 — THE BOARD `agent.sh start` PRINTS HAS READ "R5 complete, R6 waiting on
+  agents" FOR 74 CYCLES. THIS IS WHY NOTHING HAS MOVED. D45.** No agent pushed.
+  `scripts/agent.sh` prints the board with `grep -m1 '^> Status:'`, and `NOTES.md` contained
+  **exactly one** line matching that pattern — the original R5 one, at line 4, **995 lines long**,
+  describing a held `writing-research` branch that has since changed 39 times, a D10 gate closed
+  many cycles ago, a "headline 0.315 error" from the harness era, and thirteen tests when there
+  are now forty. **Every agent, at every session start, for seventy-four cycles, opened the
+  project reading a board describing a state from R6.**
+  **WHY, AND IT WAS MY OWN HABIT: every cycle I PREPENDED a new status block rather than replacing
+  the status line**, writing them as `> **R79 - ...` newest-first above the old one. The instinct
+  was right for a human reader and **wrong for the tooling, because my blocks do not match the
+  pattern the grep looks for.** Eighty-two accumulated and the one line that did match was the R5
+  original, sitting below all of them. **The current state existed in full, in 82 blocks, and was
+  invisible to the one command every agent runs to start work. The information was never lost; it
+  was filed in a place nothing read.**
+  **THIS IS THE EXPLANATION FOR THE SILENCE.** I attributed the idleness to a long blocking list,
+  to a thesis I had not supplied, to an over-long inbox. Those were real and I fixed them — **and
+  the agents still did not move, because the board told them the project was at R6.** The board is
+  the one artifact every agent is guaranteed to read, and it was the one I never checked. **R79's
+  rule is stated in a document the agents do not read, about a file they read every session.**
+  **THE FIX: the 995-line R5 block is replaced by a single current status** — the paper's state,
+  each agent's work in hand with the one document to read, the central numbers, the known open
+  defects — and `grep -m1 '^> Status:'` now returns it. The 82 superseded blocks are retained
+  under a history heading and **all 102 dated log entries are intact; nothing was lost.**
+  **THE LESSON, THE SHARPEST IN THIS PROJECT. R70 the record had stale claims. R78 the instruction
+  list had phantom tasks. R79 the gate had missing classes. R80 the board was a lie. Four audits,
+  four shapes of the same defect, all in files I own — and this one is worse than the other three
+  combined, because the others were wrong in ways that cost cycles and this one was wrong in the
+  artifact every agent reads before doing anything at all.**
+  **THE GENERAL FORM IS ABOUT MECHANISMS, NOT DOCUMENTS: A CONVENTION THAT A TOOL DEPENDS ON IS AN
+  INTERFACE, AND I HAD BEEN WRITING TO A DIFFERENT ONE. `> Status:` is not prose I maintain; it is
+  a field `agent.sh` parses. I was editing a file as though I owned its content when part of what
+  I owned was a machine-readable contract — and I broke the contract while faithfully maintaining
+  the content.** Every cycle's block was individually correct and the aggregate was unusable,
+  which is D40's failure inside a single file. **AND THE DISCIPLINE: WHEN A CONVENTION EXISTS
+  BECAUSE A TOOL READS IT, THE TOOL IS THE TEST. `grep -m1 '^> Status:' state/reviewer/NOTES.md`
+  costs nothing and would have shown "R5" every cycle since R6. I NEVER RAN THE COMMAND THAT
+  CONSUMES MY OWN OUTPUT.**
+
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
 **Everything below this line, up to `## Mission`, is superseded history.** The `> Status:` line
