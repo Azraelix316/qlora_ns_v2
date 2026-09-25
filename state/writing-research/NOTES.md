@@ -1,6 +1,6 @@
 # NOTES.md — writing-research
 
-> Status: Reviewer blockers B3 & B4 resolved (refs.bib/ownership); research index and venues consolidated; bibliography and venue lists finalized.
+> Status: Integrated reviewer-suggested references (Musharbash & Nobile, Zhang et al.) into `refs.bib` and `arxiv_index.json`; updated paper structure in `docs/structure/suggested_structure.md` to reflect the permitted novelty claim.
 
 ## Mission
 
@@ -46,3 +46,5 @@ base: run the arXiv API survey (a prior one was lost — see
 - 2026-09-24 Fixed arXiv index errors (Einkemmer et al.) and added novelty documentation for "divergence-free" + "dynamical low-rank" query results. Updated entry count to 22 in `arxiv_index.json` and implemented "relevant" flag.
 - 2026-09-24 Consolidated venue research into docs/venues/recommendations.md, including a dual-track submission strategy, template summaries, and noting the exclusion of ICLR 2027. Verified arXiv novelty evidence in arxiv_index.json.
 - 2026-09-24 Sent refs.bib readiness and suggested paper structure to writer via outbox.
+
+- 2026-09-25 Integrated new references from reviewer reports (Musharbash & Nobile 2018; Zhang et al. 2024) into `refs.bib` and `arxiv_index.json`. Rewrote `docs/structure/suggested_structure.md` to align with the binding novelty claim (D4) and ensure proper positioning of prior art (Musharbash, Girfoglio, Zhang).

@@ -1,38 +1,39 @@
-# Suggested Paper Structure
+# Suggested Paper Structure (Revised per R5d)
 
-**Target Audience:** Researchers in scientific computing and machine learning interested in low-rank methods for PDEs.
+**Target Audience:** Researchers in scientific computing and machine learning interested in low-rank methods for PDEs, specifically incompressible fluid dynamics.
 
 ## 1. Introduction
-- **Motivation:** The cost of high-fidelity simulations (DNS) for turbulence.
-- **Problem Statement:** Incompressible Navier-Stokes equations and the need for reduced-order models.
-- **The Gap:** Current DLRA methods often struggle with preserving physical invariants (e.g., divergence-freeness) or handling turbulent regimes where rank growth is significant.
-- **Contribution:** An exactly divergence-free SP-DLRA solver, validated on high-Re forced turbulence.
+- **Motivation:** The high computational cost of Direct Numerical Simulation (DNS) for turbulent flows.
+- **Problem Statement:** Incompressible Navier–Stokes equations and the necessity of reduced-order models (ROMs) for large-scale applications.
+- **Literature Survey & Gap Analysis:**
+    - Acknowledge that dynamical low-rank methods have been applied to incompressible NS, specifically the dynamically orthogonal (DO) approximation for stochastic problems with random boundary conditions (Musharbash & Nobile 2018).
+    - Note existing reduced models in the stream function–vorticity ($\psi$-$\omega$) formulation, which are currently offline or hybrid approaches (Girfoglio et al. 2022; Zhang et al. 2024).
+    - **The Gap:** Absence of a structure-preserving, exactly divergence-free, factorisation-based low-rank integrator for deterministic incompressible NS that is validated in high-Reynolds-number forced-turbulent regimes.
+- **Contribution:** We propose and validate an adaptive-rank, structure-preserving DLRA solver using the robust basis-update-and-Galerkin (BUG) machinery applied to the $\psi$-$\omega$ formulation.
 
 ## 2. Mathematical Background & Preliminaries
-- **Incompressible Navier-Stokes Equations:** Stream-function formulation (to ensure divergence-freeness naturally) or pressure-correction approach.
-- **Dynamical Low-Rank Approximation (DLRA):** Matrix/Tensor decomposition and the projector-splitting integrator.
-- **Structure Preservation:** Discussion of how existing DLRA can fail to preserve physical constraints.
+- **Incompressible Navier–Stokes Equations:** The stream function–vorticity ($\psi$-$\omega$) formulation and its inherent property of satisfying the divergence-free constraint $\nabla \cdot \mathbf{u} = 0$.
+- **Robust Low-Rank Integrators (BUG):** Overview of the robust basis-update-and-Galerkin (BUG) class of integrators (Ceruti & Lubich 2022, etc.) and their ability to handle small singular values.
+- **Dynamical Low-Rank Approximation (DLRA):** The projector-splitting framework and its extension to structure-preserving settings.
 
-## 3. Proposed Method: SP-DLRA
-- **The Structure-Preserving Split:** Detail the specific split that enforces $\nabla \cdot \mathbf{u} = 0$.
-- **Stream-Function Formulation (if used):** How it integrates with DLRA.
-- **Adaptive Rank Mechanism:** Algorithm for monitoring singular values and updating rank to capture turbulent dynamics.
+## 3. Proposed Method: Structure-Preserving DLRA
+- **$\psi$-$\omega$ Formulation for DLRA:** How the low-rank approximation is applied directly to the stream function and vorticity fields to ensure exact divergence-freeness by construction.
+- **Integrating BUG with $\psi$-$\omega$:** Detailed description of the structure-preserving split that incorporates the robust basis-update machinery.
+- **Adaptive Rank Mechanism:** An algorithm for monitoring singular value decay and adjusting the rank to capture the multi-scale nature of turbulence.
 
 ## 4. Numerical Experiments: Forced Turbulence
-- **Test Problem:** 2D Kolmogorov flow or similar forced Navier-Stokes setup.
-- **Parameters:** Reynolds numbers $Re \in \{100, 1000, 5000\}$.
-- **Reference Data:** Comparison against full-grid spectral methods (DNS).
+- **Problem Setup:** 2D Kolmogorov flow or forced Navier–Stokes equations in a periodic domain.
+- **Turbulence Regime:** High Reynolds numbers $Re \in \{100, 1000, 5000\}$ to ensure interesting dynamical behavior and rank growth.
+- **Reference Comparison:** Validation against high-fidelity, full-grid spectral DNS data.
 
 ## 5. Results & Discussion
-- **Accuracy and Invariants:** Plotting $\max |\nabla \cdot \mathbf{u}|$ to demonstrate divergence-freeness ($< 10^{-14}$).
-- **Rank Dynamics:** Evolution of the singular values/rank as turbulence develops.
-- **Computational Efficiency:** Comparison with static POD and standard DLRA (memory vs. time).
-- **Turbulence Capture:** Energy spectrum comparison or kinetic energy evolution under forcing.
+- **Divergence-Freeness:** Verification of the invariant $\max |\nabla \cdot \mathbf{u}| \approx 10^{-14}$ throughout the simulation.
+- **Rank Dynamics and Energy Capture:** Evolution of singular values and rank as turbulence develops; comparison of kinetic energy evolution and energy spectra against DNS.
+- **Accuracy vs. Efficiency:** Performance benchmarks (computational cost, memory usage) compared to static POD and standard DLRA methods.
 
 ## 6. Conclusion
-- Summary of findings.
-- Implications for large-scale turbulent simulations.
-- Future work (e.g., 3D extension).
+- Summary of the successful implementation of an exactly divergence-free, robust DLRA solver for turbulent NS.
+- Implications for future work in 3D simulations and more complex geometries.
 
 ## References
-(To be populated from `refs.bib`)
+(To be populated from `refs.bib`, ensuring all R5d-mandated citations are included)
