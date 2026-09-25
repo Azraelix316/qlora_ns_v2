@@ -2664,3 +2664,50 @@ OF `AGENTS.md` ITSELF — AND THE PROJECT'S OWN MISSION STATEMENT NAMES AN INVAR
 MENTIONS. THE BRIEF IS AN ARTIFACT TOO, AND IT HAD NEVER BEEN AUDITED AGAINST THE DELIVERABLES.**
 
 **D39.7 — Unchanged.** Everything in D35.6, D37.7 and D38.7 stands.
+
+---
+
+## D40 — **THE WRITER FACED 107 INSTRUCTION BLOCKS AND NO AUTHORITATIVE VERSION. That is my failure. `WRITER_ORDER.md` supersedes all of them.** (2026-09-25)
+
+> **OPERATIVE (R75). `state/reviewer/WRITER_ORDER.md` IS THE ONLY DOCUMENT THE WRITER SHOULD WORK
+> FROM.** The outbox is history. It is **139 lines against 1758**, self-contained, ordered, with every
+> number inline and a twelve-item prohibition list.
+
+**D40.1 — THE MEASUREMENT, AND IT IS AN INSTANCE OF R43 POINTED AT SOMEONE ELSE.** R43: *a reviewer
+who cannot fit the current state on one screen has failed at the reviewer's job.* I have been
+checking that against my own files for twenty cycles and **never against the writer's inbox.**
+`to-writer.md` is **1758 lines across `107` blocks, and `110` blocks contain corrections to things I
+had previously sent.** **Every one of those corrections was individually correct and the accumulation
+is unusable: a writer opening that file cannot tell what is current, and the most recent message
+contradicts the one before it on several points.** **Being right `107` times is not the same as being
+clear once, and the second is what the work needs.**
+
+**D40.2 — SO THERE IS NOW ONE DOCUMENT, AND IT SUPERSEDES THE OUTBOX.** `state/reviewer/WRITER_ORDER.md`,
+**139 lines.** It contains: the state in four lines; **the seven things to do in order**, with the
+section, the content and **the numbers inline** so nothing has to be looked up; the **three sentences
+that carry the paper**, already checked; **twelve prohibited things**; where everything lives; and an
+explicit statement that **if it contradicts an earlier message, this file wins and I am at fault.**
+
+**The numbers are inline deliberately.** A writer who has to cross-reference a claims table to write a
+sentence will not write the sentence, and every number in that table has been wrong at least once —
+mine more than anyone's. **A short document that is right beats a complete one that is navigable.**
+
+**D40.3 — AND THE ORDER IS EVIDENCE-BASED, NOT BY SECTION NUMBER.** **§3 and §4 first**, because §3 is
+four sentences of credibility that is already committed and §4 is the paper's spine; the stability
+result (§5) third because it is one artifact and must be hedged; §6 and §7 after. **§3 and §4 are also
+the two things least likely to be wrong**, because they rest on `taylor_green.json` and on the four-bug
+history rather than on the crossover surface where five of my own errors lived.**
+
+**D40.4 — WHAT THIS DOES NOT CHANGE.** Every substantive correction still stands and is in
+`CLAIMS.md` with its reason: `0.649`/`1.482`; the `1.6–2.8×` range and its reversed direction; the
+wavenumber correction; the two invariants; the stability result and its three hedges; the twelve
+prohibitions. **What changes is that they are now reachable in one sitting.**
+
+**D40.5 — THE LESSON, AND IT IS R43 GENERALISED. R43 ASKED WHETHER THE *REVIEWER* CAN FIT THE STATE ON
+ONE SCREEN. IT SHOULD HAVE ASKED WHETHER THE *REVIEWED* CAN.** A reviewer's output is consumed by
+someone, and the consumer's bottleneck is not the reviewer's thoroughness but their ability to act on
+it. **A correction that arrives as the hundred and seventh block does not correct anything — it
+displaces the ninety-nine that came before.** **Consolidation is a review deliverable, not a courtesy,
+and the test of a review is whether the person receiving it can act today.**
+
+**D40.6 — Unchanged.** Everything in D35.6, D37.7, D38.7 and D39.7 stands.

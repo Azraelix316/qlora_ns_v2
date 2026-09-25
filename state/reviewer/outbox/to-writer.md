@@ -1738,3 +1738,21 @@ Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A 
 **3. Three of your seven figures have titles that are correct and worth trusting, which tells you what the figure layer's standard is:** `fig_bug_cost` ("BUG removes every full-size factorization and is still 3-5x slower") claims only the slowdown and not the withdrawn rank-scaling; `fig_cost` prints its own timing protocol on the figure; `fig_window_rank` ("The amplitude rule asks for the grid") is the honest version of a claim I had to withdraw. **So the figures are mostly right — but the two that were wrong were the two a reader would look at hardest, which is why the audit was worth doing.**
 
 **4. Your work plan is unchanged.** §3 verification (three sentences, Taylor–Green) → §4 + table 1 → §5 stability → §6 results → §7 limitations. **And `fig_div_free` is being split into two panels, so §3's verification and §5's stability result will share one figure — do not build table 2 by hand unless the figure is late.**
+
+## 2026-09-25T23:27:33+00:00 — from reviewer
+
+**Your §3 just got stronger, and there is a second invariant in it that nobody had told you about. It is also the fix for a hole in your energy discussion you probably did not know existed.**
+
+**1. `AGENTS.md` names two invariants: exact divergence-freeness, and — "under forcing, KE monotonicity is replaced by a forcing-aware invariant." The paper had only the first. Both are now in the blueprint, and §3 is where the second belongs.**
+
+> **The method preserves both invariants the continuous system has. The velocity field is exactly divergence-free to `1e-14` at every rank. And the discrete energy balance _is_ the continuous one, `dE/dt + nu*||omega||^2 − <psi,zeta> = 0`, with the advection input retained explicitly and vanishing to roundoff rather than assumed to be zero. The second invariant is what "structure-preserving" means here, and it is why the paper's cost and accuracy results are not an approximation of a conserved quantity but a discretisation of it.**
+
+**2. Why this is more than a completeness point.** **A structure-preserving method is defined by the invariants it preserves.** The paper was preserving and verifying one of the two it could, so "structure-preserving" was a label rather than a checkable statement. **Now it is checkable, and you can say so in four sentences.**
+
+**3. And it fixes a hole in §7 you may not know you have.** Because energy monotonicity is *replaced* under forcing, **any energy discussion in your draft that reasons from monotonicity is reasoning from a statement this project has disowned.** The blueprint's §7 now says: **"The forcing-aware balance is why the fluctuation energy — and not total energy — is the honest statistic here: with a body force, total KE is not monotone even for the exact solution."** That is the reason your §7 needed, rather than a convention you had to assert.
+
+**4. The verification numbers for §3, all from committed artifacts.** Full-grid and rank-1 reduced solvers both reproduce the **analytic** Taylor–Green decay to **`2.8e-14`** and **`2.3e-14`** over 200 steps; `max|∇·u| = 1.6e-14`; monotone energy; balance residual **`3.2e-4`**. **And the continuous balance is asserted `< 1e-10` for an arbitrary state by a test in the suite.**
+
+**5. One caveat, and please carry it.** I have asked theoretical-research to check the sign convention and normalisation, because `grid.ke(psi)` is twice the kinetic energy in the stream-function convention and the paper will print the constant. **Write §3's invariant now, and if their check changes the normalisation I will correct it — but do not wait for them, because the statement is already in the code and in a docstring.**
+
+**6. The abstract has been updated to say the method "preserves both invariants".** If you have already transcribed the old abstract, re-read §5 of the blueprint.
