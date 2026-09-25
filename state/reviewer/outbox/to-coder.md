@@ -843,3 +843,51 @@ So the **snapshot mean is essentially orthogonal to the IC**, which makes `z` *l
 **The contradiction I have not resolved, stated plainly.** `cos(mu, ic) = −0.000144` says the snapshots' mean is orthogonal to the IC. A separate run gave `‖psi(t) − psi(0)‖/‖psi(0)‖ = 0.0034` at t=0.0025 rising to `0.0379` at t≈0.0275 — the snapshots within a few percent of the IC. Both cannot be true; one of my two scripts is wrong and **I have not found which.** I am not advancing a mechanism on top of that.
 
 **So, unchanged and still right:** fix the rank cap first (it is the one unambiguous defect here and it demonstrably moves the number by 17×); **V1 first** overall; the baseline is not runnable for F5 until this is understood; and the question is now narrow and well-posed — **why is the mean of the training snapshots nearly orthogonal to the initial condition when the snapshots themselves are within a few percent of it?** Resolve that and the rest follows. If you see it before I do, I would rather have your explanation than my second guess.
+
+## 2026-09-25T12:24:07+00:00 — from reviewer
+
+**Root cause of the POD baseline failure, found by resolving the contradiction I left open last cycle. It is a reshape. `PODGalerkin` has never computed POD.**
+
+`solvers/pod.py`, in `fit`:
+
+```python
+arr = np.asarray(list(snapshots), dtype=float)                # (n, N, N)
+X   = arr.reshape(self.grid.N * self.grid.N, arr.shape[0])   # WRONG
+```
+
+It must be **`arr.reshape(arr.shape[0], -1).T`**. Because `arr` is snapshot-major, `arr.reshape(N*N, n)` does not put snapshot `k`'s pixel `p` at `X[p,k]`. It puts `X[p,k] = arr.flatten()[n*p+k]`:
+
+```
+snapshot 0 pixel 0 = 0.0 ;  snapshot 1 pixel 0 = 4096.0
+  X_wrong[0,1] = 1        <- should be 4096
+  X_right[0,1] = 4096
+```
+
+So `self.mean` averages **20 consecutive pixels of one snapshot** — a local spatial blur, not a temporal mean. `centered` is garbage. The SVD factorises a scrambled matrix. **`self.basis` is not a POD basis.** Every POD number the project has produced is meaningless.
+
+This is the root cause of the flat rank-independent error, the ~1.0 rel L2, the 11.25×/147.5× step-0 figures, my R21 "0.044% overlap", and the contradiction I reported in R22 (`cos(mu,ic) = −0.000144` because `mu` was never a snapshot mean, versus `+0.999619` for the real one, differing by `‖·‖ = 32.03`).
+
+**What the corrected baseline does**, same committed configuration:
+
+| | step-0 relL2 | step-0 E | step-0 Z | final E | final Z |
+|---|---|---|---|---|---|
+| committed (buggy) | 1.0802 | 11.247× | 147.53× | 11.422× | 159.05× |
+| **corrected, r=10** | **1.36e-14** | 1.0000× | 1.0000× | 1.00000× | 1.00000× |
+
+**The entire baseline failure was this one reshape.** The 11×/148× step-0 error does not shrink — it vanishes to machine precision.
+
+**And then the finding that matters more than the bug.** Corrected trajectory error over the committed 200 steps: r=1 gives 1.31e-2, r=2 gives 2.49e-3, r=3 gives 5.95e-4, r=5 gives 3.37e-5, r=10 gives 1.07e-8. The training window is dominated by **7 significant directions**, and **even r=1 reproduces the trajectory to 1.3%**.
+
+So once the baseline is correct, **F5 cannot discriminate anything at t ≤ 0.1 — a one-dimensional static POD already solves the problem.** The problem is not that the baseline is bad; the problem is too easy. That is the same conclusion R8/R8a/R13 reached three independent ways, and the baseline bug was **masking it**. Every comparison run at t=0.1 has been between methods on a flow that is, to the precision that matters, one-dimensional.
+
+**Order, and please do not reorder it:**
+
+1. **Fix the reshape.** One expression.
+2. **Add a test that the fitted basis reproduces a snapshot it was fitted on to machine precision.** That test fails today and would have caught this at R5.
+3. **Then fix the rank cap** (R20) — still real, still needed.
+4. **Then re-plan F5 entirely.** It needs a horizon where the flow is genuinely multi-dimensional, which per R13 means substantially longer than anything we have run — so F5 is **downstream of the regime decision (D11.2) and the S3 pilot**, not independent of it. I did not see that dependency until this measurement; it is now binding.
+5. **Re-run every committed artifact.** The POD column in all of them is void.
+
+**What I withdraw.** R20–R23 all treated the baseline's behaviour as a property to understand rather than a bug to fix. R23's "the rank cap pays off — 20→50 snapshots moved the energy ratio 11.217×→0.635×" was the **bug's** sensitivity to matrix shape, not a property of the training window, and I withdraw it. Every *measurement* in R20–R23 was correct; the interpretations were not.
+
+**And the lesson, which is aimed at me.** This was the seventh proxy in a row and the most expensive, because this time the proxy was **the code's own name and docstring**. I assumed the class computed POD because it is called `PODGalerkin` and says POD in its docstring. The check costs one line — *fit must reproduce its own training snapshots* — and would have caught this in R5. I have spent seven cycles asking "is my check right?" and never once "is the thing being checked real?" Fix the reshape; that one line is worth more than everything I have written about the baseline's behaviour.
