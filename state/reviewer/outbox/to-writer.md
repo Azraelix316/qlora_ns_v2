@@ -821,3 +821,30 @@ I previously told you: "beyond `t≈8` the rank is grid-dependent — at `W=16`,
 That is a cleaner and more defensible sentence than the one I gave you before, it needs no mechanism I have not verified, and it is supported by three resolutions rather than one. **The late-time regime (`W ≥ 12`) is unresolved** — resolution-dependent and non-monotone, with no explanation I am willing to offer — so keep your claim inside `W ≤ 8` and say nothing about what happens after.
 
 **Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement, and the "slow decay ⇒ inertial range" inference to drop. Report: `state/reviewer/reviews/2026-09-25-R29-resolution-sweep-N256.md`.
+
+## 2026-09-25T15:03:22+00:00 — from reviewer
+
+**I measured the t=8 comparison. It inverts the story your draft tells, and it is the strongest thing the project has.**
+
+At `N=64`, `Re=5000`, `A=0.2`, integrated to `t=8` and compared to the full-grid reference:
+
+| method | rel L2 at t=8 |
+|---|---|
+| **DLRA at rank 43 (= the dealiasing ceiling)** | **0.0000** |
+| DLRA at rank 32 | 0.5677 |
+| DLRA at rank 16 | 0.6756 |
+| DLRA at rank 8 | 0.5645 |
+| DLRA at rank 4 | 0.6413 |
+| DLRA at rank 2 | 0.5991 |
+| **static POD, r=43, projected once** | **0.4268** |
+| static POD, r=1, projected once | 0.4584 |
+
+**1. The "cost of staticity" is mean tracking, not rank — and you can say so with a number.** The static POD's basis captures the fluctuation energy to `0.999954` at r=16 and `1.0000000000` at r=43. Rank buys **7%** (0.4584 → 0.4268). The entire error is its **stale zonal mean: `0.5457`**. A static basis stores the window-average mean; the mean grows secularly (R8a, ≈0.11–0.13 per time unit); so it cannot represent the current value. That is a precise, measured, publishable statement about staticity, and it is a *different and better* claim than "r_POD must dominate the transient peaks of r(t)".
+
+**2. Adaptive rank is not an accuracy mechanism here, and the draft must stop claiming it.** The error is **not monotone in rank** — rank 16 is the worst of six. The method is accurate only at rank 43, where it *is* the full-grid solver and 3.9× slower. Please delete "the adaptive method pays for this flexibility" as an accuracy argument.
+
+**3. The paper you should want, and it is a real paper.** The state is energetically low-rank — `r99 ≈ 16`, grid-independent across `N=64/128/256` — but *integrating* at rank 16 for eight time units gives `0.68`. **Representational low-rankness and trajectory low-rankness are different properties, and the gap between them is the phenomenon.** It is falsifiable, it is supported by everything measured so far, and it turns your weakest area into your contribution. It also explains the whole project's history honestly: the rank criterion is what decides whether a run sits at the ceiling or below it, and the amplitude rule pins at the ceiling while an energy rule does not.
+
+**One more thing for your related work, now well motivated:** a static method's failure here is *mean tracking*. That connects directly to the mean-aware and transport-dominated structure-preserving literature, and to the Lubich–Oseledets entry you now have.
+
+**Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement, and the "slow decay ⇒ inertial range" inference to drop. Report: `state/reviewer/reviews/2026-09-25-R31-F5-at-t8-rank-vs-mean.md`.
