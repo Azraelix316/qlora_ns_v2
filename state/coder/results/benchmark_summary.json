@@ -91,5 +91,41 @@
     "pod_stable": true
   },
   "honesty_note": "POD is finite but less accurate and its forcing-aware residual is large at Re=5000; DLRA is slower than full-grid/POD in this materialized-SVD implementation. Values are not extrapolated beyond the logged short-time run.",
-  "protocol": "Re={100,1000,5000}; N=64; dt=5e-4; T=0.1; same split/forcing/initial state"
+  "protocol": "Re={100,1000,5000}; N=64; dt=5e-4; T=0.1; same split/forcing/initial state",
+  "rank_threshold_sweep": {
+    "file": "rank_growth_sweep.json",
+    "git_commit": "8de4e43660499ecd962d2ed3fb3ec8b3704f630a",
+    "rows": [
+      {
+        "max_relative_l2_vs_full": 0.3165246412772345,
+        "max_scaled_invariant_residual": 0.001665114948609402,
+        "rank_final": 2,
+        "rank_max": 2,
+        "rank_min": 2,
+        "seconds_per_step": 0.004357793864328414,
+        "stable": true,
+        "tolerance": 1e-06
+      },
+      {
+        "max_relative_l2_vs_full": 0.3164846589738504,
+        "max_scaled_invariant_residual": 0.001665114948609402,
+        "rank_final": 3,
+        "rank_max": 3,
+        "rank_min": 2,
+        "seconds_per_step": 0.0030340086994692685,
+        "stable": true,
+        "tolerance": 1e-08
+      },
+      {
+        "max_relative_l2_vs_full": 0.31648638958382985,
+        "max_scaled_invariant_residual": 0.001665114948609402,
+        "rank_final": 15,
+        "rank_max": 15,
+        "rank_min": 2,
+        "seconds_per_step": 0.003121386630227789,
+        "stable": true,
+        "tolerance": 1e-10
+      }
+    ]
+  }
 }

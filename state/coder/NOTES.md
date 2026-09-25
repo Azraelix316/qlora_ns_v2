@@ -31,6 +31,11 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-25 Added and ran `experiments/run_rank_growth_sweep.py` at
+  Re=5000, N=64, dt=5e-4, T=0.1.  Relative thresholds 1e-6, 1e-8,
+  and 1e-10 yield maximum ranks 2, 3, and 15 respectively (all runs
+  finite), making the singular-value trigger and its cost/error tradeoff
+  explicit in `state/coder/results/rank_growth_sweep.json`.
 - 2026-09-25 Ran the committed N=64 suite (dt=5e-4, T=0.1,
   A_force=0.5, perturbation velocity RMS=1, POD rank 16, adaptive DLRA
   initial/min rank 2, max 48, relative singular tolerance 1e-10).  All three

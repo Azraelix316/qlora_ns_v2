@@ -1,0 +1,55 @@
+{
+  "case": "rank_growth_sweep",
+  "interpretation": "The unprojected candidate is inspected at each check; tighter thresholds retain more slowly decaying singular directions and therefore grow rank.",
+  "parameters": {
+    "N": 64,
+    "check_every": 5,
+    "dt": 0.0005,
+    "initial_rank": 2,
+    "max_rank": 48,
+    "min_rank": 2,
+    "re": 5000,
+    "steps": 200,
+    "tolerances": [
+      1e-06,
+      1e-08,
+      1e-10
+    ]
+  },
+  "provenance": {
+    "driver": "experiments/run_rank_growth_sweep.py",
+    "git_commit": "8de4e43660499ecd962d2ed3fb3ec8b3704f630a"
+  },
+  "rows": [
+    {
+      "max_relative_l2_vs_full": 0.3165246412772345,
+      "max_scaled_invariant_residual": 0.001665114948609402,
+      "rank_final": 2,
+      "rank_max": 2,
+      "rank_min": 2,
+      "seconds_per_step": 0.004357793864328414,
+      "stable": true,
+      "tolerance": 1e-06
+    },
+    {
+      "max_relative_l2_vs_full": 0.3164846589738504,
+      "max_scaled_invariant_residual": 0.001665114948609402,
+      "rank_final": 3,
+      "rank_max": 3,
+      "rank_min": 2,
+      "seconds_per_step": 0.0030340086994692685,
+      "stable": true,
+      "tolerance": 1e-08
+    },
+    {
+      "max_relative_l2_vs_full": 0.31648638958382985,
+      "max_scaled_invariant_residual": 0.001665114948609402,
+      "rank_final": 15,
+      "rank_max": 15,
+      "rank_min": 2,
+      "seconds_per_step": 0.003121386630227789,
+      "stable": true,
+      "tolerance": 1e-10
+    }
+  ]
+}
