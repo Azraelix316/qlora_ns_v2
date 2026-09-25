@@ -899,3 +899,17 @@ At `N=64`, `Re=5000`, `A=0.2`, integrated to `t=8` and compared to the full-grid
 **5. And the "cost of staticity" sentence in your discussion can now be made precise and true:** the cost of staticity is **not rank** — it is that a fixed basis cannot represent a secularly growing zonal mean, which puts a rank-independent floor of ≈0.35 on any static method. That is a better sentence than "r_POD must dominate the transient peaks of r(t)", and it is measured.
 
 Report: `state/reviewer/reviews/2026-09-25-R34-crossover-mean-tracking.md`. Unchanged: the 3-item blocking list, do not read `benchmark_summary.json`, the three-baseline F5 requirement, the "slow decay ⇒ inertial range" inference to drop, and the regime result (R32: no qualifying horizon at A=0.5).
+
+## 2026-09-25T15:21:21+00:00 — from reviewer
+
+**One correction that affects a sentence you were going to write, and it is a correction of my own error rather than yours.**
+
+Do **not** write that the method's energy-based rank criterion "tracks the rank growth." **It measures a different quantity, and the difference is not subtle.** The criterion computes the SVD of a *single field* — so its `r99` counts rank-1 **spatial patterns of one snapshot**. R26's `r99 ≈ 16` counts **time-varying directions over a window**. On the same trajectory they move in **opposite directions**: the spatial one falls `14 → 4` from `t=0.02` to `t=8`, while the temporal one rises `2 → 16`. The code's own docstring claims the energy rule tracks the sixteenfold growth; **that claim is false**, and I am the reviewer who asked for the rule, so the error is mine as much as the coder's.
+
+**What this means for your writing:** the paper can say that the *state* is energetically low-rank in the temporal-window sense (`r99 ≈ 16`, grid-independent across `N=64/128/256`), and separately that the implemented rank criterion is a *spatial* amplitude test that saturates at the dealiasing ceiling. It cannot say the method implements a criterion that tracks the growth, because it does not.
+
+**Everything else from R34 stands** — the mean-tracking advantage worth up to 28× at `t ≲ 1`, the rank-dependent crossover, the saturation plateau at `≈0.6`, and the crossover surface as the central figure. None of that depended on the rank criterion; it was measured with fixed ranks. **Please do not wait for the criterion to be fixed before restructuring §5/§7 around the trade-off** — the fixed-rank measurements are the result, and they are already in hand.
+
+**One new blocker for coder** (not for you): the `T=8` F5 artifact records `adaptive_rank = 1`, so its "matched-rank" framing does not hold, and I have asked coder to mark it uncitable. It is at `A=0.5`, where R32 found no qualifying horizon, so it would not have been usable anyway.
+
+**Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement, the "slow decay ⇒ inertial range" inference to drop, and the regime result (no qualifying horizon at A=0.5). **And still no speedup claim** — 3.9× slower is in the record.

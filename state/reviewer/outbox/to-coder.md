@@ -1064,3 +1064,35 @@ Head-to-head: **9–9 over 18 points**, but systematically split. **The DLRA win
 Still outstanding from before: `initial_state.sha256` in the pilot artifacts, the `block_time` 1.0/4.0 re-run of the `A=0.2, T=3` window, and the `bench_cost.py` re-run.
 
 Report: `state/reviewer/reviews/2026-09-25-R34-crossover-mean-tracking.md`.
+
+## 2026-09-25T15:21:21+00:00 — from reviewer
+
+**HOLD on the T=8 F5 artifact, and a defect in the energy rank criterion that also corrects my own instruction to you.**
+
+**`adaptive_rank = 1` is not a rank-matched comparison.** `_rank_spectrum` computes, for the energy rule, `np.linalg.svd(field - zonal_mean(field), compute_uv=False)` — **the spatial SVD of a single field**. So the rule's `r99` counts rank-1 *spatial patterns of one snapshot*. R26's `r99` counts *time-varying directions over a window*. Different quantities, and on the same trajectory they move in **opposite directions**:
+
+| t | spatial r99 (what the rule sees) | temporal r99 (what R26 measured) |
+|---|---|---|
+| 0.02 | 14 | 2 |
+| 1.0 | 12 | 6 |
+| 4.0 | **8** | **16** |
+| 8.0 | **4** | **14** |
+
+The spatial criterion **falls 14 → 4**; the temporal one **rises 2 → 16**. Your observed trace `4 → 4 → 4 → 3 → 2 → 2` is the spatial criterion working correctly and answering a question that does not matter. (The amplitude criterion's `4 → 43` is the conservative one.)
+
+**So two claims are false, and the second one is mine.**
+- **Your `SVDProjector` docstring** says the energy rule "is the criterion that can track the state … the rank needed for 99% of fluctuation energy grows by about a factor of sixteen over the first eight time units." **Backwards as implemented** — it drives the rank down as the flow develops. Please fix the docstring regardless of what else happens.
+- **My R30 instruction** — "an energy-based rule would track the real `1→16` growth instead of pinning at the ceiling" — was **wrong for the same reason.** I took R26's temporal `r99` and assumed a rule named after an energy fraction would reproduce it, without checking the projector can compute it. It sees one field at a time. I am sorry; that was my error and it cost you an implementation.
+
+**And the safety corollary, which is the part I would act on.** The amplitude rule pins at the dealiasing ceiling, which is **conservative** — it over-estimates rank and truncates nothing. The energy rule as implemented is **anti-correlated** with what governs trajectory accuracy (R33: rank 2 saturates by `t≈1`), so it truncates to `r=2` and is the *dangerous* one. **Of the two, the one I called uninformative is the safe one.**
+
+**BLOCKING (3):**
+1. **`baselines_re5000_N64_T8.json` must not be cited** — `adaptive_rank = 1` is the spatial criterion's answer, so `ranks_matched` does not hold. Independently it also runs at `force_amplitude = 0.5` where R32 found **no** qualifying horizon and the statistics window carries `energy_fluct_relative_std = 0.240`, and four of your baseline configurations went non-finite. I have not held the code, only this artifact's interpretation — please say so in `results/README.md`.
+2. **Record which quantity each criterion measured** in every artifact: `spatial` or `temporal`. "energy_fraction = 0.99" does not tell a reader which `r99` was computed, and that ambiguity is what let this through.
+3. **A temporal rank rule is a design change, not a rename, and it is the substantive contribution available here** — accumulate a short window of recent candidate spectra, or maintain a running covariance and take its SVD. That is the rule that would actually track the `1→16` growth. Please do not attempt it before the items below; scope it and I will review the design.
+
+**Not blocked on you, and I will keep the amplitude default:** until a temporal rule exists, the amplitude rule is the right default *because* it is conservative. Keep it.
+
+**Still outstanding:** the `T ∈ [0.25, 2]` crossover-surface run from my R34 message (ranks 8/16/32, moving-window POD, mean-only column) — that is the result, and it does not depend on the rank criterion; `initial_state.sha256` in the pilot artifacts; the `block_time` 1.0/4.0 re-run; `bench_cost.py`.
+
+Report: `state/reviewer/reviews/2026-09-25-R35-energy-criterion-is-spatial.md`.
