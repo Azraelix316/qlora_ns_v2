@@ -2094,3 +2094,89 @@ rank-saturation mechanism. Every fitted `c·r^p` void. No advantage in time or m
 rank-scaling withdrawn on both axes; report the `3.3–5.1×` slowdown. D27.1's misnomer stands.
 D26.4's test fixture stands. The flow is the implemented shear, with the AKS control (D20, D24).
 Every D4 barred claim stands.
+
+---
+
+## D32 — **eight committed artifacts are cited zero times. One is a manufactured-solution verification the paper must use; one is 200 steps of rank growth, which is exactly why the adaptive-rank bar is right.** (2026-09-25)
+
+> **OPERATIVE (R67).** **§3 of the paper gains an implementation-verification paragraph, free, from
+> `taylor_green.json`.** The adaptive-rank bar (D4/D12) **STANDS** and now has a precise, fixable
+> reason. **Nothing may be called a long-time validation on the strength of the `T=1` artifact.**
+
+**D32.1 — A MANUFACTURED-SOLUTION VERIFICATION EXISTS AGAINST THE **ANALYTIC** SOLUTION, AND THE
+PAPER DOES NOT USE IT.** `state/coder/results/taylor_green.json`. I checked what it is measured
+against, because "the two codes agree" and "the code is right" are different claims:
+`run_taylor_green.py` builds `exact = exp(-2·ν·(n+1)·dt)·initial` — **the analytically known
+Taylor–Green viscous decay** — and measures both solvers against it.
+`max_relative_l2_error_full = 2.76e-14`; **`max_relative_l2_error_dlra = 2.26e-14` at rank 1**;
+`max_abs_divergence = 1.63e-14`; `max_energy_increase = -6.7e-3`; `max_scaled_energy_balance_residual
+= 3.16e-4`. **So the full-grid solver and the rank-1 reduced solver both reproduce the ANALYTIC
+solution to machine precision over 200 steps.** **This is the verification `CHECKLIST` §1.3 requires
+at the bottom of the validation ladder, it is already committed, and the paper does not contain it.**
+
+**IT IS §3's IMPLEMENTATION-VERIFICATION PARAGRAPH AND IT IS THREE SENTENCES:** *we verify the
+implementation against the analytically known Taylor–Green decay; the full-grid solver and the rank-1
+reduced solver both reproduce the exact solution to `2.8e-14` and `2.3e-14` over 200 steps, with
+`max|∇·u| = 1.6e-14`, monotone energy decrease and a scaled energy-balance residual of `3.2e-4`;
+every claim that follows is therefore a statement about the method rather than about the code.*
+**It matters beyond being free: the paper's central result is a negative-and-limited one, and a
+verified implementation is what makes such a paper credible rather than merely careful.**
+
+**D32.2 — THE ADAPTIVE-RANK EVIDENCE EXISTS, AND RUNS FOR **200 STEPS**, WHICH IS PRECISELY WHY THE
+BAR IS RIGHT.** `state/coder/results/rank_growth_sweep.json`, also never cited. It is a real
+adaptive-rank experiment — `dlra_adapt_initial: true`, `dlra_min_rank: 2`, `dlra_max_rank: 48` —
+sweeping the relative-amplitude cutoff:
+
+| cutoff | rank `min → final` | `max_relative_l2_vs_full` | `s/step` | stable |
+|---|---|---|---|---|
+| `1e-6` | `17 → 36` | `1.72e-4` | 7.9 ms | ✓ |
+| `1e-8` | `17 → 43` | `1.01e-4` | 7.6 ms | ✓ |
+| `1e-10` | `17 → 43` | `1.01e-4` | 7.7 ms | ✓ |
+
+**The artifact's own `interpretation` is right** — *"tighter thresholds retain more slowly decaying
+singular directions and therefore grow rank"* — **so rank growth has been measured and its
+monotonicity in the cutoff is a real result. BUT `final_time: 0.1`, `nsteps: 200`: at `dt=5e-4`
+that is 200 steps, THE SHORTEST HORIZON ANYWHERE IN THE PROJECT, and the one `CHECKLIST` §1.4a bars
+for timings. Rank growing `17 → 43` over `0.1` time units is the initial transient, not a claim
+about rank growth in forced turbulence.**
+
+**SO THE BAR ON "adaptive rank" (D4, D12) STANDS — but with a PRECISE, FIXABLE reason.** The bar
+was never on the *idea*; it is on the *evidence*, and the evidence is one 200-step artifact. Every
+other artifact records `rank_policy: "fixed per run"`, so this sweep is the project's **only**
+adaptive-rank evidence. **AND THE RUN THAT LIFTS IT IS CHEAP: at `7.6 ms/step`, `T=8` is `16 000`
+steps ≈ 2 minutes and `T=20` is `40 000` steps ≈ 5 minutes. ONE LONGER ADAPTIVE SWEEP CONVERTS A
+BARRED CLAIM INTO A SUPPORTED ONE, FOR LESS THAN ONE FIGURE REBUILD.**
+
+**D32.3 — TWO SMALLER PROVENANCE CLOSURES.** **`regime_pilot_re5000_A0p5.json` has
+`qualifying_horizons: []`** — the `A=0.5` pilot exists as an artifact and **agrees** with R32/R36 and
+D24; my `A=0.5` statements can now cite it. **AND `kolmogorov_re5000_N64_long.json` IS `T=1.0`, NOT
+"LONG" IN ANY USEFUL SENSE** (`max_relative_l2_dlra_vs_full = 3.35e-4`, and its own note says it
+compares full-grid and DLRA only). **NOTHING MAY BE CALLED A LONG-TIME OR LONG-HORIZON VALIDATION ON
+THE STRENGTH OF A `T=1` RUN** — the crossover surface's `T=8` is the longest integration in the
+project.
+
+**D32.4 — D32 AND R66 ARE THE SAME THESIS, AND BOTH ARE ONE CHEAP RUN FROM BEING CITABLE.** **R66: a
+FIXED subspace, propagated, overflows at `r ≥ 32` — the subspace must evolve or the solver does not
+run. D32.2: a rank criterion CAN grow the rank with the dynamics, and the evidence is 200 steps.**
+**That is the paper's actual contribution in the terms the evidence supports: not "DLRA is faster",
+not "adaptive rank works", but THE SUBSPACE MUST EVOLVE — here is what happens when it does not,
+here is the criterion that makes it evolve, and here is exactly how far the latter has been
+verified.** **It is a stronger and more honest paper than the crossover-sensitivity framing it is
+currently built on, and two cheap runs would let it be stated.**
+
+**D32.5 — THE LESSON, AND IT COMPLETES THE PAIR WITH R66.** R66 found an unused result **by
+accident**, while grepping a field for a different claim. **R67 found two more by asking a
+mechanical question I had never asked: WHICH COMMITTED ARTIFACTS DOES `CLAIMS.md` NOT CITE? Eight
+of seventeen. That question costs one shell command and it is now standing practice, because an
+artifact nobody cites is either a result the paper is missing or a run that should never have been
+committed — and both are worth knowing. AUDITING CLAIMS FINDS ERRORS IN WHAT YOU SAY; AUDITING
+ARTIFACTS FINDS WHAT YOU FAILED TO SAY. BOTH ARE THE REVIEWER'S JOB AND I HAD ONLY BEEN DOING THE
+FIRST.**
+
+**D32.6 — Unchanged.** D29.4's `t* = 0.649`/`1.482`, window `≤0.63%`, Re `3–9%`, rows
+bit-reproducible. D30's bracketed never-yields threshold; D30.1's rank-saturation mechanism. D31's
+fixed-basis divergence as a §7 observation pending its sweep. Every fitted `c·r^p` void. No advantage
+in time or memory. BUG's rank-scaling withdrawn on both axes; report the `3.3–5.1×` slowdown.
+D27.1's misnomer stands. D26.4's test fixture stands. The flow is the implemented shear, with the AKS
+control (D20, D24). Every D4 barred claim stands, **including "adaptive rank", now with D32.2's
+reason.**

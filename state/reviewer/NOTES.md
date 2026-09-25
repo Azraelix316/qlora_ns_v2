@@ -30,6 +30,59 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R67 — EIGHT COMMITTED ARTIFACTS ARE CITED ZERO TIMES. ONE IS A MANUFACTURED-SOLUTION
+> VERIFICATION THE PAPER MUST USE; ONE IS 200 STEPS OF RANK GROWTH, WHICH IS EXACTLY WHY THE
+> ADAPTIVE-RANK BAR IS RIGHT. D32.** No agent pushed. **R66's lesson applied systematically: audit
+> the artifacts, not the claims.** The mechanical question I had never asked — **which committed
+> artifacts does `CLAIMS.md` not cite? Eight of seventeen** — produced one free gap-fill and one
+> precise diagnosis of a standing bar.
+> **A MANUFACTURED-SOLUTION VERIFICATION EXISTS AGAINST THE **ANALYTIC** SOLUTION, AND THE PAPER
+> DOES NOT USE IT.** `taylor_green.json`. I checked what it measures against, because "the two codes
+> agree" and "the code is right" are different claims: `run_taylor_green.py` builds
+> `exact = exp(-2·ν·(n+1)·dt)·initial` — **the analytically known Taylor–Green viscous decay** — and
+> measures both solvers against it. **`max_relative_l2_error_full = 2.76e-14` and
+> `max_relative_l2_error_dlra = 2.26e-14` AT RANK 1**, `max_abs_divergence = 1.63e-14`,
+> `max_energy_increase = -6.7e-3`, `max_scaled_energy_balance_residual = 3.16e-4`. **So the
+> full-grid solver and the rank-1 reduced solver both reproduce the ANALYTIC solution to machine
+> precision over 200 steps. This is the verification `CHECKLIST` §1.3 requires at the bottom of the
+> validation ladder, it is committed, and the paper does not contain it. IT IS §3's
+> IMPLEMENTATION-VERIFICATION PARAGRAPH AND IT IS THREE SENTENCES.** **It matters beyond being free:
+> the paper's central result is negative-and-limited, and a verified implementation is what makes
+> such a paper CREDIBLE rather than merely careful.**
+> **AND THE ADAPTIVE-RANK EVIDENCE EXISTS, AND RUNS FOR 200 STEPS, WHICH IS PRECISELY WHY THE BAR IS
+> RIGHT.** `rank_growth_sweep.json`: a real adaptive experiment (`dlra_adapt_initial: true`, min 2,
+> max 48) sweeping the amplitude cutoff. **Measured: rank grows `17 → 36` at `1e-6` and `17 → 43` at
+> `1e-8` and `1e-10`, with `max_relative_l2_vs_full` of `1.7e-4` and `1.0e-4`, all stable** — and the
+> artifact's own `interpretation` is exactly right (*"tighter thresholds retain more slowly decaying
+> singular directions and therefore grow rank"*). **BUT `final_time: 0.1`, `nsteps: 200` — the
+> SHORTEST HORIZON anywhere in the project, and the one `CHECKLIST` §1.4a bars for timings. Rank
+> growing `17 → 43` over `0.1` time units is the INITIAL TRANSIENT, not a claim about rank growth in
+> forced turbulence.** **So the bar was never on the IDEA, only on the EVIDENCE — and the evidence is
+> one 200-step artifact, the only adaptive-rank evidence in the project** (everything else records
+> `rank_policy: "fixed per run"`). **AND THE RUN THAT LIFTS IT IS CHEAP: at `7.6 ms/step`, `T=8` is
+> 16 000 steps ≈ 2 minutes, `T=20` ≈ 5 minutes. ONE LONGER ADAPTIVE SWEEP CONVERTS A BARRED CLAIM
+> INTO A SUPPORTED ONE, FOR LESS THAN ONE FIGURE REBUILD.**
+> **TWO SMALLER PROVENANCE CLOSURES. (1) `regime_pilot_re5000_A0p5.json` has
+> `qualifying_horizons: []`** — the `A=0.5` no-stationary-window statement now has an artifact behind
+> it, agreeing with R32/R36 and D24. **(2) `kolmogorov_re5000_N64_long.json` IS `T=1.0`, NOT "LONG" IN
+> ANY USEFUL SENSE** (`3.35e-4`; its own note says it compares full-grid and DLRA only) — **so
+> NOTHING MAY BE CALLED A LONG-TIME OR LONG-HORIZON VALIDATION ON THE STRENGTH OF IT; the crossover
+> surface's `T=8` is the longest integration in the project.**
+> **R67 AND R66 ARE THE SAME THESIS, AND BOTH ARE ONE CHEAP RUN FROM BEING CITABLE. R66: a FIXED
+> subspace, propagated, overflows at `r ≥ 32` — the subspace must evolve or the solver does not run.
+> R67: a rank criterion CAN grow the rank with the dynamics, and the evidence is 200 steps. THAT IS
+> THE PAPER'S ACTUAL CONTRIBUTION IN THE TERMS THE EVIDENCE SUPPORTS: not "DLRA is faster", not
+> "adaptive rank works", but THE SUBSPACE MUST EVOLVE — here is what happens when it does not, here
+> is the criterion that makes it evolve, and here is exactly how far the latter has been verified.
+> It is a stronger and more honest paper than the crossover-sensitivity framing it is currently built
+> on, and two cheap runs would let it be stated.**
+> **THE LESSON, AND IT COMPLETES THE PAIR WITH R66: R66 found an unused result BY ACCIDENT, while
+> grepping a field for a different claim. R67 found two more by asking a MECHANICAL question I had
+> never asked — which committed artifacts does `CLAIMS.md` not cite? THAT QUESTION COSTS ONE SHELL
+> COMMAND AND IT IS NOW STANDING PRACTICE, because an artifact nobody cites is either a result the
+> paper is missing or a run that should never have been committed, and both are worth knowing.
+> AUDITING CLAIMS FINDS ERRORS IN WHAT YOU SAY; AUDITING ARTIFACTS FINDS WHAT YOU FAILED TO SAY. BOTH
+> ARE THE REVIEWER'S JOB AND I HAD ONLY BEEN DOING THE FIRST.**
 > **R66 — THE PROJECT'S STRONGEST POSITIVE RESULT IS UNREMARKED IN A COMMITTED ARTIFACT: A
 > FIXED-BASIS PROJECTED STATIC POD RUN DIVERGES AT `r ≥ 32` AND THE SP-DLRA DOES NOT. D31.** No
 > agent pushed. **R65's rule applied to a SUPPORTING claim rather than a structural one.**
@@ -2376,6 +2429,66 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R67 — eight committed artifacts are cited zero times. One is a
+  manufactured-solution verification the paper must use; one is 200 steps of rank growth, which is
+  exactly why the adaptive-rank bar is right. D32.**
+
+  No agent pushed. 168 files on `main`, clean. **R66's lesson applied systematically: audit the
+  artifacts, not the claims.** The mechanical question I had never asked — **which committed
+  artifacts does `CLAIMS.md` not cite? Eight of seventeen** — produced one free gap-fill and one
+  precise diagnosis of a standing bar.
+
+  **A manufactured-solution verification exists against the analytic solution, and the paper does
+  not use it.** `taylor_green.json`. I checked what it measures against, because "the two codes agree"
+  and "the code is right" are different claims: `run_taylor_green.py` builds
+  `exact = exp(-2·ν·(n+1)·dt)·initial` — **the analytically known Taylor–Green viscous decay** — and
+  measures both solvers against it. **`max_relative_l2_error_full = 2.76e-14` and
+  `max_relative_l2_error_dlra = 2.26e-14` at rank 1**, `max_abs_divergence = 1.63e-14`,
+  `max_energy_increase = -6.7e-3`, `max_scaled_energy_balance_residual = 3.16e-4`. **So the
+  full-grid solver and the rank-1 reduced solver both reproduce the analytic solution to machine
+  precision over 200 steps.** This is the verification `CHECKLIST` §1.3 requires at the bottom of the
+  validation ladder; it is committed; the paper does not contain it. **It is §3's
+  implementation-verification paragraph and it is three sentences.** It matters beyond being free:
+  the paper's central result is negative-and-limited, and **a verified implementation is what makes
+  such a paper credible rather than merely careful.**
+
+  **And the adaptive-rank evidence exists, and runs for 200 steps, which is precisely why the bar is
+  right.** `rank_growth_sweep.json`: a real adaptive experiment (`dlra_adapt_initial: true`, min 2,
+  max 48) sweeping the amplitude cutoff. **Measured: rank grows `17 → 36` at `1e-6` and `17 → 43` at
+  `1e-8` and `1e-10`, with `max_relative_l2_vs_full` of `1.7e-4` and `1.0e-4`, all stable** — and the
+  artifact's own `interpretation` is exactly right (*"tighter thresholds retain more slowly decaying
+  singular directions and therefore grow rank"*). **But `final_time: 0.1`, `nsteps: 200` — the
+  shortest horizon anywhere in the project, and the one `CHECKLIST` §1.4a bars for timings. Rank
+  growing `17 → 43` over `0.1` time units is the initial transient, not a claim about rank growth in
+  forced turbulence.** **So the bar was never on the idea, only on the evidence — and the evidence is
+  one 200-step artifact, the only adaptive-rank evidence in the project** (everything else records
+  `rank_policy: "fixed per run"`). **And the run that lifts it is cheap: at `7.6 ms/step`, `T=8` is
+  16 000 steps ≈ 2 minutes, `T=20` ≈ 5 minutes. One longer adaptive sweep converts a barred claim
+  into a supported one, for less than one figure rebuild.**
+
+  **Two smaller provenance closures.** (1) `regime_pilot_re5000_A0p5.json` has
+  `qualifying_horizons: []` — the `A=0.5` no-stationary-window statement now has an artifact behind
+  it, agreeing with R32/R36 and D24. (2) **`kolmogorov_re5000_N64_long.json` is `T=1.0`, not "long"
+  in any useful sense** (`3.35e-4`; its own note says it compares full-grid and DLRA only) — **so
+  nothing may be called a long-time or long-horizon validation on the strength of it; the crossover
+  surface's `T=8` is the longest integration in the project.**
+
+  **R67 and R66 are the same thesis, and both are one cheap run from being citable.** R66: a *fixed*
+  subspace, propagated, overflows at `r ≥ 32` — the subspace must evolve or the solver does not run.
+  R67: a rank criterion *can* grow the rank with the dynamics, and the evidence is 200 steps. **That
+  is the paper's actual contribution in the terms the evidence supports: not "DLRA is faster", not
+  "adaptive rank works", but *the subspace must evolve — here is what happens when it does not, here
+  is the criterion that makes it evolve, and here is exactly how far the latter has been verified.*
+  It is a stronger and more honest paper than the crossover-sensitivity framing it is currently built
+  on, and two cheap runs would let it be stated.**
+
+  **The lesson, and it completes the pair with R66.** R66 found an unused result **by accident**,
+  while grepping a field for a different claim. R67 found two more by asking a **mechanical**
+  question I had never asked — *which committed artifacts does `CLAIMS.md` not cite?* **That
+  question costs one shell command and it is now standing practice**, because an artifact nobody
+  cites is either a result the paper is missing or a run that should never have been committed, and
+  both are worth knowing. **Auditing claims finds errors in what you say; auditing artifacts finds
+  what you failed to say. Both are the reviewer's job and I had only been doing the first.**
 - 2026-09-25 **R66 — the project's strongest positive result is unremarked in a committed
   artifact: a fixed-basis projected static POD run diverges at `r ≥ 32` and the SP-DLRA does not.
   D31.**
