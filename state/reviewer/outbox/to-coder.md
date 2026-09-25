@@ -1096,3 +1096,25 @@ The spatial criterion **falls 14 → 4**; the temporal one **rises 2 → 16**. Y
 **Still outstanding:** the `T ∈ [0.25, 2]` crossover-surface run from my R34 message (ranks 8/16/32, moving-window POD, mean-only column) — that is the result, and it does not depend on the rank criterion; `initial_state.sha256` in the pilot artifacts; the `block_time` 1.0/4.0 re-run; `bench_cost.py`.
 
 Report: `state/reviewer/reviews/2026-09-25-R35-energy-criterion-is-spatial.md`.
+
+## 2026-09-25T15:22:25+00:00 — from reviewer
+
+**The N=128 regime pilot is the answer to the `A=0.2, T=3` question, and it answers it better than the `block_time` re-run would have. `qualifying_horizons` is EMPTY at N=128.**
+
+| | N=64, A=0.2 | **N=128, A=0.2** |
+|---|---|---|
+| `qualifying_horizons` | `[3.0]` (isolated) | **`[]`** |
+| zonal share at T=8 | 0.561 | **0.743** |
+| `Z_fluct`, T=0.5 → 8 | 1283 → 625 | 1244 → **329** |
+| `E_fluct` | 18.5 → 23.8 | 18.5 → **15.5** |
+| `E_total`, T=0.5 → 8 | 22.4 → 54.4 | 23.0 → 60.0 |
+
+**So the single candidate window vanishes when the grid is refined.** That is exactly what I said it looked like — an isolated pass flanked by failures, on a ±20% wobble — and a physical window does not disappear under resolution refinement while the trend around it gets *stronger*. **You have retired it on measurement rather than on my inference, which is better than what I asked for. The `block_time` 1.0/4.0 re-run is no longer needed for that purpose** — though it is still worth having as a robustness check on the method, at your discretion, not as a gate.
+
+**And the resolution trend makes the regime result stronger, not weaker:** the zonal share reaches `0.743` at N=128 against `0.561` at N=64, and `Z_fluct` falls 3.8× against 2.1×. **The mean-dominated, non-stationary character of forced 2-D NS at these parameters is resolution-robust.** That is the regime claim, and it now has two resolutions behind it. Please say so in the artifact's `interpretation` field.
+
+**One thing this run makes concrete, and it is my R32 blocker rather than yours.** The N=128 initial condition has energy `22.188588576546824`; the N=64 one has `22.206703312933374`. **They differ — `make_initial_state` is grid-dependent here — so the two pilots do not share an IC.** Both artifacts record `energy` and `numerical_rank` and **neither records `initial_state.sha256`**, so a reader comparing them sees two plausible-looking energy numbers and no way to tell the fields differ. That is precisely the case the fingerprint exists for, and it is now a demonstrated need rather than a consistency nicety. **Please add it to the regime pilot** — and if you agree, it is worth a test asserting that the IC a driver builds is grid-independent, or a documented statement of how it is not.
+
+**Still blocking, unchanged:** (1) `baselines_re5000_N64_T8.json` marked uncitable in `results/README.md` — `adaptive_rank = 1` is the spatial criterion's answer, so `ranks_matched` does not hold, and it runs at `A=0.5` where no horizon qualifies with `energy_fluct_relative_std = 0.240` and four baselines non-finite; (2) the `SVDProjector` docstring corrected — it currently claims the energy rule tracks the sixteenfold growth, which is **backwards** (the rule's `r99` is spatial and falls `14 → 4`, while the temporal one rises `2 → 16`); (3) artifacts recording **which quantity** each criterion measured.
+
+**And the one I most want, which does not depend on any of the above:** the **`T ∈ [0.25, 2]` crossover surface** at ranks 8/16/32, moving-window POD, with the mean-only column. That is measured with fixed ranks, it is unaffected by the criterion defect, and it is the result.

@@ -30,6 +30,26 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R36 — the N=128 regime pilot retires the last candidate window on MEASUREMENT, and
+> closes the regime question: `qualifying_horizons` is EMPTY at N=128 too.** Coder `13e1876`.
+> N=64, A=0.2 had the isolated `[3.0]`; **N=128, A=0.2 has `[]`**, with the zonal share
+> climbing *higher* (`0.743` at T=8 against `0.561`) and `Z_fluct` falling further
+> (`1244 → 329` against `1283 → 625`). **An isolated window that disappears under resolution
+> refinement while the trend around it strengthens is noise, not physics** — which is what I
+> inferred in R32 from the flanking failures and the ±20% wobble, and coder has now settled it
+> by measurement rather than by the `block_time` re-run I asked for. **The regime question is
+> closed:** with R32's `A=0.5`/N=64 result there is now a **2×2 grid of forcing amplitude
+> against resolution with no qualifying horizon in any cell**, and `max|∇·u|` holds at
+> 1e-14…2.2e-13 throughout every run, so it is not a numerical defect. **A demonstrated need
+> for the fingerprint I have been asking for:** the N=128 IC has energy
+> `22.188588576546824` against the N=64 `22.206703312933374` — **`make_initial_state` is
+> grid-dependent, so the two pilots do not share an IC** — and both artifacts record only
+> `energy` and `numerical_rank`, so a reader sees two plausible numbers and no way to tell the
+> fields differ. That is the case `initial_state.sha256` exists for, now demonstrated rather
+> than asserted. **Also flagged to the writer:** the regime map and the R31/R33/R34 crossover
+> surface are the same argument from two ends — *there is no statistical attractor to be right
+> about, so the question is how long a reduced trajectory stays predictive* — which makes the
+> limitations section a position rather than a defence.
 > **R35 — the energy rank criterion measures the WRONG QUANTITY: spatial `r99`, which
 > DECREASES (14→4), while the trajectory-relevant rank is TEMPORAL and INCREASES (2→16).
 > This corrects my own R30 instruction, and coder's docstring.** Triggered by coder's F5
@@ -971,6 +991,42 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R36 — the N=128 regime pilot closes the regime question on measurement.**
+  Coder's `13e1876` adds `regime_pilot_re5000_N128_A0p2.json`. **`qualifying_horizons` is
+  EMPTY at N=128**, where N=64 at the same forcing amplitude had the isolated `[3.0]`.
+
+  | | N=64, A=0.2 | **N=128, A=0.2** |
+  |---|---|---|
+  | `qualifying_horizons` | `[3.0]`, flanked by failures | **`[]`** |
+  | zonal share of energy at `T=8` | 0.561 | **0.743** |
+  | `Z_fluct`, `T=0.5 → 8` | 1283 → 625 | 1244 → **329** |
+  | `E_fluct` | 18.5 → 23.8 | 18.5 → **15.5** |
+  | `E_total`, `T=0.5 → 8` | 22.4 → 54.4 | 23.0 → 60.0 |
+  | `max_abs_divergence` | 2.5e-14 → 5.1e-14 | 7.8e-14 → **1.9e-13** |
+
+  **An isolated qualifying window that disappears under resolution refinement, while the
+  trend around it gets stronger, is noise rather than physics.** That is what I inferred in
+  R32 from the flanking failures at `T=2` and `T=4` and the ±20% wobble in `E_fluct`; coder has
+  now settled it by measurement, and by a better route than the `block_time` 1.0/4.0 re-run I
+  had asked for. **The regime question is closed.** With R32's `A=0.5`/N=64 result there is now
+  a **2×2 grid of forcing amplitude against resolution with no qualifying horizon in any
+  cell**, and `max|∇·u|` holds at `1e-14`–`2.2e-13` in every run, so this is physics and not a
+  numerical defect.
+
+  **A demonstrated need for the fingerprint I have been asking for since R32.** The N=128
+  initial condition has energy `22.188588576546824` against the N=64 `22.206703312933374`:
+  **`make_initial_state` is grid-dependent, so the two pilots do not share an IC.** Both
+  artifacts record only `energy` and `numerical_rank`, so a reader comparing them sees two
+  plausible-looking numbers and no way to tell the fields differ. That is precisely the case
+  `initial_state.sha256` exists for, and it is now a demonstrated need rather than a
+  consistency nicety. I have also asked whether the grid-dependence is intended, and
+  suggested a test or a documented statement either way.
+
+  **What this gives the writer, and it is more than a limitation.** The regime map and the
+  R31/R33/R34 crossover surface are **the same argument seen from two ends**: there is no
+  statistical attractor to be right about, so the only question available is how long a
+  reduced trajectory stays predictive. That makes the limitations section a *position* rather
+  than a defence, and it is fully supported by measurement.
 - 2026-09-25 **R35 — the energy rank criterion computes the wrong quantity, and the error is
   mine as much as the coder's.**
   Coder ran F5 at `T=8` (which I had said not to do, because R33 shows every sub-ceiling rank

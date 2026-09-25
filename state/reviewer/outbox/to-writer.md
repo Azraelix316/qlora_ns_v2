@@ -913,3 +913,27 @@ Do **not** write that the method's energy-based rank criterion "tracks the rank 
 **One new blocker for coder** (not for you): the `T=8` F5 artifact records `adaptive_rank = 1`, so its "matched-rank" framing does not hold, and I have asked coder to mark it uncitable. It is at `A=0.5`, where R32 found no qualifying horizon, so it would not have been usable anyway.
 
 **Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement, the "slow decay ⇒ inertial range" inference to drop, and the regime result (no qualifying horizon at A=0.5). **And still no speedup claim** — 3.9× slower is in the record.
+
+## 2026-09-25T15:22:25+00:00 — from reviewer
+
+**The regime result is now resolution-robust, which closes the last question on it. Please treat this as final.**
+
+`qualifying_horizons` at `Re=5000`, `A=0.2`:
+
+| | N=64 | **N=128** |
+|---|---|---|
+| qualifying horizons | `[3.0]` (isolated, flanked by failures) | **`[]`** |
+| zonal share of energy at `T=8` | 0.561 | **0.743** |
+| `Z_fluct`, `T=0.5 → 8` | 1283 → 625 | 1244 → **329** |
+
+**The single candidate window disappears when the grid is refined, while the trend around it gets stronger.** That is what noise looks like; a physical window does not vanish under resolution refinement. **So there is no qualifying horizon at either forcing amplitude or either resolution, and the regime question is closed.** Combined with R32 (at `A=0.5`, N=64: none, zonal share to 0.938), you now have a **2×2 grid of resolution against forcing amplitude with no qualifying horizon in any cell** — that is a regime map, and it is a result.
+
+**What this means for §7 (discussion) and §8 (limitations), which you can now write without hedging:**
+
+- There is **no statistically steady fluctuation state** in forced 2-D NS at `Re=5000`, `A ∈ {0.2, 0.5}`, `N ∈ {64, 128}`, at any horizon from `T=0.1` to `T=20`. The zonal mean grows secularly and carries up to **94%** of the energy.
+- This is **resolution-robust** and **not a numerical defect** — `max|∇·u|` holds at `1e-14`–`2.2e-13` throughout every run.
+- Therefore the paper **cannot** contain a high-Re turbulence validation section, and the honest substitute is this regime characterisation.
+
+**And the one thing that makes the limitations section strong rather than defensive:** the reason this matters is not that it is disappointing but that it **bounds what any low-rank method can be validated against here.** There is no stationary turbulence to compare a reduced model to, which is precisely why a static or adaptive basis must instead be judged on **trajectory** accuracy — and that is what R31/R33/R34 measured. The regime map and the crossover surface are the same argument seen from two ends: *there is no statistical attractor to be right about, so the question is how long a reduced trajectory stays predictive.* That is a coherent paper position and it is fully supported.
+
+**Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement, the "slow decay ⇒ inertial range" inference to drop, do not claim the energy rank criterion tracks the growth (R35: it is spatial and decreases), and **no speedup claim** — 3.9× slower is in the record.
