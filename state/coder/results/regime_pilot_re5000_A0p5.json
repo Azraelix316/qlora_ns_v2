@@ -1,8 +1,15 @@
 {
   "case": "regime_pilot",
   "initial_state": {
+    "dtype": "float64",
     "energy": 22.206703312933374,
-    "numerical_rank": 17
+    "numerical_rank": 17,
+    "numerical_rank_cutoff_relative": 1e-10,
+    "sha256": "ebcef128e52e73f728024f67e95e0a4263addff56aa82c7a8e82e7f5e8b1af41",
+    "shape": [
+      64,
+      64
+    ]
   },
   "instantaneous_rank_series": [
     {
@@ -9058,9 +9065,14 @@
   },
   "provenance": {
     "driver": "experiments/run_regime_pilot.py",
-    "git_commit": "b328ae456b792de93a06843e352b8ca00881df3f"
+    "git_commit": "1968c46224861c1f8b1f70df8457b8dfb6e516d6"
   },
   "qualifying_horizons": [],
+  "rank_quantities": {
+    "instantaneous_rank_series": "r99/r999/amp_* are the modes needed to represent ONE state at one instant. A per-step adaptive rule returns this quantity, not the windowed one, which is why it cannot reproduce the growth above.",
+    "rank_at_end": "both criteria on the final state's fluctuations and on the whole state; the two are reported separately because the secularly growing zonal mean dominates the whole-state energy at late times",
+    "window_rank_table": "r99/r999/amp_* are the modes needed to represent a WINDOW of the trajectory (nested windows from t=0, on psi' = psi - x-avg(psi)). This is the quantity that grows 1 -> 16 over [0, 8] and is grid-independent there."
+  },
   "rows": [
     {
       "S2_energy_block_means": [],
@@ -9097,7 +9109,7 @@
         }
       },
       "samples": 6,
-      "wall_seconds": 0.7150764209218323,
+      "wall_seconds": 0.4305267841555178,
       "zonal_share_of_total_energy_at_end": 0.18397942647862783
     },
     {
@@ -9135,7 +9147,7 @@
         }
       },
       "samples": 14,
-      "wall_seconds": 1.733706243801862,
+      "wall_seconds": 1.0410244860686362,
       "zonal_share_of_total_energy_at_end": 0.21463112917237984
     },
     {
@@ -9173,7 +9185,7 @@
         }
       },
       "samples": 26,
-      "wall_seconds": 2.2176831690594554,
+      "wall_seconds": 2.1334161469712853,
       "zonal_share_of_total_energy_at_end": 0.24378416515662507
     },
     {
@@ -9211,7 +9223,7 @@
         }
       },
       "samples": 51,
-      "wall_seconds": 5.105325660901144,
+      "wall_seconds": 4.084205006016418,
       "zonal_share_of_total_energy_at_end": 0.32163117679826075
     },
     {
@@ -9249,7 +9261,7 @@
         }
       },
       "samples": 101,
-      "wall_seconds": 8.93693419592455,
+      "wall_seconds": 8.27349843410775,
       "zonal_share_of_total_energy_at_end": 0.49688615984890105
     },
     {
@@ -9293,7 +9305,7 @@
         }
       },
       "samples": 151,
-      "wall_seconds": 12.282340214122087,
+      "wall_seconds": 12.141843998804688,
       "zonal_share_of_total_energy_at_end": 0.48603747944525777
     },
     {
@@ -9337,7 +9349,7 @@
         }
       },
       "samples": 201,
-      "wall_seconds": 17.81378958001733,
+      "wall_seconds": 16.61846412718296,
       "zonal_share_of_total_energy_at_end": 0.5534467976724189
     },
     {
@@ -9383,7 +9395,7 @@
         }
       },
       "samples": 301,
-      "wall_seconds": 24.66189193399623,
+      "wall_seconds": 24.921717875869945,
       "zonal_share_of_total_energy_at_end": 0.6108846415672203
     },
     {
@@ -9429,7 +9441,7 @@
         }
       },
       "samples": 401,
-      "wall_seconds": 33.832132873125374,
+      "wall_seconds": 33.34731788095087,
       "zonal_share_of_total_energy_at_end": 0.7371225718971963
     },
     {
@@ -9479,7 +9491,7 @@
         }
       },
       "samples": 601,
-      "wall_seconds": 52.15830665407702,
+      "wall_seconds": 48.34925586194731,
       "zonal_share_of_total_energy_at_end": 0.8427156748023765
     },
     {
@@ -9531,7 +9543,7 @@
         }
       },
       "samples": 801,
-      "wall_seconds": 69.10136611992493,
+      "wall_seconds": 64.84831279981881,
       "zonal_share_of_total_energy_at_end": 0.931213298329932
     },
     {
@@ -9585,7 +9597,7 @@
         }
       },
       "samples": 1001,
-      "wall_seconds": 82.06613163091242,
+      "wall_seconds": 80.86872877599671,
       "zonal_share_of_total_energy_at_end": 0.9379530346632285
     }
   ],

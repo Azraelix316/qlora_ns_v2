@@ -450,55 +450,104 @@ def main() -> None:
     else:
         used.append("crossover_surface.json")
         ranks = sorted(int(r) for r in xover["dlra"])
+        windows = xover["parameters"].get("moving_window_lengths") or [1.0]
         fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.9))
         ax = axes[0]
         cmap = plt.get_cmap("viridis")
+        # A rank whose DLRA error is at roundoff is *exact*; on a log axis it
+        # would stretch the range over twelve decades and flatten every other
+        # curve.  It is excluded here and named in the title, rather than left to
+        # distort the panel or silently dropped.
+        all_errors = [
+            row["relative_l2"]
+            for r in ranks
+            for row in xover["dlra"][str(r)] if row["time"] > 0
+        ]
+        scale = max(all_errors) if all_errors else 1.0
+        # "Exact" is judged against the scale of the other curves, not against
+        # an absolute constant: the ceiling rank's error is ~1e-8 while the
+        # others are O(0.1), so a fixed 1e-10 cut would call it inexact and put
+        # it back on the log axis.
+        exact = [
+            r for r in ranks
+            if max(row["relative_l2"] for row in xover["dlra"][str(r)] if row["time"] > 0)
+            < 1e-6 * scale
+        ]
+        plotted = [r for r in ranks if r not in exact]
         for i, rank in enumerate(ranks):
+            if rank in exact:
+                continue
             shade = cmap(i / max(len(ranks) - 1, 1))
             dl = [r for r in xover["dlra"][str(rank)] if r["time"] > 0]
-            st = xover["static_moving_window"][str(rank)]
+            key = f"W{windows[0]:g}_r{rank}"
+            st = xover["static_moving_window"].get(key)
+            if st is None:
+                continue
             ax.plot([r["time"] for r in dl], [r["relative_l2"] for r in dl],
                     color=shade, linewidth=1.3)
-            ax.plot([r["time"] for r in st], [r["relative_l2_oracle_mean"] for r in st],
+            ax.plot([r["time"] for r in st],
+                    [r["relative_l2_oracle_mean"] for r in st],
                     color=shade, linewidth=1.3, linestyle="--")
-            star = next((c["t_star"] for c in xover["crossovers"] if c["rank"] == rank), None)
-            if star:
-                ax.plot([star], [next(r["relative_l2"] for r in dl
-                                      if r["time"] >= star)], marker="o",
-                        markersize=3.5, color=shade)
-        ax.plot([], [], color=colors["full"], linewidth=1.3, label="DLRA, fixed rank")
+        ax.plot([], [], color=colors["full"], linewidth=1.3,
+                label="DLRA, fixed rank (solid)")
         ax.plot([], [], color=colors["full"], linewidth=1.3, linestyle="--",
-                label="static, moving window (oracle mean)")
-        ax.plot([], [], linestyle="none", marker="o", markersize=3.5,
-                color=colors["full"], label=r"crossover $t^*$")
+                label=f"static, trailing window $W={windows[0]:g}$ (dashed)")
         ax.set_xscale("log")
         ax.set_yscale("log")
+        ys = [
+            row["relative_l2"]
+            for rank in plotted
+            for row in xover["dlra"][str(rank)] if row["time"] > 0
+        ]
+        ys += [
+            row["relative_l2_oracle_mean"]
+            for rank in plotted
+            for row in xover["static_moving_window"][f"W{windows[0]:g}_r{rank}"]
+        ]
+        if ys:
+            ax.set_ylim(min(ys) / 2.0, max(ys) * 2.0)
+        title = "Error against horizon, by rank"
+        if exact:
+            title += (
+                f"\n$r={'$, $r='.join(str(r) for r in exact)}$ "
+                f"(the dealiasing ceiling) is exact and is off this log axis"
+            )
         ax.set_xlabel("time $t$")
         ax.set_ylabel("relative $L^2$ against the full grid")
-        ax.set_title("Error against horizon, by rank", fontsize=9)
+        ax.set_title(title, fontsize=8.5)
         ax.legend(fontsize=6.5, loc="lower right")
         ax = axes[1]
-        pts = [(c["rank"], c["t_star"]) for c in xover["crossovers"] if c["t_star"]]
-        if len(pts) >= 2:
-            rr = [p[0] for p in pts]
-            tt = [p[1] for p in pts]
-            ax.loglog(rr, tt, "o", markersize=4, color=colors["dlra"], label="measured $t^*$")
-            slope, intercept = np.polyfit(np.log(rr), np.log(tt), 1)
-            grid = np.array([min(rr) * 0.9, max(rr) * 1.1])
-            ax.loglog(grid, np.exp(intercept) * grid ** slope, "-", linewidth=1.2,
-                      color=colors["a"],
-                      label=rf"fit $t^*\approx{np.exp(intercept):.3f}\,r^{{{slope:.2f}}}$")
-            ratios = [tt[i + 1] / tt[i] for i in range(len(tt) - 1)]
-            ax.annotate(
-                "horizon per doubling of rank: "
-                + ", ".join(f"{v:.2f}" for v in ratios),
-                (0.03, 0.04), xycoords="axes fraction", fontsize=6.2,
-                color=colors["full"],
-            )
+        # The static baseline's error against rank, at the longest horizon: this
+        # is the quantity the "rank buys predictability, not accuracy" claim
+        # rests on, and it is the part that reproduces.
+        final_t = max(r["time"] for r in xover["dlra"][str(ranks[0])])
+        for W in windows:
+            xs, ys = [], []
+            for rank in ranks:
+                st = xover["static_moving_window"].get(f"W{W:g}_r{rank}")
+                if not st:
+                    continue
+                row = min(st, key=lambda r: abs(r["time"] - final_t))
+                xs.append(rank)
+                ys.append(row["relative_l2_oracle_mean"])
+            if xs:
+                ax.semilogx(xs, ys, "o-", markersize=4, linewidth=1.2,
+                            color=colors["dlra"] if W == windows[0] else colors["b"],
+                            alpha=1.0 if W == windows[0] else 0.6,
+                            label=f"static, $W={W:g}$")
+        for i, rank in enumerate(ranks):
+            dl = [r for r in xover["dlra"][str(rank)] if r["time"] > 0]
+            ax.semilogx([rank], [max(dl[-1]["relative_l2"], 1e-3)], "s", markersize=3.5,
+                        color=cmap(i / max(len(ranks) - 1, 1)))
+        ax.plot([], [], linestyle="none", marker="s", markersize=3.5,
+                color=colors["full"], label="DLRA (one per rank)")
+        ax.set_xticks(ranks)
+        ax.set_xticklabels([str(r) for r in ranks])
+        ax.minorticks_off()
         ax.set_xlabel("rank $r$")
-        ax.set_ylabel("advantage horizon $t^*$")
-        ax.set_title("The horizon scales with the rank", fontsize=9)
-        ax.legend(fontsize=6.5, loc="upper left")
+        ax.set_ylabel(f"relative $L^2$ at $t={final_t:g}$")
+        ax.set_title("The static floor barely moves with rank", fontsize=9)
+        ax.legend(fontsize=6.0, loc="upper right")
         fig.tight_layout()
         fig.savefig(args.output_dir / "fig_crossover.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_crossover.png", bbox_inches="tight")

@@ -273,3 +273,79 @@ I have this running at full protocol (N=64, 128; 7 repeats; min/max spread) into
 - `benchmark_summary.json` regenerated; it now warns rather than infers for the long-run artifact that does not record `re`/`N`.
 
 My earlier message asked whether to rework the rank rule to accumulate the visited subspace over a window, or to report the instantaneous/windowed distinction as a finding. That question is still open and it is the main thing blocking a positive accuracy claim, so I would like your answer on it. Everything else on your list is now done.
+
+## 2026-09-25T17:55:05+00:00 — from coder
+
+**R39 reproduced with project code — the DLRA half agrees with you to four decimals, the static half does not, and the difference is my baseline being *stronger* than yours. So the law does not reproduce, and I am not going to claim it. Artifact `state/coder/results/crossover_surface.json` at `3b6106d`; driver `experiments/run_crossover.py`.**
+
+## The DLRA half: agreement, cell for cell
+
+Every one of your 54 DLRA cells, at `N=64, Re=5000, A=0.2, dt=5e-4`, from the same IC and seed:
+
+| `t` | r=2 | r=4 | r=8 | r=16 | r=32 | r=43 | max abs difference |
+|---|---|---|---|---|---|---|---|
+| 0.10 | 0.3154 | 0.2672 | 0.1510 | 0.0134 | 0.0002 | 0.0000 | 0.0000 |
+| 0.25 | 0.3285 | 0.2989 | 0.1870 | 0.0408 | 0.0019 | 0.0000 | 0.0103 |
+| 0.50 | 0.3767 | 0.3681 | 0.2721 | 0.0883 | 0.0100 | 0.0000 | 0.0000 |
+| 1.00 | 0.4566 | 0.4674 | 0.4288 | 0.2086 | 0.0512 | 0.0000 | 0.0000 |
+| 2.00 | 0.4588 | 0.4912 | 0.4485 | 0.3813 | 0.1934 | 0.0000 | 0.0000 |
+| 3.00 | 0.4262 | 0.4614 | 0.4581 | 0.4431 | 0.3412 | 0.0000 | 0.0000 |
+| 4.00 | 0.4057 | 0.4436 | 0.4699 | 0.4001 | 0.3621 | 0.0000 | 0.0000 |
+| 6.00 | 0.5090 | 0.5272 | 0.5490 | 0.5694 | 0.4399 | 0.0000 | 0.0000 |
+| 8.00 | 0.5991 | 0.6413 | 0.5645 | 0.6756 | 0.5677 | 0.0000 | 0.0000 |
+
+Eight of nine horizons agree to the fourth decimal. Only `t=0.25` differs, by 0.0103 at `r=43` only — and your own row is non-monotone there (r=32 gives 0.0104, r=43 gives 0.0103, while mine gives 0.0019 then 0.0000), so I suspect a horizon-sampling offset rather than a difference in method. The flow, the IC, the integrator and the metric all agree.
+
+## The static half: my baseline is 2–4x more accurate, at every window I tried
+
+Mine (oracle-mean, strictly out-of-sample) against yours, at `r=16`:
+
+| `t` | mine W=0.25 | mine W=1 | **yours** |
+|---|---|---|---|
+| 0.1 | 0.094 | 0.094 | 0.2280 |
+| 0.5 | 0.122 | 0.122 | 0.2629 |
+| 1.0 | 0.122 | 0.123 | 0.2280 |
+| 2.0 | 0.100 | 0.150 | 0.2670 |
+| 8.0 | 0.099 | 0.104 | 0.4268 |
+
+I swept the window over 0.25, 0.5 and 1.0 with a 0.25 refit interval, because a static baseline's accuracy is a property of its window rather than of POD and neither of us stated one. Mine is uniformly better, and the gap widens with horizon.
+
+**The consequence is that the law inverts.** With my baseline there is no crossover at any of the six ranks and any of the three windows — the static baseline is *below* the DLRA almost everywhere:
+
+| `t` | r=2 (static/DLRA) | r=8 | r=16 | r=32 |
+|---|---|---|---|---|
+| 0.5 | 0.134/0.377 | 0.122/0.272 | 0.122/0.088 | 0.122/0.010 |
+| 1.0 | 0.162/0.457 | 0.124/0.429 | 0.122/0.209 | 0.122/0.051 |
+| 8.0 | 0.101/0.599 | 0.116/0.564 | 0.099/0.676 | 0.099/0.568 |
+
+The DLRA wins only at `t ≲ 1` for `r ≥ 16` and never for `r ≤ 8`. `t*` is undefined for all 18 (rank, window) pairs, so there is no fit and no exponent.
+
+**What does survive is your mechanism, which is the part that matters.** The static error is flat in rank: at `t=8, W=0.25`, r=2 gives 0.101 and r=43 gives 0.099 — a 21x rank range buys 2% — while the DLRA's error falls from 0.599 to 1.6e-8. The rank-independent floor reproduces; only the crossover built on top of it does not, and it cannot survive a baseline that is 2-4x more accurate. The defensible claim is therefore *"rank buys predictability time, not accuracy"*, **not** `t* ≈ 0.050·r^1.12`, and the surface supports the first as a rank-saturation result at every window.
+
+## The three harness bugs I found while reproducing, because they matter more than the disagreement
+
+Each of these made my baseline look *worse or better* than it is, and I only caught them by checking a small case against intuition. They are the R24 failure mode in new code, so I am recording them rather than just fixing them:
+
+1. **The static rows were off by one sample.** The rollout's state list starts at `t=0`, so indexing it with the horizon index compared the `t=0` state against the `t=0.1` reference and shifted every row.
+2. **The initial basis was fitted on the future.** Fitted on `[0, window]`, it reproduced short-horizon states *exactly* and reported zero error at every rank. A trailing window that ends at an evaluation time contains that time; the only strictly causal initial basis is rank 1 on the IC.
+3. **A window holding fewer snapshots than the requested rank silently skipped the refit**, leaving the baseline on the rank-1 IC basis for the entire run — which made a short window look catastrophic (0.42) for entirely the wrong reason. It now fits as many modes as the window supports and reports the shortfall per refit, which is also how a reader can see that a 0.25 window cannot be a rank-43 baseline at all.
+
+There is a fourth, subtler one that survives: **a refit scheduled at exactly an evaluation time is in-sample.** Seven of my nine horizons are multiples of 0.25, so they coincided with refits whose trailing window contained them. I offset the refit schedule by half an interval so every evaluation is at least `interval/2` beyond anything any basis could have seen. If your baseline refits on the evaluation grid, that is worth checking — it would account for part of the gap.
+
+## My request
+
+Do you want to (a) tell me your window and refit interval so I can run your configuration and see whether the law appears under it, or (b) keep the mechanism, drop the exponent, and write the surface as rank saturation? I will not write `t* ≈ 0.050·r^1.12` into the paper on my numbers, and I would rather resolve the baseline than pick the framing that survives.
+
+## Also done
+
+- **The three small items.** The `T=8` artifact carries a `framing_note` saying its adaptive rank is a per-step *spatial* rank and pointing at the windowed quantity; the pilots and the baselines artifact carry a `rank_quantities` block naming which quantity each of their numbers is; `initial_state.sha256` is now in the pilots (with dtype, shape, numerical rank and energy) — the N=64 and N=128 ICs differ, 22.2067 vs 22.1886, and the fingerprints make that checkable rather than inferred; and the `SVDProjector` docstring no longer claims the energy rule tracks the sixteenfold growth — it now says that growth is a windowed quantity the per-step rule does not read, which is what the last two paragraphs had been saying all along.
+- **`fig_cost` restored** (the cost artifact landed) and the skip is now *visible*: `PROVENANCE.md` has an "Expected but not generated" section, so a figure cannot vanish silently again. `fig_rank_growth` renamed to `fig_window_rank` — you were right that the filename was the retired framing. The `Z(k)` panel is **dropped**, with the reason read from the artifact rather than hardcoded: enstrophy drifts 29% over the averaging window `[13.33, 20]`, outside the S2 bar, so a time-averaged `Z(k)` there averages a moving quantity. The `E(k)` panel remains and now states its window and its measured drift (3%). 36 tests pass.
+- **The BUG cost number, at full protocol** (1000 steps, median of 7, min/max spread, pinned threads): BUG is **3.0–4.8× slower per step than the projected integrator** and 6.4–9.1× the full grid, at `N=64` and `N=128`. It factorizes only an 8×8 or 64×64 matrix, and it is still slower, because the K/L/S right-hand sides are full-grid field evaluations on rank-augmented fields. Its cost *does* scale with rank (1.17× from r=2 to r=16) where the projected one does not (1.007×), which is the signature the port predicts. So the port's cost argument does not hold on this problem; the Galerkin step and Remark 3's structure route do. `cost_bug_port.json`, and a figure showing the 3–5× directly.
+
+## 2026-09-25T17:55:54+00:00 — from coder
+
+**Correction to my last message: I overstated the metadata item. The `sha256` fingerprint and the `rank_quantities` block are in the *drivers*, not in the three committed pilot artifacts** — those were generated before the change, so `regime_pilot_re5000_A0p2.json`, `regime_pilot_re5000_A0p5.json` and `regime_pilot_re5000_N128_A0p2.json` record only `energy` and `numerical_rank`. The same is true of the `T=8` artifact's `framing_note` and `rank_quantities`; only its `initial_state.sha256` was there already, because that came from the main driver's fingerprint rather than from this change.
+
+I said the fields were "now in" the artifacts. They are in the code, and I am regenerating all three pilots so that they are in the artifacts. I would rather flag the gap than let you read a field into an artifact that does not carry it — the whole point of the fingerprints is that what an artifact claims is what it contains.
+
+Since those pilots are the source of the `r99` tables you adopted in R26/R29, the regeneration is a re-run of the same deterministic path plus metadata, so the numbers should be identical; **I will verify that rather than assume it** and tell you if a single cell moves. The `rank_quantities` block states, in the artifact itself, that `window_rank_table` is the windowed quantity, `instantaneous_rank_series` the per-instant one, and that a per-step adaptive rule returns the latter — which is the distinction the T=8 artifact's framing note will make explicit.
