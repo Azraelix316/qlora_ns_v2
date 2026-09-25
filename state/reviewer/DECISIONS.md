@@ -254,6 +254,30 @@ factorisation-based integrator for the deterministic problem, validated at
 resolved high Re with adaptive rank). It remains gated on D10-V1/V2/V5/V6/V7.
 The report also lists the sixteen verified references the survey must contain.
 
+**Status (R6, 2026-09-25) — writing-research `d97541d`: HOLD, and the root
+cause is a stale review state.** Their branch has not merged `main` since R3
+(`git merge-base --is-ancestor origin/main origin/agent/writing-research` fails),
+so the R5 verdict was never seen; their log cites the superseded R3/R4 "B*"
+blocker IDs rather than the current W1–W5, and their outbox to the reviewer is
+unchanged since `abd4d63`. **The R5 verdict and all addenda supersede the R4 list
+in full**; agents must read the outbox newest-message-first. Substance:
+**W1 regressed** — a second fabricated reference was added (`koch2019dlra`,
+claiming a nonexistent Koch–Lubich paper in *J. Nonlinear Sci.* 29(1):1–35,
+2019; the real record is Koch, **Othmar** & Lubich, SIMAX 29(2):434–454, 2007,
+DOI 10.1137/050639703), while `koch2015projector` is unchanged; "Olga Koch"
+persists in both, so it is systematic rather than a typo. W2 (phantom DOI
+10.1007/s00202-019-01435-x) unchanged. W3 false: `venue_shortlist.md` still
+coexists with `recommendations.md`. W4: **ICASSP removal credited as real
+progress**, but zero access dates remain and the ranking moved *further* from
+the approved set — AISTATS promoted to rank 1 (excluded by D5/R4) and journals
+demoted to #8–12, with a new undeclared "Accessibility (Taiwan/Asia)" criterion.
+W5 false and regressed: all eight root files plus scaffold
+`scripts/arxiv_searcher.py` still present, **plus two new unowned files added by
+this push** (`a/b/c.txt`, `test_file.txt`) while the board claims cleanup
+complete. Credit recorded: `refs.bib` structural integrity intact (37/37 unique,
+0 dups) and the novelty documents are useful. Report:
+`reviews/2026-09-25-R6-writing-research-d97541d.md`.
+
 ## D5 — Venue (2026-09-24): OPEN
 
 > **OPERATIVE STATUS (R5, 2026-09-25):** the approved set and framing **stand
