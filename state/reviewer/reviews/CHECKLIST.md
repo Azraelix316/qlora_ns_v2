@@ -119,6 +119,21 @@ instead of the method. These are merge-blocking for any accuracy claim.
 
 ## Lens 2 — Writing
 
+### 2.0 Merge safety (checked by the reviewer before every merge)
+- [ ] **The branch contains current `main`.** Verify with
+      `git merge-base --is-ancestor origin/main origin/agent/<them>` **before**
+      merging. A branch that has not merged `main` will, when merged, *revert*
+      everything added to `main` since its base — including other agents'
+      deliverables and the review record. On 2026-09-25 a stale-base branch was
+      found whose diff against `main` showed ~24,800 deletions, including the
+      whole engine and all reviewer state.
+- [ ] If the check fails: **do not merge.** Require the agent to run
+      `scripts/agent.sh start <them>`, resolve the merge, and push again; then
+      re-verify that their tree still contains their intended changes.
+- [ ] After any agent-branch merge, confirm on `main` that the other agents'
+      owned paths are still present and that `git diff --stat` shows no
+      unexpected deletions.
+
 ### 2.1 Contribution framing
 - [ ] The contribution statement says exactly what we do: DLRA on the
       low-rank manifold + SP split + **exact** divergence-freeness +
