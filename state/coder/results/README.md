@@ -18,9 +18,23 @@ refuses to emit a summary whose members disagree about the initial state.
 | `kolmogorov_re5000_N128.json` | `run_kolmogorov.py` | two-grid check under P0 item 3 (dt scaled with dx, IC held fixed via `ic_reference_N`) |
 | `kolmogorov_re5000_N64_long.json` | `run_long_time.py` | sustained full/DLRA check, T=1 (not a statistical window) |
 | `rank_growth_sweep.json` | `run_rank_growth_sweep.py` | relative-amplitude-cutoff sweep (rank/error/cost) |
+| `regime_pilot_re5000_A0p2.json` | `run_regime_pilot.py` | S1-S3 pilot at A=0.2: the grid-independent `r99` growth R26 measured, reproduced independently |
+| `regime_pilot_re5000_A0p5.json` | `run_regime_pilot.py` | the same at the canonical A=0.5, plus the S2 ladder to T=20 |
+| `baselines_re5000_N64_T8.json` | `run_baselines.py` | F5: full grid, static POD on early/late/moving windows, POD-DMD and fixed-rank DLRA at matched ranks, T=8 |
 | `cost_retiming.json` | `bench_cost.py` | R5q re-timing: pinned threads, warm-up discarded, median of repeats with spread, two accountings, rank-independence |
-| `regime_pilot.json` | `run_regime_pilot.py` | S1-S3 pilot: S2 fluctuation drift as a function of T |
 | `taylor_green.json` | `run_taylor_green.py` | F1 laminar exactness and monotone decay |
+
+## Rank: two different quantities, both recorded
+
+`r99` in `window_rank_table` is the number of modes needed to represent a
+**window** of the trajectory (nested windows from t=0, on
+`psi' = psi - x-avg(psi)`). It grows 1 -> 16 over the first eight time units
+and is grid-independent there. The rank a **per-step** rule selects is a
+different quantity -- the rank of one state at one instant, which is ~2 at
+t=8 -- because a rule that reads one snapshot at a time cannot see the subspace
+a trajectory accumulates. Both are in the artifacts
+(`window_rank_table` and `instantaneous_rank_series`, plus each run's
+`rank_history`), and the two must not be conflated in the paper.
 
 ## What a result is not allowed to mean
 
@@ -33,6 +47,18 @@ refuses to emit a summary whose members disagree about the initial state.
   nonlinear evaluation as the reference *plus* a whole-field SVD that is
   Theta(N^3) and rank-independent. `cost_retiming.json` reports both
   accountings; a linear-algebra win is not a per-step win.
+- **No stationary window exists at these settings.** The S2 statistic (block
+  means of >= 2 time units over the final third, drift between the last two
+  thirds, bar 10% on both E_fluct and Z_fluct) passes at **no** affordable
+  horizon up to T=20, and cannot even be evaluated below T ~ 12 because the
+  final third is then shorter than two blocks. The flow is mean-dominated: the
+  zonal mean holds 94% of the total energy at T=20. Statistics are therefore
+  time-dependent and reported with the zonal mean's trajectory alongside.
+- **A baseline that diverges is reported as diverging.** Methods carry
+  `diverged`, `diverged_at_time`, `final_time_reached` and
+  `accuracy_metrics_valid`; a truncated run's statistics cover only the window
+  it reached. "POD is worse" is not a citable claim unless the divergence is
+  itself reported.
 - **No turbulence statistic from `t <= 0.1`** (S5/D11.2). At that horizon the
   regime is not turbulence, and the corrected static-POD baseline is *more*
   accurate than adaptive DLRA because its offline window is a prefix of the
