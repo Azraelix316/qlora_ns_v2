@@ -30,6 +30,57 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R68 — I REWROTE THE PAPER'S ARGUMENT. NEW THESIS: "THE SUBSPACE MUST EVOLVE." AND THE PAPER
+> IS SUBMITTABLE TODAY ON THREE FULLY-SUPPORTED CONTRIBUTIONS. D33.** No agent pushed.
+> **R67's findings made the previous thesis obsolete rather than merely incomplete.** R53's framing
+> was *"the reported accuracy advantage is not a stable quantity"* — chosen because the obvious
+> framing (a fast SP-DLRA) was unavailable. **R66 and R67 then found a better one in the project's
+> own artifacts: a fixed-basis projected POD run overflows at `r ≥ 32` where the DLRA does not, and
+> a rank criterion that grows with the dynamics exists and works. That is the paper
+> `AGENTS.md` was written for, and it was sitting unremarked in a committed artifact.**
+> **THE NEW THESIS:** *in a reduced Navier–Stokes solver, whether the subspace evolves is the
+> difference between a method that runs and one that does not. Propagating a fixed
+> low-dimensional basis through the nonlinear dynamics — same integrator, same splitting,
+> orthonormal basis — is stable at rank 16 and does not survive to `t=8` at ranks 32 and 42, where it
+> overflows. The same integrator with a time-dependent subspace holds roundoff divergence and error
+> below 1.1 throughout. **What rank buys is not accuracy; it is the ability to run at all.** And the
+> accuracy horizon this literature reports as a property of the method is a measurement that must
+> carry five qualifiers or not be reported.*
+> **WHY IT IS BETTER, NOT RELABELLED. (i) It is the only framing under which the project's most
+> striking measurement — an overflow to `1e+278` — is a CONTRIBUTION rather than an inconvenience.
+> (ii) IT IS A STABILITY RESULT, AND STABILITY IS WHAT A REDUCED METHOD IS FOR; a reader indifferent
+> to crossover horizons still cares that their solver runs. (iii) IT GIVES A LEGITIMATE ROUTE TO WHAT
+> `AGENTS.md` ASKS FOR WITH NO BARRED CLAIM — we cannot say "adaptive rank", but "the subspace must
+> evolve" is supportable today, in stability terms. (iv) IT MAKES THE METHODOLOGICAL CONTRIBUTION
+> SHARPER RATHER THAN COMPETING WITH IT: the crossover fragility becomes the second half of one
+> argument — the subspace must evolve, and here is how carefully the evolution-free comparison must
+> be built to measure it.**
+> **THE SINGLE MOST IMPORTANT OPERATIVE FACT FOR THE WRITER: THE PAPER IS SUBMITTABLE NOW.**
+> **Contributions 1 (verified implementation, D32.1), 2 (the five-qualifier protocol and the
+> horizon's fragility), 3 (the rank-saturated mechanism, D30.1) and 6 (honest costs and boundaries)
+> are supported by committed artifacts.** Contributions 4 (stability, D31) and 5 (the rank criterion,
+> D32.2) are **ONE CHEAP RUN EACH** and **belong in §7 with their evidence status stated until they
+> land.** **The writer has had a blocking list for fifteen hours and no thesis; this supplies the
+> thesis and removes the false impression that the paper is blocked on measurements it does not
+> have.**
+> **THE ABSTRACT IS REWRITTEN**, leading with verification and stability rather than the crossover.
+> **The two evidence-status hedges in it — the rank criterion's `0.1` horizon and the fixed-basis
+> result's single artifact — ARE LOAD-BEARING HONESTY AND MUST NOT BE EDITED OUT.** The old
+> abstract's closing claim that *"the rank that never yields is a property of the grid rather than
+> of the method"* is **withdrawn** (D30.2/D30.5).
+> **THE STRUCTURE NOW: §3 Method and verification (with Taylor–Green) · §4 The measurement protocol
+> and table 1, the four bugs · §5 Stability: the subspace must evolve, with table 2 built from
+> `baselines_re5000_N64_T8.json` and captioned "one parameter set" · §6 the horizon and its mechanism
+> · §7 Discussion and limitations · §8 Conclusion.** Previously there was no §5 stability and no
+> analytic verification at all.
+> **AUDITED CLEAN: the rewritten blueprint contains none of `1.26`, `2.44`, `≤7%`, `1.17×`,
+> `2.8–3.5 MiB`, `0.5–14.6%`, or the `4.0×`/`4.2×` "dealiasing-ceiling" comparisons; the surviving
+> occurrences of `1.26`, `2.44`, `24.7%`, "is the full-grid solver", "dealiasing ceiling" and
+> `1.46→1.99`/`2.45→6.04` are all in §7's prohibition list or §2's inventory, where they belong.**
+> **THE REASON THIS CYCLE WAS WORTH DOING: every blocker I have been reporting to the writer for
+> fifteen hours has been an agent-side measurement or a correction. NONE of them was the missing
+> argument, and the argument was mine to supply. I had been auditing what everyone else was doing
+> instead of writing down what the paper should say.**
 > **R67 — EIGHT COMMITTED ARTIFACTS ARE CITED ZERO TIMES. ONE IS A MANUFACTURED-SOLUTION
 > VERIFICATION THE PAPER MUST USE; ONE IS 200 STEPS OF RANK GROWTH, WHICH IS EXACTLY WHY THE
 > ADAPTIVE-RANK BAR IS RIGHT. D32.** No agent pushed. **R66's lesson applied systematically: audit
@@ -2429,6 +2480,63 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R68 — I rewrote the paper's argument. New thesis: "the subspace must evolve." And
+  the paper is submittable today on three fully-supported contributions. D33.**
+
+  No agent pushed. 169 files on `main`, clean. **R67's findings made the previous thesis obsolete
+  rather than merely incomplete.** R53's framing was *"the reported accuracy advantage is not a
+  stable quantity"* — chosen because the obvious framing (a fast SP-DLRA) was unavailable. **R66 and
+  R67 then found a better one in the project's own artifacts.**
+
+  **The new thesis:** *in a reduced Navier–Stokes solver, whether the subspace evolves is the
+  difference between a method that runs and one that does not. Propagating a fixed low-dimensional
+  basis through the nonlinear dynamics — same integrator, same splitting, orthonormal basis — is
+  stable at rank 16 and does not survive to `t=8` at ranks 32 and 42, where it overflows. The same
+  integrator with a time-dependent subspace holds roundoff divergence and error below 1.1
+  throughout. **What rank buys is not accuracy; it is the ability to run at all.** And the accuracy
+  horizon this literature reports as a property of the method is a measurement that must carry five
+  qualifiers or not be reported.*
+
+  **Why it is better, not relabelled.** (i) It is the only framing under which the project's most
+  striking measurement — an overflow to `1e+278` — is a **contribution** rather than an
+  inconvenience. (ii) **It is a stability result, and stability is what a reduced method is for**; a
+  reader indifferent to crossover horizons still cares that their solver runs. (iii) **It gives a
+  legitimate route to what `AGENTS.md` asks for with no barred claim** — we cannot say "adaptive
+  rank", but "the subspace must evolve" is supportable today, in stability terms. (iv) **It makes
+  the methodological contribution sharper rather than competing with it**: the crossover fragility
+  becomes the second half of one argument — *the subspace must evolve, and here is how carefully the
+  evolution-free comparison must be built to measure it.*
+
+  **The single most important operative fact for the writer: the paper is submittable now.**
+  **Contributions 1 (verified implementation, D32.1), 2 (the five-qualifier protocol and the
+  horizon's fragility), 3 (the rank-saturated mechanism, D30.1) and 6 (honest costs and boundaries)
+  are supported by committed artifacts.** Contributions 4 (stability, D31) and 5 (the rank
+  criterion, D32.2) are **one cheap run each** and **belong in §7 with their evidence status stated
+  until they land.** **The writer has had a blocking list for fifteen hours and no thesis; this
+  supplies the thesis and removes the false impression that the paper is blocked on measurements it
+  does not have.**
+
+  **The abstract is rewritten**, leading with verification and stability rather than the crossover.
+  **The two evidence-status hedges in it — the rank criterion's `0.1` horizon and the fixed-basis
+  result's single artifact — are load-bearing honesty and must not be edited out.** The old
+  abstract's closing claim that *"the rank that never yields is a property of the grid rather than of
+  the method"* is **withdrawn** (D30.2/D30.5).
+
+  **The structure now:** §3 Method and verification (with Taylor–Green) · §4 The measurement
+  protocol and table 1, the four bugs · §5 Stability: the subspace must evolve, with table 2 built
+  from `baselines_re5000_N64_T8.json` and captioned "one parameter set" · §6 the horizon and its
+  mechanism · §7 Discussion and limitations · §8 Conclusion. **Previously there was no §5 stability
+  and no analytic verification at all.**
+
+  **Audited clean:** the rewritten blueprint contains none of `1.26`, `2.44`, `≤7%`, `1.17×`,
+  `2.8–3.5 MiB`, `0.5–14.6%`, or the `4.0×`/`4.2×` "dealiasing-ceiling" comparisons; the surviving
+  occurrences of `1.26`, `2.44`, `24.7%`, "is the full-grid solver", "dealiasing ceiling" and
+  `1.46→1.99`/`2.45→6.04` are all in §7's prohibition list or §2's inventory, where they belong.
+
+  **Why this cycle was worth doing: every blocker I have been reporting to the writer for fifteen
+  hours has been an agent-side measurement or a correction. None of them was the missing argument,
+  and the argument was mine to supply.** I had been auditing what everyone else was doing instead
+  of writing down what the paper should say.
 - 2026-09-25 **R67 — eight committed artifacts are cited zero times. One is a
   manufactured-solution verification the paper must use; one is 200 steps of rank growth, which is
   exactly why the adaptive-rank bar is right. D32.**
