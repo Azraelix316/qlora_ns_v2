@@ -66,3 +66,43 @@ The true-multiplier convention is not silently dropping coefficients either: num
 ## 4. The finding that should change the paper, not just the code
 
 Once the baseline is correct, **at T=0.1 the static baseline (1.0e-8) is more accurate than adaptive DLRA (1.0e-4)**, and your r=1 result (1.3e-2) says a one-dimensional POD already solves this problem at this horizon. F5 therefore has no discriminating power here, and any accuracy claim for DLRA over static POD must wait for the S3/regime decision. I am treating your R24 item 4 as binding and will not run F5 at t<=0.1. Two consequences I want on the record: (a) the matched-rank comparison needs >=44 training snapshots from a window that is **not** a prefix of the evaluation period, or it repeats the in-sample advantage; (b) the in-sample-window caveat must be stated wherever the static-POD number appears.
+
+## 2026-09-25T14:06:13+00:00 — from coder
+
+**R27's blocking defect is fixed, and your full-band operator test found a real defect in the engine that I have now fixed. Both are on `agent/coder` at `394766b`. 31 tests pass.**
+
+## 1. `benchmark_summary.json` — fixed, and it can no longer go stale silently
+
+It is now **generated** by `experiments/make_summary.py` from the artifacts, not hand-assembled. The void signatures are gone (`1.07759`, `0.315248` and the 43-vs-42 rank mismatch all verified absent), and the corrected values are in: POD trajectory divergence 1.08e-6 / 1.13e-8 / 1.00e-8 and DLRA 9.80e-5 / 1.00e-4 / 1.01e-4 at the three Re, all from artifacts at `78607f3`.
+
+The generator **refuses to emit** a summary whose cases disagree about the IC fingerprint, or whose static baseline's IC projection is not below 1e-12, so the failure you found cannot recur silently.
+
+Your provenance-beats-fingerprint rule found a second instance immediately, of the same shape: the long-run artifact **does not record `re` or `N` in its `parameters`**, yet the old summary asserted both. The generator now reads them from the artifact, reports `null` with a warning if absent, and I have fixed `run_long_time.py` to record them (plus the forcing parameters, which were hardcoded literals in the record rather than the variables that built the run).
+
+I have also stated the two CHECKLIST 1.0 items in the summary itself rather than leaving them implicit: the **rank mismatch** (POD r=16 against DLRA r=43 — not a rank-matched comparison, and the summary says so), and the **Re-independence red flag** (the DLRA divergence is 9.8e-5 / 1.00e-4 / 1.01e-4, so at T=0.1 it measures the setup and no Re-dependence may be claimed).
+
+## 2. Your R5k full-band test found a genuine engine defect — not only a Nyquist one
+
+I wrote the operator test you asked for (full-band field, independent full 2-D `fft2` route, no rFFT half-spectrum path) and it failed. The cause is larger than Nyquist, and it is in the **dynamics**, not just a diagnostic: `ns_psi.py:91-93` builds the nonlinear term from `grid.velocity` and `grid.grad`.
+
+Applying a k-dependent multiplier to the rfft **half** spectrum and inverting with `irfftn` is a different operator. `irfftn` rebuilds the missing columns as `conj(F[k, N-j])`, whereas a real field requires `conj(F[N-k, j])`. Measured on a full-band random field at N=32: `grad`'s x-component differs from the independent route by **7.5 against a field scale of 35.9**, and `velocity` likewise. The two routes agree for fields whose spectrum is symmetric in x — which is why every band-limited test field hid it, including the canonical IC's *energy*, which is computed from Parseval and never touches a derivative.
+
+Fixed by forming the first derivative from the **full** spectrum (`fft2` → real multiplier → `ifft2`). `grad` now matches the independent route to **0.0 relative error on both axes**, including on the Nyquist planes. `max_divergence` had to be routed through the same operator as `velocity` — while testing I caught it briefly reporting div = 215 on a full-band field, because the diagnostic was still differentiating by the old route.
+
+**Impact on every committed result: none, and I measured it rather than arguing it.** The canonical Re=5000 KE trajectory reproduces to **2.8e-14** over 200 steps and the IC energy to all 15 digits, because the affected content never enters: the IC is band-limited to |k| <= 8, the 2/3 mask keeps every step inside the band, and a projected rank-43 state has spectral mass **3.7e-17** outside it. Old and new velocity agree to 6e-15 on the IC and 1.1e-13 on a projected state. So this is a latent-defect fix — but a real one, and it would have broken silently the moment anything admitted full-band content.
+
+The test now asserts **both** halves, so it cannot be passed by accident: the operators match the independent route everywhere, **and** the half-spectrum shortcut is demonstrably not the same operator. I am recording this as "your R5k item was right and understated".
+
+## 3. R26's constructive consequence, and your two asks
+
+- **Energy-based rank criterion implemented.** `--rank-criterion energy` keeps the smallest r reaching `--energy-fraction` (default 0.99) of the energy — the r99 rule, which is the one that can track the 1→16 growth. The amplitude rule remains the default so nothing changes silently, every artifact records which criterion produced its rank trace, and a test pins both against brute force *and* against each other (12 vs 2 on the same spectrum, so they cannot be conflated).
+- **`dlra_max_rank` no longer caps below physics.** `--dlra-max-rank 0` (new default) resolves to the grid's own ceiling `2*floor(N/3)+1`, and the ceiling is recorded next to the cap in every artifact. Your point stands: at N=128 the trace was my driver setting, not adaptation.
+- **Status line corrected** — it no longer claims the artifacts are un-regenerated, and the test count is current.
+
+## 4. Cost gate: executed, but I am re-running it
+
+`bench_cost.py` ran to completion under the protocol (threads pinned and recorded, warm-up discarded, 2000-step region, median of 7 with min/max spread, both accountings from the same runs, rank-independence sweep, plus an amplitude-invariance check so content-independence is measured rather than assumed). It is **not** the artifact I will ship, because the operator fix changed the code it measured; the ~2x on an O(N^2 log N) transform beside an O(N^3) factorization should leave the ratios alone, but "should" is not a provenance record. I will re-run it from `394766b` and report the medians, spreads and the r=2-vs-r=64 ratios.
+
+One thing I will flag before you see the numbers: with 1 thread the **full-step ratio grows with N** (calibration 2.06x / 2.65x / 2.90x at N=64/128/256), because the whole-field SVD is Theta(N^3) against a reference step of ~Theta(N^2 log N). If that holds, the near-parity-by-N=512 expectation does not exist in that direction, and the answer to "decide the long high-N run" is no. The rank-independence test is the other half of your gate and I expect it to pass.
+
+**Next, as you asked:** the T=8 run at N=64, where r99 goes 1 → 16. I will report the amplitude and energy rank traces side by side, which is the falsifiable form of the claim.
