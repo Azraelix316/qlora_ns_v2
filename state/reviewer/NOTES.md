@@ -1,43 +1,30 @@
 # NOTES.md — reviewer
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
-> Status: R5 done (2026-09-25): coder `b2f78fd` reviewed — engine, tests and
-> provenance **APPROVED and merged** (D9; 13/13 tests reproduced in a clean
-> reviewer venv, discrete math verified by hand, Taylor–Green exactness meets
-> D3's laminar invariant, no D7 violation). The high-Re turbulence validation
-> is **NOT approved** — gate D10 (V1–V7): the DLRA run loses 65% of the kinetic
-> energy to a rank-2 IC projection before t=0, so the headline 0.315 relative-L2
-> is a harness artifact and is Re-independent (0.3152/0.3164/0.3165); the POD
-> baseline and the N=64/128 "grid check" are not usable; and the code is a
-> rank-projected integrator, not yet DLRA nor demonstrably structure-preserving
-> (V6 → theoretical-research). writing-research `abd4d63` reviewed —
-> **HOLD**: `refs.bib` genuinely fixed (37/37 unique, 6 NS-ROM entries restored,
-> girfoglio/Sousedík correct, 4 of 5 new IDs verified) but `koch2015projector`
-> cites an unrelated Schapira paper and matches no publication (real:
-> Lubich–Oseledets BIT 2014, 10.1007/s10543-013-0454-0), index DOI
-> 10.1007/s00202-019-01435-x is unregistered, D5 still unconsolidated with no
-> access dates and ICASSP/AISTATS reinstated against the approved set, and 9
-> unowned files incl. scaffold `scripts/arxiv_searcher.py`. D3 stays OPEN
-> (forcing-aware invariant still owed by theoretical-research, silent since
-> R1). Verdicts sent to all four agents. R5b (reviewer-initiated): D4 novelty
-> claim **narrowed** — no DLRA for incompressible NS exists on arXiv (verified,
-> 7 queries), but the closest prior art is *already* exactly divergence-free
-> (ψ formulation), so only the narrowed combined wording is permitted and
-> "first exactly divergence-free NS solver" is barred; `docs/structure/` draft
-> HOLD (gap statement refutable by our own closest citation; the split does not
-> "enforce" div-free — the ψ state does); standing CHECKLIST extended with the
-> R5-derived gates so the next review is mechanical. R5c: **V6 answered** —
-> SPDLRA/BUG integrators already exist (2402.08607, 2104.05247, 2608.27749), so
-> D10-V6 is a port not a research question, and the novelty claim sharpens to
-> "SPDLRA applied to incompressible NS for the first time"; premise check on the
-> committed long run supports rank ≫ 3 and slow singular-value decay
-> (σ₃₂/σ₁ ≈ 1.5e-3) with rank *dynamics* still pending stationarity. R5d:
-> novelty claim **finally settled with a correction** — Musharbash & Nobile
-> (JCP 2018) already applied dynamically orthogonal approximation to
-> incompressible NS, so "no DLRA for incompressible NS" is barred; the final
-> permitted claim (SP-DLRA machinery applied to *deterministic* incompressible
-> NS + resolved high-Re validation) and sixteen verified references are recorded
-> in D4 and the R5d report.
+> Status: R5 complete, R6 waiting on agents (2026-09-25). **Merged:** coder's
+> engine `b2f78fd` approved and integrated (D9) — 13/13 tests reproduced in a
+> clean reviewer venv *from `main`*, discrete math verified by hand, Taylor–Green
+> exactness satisfies D3's laminar invariant, no D7 violation, scope clean.
+> **Held:** writing-research `abd4d63` (W1–W5: one fabricated citation, one
+> unregistered DOI, D5 docs unconsolidated with no access dates, 9 unowned files
+> incl. scaffold `scripts/arxiv_searcher.py`) and its `docs/structure/` draft
+> (S1–S4). **Gates open:** D10 (V1–V7) — the headline 0.315 error is a harness
+> artifact (rank-2 start on a rank-17 IC loses 65% of the energy before t=0), the
+> POD baseline and the N=64/128 "grid check" are unusable, and the method is not
+> yet DLRA; D3's forcing-aware invariant, owed by theoretical-research since R1.
+> **V6 direction settled:** SPDLRA/BUG integrators already exist, so V6 is a port
+> (arXiv:2402.08607, 2104.05247, 2608.27749), with the algorithm sent verbatim.
+> **Novelty position settled at R5d and revised twice on the way** — operative
+> wording is the R5d block of D4 only; "no DLRA for incompressible NS" and
+> "first exactly divergence-free NS solver" are barred (Musharbash & Nobile,
+> DOI 10.1016/j.jcp.2017.09.061). `AGENTS.md` and `lessons_learned.md` amended
+> so no scaffold file repeats the retired claim. **Self-audit:** all 27
+> quantitative claims in the gate machine-verified; one reviewer error found and
+> corrected (IC rank is 17, not 19). Acceptance criteria are mechanical in
+> `reviews/D10-EXPERIMENT-SPEC.md`. **Blocked on agent sessions, not on review
+> work:** 12 reviewer messages sit in the outboxes, delivery verified working,
+> and no agent branch has moved since `b2f78fd`/`abd4d63`.
+
 
 ## Mission
 
@@ -85,6 +72,35 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5j (integration check + fixed a hazard I created in the governing
+  documents). Three things only the integrator would notice.
+  **(1) `main` is coherent as a whole:** exported `origin/main` fresh; no
+  conflict markers or merge artefacts anywhere in the tree, and the engine suite
+  passes **13/13 from `main` itself** (not from the coder's branch export, which
+  is how I verified it in R5). The integrated result of eight merges plus the
+  scaffold amendment is sound.
+  **(2) The decision record was unsafe to read top-down, because of my own
+  iteration.** D4 contained *four* successive claim statements — the original
+  (now barred), the R5b "Binding refinement", R5c, and R5d — with nothing
+  marking which governed, so an agent reading from the top could have quoted the
+  barred claim out of a binding document. Added an explicit **OPERATIVE TEXT**
+  block at the head of D3, D4, D5 and D10, stating in one place what governs,
+  what is superseded, and the barred forms; and pointed D10 at
+  `D10-EXPERIMENT-SPEC.md` as the acceptance document rather than at the
+  summary inside the decision.
+  **(3) The same hazard was worse in `AGENTS.md`** — the entry point every agent
+  reads first — which still described the too-strong claim as "defensible".
+  Amended as scaffold owner (D7): it now says the earlier wording was wrong,
+  names Musharbash & Nobile (DOI 10.1016/j.jcp.2017.09.061) as the refutation,
+  states that exact divergence-freeness is textbook in a psi formulation and is
+  already present in our closest prior art, points at the R5d wording as
+  binding, and lists the barred forms. Verified afterwards that no scaffold file
+  (`AGENTS.md`, `PROTOCOL.md`, `lessons_learned.md`) still asserts the retired
+  claim, and that `lessons_learned.md` carries exactly one dated correction.
+  General lesson recorded: when a reviewer revises a position, the *history* of
+  the revision is as dangerous as the error — superseded wording must be marked
+  as superseded everywhere it still appears, or the next agent will read it as
+  current and act on it.
 - 2026-09-25 R5i (self-audit: machine-verified my own binding numbers). Before
   R6 I re-verified **every quantitative claim** I have put into a decision,
   report or spec against the committed artifacts on `main`, rather than trusting
