@@ -62,6 +62,21 @@ def thread_settings() -> dict:
     return {key: os.environ.get(key) for key in keys}
 
 
+def load_average() -> list[float] | None:
+    """The node's load average, recorded because the node is shared.
+
+    This machine also serves a language model, so its load moves with someone
+    else's work.  Recording it is what lets a reader decide whether a large
+    spread is the method or the neighbours, and it is the reason the protocol
+    interleaves configurations: on a node this noisy the per-configuration median
+    is unreliable while the ratio between two interleaved configurations is not.
+    """
+    try:
+        return [float(x) for x in os.getloadavg()]
+    except (OSError, AttributeError):
+        return None
+
+
 def make_state(grid: Grid2D, seed: int = 20260925, amplitude: float = 1.0) -> np.ndarray:
     """A bounded, smooth multi-mode state for the cost measurement.
 
@@ -167,20 +182,40 @@ def measure(
     state0 = make_state(grid)
 
     # Discarded warm-up: first touch of every buffer, and the LAPACK handle.
-    full_step_seconds(model, state0, dt, warmup)
-    full_runs = [full_step_seconds(model, state0, dt, steps) for _ in range(repeats)]
+    # **Interleaved, not sequential.** Repeats are the outer loop and
+    # configurations the inner one, so every configuration is measured once per
+    # "round" and a slow patch of machine time -- the node is shared -- inflates
+    # all of them together instead of penalising whichever one happened to run
+    # during it. Timing all repeats of one configuration and then all repeats of
+    # the next makes every cross-configuration ratio depend on when each block
+    # ran, and on a shared node that produced spreads of 50% on one block and
+    # 4% on the next, which is enough to invent or hide a rank-scaling effect.
+    full_runs: list[float] = []
+    runs: dict[int, list] = {r: [] for r in ranks}
+    bug_runs: dict[int, list] = {r: [] for r in ranks if bug_ranks and r in bug_ranks}
+    calls: dict[int, int] = {}
 
+    full_step_seconds(model, state0, dt, warmup)          # discarded warm-up
+    for rank in ranks:                                     # discarded warm-ups
+        _, _, calls[rank] = reduced_step_seconds(N, rank, dt, warmup)
+        if rank in bug_runs:
+            bug_step_seconds(N, rank, dt, warmup)
+
+    for _ in range(repeats):
+        full_runs.append(full_step_seconds(model, state0, dt, steps))
+        for rank in ranks:
+            runs[rank].append(reduced_step_seconds(N, rank, dt, steps))
+            if rank in bug_runs:
+                bug_runs[rank].append(bug_step_seconds(N, rank, dt, steps))
+
+    full_med = statistics.median(full_runs)
     rows = []
     for rank in ranks:
-        # Warm-up, discarded: it also reports the per-step SVD call count.
-        _, _, calls = reduced_step_seconds(N, rank, dt, warmup)
-        runs = [reduced_step_seconds(N, rank, dt, steps) for _ in range(repeats)]
         # Both accountings come from the same runs, so they are directly
         # comparable rather than independently noisy.
-        red_med = statistics.median([r[0] for r in runs])
-        la_med = statistics.median([r[1] for r in runs])
-        run_secs = [r[0] for r in runs]
-        full_med = statistics.median(full_runs)
+        red_med = statistics.median([r[0] for r in runs[rank]])
+        la_med = statistics.median([r[1] for r in runs[rank]])
+        run_secs = [r[0] for r in runs[rank]]
         # Content-independence, measured rather than assumed: the same step at
         # a 1e-3 amplitude must cost the same.
         amp_med = statistics.median(
@@ -197,19 +232,18 @@ def measure(
                 "full_step_relative_spread": (max(run_secs) - min(run_secs)) / red_med,
                 "linear_algebra_seconds_median": la_med,
                 "linear_algebra_seconds_per_step": la_med / steps,
-                "svd_calls_per_step": calls / warmup,
+                "svd_calls_per_step": calls[rank] / warmup,
                 "full_step_ratio_vs_reference": red_med / full_med,
                 "linear_algebra_ratio_vs_reference": la_med / full_med,
                 "amplitude_1e_3_seconds_median": amp_med,
                 "amplitude_cost_ratio": red_med / amp_med,
             }
         )
-        # The BUG port, on the same protocol and the same state, so the two
-        # timings differ only in the integrator.
-        if bug_ranks is not None and rank in bug_ranks:
-            bug_step_seconds(N, rank, dt, warmup)          # discarded warm-up
-            bug_runs = [bug_step_seconds(N, rank, dt, steps) for _ in range(repeats)]
-            bug_secs = [b[0] for b in bug_runs]
+        # The BUG port, on the same protocol and the same state, and interleaved
+        # with the projected runs above, so the two timings differ only in the
+        # integrator.
+        if rank in bug_runs:
+            bug_secs = [b[0] for b in bug_runs[rank]]
             bug_med = statistics.median(bug_secs)
             rows[-1]["bug"] = {
                 "full_step_seconds_median": bug_med,
@@ -217,9 +251,9 @@ def measure(
                 "full_step_seconds_max": max(bug_secs),
                 "full_step_seconds_per_step": bug_med / steps,
                 "full_step_relative_spread": (max(bug_secs) - min(bug_secs)) / bug_med,
-                "svd_seconds_median": statistics.median([b[1] for b in bug_runs]),
-                "svd_calls_per_step": bug_runs[0][2] / steps,
-                "svd_max_dimension": bug_runs[0][3],
+                "svd_seconds_median": statistics.median([b[1] for b in bug_runs[rank]]),
+                "svd_calls_per_step": bug_runs[rank][0][2] / steps,
+                "svd_max_dimension": bug_runs[rank][0][3],
                 "full_step_ratio_vs_reference": bug_med / full_med,
                 "speedup_over_projected_same_rank": red_med / bug_med,
                 "note": (
@@ -234,6 +268,11 @@ def measure(
         "repeats": repeats,
         "warmup_steps_discarded": warmup,
         "dt": dt,
+        "protocol": (
+            "interleaved: one round times the reference and every configuration "
+            "once, so a slow patch of machine time inflates all of them together "
+            "rather than whichever block happened to run during it"
+        ),
         "benchmark_state": (
             "unforced multi-mode decay (nu=0.02, ZeroForcing) at amplitude 1, "
             "with an amplitude-1e-3 repeat to measure content-independence"
@@ -338,6 +377,14 @@ def main() -> None:
             "platform": platform.platform(),
             "processor": platform.processor() or "unknown",
             "thread_settings": thread_settings(),
+            "load_average_at_end": load_average(),
+            "shared_node_note": (
+                "this node also serves a language model, so its load moves with "
+                "someone else's work; the protocol interleaves configurations "
+                "because on a node this noisy the per-configuration median is "
+                "unreliable while the ratio between interleaved configurations "
+                "is not"
+            ),
         },
         "method": {
             "accountings": {

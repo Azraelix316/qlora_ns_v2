@@ -55,6 +55,86 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-25 **The `crossovers` block was wrong because of a direction bug, and
+  it had been wrong for three review cycles because it had no test.** I detected
+  only an *upward* crossing of `R = static/DLRA` through 1, but the static
+  baseline overtaking is a **downward** crossing — `R` falls through 1 as the
+  DLRA's error grows while the static error stays flat — so the function found
+  nothing, ever, and "no crossover" was an artefact of the test's direction
+  rather than a property of the data. Rewritten to scan every horizon, locate
+  every sign change, classify each as `static_overtakes` or `dlra_retakes`,
+  count them, and report the bracket as the convention-independent statement with
+  both the log-log and linear interpolations beside it (they differ by 15–25%).
+  `unresolved` (no crossing, either method may lead) and `never` (the DLRA is
+  exact at every horizon) are now distinct, and the reason strings no longer
+  claim a horizon the data does not contain. **Six test cases** cover the
+  downward crossing, both no-crossing directions, the exact rank, a
+  triple-crossing ratio, and the consistency of every reported ratio with the
+  rows it came from.
+  On the corrected surface: **6 of 18 resolved** per Reynolds number (r=16 and
+  r=32 at all three windows), **r ≤ 8 unresolved**, **r=43 never**, and a
+  **single** crossing everywhere — which confirms the reviewer's R48
+  "crosses repeatedly" over-correction was an artefact of the buggy driver.
+  `t*` is window-invariant to 0.3% over a 4× window change and
+  Reynolds-invariant to 3–9% over a 5× change in Re.
+- 2026-09-25 **My `t*` is about half the reviewer's, and the reason is the refit
+  offset they identified in their own baseline.** Mine: r=16 → 0.649
+  (log-log) / 0.740 (linear), r=32 → 1.482 / 1.741. Theirs: 1.26 and 2.44, from
+  a driver whose trailing window *ended at* the evaluation time, so seven of
+  nine horizons were scored in-sample and the static baseline looked worse than
+  it is. Since they now apply the offset check to their own numbers (D15.6),
+  this is a difference of baseline construction, not of data — and it is the
+  third time this baseline has moved `t*` by a factor of two to four.
+- 2026-09-25 **The Re=1000 column is my own run, not their `/tmp` numbers.** They
+  offered to let me commit theirs; D14.4 forbids it, since an artifact must come
+  from the code committed beside it. `--re` now takes a list and the artifact is
+  keyed by Reynolds, with a `key_schema` block so the keys are derivable rather
+  than needing a mapping table, and the refit offset recorded in `parameters`
+  (it was claimed in a docstring and absent from the artifact — the reviewer's
+  point, and the second time that distinction has been load-bearing).
+- 2026-09-25 **The reviewer's correction to my rank-spread claim is right, and
+  the normaliser explains the whole apparent disagreement.** I quoted "a 21×
+  rank range buys 2%" from a single endpoint pair. The full row is
+  `0.1009, 0.0996, 0.1160, 0.0994, 0.0994, 0.0994` at t=8 — r=8 is the worst.
+  Their figures (16–41% at Re=5000, 43–46% at Re=1000 for t ≥ 3) are the *same
+  data* normalised by `max`; mine normalised by `min`. **Both conventions are
+  now recorded** in the artifact and the summary, and the figure labels which it
+  plots. Spread by horizon, `(max−min)/min`, all ranks: **0.0% at t=0.1, 0.1% at
+  t=0.25, 9.6% at t=0.5, 32% at t=1, 67% at t=2, 69% at t=3, then 17% by t=8**
+  at Re=5000 — against **32%, 65%, 83%, 84%, 82%, 75%** at Re=1000. So the
+  corrected claim is a mechanism with a *shape*: a static subspace cannot spend
+  rank at short horizons, can from t ≈ 1, and how far it gets is
+  **Reynolds-dependent** — at Re=1000 it sustains ~45% (by `max`) through
+  t ≥ 3 where Re=5000 falls to 14% by t=8. That Reynolds dependence is new and
+  is the reason the mechanism is the better spine than any single number.
+- 2026-09-25 **Peak memory measured, and it is now an artifact
+  (`peak_memory.json`) rather than a number in a message.** One fresh process per
+  configuration, because peak RSS is a process high-water mark. **The reduced
+  method does not save memory: it costs +2.4 MiB at N=64 and +4.2 MiB at N=128,
+  6–10% above the full-grid step, at every rank and for both integrators.** That
+  is several times the noise floor, so it is real, and it answers the reviewer's
+  "does it at least save memory?" with a clean no.
+  The variation *with rank* turned out to be barely resolvable, and I nearly
+  published a boolean that flips: the spread over rank moved from 0.125 to
+  0.398 MiB between two runs of the same code. So the driver now **measures its
+  own noise floor** by repeating one configuration — 0.086–0.133 MiB — and
+  states rank-independence relative to it instead of against a fixed threshold.
+  Honest statement: peak memory is rank-independent to within a few tenths of a
+  MiB, not exactly constant. BUG's spread is larger, in the direction its
+  construction predicts (it holds augmented factors up to 4r, not a whole-field
+  factorization).
+- 2026-09-25 **The cost protocol now interleaves configurations, and that was
+  not cosmetic.** A sequential re-run produced a 50.2% spread on one projected
+  block and 4.3% on the next, which was enough to make the BUG rank-scaling flag
+  read `true` at N=64 and `false` at N=128 — an effect appearing and vanishing
+  with machine load, not with the method. Repeats are now the outer loop and
+  configurations the inner one, so a slow patch of machine time inflates all of
+  them together. The validation is direct: under 71% and 27% individual spreads
+  the **interleaved BUG/projected ratios agreed to 4%** (0.184, 0.192), where the
+  sequential protocol could not support the comparison at all. The node's load
+  average is now recorded in the artifact, because the node also serves a
+  language model and its load moves with someone else's work.
+
 - 2026-09-25 **The windowed rank rule is implemented, measured, and it does not
   fix the problem — which settles the question the reviewer left open.** New
   criterion `window_energy` keeps the last `rank_window` candidates and takes the
