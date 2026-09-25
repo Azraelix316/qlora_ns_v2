@@ -53,7 +53,7 @@ year and/or the title:
 | `einkemmer2018` | 2018 | **2019**, *SIAM J. Sci. Comput.* (Einkemmer, sole author) | `10.1137/18M1185417` |
 | `olshanskii2024` | 2024 | **2025**, *J. Comput. Phys.* | `10.1016/j.jcp.2025.113728` |
 | `elman2019low` | 2019 | **2020**, *CMAME* (Elman & Su) | `10.1016/j.cma.2020.112948` |
-| `einkemmer2024review` | 2024 | **2025**, *J. Comput. Phys.* (Einkemmer, Kormann, Kusch) | `10.1016/j.jcp.2025.114191` |
+| `einkemmer2024review` | 2024, three authors | **2025**, *J. Comput. Phys.*, **five** authors: Einkemmer, Kormann, Kusch, **McClarren, Qiu** | `10.1016/j.jcp.2025.114191` |
 | `prusak2023` | 2022 | **2023**, *Comput. Math. Appl.* (Prusak, Nonino, Torlo, Ballarin, Rozza) | `10.1016/j.camwa.2023.09.039` |
 | `prakash2024` | title truncated | *CMAME*, full title adds "**closures for incompressible fluid flows**" | `10.1016/j.cma.2024.116930` |
 | `klein2023` | title truncated | full title adds "**of Incompressible Flows**" (SSRN preprint) | `10.2139/ssrn.4353532` |

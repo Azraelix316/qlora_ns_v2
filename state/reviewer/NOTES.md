@@ -30,6 +30,41 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R18 — every agent's entry point was eight cycles stale and actively false, and the
+> DOI audit I had left half-finished contained errors.** Verified delivery first (it
+> works: all four newest messages on the pushed branch, `print_inbox` reads the right
+> path, 69 messages queued) — so the agents are not blocked by a broken channel, they
+> have not run. Which made the header check the important one, and all four **"Where YOU
+> stand"** sections (written R6b) were not merely stale but **false**: writer's said
+> **"No draft is expected yet"** (there is a 1,572-line draft, held on six fixes);
+> writing-research's said **"nothing merged"** (merged in R9, credited); theory's said
+> D3 is possible **"only after the BUG port"** (it is not — measured Π ≈ 1e-17 vs νZ ≈
+> 1e-4, computable from existing code); coder's predated D11 entirely. **So the one
+> artifact meant to orient a returning agent would have misled all four.** Rewrote all
+> four against current state; message counts (20/23/11/15) and oldest timestamps verified
+> unchanged. **This is the R6b/R15 pattern a third time, and the recurrence is now the
+> finding: the banner says read the newest message first, which is right, but nothing
+> kept the summary *above the history* current — a pointer is not a briefing.** The fix is
+> in place, and the obligation it creates is that refreshing it is part of finishing a
+> cycle, not a cleanup someone eventually remembers.
+> **DOI audit completed: all 15 DOI-bearing entries checked. All 15 DOIs resolve, 13
+> match exactly, and 2 do not — with wrong *author given names*, in exactly the entries I
+> had skipped before:** `hijazi2020` (Hijazi **Reem**→**Saddam**, Mola **Marta**→**Andrea**)
+> and `loorenzi2016` (Cammi **Andrea**→**Antonio**, Luzzi **Lorenzo**→**Lelio**). Four
+> wrong given names on papers whose title, venue, volume, pages, year and DOI are all
+> correct. **Same failure mode as `koch2019dlra`** — a correct title wrapped around an
+> invented given name, now the second occurrence — and the direct vindication of R17's
+> "a DOI is not a check". Had I stopped at the seven from R16 I would have reported these
+> entries as sound and it would have shipped. The other six are exact, including
+> `vinograd2026` with APS's random-suffix DOI `10.1103/zrxb-t8vq`. **Correction to R17:**
+> `einkemmer2024review` has **five** authors (Einkemmer, Kormann, Kusch, **McClarren,
+> Qiu**), not three — my display truncated and I wrote down the truncation. **And a find
+> for the writer:** `vinograd2026` is *"Dimensional regimes in Kolmogorov flow"*, *Phys.
+> Rev. Fluids* 11(3) (2026) — directly relevant prior art for the regime question R8/R8a
+> opened, sitting uncited in their own bibliography. **Final tally: 38 entries, 1
+> fabricated, 1 unverifiable, 2 arXiv-only, 34 real of which 15 carry wrong metadata —
+> every one with a verified Crossref value available, so the file is mechanically
+> repairable.**
 > **R17 — I applied R16's own lesson to R16's own claim, and it was wrong again.**
 > R16 said "of the 23 DOI-less entries, 22 are recognisable and real". **"Recognisable" is
 > a proxy from memory** — the identical error R16 had retracted two sections earlier,
@@ -446,6 +481,91 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R18 — two unrelated pieces of work, both about the same failure mode: an
+  entry point that was stale, and checks assumed rather than performed.** No agent pushes,
+  so I started with the thing everything else depends on and had not re-verified in
+  cycles: **is the channel working?** It is. All four outboxes have their newest message
+  on the pushed branch; `print_inbox` reads
+  `origin/agent/<agent>:state/<agent>/outbox/to-<me>.md` as intended; all four carry the
+  "READ THIS FIRST" banner; **69 messages are queued** (coder 20, writer 23,
+  theoretical-research 11, writing-research 15). So the agents are not blocked by a broken
+  channel — **they have not run**, which is an external constraint I cannot move from the
+  reviewer seat.
+
+  **Which made the next check the important one.** Each outbox opens with the banner and
+  then a **"Where YOU stand"** section, written at **R6b** — the first substantive thing a
+  returning agent reads. All four were not merely stale but **actively false**. Writer's
+  said **"No draft is expected yet"** — there is a 1,572-line draft, held on six fixes.
+  Writing-research's said **"HOLD; nothing merged"** — it was **merged in R9** and
+  credited. Theoretical-research's said the D3 derivation is possible **"only after the
+  BUG port"** — it is not; I measured Π ≈ 1e-17 against νZ ≈ 1e-4, so it is computable
+  from the existing code, and I had been blocking that agent on a dependency that does not
+  exist. Coder's predated D11 entirely and said "start with re-timing", which has been
+  re-ordered and re-justified six times since. **The one artifact designed to orient a
+  returning agent would have misled all four of them.** I rewrote all four sections against
+  current state — coder's carries the five-item queue with D11 references, writer's leads
+  with what the draft got right before the fixes, theory's leads with the "D3 is not gated
+  on V6" correction, writing-research's opens by correcting its own "nothing merged" header
+  — and verified message counts and oldest timestamps unchanged rather than assuming it.
+
+  **This is the R6b/R15 pattern for the third time, and the recurrence is itself the
+  finding.** The banner instructs agents to read the newest message first, which is right;
+  but nothing kept the *summary above the history* current, so the first thing they read
+  was eight cycles old. **A pointer is not a briefing.** The durable fix is the one now in
+  place — the header states current status rather than history — and the obligation it
+  creates is that refreshing it is part of *finishing* a cycle, not a cleanup someone
+  eventually remembers. I have recorded it that way in the notes rather than treating it as
+  a one-off.
+
+  **Then I finished the DOI audit I had explicitly left half-finished in R17.** R17 closed
+  by stating I had checked 7 of the 15 DOI-bearing entries; I have now checked the
+  remaining **8**. **All 15 DOIs resolve, 13 match the writer's metadata exactly, and two
+  do not — with wrong author given names, in precisely the entries I had skipped before.**
+  `hijazi2020`: "Hijazi, **Reem** · Mola, **Marta**" against Crossref's "Hijazi,
+  **Saddam** · Mola, **Andrea**". `loorenzi2016`: "Cammi, **Andrea** · Luzzi,
+  **Lorenzo**" against "Cammi, **Antonio** · Luzzi, **Lelio**". Four wrong given names on
+  papers whose title, venue, volume, pages, year and resolving DOI are all correct.
+
+  **This is the same failure mode as `koch2019dlra`** — a correct title wrapped around an
+  invented given name — and it is the **second occurrence** of that specific pattern. It
+  is also the exact vindication of R17's amendment: *"it has a DOI" is not "it was
+  checked."* Had I stopped at seven and reported the DOI-bearing entries as sound, these
+  two would have shipped, and I would have made the same class of error three times: R11
+  (a signature default), R16 (a string match), R17 (recognition). The pattern is always
+  the same — **a cheap proxy substituted for the check, and the proxy's silence read as
+  confirmation** — and the entries that get skipped are exactly the ones where nobody
+  looked.
+
+  The other six newly checked are exact: `nonnenmacher2008`, `einkemmer2023`,
+  `kusch2023stability` (Kusch, Einkemmer, Ceruti, *SISC* 45(1):A1–A24),
+  `koellermeier2024`, `kochkov2021`, and `vinograd2026` — the last using APS's newer
+  random-suffix DOI format `10.1103/zrxb-t8vq`, which resolves correctly, so the unusual
+  form is not a red flag.
+
+  **A correction to R17's own table:** I listed `einkemmer2024review` as "Einkemmer,
+  Kormann, Kusch". Crossref gives **five** authors — Einkemmer, Kormann, Kusch,
+  **McClarren, Qiu**. My display truncated to three and I wrote the truncation down as
+  fact, which is the R17 lesson recurring in a new form: **a truncated display is a
+  proxy too.** I have corrected the R17 file in place.
+
+  **And a find that matters beyond the audit.** `vinograd2026` is *"Dimensional regimes
+  in Kolmogorov flow"*, Vinograd, Cullen & Clark Di Leoni, *Physical Review Fluids* 11(3)
+  (2026) — **directly relevant prior art for the regime question R8/R8a opened**, since
+  this project's flow is slowly evolving, mean-dominated and weakly chaotic, Re=100 is
+  quasi-laminar, and λ ≈ 0.69/time unit. It was sitting **uncited in the writer's own
+  bibliography**, and I have asked them to engage with it rather than list it, because a
+  reviewer who knows the field will ask why a paper on Kolmogorov-flow regimes is not
+  cited by a paper on Kolmogorov flow.
+
+  **Final calibration on the writer's bibliography, which is the honest summary of four
+  cycles of citation work:** 38 entries — **1 fabricated** (`koch2019dlra`; `koch2007`
+  already carries the correct record), **1 unverifiable** (`star2021`, no Crossref match,
+  the author's call and explicitly not a verdict from me), **2 arXiv-only and verified via
+  the abs page** (`cui2026`, `goutaudier2026`), and **34 real of which 15 carry wrong
+  metadata** — the 13 DOI-less entries from R17 plus today's 2 author-name errors. **Every
+  one of the 15 has a verified Crossref value available**, so the file is mechanically
+  repairable end to end. That is a far better position than R16 reported, and it was
+  reached only by checking at the level of the record rather than the level of the token.
 - 2026-09-25 **R17 — the same error twice in one report, and the fix is to verify the
   claim.** No agent pushes. R16 ended by reporting that the writer's bibliography was
   "~97% sound", on the strength of: *"Of the 23 entries without a DOI, 22 are

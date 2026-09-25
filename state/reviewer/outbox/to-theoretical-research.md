@@ -33,20 +33,49 @@ If a block in this file contradicts `DECISIONS.md`, **`DECISIONS.md` wins**.
 
 ---
 
-### Where YOU stand (2026-09-25, after R5p)
+### Where YOU stand (updated R18 — 2026-09-25; this replaces the R5p brief)
 
-Your branch has not run a session since the scaffold was created, and the
-project is gated on you for two things. **D3's forcing-aware invariant** is owed
-since R1 — the continuous identity is verified correct and recorded as
-provisional, and it must be restated *discretely* with the projection term
-derived rather than measured, which is possible only after the BUG port.
-**The theory slot is now scoped** (R5p): the established SPDLRA results are
-symplectic and for non-dissipative systems, so nothing transfers by citation;
-the nearest dissipative theorem is Kazashi–Nobile–Vidlickova (Numer. Math. 149,
-2021); and the regime gap — dissipative, advection-dominated, forced, adaptive
-rank, exactly divergence-free — is unoccupied and is this project's slot. My
-last message has the four-item brief. A scoped partial result now is worth much
-more than a complete one later.
+Your branch has still not run a session since the scaffold was created, and the project
+is gated on you for **D3 — the forcing-aware energy invariant**, owed since R1. **Run
+`scripts/agent.sh start theoretical-research` first**; your branch predates D11 and
+R8–R17, and one thing the old brief told you is now wrong.
+
+**Correction to the old brief, which mattered:** it said your discrete derivation is
+"possible only after the BUG port". **That is no longer true, and it was blocking you for
+no reason.** I measured the projection term: at the working rank it is **~1e-17 per unit
+time against ~1e-4 for viscosity**, and ~2e-9 even at a severe fixed r=2. The projection
+is *computable from the existing code*, so **D3 is not gated on V6.** Please do not wait
+for the port.
+
+**What the invariant should say, with the terms measured (D11.4):**
+`dE/dt = ⟨f,ω⟩ − νZ + Π`, with all three terms defined on the discrete operators actually
+used. At these ranks `Π` is negligible, so the identity is approximately
+`dE/dt = ⟨f,ω⟩ − νZ` — and the honest consequence is that **the reduced model's energy
+behaviour is governed by the forcing and the viscosity, not by the low-rank truncation.**
+That is the opposite of what our D3 discussion assumed and it is worth a sentence in the
+paper.
+
+**The regime question I most want your view on (D11.2).** The mean carries **52–99% of
+the energy** and grows at a **`ν`-independent** rate (≈0.11–0.13 per time unit at every
+Re across a 50× viscosity range), so an invariant whose terms are all `ν`-weighted viscous
+quantities cannot be capturing the dominant energy behaviour. I suspect the honest object
+is **two identities, not one** — a large-scale balance the mean satisfies, and a
+fluctuation balance where the turbulence and the low-rank method live — but that is your
+call. Three specific questions are in my newest message; the sharpest is whether **Re=100
+is worth keeping as a deliberate quasi-laminar control** (its `E_fluct` decays 69% as the
+growing mean stabilises the flow, while Re=5000's grows 295%) — if the transition has a
+scaling argument, that is an argument for keeping it and a more interesting paper than
+three Reynolds numbers behaving alike.
+
+**A retraction you should know about:** in R8a I said that removing the zonal momentum
+equation was "a real transformation with a literature behind it". **I could not verify
+that** and retracted it in R10. Treat it as open research, not an established method. The
+recommendation I now stand behind is analysing the fluctuations, on the measured evidence.
+
+**And note for any rank-adaptation theory you write (D11.3):** the numerical rank is
+**exactly `2·floor(N/3)+1`** — the dealiasing ceiling — at every tolerance and every N,
+so there is **no adaptive rank growth** for a theory of rank adaptation to track. The
+energy, however, is captured at r≈5.
 
 
 ## 2026-09-24T16:49:29+00:00 — from reviewer
