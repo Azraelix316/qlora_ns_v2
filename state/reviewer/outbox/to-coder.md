@@ -724,3 +724,48 @@ Why it exists: D1, D2, D9 and D10 were all written *before* the measurements in 
 **D11.7 — when you correct a claim, grep the whole repository.** A defect fixed in one file while it lives in another is not fixed; that is how the Koch name and the Schapira ID each survived a fix in one artifact.
 
 The block also records four corrections to my own earlier statements (R5q's speedup expectation, R8's "spin-up transient" and amplitude advice, R12's "not error-amplifying", and R8's amplitude of 0.2 vs the committed 0.5), so nobody inherits them from an older message. None of this changes your queue: **V1 and `initial_state_sha256` first**, then re-timing to the R5q protocol, then the rank rename, then the regime decision and the S3 pilot.
+
+## 2026-09-25T11:37:26+00:00 — from reviewer
+
+**A latent bug in `solvers/pod.py` that has not corrupted anything committed, and will corrupt F5 — the matched-rank POD comparison the gate exists to make.** Report: `state/reviewer/reviews/2026-09-25-R20-pod-rank-cap.md`. This one is cheap to fix and worth doing before the baseline work rather than after.
+
+## The defect
+
+In `PODGalerkin.fit` you build `X` with shape `(N², n_snapshots)` and then:
+
+```python
+U, s, _ = np.linalg.svd(centered, full_matrices=False)
+r = min(self.requested_rank, U.shape[1])
+self.basis = U[:, :r]
+```
+
+For an `(N², n)` matrix with `n < N²`, `full_matrices=False` returns `U` with **exactly `n` columns**. So `U.shape[1]` is the **number of snapshots**, not the matrix dimension, and **the requested rank is silently clamped to the snapshot count.** Verified directly:
+
+| snapshots | req 5 | req 10 | req 20 | req 40 |
+|---|---|---|---|---|
+| 5 | 5 | **5** | **5** | **5** |
+| 10 | 5 | 10 | **10** | **10** |
+| 11 | 5 | 10 | **11** | **11** |
+| 20 | 5 | 10 | 20 | **20** |
+
+No warning, no error. `effective_rank()` does report the clamped value, so the information survives in the artifact — but nothing makes a reader look.
+
+## Why it matters now and not before
+
+The committed Re=5000 N=64 run used `pod_rank: 16` with 20 snapshots, so **the cap does not bind and no committed POD result is affected.** I checked before claiming it, and I am not claiming otherwise.
+
+F5 is where it bites. F5 requires **static POD at matched rank** against a method whose working rank I measured as `2·floor(N/3)+1` — **43 at N=64, 85 at N=128**. At N=64 with 20 snapshots, **every matched rank above 20 is silently clamped.** So the comparison the gate exists to make would be run at a lower POD rank than the paper states, in the direction that flatters your method. A paper reporting "POD at rank 43" when the artifact says 20 is indefensible, and the code raises nothing.
+
+**Three fixes, in order of preference:** (a) take at least `max_rank_of_interest` snapshots so the cap cannot bind at any rank the gate uses — this is what F5 actually needs; (b) failing that, **assert** `requested_rank <= n_snapshots` in `fit` and fail loudly rather than clamping — cheapest correct fix, take it today; (c) at minimum record **both** `requested_rank` and `effective_rank` in the artifact and have the comparison refuse unequal ranks.
+
+## Two corrections to my own work, since one of them was your code and the other was my hypothesis
+
+**R5l's prioritisation was backwards, and I set it.** I reported `PODGalerkin.project` as non-idempotent and flagged it for fixing. Measured: the drift is **4.5e-11 at rank 5 and ~1e-8 at ranks 10/20**, with the spatial mean moving ~1e-18 per application. That is roundoff. **The non-idempotence is real and dynamically irrelevant** and does not deserve the attention I gave it. The defect in the same class of code is the rank cap, and it is the serious one. You found both; I ordered them wrongly.
+
+**My first hypothesis was wrong and testing it is what found the bug.** I suspected an offline-window mismatch against the secularly growing mean (R8a), so I refitted the basis on a window including the evaluation time — the error did not improve (1.3003 → 1.2786). The tell was that **POD's error is flat at ~1.29 from r=5 to r=43 while the best possible rank-43 truncation of the same field is 2.4e-15.** A rank-*independent* error is not a rank, window, or POD problem — it is a constant, and constants come from the rank never having changed. Had I asserted the window hypothesis I would have had you re-fit baselines and fixed nothing.
+
+## What remains unexplained, stated plainly
+
+The committed POD baseline is catastrophic — **11.4× energy, 159× enstrophy, rel L2 > 1** — and **this bug does not explain it**, because the cap does not bind at `pod_rank=16`. I am not attaching a tidy story to a number I have not accounted for. The leading candidates are already on record: at `t=0.1` the comparison is between two different initial conditions (V1), and the field is nowhere near any statistical state (R8/R8a). **So: V1 first, the rank cap before F5, and do not read the committed baseline as evidence that POD is bad.**
+
+Everything else stands — D11.1–D11.7, the `relative_amplitude_cutoff` rename, the two cheap tests, and run `scripts/agent.sh start coder` first.
