@@ -23,7 +23,12 @@ def main() -> None:
     parser.add_argument("--dlra-rank", type=int, default=4)
     parser.add_argument("--dlra-min-rank", type=int, default=2)
     parser.add_argument("--dlra-max-rank", type=int, default=48)
-    parser.add_argument("--dlra-tolerance", type=float, default=1e-6)
+    parser.add_argument("--dlra-relative-amplitude-cutoff", type=float, default=1e-6)
+    parser.add_argument(
+        "--dlra-adapt-initial",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
     parser.add_argument("--compare-stride", type=int, default=10)
     parser.add_argument("--force-amplitude", type=float, default=0.2)
     parser.add_argument("--base-speed", type=float, default=0.5)
@@ -57,7 +62,8 @@ def main() -> None:
             dlra_rank=args.dlra_rank,
             dlra_min_rank=args.dlra_min_rank,
             dlra_max_rank=args.dlra_max_rank,
-            dlra_tolerance=args.dlra_tolerance,
+            dlra_relative_amplitude_cutoff=args.dlra_relative_amplitude_cutoff,
+            dlra_adapt_initial=args.dlra_adapt_initial,
         )
         case_path = args.output_dir / f"kolmogorov_re{re}_N{args.N}.json"
         case_path.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n")
@@ -95,6 +101,7 @@ def main() -> None:
                 "grid_N": args.N,
                 "dt": args.dt,
                 "steps": args.steps,
+                "initial_state": result["initial_state"],
                 "cases": summary,
             },
             indent=2,

@@ -14,6 +14,7 @@ from solvers import (
     PODGalerkin,
     SelfConsistentForcing,
     StreamFunctionNS,
+    SVDProjector,
     ZeroForcing,
 )
 
@@ -67,7 +68,7 @@ def test_projection_diagnostic_tracks_stage_energy_changes():
         rank=2,
         min_rank=1,
         max_rank=8,
-        tolerance=1e-6,
+        relative_amplitude_cutoff=1e-6,
         check_every=5,
     )
     lowrank.step(field(grid), 0.002)
@@ -188,7 +189,7 @@ def test_svd_projection_adapts_and_preserves_divergence():
         rank=2,
         min_rank=1,
         max_rank=12,
-        tolerance=1e-6,
+        relative_amplitude_cutoff=1e-6,
         check_every=1,
     )
     projected = lowrank.initialize(state)
@@ -221,7 +222,7 @@ def test_adaptive_rank_decays_for_laminar_multimode_decay():
         rank=6,
         min_rank=1,
         max_rank=12,
-        tolerance=0.2,
+        relative_amplitude_cutoff=0.2,
         check_every=1,
     )
     final = lowrank.integrate(initial, 0.01, 100)
@@ -240,7 +241,7 @@ def test_rank_stagnation_and_restart_from_checkpoint():
         rank=1,
         min_rank=1,
         max_rank=6,
-        tolerance=1e-6,
+        relative_amplitude_cutoff=1e-6,
         check_every=2,
     )
     direct = first.integrate(initial, 0.002, 5)
@@ -255,7 +256,7 @@ def test_rank_stagnation_and_restart_from_checkpoint():
         rank=1,
         min_rank=1,
         max_rank=6,
-        tolerance=1e-10,
+        relative_amplitude_cutoff=1e-10,
         check_every=2,
     )
     resumed_state = resumed.integrate(checkpoint, 0.002, 3, t0=0.004)
@@ -264,10 +265,184 @@ def test_rank_stagnation_and_restart_from_checkpoint():
 
 def test_static_pod_projection_is_a_galerkin_baseline():
     grid = Grid2D(24)
-    snapshots = np.stack([field(grid, "tg"), 0.8 * field(grid, "mixed")])
+    tg = field(grid, "tg")
+    mixed = field(grid, "mixed")
+    snapshots = np.stack([tg, 0.8 * mixed])
     pod = PODGalerkin(grid, rank=1).fit(snapshots)
-    projected = pod.project(snapshots[1])
-    assert grid.max_div_velocity(projected) < 1e-12
     assert pod.effective_rank() == 1
-    assert np.isfinite(pod.relative_error(field(grid, "mixed")))
-    assert np.linalg.norm(projected - snapshots[1]) > 1e-8
+    # The fitted offset is the arithmetic snapshot mean.
+    assert np.max(np.abs(pod.mean - 0.5 * (tg + 0.8 * mixed))) < 1e-13
+    # Two snapshots have centred rank 1, so rank 1 is lossless and the static
+    # baseline reproduces its own IC bit-for-bit (the P0 requirement).
+    assert np.max(np.abs(pod.project(snapshots[1]) - snapshots[1])) < 1e-13
+    assert np.max(np.abs(pod.project(tg) - tg)) < 1e-13
+    assert np.isfinite(pod.relative_error(mixed))
+    # Projection stays in the divergence-free class by representation.
+    assert grid.max_div_velocity(pod.project(mixed)) < 1e-12
+
+    # Rank truncation is a genuine L2-orthogonal, idempotent projection.
+    three = np.stack([tg, 0.8 * mixed, 0.5 * tg + 0.9 * mixed])
+    pod1 = PODGalerkin(grid, rank=1).fit(three)
+    p = pod1.project(mixed)
+    assert np.max(np.abs(pod1.project(p) - p)) < 1e-12
+    residual = mixed - p
+    assert abs(grid.l2_dot(residual, p - pod1.mean)) < 1e-10 * grid.l2_sq(p)
+    assert np.linalg.norm(residual) > 1e-8  # rank 1 of a rank-2 set truncates
+
+
+def test_pod_basis_spans_the_centered_snapshot_matrix():
+    """Regression: fit() must SVD the snapshot matrix, not interleaved data.
+
+    The snapshot matrix is rebuilt here independently (one column per
+    snapshot), so this fails if fit() reshapes (n, N, N) straight to
+    (N*N, n) and thereby fits the SVD to shuffled values.
+    """
+    grid = Grid2D(16)
+    rng = np.random.default_rng(7)
+    snaps = [
+        field(grid, "tg") + 0.05 * rng.standard_normal((grid.N, grid.N)),
+        field(grid, "mixed") + 0.05 * rng.standard_normal((grid.N, grid.N)),
+        0.3 * field(grid, "tg") + field(grid, "mixed")
+        + 0.05 * rng.standard_normal((grid.N, grid.N)),
+    ]
+    X = np.stack([s.ravel() for s in snaps], axis=1)   # (N*N, n), correct matrix
+    # fit()'s documented contract: center every snapshot into the
+    # zero-spatial-mean class, then take the ensemble mean of those.
+    X = X - X.mean(axis=0, keepdims=True)
+    M = X.mean(axis=1)
+    centered = X - M[:, None]
+    U, s, _ = np.linalg.svd(centered, full_matrices=False)
+    for rank in (1, 2, 3):
+        pod = PODGalerkin(grid, rank=rank).fit(snaps)
+        # fit() keeps the arithmetic mean up to the documented zero-spatial-mean
+        # adjustment, which the stream-function equations require.
+        assert np.max(np.abs(pod.mean.ravel() - M)) < 1e-12
+        assert abs(float(pod.mean.mean())) < 1e-15
+        assert np.allclose(pod.singular_values[:rank], s[:rank])
+        assert np.max(np.abs(pod.basis.T @ pod.basis - np.eye(rank))) < 1e-10
+        recon = M[:, None] + pod.basis @ (pod.basis.T @ centered)
+        residual = X - recon
+        # The discarded content is orthogonal to the retained basis.
+        assert np.max(np.abs(pod.basis.T @ residual)) < 1e-9
+        if rank == 3:
+            assert np.max(np.abs(residual)) < 1e-10
+
+
+def test_pod_refuses_to_clamp_the_requested_rank():
+    """A rank-r comparison must never silently run at a lower rank."""
+    grid = Grid2D(16)
+    snaps = [field(grid, "tg"), field(grid, "mixed"), 0.5 * field(grid, "mixed")]
+    pod = PODGalerkin(grid, rank=3).fit(snaps)
+    assert pod.effective_rank() == 3
+    assert pod.requested_rank == 3
+    # 3 snapshots supply only 2 centered directions plus the mean.
+    try:
+        PODGalerkin(grid, rank=4).fit(snaps)
+    except ValueError as exc:
+        assert "4" in str(exc) and "3" in str(exc)
+    else:
+        raise AssertionError("rank request above the snapshot count must raise")
+
+
+def test_dlra_initialize_resets_a_warm_object():
+    """A reused DLRA must not inherit a previous run's rank or schedule."""
+    grid = Grid2D(24)
+    initial = field(grid, "mixed")
+    dt = 0.002
+
+    def build():
+        return DLRA(
+            StreamFunctionNS(grid, 0.01, forcing=ZeroForcing()),
+            rank=2,
+            min_rank=1,
+            max_rank=8,
+            relative_amplitude_cutoff=1e-6,
+            check_every=2,
+        )
+
+    # Drive the first run until it has adapted its rank away from nominal.
+    warm = build()
+    warm.integrate(initial, dt, 6)
+    assert warm.steps == 6
+    assert warm.spectrum_history  # learned state exists before reinitialization
+
+    # A fresh object and the reused one must agree exactly from initialize().
+    fresh = build()
+    state_fresh = fresh.initialize(initial)
+    state_reused = warm.initialize(initial)
+    assert warm.steps == 0
+    assert warm.spectrum_history == []
+    assert warm.projector.rank == warm.projector.nominal_rank
+    assert np.max(np.abs(state_fresh - state_reused)) == 0.0
+    assert fresh.rank_history == warm.rank_history
+    for _ in range(5):
+        state_fresh = fresh.step(state_fresh, dt)
+        state_reused = warm.step(state_reused, dt)
+    assert np.max(np.abs(state_fresh - state_reused)) == 0.0
+    assert fresh.rank_history == warm.rank_history
+
+
+def test_svd_projector_reproduces_its_own_input_at_full_rank():
+    """Fit-reproduces-its-own-input, applied to the DLRA projector."""
+    grid = Grid2D(24)
+    projector = SVDProjector(grid, rank=grid.N, min_rank=1, max_rank=grid.N)
+    f = field(grid, "mixed")
+    f = f - np.mean(f)
+    assert np.max(np.abs(projector.project(f) - f)) < 1e-12
+    retained = projector.candidate("stage")
+    assert retained is None
+    projector.project(f, stage="stage")
+    centered, u, s, vh = projector.candidate("stage")
+    rebuilt = (u * s) @ vh
+    assert np.max(np.abs(rebuilt - centered)) < 1e-12
+
+
+def test_nyquist_row_keeps_velocity_exactly_divergence_free():
+    """Guard the invariant against a tempting but wrong "fix".
+
+    A real field's x-Nyquist sample is self-conjugate, so a central-difference
+    stencil cannot recover its x-derivative.  Zeroing the Nyquist multiplier in
+    the first derivatives is the textbook-looking remedy and it is wrong here:
+    it deletes v's Nyquist row while keeping u's, and the divergence of the
+    resulting real velocity field becomes O(1).  SVD projections populate that
+    row, so this would silently break the project's central invariant.  The
+    spectral derivative is exact (numpy's irfftn inverts the full x-axis as a
+    complex spectrum, preserving 2D Hermitian symmetry), so the true
+    wavenumbers are kept and cancellation holds mode by mode.
+    """
+    grid = Grid2D(16)
+    X, Y = np.meshgrid(grid.x, grid.y, indexing="ij")
+    # A field whose x-Nyquist row is populated, mixed with smooth content.
+    psi = (-1.0) ** np.arange(grid.N)[:, None] * np.cos(Y) + 0.5 * np.sin(X) * np.sin(Y)
+    psi = psi - psi.mean()
+    assert np.max(np.abs(grid.fft(psi)[grid.N // 2, :])) > 1.0  # Nyquist row is real
+    u, v = grid.velocity(psi)
+    assert grid.max_div_velocity(psi) < 1e-12
+    # The multiplier arrays are deliberately untouched: only k=0 is zero.
+    for arr in (grid.kx, grid.ky):
+        assert np.count_nonzero(arr == 0.0) == 1
+    # lap keeps the true Nyquist wavenumber: on a pure Nyquist mode the
+    # multiplier k^2 is exact, so enstrophy is a real, nonzero quantity.
+    nyq = grid.N // 2
+    pure = (-1.0) ** np.arange(grid.N)[:, None] * np.ones((1, grid.N))
+    assert np.max(np.abs(grid.lap(pure) + (grid.kx[nyq] ** 2) * pure)) < 1e-10
+    assert grid.enstrophy(psi) > 0.0
+
+
+def test_initial_state_mask_is_a_box_with_rank_2c_plus_1():
+    """cutoff is a box half-width: rank 2c+1, max radial |k| floor(c*sqrt2)."""
+    from run_kolmogorov import make_initial_state
+
+    for cutoff, expect_rank in ((2, 5), (4, 9), (8, 17)):
+        grid = Grid2D(64)
+        state = make_initial_state(
+            grid, base_speed=0.5, perturbation_velocity_rms=1.0, cutoff=cutoff
+        )
+        values = np.linalg.svd(state - np.mean(state), compute_uv=False)
+        rank = int(np.count_nonzero(values > 1e-10 * values[0]))
+        assert rank == expect_rank, (cutoff, rank)
+        # Radial extent is the box corner, not the box half-width.
+        F = np.abs(grid.fft(state))
+        present = np.argwhere(F > 1e-8 * F.max())
+        radial = np.max(np.hypot(grid.kx[present[:, 0]], grid.ky[present[:, 1]]))
+        assert np.floor(cutoff * np.sqrt(2)) == int(np.floor(radial))

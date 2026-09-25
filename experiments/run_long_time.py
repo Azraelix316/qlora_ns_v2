@@ -23,6 +23,7 @@ from experiments.run_kolmogorov import (
     _energy_residual,
     _stability_assessment,
     _git_commit,
+    initial_state_fingerprint,
     make_initial_state,
     normalized_spectrum,
     relative_l2,
@@ -40,7 +41,8 @@ def run_case(
     rank: int = 2,
     min_rank: int = 2,
     max_rank: int = 48,
-    tolerance: float = 1e-10,
+    relative_amplitude_cutoff: float = 1e-10,
+    adapt_initial: bool = True,
 ) -> dict:
     nsteps = int(round(final_time / dt))
     if nsteps < 1 or abs(nsteps * dt - final_time) > 1e-12:
@@ -64,8 +66,9 @@ def run_case(
         rank=rank,
         min_rank=min_rank,
         max_rank=max_rank,
-        tolerance=tolerance,
+        relative_amplitude_cutoff=relative_amplitude_cutoff,
         check_every=5,
+        adapt_initial=adapt_initial,
     )
     full = initial.copy()
     reduced = dlra.initialize(initial)
@@ -88,7 +91,9 @@ def run_case(
     dlra_max_energy = dlra_energy[0]
     full_max_enstrophy = full_enstrophy[0]
     dlra_max_enstrophy = dlra_enstrophy[0]
-    samples = [{"step": 0, "time": 0.0, "relative_l2": 0.0}]
+    samples = [
+        {"step": 0, "time": 0.0, "relative_l2": relative_l2(reduced, full)}
+    ]
     full_spectrum = {0: normalized_spectrum(full)}
     dlra_spectrum = {0: normalized_spectrum(reduced)}
     unstable = {"full": None, "dlra": None}
@@ -197,13 +202,15 @@ def run_case(
             "initial_rank": rank,
             "min_rank": min_rank,
             "max_rank": max_rank,
-            "tolerance": tolerance,
+            "relative_amplitude_cutoff": relative_amplitude_cutoff,
+            "adapt_initial": adapt_initial,
             "force_amplitude": 0.5,
             "base_speed": 0.5,
             "perturbation_velocity_rms": 1.0,
             "cutoff": 8,
             "seed": 20260925,
         },
+        "initial_state": initial_state_fingerprint(grid, initial),
         "initial_energy": grid.ke(initial),
         "samples": samples,
         "full": {
@@ -275,7 +282,12 @@ def main() -> None:
     parser.add_argument("--rank", type=int, default=2)
     parser.add_argument("--min-rank", type=int, default=2)
     parser.add_argument("--max-rank", type=int, default=48)
-    parser.add_argument("--tolerance", type=float, default=1e-10)
+    parser.add_argument("--relative-amplitude-cutoff", type=float, default=1e-10)
+    parser.add_argument(
+        "--adapt-initial",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
     parser.add_argument(
         "--output",
         type=Path,
@@ -292,7 +304,8 @@ def main() -> None:
         args.rank,
         args.min_rank,
         args.max_rank,
-        args.tolerance,
+        args.relative_amplitude_cutoff,
+        args.adapt_initial,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n")

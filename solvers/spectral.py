@@ -30,6 +30,22 @@ class Grid2D:
         self.kx = kx
         self.ky = ky
         self.k2 = kx[:, None] ** 2 + ky[None, :] ** 2
+        # NOTE on the Nyquist mode (measured, not assumed).  The x-Nyquist
+        # sample of a real field is self-conjugate, so a real-space central
+        # difference cannot recover its x-derivative (the stencil aliases it to
+        # zero).  The *spectral* derivative is a different matter: numpy's
+        # irfftn inverts axis 0 as a complex spectrum, so the 2D Hermitian
+        # symmetry of rfft output is preserved and no coefficient is silently
+        # dropped.  Keeping the true wavenumber in first derivatives is what
+        # makes u = (psi_y, -psi_x) divergence-free mode by mode for *any* psi,
+        # including states whose x-Nyquist row is populated -- which SVD
+        # projections do, since a truncated SVD fills the whole grid.  Zeroing
+        # the Nyquist multiplier instead would delete v's Nyquist row while
+        # keeping u's, and the divergence of the resulting real velocity field
+        # becomes O(1) (measured 8.0 at N=16 for a Nyquist+smooth field).
+        # Exact divergence-freeness by representation is the project's central
+        # invariant, so it wins over derivative accuracy on an aliased mode
+        # that the 2/3 dealias mask excludes from the dynamics anyway.
         self.x = np.arange(N, dtype=float) * self.dx
         self.y = self.x.copy()
         # Parseval weights on the rfft half-grid.  Since axis 0 is a full
