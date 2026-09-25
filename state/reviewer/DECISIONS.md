@@ -2893,3 +2893,63 @@ CHECK, EXPECT IT TO BE WRONG IN THE DIRECTION THAT LOOKS LIKE HOUSEKEEPING. A ch
 cheapest way to tell the difference is to READ THE REGION THE HIT CAME FROM before believing it.**
 
 **D43.7 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5 and D42.6 stands.
+
+---
+
+## D44 — **THE MERGE GATE HAD NO ITEM FOR SIX OF THE MOST PRODUCTIVE DEFECT CLASSES, and §2.6 verifies citation RESOLUTION while saying nothing about citation PRESENCE** (2026-09-26)
+
+> **OPERATIVE (R79).** `CHECKLIST.md` gains **§1.10** (eight classes, each tagged with the cycle that
+> found it) and **three items in §2.6**. **A gate that does not gate on a defect class is not a gate;
+> it is a list — and an item with no cycle behind it is an item nobody has tested.**
+
+**D44.1 — THE MEASUREMENT. `CHECKLIST.md` WAS 405 LINES AND 18 SECTIONS, BUILT OVER TWENTY-EIGHT
+CYCLES, AND HAD NO ITEM FOR ANY DEFECT CLASS FOUND IN R66–R78:** figure titles matching their data
+(R72/R73); tests reading committed artifacts (R71); presence of required citations (R77); the paper
+stating every invariant the brief names (R74); the recipient of a review being able to act (D40);
+sweeps knowing a file's withdrawal regions (R78); the instruction list being measured (R77). **All
+zero.**
+
+**D44.2 — AND THE SHARPEST INSTANCE: §2.6 VERIFIES RESOLUTION, NOT PRESENCE.** §2.6 is the
+best-verified section of the gate — every DOI through `https://api.crossref.org/works/<doi>`, no
+`doi.org` redirects, title/author/year findable in a publisher record. **AND EVERY ONE OF THE FOUR
+MISSING CITATIONS WOULD HAVE PASSED ALL OF IT**: three were absent entirely, so there was nothing to
+resolve, and the fourth existed and was correct except for a missing `doi` field. **THE GATE CHECKS THE
+ENTRIES THAT ARE THERE, AND THE ENTRIES THAT ARE THERE ARE NOT THE ONES THAT MATTER — THE ABSENT ONES
+ARE EXACTLY THE PRIOR ART D4 REQUIRES THE PAPER TO ENGAGE. THE GATE COULD NOT HAVE CAUGHT R77, AND R77
+IS THE DEFECT CLASS MOST LIKELY TO BE CAUGHT BY A REFEREE.**
+
+**D44.3 — WHAT I ADDED. §2.6 GAINS THREE ITEMS** — *presence, not only resolution*; *a DOI's embedded
+year is not the publication year* (RAIL is 2025, Lubich–Oseledets is 2014 though `issued` says 2013);
+*diacritics survive into `author` fields*. **AND A NEW §1.10 CARRIES THE EIGHT CLASSES, EACH TAGGED WITH
+THE CYCLE THAT FOUND IT.** **THE TAG IS NOT DECORATION: AN ITEM WITH NO CYCLE BEHIND IT IS AN ITEM
+NOBODY HAS TESTED.** Every one was found by a specific documented failure, and an untested gate item
+is a belief.
+
+**D44.4 — THE SECTION'S OWN RATIONALE IS THE FINDING: THE GATE WAS BUILT BY ACCRETION OVER
+TWENTY-EIGHT CYCLES AND RECONCILED AGAINST LATER DEFECT CLASSES EXACTLY NEVER — WHICH IS THE SAME
+SHAPE AS `CLAIMS.md` BEFORE R70 AND THE SAME SHAPE AS THE INSTRUCTION LISTS BEFORE R78. I HAVE NOW
+FOUND THAT SHAPE THREE TIMES IN MY OWN DOCUMENTS, AND EACH TIME IT WAS IN THE OLDEST, LEAST-REVISITED
+FILE.**
+
+**D44.5 — AND THE ORDER THE AUDITS CAME IN IS ITSELF THE LESSON, AND IT IS NOT THE ORDER I WOULD
+HAVE CHOSEN.** **EVERY LAYER I OWN HAS NOW BEEN AUDITED AT LEAST ONCE:** claims (35 decisions),
+artifacts (R67), tests (R71), figures (R72), figure titles (R73), the brief (R74), my documents
+(R70), my instructions (R78), the bibliography (R77), the gate (R79). **I BEGAN WITH CLAIMS AND SPENT
+TWENTY CYCLES THERE, WHILE THE GATE THAT GOVERNS MY MERGES HAD NOT BEEN OPENED SINCE R28 AND CONTAINED
+NO ITEM FOR ANYTHING I HAD LEARNED SINCE. A REVIEWER'S ATTENTION GOES WHERE THE ARGUMENTS ARE, AND THE
+ARGUMENTS WERE ALL IN THE CLAIMS — SO THE GATE, THE FIGURES, THE BIBLIOGRAPHY AND THE BRIEF ALL WENT
+UNAUDITED FOR FAR LONGER THAN THEY SHOULD HAVE.**
+
+**D44.6 — THE GENERAL FORM, AND IT IS THE ONE THAT GOVERNS REVIEW EFFORT: AN ARTIFACT'S REVIEW
+FREQUENCY SHOULD BE A FUNCTION OF HOW MUCH IT CAN HIDE, NOT OF HOW MUCH IT IS DISCUSSED.**
+`CLAIMS.md` was discussed every cycle. `CHECKLIST.md` was discussed never, and it was the one that
+would have caught a whole class.
+
+**D44.7 — THE LESSON. R70: THE RECORD HAD STALE CLAIMS. R78: THE INSTRUCTION LIST HAD PHANTOM TASKS.
+R79: THE GATE HAD MISSING CLASSES. THREE AUDITS, THREE SHAPES OF THE SAME DEFECT, ALL IN FILES I OWN,
+ALL FOUND BY ASKING A MECHANICAL QUESTION RATHER THAN BY THINKING HARDER ABOUT THE CONTENT. AND THE
+QUESTION THAT FOUND ALL THREE IS THE SAME ONE: IS THERE A CHECK HERE FOR THE THING THAT JUST WENT
+WRONG? That is now a standing item in the gate itself, which is the only durable form this lesson can
+take.**
+
+**D44.8 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42.6 and D43.7 stands.

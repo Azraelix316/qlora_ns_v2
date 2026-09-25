@@ -237,6 +237,44 @@ and the block turned out to be the *more* in-sample of the two.
       structure-preservation result. A "stable" flag means "finite and within
       the stated sanity limits", not "accurate" or "long-time stable".
 
+### 1.10 Classes of defect found after this checklist was written (added R79)
+
+**Why this section exists.** This gate was built over twenty-eight cycles and **reconciled against
+the defect classes discovered later exactly never** — R79 measured it: **six of the most productive
+defect classes in the project had no item here at all.** A gate that does not gate on a defect class
+is not a gate; it is a list. **Each item names the cycle that found the defect, because an item with
+no cycle behind it is an item nobody has tested.**
+
+- [ ] **(R71) Does any test read a committed artifact?** The project had **40 component tests
+      and 0 artifact tests**, and every serious error was in the artifact layer. For a merge
+      that changes a number the paper quotes, name the test that would fail if it regressed.
+- [ ] **(R71) For a derived block, is there a test that it is a function of its primary
+      rows?** Fifteen lines, run against committed files, no compute — and it would have
+      caught four consecutive cycles of reviewer error.
+- [ ] **(R72) Does every figure's axis have enough range to show its own data?** A linear
+      axis carrying a value of `7.1e+292` rendered every finite bar at `1.5e-290` of the
+      width. **The figure looked correct and showed nothing.**
+- [ ] **(R72/R73) Does every figure title assert only what its data shows?** A title is a
+      claim. `fig_div_free` asserted *"exact divergence-freeness holds for every method"*
+      over a dataset with four counterexamples, and `fig_crossover` printed two withdrawn
+      claims — **one refuted by a code comment eleven lines above it. Two of six checkable
+      titles were wrong, and the wrong one was the central figure.**
+- [ ] **(R73) When a decision withdraws a claim, is the withdrawal swept into figure
+      titles, axis labels and suptitles — and not only into prose?** The sweep reaches files
+      the reviewer owns and stops at files they do not, **but the claims in those files are
+      theirs, and the paper reproduces them verbatim.**
+- [ ] **(R74) Does the paper state every invariant the brief names?** `AGENTS.md` named two;
+      the paper had one, and the second was implemented and tested.
+- [ ] **(R40/D40) Can the person receiving the review act on it today?** A correction
+      arriving as the hundredth block displaces the ninety-nine before it. **Consolidation
+      is a review deliverable, and the test of a review is whether its recipient can act.**
+- [ ] **(R78) Does a mechanical check over prose know where that file's legitimate
+      withdrawal regions are?** Distinguish *"this number is void, here is why"* from
+      *"this number is my claim"* **by structure, not by keyword.**
+- [ ] **(R77) Was the standing instruction list itself measured rather than trusted?** Two
+      instructions in this project named work that did not exist. **Measuring the list is
+      cheap; a phantom instruction costs cycles.**
+
 ## Lens 2 — Writing
 
 ### 1.9 Reviewer communication format (added R28 — binding on the reviewer)
@@ -399,6 +437,18 @@ now?** Test the property, not a proxy for it. Two checks, in this order.
       no publication.)
 - [ ] The owned literature index contains no unresolvable IDs, and query-log
       records are typed as query records rather than as works.
+- [ ] **(R77) PRESENCE, not only resolution.** The citations the paper's related-work
+      section *requires* are actually in `refs.bib`. **§2.6 verifies that entries which
+      exist resolve; it says nothing about entries which are absent — and the absent ones
+      are the ones D4 requires.** Three of the six were missing (Lubich–Oseledets
+      `10.1007/s10543-013-0454-0`, Kusch–Schotth\"ofer & Walter `10.1137/25m1730673`,
+      RAIL `10.1137/23M1622921`) and a fourth had no `doi` field. **Every one of them
+      would have passed every other item in this section.**
+- [ ] **(R77) A DOI's embedded year is not taken as the publication year.**
+      `10.1137/23M1622921` is **2025**; `10.1007/s10543-013-0454-0` is **2014** though its
+      `issued` says 2013. Use `published-print` where it exists.
+- [ ] **(R77) Diacritics survive into `author` fields** (`Schotth\"ofer`), or the
+      reference cannot be found by an author search.
 - [ ] No agent writes outside its owned paths, and nothing lands in `scripts/`,
       `AGENTS.md`, `PROTOCOL.md` or `lessons_learned.md` without reviewer
       approval (D7). A "net diff vs main is empty" check is how to distinguish a

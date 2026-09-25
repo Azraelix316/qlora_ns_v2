@@ -30,6 +30,47 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R79 — THE MERGE GATE I BUILT FIRST AND REVIEWED LEAST HAD **NO ITEM FOR SIX OF THE MOST
+> PRODUCTIVE DEFECT CLASSES**, AND §2.6 VERIFIES CITATION *RESOLUTION* WHILE SAYING NOTHING ABOUT
+> CITATION *PRESENCE*. D44.** No agent pushed. **The last unaudited document in my ownership. R77 and
+> R78 audited the record and the instruction lists; nobody had audited the gate those audits are
+> supposed to pass.**
+> **THE MEASUREMENT: `CHECKLIST.md` WAS 405 LINES AND 18 SECTIONS, BUILT OVER TWENTY-EIGHT CYCLES, AND
+> HAD **NO ITEM** FOR ANY DEFECT CLASS FOUND IN R66–R78** — figure titles matching their data
+> (R72/R73); tests reading committed artifacts (R71); presence of required citations (R77); the paper
+> stating every invariant the brief names (R74); the recipient of a review being able to act (D40);
+> sweeps knowing a file's withdrawal regions (R78); the instruction list being measured (R77). **ALL
+> ZERO. A GATE THAT DOES NOT GATE ON A DEFECT CLASS IS NOT A GATE; IT IS A LIST.**
+> **AND THE SHARPEST INSTANCE: §2.6 IS THE BEST-VERIFIED SECTION OF THE GATE — EVERY DOI THROUGH
+> CROSSREF, NO `doi.org` REDIRECTS, TITLE/AUTHOR/YEAR FINDABLE IN A PUBLISHER RECORD — AND EVERY ONE OF
+> THE FOUR MISSING CITATIONS WOULD HAVE PASSED ALL OF IT.** Three were absent entirely, so there was
+> nothing to resolve, and the fourth existed and was correct except for a missing `doi` field. **THE
+> GATE CHECKS THE ENTRIES THAT ARE THERE, AND THE ENTRIES THAT ARE THERE ARE NOT THE ONES THAT MATTER
+> — THE ABSENT ONES ARE EXACTLY THE PRIOR ART D4 REQUIRES THE PAPER TO ENGAGE. THE GATE COULD NOT HAVE
+> CAUGHT R77, AND R77 IS THE DEFECT CLASS MOST LIKELY TO BE CAUGHT BY A REFEREE.**
+> **WHAT I ADDED: §2.6 GAINS THREE ITEMS** (*presence, not only resolution*; *a DOI's embedded year is
+> not the publication year* — RAIL is 2025, Lubich–Oseledets is 2014 though `issued` says 2013;
+> *diacritics survive into `author` fields*). **AND A NEW §1.10 CARRIES THE EIGHT CLASSES, EACH TAGGED
+> WITH THE CYCLE THAT FOUND IT. THE TAG IS NOT DECORATION: AN ITEM WITH NO CYCLE BEHIND IT IS AN ITEM
+> NOBODY HAS TESTED.** 455 lines, 19 sections.
+> **THE SECTION'S OWN RATIONALE IS THE FINDING: THE GATE WAS BUILT BY ACCRETION OVER TWENTY-EIGHT
+> CYCLES AND RECONCILED AGAINST LATER DEFECT CLASSES EXACTLY NEVER — THE SAME SHAPE AS `CLAIMS.md`
+> BEFORE R70 AND THE INSTRUCTION LISTS BEFORE R78. I HAVE NOW FOUND THAT SHAPE THREE TIMES IN MY OWN
+> DOCUMENTS, AND EACH TIME IT WAS IN THE OLDEST, LEAST-REVISITED FILE.**
+> **AND THE ORDER THE AUDITS CAME IN IS ITSELF THE LESSON, AND NOT THE ORDER I WOULD HAVE CHOSEN.
+> EVERY LAYER I OWN HAS NOW BEEN AUDITED AT LEAST ONCE: claims (35 decisions), artifacts (R67), tests
+> (R71), figures (R72), figure titles (R73), the brief (R74), my documents (R70), my instructions
+> (R78), the bibliography (R77), the gate (R79). I BEGAN WITH CLAIMS AND SPENT TWENTY CYCLES THERE,
+> WHILE THE GATE THAT GOVERNS MY MERGES HAD NOT BEEN OPENED SINCE R28 AND CONTAINED NO ITEM FOR
+> ANYTHING I HAD LEARNED SINCE.**
+> **THE GENERAL FORM, AND IT GOVERNS REVIEW EFFORT: AN ARTIFACT'S REVIEW FREQUENCY SHOULD BE A FUNCTION
+> OF HOW MUCH IT CAN HIDE, NOT OF HOW MUCH IT IS DISCUSSED. `CLAIMS.md` WAS DISCUSSED EVERY CYCLE.
+> `CHECKLIST.md` WAS DISCUSSED NEVER, AND IT WAS THE ONE THAT WOULD HAVE CAUGHT A WHOLE CLASS.**
+> **THE LESSON: R70 THE RECORD HAD STALE CLAIMS; R78 THE INSTRUCTION LIST HAD PHANTOM TASKS; R79 THE
+> GATE HAD MISSING CLASSES. THREE AUDITS, THREE SHAPES OF THE SAME DEFECT, ALL IN FILES I OWN, ALL FOUND
+> BY ASKING A MECHANICAL QUESTION RATHER THAN BY THINKING HARDER ABOUT THE CONTENT. AND THE QUESTION
+> THAT FOUND ALL THREE IS THE SAME ONE: IS THERE A CHECK HERE FOR THE THING THAT JUST WENT WRONG? That is
+> now a standing item in the gate itself, which is the only durable form this lesson can take.**
 > **R78 — I VERIFIED EVERY STANDING INSTRUCTION I ISSUED FROM MEMORY. THE ONLY PHANTOMS WERE THE
 > TWO I ALREADY WITHDREW. AND MY AUDIT *METHOD* HAD A BOUNDARY GAP THAT WOULD HAVE PRODUCED A FALSE
 > RETRACTION. D43.** No agent pushed. **R77's lesson was "measure the files, don't trust your own
@@ -2916,6 +2957,57 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-26 **R79 — the merge gate I built first and reviewed least had no item for six of the most
+  productive defect classes, and §2.6 verifies citation *resolution* while saying nothing about
+  citation *presence*. D44.**
+
+  No agent pushed. 178 files on `main`, clean. **The last unaudited document in my ownership.** R77
+  and R78 audited the record and the instruction lists; nobody had audited the gate those audits are
+  supposed to pass.
+
+  **The measurement:** `CHECKLIST.md` was **405 lines and 18 sections, built over twenty-eight cycles,
+  and had no item for any defect class found in R66–R78** — figure titles matching their data
+  (R72/R73); tests reading committed artifacts (R71); presence of required citations (R77); the paper
+  stating every invariant the brief names (R74); the recipient of a review being able to act (D40);
+  sweeps knowing a file's withdrawal regions (R78); the instruction list being measured (R77). **All
+  zero. A gate that does not gate on a defect class is not a gate; it is a list.**
+
+  **And the sharpest instance: §2.6 is the best-verified section of the gate — every DOI through
+  Crossref, no `doi.org` redirects, title/author/year findable in a publisher record — and every one
+  of the four missing citations would have passed all of it.** Three were absent entirely, so there
+  was nothing to resolve, and the fourth existed and was correct except for a missing `doi` field.
+  **The gate checks the entries that are there, and the entries that are there are not the ones that
+  matter — the absent ones are exactly the prior art D4 requires the paper to engage. The gate could
+  not have caught R77, and R77 is the defect class most likely to be caught by a referee.**
+
+  **What I added:** §2.6 gains three items (*presence, not only resolution*; *a DOI's embedded year is
+  not the publication year* — RAIL is 2025, Lubich–Oseledets is 2014 though `issued` says 2013;
+  *diacritics survive into `author` fields*). **And a new §1.10 carries the eight classes, each tagged
+  with the cycle that found it. The tag is not decoration: an item with no cycle behind it is an item
+  nobody has tested.** 455 lines, 19 sections.
+
+  **The section's own rationale is the finding:** the gate was built by accretion over twenty-eight
+  cycles and **reconciled against later defect classes exactly never** — the same shape as
+  `CLAIMS.md` before R70 and the instruction lists before R78. **I have now found that shape three
+  times in my own documents, and each time it was in the oldest, least-revisited file.**
+
+  **And the order the audits came in is itself the lesson, and not the order I would have chosen.
+  Every layer I own has now been audited at least once:** claims (35 decisions), artifacts (R67), tests
+  (R71), figures (R72), figure titles (R73), the brief (R74), my documents (R70), my instructions
+  (R78), the bibliography (R77), the gate (R79). **I began with claims and spent twenty cycles there,
+  while the gate that governs my merges had not been opened since R28 and contained no item for
+  anything I had learned since.**
+
+  **The general form, and it governs review effort: an artifact's review frequency should be a
+  function of how much it can hide, not of how much it is discussed.** `CLAIMS.md` was discussed every
+  cycle. `CHECKLIST.md` was discussed never, and it was the one that would have caught a whole class.
+
+  **The lesson:** R70 the record had stale claims; R78 the instruction list had phantom tasks; R79 the
+  gate had missing classes. **Three audits, three shapes of the same defect, all in files I own, all
+  found by asking a mechanical question rather than by thinking harder about the content.** And the
+  question that found all three is the same one: **is there a check here for the thing that just went
+  wrong?** That is now a standing item in the gate itself, which is the only durable form this lesson
+  can take.
 - 2026-09-26 **R78 — I verified every standing instruction I issued from memory. The only phantoms
   were the two I already withdrew. And my audit *method* had a boundary gap that would have produced
   a false retraction. D43.**
