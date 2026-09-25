@@ -207,6 +207,30 @@ def test_svd_projection_adapts_and_preserves_divergence():
     assert lowrank.projector.last_stats.target_rank <= 12
 
 
+def test_adaptive_rank_decays_for_laminar_multimode_decay():
+    grid = Grid2D(24)
+    X, Y = np.meshgrid(grid.x, grid.y, indexing="ij")
+    initial = (
+        np.sin(X) * np.sin(Y)
+        + 0.1 * np.sin(2 * X) * np.sin(Y)
+        + 0.01 * np.sin(X) * np.sin(2 * Y)
+    )
+    model = StreamFunctionNS(grid, 0.02, forcing=ZeroForcing(), dealias=False)
+    lowrank = DLRA(
+        model,
+        rank=6,
+        min_rank=1,
+        max_rank=12,
+        tolerance=0.2,
+        check_every=1,
+    )
+    final = lowrank.integrate(initial, 0.01, 100)
+    assert max(lowrank.rank_history) > 1
+    assert lowrank.rank == 1
+    assert grid.ke(final) < grid.ke(initial)
+    assert grid.max_div_velocity(final) < 1e-12
+
+
 def test_rank_stagnation_and_restart_from_checkpoint():
     grid = Grid2D(24)
     model = StreamFunctionNS(grid, 0.01, forcing=ZeroForcing())

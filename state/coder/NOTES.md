@@ -1,7 +1,7 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: engine, validation ladder, sustained Re=5000 full/DLRA check, and provenance-backed Re=100/1000/5000 N=64 plus N=128 pilot results are implemented. Adaptive rank grows 2→42 (short) and 2→43 (T=1); reduced diagnostics now separate full-PDE residual from projection-work balance. Awaiting theoretical-research's binding forcing-aware-invariant wording before calling turbulence validation final.
+> Status: engine, validation ladder, sustained Re=5000 full/DLRA check, and provenance-backed Re=100/1000/5000 N=64 plus N=128 pilot results are implemented. Adaptive rank grows 2→42 (short) and 2→43 (T=1); reduced diagnostics separate full-PDE residual from projection-work balance; 13 tests pass. Awaiting theoretical-research's binding forcing-aware-invariant wording before calling turbulence validation final.
 
 ## Mission
 
@@ -40,7 +40,7 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
   candidate; inputs are 2/3-filtered before products; signed rFFT Nyquist
   wavenumbers, zero-mean frozen forcing, strict finite JSON, scale-aware
   stability/CFL flags, and explicit projection-work energy diagnostics were
-  added.  Twelve tests pass.  The sustained Re=5000, N=64, T=1 run remains
+  added.  Thirteen tests pass.  The sustained Re=5000, N=64, T=1 run remains
   finite for full and DLRA (rank 2->43, max relative L2 0.324), while the
   short three-Re comparison honestly records POD accuracy/residual limits.
 - 2026-09-25 Added and ran `experiments/run_rank_growth_sweep.py` at
