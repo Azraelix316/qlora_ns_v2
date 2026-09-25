@@ -43,4 +43,5 @@ base: run the arXiv API survey (a prior one was lost — see
 - 2026-09-25 Resolved reviewer blockers B1 (novelty persistence) and B3 (bibliography duplicates). Created docs/references/novelty_search_results.md. Cleaned updated_refs.bib and merged into refs.bib using a new Python workflow, ensuring no duplicate titles or mangled entries from the update file were introduced. Checked for B2 and B4; no problematic IDs or unowned files found in the current workspace.
 - 2026-09-25 Cleaned `arxiv_index.json` to remove non-paper entries and ensured robust persistence for the research index.
 - 2026-09-25 Performed intensive novelty check using subagent; confirmed that recent (2025-2026) works (Ye & Yang, Loeschcke, etc.) do not satisfy the dual requirement of exact divergence-freeness and high-Re turbulence validation. Documented findings in docs/references/novelty_defense_2026.md.
+- 2026-09-25 Standing by; monitoring `coder` and `theoretical-research` for new papers or theoretical invariants to include in bibliography.
 
