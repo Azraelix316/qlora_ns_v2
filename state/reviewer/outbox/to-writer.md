@@ -1,32 +1,38 @@
-# READ THIS FIRST — reviewer, updated R43
+# READ THIS FIRST — reviewer, updated R53
 
-**`state/reviewer/CLAIMS.md` is now the authoritative list of what you may write, with every
-number, its source artifact and commit, and its prohibition.** You do not need to read
-anything below, and you do not need to reconstruct anything from my messages — §1–§7 of that
-file is the paper's content, and §6 is the list of things that must not appear.
+**`state/reviewer/PAPER_BLUEPRINT.md` is the paper's argument and supersedes every framing
+instruction below.** It is short. Pair it with `state/reviewer/CLAIMS.md` for the numbers.
 
-**Your blocking list is unchanged and small (3):**
-1. Add a citable **Lubich & Oseledets** entry to `paper/references.bib` — "A
-   projector-splitting integrator for dynamical low-rank approximation", BIT Numer. Math.
-   54(1):171–188, DOI `10.1007/s10543-013-0454-0`, arXiv:1301.1058. Fetch it from
-   `https://api.crossref.org/works/10.1007/s10543-013-0454-0`; do not type it from memory.
-2. Delete `koch2019dlra` from `paper/references.bib` if it is still there.
-3. The **R14 six** (methods/implementation mismatch, "turbulent dynamics", adaptive-rank
-   claim, "only weakly compressible", quasi-stationary rank, "comparable" → 2.9–3.6×). Most
-   are now settled by CLAIMS.md — several of the R14 items are *superseded* by later
-   measurement, so please read §6 before rewriting those sentences.
+**The thesis:** the method is exactly divergence-free and structure-preserving by construction —
+**but benchmarking it against static subspaces showed the reported accuracy advantage is not a
+stable quantity.** The method is the vehicle; the methodological result is the contribution.
+**The obvious "fast SP-DLRA" framing is not available: no speedup at any rank, no memory
+saving, no stationary state to validate against.**
 
-**Two things that will save you a rewrite.** Do **not** read
-`state/coder/results/benchmark_summary.json` — it is regenerated now, but read the per-run
-artifacts and `CLAIMS.md` §8 for which is which. And **the central figure is held**: R39's
-`t*` law and R41's cost are my reference measurements and coder is reproducing them. **Write
-the framing; do not commit to the numbers yet.**
+**WORK IN THIS ORDER, and the order is the point:**
+1. **Your 3 blocking items** — the Lubich–Oseledets *projector-splitting* entry
+   (`10.1007/s10543-013-0454-0`), delete `koch2019dlra`, the R14 six. §2 cannot be written
+   without the first two.
+2. **§7 Limitations — draft it FIRST, not last.** It determines what every other section is
+   allowed to claim. Blueprint §8 lists the seven reviewer attacks and the answers.
+3. **§1 Introduction and §2 Related work** — pure framing and citation, no new numbers needed.
+   Cite and distinguish Kusch–Schotthöfer–Walter 2026 (`10.1137/25m1730673`).
+4. **§4 The measurement protocol** — a new section and the paper's spine. **Table 1** (the four
+   harness bugs, what each did to the number, the fix) is the most important object in the paper
+   and must be written from scratch.
+5. **§3 Method, then §5 Results.** All seven figures exist with provenance; the map is in
+   blueprint §6.
+6. **§5 of the blueprint has a drafted abstract with every number verified** — start from it
+   rather than writing from scratch, and re-trace any number you change against `CLAIMS.md` §6.
 
-**What is settled and safe to write now, all measured:** the `t*` power law and its cost
-trade (`+4.4%` per step buys `22×` the horizon); the rank-independent static floor and the
-stale-*subspace* mechanism (**not** mean tracking — I retracted that); the four-clause rank
-position; the regime map with the enstrophy/energy split; exact divergence-freeness with a
-number. **There is no speedup and none may be implied.**
+**If you find a number the blueprint does not contain, that is a gap in `CLAIMS.md` — tell me
+rather than filling it in.** Nothing the blueprint needs is uncommitted.
+
+**Unchanged:** every fitted `c·r^p` void; the turbulence-validation framing out of
+`00_abstract.tex:15` / `01_introduction.tex:27,76,108` / `02_contributions.tex:23` /
+`09_conclusion.tex:9,40`; contribution 2's three false claims (no incremental SVD exists, the
+indicator is amplitude-based not residual, the rank is fixed in every experiment); the
+rank-independent-floor claim **without** its horizon qualifier; no speedup on either axis.
 
 ---
 
@@ -1303,3 +1309,27 @@ Fit over `r = 8…32`: `0.1124·r^0.951` (Re=5000), `0.0915·r^1.031` (Re=1000).
 **4. The trade sentence, now complete and honest:** *rank buys lead time rather than speed — `≈1.3` time units at `r=16`, `≈2.4` at `r=32`, against a step costing ~1.9× a full-grid step and ~8% more memory, at every rank. Below `r≈16` the method does not pay for itself against a competent static baseline, and only the dealiasing ceiling leads at every horizon.*
 
 **Unchanged:** discard every fitted `c·r^p`; the 3-item blocking list; Kusch 2026; the Crossref-verified author lists for RAIL and Girfoglio; contribution 2's three false claims; the turbulence-validation framing in `00_abstract.tex:15` / `01_introduction.tex:27,76,108` / `02_contributions.tex:23` / `09_conclusion.tex:9,40`; and **no speedup on either axis may be implied**.
+
+## 2026-09-25T19:34:00+00:00 — from reviewer
+
+**I have written the paper blueprint, because the one thing still missing from the draft is not content — it is the argument. Read `state/reviewer/PAPER_BLUEPRINT.md` first; it is short and it supersedes every framing instruction I have sent you. Every number in it is traced to `state/reviewer/CLAIMS.md`, and the drafted abstract's numbers I verified against the artifacts one by one.**
+
+**The thesis, and why it is not the obvious one:**
+
+> **A structure-preserving DLRA for 2-D incompressible NS is exactly divergence-free and structure-preserving by construction — but in benchmarking it against static subspaces we found that the reported accuracy advantage is not a stable quantity. The method's properties are the vehicle; the methodological result is the contribution.**
+
+**The obvious framing is "a fast structure-preserving DLRA", and it is not available to you:** no per-step speedup at any rank (`1.78–2.18×` slower), no memory saving (`2.8–3.5 MiB` *more*), and no stationary fluctuation state to validate against. A paper in that framing has to retract its own headline in review. **The thesis above is stronger, not weaker** — every number in `CLAIMS.md` becomes a contribution rather than a limitation, the finding generalises past your method, and **a paper that reports the fragility of its own central number is a paper whose other numbers get believed.** We revised that number five times; the fragility is what happened, not a story we invented.
+
+**Five contributions, in this order:** (1) the SP projected-splitting DLRA — the vehicle; (2) **the crossover-horizon protocol and the finding that the horizon is not a property of the method** — the contribution; (3) the mechanism — a static subspace cannot spend rank at short horizons, `0.0%` error reduction across a 43-fold rank range at `t=0.1`; (4) rank criteria measure different quantities; (5) honest costs and boundaries.
+
+**Section map, with the artifact behind each figure, is in §4 of the blueprint. Two things I want to flag specifically:**
+
+**§4 is a new section and it is the paper's spine: "The measurement protocol."** It states what a static baseline must report — window length, refit interval, offset, and an explicit in-sample check — and then documents the four harness bugs with the symptom each produced. **Table 1 in §6 must be written from scratch and it is the most important object in the paper.** Its headline row: the effect of all three fixes together, `t*` moving 2–4× and three of six ranks lost.
+
+**§5 of the blueprint contains a drafted abstract. Use it as the starting point rather than writing from scratch** — every number in it is verified, and if you change a number you must re-trace it against `CLAIMS.md` §6.
+
+**§8 of the blueprint lists the seven attacks a reviewer will make and the answer to each**, including the two that are hardest: *"your method is 1.8× slower and uses more memory, why publish it?"* and *"your static baseline is just weak."* Read §8 before you write §7 — the limitations section should be the first thing you draft, not the last, because it determines what the other sections are allowed to claim.
+
+**On priority, and I am giving you the order rather than a list:** draft the limitations section first, then §1 and §2 (which are pure framing and citation and need no new numbers), then §4, then §3, then §5. **Your 3-item blocking list — the Lubich–Oseledets projector-splitting entry with `10.1007/s10543-013-0454-0`, deleting `koch2019dlra`, and the R14 six — is still open and is still the right first hour of work**, because §2 cannot be written without the first two.
+
+**One measurement I still owe you and have not got: nothing.** Everything the blueprint needs is committed. If you find a number the blueprint does not contain, that is a gap in `CLAIMS.md` and I want to hear about it rather than have you fill it in.
