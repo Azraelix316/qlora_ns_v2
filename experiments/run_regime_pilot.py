@@ -27,6 +27,7 @@ Run from the repository root::
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -154,6 +155,29 @@ def run_to(
         "max_cfl": max_cfl,
         "wall_seconds": time.perf_counter() - start,
         "nsteps": nsteps,
+    }
+
+
+def fingerprint(state: np.ndarray, grid: Grid2D) -> dict:
+    """P0 fingerprint: the *same field* must be provable across runs.
+
+    The sha256 is here because the two grids do **not** share an initial state
+    -- the N=64 and N=128 pilots have energies 22.2067 and 22.1886, because the
+    perturbation is scaled by the cell count -- so a reader comparing the two
+    has to be able to confirm from the artifact that they are different fields
+    rather than infer it.  A number that is not reproducible from the artifact
+    is not a measurement.
+    """
+    arr = np.ascontiguousarray(np.asarray(state, dtype=np.float64))
+    s = np.linalg.svd(arr - arr.mean(), compute_uv=False)
+    cutoff = 1e-10 * s[0] if s.size and s[0] > 0 else 0.0
+    return {
+        "sha256": hashlib.sha256(arr.tobytes()).hexdigest(),
+        "dtype": str(arr.dtype),
+        "shape": list(arr.shape),
+        "energy": grid.ke(state),
+        "numerical_rank": int(np.count_nonzero(s > cutoff)),
+        "numerical_rank_cutoff_relative": 1e-10,
     }
 
 
@@ -429,14 +453,23 @@ def main() -> None:
             "cutoff": args.cutoff,
             "seed": args.seed,
         },
-        "initial_state": {
-            "energy": grid.ke(initial),
-            "numerical_rank": int(
-                np.count_nonzero(
-                    np.linalg.svd(initial - initial.mean(), compute_uv=False)
-                    > 1e-10 * np.linalg.svd(initial - initial.mean(),
-                                            compute_uv=False)[0]
-                )
+        "initial_state": fingerprint(initial, grid),
+        "rank_quantities": {
+            "window_rank_table": (
+                "r99/r999/amp_* are the modes needed to represent a WINDOW of "
+                "the trajectory (nested windows from t=0, on "
+                "psi' = psi - x-avg(psi)). This is the quantity that grows 1 -> 16 "
+                "over [0, 8] and is grid-independent there."
+            ),
+            "instantaneous_rank_series": (
+                "r99/r999/amp_* are the modes needed to represent ONE state at one "
+                "instant. A per-step adaptive rule returns this quantity, not the "
+                "windowed one, which is why it cannot reproduce the growth above."
+            ),
+            "rank_at_end": (
+                "both criteria on the final state's fluctuations and on the whole "
+                "state; the two are reported separately because the secularly "
+                "growing zonal mean dominates the whole-state energy at late times"
             ),
         },
         "rows": rows,

@@ -48,12 +48,20 @@ class SVDProjector:
     dynamics'.
 
     ``rank_criterion="energy"`` keeps the smallest r with
-    ``sum(s[:r]**2)/sum(s**2) >= energy_fraction`` -- the r99-style rule.  This
-    is the criterion that can *track* the state: on forced 2-D NS the rank
-    needed for 99% of fluctuation energy grows by about a factor of sixteen
-    over the first eight time units, and it is grid-independent over that
-    range, while the amplitude rule sits at the ceiling throughout and cannot
-    see any of it.
+    ``sum(s[:r]**2)/sum(s**2) >= energy_fraction`` -- an r99-style rule.  It is
+    a far better-behaved criterion than the amplitude test: it leaves the
+    dealiasing ceiling behind and selects a physically meaningful number.  It
+    is **not**, however, the criterion that tracks the sixteenfold rank growth
+    measured on forced 2-D NS, and the earlier version of this docstring said
+    so.  The reason is the distinction spelled out below: the growth is a
+    *windowed* quantity and this rule reads an *instantaneous* one.
+
+    **Which quantity a criterion measures is part of its meaning, so artifacts
+    record it.**  Both rules above act on a single stage candidate, and the
+    rank they return is therefore a *spatial* rank -- the dimension of the
+    subspace one field needs -- not the dimension of the subspace a trajectory
+    sweeps through.  A rank trace labelled only "rank" is ambiguous between the
+    two, which is how the ceiling and the windowed growth got conflated.
 
     Both are clamped to ``[min_rank, max_rank]``.  Neither is an accuracy
     criterion: they say how many modes to keep, not how close the result is.
