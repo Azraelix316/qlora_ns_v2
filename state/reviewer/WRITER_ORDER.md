@@ -129,3 +129,33 @@ accurate, whereas the fixed basis explodes at `t ≈ 5.5–7.2`, four to eleven 
 measured at different forcing amplitudes (`0.2` and `0.5`). The divergence time is not monotone in
 rank, so we attribute the failure to propagating a fixed basis through the nonlinearity rather than to
 rank as such. Because this rests on a single case, we report it as an observation.
+
+## §3 — the clause that keeps the verification section credible (D49, binding)
+
+**Your framing is already honest** — §3 says "a verified implementation" and "reproduce the analytic
+decay", never "more accurate than". **That is why this is one clause and not a rewrite. But the
+limitation is unstated, and a reviewer who derives it will discount the whole section.**
+
+**The exact Taylor–Green solution is a single Fourier mode** (`run_taylor_green.py:51-52` sets
+`omega = 2 sin x sin y`; the artifact records `initial_state.numerical_rank: 1`). **So the rank-1
+reduced solver represents it exactly, and this case cannot discriminate between methods or say
+anything about whether low-rank approximation helps.** Measured three ways: at rank 1 the DLRA is
+`1.26e-14` against the full grid's `1.51e-14` — *more* accurate than the reference — and the error
+then **grows** to `3.9e-13` at rank 8, which is accumulated roundoff through extra rank-*r*
+operations, not truncation.
+
+**Verbatim, for §3:** *"The exact solution is a single Fourier mode, so the rank-1 reduced solver
+represents it exactly and this case verifies the implementation and the invariants rather than the
+accuracy of the reduction; raising the rank does not improve agreement but degrades it slightly
+(`1.3e-14` at rank 1 to `3.9e-13` at rank 8) as roundoff accumulates through the extra rank-*r*
+operations."*
+
+**What the case DOES establish, so keep the claim at that strength:** the full-grid solver reproduces
+an *independent analytic* solution to `2.8e-14` (a genuine test); the reduced path runs, preserves
+both invariants, and agrees; `max |div u| = 1.63e-14` and the energy-balance residual is `3.16e-4`.
+
+**One more clause for the cost discussion, free from the same artifact:** at rank 1 on `N=64` the
+reduced solver is **`3.45x` slower than the full grid** (`3.68e-3` vs `1.07e-3` s/step) — **worse than
+the headline `1.78-2.18x`, and the worst case in the project**, because all the SVD/QR overhead is paid
+while the rank buys nothing. **The naive expectation is the opposite, and this is the measured reason
+it is wrong. Say so: the reported range is not the worst case, and here is the worst case.**
