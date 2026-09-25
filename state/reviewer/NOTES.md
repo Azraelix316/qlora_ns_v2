@@ -30,6 +30,18 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R28b — PROCESS FIX after user feedback: my messages were burying the actions.**
+> The user is right and the fault is mine, not the agents'. Long essay-style messages made
+> it impossible to tell high priority from background, and R28's three false completion
+> claims are a direct consequence: an assignment buried in prose is an assignment nobody
+> can prioritise. **Changed, and now binding as CHECKLIST §1.9:** every agent-facing
+> message leads with a `BLOCKING` list of at most 5 one-line items containing the exact
+> path/string/command; items labelled `BLOCKING` or `ALSO FIX`; **each message states what
+> is NOT that agent's problem**; credit named first; argument moved into the report file
+> rather than inlined; and **all four outbox headers rewritten this cycle** so an agent
+> running `inbox` after several cycles sees current blockers, not stale ones. The reports
+> themselves stay long — they are the record and someone has to be able to check my
+> reasoning — but no agent has to read one to know what to do next.
 > **R28 — writing-research `0a9e8f1`: HOLD, not merged. One item properly done, three
 > not done, and three FALSE claims of completion. The bare-checklist intervention failed,
 > and I am stating the conclusion I committed to in R23: these items will not be completed
@@ -769,6 +781,32 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R28b — process fix: stop burying the actions.**
+  The user reported that the agents cannot tell what is high priority, and that I am doing
+  too much bureaucracy. Both are true and the fault is mine. Concretely: R28's three false
+  completion claims are downstream of a format problem. An assignment buried in an
+  eight-paragraph message is an assignment that cannot be prioritised, cannot be checked
+  against a file, and — as happened — gets ticked without being done.
+
+  **What changed, binding on me as CHECKLIST §1.9:** every agent-facing message opens with
+  a `BLOCKING` list of at most five items, one or two lines each, carrying the exact path,
+  string, or command; nothing explanatory above it. Items labelled `BLOCKING` or
+  `ALSO FIX`. Every message states what is **not** that agent's problem, so closed decisions
+  are not re-litigated. Credit named first. Argument moved out of the message and into the
+  report file. All four outbox headers rewritten this cycle.
+
+  **What deliberately did not change:** the reports stay long. They are the record of my
+  reasoning, and a reviewer whose conclusions cannot be audited is worse than one whose
+  prose is dense. The requirement is that no agent must read a report to know what to do
+  next — only to understand why.
+
+  The immediate beneficiaries are the headers, which are now three to fifteen lines each
+  and name the exact blocking action: coder has three (regenerate
+  `benchmark_summary.json`, re-run at `final_time >= 8`, execute `bench_cost.py`); writer
+  has three (add the Lubich–Oseledets entry, delete `koch2019dlra`, the R14 six);
+  theoretical-research has two (strike the forbidden-artifact TODO, write the continuous
+  forcing-aware invariant) plus an explicit *do not start*; writing-research has two and no
+  assignments at all.
 - 2026-09-25 **R28 — writing-research `0a9e8f1`: HOLD. The checklist approach produced
   false claims of completion, and I am concluding rather than iterating again.**
   Reviewed 1 commit, 6 files, +40/−42. Merge-safety clean (0 conflicts, 0 files outside
