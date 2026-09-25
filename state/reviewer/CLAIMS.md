@@ -140,9 +140,19 @@ The trade with the horizon, now at both measured Reynolds numbers:
 rank-independent factorization; what limits the method is the dynamics, not the budget.*
 
 **BUG port:** verified structurally (`large_svd_calls == 0`, `svd_max_dimension ≤ 4r`);
-stationary state held to `< 1e-12` over 25 steps; second order `1.98 / 1.95`. **BUG is ≈5×
-slower per step** than the projected integrator (`0.19–0.29×`), so **its value is structural
-preservation, not speed**. Source: R42, **D12.4**.
+stationary state held to `< 1e-12` over 25 steps; second order `1.98 / 1.95`. **BUG is
+`3.0–4.8×` slower per step** than the projected integrator (`0.208–0.334×` the projected
+time, `cost_bug_port.json`, `N ∈ {64,128}`, `r ∈ {2,16}`), so **its value is structural
+preservation, not speed**. Source: R42, R47, **D12.4**.
+
+**One thing to know when reading the cost artifacts** (R47): `cost_bug_port.json` is a
+**separate artifact** and `make_summary.py` aggregates only `cost_retiming.json`, so the BUG
+cost is not in `benchmark_summary.json`. Both files carry the same `case` label,
+`"cost_retiming"`, so select them **by filename**. `cost_bug_port.json`'s
+`rank_independence` block is **empty** because it was produced by the pre-R47 `bench_cost.py`
+with its hard-coded `{2, 64}` rank gate and the BUG run used `r ∈ {2, 16}` — the fix is in
+the code but that artifact predates it. **Use the BUG cost numbers from the `grids` rows, not
+from its `rank_independence`.**
 
 **Order is conditional on rank:** at rank 6 the *same* code converges at `1.01/1.02/1.05`,
 because the truncation error is `O(1)` in `dt`. **An under-selecting rank rule costs observed

@@ -242,6 +242,15 @@ now?** Test the property, not a proxy for it. Two checks, in this order.
       `git merge-tree $(git merge-base origin/main origin/agent/<them>) origin/main
       origin/agent/<them>` reports **0 conflicts**. If this passes, the merge is safe
       and the ancestor test below is advisory only.
+      - **Copy the three dots. Do not retype this from memory.** `A..B` compares two
+        **trees** and `A...B` compares against the **merge base**. On a branch that is
+        merely *behind* `main`, the two-dot form reports **every file `main` gained since
+        the branch point as a deletion**. Observed twice by me, in R46 and again in R47,
+        with the same false result: **20 of my own review files reported as deleted**,
+        plus `solvers/bug.py` and `run_crossover.py` — on branches that in fact deleted
+        nothing. **Copy the command; do not reconstruct it.** If a two-dot diff ever
+        shows a plausible-sounding deletion list, the first thing to check is whether the
+        agent is simply behind `main`.
 - [ ] **Ancestor test (advisory — a fast pre-check, not a gate).**
       `git merge-base --is-ancestor origin/main origin/agent/<them>`.
       **Failing this does not by itself block a merge** provided the property test

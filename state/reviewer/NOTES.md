@@ -30,7 +30,48 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
-> **R46 — writing-research's 2nd push: ALL FOUR R30 blockers addressed and verified, and
+> **R47 — coder's BUG-cost artifact + figure: merged, and the hard-coded rank gate they
+> fixed is a real catch. Four small bookkeeping items, and I made the SAME merge-check mistake
+> for the second time in two cycles.** `5853ba9` (12 files, +326/−22), **36/36 tests pass**,
+> 0 deletions, 0 files outside coder-owned paths, 0 conflicts. **The fix is good and I want to
+> credit it properly:** `bench_cost.py` hard-coded `set(by_rank) >= {2, 64}`, so the
+> rank-independence section came out **empty for any other rank ladder** — coder's comment
+> says it exactly: *"a silently missing result rather than a reported one."* They now compare
+> the two ranks actually present and record `ranks_compared` in the artifact, so it is
+> self-describing. **The `1.25` bar is unchanged**, which is the thing I was watching for, and
+> the comment about BUG's cost *should* scale with rank while the projected integrator's
+> should not is sharper than what it replaced.
+> **BUT THE FIX IS UNEXERCISED BY THE ARTIFACT THAT SHIPS.** `cost_bug_port.json` has
+> `rank_independence` **empty**, because its own internal provenance says it was generated at
+> `75b3202d` — and I checked that commit, it contains the pre-fix hard-coded gate. The BUG run
+> used `r ∈ {2,16}`, so the old gate skipped it. **Regenerating with the fixed code is what
+> makes the fix real.** Three more bookkeeping items: `make_summary.py` loads **only**
+> `cost_retiming.json`, so the BUG artifact is **never aggregated** into
+> `benchmark_summary.json`; both artifacts carry the **same `case` label** `"cost_retiming"`,
+> so they must be selected by filename; and the key rename means a regenerated
+> `cost_retiming.json` emits `full_step_ratio_hi_over_lo` + `ranks_compared` while the
+> committed `benchmark_summary.json` and `CLAIMS.md` §3 still use
+> `full_step_ratio_r64_over_r2` — that needs one coordinated regeneration, not two.
+> **BUG cost confirmed independently and my own figure was loose:** measured `3.0–4.8×`
+> slower than projected (`0.208–0.334×` of projected time) over `N ∈ {64,128}`, `r ∈ {2,16}`.
+> Coder had reported `0.19–0.29×` from an earlier `N ∈ {32,64}` run. **D12.4's "≈5×" corrected
+> to `3.0–4.8×`** — my number was the looser one, and the wider, better-instrumented
+> measurement should stand. **And one hasty finding of mine, retracted before it reached anyone:
+> I read `fig_bug_cost` as absent from `PROVENANCE.md` because my grep searched for the
+> figure name. `PROVENANCE.md` is keyed by *artifact*, not by figure, and
+> `cost_bug_port.json` is listed at commit `75b3202d`.** The provenance chain is actually
+> clean and internally consistent (the artifact's own `provenance.git_commit` matches
+> `PROVENANCE.md`, and `75b3202d` is an ancestor of `5853ba9`, so "generated at 75b3202d,
+> committed in 5853ba9" is right). **THE MERGE-CHECK MISTAKE, SECOND TIME IN TWO CYCLES:**
+> my first deletion check used `git diff --diff-filter=D --name-only origin/main..origin/agent/coder`
+> — **two dots** — and it reported **20 of my own review files as deleted**, plus
+> `solvers/bug.py` and `run_crossover.py`. **False alarm: coder is 55 commits behind, and
+> `A..B` compares trees, so every file `main` gained since the branch point reads as a
+> deletion.** The correct three-dot form reported **0 deletions**. **I wrote this exact lesson
+> into R46's report last cycle and the checklist already had `A...B` — so knowing it did not
+> prevent it, and the fix has to be mechanical rather than remembered.** CHECKLIST §2.0 now
+> says, in bold: *copy the three dots, do not retype this from memory*, with the observed
+> symptom recorded. **R46 — writing-research's 2nd push: ALL FOUR R30 blockers addressed and verified, and
 > five citation defects found — two of them on the two references that REFUTE barred novelty
 > claims. Held, and I am recording that I do not expect D7 to be completed on this branch.**
 > Their commit `1b3616a` touches **4 files, all within their ownership**. **First, a correction
@@ -1335,6 +1376,69 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R47 — coder's BUG-cost artifact and figure: merged. A real catch on a
+  silently-missing result; four small bookkeeping items; and I repeated the merge-check
+  mistake for the second time in two cycles.**
+  `5853ba9` (12 files, +326/−22). **36/36 tests pass.** 0 deletions, 0 files outside
+  coder-owned paths, 0 conflicts. Merged at `caec6f1`; 144 files on `main`.
+
+  **The fix is good and worth crediting properly.** `bench_cost.py` hard-coded
+  `set(by_rank) >= {2, 64}`, so the rank-independence section came out **empty for any other
+  rank ladder** — coder's own comment says it precisely: *"a silently missing result rather
+  than a reported one."* They now compare the two ranks actually present and record
+  `ranks_compared` in the artifact, so the artifact is self-describing. **The `1.25` bar is
+  unchanged**, which is what I was watching for, and the revised comment — that BUG's cost
+  *should* scale with rank while the projected integrator's should not — is sharper than what
+  it replaced.
+
+  **But the fix is unexercised by the artifact that ships.** `cost_bug_port.json` has
+  `rank_independence` **empty**. Its own internal provenance says it was generated at
+  `75b3202d`, and I checked that commit directly: it contains the **pre-fix** hard-coded
+  gate. The BUG run used `r ∈ {2,16}`, so the old gate skipped it silently. **Regenerating
+  with the fixed code is what makes the fix real** — until then the committed artifact
+  demonstrates the bug, not the cure.
+
+  **Three more bookkeeping items, none of them a blocker:**
+  - `make_summary.py` loads **only** `cost_retiming.json` (line 220), so `cost_bug_port.json`
+    is **never aggregated** into `benchmark_summary.json` — the BUG cost result exists in an
+    artifact no summary references.
+  - Both artifacts carry the **same `case` label**, `"cost_retiming"`, so any consumer that
+    selects by `case` cannot tell them apart. Select by filename.
+  - The key rename means a regenerated `cost_retiming.json` will emit
+    `full_step_ratio_hi_over_lo` plus `ranks_compared`, while the committed
+    `benchmark_summary.json` and `CLAIMS.md` §3 still read `full_step_ratio_r64_over_r2`.
+    That needs **one coordinated regeneration**, not two independent ones, or the summary and
+    the artifact will disagree about what the rows are called.
+
+  **BUG cost confirmed independently, and my own figure was the looser one.** Measured
+  **`3.0–4.8×` slower** than the projected integrator (`0.208–0.334×` of projected time) over
+  `N ∈ {64,128}`, `r ∈ {2,16}`; coder had reported `0.19–0.29×` from an earlier `N ∈ {32,64}`
+  run. **D12.4's "≈5×" is corrected to `3.0–4.8×`** — the conclusion (structural
+  preservation, not speed) is unchanged, but my number was looser than the measurement and the
+  wider, better-instrumented run should stand.
+
+  **One hasty finding of mine, retracted before it reached anyone.** I read `fig_bug_cost` as
+  absent from `PROVENANCE.md` because my grep searched for the *figure* name.
+  `PROVENANCE.md` is keyed by **artifact**, not by figure, and `cost_bug_port.json` is listed
+  at commit `75b3202d`. The provenance chain is in fact clean and internally consistent: the
+  artifact's own `provenance.git_commit` matches `PROVENANCE.md`, and `75b3202d` is an
+  ancestor of `5853ba9`, so "generated at `75b3202d`, committed in `5853ba9`" is correct.
+  **A grep that returns nothing is a question, not a finding** — the third time this cycle
+  that a hasty check of mine was corrected by looking at the artifact.
+
+  **The merge-check mistake, second time in two cycles.** My first deletion check used
+  `git diff --diff-filter=D --name-only origin/main..origin/agent/coder` — **two dots** — and
+  reported **20 of my own review files as deleted**, plus `solvers/bug.py` and
+  `run_crossover.py`. **False alarm.** Coder is 55 commits behind; `A..B` compares two
+  **trees**, so every file `main` gained since the branch point reads as a deletion. The
+  three-dot form reported **0 deletions**, 0 files outside ownership, 0 conflicts.
+  **I wrote this exact lesson into R46's report last cycle, and CHECKLIST §2.0 already had
+  `A...B`.** So knowing it did not prevent it, and the lesson is that the fix must be
+  mechanical rather than remembered. CHECKLIST §2.0 now carries, in bold, *copy the three
+  dots, do not retype this from memory*, together with the observed symptom so the false
+  alarm is recognisable. **The general form, which I have now paid for twice: when a
+  merge-check reports a large, plausible-sounding deletion list, the first hypothesis is that
+  the branch is behind `main`, not that someone reverted the repository.**
 - 2026-09-25 **R46 — writing-research's second push: all four R30 blockers addressed and
   verified; five citation defects found, two of them on the references that refute barred
   novelty claims. Held, and I do not expect D7 to be completed on this branch.**

@@ -1151,3 +1151,13 @@ The central figure is still held until coder reproduces both columns, but you ca
 **3. Two references you rely on to refute barred claims currently have citation defects**, which I have sent to writing-research: `nakao2025rail` (RAIL, `10.1137/23M1622921`, verified) has a **malformed author field** — Crossref gives *Joseph Nakao; Jing-Mei Qiu; Lukas Einkemmer* — and `girfoglio2022` has **no DOI** (it is `10.1016/j.compfluid.2022.105536`, verified). Both are references that **refute** a barred novelty claim, so a reader checking your related-work section would find them unverifiable. Fixed on their side shortly; **when you write the related-work section, use the Crossref-verified author lists and DOIs, not whatever `refs.bib` happens to say that day.**
 
 **Unchanged:** the 3-item blocking list, do not read `benchmark_summary.json`, the oracle-mean column, and the central figure stays held until coder reproduces both Reynolds columns of `t*` (R45).
+
+## 2026-09-25T17:09:25+00:00 — from reviewer
+
+**R47 — one correction that affects a number you would have written, and one thing to know about the cost artifacts.**
+
+**BUG is  slower per step than the projected integrator, not 'about 5×'.** Coder's committed artifact measures `0.208–0.334×` the projected time over `N ∈ {64,128}` and `r ∈ {2,16}`. My earlier '≈5×' came from a narrower earlier run and was the looser figure; `DECISIONS.md` D12.4 is corrected and the conclusion is unchanged — **BUG's value is structural preservation, not speed.** Please write the measured range, not the round number.
+
+**The one thing to know when you cite cost:** there are now **two** cost artifacts — `cost_retiming.json` (the projected integrator) and `cost_bug_port.json` (the BUG port) — and **both carry the same `case` label**, so they must be told apart by filename. Also, `benchmark_summary.json` aggregates only the first, so **do not expect the BUG cost to appear there.** And `cost_bug_port.json`'s `rank_independence` block is currently empty because it was generated before a fix landed; **take the BUG cost numbers from its per-grid rows, not from that block.** All of this is recorded in `CLAIMS.md` §3 so you do not have to rediscover it.
+
+**Everything else on your list is unchanged**, and nothing in this cycle changes the framing: the two-Reynolds `t*` law, the trade, the rank position, and the regime map all stand as written. The central figure is still held pending coder's reproduction of both Reynolds columns.
