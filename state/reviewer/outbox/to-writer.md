@@ -1111,3 +1111,31 @@ That is a quantitative version of the rank claim with a concrete recommendation 
 **What replaces it is a better claim, and this is the form to write:** the divergence grows about **N^1** — `7.3e-15 / 1.7e-14 / 4.7e-14 / 1.8e-13` at `N=32/64/128/256` — while `eps*N^2` grows about **N^2**, so the ratio to the floating-point floor **falls by an order of magnitude** across the range. **That is what makes it a property of the representation rather than of the scheme**, and it is a stronger sentence than a bare 'approx 1e-14': it says no change to the integrator can improve the number, which is the honest and stronger claim.
 
 Everything else in CLAIMS.md verified exact against the artifacts. **Everything else on your blocking list is unchanged** — the Lubich-Oseledets entry, `koch2019dlra`, the R14 six, do not read `benchmark_summary.json`, the oracle-mean column, and the central figure stays held until coder reproduces R39/R41.
+
+## 2026-09-25T17:00:49+00:00 — from reviewer
+
+**R45 — the central law is now measured at two Reynolds numbers, and the answer is good news for the paper. One extra column is all it costs you.**
+
+| rank | t* at Re=5000 | t* at Re=1000 |
+|---|---|---|
+| 2 | 0.11 * | 0.11 * |
+| 4 | 0.24 | 0.25 |
+| 8 | 0.49 | 0.51 |
+| 16 | 1.15 | 1.33 |
+| 32 | 2.42 | **3.11** |
+| 43 | **never, exact** | **never, exact** |
+| fit, r=4..32 | `0.0509·r^1.115` | `0.0435·r^1.226` |
+
+*\*not resolved — within 10% of the first measured horizon t=0.1*
+
+**Write it as:** *the advantage horizon is a power law in rank, `t* ≈ c·r^p` with `c ≈ 0.044–0.051` and `p ≈ 1.1–1.2` over `Re ∈ {1000, 5000}`, and the horizon **lengthens as Reynolds number falls** — 3% at r<=8, 28% at r=32.* That is a **stronger** claim than the one-point fit you had, and it is what turns a fitted curve into a law. The single number `t* ≈ 0.05·r^1.12` remains a fair summary **as the Re=5000 value** and should carry its Reynolds number.
+
+**Two things that are Reynolds-independent, and these are the ones your argument rests on — say them explicitly:**
+1. **The dealiasing ceiling never loses.** r=43 is `0.0000` at every horizon at both Reynolds numbers. *The only rank that never loses is the rank at which the method is the full-grid solver* does not depend on Re.
+2. **The static floor does not move with rank.** At t=0.1 the static baseline spans `0.3180 -> 0.3177` and `0.3178 -> 0.3176` across a **43-fold** rank range, at both Re.
+
+**And one finding that is a hypothesis, so do not write it as an explanation:** the horizon and the plateau move *together* — at t=8, r=32 is worse than static at both Re (`1.35x` at 5000, `2.14x` at 1000), so at low Re the crossover comes later AND the plateau is deeper. Less mixing at low Re would explain both, **but the project has not separated the causes**, so the honest move is to report the co-movement and say the mechanism is open.
+
+**Do not quote `t*` at r=2 as a resolved number** — it sits within 10% of the first measured horizon at both Re. The fit is over r=4..32, which is correct.
+
+The central figure is still held until coder reproduces both columns, but you can write the framing now. Everything else on your list is unchanged.

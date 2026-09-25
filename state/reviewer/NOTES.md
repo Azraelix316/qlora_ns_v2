@@ -30,6 +30,37 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R45 — is `t* ≈ 0.05·r^1.12` a LAW or a one-point fit? SUBSTANTIALLY A LAW, and I
+> found a provenance failure inside my own central result while checking.** R39 measured the
+> crossover at **one** Reynolds number, which is the first thing a reviewer asks. The
+> `Re=1000` trajectory was already cached, so this cost 12 minutes. **Before running anything I
+> checked that the R39 pipeline still reproduced R39's published `t*` — and it did NOT:
+> `r39_surface.py` dumps the two surfaces and nothing else, and the log-log interpolation from
+> surfaces to `t*` existed ONLY in the report's prose. The headline numbers of the paper's
+> central result were not derivable from the code that produced the data.** That is the R27
+> failure committed inside the artifact I built R44's rule about. I pinned the estimator as code
+> (`t*` = first crossing of `log(dlra/static_oracle)` through zero, log-log interpolated); applied
+> to the cached Re=5000 surfaces it reproduces R39's published values **exactly** —
+> `0.11/0.24/0.49/1.15/2.42` at every rank — and the fit to **`0.0509·r^1.115`** against the
+> published `0.050·r^1.12`. The control passed before the new measurement was trusted.
+> **THE RESULT: a 5× change in Reynolds number moves the prefactor 17% (`0.0509 → 0.0435`) and
+> the exponent 10% (`1.115 → 1.226`), and the horizon LENGTHENS as Re falls — 3% at `r ≤ 8`,
+> 28% at `r=32` (`t*=2.42 → 3.11`).** The exponent difference is REAL, not fit noise:
+> leave-one-out spreads `[1.106,1.146]` and `[1.201,1.302]` **do not overlap** — a check I would
+> not have done otherwise, because the headline conclusion is unaffected either way.
+> **The two structural facts do not drift with Re:** `r=43` is `0.0000` at every horizon at
+> both Reynolds numbers, so *"the only rank that never loses is the rank at which the method is
+> the full-grid solver"* is Reynolds-independent; and the static floor is rank-independent at
+> both (a **43-fold** rank range buys `0.3180→0.3177` and `0.3178→0.3176` at `t=0.1`).
+> **The horizon and the plateau move TOGETHER:** at `t=8`, `r=32` is worse than static at both
+> Re — `1.35×` at 5000 and **`2.14×`** at 1000 — so at low Re the crossover comes later AND the
+> plateau is deeper. **The mechanism is a hypothesis, not a result** (less mixing at low Re would
+> give both, but the causes are not separated) and CLAIMS.md says so. **One caveat now
+> load-bearing: `t*` at `r=2` is `0.11`, within 10% of the first measured horizon `t=0.1` at
+> both Re — so the lowest rank has NO measurable horizon.** R39's fit already excluded it
+> correctly; the paper must not quote `r=2` as resolved. **This is a BETTER result than a
+> one-point fit:** a law with a bounded, measured, one-sign dependence on a second parameter,
+> costing the paper one extra column.
 > **R44 — I audited `CLAIMS.md` before anyone could, and it was not clean: 29 numbers
 > verified exact, 1 real error, 1 of my own numbers struck.** I wrote that file in one pass
 > from my own 55 reports and pushed it unexamined — the same mistake I spend this project
@@ -1259,6 +1290,80 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R45 — `t*` measured at a second Reynolds number: the law survives with a
+  weak, characterisable dependence. And a provenance failure inside my own central result.**
+  R39 measured the crossover at **one** Reynolds number, which is the first thing a reviewer
+  asks. The `Re=1000` trajectory was already cached, so the cost was 12 minutes of compute.
+
+  **A provenance failure, found by running the control first.** I checked that the R39
+  pipeline still reproduced R39's published `t*`, and **it did not**: `r39_surface.py` dumps
+  the two surfaces and nothing else, and the log-log interpolation from surfaces to `t*`
+  **existed only in the report's prose**. The headline numbers of the paper's central result
+  were not derivable from the code that produced the data — **the R27 failure committed inside
+  the very artifact I built R44's rule about.** I pinned the estimator as code (`t*` is the
+  first crossing of `log(dlra / static_oracle)` through zero, log-log interpolated). Applied to
+  the cached Re=5000 surfaces it reproduces R39's published values **exactly** —
+  `0.11 / 0.24 / 0.49 / 1.15 / 2.42` at every rank — and the fit to **`0.0509 · r^1.115`**
+  against the published `0.050 · r^1.12`. The control passed before the new measurement was
+  trusted.
+
+  **The result.** Identical pipeline, `A=0.2`, `N=64`, ranks `{2,4,8,16,32,43}`, horizons
+  `{0.1,0.25,0.5,1,2,3,4,6,8}`, oracle-mean moving-window static baseline (`W=1.0`),
+  full-field relative L2. The decomposition helper validated against an independent
+  construction on the `Re=1000` cache, as on every run.
+
+  | rank | `t*` Re=5000 | `t*` Re=1000 | ratio |
+  |---|---|---|---|
+  | 2 | 0.11 | 0.11 | 1.03 |
+  | 4 | 0.24 | 0.25 | 1.03 |
+  | 8 | 0.49 | 0.51 | 1.03 |
+  | 16 | 1.15 | 1.33 | 1.16 |
+  | 32 | 2.42 | **3.11** | **1.28** |
+  | 43 | **never** | **never** | — |
+  | fit `r=4…32` | `0.0509 · r^1.115` | `0.0435 · r^1.226` | |
+
+  **The exponent difference is real, not fit noise.** Four points spanning a factor of 8 in `r`
+  is a thin basis for an exponent, so I checked with **leave-one-out**: Re=5000 gives
+  `p = 1.115` with spread `[1.106, 1.146]`, Re=1000 gives `p = 1.226` with spread
+  `[1.201, 1.302]`, and **the two spreads do not overlap.** I would not have known that without
+  the check, because the headline conclusion is unaffected either way — which is exactly why it
+  was worth doing.
+
+  **So: a 5× change in Reynolds number moves the prefactor 17% and the exponent 10%, and the
+  horizon lengthens as `Re` falls — 3% at `r ≤ 8`, 28% at `r=32`.** `t* ≈ 0.05 · r^1.12`
+  remains a fair single-number summary *as the Re=5000 value*, but it understates the Re=1000
+  horizon by up to 28% at `r=32`, so it must carry its Reynolds number. **This is a better
+  result than a one-point fit**: a law with a bounded, measured, one-sign dependence on a
+  second parameter, and the cost to the paper is one extra column.
+
+  **The two structural facts do not drift with Reynolds number, and they matter more than the
+  fit** because the paper's argument rests on them. **(1)** `r=43` is `0.0000` at every horizon
+  from `t=0.1` to `t=8` at **both** Reynolds numbers, so `t* = ∞` at both — *"the only rank
+  that never loses is the rank at which the method is the full-grid solver"* is
+  Reynolds-independent. **(2)** The static floor does not move with rank at either: at `t=0.1`
+  the oracle baseline spans `0.3180 → 0.3177` (Re=5000) and `0.3178 → 0.3176` (Re=1000) across
+  a **43-fold** rank range.
+
+  **The horizon and the plateau move together.** At `t=8`, `r=32` is **worse** than the static
+  baseline at both Reynolds numbers — `1.35×` at Re=5000 and **`2.14×`** at Re=1000 — so at low
+  Reynolds the crossover comes *later* **and** the plateau is *deeper*. **The mechanism is a
+  hypothesis and not a result**: less mixing at low `Re` would give both, but the project has
+  not separated the causes, and CLAIMS.md now says exactly that so nobody upgrades it into an
+  explanation.
+
+  **One caveat now load-bearing.** `t*` at `r=2` is `0.11`, within 10% of the first measured
+  horizon `t=0.1` at **both** Reynolds numbers — so the lowest rank has **no measurable**
+  advantage horizon, and `0.11` is the interpolation's edge rather than a resolved quantity.
+  R39's fit was over `r=4…32` and already excluded it correctly; the paper must not quote
+  `t*` at `r=2` as though it were resolved.
+
+  **What is still missing: this is the reviewer's second Reynolds number, not the project's.**
+  Coder reproducing R39 must reproduce **both** columns, and `run_crossover.py` must take `Re`
+  as a parameter rather than being pinned to 5000 — otherwise the reproduction can only check
+  half the result. Surfaces at `/tmp/opencode/r39_surface.json` (Re=5000) and
+  `/tmp/opencode/r45_surface_Re1000.json` (Re=1000); the pinned estimator is appended to
+  `/tmp/opencode/r45_re1000.py` and reproduces R39's published values exactly, so coder can
+  adopt it rather than re-deriving it.
 - 2026-09-25 **R44 — I audited `CLAIMS.md` before anyone else could, and it was not clean:
   29 numbers verified exact, 1 real error, 1 of my own numbers struck.**
   I wrote `CLAIMS.md` in one pass from my own 55 reports and pushed it unexamined — the same

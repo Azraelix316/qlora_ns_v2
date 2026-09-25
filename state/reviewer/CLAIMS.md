@@ -27,17 +27,32 @@ recorded here and the earlier figure is struck, not quietly dropped.
 ### 1.1 The advantage horizon is a power law in rank
 
 > A rank-`r` reduced integrator integrated with a **fixed** rank beats a static subspace of
-> the same rank for **`t* ≈ 0.050 · r^1.12`** time units, and the only rank that never
-> loses is the dealiasing ceiling, where it is the full-grid solver.
+> the same rank for **`t* ≈ c · r^p` time units**, with **`c ≈ 0.044–0.051` and
+> `p ≈ 1.1–1.2` over `Re ∈ {1000, 5000}`**, and the only rank that never loses is the
+> dealiasing ceiling, where it is the full-grid solver.
 
 | rank | 2 | 4 | 8 | 16 | 32 | 43 |
 |---|---|---|---|---|---|---|
-| `t*` | 0.11 | 0.24 | 0.49 | 1.15 | 2.42 | **never (exact)** |
+| `t*` at `Re=5000` | 0.11 | 0.24 | 0.49 | 1.15 | 2.42 | **never (exact)** |
+| `t*` at `Re=1000` | 0.11 | 0.25 | 0.51 | 1.33 | **3.11** | **never (exact)** |
+| fit | — | \multicolumn{5}{c}{`0.0509 · r^1.115` (`Re=5000`)} \multicolumn{2}{c}{`0.0435 · r^1.226` (`Re=1000`)} | — |
 
-Source: R39, reviewer's reference version, `N=64`, `Re=5000`, `A=0.2`, full-field relative
-L2 against the full-grid reference, oracle-mean static baseline.
-**Not yet reproduced by project code** — `run_crossover.py` exists; the figure is held until
-it lands.
+**A 5× change in Reynolds number moves the prefactor 17% and the exponent 10%, and the
+exponent difference is real** (leave-one-out spreads `[1.106,1.146]` and `[1.201,1.302]` do
+not overlap). **The horizon lengthens as `Re` falls** — 3% at `r ≤ 8`, 28% at `r=32`.
+`Re=5000`: `N=64`, `A=0.2`, full-field relative L2 against the full-grid reference, oracle-mean
+moving-window static baseline (`W=1.0`). `t*` is the first crossing of
+`log(dlra / static_oracle)` through zero, log-log interpolated — **that estimator is now
+pinned as code and reproduces R39's published values exactly**, because it previously existed
+only in report prose (R45). Sources: R39, R45.
+
+**`t*` at `r=2` is not resolved.** `0.11` sits within 10% of the first measured horizon
+`t=0.1` at both Reynolds numbers, so the lowest rank has no *measurable* horizon. The fit is
+over `r=4…32` and correctly excludes it. **Do not quote `t*` at `r=2` as if it were resolved.**
+
+**`Re=1000` is the reviewer's second measurement, not the project's.** Coder reproducing R39
+must reproduce **both** columns, and `run_crossover.py` must take `Re` as a parameter rather
+than being pinned to 5000 — otherwise the reproduction can only check half the result.
 
 ### 1.2 Why the law is clean
 
@@ -53,6 +68,23 @@ is enriched over the field's own mass by `0.86 / 4.6 / 11.1 / 20.6 / 110.6` at
 **NOT the mean.** Giving the static method the current zonal mean improves it by
 `0.002–0.027` against a `0.22–0.43` error; the mean drift is only `0.038–0.116`. The
 mean-tracking explanation was **retracted (R37)** and must not reappear.
+
+### 1.3 The two structural facts, which do not drift with `Re`
+
+These matter more than the fit, because the paper's argument rests on them:
+
+1. **The dealiasing ceiling never loses.** `r=43` is `0.0000` at every horizon from `t=0.1` to
+   `t=8` at **both** Reynolds numbers, so `t* = ∞` at both. *"The only rank that never loses is
+   the rank at which the method is the full-grid solver"* is Reynolds-independent.
+2. **The static floor does not move with rank.** At `t=0.1` the oracle baseline spans
+   `0.3180 → 0.3177` (`Re=5000`) and `0.3178 → 0.3176` (`Re=1000`) across a **43-fold** rank
+   range. Source: R45.
+
+**And the horizon and the plateau move together.** At `t=8`, `r=32` is **worse** than the static
+baseline at both Reynolds numbers — `1.35×` at Re=5000 and **`2.14×`** at Re=1000 — so at low
+Reynolds the crossover comes *later* **and** the plateau is *deeper*. **The mechanism is a
+hypothesis, not a result** (less mixing at low `Re` would give both, but the project has not
+separated the causes). Do not write it as an explanation.
 
 ---
 
@@ -93,6 +125,15 @@ do not write that it grows without limit. Source: R29.
 | SVD share of the DLRA step | `43–48%` | R41 |
 | content-independence | ratios `0.94–1.03` | R42 |
 | **the trade** | **`r=2 → r=32`: +4.4% per step, 22× the horizon. `r=43`: +6.6% vs `r=2`, exact forever** | R39+R41 |
+
+The trade with the horizon, now at both measured Reynolds numbers:
+
+| rank | cost vs full grid | `t*` at `Re=5000` | `t*` at `Re=1000` |
+|---|---|---|---|
+| 2 | **1.82×** | 0.11 — *not resolved* | 0.11 — *not resolved* |
+| 8 | **1.86×** | 0.49 | 0.51 |
+| 32 | **1.90×** | 2.42 | **3.11** |
+| 43 / 64 | **1.94–2.07×** | **exact at every horizon** | **exact at every horizon** |
 
 **The sentence to write:** *rank is nearly free, because per-step cost is dominated by a
 rank-independent factorization; what limits the method is the dynamics, not the budget.*
@@ -192,7 +233,8 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 Everything below is measured, and none of it requires retracting a number:
 
 1. **A reduced integrator's accuracy advantage over a static subspace is a power law in
-   rank** — `t* ≈ 0.050 · r^1.12` — with a cost that is nearly rank-independent, so rank buys
+   rank** — `t* ≈ c · r^p`, `c ≈ 0.044–0.051`, `p ≈ 1.1–1.2` over `Re ∈ {1000, 5000}`, horizon
+   lengthening as `Re` falls — with a cost that is nearly rank-independent, so rank buys
    horizon rather than speed: `+4.4%` per step buys `22×` the horizon.
 2. **The limit is structural, not numerical.** A static subspace cannot track a flow whose
    support moves, and its error floor is rank-independent; a refitting integrator can, until
