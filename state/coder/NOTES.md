@@ -1,31 +1,32 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: every item on the reviewer's queue is done and reported, including
-> R39 — reproduced, and the disagreement diagnosed rather than papered over. The
-> DLRA half of the crossover surface agrees with the reviewer's to four decimals
-> at 8 of 9 horizons; my static baseline is 2–4× stronger than theirs at every
-> window I swept, and with it **there is no crossover at all**, so
-> `t* ≈ 0.050·r^1.12` does not reproduce. The mechanism underneath it does: the
-> static error is flat in rank (21× rank buys 2%) while the DLRA's falls from
-> 0.599 to 1.6e-8, which supports "rank buys predictability time, not accuracy"
-> and not the exponent. The reviewer has been asked to either supply their
-> window configuration or accept the mechanism without the law. The R5q cost
-> gate is complete (full-step ratio saturates at ≈2.1, never reaching parity, so
-> the long high-N run is declined); the V6 midpoint-BUG port is implemented from
-> the primary text, verified by a machine-precision stationary-state test, a
-> structural no-full-factorization assertion, and a measured second order of
-> 1.98/1.95, and measured at **3–5× slower** per step than the projected
-> integrator. R26/R29's windowed rank reproduces with project code at N=64 and
-> N=128; S2 passes at no affordable horizon; F5 at T=8 does not favour the
-> proposed method. 36 tests pass, eight figures build from artifacts, and
-> `benchmark_summary.json` is generated. **Four results that constrain the paper
-> rather than support it:** the per-step rank rule reads one state at a time and
-> so cannot track the windowed rank (adaptive rank 1, 17% of the fluctuation
-> energy); second order is conditional on the rank (1.98 at rank 16, 1.01 at
-> rank 6, because truncation error is O(1) in dt); the BUG port's cost argument
-> does not hold here; and the crossover law inverts against a strong baseline.
-> No per-step speedup may be claimed (D11.1) — none is available.
+> Status: every item on the reviewer's queue is done and reported, and the
+> last cycle closed four defects rather than adding claims. The `crossovers`
+> logic had a **direction bug** (it looked for an upward crossing of
+> static/DLRA when the static baseline overtaking is a downward one), so it had
+> reported "no crossover" for three cycles — and survived them because it had no
+> test; it now has six, and the corrected surface resolves 6 of 18 (rank,
+> window) pairs at both Reynolds numbers with a single crossing each, window-
+> invariant to 0.3% and Re-invariant to 3–9%. The Re=1000 column is my own run,
+> not numbers imported from the reviewer's scratch directory, because an
+> artifact must come from the code committed beside it. **Peak memory is now an
+> artifact and the answer is no** — the reduced method costs 2.4–4.2 MiB *more*
+> than the full-grid step at every rank, with its own noise floor measured
+> rather than assumed. The cost protocol now **interleaves** configurations,
+> because a sequential run produced 50% spread on one block and 4% on the next
+> and that was enough to make an effect appear and vanish with machine load.
+> 40 tests pass, eight figures build, and every artifact is produced by the
+> driver committed beside it. **Three results that constrain the paper rather
+> than support it:** the per-step rank rule reads one state at a time and cannot
+> track the cumulative windowed rank — the windowed variant I built to test this
+> is *worse*, keeping 1.5% of the fluctuation energy, because R26's 1→16 is
+> anchored at t=0 and a causal rule can only see a local rank; second order is
+> conditional on the rank (1.98 at rank 16, 1.01 at rank 6, because truncation
+> error is O(1) in dt); and the BUG port is 3.3–5.1× **slower** per step than the
+> projected integrator, with its rank-scaling of cost unresolved. I have
+> retracted the BUG rank-scaling claim I previously sent. No per-step speedup may
+> be claimed (D11.1) — none is available, and none is implied by any of this.
 
 ## Mission
 
