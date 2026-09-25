@@ -26,7 +26,12 @@
 > "first exactly divergence-free NS solver" is barred; `docs/structure/` draft
 > HOLD (gap statement refutable by our own closest citation; the split does not
 > "enforce" div-free — the ψ state does); standing CHECKLIST extended with the
-> R5-derived gates so the next review is mechanical.
+> R5-derived gates so the next review is mechanical. R5c: **V6 answered** —
+> SPDLRA/BUG integrators already exist (2402.08607, 2104.05247, 2608.27749), so
+> D10-V6 is a port not a research question, and the novelty claim sharpens to
+> "SPDLRA applied to incompressible NS for the first time"; premise check on the
+> committed long run supports rank ≫ 3 and slow singular-value decay
+> (σ₃₂/σ₁ ≈ 1.5e-3) with rank *dynamics* still pending stationarity.
 
 ## Mission
 
@@ -74,6 +79,43 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5c (reviewer homework, again no dependency on pending fixes):
+  **V6 answered — SPDLRA is standard execution, not a moonshot.** Searched the
+  literature (arXiv all-fields; abs pages read directly) and found the method
+  family our engine is a naive member of: **BUG (basis-update & Galerkin)
+  integrators** — arXiv:2402.08607 (Ceruti, Einkemmer, Kusch & Lubich, robust
+  second-order BUG via the midpoint rule, i.e. the rule we already use),
+  arXiv:2104.05247 (Ceruti, Kusch & Lubich, rank-adaptive robust integrator:
+  update bases, Galerkin in the span of old+new bases, truncate to tolerance),
+  arXiv:2608.27749 (Hauck, Kusch & Schotthöfer, high-order robust BUG, Aug
+  2026). Consequence: D10-V6 is a **port**, not a research question — replace
+  the per-step full SVD with QR/CholeskyQR basis update + Galerkin projection +
+  tolerance truncation, factorisation kept in Fourier space. This likely fixes
+  the cost, accuracy and structure objections together, and is recorded as the
+  decision with honest-reframing as the fallback if blocked. **This also
+  sharpens the novelty claim**: SPDLRA is established for Hamiltonian
+  (2007.13153, 2008.07427, 2308.16547), Vlasov–Poisson (2608.00397), elastic
+  waves (2606.30469) and kinetics (review 2412.05912) but for **nothing** in
+  incompressible NS — so the contribution is "first application of SPDLRA to
+  incompressible NS, with exact divergence-freeness by representation, validated
+  on resolved high-Re turbulence with adaptive rank", which is a far better
+  position than the divergence-free framing. Gated on V6 being implemented.
+  **Premise check on the committed long run** (AGENTS.md's "rank ≫ 3, slow
+  singular-value decay, adaptive rank growth"): two of three hold. Rank 2→40 by
+  step 50, 42 by 100, plateau 43, never touching the `max_rank=48` cap, so the
+  growth is a real measurement. Slow decay quantified from the *untruncated*
+  full-grid spectrum at step 2000: σ₃₂/σ₁ = 1.5e-3, σ₁₀/σ₁ = 3.2e-2 (<3 decades
+  over 32 modes). "Adaptive rank *dynamics*" is not yet shown — the rank jumps
+  and plateaus, which is the T≤1 transient, not the rank logic (D10-V2). Side
+  finding: the full-grid IC spectrum has σ₂₀ ≈ 2e-17, i.e. the IC is
+  numerically rank ≈19 (a field band-limited to |k|≤8 has matrix rank ≤17 by
+  construction, plus the rank-1 shear) — so the IC is genuinely low-rank and
+  the rank-2/65%-energy-loss start is a harness choice, which sharpens V1. The
+  DLRA's own spectrum decays *faster* than the reference (σ₃₂ = 3.2e-4 vs
+  1.5e-3), consistent with the projection discarding real content. **Reviewer
+  note to self:** I should have run this search before writing the R5 V6 message
+  — I framed a settled question as an open choice and cost the agents a round
+  trip. Recorded so R6 does not repeat it.
 - 2026-09-25 R5b (reviewer-initiated, no dependency on the pending fixes):
   **D4 novelty claim narrowed.** Re-ran the novelty check independently (arXiv
   all-fields, 7 queries, strings persisted in the report). Confirmed there is
