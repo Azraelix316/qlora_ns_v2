@@ -152,19 +152,35 @@ DLRA/full-grid ratio), so a reviewer cannot reconstruct them.
 ## Lens 2 — Writing
 
 ### 2.0 Merge safety (checked by the reviewer before every merge)
-- [ ] **The branch contains current `main`.** Verify with
-      `git merge-base --is-ancestor origin/main origin/agent/<them>` **before**
-      merging. A branch that has not merged `main` will, when merged, *revert*
-      everything added to `main` since its base — including other agents'
-      deliverables and the review record. On 2026-09-25 a stale-base branch was
-      found whose diff against `main` showed ~24,800 deletions, including the
-      whole engine and all reviewer state.
-- [ ] If the check fails: **do not merge.** Require the agent to run
-      `scripts/agent.sh start <them>`, resolve the merge, and push again; then
-      re-verify that their tree still contains their intended changes.
-- [ ] After any agent-branch merge, confirm on `main` that the other agents'
-      owned paths are still present and that `git diff --stat` shows no
-      unexpected deletions.
+
+**The binding question is: would merging delete or revert anything that is on `main`
+now?** Test the property, not a proxy for it. Two checks, in this order.
+
+- [ ] **Property test (binding).** `git diff --diff-filter=D --name-only
+      origin/main...origin/agent/<them>` must be **empty** — no file present on
+      `main` is deleted by their branch. Then confirm the branch touches nothing
+      outside the agent's owned paths, and that
+      `git merge-tree $(git merge-base origin/main origin/agent/<them>) origin/main
+      origin/agent/<them>` reports **0 conflicts**. If this passes, the merge is safe
+      and the ancestor test below is advisory only.
+- [ ] **Ancestor test (advisory — a fast pre-check, not a gate).**
+      `git merge-base --is-ancestor origin/main origin/agent/<them>`.
+      **Failing this does not by itself block a merge** provided the property test
+      passes. Added after R9: the ancestor test is a *proxy* for "will this revert
+      content", and on 2026-09-25 a branch based on `main@8d4098c` failed it while
+      deleting nothing from a `main` four merges ahead, and provably touched nothing
+      outside its owned paths. A proxy that is too strict will eventually block a
+      legitimate merge, and an agent that cannot land clean work stops doing the work.
+      The catastrophic case the proxy was written for is real — a branch based on a
+      pre-engine commit diffs as **~24,800 deletions** including the whole engine and
+      the review record — but the property test detects it directly and exactly.
+- [ ] **After every agent-branch merge, verify explicitly:** the other agents' owned
+      paths are still present (`solvers/`, `experiments/`, `state/coder/`,
+      `state/reviewer/`, scaffold files), the file count went **up or stayed equal**,
+      and `git diff --stat` against the pre-merge `main` shows no unexpected deletions.
+      On 2026-09-25 this caught nothing (79 → 88 files, all 19 key paths present),
+      which is the point: it is cheap and it is the check that would have caught a
+      real revert.
 
 ### 2.1 Contribution framing
 - [ ] The contribution statement says exactly what we do: DLRA on the

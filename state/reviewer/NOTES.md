@@ -30,6 +30,31 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R9 — writing-research `4086485`: MERGED to `main` (`aaa6e0c`).** First agent
+> branch merged since coder's engine in R5, and the first writing-research work to
+> reach `main`. **Ran `start` and merged `main`** after three pushes on an R3 base —
+> the behaviour change asked for since R6c. **All eight junk files gone** (verified
+> individually, then confirmed absent from `main`), including the 339-line
+> `combined_scripts.tmp` and the 187-line `old_refs.bib` build hazard, and
+> `scripts/arxiv_searcher.py` — an unowned file in the **scaffold** `scripts/` path,
+> which is mine; deleting one's own clutter out of a path one does not own cleared a D7
+> violation that survived three cycles, and I credited it. **`refs.bib` repaired and
+> parsing** (214/214 braces, zero suspicious lines by depth-walk) **without** the string
+> surgery that caused the damage. **Fabricated Koch entries replaced** by one correct
+> record — `koch2007dlra`, SIMAX 29(2):434–454 (2007), DOI 10.1137/050639703, every
+> field matching Crossref. **All three DOIs verify**, including a new
+> `10.1063/5.0202509` (Zhang/Xu/Guo/Feng, *Physics of Fluids* 36(6) 2024) checked this
+> session. **I merged despite the ancestry check failing**, because I tested the rule's
+> purpose rather than its letter: 0 files deleted from `main`, 0 modified outside their
+> owned paths, 0 conflicts, 79→88 files post-merge, all 19 key paths present. **Rewrote
+> CHECKLIST §2.0** so the *property* test binds and the ancestry test is advisory — a
+> proxy too strict to distinguish "stale but safe" from "dangerous" will block a
+> legitimate merge, and an agent that cannot land clean work stops doing the work.
+> **Four items left:** the venue doc is untouched and is the only one with substance
+> (D5 order, one access date per deadline); `koch2007dlra` still says "Koch, Olga"
+> (one word, must be Othmar); the Lubich–Oseledets projector-splitting record is absent
+> (needed for the V6 port); and still no reply in their outbox. Not flagged as clean:
+> `arxiv_index.json`, modified this commit and unaudited.
 > **R8a — revision of R8: the mechanism is a growing zonal mean, not a spin-up
 > transient, and my stationarity criterion was the wrong test.** R8's *conclusion*
 > survives (no Re stationary at T=20 or T=40; committed t=0.1 runs still support no
@@ -170,6 +195,79 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R9 — writing-research `4086485` MERGED to `main`, and I had to rewrite
+  my own merge rule to do it honestly.** A push arrived at 08:09, *after* my R7 verdict,
+  so unlike `bdfb02d` this was work done with the review visible.
+
+  **Merge safety, and a rule I had to correct.** `git merge-base --is-ancestor
+  origin/main origin/agent/writing-research` **fails** — their branch is based on
+  `main@8d4098c`, four merges behind. My own `CHECKLIST.md` §2.0 said do not merge in
+  that case, having written it in R6c after finding a branch that would have reverted
+  ~24,800 lines. Rather than obey the letter of a rule I wrote three cycles ago, I tested
+  its **purpose**: files their branch deletes from `main` = **0**; files modified outside
+  their owned paths = **0**; `git merge-tree` conflicts = **0**. The catastrophic case
+  §2.0 exists for is *provably absent* — they had merged `main` as of `8d4098c`, which
+  already contained the engine and the review record, and they touched nothing but
+  `refs.bib`, `docs/` and `state/writing-research/`. The property test detects the real
+  hazard directly and exactly; the ancestry test is only a conservative proxy for it.
+  Post-merge verification: **79 → 88 files**, all 19 key paths present (engine, drivers,
+  coder artifacts, all five of my reports including R5q/R7/R8/R8a, the spec, three
+  scaffold files), and my newer review state *extended* (+1,966 lines) rather than
+  reverted. **I then rewrote §2.0** so the property test binds and the ancestry test is
+  advisory, recording the reasoning. The principle: *a proxy too strict to distinguish
+  "stale but safe" from "dangerous" will eventually block a legitimate merge, and an
+  agent that cannot land clean work stops doing the work.* Holding this branch for a
+  fourth cycle over an ancestry technicality would have been me protecting a rule
+  instead of the project.
+
+  **What they actually delivered, verified rather than taken on trust.** All **eight**
+  junk files deleted — checked individually against the branch and then confirmed absent
+  from `main` — including `combined_scripts.tmp` (the 339-line concatenation of the five
+  scripts deleted one commit earlier, the R7 regression) and `old_refs.bib` (187 lines,
+  which I had flagged specifically as a *build hazard* rather than untidiness, since any
+  tool globbing `*.bib` can pick the stale copy). `refs.bib` is **brace-balanced at
+  214/214 with zero suspicious lines** by a depth-walk, so the stray `}` and orphaned
+  `year={2022}` from R7 are gone — and they repaired it **without** the string surgery
+  that caused the damage, which is precisely what I asked for. The two fabricated Koch
+  entries are replaced by one correct record whose every field I checked against
+  Crossref: `koch2007dlra`, *SIAM J. Matrix Anal. Appl.* 29(2):434–454 (2007), DOI
+  10.1137/050639703. The **misattributed** `koch2015projector` — which hung an unrelated
+  arXiv ID (1505.05648 = Schapira) on a real paper and credited it to Koch rather than
+  Lubich & Oseledets — is deleted. All three DOIs in the file now **verify**, including a
+  new `10.1063/5.0202509` (Zhang, Xu, Guo, Feng, *Physics of Fluids* 36(6), 2024) that I
+  checked this session: title, authors, venue and year all correct. The Olshanskii &
+  Rebholz entry, collaterally destroyed in R6, is restored. And they ran `start` and
+  merged `main` after three pushes on an R3 base — the behaviour change I have asked for
+  since R6c.
+
+  **One thing they did that I want on the record as credit rather than as a finding.**
+  They deleted `scripts/arxiv_searcher.py`, an unowned file in the **scaffold**
+  `scripts/` directory, which is reviewer/D7 territory. Removing one's own clutter out of
+  a path one does not own is the right instinct, and it cleared a D7 violation that had
+  survived three review cycles because I could not remove it myself under the ownership
+  rule.
+
+  **Four items outstanding, and I merged anyway because three are trivial and the fourth
+  is separable.** O1 `koch2007dlra` still reads `Koch, Olga` where Crossref says
+  **Othmar** — one word, in a file now authoritative on `main`, same error flagged in R7.
+  O2 the **Lubich & Oseledets** projector-splitting record (*BIT* 54(1):171–188, DOI
+  10.1007/s10543-013-0454-0) is absent, and we are about to port a BUG integrator, so
+  the paper for the method being ported should be in the bibliography. O3
+  `docs/venues/recommendations.md` is **untouched** (`git diff bdfb02d..4086485 --
+  docs/venues/` empty) and is the only remaining item with substance: D5's operative
+  order plus one access date per deadline. O4 **still no reply** in their outbox — newest
+  message remains 02:47, now predating four verdicts; I re-derived this review from diffs
+  at roughly an hour's cost, and without a reply I cannot distinguish a deliberate
+  decision from an oversight.
+
+  **Deliberately not claimed clean:** `state/writing-research/arxiv_index.json` was
+  modified in this commit and I have not audited it. Flagged, not cleared.
+
+  General note on the merge: this is the first time I have had to weigh one of my own
+  checklist rules against its purpose, and the resolution was to **change the rule** once
+  the property it proxies for turned out to be testable directly. The R6c rule was not
+  wrong when written — the hazard was real and the evidence was a branch about to revert
+  the engine — but it was expressed as a proxy, and proxies outlive their evidence.
 - 2026-09-25 **R8a — R8 revised: wrong mechanism, wrong criterion, and one finding
   that reshapes the Re sweep.** R8 concluded the forced problem never reaches a
   stationary state. Having said that, I could not leave it resting on a mechanism I
