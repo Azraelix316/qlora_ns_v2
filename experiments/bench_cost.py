@@ -284,27 +284,35 @@ def main() -> None:
     rank_independence = []
     for entry in grids:
         by_rank = {row["rank"]: row for row in entry["rows"]}
-        if set(by_rank) >= {2, 64}:
-            lo = by_rank[2]["full_step_seconds_median"]
-            hi = by_rank[64]["full_step_seconds_median"]
-            lo_la = by_rank[2]["linear_algebra_seconds_median"]
-            hi_la = by_rank[64]["linear_algebra_seconds_median"]
-            row = {
-                "N": entry["N"],
-                "full_step_ratio_r64_over_r2": hi / lo,
-                "linear_algebra_ratio_r64_over_r2": hi_la / lo_la,
-                "within_1p25": bool(hi / lo <= 1.25 and hi_la / lo_la <= 1.25),
-            }
-            # The port's claim is the opposite one: its cost should *scale* with
-            # the rank, because that is what the O(N r^2) factor work means.
-            if "bug" in by_rank[2] and "bug" in by_rank[64]:
-                b_lo = by_rank[2]["bug"]["full_step_seconds_median"]
-                b_hi = by_rank[64]["bug"]["full_step_seconds_median"]
-                row["bug_full_step_ratio_r64_over_r2"] = b_hi / b_lo
-                row["bug_rank_dependent"] = bool(b_hi / b_lo > 1.25)
-                row["bug_speedup_r2"] = by_rank[2]["bug"]["speedup_over_projected_same_rank"]
-                row["bug_speedup_r64"] = by_rank[64]["bug"]["speedup_over_projected_same_rank"]
-            rank_independence.append(row)
+        # Compare the two ranks actually requested.  Hard-coding {2, 64} made
+        # this section come out empty for any other ladder, which is a silently
+        # missing result rather than a reported one.
+        present = sorted(by_rank)
+        if len(present) < 2:
+            continue
+        lo_rank, hi_rank = present[0], present[-1]
+        lo = by_rank[lo_rank]["full_step_seconds_median"]
+        hi = by_rank[hi_rank]["full_step_seconds_median"]
+        lo_la = by_rank[lo_rank]["linear_algebra_seconds_median"]
+        hi_la = by_rank[hi_rank]["linear_algebra_seconds_median"]
+        row = {
+            "N": entry["N"],
+            "ranks_compared": [lo_rank, hi_rank],
+            "full_step_ratio_hi_over_lo": hi / lo,
+            "linear_algebra_ratio_hi_over_lo": hi_la / lo_la,
+            "within_1p25": bool(hi / lo <= 1.25 and hi_la / lo_la <= 1.25),
+        }
+        # The port's claim is the opposite one: its cost should *scale* with the
+        # rank, because that is what the O(N r^2) factor work means, while the
+        # projected integrator's does not.
+        if "bug" in by_rank[lo_rank] and "bug" in by_rank[hi_rank]:
+            b_lo = by_rank[lo_rank]["bug"]["full_step_seconds_median"]
+            b_hi = by_rank[hi_rank]["bug"]["full_step_seconds_median"]
+            row["bug_full_step_ratio_hi_over_lo"] = b_hi / b_lo
+            row["bug_rank_dependent"] = bool(b_hi / b_lo > 1.25)
+            row["bug_speedup_lo"] = by_rank[lo_rank]["bug"]["speedup_over_projected_same_rank"]
+            row["bug_speedup_hi"] = by_rank[hi_rank]["bug"]["speedup_over_projected_same_rank"]
+        rank_independence.append(row)
 
     output = {
         "case": "cost_retiming",
