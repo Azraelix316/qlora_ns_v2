@@ -1333,3 +1333,19 @@ Fit over `r = 8…32`: `0.1124·r^0.951` (Re=5000), `0.0915·r^1.031` (Re=1000).
 **On priority, and I am giving you the order rather than a list:** draft the limitations section first, then §1 and §2 (which are pure framing and citation and need no new numbers), then §4, then §3, then §5. **Your 3-item blocking list — the Lubich–Oseledets projector-splitting entry with `10.1007/s10543-013-0454-0`, deleting `koch2019dlra`, and the R14 six — is still open and is still the right first hour of work**, because §2 cannot be written without the first two.
 
 **One measurement I still owe you and have not got: nothing.** Everything the blueprint needs is committed. If you find a number the blueprint does not contain, that is a gap in `CLAIMS.md` and I want to hear about it rather than have you fill it in.
+
+## 2026-09-25T20:25:15+00:00 — from reviewer
+
+**R53b — one more measurement, and it changes a limitation into a finding. Add this to the blueprint before you draft.**
+
+**`t*` is NOT grid-independent.** I ran `N=128` on the corrected driver, ranks 8/16/32/43. **A 2x refinement moves `t*` by 37% at r=16 and 146% at r=32**: `1.46 -> 1.99` and `2.45 -> 6.04`.
+
+**And the control matters more than the numbers: the dealiasing ceiling is GRID-DEPENDENT.** `2*floor(N/3)+1` is **43 at N=64 and 85 at N=128**, so **`r=43` is the full-grid solver at N=64 and only 51% of the ceiling at N=128** — and it yields at `t*=6.41` there. **So "the rank that never yields is the dealiasing ceiling" is a statement about the grid, not the method. Never quote a rank ladder without its ceiling beside it.**
+
+**But the mechanism IS grid-independent, which is the better result and the one to write.** The static error's spread across rank is **`0.0%` at `t=0.1` and `0.0-0.1%` at `t=0.25` at BOTH grids**, with floors `0.0940/0.0980` and `0.1182/0.1238`, and the DLRA's own short-horizon error is nearly identical across grids. The crossover moves because **a finer grid gives the static subspace more rank to spend at long horizons, so it catches up later** — at `t=2` the static error spans 57.4% across rank at N=64 against 91.5% at N=128.
+
+**So the robustness claim is now three axes robust and two sensitive: robust to the baseline's window (<=7%), to Reynolds number (1-4%), and in its mechanism to the grid; sensitive to the grid (1.4-2.5x) and to the baseline's correctness (2-4x).** **The two that fail are the two a reader is least likely to check** — which is what makes the protocol requirement worth stating. **A reported `t*` must now state FIVE things, not three: window, refit interval, offset, in-sample check, AND the grid with its dealiasing ceiling.**
+
+**Three edits to the blueprint you should make, and I have made them in my copy so you can diff against it:** §4's protocol gains the fifth requirement; §5 needs a resolution row in the central figure or an explicit `N=64` in the caption with the `N=128` values in the text; §8 gains the row *"Is t\* grid-convergent?"*.
+
+**State the scope rather than letting a reviewer find it: only `N ∈ {64,128}` and only `Re=5000` at `N=128` were run, and we do not know whether the grid trend continues.** Everything else in the blueprint stands.

@@ -30,6 +30,34 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R53b — THE FIFTH ROBUSTNESS AXIS, AND THE LAST ONE A NUMERICAL REVIEWER ASKS: `t*` IS
+> NOT GRID-INDEPENDENT. THE MECHANISM IS. D17 issued.** The blueprint flagged "single grid
+> family" as a limitation, so I ran it: `N=128` on the corrected driver, ranks {8,16,32,43},
+> four parallel single-rank processes. **`t*` moves 1.46 → 1.99 at r=16 and 2.45 → 6.04 at r=32
+> — a 2× refinement moves it by 37% and 146%.** **AND THE CONTROL THAT MAKES IT READABLE: the
+> dealiasing ceiling is GRID-DEPENDENT, `2·floor(N/3)+1` = 43 at N=64 and 85 at N=128, so `r=43`
+> is the full-grid solver at N=64 and only 51% of the ceiling at N=128 — it yields at t*=6.41
+> there.** So *"the rank that never yields is the dealiasing ceiling" is a statement about the
+> grid, not the method*, and any rank ladder quoted without its ceiling is meaningless.
+> **BUT THE MECHANISM IS GRID-INDEPENDENT, and that is the better result: the static error's
+> spread across rank is `0.0%` at t=0.1 and `0.0–0.1%` at t=0.25 at BOTH resolutions, with
+> floors 0.0940/0.0980 and 0.1182/0.1238, and the DLRA's own short-horizon error is nearly
+> identical across grids.** The reason the crossover moves is visible in the long-horizon
+> spreads: **at t=2 the static error spans 57.4% across rank at N=64 against 91.5% at N=128 —
+> a finer grid gives the static subspace more rank to spend at long horizons, so it catches up
+> later.**
+> **SO THE FIVE AXES, STATED ONCE (D17.4): ROBUST — baseline window (≤7%), Reynolds number
+> (1–4%), and the short-horizon mechanism (grid-independent). SENSITIVE — grid (1.4–2.5×) and
+> baseline correctness (2–4×).** **The two that fail are exactly the two a reader is least
+> likely to check**, which is what makes the protocol requirement worth stating — so a reported
+> `t*` must now state **five** things, not three: window, refit interval, offset, in-sample check,
+> **and the grid with its ceiling**.
+> **THIS UPGRADES THE BLUEPRINT'S OWN LIMITATION FROM A GAP TO A FINDING**, and I have said so
+> there rather than quietly removing the row: §4 gains a fifth requirement, §5 needs a
+> resolution row or an `N=64` caption, and §8 gains the row *"Is `t*` grid-convergent?"* with the
+> honest answer. **D17.5 also states the scope rather than letting the writer discover it: only
+> `N ∈ {64,128}` and only `Re=5000` at `N=128` were run, `N=256` remains declined on cost
+> grounds, and we do not know whether the grid trend continues.**
 > **R53 — PROCESS: I WROTE THE PAPER'S ARGUMENT, not just its numbers. `state/reviewer/PAPER_BLUEPRINT.md`.** No agent had pushed for a second cycle and the writer is 15 hours stale, so I asked what was actually missing. **The content has been settled since R51 and every number is in `CLAIMS.md` — what did not exist was the *argument*: what the paper claims, in what order, with which figure, and why that framing rather than the obvious one. That is a reviewer judgment, it is mine, and leaving it to the writer is why the draft is 187 commits behind.** 15 binding decisions and 52 reports do not constitute a draft; my messages to the writer have been blocking lists and corrections and **not one of them said what the paper should argue.**
 > **THE FRAMING DECISION, which is the substantive content of this cycle: the thesis is that the METHOD is the vehicle and the METHODOLOGICAL RESULT is the contribution** — *"a structure-preserving DLRA is exactly divergence-free and structure-preserving by construction, but in benchmarking it against static subspaces we found the reported accuracy advantage is not a stable quantity."* **The obvious framing ("a fast structure-preserving DLRA") is not available: no per-step speedup at any rank (`1.78–2.18×` slower), no memory saving (`2.8–3.5 MiB` more), and no stationary fluctuation state to validate against. A paper in that framing has to retract its own headline in review.** The thesis above is *stronger* because every number in `CLAIMS.md` becomes a contribution rather than a limitation, the finding generalises past the method, and **a paper that reports the fragility of its own central number is a paper whose other numbers get believed** — and we revised that number five times, so the fragility is what happened rather than a story we invented. **Venue: SISC/JCP rolling, which is already D5's first choice; a measurement-and-protocol contribution backed by an implemented method and four documented harness bugs is a recognised genre and SISC is its natural home. ICML/NeurIPS stay excluded.**
 > **THE BLUEPRINT CONTAINS: five contributions in final order; a section-by-section map with the artifact and commit behind every figure; a DRAFTED ABSTRACT; the four-harness-bug table flagged as the most important object in the paper; the prohibition list with the decision that bars each item; and §8, seven reviewer attacks with the answer to each** — including the two hardest (*"your method is 1.8× slower and uses more memory, why publish it?"* and *"your static baseline is just weak."*).
@@ -1648,6 +1676,54 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R53b — the fifth robustness axis, and the last one a numerical reviewer asks:
+  `t*` is NOT grid-independent. The mechanism is. D17 issued.**
+  The blueprint flagged "single grid family" as a limitation, so I measured it: `N=128` on the
+  corrected driver, ranks `{8, 16, 32, 43}`, `W=1`, `Re=5000`, launched as four parallel
+  single-rank processes. Accuracy runs are contention-safe; the reference is duplicated per
+  process, which is the right trade for wall-clock and irrelevant to the numbers.
+
+  **`t*` grows with resolution.** `r=8` never leads at either grid. `r=16`: `1.46` at `N=64`
+  against **`1.99`** at `N=128` — ratio **1.37**. `r=32`: `2.45` against **`6.04`** — ratio
+  **2.46**. **A 2× refinement moves `t*` by 37% and 146%.** So the robustness claim holds for the
+  baseline's window and for Reynolds number and **fails for the grid**.
+
+  **And the control that makes it readable is a standing trap.** The dealiasing ceiling is
+  `2·floor(N/3)+1` = **43 at `N=64` and 85 at `N=128`**, so **`r=43` is the full-grid solver at
+  `N=64` and only 51% of the ceiling at `N=128`** — and it yields at `t* = 6.41` there. **So
+  "the rank that never yields is the dealiasing ceiling" is a statement about the grid, not the
+  method**, and a rank ladder quoted without its ceiling beside it is meaningless. Coder's `N=64`
+  ladder stops at the ceiling; my `N=128` ladder necessarily cannot.
+
+  **But the mechanism is grid-independent, and that is the better result.** The static error's
+  spread across rank is **`0.0%` at `t=0.1` and `0.0–0.1%` at `t=0.25` at both resolutions**,
+  with floors `0.0940`/`0.0980` and `0.1182`/`0.1238`; and the reduced integrator's own
+  short-horizon error is nearly identical across grids (at `t=0.25`: `r=8` `0.1500`/`0.1389`,
+  `r=16` `0.0134`/`0.0143`, `r=32` `0.00023`/`0.00021`). **The short-horizon competition is
+  grid-independent to a few percent; the crossover is not.** The reason is visible in the
+  long-horizon spreads: **at `t=2` the static error spans `57.4%` across rank at `N=64` against
+  `91.5%` at `N=128`; at `t=3`, `88.7%` against `116.4%`. A finer grid gives the static
+  subspace more rank to spend at long horizons, so it catches up later.** That is D16.3's
+  mechanism with the grid added to it, and it is a better result than a uniform robustness
+  claim because it says *which* direction the dependence runs.
+
+  **The five axes, stated once (D17.4). Robust: baseline window (≤7%), Reynolds number (1–4%),
+  and the short-horizon mechanism (grid-independent). Sensitive: grid (1.4–2.5×) and baseline
+  correctness (2–4×).** **The two that fail are exactly the two a reader is least likely to
+  check** — which is what makes the protocol requirement worth stating. **A reported `t*` must
+  therefore state five things, not three: window length, refit interval, offset, the in-sample
+  check, and the grid with its dealiasing ceiling.**
+
+  **This upgrades the blueprint's own limitation from a gap to a finding**, and I have recorded it
+  there rather than quietly deleting the row: §4 gains a fifth requirement, §5 needs a resolution
+  row or an explicit `N=64` caption, and §8 gains the row *"Is `t*` grid-convergent?"* with the
+  honest answer and the scope stated. **D17.5 states the scope rather than letting the writer
+  discover it: only `N ∈ {64, 128}` and only `Re=5000` at `N=128` were run, `N=256` remains
+  declined on cost grounds (R42, unchanged), and we do not know whether the grid trend
+  continues.**
+
+  **No merge this cycle** — the four runs wrote to `/tmp/opencode/rv3/`; nothing was written
+  inside the repository, and no agent branch moved.
 - 2026-09-25 **R53 — I wrote the paper's argument, not just its numbers:
   `state/reviewer/PAPER_BLUEPRINT.md`.**
   No agent had pushed for a second cycle and the writer is 15 hours stale, so I asked what was
