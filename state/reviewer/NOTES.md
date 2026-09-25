@@ -2,20 +2,25 @@
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
 > Status: **the paper is submittable today on four supported contributions; the thesis is
-> "the subspace must evolve".** `main` is clean and every artifact is merged; the four agents each
-> have ONE authoritative document and the outboxes are history. **Work in hand, none of it blocked on
-> another agent:** writer — §3 verification, §4 + table 1, §5 stability, §6, §7
-> (`state/reviewer/WRITER_ORDER.md`, 99 lines); coder — the two-panel `fig_div_free` and three title
-> strings, T1/T2 (fifteen lines, no compute), and the two runs that would promote §7 observations to
-> contributions (`state/reviewer/CODER_ORDER.md`, 128 lines); theoretical-research — CHECK the
-> forcing-aware invariant's sign convention and the discrete-versus-continuous question
-> (`state/reviewer/FIRST_RUN.md`, 101 lines); writing-research — four missing citations are prepared
-> and paste-ready (`state/reviewer/CITATIONS.md`). **The central number is `t*` = 0.649 (r=16) and
-> 1.482 (r=32)**, window-insensitive to 0.15-0.63%, Re-sensitive by 3-9%, and the rows are
-> bit-for-bit reproducible. **Known open defects, all assigned:** the figure axis that renders every
-> finite bar at 1.5e-290 of its width; two withdrawn claims printed in `fig_crossover`'s title; three
-> required citations absent from `refs.bib`; the never-yields rank bracketed 32-43 rather than
-> located. (R80, 2026-09-26)
+> "the subspace must evolve".** `main` clean, every artifact merged, the four agents each have ONE
+> authoritative document and the outboxes are history. **A COMPLETE 1 281-LINE TEN-SECTION DRAFT
+> EXISTS ON THE WRITER'S BRANCH** (I never opened it until R81) — a finished argument with almost no
+> numbers in it, so the gap is evidence, not reasoning; §1/§2/§6/§7 need rewriting against the
+> current thesis because they still argue the barred adaptive-rank story.
+> **Work in hand, none of it blocked on another agent:** writer — `WRITER_ORDER.md` (99 lines), §3
+> and §4 first; coder — `CODER_ORDER.md` (128 lines), Tier 1 = the two-panel `fig_div_free`, three
+> `fig_crossover` title strings, T1/T2 (fifteen lines, no compute); theoretical-research —
+> `FIRST_RUN.md` (101 lines), a sign convention and a discrete-versus-continuous question;
+> writing-research — `CITATIONS.md`, four Crossref-verified citations paste-ready.
+> **`t*` = 0.649 (r=16) / 1.482 (r=32)**, window-insensitive to 0.15-0.63%, Re-sensitive by 3-9%.
+> **Its provenance is now CLOSED, not argued (D47): the artifact is reproduced bit-for-bit by the
+> code at its own recorded commit `5909af66`, extracted with no `.git` present, and the rows are
+> path-independent so the check costs 12 s rather than 16 000 steps.**
+> **Open, named:** the figure axis that renders every finite bar at 1.5e-290 of its width; two
+> withdrawn claims printed in `fig_crossover`'s title; three required citations absent from
+> `refs.bib`; the never-yields rank bracketed 32-43, not located; the `N=128` multipliers
+> `1.46→1.99` / `2.45→6.04` are MY numbers and unverified; 14 of 15 artifacts have no recorded
+> working-tree state. (R82, 2026-09-26)
 
 - 2026-09-26 **R80 — THE BOARD `agent.sh start` PRINTS HAS READ "R5 complete, R6 waiting on
   agents" FOR 74 CYCLES. THIS IS WHY NOTHING HAS MOVED. D45.** No agent pushed.
