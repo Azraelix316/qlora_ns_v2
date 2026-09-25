@@ -91,29 +91,40 @@ recorded here and the earlier figure is struck, not quietly dropped.
 > until then state the qualitative claim (leads at `r ≥ 16`, never at `r ≤ 8`, ceiling is exact)
 > without a `t*` value.**
 
-`N=64`, `A=0.2`, full-field relative L2, `Re ∈ {1000, 5000}`, `W ∈ {0.25, 0.5, 1.0}`. Sources:
-`crossover_surface.json` @ `6571c46` (Re=5000, R51) and the reviewer's Re=1000 run on the same
-corrected driver (R52). **D16.1.** **These values are now confirmed by a THIRD independent
-route — the committed artifact @ `95f1859`, which carries both Reynolds numbers — and all three
-agree exactly (R58, D23.1).** The Re dependence is `0.989` (`r=16`) and `1.037` (`r=32`), a **1–4%**
-effect measured on committed data. `r ≤ 8`'s `0.25` is the first measurable interval, so "never
-leads" means *no resolvable lead*, not a measured zero.
+`N=64`, `A=0.2`, full-field relative L2, `Re ∈ {1000, 5000}`, `W ∈ {0.25, 0.5, 1.0}`.
 
-**Robustness — and the third axis fails (R53b, D17).** A 4× change in the baseline's window
-moves `t*` by ≤7% (`r=16`) and ≤1% (`r=32`); a 5× change in Reynolds number by 1–4%. **But a 2×
-refinement of the grid moves it by 37% at `r=16` and 146% at `r=32`:**
+**Source, and it is now a single authoritative one (D29):** the committed `crossover_surface.json`'s
+`crossovers` block, which **is** the `dlra` / `static_moving_window` rows — `static[oracle] /
+dlra[relative_l2]` at the same horizon reproduces the block's `ratio_by_horizon` to `1e-9` at all
+nine horizons — and **the rows are bit-for-bit reproducible** (a fresh run of the committed driver
+recovered every cell to `0.00%`). The Re=1000 column is **coder's own run**, not a number imported
+from a reviewer's scratch directory, because an artifact must come from the code committed beside it.
 
-| rank | `t*` at `N=64` | `t*` at `N=128` | `r`/ceiling at `N=64` | `r`/ceiling at `N=128` |
-|---|---|---|---|---|
-| 8 | *never leads* | *never leads* | 0.19 | 0.09 |
-| 16 | 1.46 | **1.99** | 0.37 | 0.19 |
-| 32 | 2.45 | **6.04** | 0.74 | 0.38 |
-| 43 | **never** | **6.41** | **1.00** | **0.51** |
+**The Re dependence is `2.8%` at `r=16` and `8.6%` at `r=32`** (`0.667/0.649` and `1.609/1.482`).
+**WITHDRAWN (D29.2–D29.3): the earlier `0.989`/`1.037` "1–4%" figures, and the "three independent
+routes agree exactly" claim** — the routes agreed because my one-horizon index bug was consistent
+across them, not because three independent computations confirmed each other. `r ≤ 8`'s `0.25` is
+the first measurable interval, so "never leads" means *no resolvable lead*, not a measured zero.
 
-**THE CEILING IS GRID-DEPENDENT — `2·floor(N/3)+1` = 43 at `N=64`, 85 at `N=128` — so `r=43` is
-below the static baseline's at every horizon at `N=64`, and `r=43` is the largest rank tested.
-**`r=85` at `N=128` appears in no artifact** (D30.5). Never quote a rank ladder
-without the ceiling beside it (D17.2).**
+**Robustness — what holds, and the one axis that does not (D29.2, D29.7, D30).** From the
+committed block, at `N=64`:
+
+| axis | change | effect on `t*` | status |
+|---|---|---|---|
+| baseline window | 4× (`0.25 → 1.0`) | **`0.15–0.63%`** | **measured, both Re, both ranks** |
+| Reynolds number | 5× (`1000 → 5000`) | **`2.8%` (`r=16`), `8.6%` (`r=32`)** | **measured** |
+| **grid** | 2× (`64 → 128`) | **NOT ESTABLISHED** | **withdrawn (D29.7) — the `N=128` multipliers are mine and may carry an index shift. Do not quote `1.46→1.99`, `2.45→6.04` or `6.41`.** |
+
+**AND TWO CORRECTIONS TO THE OLD FRAMING OF THIS AXIS. (1) The `r`/ceiling ratios are
+MEANINGLESS — they divide a rank by a WAVENUMBER.** `2·floor(N/3)+1` is the largest wavenumber 2/3
+dealiasing keeps per direction; it is not a mode count, and the dealiased 64×64 grid carries ~1849
+dof. **Never write a rank divided by a "ceiling" (D30.2). (2) `r=43` is the LARGEST RANK TESTED, not
+a ceiling, and `r=85` at `N=128` appears in NO artifact** (D30.5).
+
+**WHAT SURVIVES: the grid still belongs in a reported `t*` — we do not know how `t*` behaves under
+refinement, and saying so is the honest position — but we no longer assert a multiplier, and D17.2's
+"report the ceiling beside the ladder" is WITHDRAWN in favour of "report the grid and the largest
+rank tested."**
 
 **A reported `t*` must therefore state FIVE things: the baseline's window length, its refit
 interval, its offset, the in-sample check, AND **the grid together with the largest rank
@@ -125,9 +136,11 @@ requirement is satisfiable from the artifact rather than from the driver (D22.1)
 
 > **A static subspace cannot spend rank at short horizons, and that fixed number is what the
 > reduced integrator competes against.** At `t = 0.1` and `t = 0.25` the static error is
-> `0.0940` and `0.1183` at **every** rank — a 43-fold rank range buys **0.0%** and **0.1%** —
-> while the reduced integrator's falls to `0.0002` at `r=32`, a factor of `941`. From
-> `t ≈ 1` the static subspace can begin to use rank and the crossover is when it does.
+> `0.0940` and `0.1183` at **every** rank tested — the spread across the **whole** resolved
+> rank range is `0.00%` and `0.09%` — while the reduced integrator's falls to `0.0002` at `r=32`, a
+> factor of `941`. **And above `r ≈ 8` the static baseline SATURATES: `r=16`, `r=32` and `r=43` have
+> *identical* static errors at every horizon (D30.1).** From `t ≈ 0.5` at the smallest ranks the
+> static subspace can begin to use rank, and the crossover is when it does.
 
 **The static error is rank-independent at SHORT horizons only — and that is GRID-INDEPENDENT.**
 Spread across rank at `t=0.1` is `0.0%` at **both** `N=64` and `N=128`, and `0.0–0.1%` at
@@ -254,10 +267,13 @@ commit `f9ade4f8`). Source: R26, R26f, R38. **D12.1.**
 **The sharpest form of the rank claim** (coder's, adopted over mine):
 
 > `r99` **measures the dynamics** — it is `16` on both grids, invariant under a 4× change in
-> available modes. The **amplitude rule measures the discretisation** — at `W=8` it requests
-> `174` and `357` against dealiasing ceilings of `43` and `85`, i.e. **4.0× and 4.2×**, so no
-> fixed relative cutoff can repair it, because any such cutoff requests a grid-dependent
-> number of modes.
+> available modes. The **amplitude rule measures the discretisation, not the dynamics** — at `W=8`
+> it requests `174` and `357` modes at the two grids, i.e. roughly four times as many modes as the
+> largest rank we ever ran, so no fixed relative cutoff can repair it, because any such cutoff
+> requests a **grid-dependent** number of modes.
+> **DO NOT express this as a multiple of a "dealiasing ceiling": `2·floor(N/3)+1` (`43`, `85`) is a
+> WAVENUMBER, and dividing a rank by it is meaningless (D30.2). The claim is that the rank
+> requested grows with the grid, not that anything is a multiple of a ceiling.**
 
 **Open and unexplained:** for `W ≥ 12` the required rank is resolution-dependent and
 **non-monotone** (`14, 24, 13` at `N=64/128/256`). Do not write that the rank saturates, and
@@ -284,9 +300,9 @@ The trade with the horizon, now at both measured Reynolds numbers:
 | 2 | **1.82×** | *never leads* |
 | 4 | **1.86×** | *never leads* |
 | 8 | **1.86×** | *never leads* |
-| 16 | **1.88×** | `t* ≈ 1.3`, leading by `8.9×` at `t = 0.25` |
-| 32 | **1.90×** | `t* ≈ 2.4`, leading by `506×` at `t = 0.25` |
-| 43 / 64 | **1.94–2.07×** | **never yields — exact at every horizon** |
+| 16 | **1.88×** | **`t* = 0.649`** (D29.4) |
+| 32 | **1.90×** | **`t* = 1.482`** (D29.4) |
+| 43 | **1.94–2.07×** | **never yields — error `1e-13`–`1e-8`, 6–11 orders below the static baseline. `r=43` is the largest rank TESTED, not a ceiling (D30.2)** |
 | any | — | **and no memory advantage: `+2.5 MiB` (N=64) to `+3.8 MiB` (N=128`) _more_ than the full-grid step, flat in rank to within 0.3 MiB** |
 
 **The trade: the lead grows linearly in rank and the cost is nearly rank-independent, so rank
@@ -484,10 +500,12 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 
 Everything below is measured, and none of it requires retracting a number:
 
-1. **A static subspace has a rank-independent error floor that no rank removes** — a 43-fold
-   rank range buys 2% — while a reduced integrator's error falls from `0.6` to `1.6e-8`. **Rank
-   buys predictability time, not accuracy**, and the horizon is `≈1.3` at `r=16` and `≈2.4` at
-   `r=32` against a correctly implemented baseline.
+1. **A static subspace's error SATURATES in rank — above `r ≈ 8`, extra rank buys it nothing
+   measurable at any horizon**, and the spread across the whole resolved rank range is `0.00%` at
+   `t=0.1`, reaching `40–46%` by `t=2–4` (D30.1; **state the normaliser, it changes the number by
+   nearly 2×**). Meanwhile a reduced integrator's error falls from `0.6` to `1.6e-8`. **Rank buys
+   predictability time, not accuracy**, and the horizon is **`0.649` at `r=16` and `1.482` at
+   `r=32`** against a correctly implemented baseline.
 2. **That horizon is not a stable quantity, and saying so is the methodological contribution.**
    Three successive corrections to a 60-line baseline moved it by `1.6–2.8×` (D34) and removed half the
    ranks. **Any published crossover for this class of method should carry FIVE things: the
@@ -501,8 +519,8 @@ Everything below is measured, and none of it requires retracting a number:
 4. **Rank criteria measure different things, and a causal rule provably cannot reach the
    cumulative one.** The windowed `r99` rises `1 → 16` and is grid-independent; a per-step rule
    reads the *instantaneous* `r99`, which falls `14 → 4`; the amplitude rule measures the
-   discretisation and asks for `4.0×`/`4.2×` the dealiasing ceilings, so **no fixed cutoff can
-   repair it.** **A window-accumulating rule was implemented, measured, and does not work:** it
+   discretisation and asks for a **grid-dependent** number of modes — `174` and `357` at the two
+   grids, roughly four times the largest rank we ran — so **no fixed cutoff can repair it.**
    never exceeds rank 2 and keeps `1.5%` of the fluctuation energy against the per-step rule's
    `27.5%`, because it measures *local* complexity — which genuinely is `≈2` — while `1 → 16`
    is **cumulative**, reachable only by remembering the whole trajectory, which is what static

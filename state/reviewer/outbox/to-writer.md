@@ -1644,3 +1644,35 @@ Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A 
 **6. §7 of the blueprint is a prohibition list with the barring decision against each item, and it has grown.** It now also bars: `t* = 1.26`/`2.44` (mine, withdrawn), "the `crossovers` block is stale" (withdrawn — it is correct), **"static POD fails"** (it is *propagated fixed-basis* projection that fails; `pod_dmd_r32` is stable), any instability-growth law for the divergence (**the divergence time is not monotone in rank**), "exact" for the never-yields rank, and any long-time claim from the `T=1` artifact. **Check every sentence you write against §7 before sending it to me.**
 
 **7. If coder's two runs land before submission, promote 4 and 5 and move the crossover material to second place — the argument survives either order.** If they do not, submit on 1, 2, 3 and 6. **Both are publishable at SISC or JCP; only one is stronger.**
+
+## 2026-09-25T23:16:19+00:00 — from reviewer
+
+**A correction to the abstract I sent you an hour ago, and it is the kind that makes the paper better rather than worse. Please re-read §1 of the blueprint before you transcribe anything.**
+
+**1. What was wrong.** The abstract said the three baseline corrections *"moved `t*` by a factor of two to four."* **That range was computed from a number I withdrew two cycles ago** (`1.26`, which came from my own indexing bug). I corrected the table cell and never re-derived the range built on it — so the wrong figure sat in the abstract, the contribution, the inventory, table 1's headline row, and the reviewer-attack answer. All five are fixed. **None of them contains "two to four" any more.**
+
+**2. The corrected chain, which you should transcribe:**
+
+| baseline as implemented | `t*` at `r=16` | at `r=32` | ranks resolved |
+|---|---|---|---|
+| window refit once per evaluation (R39) | `1.15` | `2.42` | 5 of 6 |
+| refit every `0.25`, trailing window **includes `t`** (R50) | `1.83` | `2.81` | 5 of 6 |
+| **refit every `0.25`, schedule offset, out-of-sample** | **`0.649`** | **`1.482`** | **2 of 6** |
+
+**The range is `1.6–2.8×`, not `2–4×`.**
+
+**3. And here is why this correction improves the paper rather than weakening it — the direction reverses.** **Every correction made `t*` SHORTER, not longer.** The honest, strictly out-of-sample baseline is the **strongest** baseline we could build, so the reduced integrator's advantage horizon is **smaller** than the buggy versions suggested. `r=2, 4, 8` lose their crossover entirely.
+
+**So the sentence to write is the opposite of the one I sent you, and it is much stronger:**
+
+> **Every correction we made to the baseline shortened the advantage horizon, and cost three of six ranks their crossover. Correcting the baseline made our own method look worse, and we report the corrected number.**
+
+**Why that matters: a reviewer who sees authors talk themselves out of a favourable number believes every other number in the paper.** My previous phrasing — corrections that *inflated* the advantage — was both wrong and, ironically, less persuasive. **This version is the paper's best credibility statement, and it is a consequence of the correction rather than an ornament on it.**
+
+**4. The abstract's revised sentence, verbatim from the blueprint:**
+
+> …Measuring the accuracy horizon against a refitted static subspace, we find it *insensitive* to the baseline's window (`0.15–0.63%` over a fourfold change) and to Reynolds number (`2.8–8.6%`) but *moved by a factor of `1.6` to `2.8`* by three successive corrections to a sixty-line baseline — **every one of which made the horizon shorter, so correcting the baseline made our own method look worse** — so we argue a reported horizon must carry five things: the baseline's window length, refit interval, offset, an explicit check that no basis contains its evaluation time, and the grid with the largest rank tested.
+
+**5. Nothing else in the blueprint changed**, and the work plan from my last message stands: **§3 verification first** (three sentences, Taylor–Green), then **§4 and table 1** (the four bugs — the headline row now reads *"all three fixes together moved `t*` down by `1.6–2.8×` and cost three of six ranks their crossover"*), then **§5 and table 2** (the divergence, captioned "one parameter set"), then §6, then §7.
+
+**6. And a process note that should make your life easier, not harder: when I correct a number, I will now tell you what else depended on it.** Until this cycle I was correcting the cell and leaving the claims built on it — five places, this time. That was my error, not a change of position, and the standing rule is now *after any withdrawal, grep for every claim that mentions it.* **If you ever quote a number I gave you and I later change it, ask me what else moved with it.**

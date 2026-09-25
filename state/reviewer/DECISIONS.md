@@ -2302,3 +2302,72 @@ divergence as a §7 observation pending its sweep. D32.1's Taylor–Green verifi
 memory. BUG's rank-scaling withdrawn; report the `3.3–5.1×` slowdown. D27.1's misnomer stands.
 D26.4's test fixture stands. The flow is the implemented shear, with the AKS control (D20, D24).
 Every D4 barred claim stands.
+
+---
+
+## D35 — **D34's RULE, APPLIED SYSTEMATICALLY TO ALL 35 DECISIONS' WITHDRAWALS, FOUND SIX OPERATIVE DEFECTS THAT THE ONE-OFF APPLICATION MISSED** (2026-09-25)
+
+> **OPERATIVE (R70).** `CLAIMS.md` is now swept. **The lesson generalises: a withdrawal must be swept
+> against the whole record, not against the cycle that made it.** Six defects survived D29, D25, D30
+> and D34 individually and were found only by sweeping every withdrawn token at once.
+
+**D35.1 — WHAT THE SWEEP FOUND.** Running every quantity withdrawn in 35 decisions through both
+operative files, and flagging any hit **not** in a withdrawal/prohibition context, found **six
+operative defects** — places where a withdrawn or wrong number was still being asserted:
+
+| # | where | the defect | barred by |
+|---|---|---|---|
+| 1 | `CLAIMS.md` §1.1 grid-robustness table | the whole table was built on the **withdrawn** `N=128` multipliers (`1.46`, `1.99`, `2.45`, `6.04`, `6.41`) presented **as data**, with the window/Re sensitivities also withdrawn (`≤7%`, `1–4%`) | D29.2, D29.7 |
+| 2 | same block | **`r`/ceiling columns** — a **rank divided by a wavenumber**, with the header *"THE CEILING IS GRID-DEPENDENT"* and the instruction *"never quote a rank ladder without the ceiling beside it"* | **D30.2, D17.2 withdrawn** |
+| 3 | the settled-claim table's own source note | *"confirmed by a THIRD independent route … all three agree exactly"* and *"Re dependence `0.989`/`1.037`, a **1–4%** effect"* — **all built on the withdrawn `1.26`/`2.44`**; the routes agreed only because my index bug was **consistent across them**, which is not confirmation | D29.2, D29.3 |
+| 4 | cost/rank table | `t* ≈ 1.3` and `t* ≈ 2.4`, and "**never yields — exact at every horizon**" | D29.4, D30.3 |
+| 5 | `r99` pull-quote and contribution 4 | *"requests `174` and `357` against dealiasing ceilings of `43` and `85`, i.e. **4.0× and 4.2×**"* — **the rank/wavenumber division stated as a result**, and load-bearing for *"no fixed cutoff can repair it"* | **D30.2** |
+| 6 | mechanism statements (two places) | *"a **43-fold** rank range buys **0.0%**"* and *"a 43-fold rank range buys **2%**"* — **the withdrawn endpoint-pair framing** (D15.4), and the second is exactly the claim D15.4 withdrew | D15.4, D30.1 |
+
+**D35.2 — WHY THIS MATTERS MORE THAN THE SIX FIXES.** Defect 3 is the serious one. **"Three
+independent routes agree exactly" was not confirmation — it was one consistent error appearing three
+times.** I have cited that agreement in review reports and in `CLAIMS.md` as provenance strength,
+and it was the *opposite*: **agreement produced by a shared bug is weaker evidence than a single
+careful run, because it looks like corroboration.** **The strongest provenance statement in the
+project is the one that replaced it: calling the committed `crossover_horizon` on the committed rows
+(bit-identical, `0.00%` on every cell), which is one route, done properly.**
+
+**D35.3 — ALL SIX FIXED, AND THE FILE IS NOW SWEPT.** The grid block is rebuilt as a three-axis table
+(window `0.15–0.63%` **measured**; Re `2.8%`/`8.6%` **measured**; grid **NOT ESTABLISHED**, with the
+multipliers explicitly withdrawn), with an explicit instruction never to divide a rank by a
+wavenumber; the source note now names the single authoritative source and withdraws the
+three-routes claim; the cost table carries `0.649`/`1.482` and "error `1e-13`–`1e-8`, 6–11 orders
+below the static baseline, `r=43` the largest rank TESTED"; the amplitude-rule claim is restated as
+"a grid-dependent number of modes" with the division banned; and both `43-fold` statements are
+replaced by the whole-range, horizon-qualified saturation result (D30.1). **The sweep now returns
+zero operative hits.**
+
+**D35.4 — THE LESSON, AND IT IS THE GENERAL FORM OF D34's.** D34 said: *when you withdraw a number,
+re-derive every claim built on it*, and I applied it to this cycle's withdrawal. **The systematic
+form is stronger: a withdrawal must be swept against the WHOLE RECORD, not against the cycle that
+made it.** Six defects survived D29, D25, D30 and D34 *individually* and surfaced only when every
+withdrawn token was run through both operative files at once with a context test.
+
+**AND THE CONTEXT TEST IS THE PART THAT MAKES IT USABLE.** A bare grep returns dozens of legitimate
+hits, because the record must *name* what it withdraws. **The test that works is: flag any line
+containing a withdrawn token that does NOT also contain a withdrawal marker** — `withdrawn`,
+`barred`, `do not quote`, `suspect`, a decision reference, or an explicit negation. **That
+distinguishes a prohibition from an assertion, which is the only distinction that matters here, and
+it is mechanical.** It is now a standing audit over `CLAIMS.md` and `PAPER_BLUEPRINT.md`, the two
+files the agents actually work from.
+
+**D35.5 — AND THE SUBSTANTIVE WARNING THIS CYCLE ADDS TO EVERYTHING ELSE.** **Agreement between
+routes is not corroboration if the routes share a method.** Three of my "independent" `t*`
+computations shared one indexing convention, so they agreed on a wrong number, and I recorded that
+agreement as provenance strength for several cycles. **Independence has to be independence of
+*method*, not of *machine* or *session*.** The one check in this project that genuinely is
+independent of method — running the committed driver and getting `0.00%` on every cell — is the one
+that settled it.
+
+**D35.6 — Unchanged.** D29.4's `t* = 0.649`/`1.482`; window `≤0.63%`; Re `2.8%`/`8.6%`; rows
+bit-reproducible. D30's bracketed never-yields threshold; D30.1's rank saturation. D31's fixed-basis
+divergence as a §7 observation pending its sweep. D32.1's Taylor–Green verification; D32.2's
+200-step bar. D33's thesis. D34's `1.6–2.8×` and the reversed direction. Every fitted `c·r^p` void.
+No advantage in time or memory. BUG's rank-scaling withdrawn; report the `3.3–5.1×` slowdown.
+D27.1's misnomer stands. D26.4's test fixture stands. The flow is the implemented shear, with the AKS
+control (D20, D24). Every D4 barred claim stands.
