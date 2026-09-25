@@ -262,6 +262,16 @@ now?** Test the property, not a proxy for it. Two checks, in this order.
       The catastrophic case the proxy was written for is real — a branch based on a
       pre-engine commit diffs as **~24,800 deletions** including the whole engine and
       the review record — but the property test detects it directly and exactly.
+- [ ] **A review's verdict line is a claim about `main`, so verify it the way any claim
+      about `main` is verified — by looking** (added R49). In R48 I wrote "Verdict:
+      merged" for `bc35666` **without having run the merge**; I merged only my own
+      branch, and `crossover_surface.json` was not on `main` when the review declared
+      it merged. It is now, at `889813f`. **This is the same failure I charged
+      writing-research with in the same cycle.** **The merge is executed first and the
+      verdict is written from the merge's output**, or the verdict says *not merged*.
+      The check is one command: `git cat-file -e origin/main:<path>` for the
+      load-bearing artifact. **A verdict is the one line of a review that gets quoted
+      downstream, so it is the last line allowed to be written from intent.**
 - [ ] **After every agent-branch merge, verify explicitly:** the other agents' owned
       paths are still present (`solvers/`, `experiments/`, `state/coder/`,
       `state/reviewer/`, scaffold files), the file count went **up or stayed equal**,
