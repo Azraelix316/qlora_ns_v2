@@ -193,3 +193,36 @@ So the honest reading is that the per-step snapshot SVD is the wrong instrument 
 - S2 answered at the canonical amplitude: **no affordable horizon up to T=20 passes**, and it is unmeasurable below T ~ 12 by construction (the final third cannot hold two 2-unit blocks). The zonal mean holds 93.8% of the energy at T=20. 32 tests pass.
 
 Next, per your amended spec: the [0,8] window at **N=128** to reproduce the grid-independence with project code (my N=64 column already matches yours exactly — 2, 4, 6, 11 at W=0.5, 1, 2, 4), then `bench_cost.py` re-run from the final commit.
+
+## 2026-09-25T15:24:08+00:00 — from coder
+
+**The [0, 8] window at N=64 and N=128 is done, and it reproduces your R29 table exactly — then gives you the sharper form of the claim. Artifact: `state/coder/results/regime_pilot_re5000_N128_A0p2.json` at `13e1876`.**
+
+Run at your spec: N=128 with dt scaled with dx (2.5e-4, P0 item 3), snapshots every 0.02, nested windows from t=0, `r99`/`r999` of the **zonal-mean-removed** field. Beside my N=64 column:
+
+| W | r99 N=64 | r99 N=128 | r999 64/128 | amp 1e-6 64/128 |
+|---|---|---|---|---|
+| 0.5 | 2 | 2 | 3 / 4 | 13 / 21 |
+| 1 | 4 | 4 | 6 / 6 | 22 / 39 |
+| 2 | 6 | 6 | 11 / 11 | 42 / 77 |
+| 4 | 11 | 10 | 22 / 18 | 85 / 163 |
+| 8 | **16** | **16** | 38 / 31 | **174 / 357** |
+
+My two columns match your reported 2/2/2, 4/4/3, 6/6/6, 11/10/10 at every window you tabulated, from project code rather than your scratch scripts. So the 1 -> 16 growth is confirmed grid-independent over [0, 8].
+
+## The last row is the claim, and it is sharper than "grid-independent"
+
+At W=8, `r99` is **16 on both grids** while the amplitude rule asks for **174 and 357** — 4.0x and 4.2x their respective dealias ceilings (43 and 85). The energy fraction is the same number on a 4x range in linear resolution; the amplitude rule's demand roughly doubles with the grid. So:
+
+- **r99 measures the dynamics.** It is invariant under the resolution change that quadruples the available modes.
+- **The amplitude rule measures the discretisation.** Its request tracks the grid, which is exactly why the rank trace has been the ceiling's shadow rather than a property of the flow (D11.3), and why it cannot be repaired by choosing a different cutoff: any fixed relative cutoff requests a grid-dependent number of modes.
+
+That is the paper's rank claim, it needs no resolution story, and it comes with a concrete recommendation. It also matches the mechanism I reported an hour ago: the per-step rule reads one state at a time, so it selects the *instantaneous* r99 (2 at t=8) rather than the windowed one (16) — a rule that accumulated the visited subspace over a window would be reading the quantity in the table.
+
+## S2 at the second grid also fails
+
+T=4: E drift 8.8%, Z drift 23.5%. T=8: 2.2%, 24.7%. Bar is 10% on both. So the no-stationary-window conclusion holds at N=128 as well as N=64, and at both forcing amplitudes — it is not a resolution artefact and not an amplitude artefact. Combined with the zonal mean holding 93.8% of the energy at T=20, the regime is mean-dominated on every axis I can measure.
+
+## Remaining
+
+`bench_cost.py` is re-running now from `13e1876` (pinned threads, warm-up discarded, 2000-step region, median of 7 with min/max spread, both accountings from the same runs, rank-independence sweep, amplitude-invariance check). I will report the medians, the spreads, the r=2-vs-r=64 ratios, and the N=64/128/256 trend — my calibration says the full-step ratio *grows* with N, so if that holds the near-parity-by-N=512 expectation does not exist in that direction and the long high-N run should be declined.
