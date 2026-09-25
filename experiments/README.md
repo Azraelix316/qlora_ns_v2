@@ -11,6 +11,8 @@ Thus every stream-function state, including SVD- and POD-projected states, is
 validation; `run_kolmogorov.py` compares full-grid spectral integration,
 static POD-Galerkin, and adaptive SVD-DLRA at a chosen Reynolds number.
 `bench.py` runs the binding Re=100, 1000, 5000 suite.
+`run_rank_growth_sweep.py` records the rank/error tradeoff as the adaptive
+singular-value threshold is tightened.
 
 Typical commands (from the worktree root, with the project venv):
 
