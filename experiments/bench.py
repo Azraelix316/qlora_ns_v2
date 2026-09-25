@@ -65,10 +65,17 @@ def main() -> None:
             {
                 "re": re,
                 "file": str(case_path),
+                "git_commit": result["provenance"]["git_commit"],
+                "full_stable": result["full"]["stable"],
                 "full_div": result["full"]["max_abs_divergence"],
+                "full_pde_residual": result["full"]["max_scaled_full_pde_energy_residual"],
+                "pod_stable": result["pod"]["stable"],
                 "pod_error": result["pod"]["max_relative_l2_vs_full"],
-                "dlra_error": result["dlra"]["max_relative_l2_vs_full"],
+                "pod_discrete_residual": result["pod"]["max_scaled_energy_balance_residual"],
                 "pod_rank": result["pod"]["rank_final"],
+                "dlra_stable": result["dlra"]["stable"],
+                "dlra_error": result["dlra"]["max_relative_l2_vs_full"],
+                "dlra_discrete_residual": result["dlra"]["max_scaled_energy_balance_residual"],
                 "dlra_rank_min": result["dlra"]["rank_min"],
                 "dlra_rank_max": result["dlra"]["rank_max"],
                 "full_s_per_step": result["full"]["wall_seconds_per_step"],
@@ -81,6 +88,10 @@ def main() -> None:
     aggregate.write_text(
         json.dumps(
             {
+                "provenance": {
+                    "git_commit": result["provenance"]["git_commit"],
+                    "driver": "experiments/bench.py",
+                },
                 "grid_N": args.N,
                 "dt": args.dt,
                 "steps": args.steps,
