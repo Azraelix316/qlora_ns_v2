@@ -148,7 +148,7 @@ class PODDMD:
         self.operator: np.ndarray | None = None
         self._gram: np.ndarray | None = None
         self._cross: np.ndarray | None = None
-        self._samples = 0
+        self.samples = 0
         self._previous: np.ndarray | None = None
 
     # -- offline phase ----------------------------------------------------
@@ -169,12 +169,12 @@ class PODDMD:
             # A^T, which a symmetric test operator can hide -- the dedicated
             # non-symmetric linear-system test exists for that reason.
             self._cross += np.outer(c, self._previous)
-            self._samples += 1
+            self.samples += 1
         self._previous = c
 
     def fit(self) -> "PODDMD":
         """Solve the accumulated normal equations for ``A``."""
-        if self._gram is None or self._samples == 0:
+        if self._gram is None or self.samples == 0:
             raise RuntimeError("PODDMD.accumulate must be called before fit")
         gram = self._gram.copy()
         if self.ridge > 0.0:
