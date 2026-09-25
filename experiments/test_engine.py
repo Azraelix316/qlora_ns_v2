@@ -495,6 +495,60 @@ def test_pod_dmd_reports_when_it_is_undertrained():
         raise AssertionError("PODDMD.fit must refuse with no sample pairs")
 
 
+def test_baseline_rollouts_run_to_completion():
+    """The baseline rollouts must actually run, not just import.
+
+    A moving-window rollout that only receives its projector at the first refit
+    has an unbound projector before that point; nothing else in the suite would
+    notice, because the failure only appears when the driver is run.  This
+    exercises both rollout paths end to end at a size where they are instant,
+    and checks the fields the artifact contract depends on.
+    """
+    from run_baselines import run_dmd, run_projected_moving
+
+    grid = Grid2D(16)
+    dt = 0.01
+    model = StreamFunctionNS(grid, 0.05, forcing=KolmogorovForcing(0.5, 1.0))
+    initial = field(grid, "mixed")
+    initial = initial - initial.mean()
+
+    # POD-DMD: fitted on a short window, rolled out with a stride > 1.
+    pod = PODGalerkin(grid, rank=3).fit(np.stack([initial, 0.9 * initial, 1.1 * initial]))
+    dmd = PODDMD(pod)
+    # A few distinct coefficient vectors, so the Gram is not rank deficient.
+    for c in (np.array([1.0, 0.0, 0.0]), np.array([0.0, 1.0, 0.0]),
+              np.array([0.0, 0.0, 1.0]), np.array([0.5, 0.5, 0.0])):
+        dmd.accumulate(dmd.reconstruct(c))
+    dmd.fit()
+    assert not dmd.singular_gram
+    out = run_dmd(
+        grid, dmd, initial, dt, 0.1, sample_every=5, steps_per_application=5
+    )
+    assert out["times"][-1] == 0.1
+    assert out["applications"] == 2
+    assert out["diverged_at_step"] is None
+    assert len(out["states"]) == len(out["times"])
+
+    # Moving window: no initial projector, so the first steps run unprojected
+    # rather than raising on an unbound one.
+    schedule = {5: pod}
+    out = run_projected_moving(
+        grid,
+        StreamFunctionNS(grid, 0.05, forcing=KolmogorovForcing(0.5, 1.0)),
+        initial, dt, 0.1, 5, schedule,
+    )
+    assert out["times"][-1] == 0.1
+    assert out["diverged_at_step"] is None
+    assert out["final_time_reached"] == 0.1
+    # ...and with an initial projector it is projected from t=0.
+    out2 = run_projected_moving(
+        grid,
+        StreamFunctionNS(grid, 0.05, forcing=KolmogorovForcing(0.5, 1.0)),
+        initial, dt, 0.1, 5, schedule, initial_projector=pod,
+    )
+    assert out2["diverged_at_step"] is None
+
+
 def test_isotropic_spectra_reproduce_the_energies():
     """The shell sums must equal ke() and enstrophy(), or the spectra lie."""
     grid = Grid2D(24)

@@ -123,17 +123,24 @@ def run_reference(
     grid: Grid2D, model: StreamFunctionNS, initial: np.ndarray, dt: float,
     final_time: float, sample_every: int, train_until: float, keep_stride: int,
 ) -> dict:
-    """Full-grid reference; also the source of the offline training window."""
+    """Full-grid reference; also the source of every offline training window.
+
+    Two series come out of the one pass: states at the comparison stride (the
+    accuracy metrics), and a snapshot series at the (finer) training stride,
+    which is the raw material for the early, late and moving windows F5 needs.
+    """
     state = initial.copy()
     times = [0.0]
     states = [state.copy()]
-    training = [state.copy()]          # t=0 included: P0 for the static baseline
+    snap_times = [0.0]
+    snap_states = [state.copy()]
     checkpoints = {0: state.copy()}
     max_div = grid.max_div_velocity(state)
     u0, v0 = grid.velocity(state)
     max_cfl = float(np.max(np.hypot(u0, v0)) * dt / grid.dx)
     max_residual = 0.0
     nsteps = int(round(final_time / dt))
+    snap_stride = max(1, int(round(keep_stride / dt)))
     for step in range(1, nsteps + 1):
         old = state
         state = model.step(old, dt, t=(step - 1) * dt)
@@ -146,8 +153,9 @@ def run_reference(
                 (grid.ke(state) - grid.ke(old)) / dt
             )) / max(1.0, grid.enstrophy(old), 1e-30),
         )
-        if step <= int(round(train_until / dt)) and step % max(1, int(round(keep_stride / dt))) == 0:
-            training.append(state.copy())
+        if step % snap_stride == 0 or step == nsteps:
+            snap_times.append(step * dt)
+            snap_states.append(state.copy())
         if step % sample_every == 0 or step == nsteps:
             times.append(step * dt)
             states.append(state.copy())
@@ -155,7 +163,8 @@ def run_reference(
     return {
         "times": times,
         "states": states,
-        "training": training,
+        "snap_times": snap_times,
+        "snap_states": snap_states,
         "checkpoints": checkpoints,
         "max_abs_divergence": max_div,
         "max_cfl": max_cfl,
@@ -167,13 +176,22 @@ def run_projected(
     grid: Grid2D, model: StreamFunctionNS, initial: np.ndarray, dt: float,
     final_time: float, sample_every: int, projector, reference_checkpoints: dict,
 ) -> dict:
-    """A projected run: static POD or fixed-rank DLRA share this path."""
+    """A projected run: static POD or fixed-rank DLRA share this path.
+
+    A baseline that goes non-finite is a *result*, not a harness failure: it is
+    recorded with the step it died at and the time it reached, and the accuracy
+    metrics are reported over the window it actually covered.  Aborting the
+    whole comparison because one baseline diverged would discard every other
+    method's numbers, and "POD is worse" is not a citable claim unless the
+    divergence is itself reported (R24's lesson).
+    """
     state = projector(initial.copy())
     times = [0.0]
     states = [state.copy()]
     max_div = grid.max_div_velocity(state)
     max_residual = 0.0
     projection_energy = 0.0
+    diverged_at_step = None
     nsteps = int(round(final_time / dt))
     start = time.perf_counter()
     for step in range(1, nsteps + 1):
@@ -181,7 +199,8 @@ def run_projected(
         before = grid.ke(old)
         state = model.step(old, dt, t=(step - 1) * dt, projector=projector)
         if not np.isfinite(state).all():
-            raise FloatingPointError(f"projected run non-finite at step {step}")
+            diverged_at_step = step
+            break
         projection_energy += grid.ke(state) - before
         max_div = max(max_div, grid.max_div_velocity(state))
         if step % sample_every == 0 or step == nsteps:
@@ -194,14 +213,23 @@ def run_projected(
         "max_scaled_energy_balance_residual": max_residual,
         "projection_energy_total": projection_energy,
         "wall_seconds": time.perf_counter() - start,
+        "diverged_at_step": diverged_at_step,
+        "final_time_reached": times[-1],
     }
 
 
 def run_dmd(
     grid: Grid2D, dmd: PODDMD, initial: np.ndarray, dt: float,
-    final_time: float, sample_every: int,
+    final_time: float, sample_every: int, steps_per_application: int = 1,
 ) -> dict:
-    """POD-DMD rollout: the modal operator advances, not the PDE."""
+    """POD-DMD rollout: the modal operator advances, not the PDE.
+
+    ``steps_per_application`` is the snapshot stride the operator was fitted
+    at: one application advances the state by that many solver steps.  This is
+    also the baseline's cost advantage -- it does no PDE work per step -- so it
+    is recorded rather than quietly absorbed, and the comparison states the
+    arithmetic-algebra cost separately from the full-step cost.
+    """
     coefficients = dmd.coefficients(initial)
     state = dmd.reconstruct(coefficients)
     times = [0.0]
@@ -209,12 +237,17 @@ def run_dmd(
     max_div = grid.max_div_velocity(state)
     nsteps = int(round(final_time / dt))
     start = time.perf_counter()
+    applications = 0
+    diverged_at_step = None
     for step in range(1, nsteps + 1):
-        coefficients = dmd.step(coefficients)
-        state = dmd.reconstruct(coefficients)
-        if not np.isfinite(state).all():
-            raise FloatingPointError(f"POD-DMD non-finite at step {step}")
-        max_div = max(max_div, grid.max_div_velocity(state))
+        if step % steps_per_application == 0:
+            coefficients = dmd.step(coefficients)
+            applications += 1
+            state = dmd.reconstruct(coefficients)
+            if not np.isfinite(state).all():
+                diverged_at_step = step
+                break
+            max_div = max(max_div, grid.max_div_velocity(state))
         if step % sample_every == 0 or step == nsteps:
             times.append(step * dt)
             states.append(state.copy())
@@ -223,6 +256,10 @@ def run_dmd(
         "states": states,
         "max_abs_divergence": max_div,
         "wall_seconds": time.perf_counter() - start,
+        "applications": applications,
+        "seconds_per_application": (time.perf_counter() - start) / max(applications, 1),
+        "diverged_at_step": diverged_at_step,
+        "final_time_reached": times[-1],
     }
 
 
@@ -243,6 +280,72 @@ def divergence_series(
     return out
 
 
+def run_projected_moving(
+    grid: Grid2D, model: StreamFunctionNS, initial: np.ndarray, dt: float,
+    final_time: float, sample_every: int, schedule: dict[int, object],
+    initial_projector=None, start_state: np.ndarray | None = None,
+) -> dict:
+    """A static baseline whose basis is refitted on a moving window.
+
+    This is the oracle form of "static POD": at each refit the basis is built
+    from the most recent window of the *reference* trajectory, so it is the best
+    a fixed-rank, offline-fitted method can do at that instant.  R27's point is
+    that the cost of staticity is a function of window placement -- at t=0.1 an
+    early window is near-optimal, at t=8 the same window is useless -- so a
+    comparison that only reports the early window measures the choice of window
+    rather than the method.
+
+    ``initial_projector`` is used until the first refit, so the baseline is
+    projected from t=0 (which also keeps P0: its start is the exact projection
+    of the IC) rather than running unprojected for the first interval.
+    """
+    projector_state = initial_projector
+    state = (start_state if start_state is not None else initial).copy()
+    times = [0.0]
+    states = [state.copy()]
+    max_div = grid.max_div_velocity(state)
+    projection_energy = 0.0
+    diverged_at_step = None
+    nsteps = int(round(final_time / dt))
+    start = time.perf_counter()
+    for step in range(1, nsteps + 1):
+        if step in schedule:
+            projector_state = schedule[step]
+            state = projector_state(state)
+        old = state
+        before = grid.ke(old)
+        state = model.step(old, dt, t=(step - 1) * dt, projector=projector_state)
+        if not np.isfinite(state).all():
+            diverged_at_step = step
+            break
+        projection_energy += grid.ke(state) - before
+        max_div = max(max_div, grid.max_div_velocity(state))
+        if step % sample_every == 0 or step == nsteps:
+            times.append(step * dt)
+            states.append(state.copy())
+    return {
+        "times": times,
+        "states": states,
+        "max_abs_divergence": max_div,
+        "max_scaled_energy_balance_residual": None,
+        "projection_energy_total": projection_energy,
+        "wall_seconds": time.perf_counter() - start,
+        "diverged_at_step": diverged_at_step,
+        "final_time_reached": times[-1],
+    }
+
+
+def select_window(
+    snap_times: list[float], snap_states: list[np.ndarray],
+    start: float, end: float,
+) -> list[np.ndarray]:
+    """Snapshots whose time lies in ``[start, end]`` (inclusive, with slack)."""
+    return [
+        s for t, s in zip(snap_times, snap_states)
+        if start - 1e-12 <= t <= end + 1e-12
+    ]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--re", type=int, default=5000)
@@ -257,10 +360,36 @@ def main() -> None:
     parser.add_argument("--train-time", type=float, default=None,
                         help="offline training window (default: first 20%% of T)")
     parser.add_argument("--train-snapshot-stride", type=float, default=0.05)
+    parser.add_argument(
+        "--moving-window", action=argparse.BooleanOptionalAction, default=True,
+        help="also run the oracle moving-window static baseline (R27)",
+    )
+    parser.add_argument(
+        "--refit-interval", type=float, default=1.0,
+        help="time between moving-window refits",
+    )
     parser.add_argument("--ranks", type=int, nargs="+", default=[16, 32, 42])
     parser.add_argument("--dmd-ridge", type=float, default=0.0)
     parser.add_argument("--dlra-relative-amplitude-cutoff", type=float, default=1e-10)
-    parser.add_argument("--dlra-max-rank", type=int, default=64)
+    parser.add_argument(
+        "--rank-criterion", choices=("amplitude", "energy"), default="energy",
+        help="the adaptive method's rank rule. 'energy' is the r99-style rule, "
+             "which is the one that can track the state's growth; 'amplitude' "
+             "is the historical rule that saturates at the dealias ceiling",
+    )
+    parser.add_argument("--energy-fraction", type=float, default=0.99)
+    parser.add_argument(
+        "--rank-basis", choices=("state", "fluctuations"), default="fluctuations",
+        help="whose energy the rank rule counts. 'fluctuations' ranks on "
+             "psi - x-avg(psi), which is what R26 measured and what S1 "
+             "requires of every statistic here; 'state' ranks on the whole "
+             "field, which the secularly growing zonal mean eventually "
+             "dominates",
+    )
+    parser.add_argument(
+        "--dlra-max-rank", type=int, default=0,
+        help="largest retained rank; 0 selects the grid's dealiasing ceiling",
+    )
     parser.add_argument("--dlra-check-every", type=int, default=5)
     parser.add_argument("--force-amplitude", type=float, default=0.5)
     parser.add_argument("--base-speed", type=float, default=0.5)
@@ -309,6 +438,13 @@ def main() -> None:
         f"offline window: ~{n_train} snapshots for ranks up to {largest}",
         flush=True,
     )
+    if train_time * 2 > args.T:
+        print(
+            f"warning: --train-time {train_time} is more than half of T={args.T}, "
+            "so the early and late windows overlap and are not independent "
+            "placements",
+            flush=True,
+        )
 
     print(f"reference: Re={args.re} N={args.N} T={args.T} dt={dt} ...", flush=True)
     ref = run_reference(
@@ -326,6 +462,14 @@ def main() -> None:
         metrics = window_metrics(grid, run["states"], run["times"], window)
         div = divergence_series(run["times"], run["states"], ref["times"], ref["states"])
         finite = [d["relative_l2"] for d in div if d["relative_l2"] is not None]
+        diverged = run.get("diverged_at_step")
+        reached = run.get("final_time_reached", run["times"][-1])
+        # A method that died early has statistics over a shorter window, and
+        # saying so is the difference between a result and a misread one.
+        covered_full = reached >= args.T - 1e-9
+        if metrics:
+            metrics["covers_requested_window"] = covered_full
+            metrics["window_actually_covered_end"] = reached
         entry = {
             "metrics": metrics,
             "max_abs_divergence": run["max_abs_divergence"],
@@ -333,15 +477,22 @@ def main() -> None:
             "max_trajectory_divergence": max(finite) if finite else None,
             "final_trajectory_divergence": finite[-1] if finite else None,
             "wall_seconds": run.get("wall_seconds"),
+            "diverged": diverged is not None,
+            "diverged_at_step": diverged,
+            "diverged_at_time": (diverged * dt) if diverged else None,
+            "final_time_reached": reached,
+            "covers_requested_window": covered_full,
+            "accuracy_metrics_valid": covered_full,
         }
         if extra:
             entry.update(extra)
         methods[name] = entry
+        flag = "" if covered_full else f"  [DIVERGED at t={reached:.3f}]"
         print(
             f"  {name}: E_fluct={metrics.get('energy_fluct_mean')} "
             f"Z_fluct={metrics.get('enstrophy_fluct_mean')} "
             f"maxdiv={run['max_abs_divergence']:.2e} "
-            f"traj_div={entry['max_trajectory_divergence']}",
+            f"traj_div={entry['max_trajectory_divergence']}{flag}",
             flush=True,
         )
 
@@ -354,8 +505,11 @@ def main() -> None:
         new_model(grid, args.re, args.force_amplitude),
         rank=2,
         min_rank=1,
-        max_rank=args.dlra_max_rank,
+        max_rank=args.dlra_max_rank or 2 * (args.N // 3) + 1,
         relative_amplitude_cutoff=args.dlra_relative_amplitude_cutoff,
+        rank_criterion=args.rank_criterion,
+        energy_fraction=args.energy_fraction,
+        rank_basis=args.rank_basis,
         check_every=args.dlra_check_every,
         adapt_initial=True,
     )
@@ -365,10 +519,12 @@ def main() -> None:
     dlra_div = grid.max_div_velocity(dlra_state)
     dlra_start = time.perf_counter()
     nsteps = int(round(args.T / dt))
+    dlra_diverged = None
     for step in range(1, nsteps + 1):
         dlra_state = adaptive.step(dlra_state, dt, t=(step - 1) * dt)
         if not np.isfinite(dlra_state).all():
-            raise FloatingPointError(f"DLRA non-finite at step {step}")
+            dlra_diverged = step
+            break
         dlra_div = max(dlra_div, grid.max_div_velocity(dlra_state))
         if step % sample_every == 0 or step == nsteps:
             dlra_times.append(step * dt)
@@ -381,6 +537,8 @@ def main() -> None:
             "states": dlra_states,
             "max_abs_divergence": dlra_div,
             "wall_seconds": time.perf_counter() - dlra_start,
+            "diverged_at_step": dlra_diverged,
+            "final_time_reached": dlra_times[-1],
         },
         {
             "rank_final": adaptive_rank,
@@ -392,40 +550,125 @@ def main() -> None:
 
     # Matched ranks: the requested ladder plus the rank adaptivity reached.
     matched = sorted(set(args.ranks + [adaptive_rank]))
+
+    # R27: "the cost of staticity" turns out to be a function of *window
+    # placement*, not a property of POD -- at t=0.1 an early window is
+    # near-optimal, at t=8 the same window is useless and one at [7.95, 8] would
+    # be near-exact.  So all three placements are reported and the comparison is
+    # against the best of them; reporting only the early window would measure my
+    # choice of window rather than the method.
+    windows = {
+        "early": (0.0, train_time),
+        "late": (max(0.0, args.T - train_time), args.T),
+    }
     for rank in matched:
-        print(f"static POD at matched rank {rank} ...", flush=True)
-        pod = PODGalerkin(grid, rank).fit(ref["training"])
-        run = run_projected(
-            grid, new_model(grid, args.re, args.force_amplitude), initial, dt,
-            args.T, sample_every, pod.project, ref["checkpoints"],
-        )
-        run["max_scaled_energy_balance_residual"] = None
-        record(
-            f"pod_r{rank}",
-            run,
-            {
-                "rank_requested": rank,
-                "rank_effective": pod.effective_rank(),
-                "rank_matched_to_adaptive": rank == adaptive_rank,
-                "initial_projection_relative_l2": pod.relative_error(initial),
-                "role": "static offline baseline at a matched rank",
-            },
-        )
+        for label, (w0, w1) in windows.items():
+            snaps = select_window(ref["snap_times"], ref["snap_states"], w0, w1)
+            if len(snaps) < rank:
+                print(
+                    f"  skipping pod_{label}_r{rank}: window holds {len(snaps)} "
+                    f"snapshots, fewer than the requested rank",
+                    flush=True,
+                )
+                continue
+            print(f"static POD r={rank} on the {label} window "
+                  f"[{w0:.2f}, {w1:.2f}] ({len(snaps)} snapshots) ...", flush=True)
+            pod = PODGalerkin(grid, rank).fit(snaps)
+            run = run_projected(
+                grid, new_model(grid, args.re, args.force_amplitude), initial, dt,
+                args.T, sample_every, pod.project, ref["checkpoints"],
+            )
+            run["max_scaled_energy_balance_residual"] = None
+            record(
+                f"pod_{label}_r{rank}",
+                run,
+                {
+                    "rank_requested": rank,
+                    "rank_effective": pod.effective_rank(),
+                    "rank_matched_to_adaptive": rank == adaptive_rank,
+                    "window": label,
+                    "window_start": w0,
+                    "window_end": w1,
+                    "window_snapshots": len(snaps),
+                    "initial_projection_relative_l2": pod.relative_error(initial),
+                    "role": (
+                        "static offline baseline at a matched rank; the window "
+                        "placement is reported because it, not POD, decides how "
+                        "good this baseline is"
+                    ),
+                },
+            )
+
+    # The moving/oracle window: refit on a trailing window as the run proceeds.
+    # This is the strongest a fixed-rank offline-fitted method can be, and it
+    # is the one the proposed method has to beat to be worth anything.
+    if args.moving_window:
+        rank = adaptive_rank
+        refit_every = max(1, int(round(args.refit_interval / dt)))
+        schedule = {}
+        n_train_steps = int(round(train_time / dt))
+        for step in range(refit_every, nsteps + 1, refit_every):
+            t_now = step * dt
+            snaps = select_window(
+                ref["snap_times"], ref["snap_states"],
+                max(0.0, t_now - train_time), t_now,
+            )
+            if len(snaps) >= rank:
+                schedule[step] = PODGalerkin(grid, rank).fit(snaps)
+        print(f"moving-window (oracle) static POD at r={rank}, "
+              f"refit every {args.refit_interval} ...", flush=True)
+        if schedule:
+            early_snaps = select_window(
+                ref["snap_times"], ref["snap_states"], 0.0, train_time
+            )
+            initial_projector = (
+                PODGalerkin(grid, rank).fit(early_snaps)
+                if len(early_snaps) >= rank else None
+            )
+            run = run_projected_moving(
+                grid, new_model(grid, args.re, args.force_amplitude), initial, dt,
+                args.T, sample_every, schedule,
+                initial_projector=initial_projector,
+            )
+            record(
+                f"pod_moving_r{rank}",
+                run,
+                {
+                    "rank_requested": rank,
+                    "rank_matched_to_adaptive": True,
+                    "refit_interval": args.refit_interval,
+                    "refits": len(schedule),
+                    "role": (
+                        "oracle static baseline: the basis is refitted on a "
+                        "trailing window of the reference trajectory, so this is "
+                        "the best a fixed-rank offline method can do"
+                    ),
+                },
+            )
+        else:
+            print("  moving window skipped: no refit point had enough snapshots")
 
     for rank in matched:
         print(f"POD-DMD at matched rank {rank} ...", flush=True)
-        pod = PODGalerkin(grid, rank).fit(ref["training"])
+        # The DMD basis uses the early window, including t=0, so P0 holds: the
+        # online state is the exact projection of the IC.  The operator is fitted
+        # to the *reference's own* snapshots in that window -- the surrogate
+        # learns the true dynamics -- so no extra PDE pass is needed.
+        train_snaps = select_window(
+            ref["snap_times"], ref["snap_states"], 0.0, train_time
+        )
+        pod = PODGalerkin(grid, rank).fit(train_snaps)
         dmd = PODDMD(pod, ridge=args.dmd_ridge)
-        train_model = new_model(grid, args.re, args.force_amplitude)
-        state = initial.copy()
-        train_steps = int(round(train_time / dt))
-        for step in range(train_steps):
-            state = train_model.step(state, dt, t=step * dt)
+        for state in train_snaps:
             dmd.accumulate(state)
         fit_start = time.perf_counter()
         dmd.fit()
         fit_seconds = time.perf_counter() - fit_start
-        run = run_dmd(grid, dmd, initial, dt, args.T, sample_every)
+        dmd_stride = max(1, int(round(args.train_snapshot_stride / dt)))
+        run = run_dmd(
+            grid, dmd, initial, dt, args.T, sample_every,
+            steps_per_application=dmd_stride,
+        )
         record(
             f"pod_dmd_r{rank}",
             run,
@@ -434,10 +677,18 @@ def main() -> None:
                 "rank_effective": pod.effective_rank(),
                 "rank_matched_to_adaptive": rank == adaptive_rank,
                 "ridge": args.dmd_ridge,
-                "training_steps": train_steps,
-                "training_pairs": dmd._samples,
+                "window": "early",
+                "training_steps": len(train_snaps) * dmd_stride,
+                "training_pairs": dmd.samples,
+                "steps_per_application": dmd_stride,
+                "applications": run.get("applications"),
+                "seconds_per_application": run.get("seconds_per_application"),
                 "fit_seconds": fit_seconds,
-                "role": "dynamic data-driven baseline at a matched rank",
+                "role": (
+                    "dynamic data-driven baseline at a matched rank; it does no "
+                    "PDE work per step, so its cost is reported per operator "
+                    "application as well as per step"
+                ),
             },
         )
 
@@ -450,6 +701,9 @@ def main() -> None:
             min_rank=rank,
             max_rank=rank,
             relative_amplitude_cutoff=args.dlra_relative_amplitude_cutoff,
+            rank_criterion=args.rank_criterion,
+            energy_fraction=args.energy_fraction,
+            rank_basis=args.rank_basis,
             check_every=10**9,        # never adapt: this isolates the rank
             adapt_initial=False,
         )
@@ -458,10 +712,12 @@ def main() -> None:
         states = [state.copy()]
         div = grid.max_div_velocity(state)
         start = time.perf_counter()
+        fixed_diverged = None
         for step in range(1, nsteps + 1):
             state = fixed.step(state, dt, t=(step - 1) * dt)
             if not np.isfinite(state).all():
-                raise FloatingPointError(f"fixed-rank DLRA non-finite at step {step}")
+                fixed_diverged = step
+                break
             div = max(div, grid.max_div_velocity(state))
             if step % sample_every == 0 or step == nsteps:
                 times.append(step * dt)
@@ -473,6 +729,8 @@ def main() -> None:
                 "states": states,
                 "max_abs_divergence": div,
                 "wall_seconds": time.perf_counter() - start,
+                "diverged_at_step": fixed_diverged,
+                "final_time_reached": times[-1],
             },
             {
                 "rank_requested": rank,
@@ -489,6 +747,17 @@ def main() -> None:
     }
     if len(fingerprints) > 1:
         raise SystemExit(f"methods disagree about the initial state: {fingerprints}")
+
+    diverged = sorted(
+        name for name, entry in methods.items() if entry.get("diverged")
+    )
+    if diverged:
+        print(
+            f"\n{len(diverged)} method(s) went non-finite and are reported as "
+            f"such, with their statistics over the window they actually "
+            f"covered: {diverged}",
+            flush=True,
+        )
 
     output = {
         "case": "baselines",
@@ -509,8 +778,11 @@ def main() -> None:
             "ranks_matched": matched,
             "adaptive_rank": adaptive_rank,
             "dmd_ridge": args.dmd_ridge,
+            "rank_criterion": args.rank_criterion,
+            "energy_fraction": args.energy_fraction,
+            "rank_basis": args.rank_basis,
+            "dlra_max_rank": args.dlra_max_rank or 2 * (args.N // 3) + 1,
             "dlra_relative_amplitude_cutoff": args.dlra_relative_amplitude_cutoff,
-            "dlra_max_rank": args.dlra_max_rank,
             "dlra_check_every": args.dlra_check_every,
             "force_amplitude": args.force_amplitude,
             "base_speed": args.base_speed,
@@ -522,14 +794,19 @@ def main() -> None:
         "initial_state": fingerprint,
         "reference": ref_metrics,
         "methods": methods,
+        "diverged_methods": diverged,
         "interpretation": (
             "Ranks are matched by construction: the adaptive rank is read from "
             "the DLRA run and then requested explicitly from static POD and "
             "POD-DMD. Accuracy is judged on time-averaged fluctuation KE and "
             "enstrophy over the statistical window and on the spectra over the "
             "resolved range; pointwise L2 is reported last and is labelled "
-            "trajectory divergence. If the adaptive method does not win at "
-            "matched rank, that is recorded here rather than argued away."
+            "trajectory divergence. A method marked diverged went non-finite "
+            "part way through: its statistics cover only the window it reached "
+            "and accuracy_metrics_valid is false, so it is reported as a "
+            "divergence rather than as an accuracy. If the adaptive method does "
+            "not win at matched rank, that is recorded here rather than argued "
+            "away."
         ),
     }
     output_path.parent.mkdir(parents=True, exist_ok=True)

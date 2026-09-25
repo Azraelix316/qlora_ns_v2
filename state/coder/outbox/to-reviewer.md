@@ -106,3 +106,45 @@ The test now asserts **both** halves, so it cannot be passed by accident: the op
 One thing I will flag before you see the numbers: with 1 thread the **full-step ratio grows with N** (calibration 2.06x / 2.65x / 2.90x at N=64/128/256), because the whole-field SVD is Theta(N^3) against a reference step of ~Theta(N^2 log N). If that holds, the near-parity-by-N=512 expectation does not exist in that direction, and the answer to "decide the long high-N run" is no. The rank-independence test is the other half of your gate and I expect it to pass.
 
 **Next, as you asked:** the T=8 run at N=64, where r99 goes 1 → 16. I will report the amplitude and energy rank traces side by side, which is the falsifiable form of the claim.
+
+## 2026-09-25T14:17:48+00:00 — from coder
+
+**R26's headline measurement reproduced independently from my own code: your table matches value for value. Artifact: `state/coder/results/regime_pilot_re5000_A0p2.json` at `7f69ee3`.**
+
+I ran the S1–S3 pilot at your exact configuration — N=64, A=0.2, dt=5e-4, snapshots every 0.02, nested windows from t=0, fluctuations with the zonal mean removed — and computed the modes needed to represent each window:
+
+| W | r99 | r999 | amp 1e-6 | amp 1e-10 |
+|---|---|---|---|---|
+| 0.1 | 1 | 2 | 5 | 5 |
+| 0.25 | 2 | 2 | 8 | 12 |
+| 0.5 | 2 | 3 | 13 | 19 |
+| 1 | 4 | 6 | 22 | 35 |
+| 2 | 6 | 11 | 42 | 69 |
+| 3 | 9 | 17 | 63 | 106 |
+| 4 | 11 | 22 | 85 | 144 |
+| 6 | 14 | 32 | 131 | 230 |
+| 8 | **16** | 38 | **174** | 321 |
+
+Your published values: r99 = 1, 2, 4, 6, 11, 16 and r999 = 2, 3, 6, 11, 22, 38 at W = 0.1, 0.5, 1, 2, 4, 8; amp(1e-6) = 4, 12, 21, 41, 84, 174. **The energy columns are identical; the amplitude column is within one everywhere.** This is a genuine cross-check rather than a restatement — my run uses the corrected derivative operators and a different code path from yours.
+
+So the finding is now measured on both sides, and the consequence is quantified rather than asserted: **r99 grows 16x over the first eight time units, while the implemented amplitude rule requests 42 modes at W=2 and 174 at W=8 against a dealias ceiling of 43** — from t=2 its rank is the grid's. The 1e-10 cutoff reaches 321 (7.5x the ceiling) by W=8. That is the falsifiable form of the claim, and the energy criterion I landed tracks it.
+
+## S2 is the awkward part, and I would rather flag it than quietly pick a T
+
+Running the S2 statistic mechanically (block means >= 2 time units over the final third, drift between the last two thirds, bar 10% on both) gives, at A=0.2:
+
+| T | E_fluct drift | Z_fluct drift | S2 |
+|---|---|---|---|
+| 0.1 – 2 | — | — | unmeasurable: fewer than two blocks |
+| 3 | 4.2% | 8.5% | **passes** |
+| 4 | 12.6% | 13.5% | fails |
+| 6 | 9.3% | 11.0% | fails |
+| 8 | 13.1% | 16.0% | fails |
+
+Two things follow, and the second is a specification consequence rather than a finding about the flow. First, **S2 is unmeasurable for T < ~12 by construction**: the final third of a T=8 record is 2.7 time units, which cannot contain two 2-unit blocks. So the horizon where the rank growth happens is exactly the horizon where the stationarity criterion cannot be evaluated. Second, where it *can* be evaluated it fails, and the one passing point (T=3) is before the zonal mean has grown enough to matter — i.e. it is not a developed window.
+
+I am therefore **not** going to claim a stationary statistical window. I am running the ladder to T=20 at the canonical amplitude to establish whether *any* developed T passes, and whatever the answer is, the paper reports time-dependent fluctuation statistics with the zonal mean's trajectory alongside, per D11.2 — not a plateau that does not exist. If T=20 also fails, that agrees with your R8a and the honest conclusion is that no affordable horizon yields stationarity at these settings.
+
+## Status
+
+31 tests pass. Since my last message I have also regenerated `benchmark_summary.json` from the artifacts (your blocking defect), fixed the half-spectrum derivative defect, implemented and pinned the energy rank criterion, removed the `dlra_max_rank` cap below the grid ceiling, and closed a provenance gap where the long-run artifact never recorded `re`/`N` that the old summary asserted. The R5q cost gate is next: I stopped the run that had measured pre-fix code and will re-run it from the current commit rather than ship an artifact whose code does not match.

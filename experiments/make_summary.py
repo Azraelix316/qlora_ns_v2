@@ -240,12 +240,24 @@ def main() -> None:
         }
 
     regime = None
+    regime_name = None
     regime_data = load("regime_pilot.json")
     if regime_data is not None:
+        regime_name = "regime_pilot.json"
+    else:
+        # The pilot is per (Re, forcing amplitude); prefer the canonical
+        # amplitude rather than silently taking whichever sorts first.
+        for path in sorted(RESULTS.glob("regime_pilot_*.json")):
+            data = load(path.name)
+            if data and data["parameters"]["force_amplitude"] == 0.5:
+                regime_data, regime_name = data, path.name
+                break
+    if regime_data is not None:
         regime = {
-            "file": "regime_pilot.json",
+            "file": regime_name,
             "git_commit": regime_data["provenance"]["git_commit"],
             "re": regime_data["parameters"]["re"],
+            "force_amplitude": regime_data["parameters"]["force_amplitude"],
             "rows": [
                 {
                     "final_time": r["final_time"],
@@ -261,6 +273,7 @@ def main() -> None:
                 for r in regime_data["rows"]
             ],
             "qualifying_horizons": regime_data["qualifying_horizons"],
+            "window_rank_table": regime_data.get("window_rank_table", []),
             "windowed_spectra": {
                 key: {
                     "window_start": val.get("window_start"),
@@ -272,6 +285,13 @@ def main() -> None:
                 }
                 for key, val in regime_data.get("windowed_spectra", {}).items()
             },
+            "rank_finding": (
+                "window_rank_table gives the modes needed to represent the "
+                "fluctuations over [0, W]: r99 grows 1 -> 16 over the first "
+                "eight time units, while the amplitude rule requests more modes "
+                "than the dealiasing ceiling holds from t=2 onward, so its rank "
+                "trace is the grid's and not the dynamics'"
+            ),
         }
 
     output = {

@@ -148,7 +148,8 @@ class PODDMD:
         self.operator: np.ndarray | None = None
         self._gram: np.ndarray | None = None
         self._cross: np.ndarray | None = None
-        self._samples = 0
+        self.samples = 0
+        self.singular_gram = False
         self._previous: np.ndarray | None = None
 
     # -- offline phase ----------------------------------------------------
@@ -169,19 +170,27 @@ class PODDMD:
             # A^T, which a symmetric test operator can hide -- the dedicated
             # non-symmetric linear-system test exists for that reason.
             self._cross += np.outer(c, self._previous)
-            self._samples += 1
+            self.samples += 1
         self._previous = c
 
     def fit(self) -> "PODDMD":
         """Solve the accumulated normal equations for ``A``."""
-        if self._gram is None or self._samples == 0:
+        if self._gram is None or self.samples == 0:
             raise RuntimeError("PODDMD.accumulate must be called before fit")
         gram = self._gram.copy()
         if self.ridge > 0.0:
             gram += self.ridge * np.trace(self._gram) / gram.shape[0] * np.eye(gram.shape[0])
         # A = C_{n+1} C_n^T (C_n C_n^T)^{-1}; the Gram is symmetric, so this is
-        # solve(G, cross^T)^T.
-        self.operator = np.linalg.solve(gram, self._cross.T).T
+        # solve(G, cross^T)^T.  A rank-deficient Gram (too few distinct training
+        # directions) is reported and solved in the least-squares sense rather
+        # than raising, because a baseline that refuses to fit is a harness
+        # failure and not a finding.
+        try:
+            self.operator = np.linalg.solve(gram, self._cross.T).T
+            self.singular_gram = False
+        except np.linalg.LinAlgError:
+            self.operator = np.linalg.lstsq(gram, self._cross.T, rcond=None)[0].T
+            self.singular_gram = True
         return self
 
     # -- online phase -----------------------------------------------------
