@@ -30,6 +30,40 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R40 — coder's figure rewrite: exemplary in intent, three defects, one blocking.
+> Coder `1c67cb4` merged (`e1a7621`), 129 files.** The new `make_figures.py` docstring states
+> **three things it deliberately does not do**, each citing a binding rule: it does not title a
+> rank trace "adaptive rank growth" (a `17→43` trace is the grid, not the dynamics — D11.3;
+> the rank figure is the **windowed** rank, the grid-independent quantity); it does not label
+> pointwise L2 as "error" (it measures phase once solutions decorrelate, so every such axis
+> reads **"trajectory divergence"**); and it does not plot a rank-truncated state's singular
+> values as a spectrum. **And every figure records the artifact and commit behind it via
+> `PROVENANCE.md`, so a figure cannot outlive its numbers** — the right structural guarantee,
+> and it exists nowhere else in this project. Two titles are directly quotable: **"The
+> amplitude rule asks for the grid"** and **"Exact divergence-freeness holds for every
+> method"** (`7.1e-15` at `N=32`; `1e-14`–`2.2e-13` across every run). **Three defects.**
+> **(1) BLOCKING — `fig_cost.pdf/png` were DELETED and not regenerated.** The previous set was
+> `fig_cost`/`fig_rank_error`/`fig_singular_values`; the new set has no cost figure, the
+> rewritten script still contains the code, and `PROVENANCE.md` lists no cost artifact — so it
+> was skipped because the `bench_cost.py` artifact does not exist yet. **This is the figure R39
+> needs:** `t* ≈ 0.050·r^1.12` is a statement about a *trade* — per-step cost is Θ(N³) and
+> **rank-independent** (D11.1), so buying `r=32` for `t*=2.4` costs the full-grid solver's
+> 3.9× — and without the cost panel the law cannot be weighed. **Required: restore it, and
+> list expected-but-skipped figures in `PROVENANCE.md`** so a missing figure is stated rather
+> than inferred from an absence; a set committed with one silently missing is the exact failure
+> the script's own `provenance()` call was built to prevent. **(2)
+> `fig_spectra_ek` time-averages a non-stationary quantity over exactly the wrong window:** it
+> takes `next(iter(windowed_spectra.values()))` = **`t ∈ [4, 8]`** (`window_start=4.0`,
+> `window_end=8.0`, 401 samples) and labels the axis "time-averaged" without naming the
+> window. R38 measured across that interval: **energy drift `8.8%` (inside the S2 bar),
+> enstrophy drift `24.7%` (outside)**. So **`E(k)` over `[4,8]` is defensible and `Z(k)` is
+> not** — required: state the window and the drift, or drop the `Z(k)` panel. **(3)
+> `fig_rank_growth` is misnamed** — its panels are "Rank of the windowed fluctuations" and
+> "The amplitude rule asks for the grid", both the *opposite* of the retired "rank growth"
+> framing, and filenames leak into `\ref{}` and the writer's prose. Rename. **Merge safety:**
+> 0 conflicts, 0 files outside coder-owned paths; the 6 "deletions" verified individually —
+> `fig_cost.{pdf,png}` genuinely dropped, and the four `fig_rank_error`/`fig_singular_values`
+> files all re-added under new names.
 > **R39 — THE PAPER'S CENTRAL RESULT, measured by me: the advantage horizon scales as
 > `t* ≈ 0.050 · r^1.12`. A static subspace has a rank-INDEPENDENT error floor of ≈0.30 that
 > no rank removes.** Coder has not run the crossover surface (they are on `bench_cost.py`)
@@ -1084,6 +1118,59 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R40 — coder's figure rewrite: exemplary in intent, three defects, one
+  blocking.**
+  `1c67cb4` merged at `e1a7621`; 129 files on `main`.
+
+  **Credit, and it is specific.** The new `make_figures.py` docstring states **three things the
+  script deliberately does not do**, each citing a binding rule: it does not title a rank trace
+  "adaptive rank growth" (a `17 → 43` trace is the grid, not the dynamics — D11.3; the rank
+  figure is the **windowed** rank, the grid-independent quantity); it does not label pointwise
+  L2 as "error" (it measures phase once solutions decorrelate, so every such axis reads **"trajectory
+  divergence"**); and it does not plot a rank-truncated state's singular values as a spectrum
+  (such a state has exactly as many values as its rank). **And every figure records the
+  artifact and commit behind it via `PROVENANCE.md`, so a figure cannot outlive its numbers** —
+  the right structural guarantee, and it exists nowhere else in this project. Two titles are
+  directly quotable and both are supportable claims: **"The amplitude rule asks for the grid"**
+  and **"Exact divergence-freeness holds for every method"** (`7.1e-15` at `N=32`;
+  `1e-14`–`2.2e-13` across every run).
+
+  **(1) BLOCKING — `fig_cost.pdf` and `fig_cost.png` were deleted and not regenerated.** The
+  previous set was `fig_cost` / `fig_rank_error` / `fig_singular_values`; the new set is
+  `fig_div_free` / `fig_divergence` / `fig_rank_growth` / `fig_spectra_ek` / `fig_spectrum`, so
+  two were renamed and **the cost figure was simply dropped**. The rewritten script still
+  contains the cost code and `PROVENANCE.md` lists no cost artifact, so it was skipped because
+  the `bench_cost.py` output does not exist yet.
+
+  **This is the figure R39 needs.** `t* ≈ 0.050 · r^1.12` is a claim about a **trade**: per-step
+  cost is `Θ(N³)` and **rank-independent** (D11.1), so buying `r = 32` for `t* = 2.4` costs the
+  full-grid solver's **3.9×**. Without the cost panel the law cannot be weighed and a reader
+  has no way to know what `r = 32` costs. **Required:** restore it when the cost artifact
+  lands, **and list expected-but-skipped figures in `PROVENANCE.md`** so a missing figure is
+  *stated* rather than inferred from an absence. A figure set committed with one silently
+  missing is the exact failure mode the script's own `provenance()` call exists to prevent —
+  which is what makes this worth blocking on rather than noting.
+
+  **(2) `fig_spectra_ek` time-averages a non-stationary quantity over exactly the wrong
+  window.** It takes `next(iter(data["windowed_spectra"].values()))`, which resolves to
+  **`t ∈ [4, 8]`** (`window_start = 4.0`, `window_end = 8.0`, 401 samples), and labels the axis
+  **"normalised, time-averaged"** without naming the window. R38 measured across exactly that
+  interval: **fluctuation-energy drift `8.8%` (inside the S2 bar) and enstrophy drift `24.7%`
+  (outside it)**. So **`E(k)` over `[4,8]` is defensible and `Z(k)` is not** — a time-averaged
+  `Z(k)` there averages a quantity that changes by a quarter across the window. **Required:**
+  state the window and the measured drift on the figure, or drop the `Z(k)` panel. This is the
+  R38 constraint made concrete, and it is precisely where a spectra figure — the kind a
+  low-rank paper most wants — stops being defensible.
+
+  **(3) `fig_rank_growth` is misnamed.** Its two panels are "Rank of the windowed fluctuations"
+  and "The amplitude rule asks for the grid" — both correct, and both the **opposite** of the
+  retired "rank growth" framing. Filenames leak into `\ref{}` and into the writer's prose,
+  where a reader seeing `fig_rank_growth` will read "adaptive rank growth" into a figure that
+  argues against it. Rename.
+
+  **Merge safety.** 0 conflicts, 0 files outside coder-owned paths. The 6 "deletions" verified
+  individually rather than by count: `fig_cost.{pdf,png}` genuinely dropped (§2), and the four
+  `fig_rank_error` / `fig_singular_values` files all re-added under new names.
 - 2026-09-25 **R39 — the paper's central result, measured by me: a scaling law for the
   advantage horizon. A static subspace has a rank-independent floor; a reduced integrator's
   error falls with rank; the two cross where rank alone decides.**
