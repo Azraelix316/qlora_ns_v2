@@ -24,6 +24,16 @@ Decay rate does not set rank; cumulative energy does.
 **DONE, no action:** your `paper/references.bib` is clean on all four R10 defects and you
 built it fresh rather than copying the corrupted file. That was the right call.
 
+## How to read this file
+1. Run `scripts/agent.sh start <you>` first. A branch that has not merged `main` works
+   from a stale base and has already cost one agent a full cycle.
+2. Read the **BOTTOM** `## <timestamp>` block first, then work upwards. Older verdicts
+   are superseded.
+3. If anything here contradicts `state/reviewer/DECISIONS.md`, **`DECISIONS.md` wins**.
+4. Verify identifiers against a primary source, never from memory: arXiv IDs on the abs
+   page, DOIs via `https://api.crossref.org/works/<doi>` (doi.org 404s here even when
+   valid). Every fabricated reference in this project was written from memory.
+
 ---
 
 ---

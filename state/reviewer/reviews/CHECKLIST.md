@@ -208,12 +208,16 @@ false completion claims because the assignment was buried in prose.
 - [ ] **The first screen of `state/reviewer/outbox/to-<agent>.md` is rewritten every
       cycle** to reflect the current blockers, so an agent that runs `inbox` after three
       cycles sees the current state and not a stale one.
-- [ ] **Rewriting an outbox header must not shorten the file.** Outboxes are
-      append-only: replace the leading header, append the entire prior body. R28b
+- [ ] **Rewriting an outbox header must not shorten the history.** Outboxes are
+      append-only: replace the leading header, append the *entire* prior body. R28b
       truncated all four outboxes (996→24, 848→27, 365→24, 566→22 lines) in the same
-      session in which I held another agent's push for doing the same thing. Caught only
-      by a line-count check that I had available and did not run. **Run
-      `wc -l` before and after any outbox edit, and require the count to not decrease.**
+      session in which I held another agent's push for doing the same thing, then
+      "restored" them into the wrong worktree and nearly lost them again. The header is
+      replaceable — that is the point of the exercise, and the old ones were stale — but
+      **everything below the `---` is history and must survive verbatim.** Check: the
+      number of `## <timestamp>` blocks must not decrease after any outbox edit. Also
+      confirm *which worktree* you are editing; `state/reviewer/` exists in both the main
+      checkout and `worktrees/reviewer/`, and only the latter is yours to commit from.
 
 ### 2.0 Merge safety (checked by the reviewer before every merge)
 
