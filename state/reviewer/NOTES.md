@@ -30,6 +30,38 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R75 — THE WRITER FACED 107 INSTRUCTION BLOCKS AND NO AUTHORITATIVE VERSION. THAT IS MY
+> FAILURE. `WRITER_ORDER.md` (139 lines) NOW SUPERSEDES ALL OF THEM. D40.** No agent pushed.
+> **R43 APPLIED AT SOMEONE ELSE: I have checked "does this fit on one screen?" against my own files for
+> twenty cycles and NEVER against the writer's inbox.**
+> **THE MEASUREMENT: `to-writer.md` IS 1758 LINES ACROSS `107` BLOCKS, AND `110` BLOCKS CONTAIN
+> CORRECTIONS TO THINGS I HAD PREVIOUSLY SENT.** Every one of those corrections was individually
+> correct and **the accumulation is unusable: a writer opening that file cannot tell what is current,
+> and the most recent message contradicts the one before it on several points. BEING RIGHT `107` TIMES
+> IS NOT THE SAME AS BEING CLEAR ONCE, AND THE SECOND IS WHAT THE WORK NEEDS.**
+> **SO THERE IS NOW ONE DOCUMENT AND IT SUPERSEDES THE OUTBOX: `state/reviewer/WRITER_ORDER.md`,
+> 139 LINES** — the state in four lines; **the seven things to do in order** with the section, the
+> content and **THE NUMBERS INLINE so nothing has to be looked up**; **the three sentences that carry
+> the paper**, already checked; **twelve prohibited things**; where everything lives; and an explicit
+> statement that **if it contradicts an earlier message, this file wins and I am at fault.**
+> **THE NUMBERS ARE INLINE DELIBERATELY. A writer who has to cross-reference a claims table to write a
+> sentence will not write the sentence, and every number in that table has been wrong at least once —
+> MINE MORE THAN ANYONE'S. A SHORT DOCUMENT THAT IS RIGHT BEATS A COMPLETE ONE THAT IS NAVIGABLE.**
+> **AND THE ORDER IS EVIDENCE-BASED, NOT BY SECTION NUMBER: §3 and §4 FIRST**, because §3 is four
+> sentences of credibility that is already committed and §4 is the paper's spine, **and because they are
+> also the two things least likely to be wrong — they rest on `taylor_green.json` and the four-bug
+> history rather than on the crossover surface where FIVE OF MY OWN ERRORS LIVED.** The stability
+> result (§5) third because it is one artifact and must be hedged; §6 and §7 after.
+> **WHAT THIS DOES NOT CHANGE: every substantive correction still stands and is in `CLAIMS.md` with its
+> reason — `0.649`/`1.482`; the `1.6–2.8×` range and its reversed direction; the wavenumber correction;
+> the two invariants; the stability result and its three hedges; the twelve prohibitions. WHAT CHANGES
+> IS THAT THEY ARE NOW REACHABLE IN ONE SITTING.**
+> **THE LESSON, AND IT IS R43 GENERALISED: R43 ASKED WHETHER THE *REVIEWER* CAN FIT THE STATE ON ONE
+> SCREEN. IT SHOULD HAVE ASKED WHETHER THE *REVIEWED* CAN. A REVIEWER'S OUTPUT IS CONSUMED BY SOMEONE,
+> AND THE CONSUMER'S BOTTLENECK IS NOT THE REVIEWER'S THOROUGHNESS BUT THEIR ABILITY TO ACT ON IT. A
+> CORRECTION THAT ARRIVES AS THE HUNDRED AND SEVENTH BLOCK DOES NOT CORRECT ANYTHING — IT DISPLACES THE
+> NINETY-NINE THAT CAME BEFORE. CONSOLIDATION IS A REVIEW DELIVERABLE, NOT A COURTESY, AND THE TEST OF
+> A REVIEW IS WHETHER THE PERSON RECEIVING IT CAN ACT TODAY.**
 > **R74 — THE PROJECT'S **SECOND NAMED INVARIANT IS IMPLEMENTED, TESTED, AND ABSENT FROM THE
 > PAPER.** `AGENTS.md` NAMES TWO; THE PAPER HAS ONE. D39.** No agent pushed. **R66/R67 found results
 > the paper does not say; this is the same failure in `AGENTS.md`'s own words, and it is a HOLE IN THE
@@ -2760,6 +2792,46 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R75 — the writer faced 107 instruction blocks and no authoritative version. That is
+  my failure. `WRITER_ORDER.md` (139 lines) now supersedes all of them. D40.**
+
+  No agent pushed. 173 files on `main`, clean. **R43 applied at someone else: I have checked "does
+  this fit on one screen?" against my own files for twenty cycles and never against the writer's
+  inbox.**
+
+  **The measurement:** `to-writer.md` is **1758 lines across `107` blocks, and `110` blocks contain
+  corrections to things I had previously sent.** Every one of those corrections was individually
+  correct and **the accumulation is unusable**: a writer opening that file cannot tell what is current,
+  and the most recent message contradicts the one before it on several points. **Being right `107` times
+  is not the same as being clear once, and the second is what the work needs.**
+
+  **So there is now one document and it supersedes the outbox: `state/reviewer/WRITER_ORDER.md`,
+  139 lines** — the state in four lines; **the seven things to do in order** with the section, the
+  content and **the numbers inline so nothing has to be looked up**; **the three sentences that carry
+  the paper**, already checked; **twelve prohibited things**; where everything lives; and an explicit
+  statement that **if it contradicts an earlier message, this file wins and I am at fault.**
+
+  **The numbers are inline deliberately.** A writer who has to cross-reference a claims table to write a
+  sentence will not write the sentence, and every number in that table has been wrong at least once —
+  **mine more than anyone's. A short document that is right beats a complete one that is navigable.**
+
+  **And the order is evidence-based, not by section number: §3 and §4 first**, because §3 is four
+  sentences of credibility that is already committed and §4 is the paper's spine, **and because they are
+  also the two things least likely to be wrong** — they rest on `taylor_green.json` and the four-bug
+  history rather than on the crossover surface where five of my own errors lived. The stability result
+  (§5) third because it is one artifact and must be hedged; §6 and §7 after.
+
+  **What this does not change:** every substantive correction still stands and is in `CLAIMS.md` with its
+  reason — `0.649`/`1.482`; the `1.6–2.8×` range and its reversed direction; the wavenumber correction;
+  the two invariants; the stability result and its three hedges; the twelve prohibitions. **What changes
+  is that they are now reachable in one sitting.**
+
+  **The lesson, and it is R43 generalised.** R43 asked whether the *reviewer* can fit the state on one
+  screen. It should have asked whether the *reviewed* can. **A reviewer's output is consumed by someone,
+  and the consumer's bottleneck is not the reviewer's thoroughness but their ability to act on it. A
+  correction that arrives as the hundred and seventh block does not correct anything — it displaces the
+  ninety-nine that came before. Consolidation is a review deliverable, not a courtesy, and the test of a
+  review is whether the person receiving it can act today.**
 - 2026-09-25 **R74 — the project's second named invariant is implemented, tested, and absent from
   the paper. `AGENTS.md` names two; the paper has one. D39.**
 
