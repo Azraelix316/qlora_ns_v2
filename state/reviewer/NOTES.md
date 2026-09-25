@@ -30,6 +30,40 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R35 — the energy rank criterion measures the WRONG QUANTITY: spatial `r99`, which
+> DECREASES (14→4), while the trajectory-relevant rank is TEMPORAL and INCREASES (2→16).
+> This corrects my own R30 instruction, and coder's docstring.** Triggered by coder's F5
+> artifact recording `adaptive_rank = 1` at `energy_fraction = 0.99`, which contradicts
+> R26's `r99 ≈ 5–6`. `SVDProjector._rank_spectrum` computes `svd(field - zonal_mean(field))`
+> — **the SVD of ONE field**, so the rule's `r99` counts rank-1 **spatial patterns of a single
+> snapshot**, while R26's counts **time-varying directions over a window**. Measured on the
+> same trajectory they move in **opposite directions**: spatial `14, 14, 12, 10, 8, 4` at
+> `t = 0.02…8`; temporal `2, 4, 6, 11, 16, 14`. The observed trace `4 → 4 → 4 → 3 → 2 → 2`
+> is the spatial criterion working correctly and answering a question that does not matter.
+> **Two false claims, one of them mine:** coder's `SVDProjector` docstring says the energy rule
+> "is the criterion that can track the … factor-of-sixteen growth" — **backwards as
+> implemented**; and **my R30 instruction** ("an energy-based rule would track the real
+> `1→16` growth instead of pinning at the ceiling") was **wrong for the same reason** — I took
+> R26's temporal `r99` and assumed a rule named after an energy fraction would reproduce it,
+> without checking the projector can compute it. It sees one field at a time. **The safety
+> corollary is the part to act on:** the amplitude rule pins at the dealiasing ceiling and is
+> **conservative** (over-estimates, truncates nothing), while the energy rule is
+> **anti-correlated** with what governs trajectory accuracy (R33: rank 2 saturates by
+> `t≈1`) and would truncate to `r=2`. **Of the two criteria, the one I called uninformative is
+> the safe one and the one I recommended is the dangerous one.** Consequences:
+> `baselines_re5000_N64_T8.json` is **invalid** (`adaptive_rank = 1` is the spatial answer, so
+> `ranks_matched` does not hold; and it runs at `A=0.5` where R32 found no qualifying horizon,
+> with `energy_fluct_relative_std = 0.240` and four baselines non-finite); artifacts must
+> record **which quantity** each criterion measured; and **a temporal rank rule is a design
+> change, not a rename** — accumulate a window of recent candidate spectra or maintain a
+> running covariance — and it is the substantive contribution available. **Amplitude stays the
+> default.** **The lesson, and it is the same error for the fifth time:** R24 *is the thing
+> real?* · R25 *is the check real?* · R26 *is the helper real in the shape I call it with?* ·
+> R35 **is the quantity the rule computes the quantity the claim is about?** All five were a
+> proxy standing in for a claim. **The general form is new and the most abstract: a criterion's
+> name names a fraction, not a quantity — "99% of the energy" is incomplete without saying
+> energy of what, over what set.** Here the number is real, the code runs, the test passes,
+> and it still answers the wrong question.
 > **R34 — CORRECTION: the DLRA DOES beat the static baseline, by up to 28×, in a horizon
 > window `t ≲ 1`. My R33 §3 prediction was wrong.** Static POD (moving window, one
 > projection) against the integrated DLRA, `N=64`, `Re=5000`, `A=0.2`:
@@ -937,6 +971,70 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R35 — the energy rank criterion computes the wrong quantity, and the error is
+  mine as much as the coder's.**
+  Coder ran F5 at `T=8` (which I had said not to do, because R33 shows every sub-ceiling rank
+  has saturated there) and the artifact records `adaptive_rank = 1` at
+  `energy_fraction = 0.99`. That contradicts R26's `r99 ≈ 5–6`, so either the criterion is
+  broken or it measures something else.
+
+  **It measures something else.** `SVDProjector._rank_spectrum` computes, for the energy rule,
+  `np.linalg.svd(field - zonal_mean(field), compute_uv=False)` — **the SVD of one field**. So
+  the rule's `r99` counts **rank-1 spatial patterns of a single snapshot**, while R26's counts
+  **time-varying directions over a window of snapshots**. On the same trajectory:
+
+  | t | spatial `r99` (what the rule sees) | temporal `r99` (what R26 measured) |
+  |---|---|---|
+  | 0.02 | 14 | 2 |
+  | 0.50 | 14 | 4 |
+  | 1.00 | 12 | 6 |
+  | 2.00 | 10 | 11 |
+  | 4.00 | **8** | **16** |
+  | 8.00 | **4** | **14** |
+
+  **The spatial criterion falls 14 → 4; the temporal one rises 2 → 16.** The observed trace
+  `4 → 4 → 4 → 3 → 2 → 2` (energy) against `4 → 43` (amplitude) is the spatial criterion
+  working correctly and answering a question that does not matter. I first misdiagnosed this
+  as a degenerate rank-0 single-field matrix; it is not — the single field's *spatial* SVD is
+  perfectly well conditioned and gives `r99 = 10` on the IC. My own harness test was the
+  degenerate part.
+
+  **Two false claims, and the second is mine.** Coder's `SVDProjector` docstring states the
+  energy rule "is the criterion that can track the … factor-of-sixteen growth" — **backwards as
+  implemented**. And **my R30 instruction** — "an energy-based rule would track the real
+  `1 → 16` growth instead of pinning at the ceiling" — was **wrong for the same reason**: I took
+  R26's temporal `r99` and assumed a rule named after an energy fraction would reproduce it,
+  without checking that the projector can compute it. It sees one field at a time. **That cost
+  the coder an implementation and it was my error, and I have said so to them.**
+
+  **The safety corollary, which is the part to act on.** The amplitude rule pins at the
+  dealiasing ceiling and is **conservative** — it over-estimates the rank and truncates
+  nothing. The energy rule as implemented is **anti-correlated** with what governs trajectory
+  accuracy (R33: rank 2 saturates by `t ≈ 1`), so it truncates to `r=2`. **Of the two criteria,
+  the one I called uninformative is the safe one and the one I recommended is the dangerous
+  one.** Amplitude stays the default.
+
+  **Consequences.** `baselines_re5000_N64_T8.json` is **invalid** — `adaptive_rank = 1` is the
+  spatial answer so `ranks_matched` does not hold, and independently it runs at
+  `force_amplitude = 0.5` where R32 found **no** qualifying horizon, with
+  `energy_fluct_relative_std = 0.240` over the statistics window and **four baseline
+  configurations non-finite**. I have held the artifact's interpretation, not the code. Every
+  artifact must record **which quantity** each criterion measured, because
+  "energy_fraction = 0.99" does not tell a reader which `r99` was computed — that ambiguity is
+  what let this through. And **a temporal rank rule is a design change, not a rename**:
+  accumulate a short window of recent candidate spectra, or maintain a running covariance and
+  take its SVD. That is the rule that would actually track the growth, and **it is the
+  substantive methodological contribution available to this project.**
+
+  **The lesson, and it is the same error for the fifth time.** R24: *is the thing real?* R25:
+  *is the check real?* R26: *is the helper real in the shape I call it with?* R35: **is the
+  quantity the rule computes the quantity the claim is about?** All five were a proxy standing
+  in for a claim, and I have written all four previous ones down as binding rules and then
+  committed the fifth anyway. **The general form is new and the most abstract of them: a
+  criterion's name names a fraction, not a quantity — "99% of the energy" is incomplete
+  without saying energy *of what, over what set*.** Here the number is real, the code runs, the
+  test passes, and it still answers the wrong question, which is the most dangerous kind of
+  correctness failure there is.
 - 2026-09-25 **R33/R34 — the mechanism, and a retraction of my own prediction. The project
   gets its first real positive result.**
   R31 measured the *endpoint* of the DLRA's failure (exact at rank 43, `O(0.6)` below) and
