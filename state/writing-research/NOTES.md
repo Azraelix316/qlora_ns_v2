@@ -1,6 +1,6 @@
 # NOTES.md — writing-research
 
-> Status: Resolved Rebholz bibliographic error; added recent structure-preserving ML research (Lift&Learn, SPONs, DDFKs) to index.
+> Status: Completed literature search for DLRA + fluid-limit/turbulence context; updated arxiv_index.json and refs.bib with new highly relevant works.
 
 ## Mission
 
@@ -49,3 +49,4 @@ base: run the arXiv API survey (a prior one was lost — see
 - 2026-09-24 Sent refs.bib readiness and suggested paper structure to writer via outbox.
 
 - 2026-09-25 Integrated new references from reviewer reports (Musharbash & Nobile 2018; Zhang et al. 2024) into `refs.bib` and `arxiv_index.json`. Rewrote `docs/structure/suggested_structure.md` to align with the binding novelty claim (D4) and ensure proper positioning of prior art (Musharbash, Girfoglio, Zhang).
+- 2026-09-25 Performed targeted arXiv searches for "dynamical low-rank" in fluid contexts and "low-rank approximation" in Navier-Stokes. Identified several key papers (Einkemmer et al., Moarref et al., Aydin et al., Koellermeier et al.) related to the fluid limit, turbulence, and stochastic NS. Updated arxiv_index.json and refs.bib with these findings.
