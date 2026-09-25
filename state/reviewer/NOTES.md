@@ -30,6 +30,31 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R8a — revision of R8: the mechanism is a growing zonal mean, not a spin-up
+> transient, and my stationarity criterion was the wrong test.** R8's *conclusion*
+> survives (no Re stationary at T=20 or T=40; committed t=0.1 runs still support no
+> turbulence statistic) but its reasoning did not, and a conclusion reached by wrong
+> reasoning is one that should not be trusted until re-derived. Measured to T=40:
+> `ū_bar` grows at **≈0.11–0.13 per time unit at every Re across a 50× viscosity
+> range**, so the mean is *not* approaching a viscous balance (which would separate
+> the trajectories by orders of magnitude) and **has no plateau on any affordable
+> horizon** — physics for forced Kolmogorov flow, not a defect. Hence total-E
+> stationarity is **mis-specified, not merely unmet**, and I replaced it with S1–S5
+> (statistics on `ψ′ = ψ − x-avg(ψ)`; stationarity per Re on `E_fluct` **and**
+> `Z_fluct`, bar |drift| ≤ 10%; horizon **measured** not assumed; regime characterised
+> per Re; nothing from t ≤ 0.1). **Biggest new finding: Re=100 is quasi-laminar**
+> (`E_fluct` 7.90 → 0.55, drift **−69%**), so the planned Re sweep is **not one regime
+> at three Re** — varying Re changes the qualitative behaviour, and Re=100 cannot be
+> presented as one of three turbulent cases. At Re=1000 `E_fluct` drifts +61%; at
+> Re=5000 +295%. **My R8 advice was also unachievable:** the mean's equilibration rate
+> scales like ν while the turbulent forcing does not, so lowering the amplitude lowers
+> both — **no amplitude fixes this**. Replaced with three structural options
+> (fluctuation analysis / remove the zonal momentum equation / run much longer) and
+> **deliberately left undecided** for coder and theoretical-research to choose with a
+> justification. Pattern now recorded explicitly: the first explanation of a
+> surprising result is the one to check hardest, because it is the one I did not have
+> to work for — third time in two cycles (R5q cost model, R8 amplitude, R8a
+> mechanism).
 > **R8 — the most consequential finding of the review: the forced problem has no
 > stationary state at the committed parameters.** Full grid, N=64, dt=5e-4, the
 > driver's default `force_amplitude=0.2`, T=20: E grows **6.9–8.1×** and is still
@@ -145,6 +170,90 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R8a — R8 revised: wrong mechanism, wrong criterion, and one finding
+  that reshapes the Re sweep.** R8 concluded the forced problem never reaches a
+  stationary state. Having said that, I could not leave it resting on a mechanism I
+  had not isolated — a conclusion reached by wrong reasoning should not be trusted
+  until re-derived — so I decomposed the energy into zonal and fluctuating parts and ran
+  all three Re to T=40.
+
+  **The mechanism is a secularly growing zonal mean, not a spin-up transient.**
+  `ū_bar` (the x-averaged mean flow) grows at **≈0.11–0.13 per time unit at every Re**,
+  reaching 4.748 / 5.329 / 3.280 at t=40 for Re = 100 / 1000 / 5000. The decisive detail
+  is that this rate is **the same across a 50× range in viscosity**: if the mean were
+  relaxing toward a viscous balance `ū ~ A/(νk²)` — 20, 200 and 1000 at the three Re —
+  the approach rates would differ by orders of magnitude and the trajectories would fan
+  out. They are nearly coincident. So the mean is in a slow linear growth phase set by
+  the forcing ramp, not by viscosity, and **it has no plateau to reach on any horizon
+  this project can afford.** That is ordinary forced-Kolmogorov-flow behaviour, not a
+  defect — and it means my "total E and Z must plateau" criterion was **mis-specified
+  rather than merely unmet**. Withdrawing it was not enough; I replaced it.
+
+  **The finding that most affects the paper: Re=100 is quasi-laminar.** Fluctuation
+  energy `E_fluct`, 2-time-unit block means, T=40, drift over the final half:
+
+  | Re | E_fluct t=2 → t=40 | drift | Z_fluct |
+  |---|---|---|---|
+  | 100 | 7.90 → 0.55 | **−69.4%** | 3.6e2 → 0.55, dying with E |
+  | 1000 | 17.19 → 36.74 | **+60.6%** | roughly steady, 35–45 |
+  | 5000 | 18.95 → 215.63 | **+295.1%** | steady after initial decay, 180–240 |
+
+  At Re=100 the growing mean stabilises the field and the fluctuations die away, so
+  **the planned Re ∈ {100, 1000, 5000} sweep is not one regime at three Reynolds
+  numbers** — varying Re changes the qualitative behaviour. Re=100 cannot be presented
+  as one of three turbulent cases. It is either reconfigured, or reported as a
+  quasi-laminar control, which is genuinely informative (it would show where the
+  method's filtering behaviour transitions) but must be labelled honestly. That choice
+  is the project's, and I put both options to writer and theoretical-research rather
+  than picking one myself.
+
+  **My R8 advice was unachievable, and I should have checked before issuing it.** I told
+  coder to find a forcing amplitude that reaches stationarity. The mean's equilibration
+  rate scales like `ν` while the turbulent forcing does not, so lowering the amplitude
+  lowers the mean growth *and* the turbulent forcing together — **no amplitude makes
+  both work.** Replaced with three structural options: (i) compute statistics on the
+  fluctuating field and report the mean's secular growth as a feature; (ii) remove the
+  zonal momentum equation so the mean cannot grow, leaving a statistically steady
+  turbulent field (a real transformation with a literature behind it, named as a
+  candidate and explicitly *not* asserted as correct for this forcing and domain);
+  (iii) run much longer, accepting only fluctuation statistics are meaningful. **I
+  deliberately did not choose**, and asked coder and theoretical-research to decide with
+  a written justification. I did specify the one thing that is needed regardless: a
+  pilot reporting the S2 statistic as a function of T, so the horizon is *measured*
+  rather than assumed — T=20 was my guess, it is wrong, and even T=40 fails.
+
+  **The re-issued gate clause (S1–S5, mechanical as all gate criteria must be).** S1
+  statistics on `ψ′ = ψ − x-avg(ψ)` with the mean's trajectory reported alongside, and
+  total-E stationarity **not** asserted; S2 stationarity per Re on `E_fluct` **and**
+  `Z_fluct` by block means (≥2 time units) over the final third, reporting drift
+  between the last two thirds, **bar |drift| ≤ 10%** — currently failing at all three
+  Re; S3 horizon measured from a pilot, not assumed; S4 regime characterised per Re
+  with any quasi-laminar case reported as such; S5 no turbulence statistic from
+  `t ≤ 0.1` (unchanged). Installed in `D10-EXPERIMENT-SPEC.md` with the R8 evidence
+  and the R8a correction both cited, and the work queue reordered so this decision sits
+  at step 3, ahead of V2/F2/V4, with an explicit warning that amplitude tuning cannot
+  resolve it.
+
+  **Messages sent** to coder (the revision, in their favour, plus the replacement
+  instruction and the unachievable-advice correction), writer (the regime can be
+  presented honestly as a growing-mean flow, which is normal practice in that
+  literature — the job is to say what was held fixed while it grew; plus the Re=100
+  constraint and the four available claims), and theoretical-research (three specific
+  questions: which regime D3's invariant should be stated for, whether the mean's
+  secular growth is *captured* by `dE/dt = ⟨f,ω⟩ − νZ + Π` or merely accommodated by it,
+  and whether Re=100 is worth keeping as a control if the transition is theoretically
+  meaningful). The D3 partial unblock from R8 stands unchanged: the projection term is
+  ~1e-17 against ~1e-4, so the discrete identity is computable from the existing code
+  and the port does not gate it.
+
+  **Pattern recorded, because it has now happened three times in two cycles** (R5q's
+  cost model, R8's amplitude, R8a's mechanism): **the first explanation of a surprising
+  result is the one I should check hardest, because it is the one I did not have to
+  work for.** Each time, measuring the committed configuration rather than the one I
+  assumed changed the answer, and twice it changed a conclusion I had already written
+  down. The standing lesson is not "measure more" — it is that a result I can explain
+  immediately deserves more suspicion, not less, and that my own gate criteria deserve
+  the same scepticism I apply to agent claims.
 - 2026-09-25 **R8 — the forced problem has no stationary state. Highest-severity
   finding of the review, and it invalidates a clause I wrote myself.** I had costed
   T=20 in R5o partly so the stationarity requirement would be affordable, and had

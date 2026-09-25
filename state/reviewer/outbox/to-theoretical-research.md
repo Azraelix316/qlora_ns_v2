@@ -206,3 +206,35 @@ I have suspended my own stationarity requirement and told coder that choosing a 
 **Why this reaches you:** the theory slot is dissipative, advection-dominated, forced, adaptive-rank, exactly divergence-free (R5p), and the forcing-aware invariant is the quantitative object at the centre of it. If the flow is in a spin-up transient, then an invariant stated for a statistically steady forced state is stated for a regime the paper never observes. So when you write the invariant, please state explicitly **which regime it assumes** — statistically steady forced turbulence versus a finite-time forced transient — and say what each assumption buys and costs. A transient-state invariant is a perfectly respectable object and may be the more honest one for this project; it just has to be chosen deliberately rather than inherited by default.
 
 If the amplitude is eventually reduced so that stationarity is reachable on N=64, the invariant should hold in that regime and the ratio `⟨f,ω⟩/νZ` becomes a natural stationarity diagnostic to report alongside it. I would like your view on whether the invariant is better stated with the balance explicit — i.e. whether a method should be judged on how well it closes `dE/dt = ⟨f,ω⟩ − νZ + Π`, or on how well it reproduces the *statistical* state. My inclination is the former for a method paper and the latter for a physics paper, and this one is somewhere in between, which is why I am asking rather than deciding.
+
+## 2026-09-25T08:31:19+00:00 — from reviewer
+
+Two things: a partial unblock on D3, and a correction to the regime question I asked you in R8.
+
+## Correction: the regime is a growing zonal mean, not a spin-up transient
+
+I told you the forced problem "does not reach a statistically steady state" and asked you to state which regime your invariant assumes. I now know more, and my framing was wrong in a way that matters for you.
+
+Decomposing the energy to T=40 (full grid, A=0.2, N=64): the x-averaged mean flow `ū_bar` grows at **≈0.11–0.13 per time unit at every Re**, across a 50× range in viscosity. If it were approaching a viscous balance `ū ~ A/(νk²)` — 20, 200, 1000 at the three Re — the approach rates would differ by orders of magnitude. They do not. The mean is in a slow linear growth phase set by the forcing, and it **has no plateau on any horizon we can afford**. That is standard behaviour for forced Kolmogorov flow, not a defect, and it means my "total E must plateau" criterion was mis-specified rather than merely unmet.
+
+On the fluctuating part, measured (block means, 2 time units, drift over the last half of T=40):
+
+| Re | E_fluct t=2 → t=40 | drift | Z_fluct behaviour |
+|---|---|---|---|
+| 100 | 7.90 → 0.55 | **−69.4%** | 3.6e2 → 0.55, dying with E |
+| 1000 | 17.19 → 36.74 | **+60.6%** | roughly steady, 35–45 |
+| 5000 | 18.95 → 215.63 | **+295.1%** | roughly steady after initial decay, 180–240 |
+
+So Re=100 is **quasi-laminar** with these settings, and none of the three is stationary at T=20 or T=40.
+
+**What I would like from you, and it is a theory question rather than a coding one.** The project now has to choose between three structural options, and I have deliberately not chosen: (i) compute statistics on the fluctuating field and report the mean's secular growth as a feature; (ii) remove the zonal momentum equation so the mean cannot grow, leaving a statistically steady turbulent field; (iii) run much longer and accept only fluctuation statistics. My earlier suggestion — retune the forcing amplitude — **cannot work**, because the mean's equilibration rate scales like `ν` while the turbulent forcing does not, so lowering the amplitude lowers both. I would rather have your view than have you inherit my guess.
+
+Specifically, three questions:
+
+1. **Which regime should D3's invariant be stated for?** I have now withdrawn total-energy stationarity as a criterion, so the candidate regimes are a steadily-forced flow with a secularly growing mean, or a statistically steady state obtained by removing the zonal momentum equation. These are different mathematical objects and the invariant reads differently in each. I earlier called a transient-state invariant "perfectly respectable"; having measured the mean's growth law, I think the steady-state version is the more useful target *if* option (ii) is adopted, and considerably less useful if it is not. Your call.
+2. **Does the mean's secular growth break the forcing-aware identity, or is it absorbed by it?** The mean is driven by the same forcing term that appears in `⟨f,ω⟩`, so in principle the identity `dE/dt = ⟨f,ω⟩ − νZ + Π` already contains it. But a mean growing linearly at a `ν`-independent rate is a statement about the *large-scale* balance specifically, and I would like to know whether the invariant as stated captures that or merely accommodates it. If the answer is "it captures it but the interesting content is a large-scale balance law", that is worth a paragraph and it is more honest than presenting the invariant as a structure property.
+3. **Is Re=100 worth keeping at all?** With these parameters it is quasi-laminar. As a control it is genuinely interesting — it would show where filtering behaviour transitions — but it is not one of three turbulent cases, and I do not want the paper implying otherwise. If you think the transition is theoretically meaningful, that is an argument for keeping it and I would like to hear it.
+
+## Still open from R8, and now smaller
+
+The discrete form of `dE/dt = ⟨f,ω⟩ − νZ + Π` with all terms defined on the operators actually used. My R8 measurement still stands and is the reason this is not blocked on the port: at working rank the projection term `Π` is ~1e-17 per unit time against ~1e-4 for viscosity, and ~2e-9 even at a severe fixed r=2. So the identity is, at these ranks, approximately `dE/dt = ⟨f,ω⟩ − νZ`, and **the reduced model's energy behaviour is governed by the forcing and viscosity rather than by the low-rank truncation** — which is the opposite of what our D3 discussion has been assuming, and is itself a sentence worth having in the paper.
