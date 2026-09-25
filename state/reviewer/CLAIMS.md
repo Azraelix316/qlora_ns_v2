@@ -46,8 +46,23 @@ recorded here and the earlier figure is struck, not quietly dropped.
 corrected driver (R52). **D16.1.** `r ≤ 8`'s `0.25` is the first measurable interval, so "never
 leads" means *no resolvable lead*, not a measured zero.
 
-**Robustness, both axes, both measured (R52, D16.1): a 5× change in Reynolds number moves `t*`
-by 1–4%; a 4× change in the baseline's window by ≤7% (`r=16`) and ≤1% (`r=32`).**
+**Robustness — and the third axis fails (R53b, D17).** A 4× change in the baseline's window
+moves `t*` by ≤7% (`r=16`) and ≤1% (`r=32`); a 5× change in Reynolds number by 1–4%. **But a 2×
+refinement of the grid moves it by 37% at `r=16` and 146% at `r=32`:**
+
+| rank | `t*` at `N=64` | `t*` at `N=128` | `r`/ceiling at `N=64` | `r`/ceiling at `N=128` |
+|---|---|---|---|---|
+| 8 | *never leads* | *never leads* | 0.19 | 0.09 |
+| 16 | 1.46 | **1.99** | 0.37 | 0.19 |
+| 32 | 2.45 | **6.04** | 0.74 | 0.38 |
+| 43 | **never** | **6.41** | **1.00** | **0.51** |
+
+**THE CEILING IS GRID-DEPENDENT — `2·floor(N/3)+1` = 43 at `N=64`, 85 at `N=128` — so `r=43` is
+the full-grid solver at `N=64` and only half the ceiling at `N=128`. Never quote a rank ladder
+without the ceiling beside it (D17.2).**
+
+**A reported `t*` must therefore state FIVE things: the baseline's window length, its refit
+interval, its offset, the in-sample check, AND the grid with its dealiasing ceiling.**
 
 **The corrected spine, which is a mechanism rather than a slogan** (R52, **D16.2–D16.3**):
 
@@ -57,10 +72,13 @@ by 1–4%; a 4× change in the baseline's window by ≤7% (`r=16`) and ≤1% (`r
 > while the reduced integrator's falls to `0.0002` at `r=32`, a factor of `941`. From
 > `t ≈ 1` the static subspace can begin to use rank and the crossover is when it does.
 
-**The static error is rank-independent at SHORT horizons only.** Its spread across rank is
-`0.0%` at `t=0.1`, `0.1%` at `t=0.25`, `8.7%` at `t=0.5`, `~24%` at `t=1`, and `~40%` by
-`t=2–3` — with the long-horizon sensitivity **stronger at low Reynolds** (`43–46%` at
-`Re=1000` against `16–41%` at `Re=5000` for `t ≥ 3`). **And it is not monotone in rank: the
+**The static error is rank-independent at SHORT horizons only — and that is GRID-INDEPENDENT.**
+Spread across rank at `t=0.1` is `0.0%` at **both** `N=64` and `N=128`, and `0.0–0.1%` at
+`t=0.25`; the floors are `0.0940`/`0.0980` and `0.1182`/`0.1238`. Beyond `t≈1` it becomes
+rank-sensitive (`~24%` at `t=1`, `~40%` by `t=2–3` at `N=64`), **more so on the finer grid**
+(`57.4%` against `91.5%` at `t=2`), and **more so at low Reynolds** (`43–46%` at `Re=1000`
+against `16–41%` at `Re=5000` for `t ≥ 3`). **A finer grid gives the static subspace more rank
+to spend at long horizons, so it catches up later — which is the mechanism behind D17.1.** **And it is not monotone in rank: the
 interior rank `r=8` is consistently the worst**, so comparing only the endpoints `r=2` and
 `r=43` **understates the spread by 8×** — which is what both coder and I did.
 
@@ -296,7 +314,9 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "`r ≥ 32` wins at every horizon" / "`r ≤ 8` does not pay" (D13) | from the starvation-affected artifact |
 | quoting `crossover_surface.json`'s `crossovers` block | wrong for the third cycle; read the `dlra` / `static_moving_window` rows |
 | reporting `t*` without the baseline's window, refit interval and offset | **D15.3** — the number is meaningless without them |
-| "a static subspace's floor is rank-independent" **without the horizon qualifier** | **D16.2** — true at `t ≤ 0.25` (0.0–0.1%), false by `t ≈ 2–3` (~40%), and stronger at low `Re` |
+| "a static subspace's floor is rank-independent" **without the horizon qualifier** | **D16.2** — true at `t ≤ 0.25` (0.0–0.1%), false by `t ≈ 2–3` (~40%), and stronger at low `Re` and on a finer grid |
+| reporting `t*` without the grid and its dealiasing ceiling | **D17.1–D17.2** — `t*` grows 1.4–2.5× from `N=64` to `N=128`, and the ceiling is 43 vs 85 |
+| "the rank that never yields is the ceiling" as a grid-free statement | **D17.2** — it is a statement about the *grid*; at `N=128`, `r=43` is half the ceiling and does yield |
 | any memory or footprint advantage | **D16.4** — peak RSS is rank-independent and the reduced method costs **more** than the full grid |
 | quoting raw RSS as the memory figure | the ~34 MiB interpreter baseline dominates; report the **overhead over the full grid** |
 | quoting `crossover_surface.json`'s `crossovers` block | its reason string is **false** for `r = 2, 4, 16`; read the `dlra` / `static_moving_window` rows instead |

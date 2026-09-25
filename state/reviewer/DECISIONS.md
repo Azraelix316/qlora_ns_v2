@@ -987,3 +987,58 @@ block wrong for the third cycle. No per-step speedup in time or memory. Exact
 divergence-freeness `2.3e-14`–`2.2e-13`. BUG is `3.0–4.8×` slower than the projected integrator
 but its cost scales with rank (`1.17×`) where the projected one does not (`1.007×`). Every D4
 barred claim stands.
+
+---
+
+## D17 — The fifth axis: **`t*` is grid-dependent; the mechanism is not. D16's robustness
+## claim is qualified** (2026-09-25)
+
+> **OPERATIVE (R53b).** A reported `t*` must state **five** things: the baseline's window
+> length, its refit interval, its offset, the in-sample check, **and the grid together with its
+> dealiasing ceiling.** The claim of robustness holds for window and Reynolds number and **fails
+> for the grid and for the baseline's correctness** — and the two that fail are exactly the two
+> conventionally omitted from published comparisons.
+
+**D17.1 — `t*` grows with resolution.** `N=128` on the corrected driver, `W=1`, `Re=5000`,
+ranks `{8,16,32,43}` (four parallel single-rank runs; accuracy runs are contention-safe):
+
+| rank | `t*` at `N=64` | `t*` at `N=128` | ratio |
+|---|---|---|---|
+| 8 | *never leads* | *never leads* | — |
+| 16 | 1.46 | **1.99** | **1.37** |
+| 32 | 2.45 | **6.04** | **2.46** |
+| 43 | **never** | **6.41** | — |
+
+**A 2× refinement moves `t*` by 37% at `r=16` and 146% at `r=32`.**
+
+**D17.2 — The control that makes it readable, and a standing trap.** The dealiasing ceiling is
+`2·floor(N/3)+1` = **43 at `N=64` and 85 at `N=128`**, so **`r=43` is the full-grid solver at
+`N=64` and only 51% of the ceiling at `N=128`.** *"The rank that never yields is the
+dealiasing ceiling" is a statement about the grid, not the method*, and any `r=43` row compared
+across grids compares two different configurations. **Never quote a rank ladder without the
+ceiling beside it.**
+
+**D17.3 — The mechanism is grid-independent, and that is the better result.** Static error spread
+across rank: `0.0%` at `t=0.1` and `0.0–0.1%` at `t=0.25` at **both** resolutions, with floors
+`0.0940`/`0.0980` and `0.1182`/`0.1238`. The reduced integrator's own short-horizon error is
+nearly identical across grids (at `t=0.25`: `r=8` `0.1500`/`0.1389`, `r=16` `0.0134`/`0.0143`,
+`r=32` `0.00023`/`0.00021`). **So the short-horizon competition is grid-independent to a few
+percent and the crossover is not.** The reason is the long-horizon spread: at `t=2` the static
+error spans `57.4%` across rank at `N=64` against `91.5%` at `N=128`; at `t=3`, `88.7%` against
+`116.4%`. **A finer grid gives the static subspace more rank to spend at long horizons, so it
+catches up later.**
+
+**D17.4 — The five axes, stated once.** Robust: baseline window (≤7%), Reynolds number (1–4%),
+and the short-horizon mechanism (grid-independent). Sensitive: **grid (1.4–2.5×)** and **baseline
+correctness (2–4×)**. **The two that fail are the two a reader is least likely to check**, which
+is what makes the protocol requirement worth stating.
+
+**D17.5 — Scope, stated rather than left to be discovered.** Only `N ∈ {64, 128}` and only
+`Re=5000` at `N=128` were run. `N=256` remains declined on cost grounds (R42, unchanged). **A
+reader may reasonably ask whether the grid trend continues, and the honest answer is that we do
+not know.**
+
+**D17.6 — Unchanged.** Every fitted `c·r^p` void. `t*` is `≈1.3` (`r=16`) and `≈2.4` (`r=32`) at
+`N=64`. No per-step advantage in time (`1.78–2.18×` slower) or memory (`2.8–3.5 MiB` more).
+`crossover_surface.json`'s `crossovers` block still wrong. The artifact still does not record the
+refit offset. Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred claim stands.
