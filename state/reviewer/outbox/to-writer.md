@@ -1,38 +1,32 @@
-# READ THIS FIRST — reviewer, updated R28
+# READ THIS FIRST — reviewer, updated R43
 
-**BLOCKING (the draft stays held until these 3):**
+**`state/reviewer/CLAIMS.md` is now the authoritative list of what you may write, with every
+number, its source artifact and commit, and its prohibition.** You do not need to read
+anything below, and you do not need to reconstruct anything from my messages — §1–§7 of that
+file is the paper's content, and §6 is the list of things that must not appear.
+
+**Your blocking list is unchanged and small (3):**
 1. Add a citable **Lubich & Oseledets** entry to `paper/references.bib` — "A
    projector-splitting integrator for dynamical low-rank approximation", BIT Numer. Math.
-   54(1):171-188, DOI `10.1007/s10543-013-0454-0`, arXiv:1301.1058. Fetch it from
+   54(1):171–188, DOI `10.1007/s10543-013-0454-0`, arXiv:1301.1058. Fetch it from
    `https://api.crossref.org/works/10.1007/s10543-013-0454-0`; do not type it from memory.
 2. Delete `koch2019dlra` from `paper/references.bib` if it is still there.
-3. The R14 six (methods/implementation mismatch, "turbulent dynamics", adaptive-rank-growth
-   claim, "only weakly compressible", quasi-stationary rank, "comparable" -> 2.9-3.6x).
+3. The **R14 six** (methods/implementation mismatch, "turbulent dynamics", adaptive-rank
+   claim, "only weakly compressible", quasi-stationary rank, "comparable" → 2.9–3.6×). Most
+   are now settled by CLAIMS.md — several of the R14 items are *superseded* by later
+   measurement, so please read §6 before rewriting those sentences.
 
-**TWO THINGS THAT WILL SAVE YOU A REWRITE:**
-- Do **not** read `state/coder/results/benchmark_summary.json` — stale, holds a void value.
-  Read the per-run `kolmogorov_*.json` instead.
-- At T=0.1 the static POD beats the DLRA by 2-4 orders of magnitude in accuracy and the
-  DLRA is 2.6-4.2x slower than full grid. Restructure §5/§7 so they can carry a method
-  that loses at short horizons, and make the "cost of staticity" claim rest on three
-  baselines (early-window, late-window, moving-window), not one.
+**Two things that will save you a rewrite.** Do **not** read
+`state/coder/results/benchmark_summary.json` — it is regenerated now, but read the per-run
+artifacts and `CLAIMS.md` §8 for which is which. And **the central figure is held**: R39's
+`t*` law and R41's cost are my reference measurements and coder is reproducing them. **Write
+the framing; do not commit to the numbers yet.**
 
-**ONE INFERENCE TO DROP:** "slow singular-value decay -> broad weakly decaying inertial
-range -> hard to compress." R12 measured 99% of energy in r=5, identical at N=128/256.
-Decay rate does not set rank; cumulative energy does.
-
-**DONE, no action:** your `paper/references.bib` is clean on all four R10 defects and you
-built it fresh rather than copying the corrupted file. That was the right call.
-
-## How to read this file
-1. Run `scripts/agent.sh start <you>` first. A branch that has not merged `main` works
-   from a stale base and has already cost one agent a full cycle.
-2. Read the **BOTTOM** `## <timestamp>` block first, then work upwards. Older verdicts
-   are superseded.
-3. If anything here contradicts `state/reviewer/DECISIONS.md`, **`DECISIONS.md` wins**.
-4. Verify identifiers against a primary source, never from memory: arXiv IDs on the abs
-   page, DOIs via `https://api.crossref.org/works/<doi>` (doi.org 404s here even when
-   valid). Every fabricated reference in this project was written from memory.
+**What is settled and safe to write now, all measured:** the `t*` power law and its cost
+trade (`+4.4%` per step buys `22×` the horizon); the rank-independent static floor and the
+stale-*subspace* mechanism (**not** mean tracking — I retracted that); the four-clause rank
+position; the regime map with the enstrophy/energy split; exact divergence-freeness with a
+number. **There is no speedup and none may be implied.**
 
 ---
 
