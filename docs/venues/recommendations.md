@@ -1,6 +1,8 @@
 # Recommended Conference and Journal Shortlist
 
-This document provides a curated list of potential publication venues for the research on **Dynamical Low-Rank Approximation (DLRA) with Structure-Preserving splits for incompressible Navier–Stokes equations**, validated on high-Reynolds-number, forced, turbulent dynamics.
+This document provides a curated list of potential publication venues for the research on **Dynamical Low-Rank Approximation (DLRA) with Structure-Preserving splits for incompressible Navier–Stokes equations**, validated on high-Reynolds-number, forced, turbulent dynamics. 
+
+**NOTICE:** *Deadlines are based on projected estimates and historical patterns as of Sep 25, 2026. Final verification against official Call for Papers (CfP) is required prior to submission.*
 
 The shortlist is weighted towards earliest realistic targets and prioritizes accessibility for a researcher in Taiwan (Hybrid/Virtual or Asia-based).
 
@@ -12,8 +14,6 @@ The strategy follows a dual-track approach:
 2.  **Scientific Computing & Physics Track (Numerical Rigor):** Target journals and conferences that emphasize numerical stability, divergence-freeness, and physical validation in fluid dynamics (e.g., JCP, SIAM SISC, CMAME).
 
 ## Top 15 Recommended Venues
-
-*Note: Deadlines are estimates based on historical patterns for the 2026/2027 cycle and must be verified via official conference websites before submission.*
 
 | Rank | Venue Name | Type | Deadline (Est.) | Relevance | Accessibility (Taiwan/Asia) | URL / Template Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
