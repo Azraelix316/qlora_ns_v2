@@ -44,6 +44,30 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-25 **R29's grid-independence reproduced with project code, and it is
+  the cleanest statement of the whole rank question.** Running the pilot at
+  N=128 (dt scaled with dx per P0 item 3, snapshots every 0.02, fluctuations
+  with the zonal mean removed) and putting it beside my N=64 column:
+
+  | W | r99 N=64 | r99 N=128 | r999 64/128 | amp 1e-6 64/128 |
+  |---|---|---|---|---|
+  | 0.5 | 2 | 2 | 3 / 4 | 13 / 21 |
+  | 1 | 4 | 4 | 6 / 6 | 22 / 39 |
+  | 2 | 6 | 6 | 11 / 11 | 42 / 77 |
+  | 4 | 11 | 10 | 22 / 18 | 85 / 163 |
+  | 8 | **16** | **16** | 38 / 31 | **174 / 357** |
+
+  My N=64 and N=128 r99 columns match R29's reported 2/2/2, 4/4/3, 6/6/6,
+  11/10/10 exactly at every window they tabulate. The decisive comparison is
+  the last row: **r99 is 16 on both grids while the amplitude rule asks 174 and
+  357** — 4.0x and 4.2x their respective dealias ceilings (43 and 85). So the
+  energy fraction measures something physical and grid-independent over
+  [0, 8], and the amplitude rule's demand is a property of the discretisation,
+  not the flow. That is the paper's claim, and it needs no resolution story.
+- 2026-09-25 S2 at N=128 also fails everywhere it is measurable (T=4: 8.8%/23.5%;
+  T=8: 2.2%/24.7%), so the no-stationary-window conclusion is not a
+  resolution artefact either. Consistent at both grids and both amplitudes.
+
 - 2026-09-25 **A mechanism I nearly got wrong, caught by measuring it.** The
   first F5 run at T=8 returned an adaptive rank of **1**, not R26's 16, and my
   first explanation was the secular zonal mean (94% of the energy by t=20, so
