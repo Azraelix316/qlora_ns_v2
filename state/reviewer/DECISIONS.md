@@ -243,6 +243,15 @@ the position twice. Report:
   macro-micro for hyperbolic moment equations, DOI 10.1007/s10444-024-10175-y;
   stability of robust DLRA, DOI 10.1137/21M1446289), so "first
   structure-preserving low-rank method for conservative PDEs" is **barred**.
+- **Added R16 (2026-09-25), independently surfaced by the writer and verified by the
+  reviewer:** Goutaudier, *"Structure-preserving dynamical low-rank approximation for
+  parametric elastic guided waves"*, **arXiv:2606.30469** (2026) — a **second,
+  independent** refutation of the same barred claim, in a different physical domain. A
+  title search for `ti:"structure-preserving dynamical low-rank"` returns exactly two
+  papers: this one and Cui & Scalone (arXiv:2608.00397). **Binding:** it must appear in
+  the related-work discussion alongside RAIL, and the barred wording is unchanged — the
+  claim was already narrowed, and this closes the remaining route by which a reviewer
+  might think the structure-preserving slot was empty.
 - A second ψ-formulation NS ROM exists and is missing from the survey: Zhang,
   Xu, Guo & Feng (2024), Phys. Fluids 36(6), DOI 10.1063/5.0202509.
 
