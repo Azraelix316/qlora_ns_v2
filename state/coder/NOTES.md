@@ -44,6 +44,38 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-25 **R26's central measurement reproduced independently, and it
+  matches their table value for value.** Running the S1–S3 pilot at R26's exact
+  configuration (N=64, A=0.2, dt=5e-4, snapshots every 0.02, nested windows
+  from t=0, fluctuations with the zonal mean removed), the modes needed to
+  represent a window are
+
+  | W | r99 | r999 | amp 1e-6 | amp 1e-10 |
+  |---|---|---|---|---|
+  | 0.1 | 1 | 2 | 5 | 5 |
+  | 0.5 | 2 | 3 | 13 | 19 |
+  | 1 | 4 | 6 | 22 | 35 |
+  | 2 | 6 | 11 | 42 | 69 |
+  | 4 | 11 | 22 | 85 | 144 |
+  | 8 | **16** | 38 | **174** | 321 |
+
+  against R26's 1/2, 2/3, 4/6, 6/11, 11/22, 16/38 and 4/12, 12/21, 21/41,
+  41/84, 84/174 — the energy columns are identical and the amplitude column is
+  within one. This is a cross-check of their headline number from my own code
+  with the corrected derivative operators, not a restatement of it.
+  **The consequence is now measured on our side too:** r99 grows 16x over the
+  first eight time units, while the implemented amplitude rule asks for 42
+  modes at W=2 and 174 at W=8 against a dealias ceiling of 43 — so from t=2 its
+  rank is the grid's, exactly as R26 reports, and the 1e-10 cutoff reaches 321
+  (7.5x the ceiling) by W=8.
+- 2026-09-25 S2 measured rather than assumed, and the honest answer is that it
+  is not available at the horizon the rank question lives on: with the spec's
+  >= 2 time-unit blocks over the final third, T=3 passes (E drift 4.2%, Z drift
+  8.5%) but T=4, 6 and 8 fail (11–16%), and no T <= 8 can have two blocks in its
+  final third below T ~ 12. So S2 is *unmeasurable* for T < 12 by construction
+  and *failing* for T in [4, 8] once it is measurable. Running the ladder to
+  T=20 at the canonical amplitude to see whether any developed window passes.
+
 - 2026-09-25 **A real defect in the first-derivative operators, found by the
   R5k full-band test — and proved inert for every committed result.** Applying
   a k-dependent multiplier to the rfft *half* spectrum and inverting with
