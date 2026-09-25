@@ -1181,3 +1181,57 @@ cost artifact with a BUG-port one.
 **D19.7 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1). No per-step
 advantage in time or memory. Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred
 claim stands.
+
+---
+
+## D20 — **The flow is not the Kolmogorov flow.** The setup must be re-scoped (2026-09-25)
+
+> **OPERATIVE (R56).** The paper studies **forced 2-D incompressible NS with a single-mode
+> periodic unidirectional shear** `f = (A sin(k y), 0)`, **not** the Arnold–Korkin–Sinitsyn
+> cellular pump. **The setup section must state the force's formula — it currently never does.**
+> Drop "Kolmogorov equilibrium" and the Vinograd–Cullen–Clark classification, or retain them
+> only with an explicit statement that they describe a different flow. **Re-attribute "no
+> stationary fluctuation state" from the flow to the forcing.**
+
+**D20.1 — The finding, verified against the code.** `solvers/forcing.py`'s module docstring
+states the force is `f = (A sin(k y), 0)`, whose curl is `zeta = -A k cos(k y)` — a single
+resolved Fourier mode, divergence-free because `d_x f_x = 0` — and calls itself *"the periodic
+analogue of the usual Kolmogorov body-force driver."* **The AKS flow is
+`u = (U sin(αy), -U α sin(αx) cos(αy))`, a cellular pump with a steady lattice of convection
+cells and the classical Vinograd–Cullen–Clark stability boundary. These are different flows
+with different dynamics.** The naming is genuinely ambiguous in the literature — a periodic
+unidirectional shear is itself often called a Kolmogorov (shear) flow — **but CHECKLIST 1.3 asks
+that the forcing match what the name claims, and it does not.**
+
+**D20.2 — Where the error lives, and why it survived.** Seven mentions across four draft
+sections: *"single-mode Kolmogorov forcing"*, *"the system possesses the Kolmogorov
+equilibrium"*, *"forced Kolmogorov-flow runs"*, a figure caption, and the Vinograd–Cullen–Clark
+citation. **The draft never states the force's formula anywhere, so the error is invisible from
+the paper alone.** **I asserted "Kolmogorov flow" in six of my own review reports (10
+mentions) without ever opening `solvers/forcing.py`** — I reviewed a claim the paper makes
+about itself, in the paper, and did not verify it against the code. That is the standing
+failure mode, and the standing fix: *a paper's description of its own setup is a claim about
+the code, and is verified against the code.*
+
+**D20.3 — A finding of mine is weakened, and it should be.** D11.2 barred "turbulent
+dynamics" because R32/R36 found no qualifying stationary fluctuation state at any amplitude or
+resolution. **I had read that as a fact about the flow. It is a fact about the implemented
+force:** the AKS Kolmogorov flow *has* a well-known steady cellular state, and the literature
+the draft cites is precisely about it. **So the absence of a stationary state is not evidence
+about Kolmogorov flow at all — it is what one should expect from a periodic unidirectional
+shear, which has no steady cellular attractor.** R32/R36/R38 stand as measurements *of this
+forcing*; the paper must not present the absence of stationarity as a property of the flow it
+names, and must not claim to study the Kolmogorov flow's transition.
+
+**D20.4 — Only one option is feasible, and it costs something.** Implementing the AKS pump
+would **invalidate every measurement in the project**. So the paper is renamed honestly: it
+studies **forced 2-D NS with a single-mode periodic unidirectional shear**; §5 states the
+force's formula; the cellular-flow literature is dropped or explicitly distinguished; and
+"no stationary fluctuation state" is re-attributed to the forcing. **This costs the paper its
+recognisability, which is a real trade and one a reviewer should be told about rather than
+discover.** Recorded as a trade, not as a free fix.
+
+**D20.5 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent. No per-step advantage in
+time or memory. BUG's rank-dependent cost is the best-evidenced positive claim (D19.2). The
+windowed rank rule is worse (D18.1). Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4
+barred claim stands.
