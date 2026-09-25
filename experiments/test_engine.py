@@ -39,6 +39,8 @@ def test_spectral_conventions_and_norms():
     assert grid.max_div_velocity(psi) < 1e-12
     assert np.isclose(grid.ke(psi), 0.5 * (grid.l2_sq(u) + grid.l2_sq(v)))
     assert np.isclose(grid.enstrophy(psi), 0.5 * grid.l2_sq(omega))
+    random = np.random.default_rng(3).normal(size=(grid.N, grid.N))
+    assert np.isclose(grid.l2_sq(random), grid.spec_norm_sq(grid.fft(random)))
     omega_x, omega_y = grid.grad(omega)
     assert np.isclose(
         grid.laplacian_enstrophy(psi),
@@ -112,6 +114,22 @@ def test_energy_balance_for_self_consistent_state():
     assert abs(terms.residual_from_derivative(derivative)) < 1e-10
 
 
+def test_continuous_energy_balance_for_arbitrary_state():
+    grid = Grid2D(32)
+    model = StreamFunctionNS(
+        grid,
+        nu=0.01,
+        forcing=KolmogorovForcing(amplitude=0.2),
+        dealias=True,
+    )
+    psi = field(grid, "mixed")
+    psi_x, psi_y = grid.grad(psi)
+    rhs_x, rhs_y = grid.grad(model.rhs(psi))
+    derivative = grid.l2_dot(psi_x, rhs_x) + grid.l2_dot(psi_y, rhs_y)
+    terms = model.energy_terms(psi)
+    assert abs(terms.residual_from_derivative(derivative)) < 1e-10
+
+
 def test_midpoint_time_order_on_forced_multi_mode_state():
     grid = Grid2D(32)
     model = StreamFunctionNS(
@@ -143,17 +161,54 @@ def test_svd_projection_adapts_and_preserves_divergence():
         rank=2,
         min_rank=1,
         max_rank=12,
-        tolerance=1e-3,
+        tolerance=1e-6,
         check_every=1,
     )
     projected = lowrank.initialize(state)
     assert grid.max_div_velocity(projected) < 1e-12
     evolved = lowrank.step(projected, 0.002)
-    assert lowrank.rank >= 1
+    # Diffusion is a diagonal Fourier semigroup, so it preserves the
+    # low-rank stream-function subspace before the nonlinear projection.
+    diffuse_rank = np.linalg.svd(
+        StreamFunctionNS(grid, 0.01).diffuse(projected, 0.01), compute_uv=False
+    )
+    assert np.count_nonzero(diffuse_rank > 1e-10 * diffuse_rank[0]) <= 2
+    assert lowrank.rank > 2
     assert lowrank.rank <= 12
     assert grid.max_div_velocity(evolved) < 1e-12
     assert lowrank.projector.last_stats is not None
     assert lowrank.projector.last_stats.numerical_rank <= 12
+
+
+def test_rank_stagnation_and_restart_from_checkpoint():
+    grid = Grid2D(24)
+    model = StreamFunctionNS(grid, 0.01, forcing=KolmogorovForcing(0.1))
+    initial = field(grid, "tg")
+    first = DLRA(
+        model,
+        rank=1,
+        min_rank=1,
+        max_rank=6,
+        tolerance=1e-10,
+        check_every=2,
+    )
+    direct = first.integrate(initial, 0.002, 5)
+    assert set(first.rank_history) == {1}
+
+    # Reinitialize the adaptive state from a saved field and verify that a
+    # resumed trajectory agrees with an uninterrupted one.
+    checkpoint = first.integrate(initial, 0.002, 2)
+    resumed_model = StreamFunctionNS(grid, 0.01, forcing=KolmogorovForcing(0.1))
+    resumed = DLRA(
+        resumed_model,
+        rank=1,
+        min_rank=1,
+        max_rank=6,
+        tolerance=1e-10,
+        check_every=2,
+    )
+    resumed_state = resumed.integrate(checkpoint, 0.002, 3, t0=0.004)
+    assert np.max(np.abs(resumed_state - direct)) < 2e-11
 
 
 def test_static_pod_projection_is_a_galerkin_baseline():

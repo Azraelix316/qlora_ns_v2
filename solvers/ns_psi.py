@@ -124,29 +124,24 @@ class StreamFunctionNS:
         """
         if dt <= 0.0:
             raise ValueError("dt must be positive")
-        grid = self.grid
         state = np.asarray(psi, dtype=float)
         state = state - np.mean(state)
         state = self.diffuse(state, 0.5 * dt)
         if projector is not None:
             state = np.asarray(projector(state), dtype=float)
-            state = state - np.mean(state)
 
         y0 = self.nonlinear_forcing(state, t)
         midpoint = state + 0.5 * dt * y0
         if projector is not None:
             midpoint = np.asarray(projector(midpoint), dtype=float)
-            midpoint = midpoint - np.mean(midpoint)
         ymid = self.nonlinear_forcing(midpoint, t + 0.5 * dt)
         state = state + dt * ymid
         if projector is not None:
             state = np.asarray(projector(state), dtype=float)
-            state = state - np.mean(state)
 
         state = self.diffuse(state, 0.5 * dt)
         if projector is not None:
             state = np.asarray(projector(state), dtype=float)
-            state = state - np.mean(state)
         self.step_count += 1
         return state
 

@@ -1,7 +1,7 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: core stream-function spectral operators, SP split integrator, forcing primitives, DLRA projector, POD baseline, and 8 correctness tests are implemented and passing; benchmark drivers/results remain.
+> Status: core engine, adaptive DLRA/POD drivers, provenance-aware experiment scripts, and 10 correctness tests are implemented; final Re benchmark artifacts are being regenerated.
 
 ## Mission
 
@@ -31,6 +31,14 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-25 Added reproducible Taylor--Green and Kolmogorov drivers, a
+  three-Reynolds benchmark wrapper, JSON provenance, singular-value snapshots,
+  energy/enstrophy histories, rank traces, and finite-value stability flags.
+  Corrected the stream-function constant-gauge handling so SVD rank preservation
+  is not destroyed by a post-projection mean subtraction.  The test suite now
+  passes 10 tests, including restart, rank-growth, continuous energy-balance,
+  and SP diffusion-rank checks.  Final Re=100/1000/5000 result files remain to
+  be regenerated from the committed driver.
 - 2026-09-25 Implemented the initial stream-function engine: corrected the
   rFFT axis/wavenumber and Parseval conventions, exact vorticity sign, exact
   diffusion semigroup, dealiased midpoint SP split, periodic Kolmogorov source,

@@ -96,7 +96,7 @@ class KolmogorovForcing:
         return np.broadcast_to(chi, (grid.N, grid.N)).copy()
 
     def energy_input(self, psi: np.ndarray, grid: Grid2D, t: float = 0.0) -> float:
-        return grid.l2_sq(psi * self.vorticity(grid, t))
+        return grid.l2_dot(psi, self.vorticity(grid, t))
 
 
 class FrozenVorticityForcing:
@@ -118,7 +118,7 @@ class FrozenVorticityForcing:
         return np.zeros_like(self.zeta), np.zeros_like(self.zeta)
 
     def energy_input(self, psi: np.ndarray, grid: Grid2D, t: float = 0.0) -> float:
-        return grid.l2_sq(psi * self.vorticity(grid, t))
+        return grid.l2_dot(psi, self.vorticity(grid, t))
 
 
 class SelfConsistentForcing(FrozenVorticityForcing):

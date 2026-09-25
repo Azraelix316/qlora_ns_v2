@@ -32,19 +32,13 @@ class Grid2D:
         self.k2 = kx[:, None] ** 2 + ky[None, :] ** 2
         self.x = np.arange(N, dtype=float) * self.dx
         self.y = self.x.copy()
-        # Parseval weights on the rfft half-grid: a mode counts once on each
-        # Nyquist/zero mirror plane, otherwise it pairs with its conjugate.
+        # Parseval weights on the rfft half-grid.  Since axis 0 is a full
+        # x-axis, the only self-conjugate planes in the half spectrum are
+        # ky=0 and (for even N) ky=Nyquist.  All other columns contain one
+        # member of a conjugate pair and therefore have weight two.
         w = 2.0 * np.ones((N, N // 2 + 1))
-        w[0, :] = 1.0
         w[:, 0] = 1.0
         if N % 2 == 0:
-            # kx=Nyquist is row N/2; in the rfft half-spectrum ky=Nyquist is
-            # the final column.  The last kx row is -1, not a self-conjugate
-            # mode (except in the accidental N=2 case, handled below).
-            if N == 2:
-                w[-1, :] = 1.0
-            else:
-                w[N // 2, :] = 1.0
             w[:, -1] = 1.0
         self.w = w
         # Rectangular 2/3 dealiasing mask for pseudospectral products.
@@ -58,7 +52,7 @@ class Grid2D:
         return np.fft.rfftn(f)
 
     def ifft(self, F: np.ndarray) -> np.ndarray:
-        return np.fft.irfftn(F, s=(self.N, self.N))
+        return np.fft.irfftn(F, s=(self.N, self.N), axes=(0, 1))
 
     # -- differential operators -------------------------------------------
     def lap(self, f: np.ndarray) -> np.ndarray:
@@ -123,7 +117,7 @@ class Grid2D:
         return 0.5 * self.spec_norm_sq(self.k2 * self.fft(psi))
 
     def laplacian_enstrophy(self, psi: np.ndarray) -> float:
-        """||Lap psi||^2 = integral |grad omega|^2 (dissipation integrand)."""
+        """Integral |grad omega|² (enstrophy-dissipation integrand)."""
         return self.spec_norm_sq(-self.k2 * self.fft(psi), self.k2)
 
     def max_div_velocity(self, psi: np.ndarray) -> float:
