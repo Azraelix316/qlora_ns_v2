@@ -105,6 +105,38 @@ instead of the method. These are merge-blocking for any accuracy claim.
       the retained pre-projection candidate; factor columns are orthonormal.
 - [ ] **(R5)** Order and energy tests exist for the **reduced** path, not only
       for the full-grid kernel.
+- [ ] **(R5q)** **Cost-model tests.** A test that pins the *current* per-step cost
+      model, so that a later improvement is visible as a test changing state rather
+      than as a claim in prose. Two assertions: (a) per-step cost is currently
+      **rank-independent** — the projector SVDs the whole `N×N` field at four stage
+      boundaries, so `r=2` and `r=64` cost the same to within 1.25× (measured: 7.31
+      vs 7.81 ms at N=64); the docstring must say this is today's behaviour and that
+      the V6 port must invert it; (b) the number of full SVDs per step is counted
+      and asserted, so that reducing 4 → 1 is a test that can fail.
+
+### 1.4a Timing methodology (R5q — every timing that reaches the paper)
+
+These are not style preferences. The committed timings were invalid on both counts
+below, and the resulting bias was **configuration-dependent** (20–36% on the
+DLRA/full-grid ratio), so a reviewer cannot reconstruct them.
+
+- [ ] **(R5q)** **Thread counts pinned and recorded in the artifact** that contains
+      the timing (`OMP_NUM_THREADS`, `OPENBLAS_NUM_THREADS`, `MKL_NUM_THREADS`).
+      Unpinned multithreaded LAPACK `gesdd` measured 23–78× slower than the same
+      factorization at 1 thread on matrices from 47×47 to 256×256, and
+      `scipy.linalg.svd(..., lapack_driver='gesvd')` is ~80× faster than `gesdd` on
+      the same 47×47 input. Timings without pinned threads are not reproducible.
+- [ ] **(R5q)** **The timed region dominates process start-up.** At `dt=5e-4` that
+      means ≥2000 steps. The committed runs used `final_time: 0.1` = 200 steps and
+      <1.2 s total, so they measured interpreter start-up and BLAS thread-pool
+      spin-up, not the method.
+- [ ] **(R5q)** **Warm-up discarded, ≥7 repeats, median with spread** — and a
+      Re-to-Re spread above a few percent is treated as an artifact, not a result:
+      the three Re cases are computationally identical except for `nu`.
+- [ ] **(R5q)** **Cost and accuracy are on the same axes.** A cost bar with no
+      accuracy axis cannot support a claim, and at `r≈45` no per-step speedup is
+      available to this method (measured 2.9×/3.1×/3.6× slower than the full grid
+      at N=64/128/256; near-parity by N=512 after the V6 port, not a win).
 
 ### 1.5 Honesty
 - [ ] Where we are slower / less accurate, it is reported, not hidden.

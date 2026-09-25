@@ -238,3 +238,32 @@ That matters because **our problem is dissipative and forced.** A contracting, f
 3. **Never:** a symplecticity claim, or any implication that "structure-preserving" transfers from the Hamiltonian literature to forced viscous flow. If a reviewer asks "what structure do you preserve?", the answer is currently "divergence-freeness, exactly and by representation; the forced energy balance is inherited in the continuous limit and characterised discretely in §X" — which is a respectable answer, and an honest one.
 
 I would rather you write it this way than have the method section over-promise and be corrected at review. The novelty wording in D4 is unchanged by this; it already says "structure-preserving" in the sense of the construction and the exactness property, not in the sense of a proved conservation law. If you would like, I can also note in the record that the *absence* of a discrete energy identity for advection-dominated forced low-rank integrators is itself an open problem we are contributing to — that is a legitimate and attractive framing for the closing paragraph of the introduction, provided it is stated as an open problem rather than as our result.
+
+## 2026-09-25T07:02:27+00:00 — from reviewer
+
+A finding that changes what the paper's cost section may claim, so it is relevant to you before you draft anything quantitative. Evidence and numbers: `state/reviewer/reviews/2026-09-25-R5q-cost-model-audit.md`.
+
+## The short version
+
+There will be **no speedup claim**, and the paper must not gesture at one. I had told coder that removing the per-stage full SVD was "the only route to a cost figure that shows a win". I measured the arithmetic and I was wrong, and I have told coder so explicitly. Both methods must evaluate the nonlinear term on the full grid, so both pay the same Θ(N² log N); the reduced linear algebra then *adds* Θ(N²r²), and `r > log N` at every `(N, r)` this project will use. A per-step win is arithmetically unavailable at r≈45.
+
+Measured today, threads pinned, median of repeats: the method is **2.9× / 3.1× / 3.6× slower than the full grid at N=64/128/256**. After the planned integrator port the expectation is **near-parity by N=512** — a large and reportable improvement over today's penalty, still not a speedup.
+
+A detail worth knowing because it is the kind of thing a reviewer checks: the port's basis update costs ≈2N²r² flops against ≈⅔N³ for the dense SVD it replaces, so at r≈43 it does **more** arithmetic (43× more at N=64) and wins on arithmetic intensity rather than operation count. The flop crossover is `r = 0.82·√N`, not `r ≪ N`. The paper should say this rather than imply the method is cheap.
+
+## What the cost section may claim instead
+
+In descending order of strength:
+
+1. **Rank-controlled cost that decouples the method from N** — Θ(N²r + r³) against the full grid's Θ(N² log N), with an O(r²) reduced state. The enabling claim is reaching N=512/1024 at a cost the full grid cannot afford, not being cheaper per step.
+2. **Accuracy at under-resolved Re.** This is the strongest argument available and it is an accuracy argument. N=64 is demonstrably not resolved at Re=5000 (enstrophy differs 2.25× against N=128), so a rank-adaptive method that *filters* can be more accurate than an under-resolved full grid at comparable cost. This is the framing I would build the contribution around.
+3. **Matched-accuracy cost curves** — error against wall time, which is the only comparison in which a filtering method can win. This is now what F6 is.
+4. **Adaptive rank tracking a developing spectrum**, which a fixed-rank POD cannot do.
+
+Reporting "slower than full grid" alongside these is required, and coder has already earned credit for not hiding it. The correction is to stop implying a speedup is coming.
+
+## Two more things to hold
+
+The committed cost numbers cannot be cited at all: they come from 200-step, sub-1.2-second runs, and this machine's default multithreaded LAPACK makes SVDs 23–78× slower than with threads pinned, which biases the DLRA/full-grid ratio by 20–36% in a configuration-dependent direction. Any cost number you write must come from artifacts produced under the new protocol in `CHECKLIST.md` §1.4a — threads pinned and recorded, ≥2000 steps, median of ≥7 repeats with spread.
+
+And the step-0 relative error is 0.319, not the 0.0 currently hardcoded in the driver. Until that is fixed and re-run, there is no error-versus-time curve to write, and no validation section at all. That remains the gate.

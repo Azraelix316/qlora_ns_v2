@@ -134,13 +134,24 @@ window onto a POD basis, fit the linear operator, advance the modal
 coefficients, reconstruct — it reuses `solvers/pod.py`. *Closes V4.*
 
 **F6 — Cost and memory.**
-Wall time and peak memory versus `N` and versus `r`, for full grid, POD, and the
-method. **Bar:** state the crossover explicitly. For the ported integrator the
-only SVD is `r̂×r̂` — that must be visible in the implementation and in the
-prose, because it is the whole cost argument. At N=64 with r≈43 the reduced rank
-is comparable to N and a win is not expected; report N=128/256 where it can
-appear, and say where it does not. Report also where we are slower, as the
-project's own honesty rule requires. *Closes the cost item in V4/V6.*
+Error versus wall time and peak memory versus `N` and versus `r`, for full grid,
+rank-matched POD, POD-DMD, and the method. **Bar (revised by R5q — this supersedes
+the earlier "state the crossover" wording, which is retained as a sub-requirement):
+** *no per-step speedup is available to this method at r≈45 and the paper must not
+imply one.* Both methods evaluate the same nonlinear term on the full grid, so both
+pay Θ(N² log N); the reduced linear algebra adds Θ(N²r²) on top, and `r > log N` for
+every `(N, r)` this project will use. Measured today: **2.9×/3.1×/3.6× slower than
+the full grid at N=64/128/256.** After the V6 port the measured expectation is
+**near-parity by N=512, not a win.** What F6 must therefore deliver is the
+**matched-accuracy** comparison (error on one axis, wall time on the other), which is
+the only comparison in which a filtering method can win, plus the resolution
+dimension. Sub-requirements, all binding: report **both** accountings — the linear
+algebra alone (`4×SVD` vs `1×QR + r̂×r̂`, whose crossover at r≈43 lies between N=64
+and N=128) and the full step — and never present the linear-algebra win as a per-step
+win; state the `2N²r²`-versus-⅔N³ flop counts, because BUG does *more* arithmetic
+than the dense SVD it replaces at these ranks and wins only on arithmetic intensity;
+report where we are slower, as the project's own honesty rule requires. *Closes the
+cost item in V4/V6; see `reviews/2026-09-25-R5q-cost-model-audit.md`.*
 
 **F7 — Resolution study.**
 E, Z, and spectra at N = 64/128/256 with the physical problem fixed. **Bar:**
@@ -183,6 +194,13 @@ others.
 
 ## Is the gate affordable? Costed order of work (R5o)
 
+> **SUPERSEDED IN PART by R5q** (`reviews/2026-09-25-R5q-cost-model-audit.md`).
+> The per-step costs quoted below were taken from the committed artifacts, which R5q
+> showed are **not reproducible**: they come from 200-step, sub-1.2-second runs timed
+> under default multithreaded LAPACK, whose `gesdd` is 23–78× slower than the same
+> factorization at `OMP_NUM_THREADS=1`. **Use the R5q measured figures below, not
+> these.** The sequencing conclusions still hold and are confirmed.
+
 A gate that cannot be executed gets quietly relaxed, so the reviewer costed the
 required runs from the committed per-step timings (full 1.84 ms, POD 2.95 ms,
 DLRA 4.60 ms per step at N=64). Full reasoning in
@@ -204,12 +222,38 @@ sequencing:
   **measured**, not extrapolated (a two-component fit from two points degenerates
   and returns a physically impossible ordering).
 
-**Order of work:** (1) re-time properly; (2) V1; (3) V2 at N=64, T=20; (4) F2
+### Measured costs (R5q — replaces the projections above)
+
+Median of 7 repeats after 2 discarded warm-up calls, `OMP_NUM_THREADS=1`, real
+workload, working rank as reached:
+
+| N | full-grid step | DLRA step | ratio | T=20 steps | T=20 full | T=20 DLRA |
+|---|---|---|---|---|---|---|
+| 64 | 2.87 ms | 8.38 ms (r=43) | 2.9× | 40,000 | 1.9 min | 5.6 min |
+| 128 | 7.79 ms | 24.52 ms (r=48) | 3.1× | 80,000 | 10.4 min | 32.7 min |
+| 256 | 25.87 ms | 93.91 ms (r=46) | 3.6× | 160,000 | 69.0 min | 250.4 min |
+
+The full T=20 matrix (full + DLRA at working rank, three Re, all three N) is
+**18.5 h**, of which **16.0 h is N=256**. Two consequences: stationarity at N=64 is
+even cheaper than R5o estimated and remains not a reason to defer anything; and any
+long high-N run is genuinely expensive, so the N=256 decision must be made from the
+matched-accuracy result rather than assumed.
+
+**Timing protocol, now binding (R5q):** thread counts pinned *and recorded in the
+artifact*; warm-up discarded; ≥7 repeats; median plus spread; and a timed region that
+dominates process start-up — at `dt=5e-4` that means **≥2000 steps, not the 200 the
+committed runs used**. A timing that does not meet this is not a measurement.
+
+**Order of work:** (1) re-time properly, to the R5q protocol; (2) V1; (3) V2 at N=64, T=20; (4) F2
 with the full spectrum recorded — `normalized_spectrum` currently caps at 32
 values, which is the binding constraint on the slow-decay claim and must become
 a parameter; (5) V5 at short T; (6) V4; (7) V6, then re-run 3–6 with the new
 integrator; (8) decide any long high-N run from the measured cost. Steps 1–5 are
-a few hours in total.
+a few hours in total. **Added at R5q, and cheap enough to do during step 1:** a
+test asserting that per-step cost is currently *rank-independent* (`r=2` versus
+`r=64` within 1.25×), with a docstring saying this is today's behaviour and that V6
+must invert it — so the port's improvement shows up as a test going from pass to fail
+to pass, rather than as a claim in prose.
 
 ## Figures — per-figure requirements (R5n)
 
@@ -237,6 +281,15 @@ evidence are in `reviews/2026-09-25-R5n-figures-audit.md`.
   spread bar. Annotate N, dt, achieved rank, and thread pinning. Do not present
   a Re-dependence that is a measurement artifact — the three Re cases are
   computationally identical except for `nu`, so cost should be Re-independent.
+  **R5q additions, binding:** pin and *record* `OMP_NUM_THREADS` in every artifact
+  containing a timing (unpinned LAPACK `gesdd` is 23–78× slower here and biases the
+  DLRA/full-grid *ratio*, not just the absolute numbers); time ≥2000 steps so the
+  timed region dominates start-up; and plot error against wall time rather than cost
+  alone, since a per-step win is not available to this method (F6). Add a
+  rank-dependence panel — the current implementation's cost is **flat in r** (7.31 ms
+  at r=2 versus 7.81 ms at r=64, N=64, because the projector SVDs the whole N×N field
+  four times per step), and that flatness is the single most important fact about the
+  present cost model. It should be visible in the figure and pinned by a test.
 - **All figures.** No paper-quality typesetting on a provisional figure: either
   mark it superseded in `experiments/README.md` or move it out of
   `experiments/figures/`.

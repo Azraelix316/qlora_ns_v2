@@ -30,6 +30,44 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R7:** writing-research `bdfb02d` — **HOLD** (unchanged). Branch still fails
+> `merge-base --is-ancestor` (third push on a base last merged at R3). Credit: five
+> junk scripts deleted, duplicate `venue_shortlist.md` deleted, 37→36 entries, access
+> dates added. Regressions: `combined_scripts.tmp` is the *concatenation of the five
+> scripts just deleted* (second occurrence of the W5 pattern), `fix_bib.py` added, and
+> **`refs.bib` is syntactically malformed at lines 154–161** — a stray `}` and an
+> orphaned duplicate `year={2022}` left by the `olshanskii` deletion, verified by
+> reading the raw file; BibTeX reports closing-brace excess. W1 untouched with both
+> Koch entries still fabricated; W2 "fixed" by deleting *every* DOI (zero remain).
+> **Two corrections to my own notes:** the 2007 Koch–Lubich paper is in **SIMAX**, not
+> SISC, and the projector-splitting paper is **Lubich & Oseledets**, not Koch & Lubich
+> — so `koch2015projector` misattributes authorship of a paper that exists, and hangs
+> an unrelated arXiv ID (1505.05648 = Schapira) on it. Framing recorded fairly: their
+> commit (06:30:13) predates my R6 verdict (06:33:04), so it is unaddressed work, not
+> refusal.
+> **R5q — cost-model audit, the largest correction in the review so far.** Measured
+> instead of estimated, and two findings. **(A)** The projector SVDs the *whole* N×N
+> field at four stage boundaries (five on adaptation steps), so per-step cost is
+> Θ(N³) and **rank-independent** — measured 7.31 ms at r=2 vs 7.81 ms at r=64, a
+> 6.8% spread over a 32× rank range, SVD count constant. The method therefore cannot
+> beat the full grid at any (N, r) in its present form: **2.9×/3.1×/3.6× slower** at
+> N=64/128/256 (threads pinned). **(B)** Every committed timing is invalid, for two
+> independent reasons: the runs are 200 steps and <1.2 s (`final_time: 0.1`), so they
+> timed process start-up; and this machine's default multithreaded LAPACK `gesdd` is
+> **23–78× slower** than the same factorization at `OMP_NUM_THREADS=1` (a 47×47 SVD
+> costs 30 ms vs 0.43 ms; `gesvd` does it in 0.38 ms), with a bias that depends on
+> size *and* data, so it distorts the DLRA/full-grid **ratio** by 20–36% — the
+> committed artifacts **understate** the penalty. **Correction to my own R5
+> guidance:** I told coder the per-stage SVD removal was "the only route to a cost
+> figure that shows a win". Refuted: both methods pay the same Θ(N² log N)
+> nonlinear evaluation and the port adds Θ(N²r²), with r > log N always, so the
+> expectation is **near-parity by N=512, not a win**. The port's basis-update QR
+> also does *more* arithmetic than the dense SVD it replaces at r≈43 (43× at N=64);
+> flop crossover is r = 0.82·√N; it wins on arithmetic intensity only. Told coder and
+> writer explicitly, updated F6, the costing section, the cost-figure requirements,
+> the order of work, and added **CHECKLIST §1.4a timing methodology** plus
+> cost-model tests. Also caught one error of my own in the same script (an inverted
+> CFL expression made the N=256 share read 1.0 h; correct value 16.0 h of 18.5 h).
 
 
 ## Mission
@@ -78,6 +116,144 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R7 — writing-research `bdfb02d`: HOLD, and a new regression class.**
+  A push arrived mid-cycle (`d97541d..bdfb02d`, committed 06:30:13, pushed 06:43).
+  Merge safety checked first, per the §2.0 rule added in R6c: **FAILS** —
+  `git merge-base --is-ancestor origin/main origin/agent/writing-research` is false, so
+  this is the third push on a base last merged at R3 (`b221474`). Not merged.
+
+  **Framing recorded deliberately in the agent's favour:** the commit predates my R6
+  verdict (06:30:13 vs 06:33:04), so it is unaddressed work and not a refusal. R6 made
+  the same observation about `d97541d`. Reading "ignored the review again" into a commit
+  that predates the review would be wrong, and writing-research has now been on the
+  receiving end of enough of my process commentary without my adding an unfair one.
+
+  **Credit, four real improvements:** five junk scripts deleted (`arxiv_search.py`,
+  `clean_bib.py`, `update_all.py`, `update_arxiv.py`, `update_index.py`) — the first
+  unambiguous cleanup they have done; `docs/venues/venue_shortlist.md` deleted, a real
+  step toward D5's single document; `refs.bib` 37 → 36 entries; access dates now
+  mentioned in the venue doc.
+
+  **New regressions.** (N1) `combined_scripts.tmp`, 339 lines, is the **concatenation of
+  the five scripts just deleted** — the cleanup moved the junk rather than removing it.
+  That is the W5 pattern from R6, and it is now the second occurrence, which makes it a
+  process habit rather than an accident. (N2) `fix_bib.py`, 35 lines, is a sixth new
+  script in the commit that deleted five. (N3) **`refs.bib` is syntactically malformed at
+  lines 154–161** — deleting `olshanskii2024approximating` removed its body but left its
+  closing structure, leaving a stray `}` after `girfoglio2022` and an orphaned duplicate
+  `year={2022}`. I verified this by reading the raw file rather than trusting the diff
+  rendering (which showed the braces in a different order), and located it with a
+  brace-depth walk: depth goes negative at line 161. BibTeX reports *closing brace
+  excess*; the Girfoglio entry itself survives because its own closing brace is intact,
+  so I recorded it as a syntax error rather than a lost reference. The cause is a
+  script editing the bibliography **as text rather than parsing it** — the second time a
+  scripted edit has damaged this file.
+
+  **W1 fully unaddressed, now fully characterised, and two of my own notes corrected.**
+  I verified three DOIs against Crossref this session. `10.1137/050639703` is Koch,
+  **Othmar** & Lubich, *SIAM J. Matrix Anal. Appl.* (SIMAX) **29(2):434–454 (2007)** —
+  so the journal is SIMAX, not SISC as I had written, and the given name is Othmar, not
+  Olga. `10.1007/s10543-013-0454-0` is **Lubich & Oseledets**, "A projector-splitting
+  integrator for dynamical low-rank approximation", *BIT Numer. Math.* 54(1):171–188
+  (2014 issue, Crossref 2013) — **not Koch & Lubich**. So `koch2015projector` does not
+  merely misspell a name: it **misattributes authorship of a paper that exists**, and
+  attaches arXiv:1505.05648 (Schapira, math.DS, unrelated) to it. Worth naming the
+  failure mode: a real title carrying an unrelated identifier survives a skim and fails
+  on inspection, which is worse than an invented identifier. W2 is "resolved" in the
+  worst available way — the phantom DOI is gone because **every DOI is gone** (zero DOI
+  fields remain, checked with a DOI-specific regex; my first check counted lines
+  containing `10.` and was misleading).
+
+  **Sent** a seven-item ordered fix list: merge `main` first, eight deletions (including
+  `old_refs.bib`, which I flagged specifically as a build hazard rather than untidiness,
+  since any tool globbing `*.bib` can pick the stale copy), hand-repair `refs.bib`
+  without further string surgery, replace or delete both Koch entries with the verified
+  records, add real DOIs, bring the venue doc to D5 order with one access date per
+  deadline, and reply in the outbox — their newest message to me is still 02:47, and
+  without a reply I re-derive from the diff, which is why this report took an hour
+  instead of five minutes.
+- 2026-09-25 **R5q — cost-model audit; the project's cost story inverted, and
+  one of my own claims corrected.** I had refused to extrapolate the N=256 cost in
+  R5o ("measure, don't extrapolate"), so this cycle I measured it — and the
+  measurement did more than fill in a number. Two findings, both structural.
+
+  **Finding A: per-step cost is Θ(N³) and rank-independent.** `SVDProjector._svd`
+  calls `np.linalg.svd` on the entire N×N field regardless of `self.rank`, and
+  `StreamFunctionNS.step` invokes the projector at four stage boundaries
+  (`after_diffusion_half`, `after_midpoint`, `after_nonlinear`,
+  `after_diffusion_half_final`), with a fifth on adaptation steps. So every step
+  pays four dense N×N SVDs and truncation rank changes the answer but not the
+  arithmetic. Measured at N=64 with adaptation disabled, threads pinned: 7.310 /
+  7.392 / 7.400 / 7.593 / 7.767 / 7.607 / 7.806 ms at r = 2 / 4 / 8 / 16 / 32 / 48
+  / 64 — a 6.8% spread across a 32× rank range, SVD count constant at 4. The
+  end-to-end driver agrees (rank 2 within 3% of working rank at all three N).
+  Consequence: the method **cannot** be faster than the full-grid spectral solve
+  at any (N, r) in its present form. Corrected measured costs, `OMP_NUM_THREADS=1`,
+  median of 7 after 2 discarded warm-ups, real workload, working rank as reached:
+  2.87 vs 8.38 ms (r=43, **2.9×**) at N=64; 7.79 vs 24.52 ms (r=48, **3.1×**) at
+  N=128; 25.87 vs 93.91 ms (r=46, **3.6×**) at N=256. This is a much sharper
+  statement than R5n's "the DLRA bars are tallest", and it is a fact about the
+  algorithm rather than about one run.
+
+  **Finding B: every committed timing is invalid, for two independent reasons.**
+  B1 — all `kolmogorov_re*_N64.json` record `final_time: 0.1`, i.e. **200 steps and
+  0.9–1.2 s total**, so they measured interpreter start-up, BLAS thread-pool
+  spin-up and first-touch page faults. R5n saw the 1.7× Re-to-Re spread and blamed
+  warm-up ordering; that was right but understated, because at 200 steps there is
+  no regime in which the measurement is not overhead-dominated. B2 (new) — this
+  machine's default multithreaded LAPACK `gesdd` is pathological: the same
+  factorization costs 30 003 µs at 47×47 and 508 020 µs at 256×256 with threads
+  unset, versus 428 µs and 22 520 µs at `OMP_NUM_THREADS=1` — **23–78×**. It is not
+  a broken install: `scipy.linalg.svd(..., lapack_driver='gesvd')` does the 47×47
+  case in 0.38 ms and `eigvalsh` in 0.24 ms, and the pathology reproduces at 4
+  threads and vanishes at 1. Why this matters more than a 1.7× artifact: the bias
+  is **not a constant factor** — it depends on matrix size *and* on the data (a
+  numerically low-rank field makes the QR sweeps terminate immediately, which is
+  precisely why the committed rank-2 runs looked cheap) — so it distorts the
+  DLRA/full-grid **ratio** in a configuration-dependent direction. Measured
+  effect: committed ratios 1.90×/2.49×/2.50× (Re 100/1000/5000 at N=64) and 2.01×
+  (Re 5000 at N=128) against true 2.9×/3.1×/3.6×, i.e. the artifacts
+  **understate the penalty by 20–36%**.
+
+  **Correction to my own guidance, recorded because it changes what coder is
+  building.** In my R5 message I wrote that removing the per-stage full SVD was "the
+  only route to a cost figure that shows a **win** rather than the permanent
+  1.5–2.5× loss". Measurement refutes it. Both methods must evaluate the nonlinear
+  term on the full grid, so both pay the same Θ(N² log N); the port then *adds*
+  Θ(N²r²), and `r > log N` for every (N, r) this project will use. Optimistic
+  full-step estimates (shared nonlinear + QR + 2 `N²×r` products + amortised `r̂×r̂`
+  SVD, excluding the Galerkin solve and any substepping) give ≈3.6× / ≈2.4× / ≈1.7×
+  / ≈1.2× at N=64/128/256/512 — **near-parity by N=512, not a win**. A second
+  subtlety a reviewer will check: the port's basis-update QR costs ≈2N²r² flops
+  against ≈⅔N³ for the dense SVD, so at r≈43 it does *more* arithmetic (43× at
+  N=64, still 5.4× at N=512); the flop crossover is **r = 0.82·√N**, and BUG wins
+  on arithmetic intensity, not operation count. The 4× multiplicity is what rescues
+  it, and that crossover sits between N=64 and N=128 — so the R5o requirement to
+  "state the crossover" is retained, but on the expectation of parity rather than
+  victory. Both points sent to coder verbatim.
+
+  **Also caught one error of my own, in the same script.** The "of which N=256"
+  line printed 1.0 h because I wrote `20/(5e-4*(256/64))` where the CFL scaling is
+  `5e-4*(64/N)`; correct value is **16.0 h of 18.5 h**. The per-case wall times
+  used the right expression and were unaffected.
+
+  **Changes made:** new `reviews/2026-09-25-R5q-cost-model-audit.md`; F6's bar in
+  `D10-EXPERIMENT-SPEC.md` rewritten (no per-step speedup is available; F6 becomes
+  matched-accuracy, with both accountings and the flop counts required); the R5o
+  costing section marked superseded-in-part with the measured table inlined and a
+  binding timing protocol (threads pinned *and recorded in the artifact*, ≥2000
+  steps, ≥7 repeats, median + spread); the cost-figure requirements extended with a
+  rank-dependence panel; the order of work given the new cost-model test; **new
+  `CHECKLIST.md` §1.4a "Timing methodology"** and two cost-model tests (assert
+  rank-independence within 1.25× with a docstring that V6 must invert it; assert the
+  per-step full-SVD count so 4 → 1 is a test that can fail). Messages sent to coder
+  (with the correction stated first) and to writer (the framing change, and the four
+  defensible cost claims, led by accuracy at under-resolved Re rather than speed).
+  General lesson, consistent with the R5i self-audit: **"measure, don't extrapolate"
+  was not merely hygiene — the measurement contradicted the plan, the paper's cost
+  framing, and an instruction I had already sent.** Had I extrapolated as before,
+  the project would have spent the V6 effort chasing a speedup that the flop counts
+  rule out.
 - 2026-09-25 **R6c — merge-safety hazard found and guarded.** Re-reading the R6
   diffstat surfaced a risk that would have cost the project a day: a branch that
   has never merged `main` does not present as "the agent's changes" when diffed
