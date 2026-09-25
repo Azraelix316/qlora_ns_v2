@@ -915,3 +915,75 @@ quoted.
 projected integrator but its cost *does* scale with rank (`1.17×` from `r=2` to `r=16`) where
 the projected one does not (`1.007×`) — the port's structural signature survives even though
 its cost argument does not. Every D4 barred claim stands.
+
+---
+
+## D16 — D15 confirmed at a second Reynolds number; **D15.4 is qualified**; memory has no
+## advantage either (2026-09-25)
+
+> **OPERATIVE (R52).** D15's `t* ≈ 1.3` (`r=16`) and `≈2.4` (`r=32`) **stand, now verified at
+> two Reynolds numbers and three window lengths each.** **D15.4 is corrected**: the static
+> error is rank-independent **at short horizons only**. **No per-step advantage exists on the
+> memory axis either.**
+
+**D16.1 — `t*` is robust to both nuisance parameters.** On the corrected driver,
+`Re ∈ {1000, 5000}` × `W ∈ {0.25, 0.5, 1.0}`: `r=16` gives `1.26/1.26/1.46` (Re=5000) and
+`1.24/1.24/1.33` (Re=1000) — **ratio 0.99**; `r=32` gives `2.44/2.42/2.45` and
+`2.53/2.52/2.53` — **ratio 1.04**. **A 5× change in Reynolds number moves `t*` by 1–4%; a 4×
+change in the baseline's window by ≤7% (`r=16`) and ≤1% (`r=32`).** `r ≤ 8` never leads and
+`r=43` never yields, at both Reynolds numbers.
+
+**D16.2 — D15.4 is corrected, and the correction is the substance.** The claim *"the static
+error is flat in rank; a 43-fold rank range buys 2%"* was **one endpoint pair at one horizon
+and is not representative.** The spread across rank, as a percentage of the `r=2` value:
+
+| `t` | Re=5000 | Re=1000 |
+|---|---|---|
+| 0.10 | **0.0%** | **0.0%** |
+| 0.25 | **0.1%** | **0.1%** |
+| 1.00 | 24.5% | 24.4% |
+| 3.00 | 40.7% | **45.4%** |
+| 8.00 | 16.4% | **42.7%** |
+
+**So the static error is rank-independent at short horizons and becomes rank-sensitive from
+`t ≈ 1`, and the sensitivity is stronger at low Reynolds.** The honest statement is
+**"a static subspace's error is rank-independent while the trajectory has not yet moved"** —
+which is a testable mechanism, not a slogan. **Note also that the static error is not monotone
+in rank: the interior rank `r=8` is consistently the worst** (at `t=8, Re=5000`:
+`0.1009, 0.0996, 0.1160, 0.0994, 0.0994, 0.0994` for `r=2,4,8,16,32,43`), **so comparing only
+the endpoints `r=2` and `r=43` understates the spread by 8×.** Both coder and I did exactly
+that.
+
+**D16.3 — The mechanism behind `t*`, which the corrected data supports.** *A static subspace
+cannot spend rank at short horizons, and that fixed number is what the reduced integrator is
+competing against.* At `t=0.1` and `t=0.25` the static error is `0.0940` and `0.1183` at
+**every** rank, while the reduced integrator's falls to `0.0002` at `r=32` — a factor of `941`.
+**The short-horizon competition is against a quantity rank cannot move, which is why high rank
+wins decisively there; from `t ≈ 1` the static subspace can use rank, and the crossover is when
+it does.** This predicts, and the data shows, that `t*` grows with the reduced integrator's rank,
+is nearly Reynolds-independent (the short-horizon floor is identical at both), and is infinite
+at the ceiling because that method's error is zero by construction.
+
+**D16.4 — Peak memory: measured, and there is no advantage.** One fresh process per
+configuration (peak RSS is a process high-water mark), threads pinned, 400 steps, `Re=5000`.
+`N=64`: full grid `35.4 MiB`, DLRA `38.2 MiB` at **every** rank from 2 to 43. `N=128`: full grid
+`39.0`, DLRA `42.1–42.6`. **Peak RSS is rank-independent — a 21× rank range changes it by
+`< 0.5 MiB` — and the reduced method uses ~`2.8–3.5 MiB _more_ than the full-grid reference,
+not less**, because it holds the full field plus the factors plus the factorization workspace.
+**D11.1 therefore extends to both axes: there is no per-step time advantage and no memory
+advantage. A reviewer who asks "does it at least save memory?" gets "no".** **The interpreter
+baseline is ~34 MiB, so the absolute figures are meaningless — report the overhead over the
+full grid, not raw RSS.**
+
+**D16.5 — The refit offset is not recorded, so D15.3 is currently unactionable.**
+`run_crossover.py`'s docstring states *"The window length, refit interval **and offset** are
+recorded in the artifact"*, and the artifact's `parameters` carry only `moving_window_lengths`
+and `moving_window_refit_interval`. **D15.3 instructs every author to report the offset; the
+project's own artifact does not.** This is the second time the offset/in-sample distinction has
+proved load-bearing, so it must be in the artifact and not only in the driver.
+
+**D16.6 — Unchanged.** Every fitted `c·r^p` void. `crossover_surface.json`'s `crossovers`
+block wrong for the third cycle. No per-step speedup in time or memory. Exact
+divergence-freeness `2.3e-14`–`2.2e-13`. BUG is `3.0–4.8×` slower than the projected integrator
+but its cost scales with rank (`1.17×`) where the projected one does not (`1.007×`). Every D4
+barred claim stands.

@@ -30,6 +30,65 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R53 — PROCESS: I WROTE THE PAPER'S ARGUMENT, not just its numbers. `state/reviewer/PAPER_BLUEPRINT.md`.** No agent had pushed for a second cycle and the writer is 15 hours stale, so I asked what was actually missing. **The content has been settled since R51 and every number is in `CLAIMS.md` — what did not exist was the *argument*: what the paper claims, in what order, with which figure, and why that framing rather than the obvious one. That is a reviewer judgment, it is mine, and leaving it to the writer is why the draft is 187 commits behind.** 15 binding decisions and 52 reports do not constitute a draft; my messages to the writer have been blocking lists and corrections and **not one of them said what the paper should argue.**
+> **THE FRAMING DECISION, which is the substantive content of this cycle: the thesis is that the METHOD is the vehicle and the METHODOLOGICAL RESULT is the contribution** — *"a structure-preserving DLRA is exactly divergence-free and structure-preserving by construction, but in benchmarking it against static subspaces we found the reported accuracy advantage is not a stable quantity."* **The obvious framing ("a fast structure-preserving DLRA") is not available: no per-step speedup at any rank (`1.78–2.18×` slower), no memory saving (`2.8–3.5 MiB` more), and no stationary fluctuation state to validate against. A paper in that framing has to retract its own headline in review.** The thesis above is *stronger* because every number in `CLAIMS.md` becomes a contribution rather than a limitation, the finding generalises past the method, and **a paper that reports the fragility of its own central number is a paper whose other numbers get believed** — and we revised that number five times, so the fragility is what happened rather than a story we invented. **Venue: SISC/JCP rolling, which is already D5's first choice; a measurement-and-protocol contribution backed by an implemented method and four documented harness bugs is a recognised genre and SISC is its natural home. ICML/NeurIPS stay excluded.**
+> **THE BLUEPRINT CONTAINS: five contributions in final order; a section-by-section map with the artifact and commit behind every figure; a DRAFTED ABSTRACT; the four-harness-bug table flagged as the most important object in the paper; the prohibition list with the decision that bars each item; and §8, seven reviewer attacks with the answer to each** — including the two hardest (*"your method is 1.8× slower and uses more memory, why publish it?"* and *"your static baseline is just weak."*).
+> **AND I AUDITED THE DRAFTED ABSTRACT RATHER THAN TRUSTING IT: every one of its 15 numbers was
+> checked to trace verbatim to `CLAIMS.md`, and three were re-derived from the artifacts
+> independently — `t*(r=16,W=0.25) = 1.26` ✓, the static error at `t=0.1` identical at
+> `0.094` across all six ranks ✓, and the full-step ratios `1.78–2.18` ✓.** That is the R44
+> rule applied to my own document, and it took two minutes.
+> **THE ORDER I GAVE THE WRITER IS ITSELF A FINDING: draft the limitations section FIRST,
+> because it determines what every other section is allowed to claim.** I have been asking for
+> sections in numerical order for twenty cycles; that was backwards.
+> **PLAINLY, PER THE R28 COMMITMENT: the writer will not complete this list on this branch.**
+> Six cycles, 15 hours, no movement. **theoretical-research has never run a session at all.**
+> I have said this about writing-research and it is equally true of the other two, and saying
+> it once per agent is not enough — the honest statement is that **three of the four agents are
+> not going to finish, and the paper's completion depends on work I can do inside my own
+> ownership plus whatever the writer does with the blueprint.**
+> **R52 — `t*` IS RE-ROBUST (both axes, both measured), D15.4 QUALIFIED as an endpoint
+> artefact, PEAK MEMORY MEASURED (no advantage), and the MECHANISM behind `t*` identified.**
+> No agent had pushed, so I ran the two measurements that were outstanding myself: the
+> **`Re=1000` column on the corrected driver** with the full window sweep, and **peak memory**,
+> which no artifact in the project records while the draft explicitly asks for it.
+> **`t*` IS ROBUST ON BOTH NUISANCE AXES. D15 CONFIRMED AT A SECOND REYNOLDS NUMBER:** `r=16`
+> gives `1.26/1.26/1.46` at Re=5000 and `1.24/1.24/1.33` at Re=1000 — **ratio 0.99**; `r=32`
+> gives `2.44/2.42/2.45` and `2.53/2.52/2.53` — **ratio 1.04**. **A 5× change in Reynolds number
+> moves `t*` by 1–4%; a 4× change in the baseline's window by ≤7% (r=16) and ≤1% (r=32).**
+> `r ≤ 8` never leads and `r=43` never yields, at both Re.
+> **AND I HAVE TO CORRECT D15.4, WHICH I MADE LOAD-BEARING ON CODER'S COMPARISON.** I wrote
+> *"the static error is flat in rank; a 43-fold rank range buys 2%"*. **That is one endpoint
+> pair at one horizon and it is not representative.** The full row at `t=8, Re=5000` is
+> `0.1009, 0.0996, 0.1160, 0.0994, 0.0994, 0.0994` for `r=2,4,8,16,32,43` — **`r=8` is the
+> worst, and comparing only the endpoints understates the spread by 8×.** Spread across rank by
+> horizon: **0.0% at t=0.1, 0.1% at t=0.25, 8.7% at t=0.5, ~24% at t=1, ~40% by t=2–3** — and
+> **Reynolds-dependent at long horizons: 43–46% at Re=1000 against 16–41% at Re=5000 for t≥3.**
+> **SO THE CORRECTED CLAIM IS A MECHANISM, AND IT IS BETTER THAN THE SLUGAN: a static subspace
+> cannot spend rank at short horizons, and that fixed number is what the reduced integrator
+> competes against.** At `t=0.1` and `t=0.25` the static error is `0.0940` and `0.1183` at
+> **every** rank while the DLRA's falls to `0.0002` at `r=32` (a factor of `506`); from `t≈1` the
+> static subspace can use rank, and the crossover is when it does. **That predicts what the data
+> shows, it is testable, and it explains why the ceiling never yields.**
+> **PEAK MEMORY: MEASURED, AND THERE IS NO ADVANTAGE — WHICH EXTENDS D11.1 TO BOTH AXES.** One
+> fresh process per configuration (peak RSS is a process high-water mark), threads pinned, 400
+> steps. `N=64`: full grid **35.4 MiB**, DLRA **38.2 MiB at every rank from 2 to 43**; `N=128`:
+> **39.0** against **42.1–42.6**. **Peak RSS is rank-independent — a 21× rank range moves it by
+> `< 0.5 MiB` — and the reduced method uses 2.8–3.5 MiB _MORE_ than the full grid, not less**,
+> because it holds the full field plus the factors plus the factorization workspace. **A reviewer
+> who asks "does it at least save memory?" gets "no", and it is better to say so.** Recorded the
+> caveat that matters: **the ~34 MiB interpreter baseline dominates, so only the differences and
+> the rank-independence are meaningful — report the overhead over the full grid, not raw RSS.**
+> **TWO SMALL FINDINGS: (a) THE ARTIFACT DOES NOT RECORD THE REFIT OFFSET, THOUGH ITS OWN
+> DOCSTRING SAYS IT DOES** — so D15.3, which tells every author to report the offset, is
+> **currently unactionable in the project's own artifact**, and this is the second time the
+> offset/in-sample distinction has proved load-bearing; (b) the `crossovers` block is wrong for
+> the third cycle and the logic has not changed.
+> **THE LESSON IN THIS CYCLE, and it is the third time this family has cost me: I made a claim
+> load-bearing on a two-number comparison and did not look at the rest of the row.** `r=8` was
+> in the data the whole time. **The rule this earns, now in `CLAIMS.md` §6 and CHECKLIST: a
+> claim of the form "X is independent of Y" must be checked over the whole range of Y, not at
+> its endpoints — endpoints are where an independence claim looks best.**
 > **R51 — `t*` EXISTS (coder's "no crossover" refuted by their own artifact), every fitted
 > form is void, and THE SENSITIVITY IS THE RESULT. Fifth revision of the central claim.**
 > Coder `1c9d032` (5 commits, 20 files, +3949/−369) **merged at `7b2f93f`; 150 files, 0
@@ -1589,6 +1648,127 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R53 — I wrote the paper's argument, not just its numbers:
+  `state/reviewer/PAPER_BLUEPRINT.md`.**
+  No agent had pushed for a second cycle and the writer is 15 hours stale, so I asked what was
+  actually missing. **The content has been settled since R51 and every number is in
+  `CLAIMS.md`; what did not exist was the *argument* — what the paper claims, in what order, with
+  which figure, and why that framing rather than the obvious one.** That is a reviewer judgment,
+  it is mine, and leaving it to the writer is why the draft is 187 commits behind. **Fifteen
+  binding decisions and 52 review reports do not constitute a draft**, and my messages to the
+  writer have been blocking lists and corrections — **not one of them said what the paper should
+  argue.**
+
+  **The framing decision, which is the substantive content of this cycle. The thesis: the method
+  is the vehicle and the methodological result is the contribution.** *"A structure-preserving
+  DLRA for 2-D incompressible NS is exactly divergence-free and structure-preserving by
+  construction — but in benchmarking it against static subspaces we found that the reported
+  accuracy advantage is not a stable quantity. Three successive, individually reasonable
+  corrections to a 60-line baseline moved it by a factor of 2–4 and removed half the ranks."*
+
+  **The obvious framing — "a fast structure-preserving DLRA" — is not available.** There is no
+  per-step speedup at any rank (`1.78–2.18×` slower), no memory saving (`2.8–3.5 MiB` *more*),
+  and no stationary fluctuation state to validate against. **A paper in that framing has to
+  retract its own headline in review.** The thesis above is *stronger*, not weaker, for three
+  reasons: every number in `CLAIMS.md` becomes a contribution rather than a limitation; the
+  finding generalises past this paper's method, so a reader uninterested in DLRA still gets
+  something; and **a paper that reports the fragility of its own central number is a paper whose
+  other numbers get believed** — and this project revised that number five times, so the
+  fragility is what happened rather than a story we invented.
+
+  **Venue: SISC/JCP rolling, which is already D5's first choice.** A
+  measurement-and-protocol contribution backed by an implemented method and four documented
+  harness bugs is a recognised genre in scientific computing and SISC is its natural home. JCP
+  is the fallback and also fits. ICML and NeurIPS stay excluded, as D5 already decided.
+
+  **The blueprint contains:** the five contributions in final order; a section-by-section map
+  with the artifact and commit behind every one of the seven figures; **a drafted abstract**; the
+  four-harness-bug table flagged as the most important object in the paper; the prohibition list
+  with the decision that bars each item; and **§8 — seven reviewer attacks with the answer to
+  each**, including the two hardest: *"your method is 1.8× slower and uses more memory, why
+  publish it?"* and *"your static baseline is just weak."*
+
+  **And I audited the drafted abstract rather than trusting it.** Every one of its 15 numbers
+  was checked to trace verbatim to `CLAIMS.md`, and three were re-derived from the artifacts
+  independently: `t*(r=16, W=0.25) = 1.26` ✓, the static error at `t=0.1` identical at `0.094`
+  across all six ranks ✓, and the full-step ratios `1.78–2.18` ✓. **That is the R44 rule applied
+  to my own document, and it cost two minutes.**
+
+  **The order I gave the writer is itself a finding: draft the limitations section first,
+  because it determines what every other section is allowed to claim.** I have been asking for
+  sections in numerical order for twenty cycles. That was backwards.
+
+  **Plainly, per the R28 commitment: the writer will not complete this list on this branch.** Six
+  cycles, fifteen hours, no movement. **theoretical-research has never run a session at all.**
+  I have already said this about writing-research, and it is equally true of these two — saying
+  it once per agent is not enough. The honest statement is that **three of the four agents are
+  not going to finish, and the paper's completion now depends on work I can do inside my own
+  ownership, plus whatever the writer does with the blueprint.**
+
+  **No merge this cycle**; no agent branch moved.
+- 2026-09-25 **R52 — `t*` is Reynolds-robust on both axes, D15.4 is qualified as an endpoint
+  artefact, peak memory is measured and shows no advantage, and the mechanism behind `t*` is
+  identified.**
+  No agent had pushed, so I ran the two outstanding measurements myself: the **`Re=1000` column
+  on the corrected driver** with the full window sweep, and **peak memory** — which no artifact
+  in the project records, while the draft explicitly asks for *"per-step and total wall-clock
+  time **and peak memory**"*.
+
+  **`t*` is robust on both nuisance axes, and D15 is confirmed at a second Reynolds number.**
+  `r=16` gives `1.26 / 1.26 / 1.46` at `Re=5000` and `1.24 / 1.24 / 1.33` at `Re=1000` —
+  **ratio 0.99**. `r=32` gives `2.44 / 2.42 / 2.45` and `2.53 / 2.52 / 2.53` — **ratio 1.04**.
+  **A 5× change in Reynolds number moves `t*` by 1–4%, and a 4× change in the baseline's window
+  by ≤7% (`r=16`) and ≤1% (`r=32`).** `r ≤ 8` never leads and `r=43` never yields, at both
+  Reynolds numbers. That is as well-supported as anything in this project has ever been.
+
+  **And I have to correct D15.4, which I made load-bearing on coder's comparison.** I wrote
+  *"the static error is flat in rank — a 43-fold rank range buys 2%"*. **That is one endpoint
+  pair at one horizon and it is not representative.** The full row at `t=8, Re=5000` is
+  `0.1009, 0.0996, 0.1160, 0.0994, 0.0994, 0.0994` for `r = 2, 4, 8, 16, 32, 43` — **the
+  interior rank `r=8` is the worst, and comparing only the endpoints `r=2` and `r=43` understates
+  the spread by 8×.** The spread across rank, by horizon: **0.0% at `t=0.1`, 0.1% at `t=0.25`,
+  8.7% at `t=0.5`, ~24% at `t=1`, ~40% by `t=2–3`** — and it is **Reynolds-dependent at long
+  horizons**: `43–46%` at `Re=1000` against `16–41%` at `Re=5000` for `t ≥ 3`.
+
+  **So the corrected claim is a mechanism rather than a slogan, and it is better:**
+
+  > **A static subspace cannot spend rank at short horizons, and that fixed number is what the
+  > reduced integrator competes against.** At `t=0.1` and `t=0.25` the static error is `0.0940`
+  > and `0.1183` at **every** rank, while the reduced integrator's error falls to `0.0002` at
+  > `r=32` — a factor of `506`. From `t ≈ 1` the static subspace can begin to use rank, and the
+  > crossover is when it does.
+
+  This predicts what the data shows: `t*` grows with the reduced integrator's rank, is nearly
+  Reynolds-independent (the short-horizon floor is identical at both), and is infinite at the
+  ceiling because that method's error is zero by construction rather than by competition.
+
+  **Peak memory: measured, and there is no advantage — which extends D11.1 to both axes.** One
+  fresh process per configuration, because peak RSS is a process high-water mark that cannot be
+  reset; threads pinned and recorded; 400 steps; `Re=5000`, `A=0.2`, `dt=5e-4`. `N=64`: full
+  grid **35.4 MiB**, DLRA **38.2 MiB at every rank from 2 to 43**. `N=128`: full grid **39.0**,
+  DLRA **42.1–42.6**. **Peak RSS is rank-independent — a 21× rank range moves it by `< 0.5 MiB`
+  — and the reduced method uses 2.8–3.5 MiB _more_ than the full-grid reference, not less**,
+  because it holds the full field *plus* the factors *plus* the factorization workspace. **A
+  reviewer who asks "does it at least save memory?" gets "no", and it is better to say so.**
+  The caveat that matters, recorded with it: **the ~34 MiB interpreter baseline dominates, so
+  the absolute figures are meaningless — report the overhead over the full grid, not raw RSS.**
+
+  **Two small findings.** (a) **The artifact does not record the refit offset, though its own
+  docstring says it does** — `parameters` carries only `moving_window_lengths` and
+  `moving_window_refit_interval`. **D15.3 instructs every author to report the offset, so the
+  rule is currently unactionable in the project's own artifact**, and this is the second time
+  the offset/in-sample distinction has proved load-bearing. (b) The `crossovers` block is wrong
+  for the third cycle and its logic has not changed.
+
+  **The lesson in this cycle, and it is the third time this family has cost me: I made a claim
+  load-bearing on a two-number comparison and did not look at the rest of the row.** `r=8` was
+  in the data the whole time. **The rule this earns: a claim of the form "X is independent of
+  Y" must be checked across the whole range of Y, not at its endpoints — endpoints are exactly
+  where an independence claim looks best.** It is the same shape as R44's "the divergence
+  range" and R41's ratio: a single convenient pair of numbers standing in for a distribution.
+
+  **No merge this cycle** — the runs wrote to `/tmp/opencode/rv2/` and one-process-per-config
+  probes; nothing was written inside the repository, and no agent branch moved.
 - 2026-09-25 **R51 — `t*` exists (coder's "no crossover" refuted by their own artifact), every
   fitted form is void, and the sensitivity is the result. Fifth revision of one number.**
   Coder `1c9d032` (5 commits, 20 files, +3949/−369), **merged at `7b2f93f`**; 150 files on
