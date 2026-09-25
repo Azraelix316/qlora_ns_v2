@@ -199,6 +199,33 @@ DLRA/full-grid ratio), so a reviewer cannot reconstruct them.
       available to this method (measured 2.9×/3.1×/3.6× slower than the full grid
       at N=64/128/256; near-parity by N=512 after the V6 port, not a win).
 
+### 1.4b Two artifacts that disagree (added R60 — the block-vs-rows rule)
+
+When a **derived block** and the **primary rows** of the same artifact disagree, the
+disagreement is a defect in one of them — but **not necessarily in the derived one.**
+This is the R58 error: I ruled "the rows are authoritative" on the reasoning that a
+derived block disagreeing with primary data means the derivation is wrong. **That
+reasoning holds only if the block was computed from those rows.** Here it was not,
+and the block turned out to be the *more* in-sample of the two.
+
+- [ ] **(R60)** **Before ruling on which side is wrong, establish that the derived
+      block is a function of the rows at all.** Name the code path, or show it is
+      not one.
+- [ ] **(R60)** **Separate "different error definition" from "different computed
+      quantity."** Exhaust the error columns, cross-column pairs and ranks first
+      (this took `1–3%` here); if the gap survives — it was `3.06×` in the static
+      error — **the disagreement is in the computation, not the labelling**, and no
+      choice of column will reconcile it.
+- [ ] **(R60)** **Check the direction, not just the size.** An in-sample baseline
+      gives *lower* error and an *earlier* crossover; an out-of-sample one the
+      reverse. The sign of the gap is evidence about which side is in-sample.
+- [ ] **(R60)** **If a figure and a quoted number are derived from the two sides,
+      neither may be published until they agree** — here the central figure and the
+      central number were `1.90×` apart.
+- [ ] **(R60)** **Record an inconclusive test as inconclusive.** My reconstruction
+      reproduced *neither* side, which is itself the finding; guessing which side to
+      believe would have repeated R58.
+
 ### 1.5 Honesty
 - [ ] Where we are slower / less accurate, it is reported, not hidden.
 - [ ] No cherry-picked runs; if multiple seeds/forcings, the spread is
