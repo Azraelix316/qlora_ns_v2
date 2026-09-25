@@ -2779,3 +2779,58 @@ because I had been treating coder's pile as evidence of engagement rather than a
 communication failure.
 
 **D41.5 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7 and D40.6 stands.
+
+---
+
+## D42 — **THE PAPER'S RELATED-WORK SECTION CANNOT BE WRITTEN: three of its six required citations are ABSENT from `refs.bib` on `main`, and all three fixes sit on an unmerged branch. `CITATIONS.md` has them verified and paste-ready.** (2026-09-26)
+
+> **OPERATIVE (R77).** Four entries, Crossref-verified, ready to paste: **Lubich & Oseledets,
+> Kusch–Schotthöfer & Walter 2026, RAIL**, and the missing `doi` field on `girfoglio2022`. **The
+> related-work section is the worst place for the paper to be short, and the gap is a branch, not a
+> research task.**
+
+**D42.1 — THE MEASUREMENT. `refs.bib` ON `main` HAS 42 ENTRIES AND FOUR OF THE SIX THE PAPER'S
+RELATED-WORK SECTION REQUIRES ARE NOT USABLE:**
+
+| required for | DOI | in `refs.bib` on `main`? |
+|---|---|---|
+| Koch & Othmar (SIMAX 2007) | `10.1137/050639703` | **present** |
+| **Lubich & Oseledets — projector splitting** | `10.1007/s10543-013-0454-0` | **MISSING** |
+| **Kusch, Schotthöfer & Walter 2026 — closest modern prior art** | `10.1137/25m1730673` | **MISSING** |
+| **RAIL — retires "first structure-preserving low-rank"** | `10.1137/23M1622921` | **MISSING** |
+| Musharbash & Nobile | `10.1016/j.jcp.2017.09.061` | **present** |
+| **Girfoglio, Quaini & Rozza** | `10.1016/j.compfluid.2022.105536` | **entry present, NO `doi` field** |
+
+**D42.2 — ALL THREE MISSING ENTRIES ARE THE ONES `AGENTS.md` AND D4 NAME AS REQUIRED EVIDENCE.**
+Lubich–Oseledets is **the projector splitting this method is built on**; Kusch–Schotthöfer–Walter 2026
+is **the closest modern prior art**, which D4 requires citing; RAIL is the evidence `AGENTS.md` itself
+cites for retiring "first structure-preserving low-rank". **A projector-splitting DLRA paper that
+does not cite Lubich–Oseledets, and does not cite the 2026 augmented projector-splitting paper it is
+closest to, invites exactly the suspicion D4 exists to prevent.**
+
+**D42.3 — THE CAUSE IS A BRANCH, NOT A RESEARCH TASK. ALL THE FIXES LIVE ON
+`writing-research`'s UNMERGED 39-COMMIT BRANCH, WHICH I DO NOT EXPECT TO LAND (R28, R46).** **That is
+the concrete reason the paper cannot be finished rather than merely unfinished: four paste-ready
+entries are sitting on a branch nobody will merge.** `refs.bib` is not my path, so
+`state/reviewer/CITATIONS.md` carries them **verified and paste-ready** for whoever lands it, or for
+the writer.
+
+**D42.4 — VERIFICATION, AND THREE TRAPS THAT WOULD EACH PRODUCE A CITATION ERROR.** Every DOI resolved
+through **`https://api.crossref.org/works/<doi>`** on 2026-09-26, per the standing rule that
+**doi.org redirects are never used.** **TRAP 1: RAIL IS 2025, NOT 2023 — THE DOI LIES.**
+`10.1137/**23M**1622921` encodes the 2023 manuscript, but `issued` and `published-print` are both
+**2025** (*SIAM J. Sci. Comput.* **47**(2):A1145–A1169). **TRAP 2: LUBICH–OSELEDETS IS 2014, NOT 2013
+— THE DOI LIES THE OTHER WAY.** `s10543-**013**` and `issued` say 2013 (online `2013-11-07`), but
+**`published-print` is 2014-03** (*BIT Numer. Math.* **54**(1):171–188). **TRAP 3: "SCHOTTHÖFER" HAS AN
+UMLAUT** — `Schotth\"ofer`, or the writer will not find the reference by typing the name they see
+printed. **My own records cite RAIL by DOI without a year, so they are not wrong — but anyone writing
+the entry from the DOI will get the year wrong, and the year is what a reader checks.**
+
+**D42.5 — TWO STANDING INSTRUCTIONS RESOLVED, SO STOP ASKING. THERE IS NO `koch2019` ENTRY** — only
+`koch2007dlra`, which is correct; **I have been ordering that deletion for several cycles against a
+key that no longer exists.** And **`temam1977navier` IS PRESENT ON `main`**, so that fix has landed.
+**Both were on my list for many cycles as outstanding work, and neither exists. That is two cycles of
+my own bookkeeping spent on tasks that were already done — the D35 lesson again, in the one place I
+never swept.**
+
+**D42.6 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6 and D41.5 stands.
