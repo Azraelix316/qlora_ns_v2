@@ -44,6 +44,58 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-25 **A mechanism I nearly got wrong, caught by measuring it.** The
+  first F5 run at T=8 returned an adaptive rank of **1**, not R26's 16, and my
+  first explanation was the secular zonal mean (94% of the energy by t=20, so
+  a 99% fraction of the whole state is reached by the mean alone). Measuring it
+  refuted that: at t=8 the zonal share is 73.7%, and the *instantaneous*
+  fluctuation r99 is **2** — the same as the whole-state r99. The real
+  difference is **instantaneous versus windowed rank**: each snapshot at t=8 is
+  nearly 2-dimensional, while the 401 snapshots spanning [0, 8] occupy a
+  14-dimensional subspace. So R26's 1→16 growth is a property of the subspace
+  the trajectory *visits*, and a per-step rule that reads one state at a time
+  cannot approach it — the energy criterion moves the selection off the
+  dealiasing ceiling onto a physically meaningful ~2, but 2 is not 16 and no
+  threshold on a single snapshot makes it so. Tracking the windowed rank needs
+  a method that accumulates the visited subspace, which per-step truncation is
+  not. I corrected the `SVDProjector` docstring, which had asserted the
+  refuted explanation with numbers.
+- 2026-09-25 F5 harness hardened: a baseline that goes non-finite is now a
+  **recorded result**, not an abort. The first T=8 run died when
+  `pod_early_r32` went non-finite at t=6.96, discarding every other method's
+  numbers. Each run now reports `diverged`, the step and time it died at, the
+  window it actually covered, and `accuracy_metrics_valid: false`, and the
+  artifact lists `diverged_methods`. Aborting a comparison because one
+  baseline failed is the R24 lesson recurring: "POD is worse" is not citable
+  unless the divergence is itself reported.
+
+- 2026-09-25 **S2 answered at the canonical amplitude, and the answer is no.**
+  The full ladder to T=20 at A=0.5 gives drift between the last two thirds of
+  `E_fluct` / `Z_fluct` of 31%/9% (T=3), 40%/11% (T=4), 30%/8% (T=6), 25%/15%
+  (T=8), 29%/7% (T=12), 34%/28% (T=16), 3%/29% (T=20) against a bar of 10% on
+  **both**. `qualifying_horizons` is empty: no affordable horizon is stationary
+  in the S2 sense. Two supporting measurements from the same run: the zonal
+  mean holds **93.8%** of the total energy at T=20 (E_total 939.7 against
+  E_fluct 58.3, total energy up 42x from 22.2), and the rank ladder at A=0.5
+  gives r99 = 1, 2, 2, 4, 7, 10, 11, 12, 14 at W = 0.1 … 8 while the amplitude
+  rule asks 46, 99 and 230 modes at W = 2, 4, 8 against a ceiling of 43. So the
+  regime is mean-dominated exactly as D11.2 states, now measured at our own
+  amplitude, and the paper reports time-dependent fluctuation statistics with
+  the zonal trajectory alongside rather than a plateau that does not exist.
+- 2026-09-25 R27's F5 spec addition implemented: **three static-POD window
+  placements** (early `[0, train]`, late `[T-train, T]`, and a moving/oracle
+  window refitted on a trailing window of the reference) with the comparison
+  made against the best of them, because "the cost of staticity" is a function
+  of window placement rather than a property of POD. `PODDMD` now also learns
+  from the reference's own snapshots, so it needs no extra PDE pass.
+  **That change fixed a real defect in the baseline:** fitted on a separately
+  re-run trajectory, POD-DMD diverged (E_fluct 8e11 at r=8, max div 4.2e-9);
+  fitted consistently with the rollout it is stable at every rank (18.8/22.3/
+  19.3 against a reference 19.1). A baseline that blows up because its training
+  and rollout trajectories differ is not a baseline, it is a harness error —
+  which is the R24 failure mode recurring in new code, caught by the smoke run
+  rather than by a test.
+
 - 2026-09-25 **R26's central measurement reproduced independently, and it
   matches their table value for value.** Running the S1–S3 pilot at R26's exact
   configuration (N=64, A=0.2, dt=5e-4, snapshots every 0.02, nested windows
