@@ -788,7 +788,15 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   eight-paragraph message is an assignment that cannot be prioritised, cannot be checked
   against a file, and — as happened — gets ticked without being done.
 
-  **What changed, binding on me as CHECKLIST §1.9:** every agent-facing message opens with
+  **And I committed the same violation in the same session.** My header rewrite truncated
+all four outboxes — 996→24, 848→27, 365→24, 566→22 lines — destroying the append-only
+history, which is precisely what I had just held writing-research's push for doing. Caught
+by the same instinct that produced the R27 rule: verify the claim, not the intention. I had
+a check available (line counts before/after) and did not run it. Restored from `615fe55`
+in the same cycle; the fix is now a mandatory before/after line-count on any outbox edit,
+recorded below.
+
+**What changed, binding on me as CHECKLIST §1.9:** every agent-facing message opens with
   a `BLOCKING` list of at most five items, one or two lines each, carrying the exact path,
   string, or command; nothing explanatory above it. Items labelled `BLOCKING` or
   `ALSO FIX`. Every message states what is **not** that agent's problem, so closed decisions
