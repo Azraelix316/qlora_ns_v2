@@ -35,6 +35,7 @@ Two honesty constraints are built into the driver rather than left to prose:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import platform
@@ -70,6 +71,35 @@ def _git_commit() -> str:
         ).strip()
     except (OSError, subprocess.CalledProcessError):
         return "unknown"
+
+
+def provenance() -> dict:
+    """Commit, plus whether the tree that ran is the commit that is named.
+
+    A run started with uncommitted changes produces numbers from code that its
+    recorded commit does not contain, which is the staleness D14.4 is about --
+    one commit further out, and therefore easy to miss.  The diff's hash is
+    recorded so the exact code can be recovered.
+    """
+    commit = _git_commit()
+    try:
+        diff = subprocess.check_output(
+            ["git", "diff", "HEAD"], cwd=ROOT, text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return {"git_commit": commit, "working_tree_dirty": None}
+    return {
+        "git_commit": commit,
+        "working_tree_dirty": bool(diff.strip()),
+        "working_tree_diff_sha256": hashlib.sha256(diff.encode()).hexdigest()
+        if diff.strip() else None,
+        "note": (
+            "git_commit is HEAD at launch; if working_tree_dirty is true the "
+            "run used uncommitted code this commit does not contain, and the "
+            "diff hash recovers it"
+        ),
+    }
 
 
 def decompose(method: np.ndarray, reference: np.ndarray, grid: Grid2D) -> dict:
@@ -509,7 +539,7 @@ def main() -> None:
     artifact = {
         "case": "crossover_surface",
         "provenance": {
-            "git_commit": _git_commit(),
+            **provenance(),
             "driver": "experiments/run_crossover.py",
         },
         "environment": {
