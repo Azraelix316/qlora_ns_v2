@@ -30,7 +30,33 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
-> **R21 — the number I refused to explain is now fully explained: the POD baseline's
+> **R22 — retracted R21's mechanism, and did not replace it.** Testing R21's own open
+> question, I found its stated mechanism was measured in the **wrong subspace**: I took the
+> SVD of *mean-subtracted snapshots* where `PODGalerkin.fit` takes the SVD of
+> `X - X.mean(axis=1)[:,None]`, i.e. deviations from the snapshot mean. Re-measured in the
+> library's subspace the IC's overlap is **0.723, not 0.044%** — so "the IC is nearly
+> orthogonal to the training subspace" is **false** and R21 §3 is withdrawn. R21's
+> *measurements* survive: the step-0 error is the whole error (11.247× → 11.422×), the error
+> is flat in rank, and "POD is 159× worse" must still be struck — none of which depended on
+> the mechanism. **This is the sixth instance of a proxy standing in for the real
+> computation, and the first time the error is in a *mechanism* rather than a check**, which
+> is worse: a wrong check wastes an hour, a wrong mechanism misleads whoever acts on it.
+> **Established by component measurement** (r=16, 20 snapshots): `‖ic‖`=24.434,
+> `‖mu‖`=20.036 (82.0% of `‖ic‖`), **`‖ic−mu‖`=31.601 — larger than `‖ic‖` itself**,
+> `‖Uᵀz‖`/`‖z‖`=**55.0%**, **`cos(mu,ic)`=−0.000144**, `‖mu−ic‖/‖ic‖`=1.2933. So the
+> snapshot mean is essentially orthogonal to the IC, which makes the centred target *larger*
+> than the original, while the basis term is recovered at 55% — the basis is not failing, the
+> `mu` term governs the accuracy. **R20's fix demonstrably pays:** 50 snapshots instead of 20
+> (cap no longer binding) moves the step-0 energy ratio from **11.217× to 0.635×**, while a
+> 201-snapshot window spanning the online phase is *worse* (11.342×) — so the energy ratio is
+> not monotone in basis quality. **And I have an unresolved contradiction between two of my
+> own measurements:** `cos(mu,ic)≈0` says the snapshots' mean is orthogonal to the IC, while
+> a separate run gave `‖psi(t)−psi(0)‖/‖psi(0)‖`=0.0034 rising to 0.0379 over t≈0.0275 —
+> the snapshots within a few percent of it. Both cannot be true, one of my scripts is wrong,
+> and **I did not find which, so I advanced no mechanism.** The question is left narrow and
+> well-posed for whoever picks it up: why is the training snapshots' mean nearly orthogonal
+> to the initial condition when the snapshots are within a few percent of it?
+> **R21 — the number I refused to explain is now fully explained (mechanism since retracted in R22): the POD baseline's
 > failure is a step-0 artefact, and the IC is nearly orthogonal to the training subspace.**
 > R20 ended by declining to attach a story to the committed baseline's 11.4×/159× failure
 > because the rank cap did not account for it. So I accounted for it. Committed config
@@ -611,6 +637,73 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R22 — retracted R21's mechanism, and deliberately did not replace it.**
+  R21 left one open question — whether a training window spanning the evaluation period
+  fixes the POD baseline — and answering it is reviewer work even though choosing the
+  protocol is coder's and theoretical-research's. I ran it, and the run found an error in my
+  own previous report.
+
+  **The retraction.** R21 stated that the IC has **0.044%** of its L2 norm in the training
+  subspace and built the mechanism "the IC is nearly orthogonal to the training subspace" on
+  it. **That number was computed in the wrong subspace.** My script took the SVD of
+  *mean-subtracted snapshots*; `PODGalerkin.fit` takes the SVD of
+  `X - X.mean(axis=1)[:,None]`, which is the span of **deviations from the snapshot mean**.
+  These are different subspaces. Re-measured in the one the library actually uses, the
+  overlap is **0.723** (2 states: 0.406, 3: 0.454, 5: 0.513, 11: 0.595, 21: 0.723) — so the
+  IC has ~72% of its centred norm *inside* the POD subspace and the stated mechanism is
+  **false**. R21 §3 is withdrawn and the file is annotated with the retraction rather than
+  quietly superseded.
+
+  **What survives, and it is the part that matters for the paper.** R21's *measurements*
+  never depended on the mechanism: the step-0 error **is** the whole error (11.247× →
+  11.422× energy, 147.5× → 159.05× enstrophy); the error **is** flat in rank from r=20 to
+  r=43 on a rank-17 field; and therefore the baseline's initialisation is invalid and
+  **"POD is 159× worse" must be struck** from R5m and the gate spec. Those stand.
+
+  **This is the sixth instance of a proxy standing in for the real computation, and the
+  first time the error has been in a *mechanism* rather than a check** — which is a worse
+  class of error, because a wrong check wastes an hour and a wrong mechanism misleads
+  whoever acts on it. The six: signature default (R11), string match (R16), recognition
+  (R17), truncated display (R17), heading count (R19), merge return code (R19b), and here a
+  subspace that looked equivalent and was not. I have written the general rule each time and
+  it did not prevent this one, which is itself worth recording: **knowing the failure mode
+  does not immunise you against it.** What limited the damage was not the rule but the
+  habit of re-measuring a surprising number before building on it.
+
+  **What is established by component measurement** (r=16, 20 snapshots, t ∈ (0, 0.05]):
+  `‖ic‖` = 24.434; `‖mu‖` = 20.036, i.e. **82.0% of `‖ic‖`**; **`‖ic − mu‖` = 31.601, larger
+  than `‖ic‖` itself**; `‖Uᵀz‖/‖z‖` = **55.0%**; **`cos(mu, ic)` = −0.000144**;
+  `‖mu − ic‖/‖ic‖` = 1.2933; rel L2 = 1.0802. So the snapshot mean is essentially
+  orthogonal to the IC, which makes the centred target *larger* than the original — the
+  projection is being asked to represent a vector further from the origin than the one it
+  started from — while the basis term itself is recovered at 55%. **The basis is not
+  failing; the `mu` term governs the accuracy.** Including the IC in the training set does not
+  help (rel L2 1.0013, `‖mu₂ − ic‖/‖ic‖` = 1.2844, effective rank 16 of 21).
+
+  **R20's fix demonstrably pays, which is worth recording as a positive.** Going from 20 to
+  50 snapshots — so the rank cap no longer binds at r=32 — moves the committed window's
+  step-0 **energy** ratio from **11.217× to 0.635×**, a factor of 17, while rel L2 stays
+  ≈ 1.0. Conversely, a window spanning the whole online phase with 201 snapshots is
+  *worse* on energy (11.342×) than the narrow window with 50. So the energy ratio is **not a
+  monotone function of basis quality**, and I do not understand its dependence on the
+  training window. I am recording that as an open question rather than a result.
+
+  **And the contradiction I did not resolve.** `cos(mu, ic) = −0.000144` says the training
+  snapshots' mean is orthogonal to the IC. A separate run gave
+  `‖psi(t) − psi(0)‖/‖psi(0)‖` = 0.0034 at t=0.0025 rising to 0.0379 at t≈0.0275 — the
+  snapshots within a few percent of the IC. If the snapshots are within 4% of the IC their
+  mean must be too and `cos` must be ≈1. The two disagree by an order of magnitude in
+  opposite directions; **one of my two scripts is wrong and I did not find which.** So I
+  advanced no mechanism, and R22 exists specifically to stop the next report from inheriting
+  one as settled. The question is left narrow and well-posed: **why is the mean of the
+  training snapshots nearly orthogonal to the initial condition when the snapshots themselves
+  are within a few percent of it?** Both scripts are reproducible from R22's numbers; the
+  first thing to check is whether the two snapshot sets are actually identical.
+
+  **What remains actionable regardless of the unresolved piece.** Fix the rank cap first —
+  it is the one unambiguous defect here and it moves the number by 17×. V1 first overall. The
+  baseline is not runnable for F5 until this is understood. And I have told coder plainly
+  that **I would rather have their explanation than my second guess.**
 - 2026-09-25 **R21 — accounted for the number I had refused to explain.** R20 ended by
   explicitly declining to attach a tidy story to the committed POD baseline's
   11.4×/159× failure, because the rank cap did not account for it and I would not invent a

@@ -1,6 +1,15 @@
 # R21 — The committed POD baseline's failure is **fully accounted for**: it is a step-0 artefact, and the initial condition is nearly orthogonal to the training subspace
 
 **Cycle:** R21
+> **RETRACTED IN PART BY R22.** §1 (the step-0 error is the whole error), §2 (the error
+> is flat in rank) and §5 (the baseline is invalid; "POD is 159× worse" must be struck) are
+> **measurements and stand**. **§3's mechanism is withdrawn**: the 0.044% overlap was
+> computed in the wrong subspace — the span of mean-subtracted snapshots rather than the
+> span of deviations from the snapshot mean that `PODGalerkin.fit` actually uses. Re-measured
+> correctly it is **0.723**, so "the IC is nearly orthogonal to the training subspace" is
+> false. See `reviews/2026-09-25-R22-retraction-of-r21-mechanism.md`, which also records a
+> contradiction between two of my own measurements that I have not resolved.
+
 **Scope:** closes the item R20 explicitly left open — "the committed baseline's 11.4×/159×
 failure remains unexplained". It is now explained, with a mechanism, a measurement, and a
 consequence for V1 and F5.
