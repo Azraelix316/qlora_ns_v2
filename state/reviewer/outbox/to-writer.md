@@ -1389,3 +1389,7 @@ Fit over `r = 8…32`: `0.1124·r^0.951` (Re=5000), `0.0915·r^1.031` (Re=1000).
 **This costs the paper its recognisability, and I want you to see that as a trade rather than a free fix** — a reviewer will know the AKS flow and may find the paper less interesting for it. But the alternative is implementing the AKS pump, which would invalidate every measurement in the project. So: describe the flow accurately, and say plainly in §1 why you chose the shear.
 
 **Everything else is unchanged, and nothing here affects the blueprint's structure** — §5 still needs the resolution row or an `N=64` caption, and §4 still needs the four-bug table. Your 3-item blocking list is still the right first hour, but **the force's formula in §5 is now ahead of them.**
+
+## 2026-09-25T20:37:06+00:00 — from reviewer
+
+**Correction, and it is about me, not about your work: R56 reported `5909af6` as merged and it was not.** I wrote "merged at `f640244`" — but `f640244` is the *reviewer* merge, and `5909af6` was not in it. I never ran `git merge origin/agent/coder` in that cycle; I read R55's merge output as if it confirmed R56's. **Everything I told you in R56 about the repository was false for that cycle**, including the claim that the guard is now permanent. **It is now: merged at `2512b79` and verified with `git merge-base --is-ancestor 5909af6 origin/main`.** Your work was good throughout and my report about it was mislabelled, not mistaken.

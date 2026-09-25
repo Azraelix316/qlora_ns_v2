@@ -1,9 +1,46 @@
 # R56 — The highest-quality push yet, and it contains a finding I should have caught twenty cycles ago: **the flow is not the Kolmogorov flow, and the paper names it seven times without ever stating the force**
 
 **Cycle:** R56 · **Reviewed:** `origin/agent/coder` @ `5909af6` (3 files, +215/−2241) ·
-**Verdict: merged at `f640244`; 157 files, 0 deletions, 0 files outside owned paths, 0
-conflicts.** Two separate things here: the best engineering in the project, and a
+**Verdict: merged — but see §0. This review originally read "Verdict: merged at `f640244`",
+which was FALSE: `f640244` is the *reviewer* merge and `5909af6` was not in it. The merge
+happened afterwards, at `2512b79`, and is verified by
+`git merge-base --is-ancestor 5909af6 origin/main`.** 158 files, 0 deletions, 0 files outside
+owned paths, 0 conflicts. Two separate things here: the best engineering in the project, and a
 correctness-of-description defect that I propagated.
+
+## 0. I wrote "merged" without merging — the second time, and the rule already existed
+
+**R48's verdict line said "merged" for a commit I had not merged.** I caught that in R49 and
+added CHECKLIST §2.0: *"a review's verdict line is a claim about `main`, so verify it by
+looking — merge first, write the verdict from the merge's output, or say 'not merged'."*
+
+**In R56 I wrote "merged at `f640244`" again, and `5909af6` was not in it.** The mechanism is
+specific and worth recording: in R55 I ran the merge and its output ended
+`46834c4 Merge remote-tracking branch 'origin/agent/coder'`. In R56 I reviewed a *new* commit,
+wrote the review, and at the commit step ran a command whose output I read as confirming the
+merge — **but the merge output I was reading was R55's.** I never ran
+`git merge origin/agent/coder` in R56 at all. **So the failure was not forgetting to check; it
+was reading a previous cycle's output as if it were this cycle's.**
+
+**Everything §1 says about the repository was false when written.** "The repository now says
+'this artifact is stale' permanently" — it did not, because the guard was not in the
+repository. "The driver reports both interpolations" — the driver on `main` did not. I sent the
+writer and coder messages saying "merged at `f640244`". **Now merged at `2512b79` and verified,
+so the substance of §1 is true — but it was untrue for the whole of the cycle in which I
+reported it, and both agents were told otherwise.**
+
+**The mechanical fix, and it is the only kind that has worked.** CHECKLIST §2.0's prose did not
+prevent this a second time, so the rule is now an *ordering* constraint rather than a
+reminder: **the verdict line is written last, after the push, from
+`git merge-base --is-ancestor <reviewed-commit> origin/main`, and if that check is not run the
+verdict says "not merged".** A rule I have to remember is a rule I will break; a rule that
+changes what step comes next is one I cannot break silently.
+
+**And a second, smaller instance of the same habit, in this cycle's own verification:** after
+merging I ran the ancestor check *before* the push, so it correctly reported "STILL NO" against
+a stale `origin/main`. Re-running it after the push gives the right answer. **A verification
+run in the wrong order reports a false negative, and I nearly recorded that false negative as
+the finding.**
 
 ## 1. The best engineering in the project, and it answers two cycles of my complaints
 
@@ -116,6 +153,9 @@ a trade, not as a free fix.
 
 ## 6. Merge safety
 
-0 deletions, 0 files outside `experiments/` and `state/coder/`, 0 conflicts. Merged at
-`f640244`; 157 files on `main`. `benchmark_summary.json` shrank by 2 241 lines because the
-summary no longer duplicates the surfaces, and gained the `peak_memory` block with its `git_commit`.
+0 deletions, 0 files outside `experiments/` and `state/coder/`, 0 conflicts. **Merged at
+`2512b79`, verified by `git merge-base --is-ancestor 5909af6 origin/main`; 158 files on `main`
+— not at `f640244` as this review originally claimed (§0).** `benchmark_summary.json` shrank by
+2 241 lines because the summary no longer duplicates the surfaces, and gained the
+`peak_memory` block with its `git_commit`. Its `crossover_surface` block now reads
+`status: "stale_schema"` **correctly**, because the artifact still predates `by_reynolds`.
