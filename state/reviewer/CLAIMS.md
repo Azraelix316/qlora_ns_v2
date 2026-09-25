@@ -30,8 +30,11 @@ recorded here and the earlier figure is struck, not quietly dropped.
 > > with the refit schedule **offset by half an interval, so no basis ever contains the time it
 > > is scored at** — a fixed-rank reduced integrator **leads for `t* = 0.649` at `r = 16` and
 > > `1.482` at `r = 32`**, **robust to a 4× change in the baseline's window length (`≤0.63%`)**;
-> > **it does not lead at all at `r ≤ 8`**; and **only the dealiasing ceiling leads at every
-> > horizon**, because at that rank the method *is* the full-grid solver.
+> > **it does not lead at all at `r ≤ 8`**; and **above a rank threshold — bracketed between 32
+> > and 43 at `N=64` — it leads at every horizon**, because its error there stays `6–11` orders of
+> > magnitude below the static baseline's. **`r=43` is the largest rank tested, NOT the dealiasing
+> > ceiling** (D30.2): `2·floor(64/3)+1 = 43` is a *wavenumber*, and the dealiased 64×64 grid
+> > carries ~1849 dof, so a rank-43 subspace is not the full-grid solver.
 > > **Do not fit a power law** — two resolved ranks cannot support one.
 
 | rank | 2 | 4 | 8 | 16 | 32 | 43 |
@@ -108,11 +111,13 @@ refinement of the grid moves it by 37% at `r=16` and 146% at `r=32`:**
 | 43 | **never** | **6.41** | **1.00** | **0.51** |
 
 **THE CEILING IS GRID-DEPENDENT — `2·floor(N/3)+1` = 43 at `N=64`, 85 at `N=128` — so `r=43` is
-the full-grid solver at `N=64` and only half the ceiling at `N=128`. Never quote a rank ladder
+below the static baseline's at every horizon at `N=64`, and `r=43` is the largest rank tested.
+**`r=85` at `N=128` appears in no artifact** (D30.5). Never quote a rank ladder
 without the ceiling beside it (D17.2).**
 
 **A reported `t*` must therefore state FIVE things: the baseline's window length, its refit
-interval, its offset, the in-sample check, AND the grid with its dealiasing ceiling.**
+interval, its offset, the in-sample check, AND **the grid together with the largest rank
+   tested**. *(D30.5: NOT "the dealiasing ceiling" — that is a wavenumber, not a rank.)*
 **The offset is now recorded in the artifact (`moving_window_refit_offset: 0.125`), so this
 requirement is satisfiable from the artifact rather than from the driver (D22.1).**
 
@@ -201,14 +206,24 @@ rows, and **assert any derived block against them** (D22.5).
 
 These matter more than the fit, because the paper's argument rests on them:
 
-1. **The dealiasing ceiling never loses.** `r=43` is `0.0000` at every horizon from `t=0.1` to
-   `t=8` at **both** Reynolds numbers, and it beats the strongest static baseline by
-   `1.9e8–4.5e10×`. *"The only rank that never loses is the rank at which the method is the
-   full-grid solver"* is the one part of the central result that is Reynolds-independent
-   **and** baseline-independent.
-2. **The static floor does not move with rank.** At `t=0.1` the oracle baseline spans
-   `0.3180 → 0.3177` (`Re=5000`) and `0.3178 → 0.3176` (`Re=1000`) across a **43-fold** rank
-   range. Source: R45.
+1. **Above a rank threshold, nothing overtakes the reduced integrator — and the threshold is
+   BRACKETED, not identified.** At `r=43` the DLRA's error runs `6.7e-13` (`t=0.1`) to `2.5e-09`
+   (`t=8`, Re=1000) and beats the static baseline by `6e6–1.4e11×`, at **both** Reynolds numbers.
+   At `r=32` it does **not** hold (error `0.568` at `t=8`, worse than the static's `0.099`), so the
+   threshold lies **between 32 and 43**. **This is Reynolds-independent and baseline-independent.**
+   **It is NOT the dealiasing ceiling, and the method is NOT the full-grid solver at that rank**
+   (`r=43` is the largest rank tested and coincides with the *wavenumber* `2·floor(64/3)+1`; the
+   dealiased grid has ~1849 dof). **"Exact" is also wrong — the error is `1e-13`–`1e-8`, not zero.**
+   The real reason is that the dynamics here are effectively low-dimensional. **D30.2–D30.4.**
+   **The test that would settle it: `r ∈ {40, 48, 64, 85}` at `N=64`.**
+2. **The static baseline SATURATES in rank — above `r ≈ 8`, extra rank buys it nothing.** Verified
+   time-keyed from the committed artifact at both Re, all six tested ranks: the spread across rank
+   is **`0.00%` at `t=0.1` and `0.09%` at `t=0.25`**, and **`r=16`, `r=32` and `r=43` have
+   *identical* static errors to four decimals at every horizon.** Rank-sensitivity begins at
+   **`t=0.5` at `r=2` and `r=4`** (not "from `t≈1`"), reaching `40–46%` by `t=2–4` on
+   `(max−min)/max` and `56–84%` on `(max−min)/min` — **so the normaliser must be stated; it changes
+   the number by nearly 2×.** Re=5000 falls back to `14.3%` by `t=8`. Source: R65/D30.1, superseding
+   R45's older `0.3180 → 0.3177` figures, which are from a different regime.
 
 **And the horizon and the plateau move together.** At `t=8`, `r=32` is **worse** than the static
 baseline at both Reynolds numbers — `1.35×` at Re=5000 and **`2.14×`** at Re=1000 — so at low
@@ -437,7 +452,8 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | quoting `crossover_surface.json`'s `crossovers` block | wrong for the third cycle; read the `dlra` / `static_moving_window` rows |
 | reporting `t*` without the baseline's window, refit interval and offset | **D15.3** — the number is meaningless without them |
 | "a static subspace's floor is rank-independent" **without the horizon qualifier** | **D16.2** — true at `t ≤ 0.25` (0.0–0.1%), false by `t ≈ 2–3` (~40%), and stronger at low `Re` and on a finer grid |
-| reporting `t*` without the grid and its dealiasing ceiling | **D17.1–D17.2** — `t*` grows 1.4–2.5× from `N=64` to `N=128`, and the ceiling is 43 vs 85 |
+| reporting `t*` without the grid **and the largest rank tested** | **D30.5** — the grid matters (`t*` grows under refinement) but the *dealiasing ceiling* is a **wavenumber**, not a rank, and `r=85` is untested. **D17.1–D17.2 withdrawn on the ceiling clause.** |
+| **"only the dealiasing ceiling leads at every horizon, because at that rank the method is the full-grid solver"** | **D30.2/D30.3** — **false on every part.** `r=43` is the largest rank *tested* and coincides with the wavenumber `2·floor(64/3)+1`; the dealiased grid has ~1849 dof; the real reason is that `r=43`'s error is `1e-13`–`1e-8`, i.e. the dynamics are effectively low-dimensional. **"Exact" is also wrong — it is near-roundoff, not zero.** |
 | "the rank that never yields is the ceiling" as a grid-free statement | **D17.2** — it is a statement about the *grid*; at `N=128`, `r=43` is half the ceiling and does yield |
 | `27.5%` / `1.5%` for the rank rules | **D18.6** — message-only, no artifact; not admissible until committed |
 | "a window-accumulating rank rule would fix the criterion" | **D18.1** — implemented and measured: it is **worse** (`1.5%` vs `27.5%` of fluctuation energy) |
@@ -468,10 +484,13 @@ Everything below is measured, and none of it requires retracting a number:
    `r=32` against a correctly implemented baseline.
 2. **That horizon is not a stable quantity, and saying so is the methodological contribution.**
    Three successive corrections to a 60-line baseline moved it by 2–4× and removed half the
-   ranks. **Any published crossover for this class of method should carry the baseline's window
-   length, refit interval, offset, and a check that no basis contains its evaluation time.**
+   ranks. **Any published crossover for this class of method should carry FIVE things: the
+   baseline's window length, its refit interval, its offset, a check that no basis contains its
+   evaluation time, and the grid together with the largest rank tested** (D30.5 — the fifth is
+   *not* the dealiasing ceiling, which is a wavenumber).
 3. **The limit is structural, not numerical.** A static subspace cannot track a flow whose
-   support moves, and its error floor is rank-independent; a refitting integrator can, until
+   support moves, and **its error saturates in rank — `r ≥ 16` buys it nothing measurable at any
+   horizon** (D30.1); a refitting integrator can, until
    its own per-step truncation accumulates onto a saturation plateau.
 4. **Rank criteria measure different things, and a causal rule provably cannot reach the
    cumulative one.** The windowed `r99` rises `1 → 16` and is grid-independent; a per-step rule

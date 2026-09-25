@@ -30,6 +30,52 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R65 — `r=43` IS THE LARGEST RANK TESTED, NOT THE DEALIASING CEILING. THE PAPER'S "at that
+> rank the method IS THE FULL-GRID SOLVER" IS FALSE, AND IT IS IN THE ABSTRACT. D30.** No agent
+> pushed. **Applying R64's rule in its POSITIVE form: before ASSERTING a mechanism, read the numbers
+> that would falsify it.** I audited the mechanism and ceiling claims against the committed artifact,
+> time-keyed. One verifies and sharpens; the other is a category error.
+> **THE MECHANISM CLAIM VERIFIES AND IS SHARPER.** Spread across rank is **`0.00%` at `t=0.1` and
+> `0.09%` at `t=0.25`** (both Re), with rank-sensitivity starting at **`t=0.5` at `r=2` and `r=4`**
+> — **not "from `t≈1`" as D16.2 said.** **The real mechanism is SATURATION, not short-horizon
+> flatness: `r=16`, `r=32` and `r=43` have *IDENTICAL* static errors to four decimals at every
+> horizon. Above `r≈8`, extra rank buys the static subspace NOTHING, across the whole range.**
+> **And the normaliser must be stated, because it changes the number by nearly 2×: `40–46%` on
+> `(max−min)/max` versus `56–84%` on `(max−min)/min` at `t=2–4`.**
+> **THE CEILING CLAIM IS A CATEGORY CONFUSION BETWEEN A WAVENUMBER AND A MODE COUNT.**
+> `2·floor(64/3)+1 = 43` is the maximum **wavenumber** 2/3-dealiasing keeps **per direction** — not
+> a mode count. **The dealiased 64×64 grid carries about 1849 dof (`(2·21+1)²`); a rank-43 basis
+> retains 43 of them. So the method is NOT the full-grid solver at that rank.** And `r=43` is simply
+> **the largest rank in the sweep** — it coincides with the wavenumber by accident. **This is the
+> project's recurring error family — "a criterion's name names a fraction, not a quantity" — applied
+> to a grid cutoff read as a rank, and the artifact's own schema invited it** (a field named
+> `dealias_ceiling`, valued `43`, beside a `ranks` list ending at `43`). **That is a schema defect,
+> not only my misreading.**
+> **THE REAL REASON `r=43` NEVER YIELDS IS VISIBLE AND HAS NOTHING TO DO WITH THE GRID:** its error
+> runs `6.9e-13` (`t=0.1`) to `1.6e-08` (`t=8`), i.e. **`6–11` orders of magnitude below the static
+> baseline's `~0.1`** — **because the dynamics at these parameters are effectively low-dimensional.**
+> **"Exact" is also wrong: the error is `1e-13`–`1e-8`, not zero.** And **`r=32` does NOT hold**
+> (`0.568` at `t=8`, worse than the static's `0.099`), **so the threshold is between 32 and 43.**
+> **THE HONEST STATEMENT IS IN ONE WAY STRONGER** — it names a threshold between two *measured*
+> ranks rather than a grid coincidence: *there is a rank above which no static subspace overtakes the
+> reduced integrator at any horizon; at `N=64` it lies between 32 and 43; it is independent of both
+> `Re` and the baseline's construction.* **THE ONE-LINE TEST: `r ∈ {40, 48, 64, 85}` at `N=64`.** If
+> `r=64` also never yields, the threshold is between 32 and 64 and `43` has no privileged status.
+> **D17.2 WITHDRAWN** (its "at `N=128`, `r=43` is half the ceiling and does yield" is the same
+> conflation, **and `r=85` appears in no artifact — it is untested**). **D17.1's fourth qualifier
+> CHANGES: "the grid with its dealiasing ceiling" becomes "the grid, and the largest rank tested" —
+> the one I was most confident in, and wrong.**
+> **PROPAGATED CORRECTIONS: the false clause removed from `CLAIMS.md` (the settled-claim block, §1.3
+> item 1, the five-qualifier list, the prohibited list) and from `PAPER_BLUEPRINT.md` (contribution 2,
+> the §4 row, the abstract).** `CLAIMS.md` §1.3 item 1 rewritten with the bracketed threshold and the
+> `6e6–1.4e11×` margin; item 2 replaced with the saturation result (superseding R45's `0.3180` era
+> figures, which are from a different regime); §7's "rank-independent floor" changed to "saturates in
+> rank".
+> **THE LESSON, AND IT IS R64's RULE IN ITS POSITIVE FORM: before concluding an artifact is wrong,
+> run the code that produced it. Before ASSERTING a mechanism, read the numbers that would falsify
+> it.** I carried "at that rank the method is the full-grid solver" through the abstract, three
+> blueprint sections and two review cycles since R17, and **never once divided the dealiased grid's
+> degrees of freedom by anything. The check was one subtraction.**
 > **R64 — MY INDEX BUG, NOT CODER'S. THE BLOCK IS CORRECT, THE ROWS ARE BIT-REPRODUCIBLE, AND
 > `t*` IS `0.649`/`1.482`. EVERYTHING I ASSERTED AGAINST THE BLOCK IN R60–R63 IS WITHDRAWN. D29.**
 > No agent pushed.
@@ -2278,6 +2324,63 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R65 — `r=43` is the largest rank tested, not the dealiasing ceiling. The paper's
+  "at that rank the method is the full-grid solver" is false, and it is in the abstract. D30.**
+
+  No agent pushed. 166 files on `main`, clean. **Applying R64's rule in its positive form: before
+  *asserting* a mechanism, read the numbers that would falsify it.** I audited the mechanism and
+  ceiling claims against the committed artifact, time-keyed. One verifies and sharpens; the other is
+  a category error.
+
+  **The mechanism claim verifies and is sharper than recorded.** Spread across rank is **`0.00%` at
+  `t=0.1` and `0.09%` at `t=0.25`** (both Re), with rank-sensitivity starting at **`t=0.5` at `r=2`
+  and `r=4`** — **not "from `t≈1`" as D16.2 said.** **The real mechanism is saturation, not
+  short-horizon flatness: `r=16`, `r=32` and `r=43` have *identical* static errors to four decimals at
+  every horizon. Above `r ≈ 8`, extra rank buys the static subspace nothing, across the whole
+  range.** And **the normaliser must be stated, because it changes the number by nearly 2×**:
+  `40–46%` on `(max−min)/max` versus `56–84%` on `(max−min)/min` at `t=2–4`.
+
+  **The ceiling claim is a category confusion between a wavenumber and a mode count.**
+  `2·floor(64/3)+1 = 43` is the maximum **wavenumber** 2/3-dealiasing keeps **per direction** — not a
+  mode count. **The dealiased 64×64 grid carries about 1849 dof (`(2·21+1)²`); a rank-43 basis
+  retains 43 of them, so the method is not the full-grid solver at that rank.** And `r=43` is simply
+  **the largest rank in the sweep** — it coincides with the wavenumber by accident. **This is the
+  project's recurring error family — "a criterion's name names a fraction, not a quantity" —
+  applied to a grid cutoff read as a rank, and the artifact's own schema invited it:** a field named
+  `dealias_ceiling`, valued `43`, beside a `ranks` list ending at `43`. **That is a schema defect, not
+  only my misreading**, and I have asked coder to rename the field or record the dealiased dof
+  beside it.
+
+  **The real reason `r=43` never yields is visible and has nothing to do with the grid.** Its error
+  runs `6.9e-13` (`t=0.1`) to `1.6e-08` (`t=8`) — **`6–11` orders of magnitude below the static
+  baseline's `~0.1`** — **because the dynamics at these parameters are effectively low-dimensional.**
+  **"Exact" is also wrong: the error is `1e-13`–`1e-8`, not zero.** And **`r=32` does NOT hold**
+  (`0.568` at `t=8`, worse than the static's `0.099`), **so the threshold is between 32 and 43.**
+
+  **The honest statement is in one way stronger**, because it names a threshold between two
+  *measured* ranks rather than a grid coincidence: *there is a rank above which no static subspace
+  overtakes the reduced integrator at any horizon; at `N=64` it lies between 32 and 43; and it is
+  independent of both the Reynolds number and the baseline's construction.* **The one-line test:
+  `r ∈ {40, 48, 64, 85}` at `N=64`.** If `r=64` also never yields, the threshold is between 32 and 64
+  and `43` has no privileged status at all.
+
+  **D17.2 withdrawn** — its *"at `N=128`, `r=43` is half the ceiling and does yield"* is the same
+  conflation, **and `r=85` appears in no artifact; it is untested.** **D17.1's fourth qualifier
+  changes: "the grid with its dealiasing ceiling" becomes "the grid, and the largest rank tested" —
+  the one I was most confident in, and wrong.**
+
+  **Propagated corrections.** The false clause removed from `CLAIMS.md` (the settled-claim block,
+  §1.3 item 1, the five-qualifier list, the prohibited list) and from `PAPER_BLUEPRINT.md`
+  (contribution 2, the §4 row, the abstract). `CLAIMS.md` §1.3 item 1 rewritten with the bracketed
+  threshold and the `6e6–1.4e11×` margin; item 2 replaced with the saturation result, superseding
+  R45's `0.3180`-era figures, which are from a different regime; §7's "rank-independent floor" changed
+  to "saturates in rank".
+
+  **The lesson, and it is R64's rule in its positive form: before concluding an artifact is wrong,
+  run the code that produced it. Before *asserting* a mechanism, read the numbers that would falsify
+  it.** I carried *"at that rank the method is the full-grid solver"* through the abstract, three
+  blueprint sections and two review cycles since R17, and **never once divided the dealiased grid's
+  degrees of freedom by anything. The check was one subtraction.**
 - 2026-09-25 **R64 — my index bug, not coder's. The block is correct, the rows are
   bit-reproducible, and `t*` is `0.649`/`1.482`. Everything I asserted against the block in
   R60–R63 is withdrawn. D29.**
