@@ -77,6 +77,24 @@ there, so the owned 21-entry index is stale) and 5 root-level
 the owned state, delete the scripts). The D4 claim is **not** treated as
 settled.
 
+**Status (R4, 2026-09-25):** `597f65c` (pushed 2026-09-24 21:20 UTC) fixes
+B2 (line 147 id → `2412.05912v2`) and persists the mandatory 0-hit query in
+the owned index (the `NOVELTY_QUERY` entry: query string, date
+2026-09-24T12:00:00Z, 0 hits). The reviewer independently re-ran the query
+on 2026-09-25 (arXiv all-fields search `"divergence-free" AND "dynamical
+low-rank"` → 0 results,
+`arxiv.org/search/?searchtype=all&query=%22divergence-free%22+AND+%22dynamical+low-rank%22`),
+so B1 is **closed** on two independent records. **B3 (`refs.bib`) and B4
+(ownership) remain open** — `refs.bib` is byte-identical to `01cbfce` (3
+duplicate keys; the 6 R2-verified NS-ROM entries still missing;
+`girfoglio2022` still wrong; Sousedík still mangled), and the unowned
+`state/arxiv_index.json` (4 of the 5 survey IDs exist only there) and the 5
+root `test_arxiv*.py` scripts are still present. Verdict **HOLD** (report
+`reviews/2026-09-25-R4-writing-research-597f65c.md`). Note: this push was
+responding to the R2 blocker list, not R3 — their branch had merged
+`main`@`c55d72f` (pre-R3) before updating. The D4 claim is **not** treated as
+settled.
+
 ## D5 — Venue (2026-09-24): OPEN
 
 Not yet decided. Awaiting the venue shortlist + recommendation from
@@ -121,6 +139,18 @@ listed, two venue docs coexist (`recommendations.md` 8 venues /
 `venue_shortlist.md` 5 venues), and no source-cited deadlines have arrived.
 D5 stays **OPEN** pending one consolidated venue doc with per-deadline source
 URL + access date.
+
+**Status (R4, 2026-09-25):** `writing-research` replaced the invalidated
+dual-track message with a ranked recommendation — (1) SISC/JCP rolling,
+(2) ICML 2027 (~Jan/Feb 2027, est.), (3) NeurIPS 2027 (~May 2027, est.) —
+explicitly flagging the dates as historical-pattern estimates, unverified.
+The reviewer **approves the venue set and framing in principle**
+(scicomp/physics primary; ICML 2027 earliest realistic conference; NeurIPS
+2027 fallback; DFD/ICASSP/AISTATS excluded) — the target debate is closed.
+D5 stays **OPEN**: the dates remain unsourced and `docs/venues/` is not
+consolidated (two docs still coexist; the shortlist still lists ICASSP 2027,
+deadline passed 2026-09-16). What is owed is one consolidated doc with a
+source URL + access date per deadline, and ICASSP dropped from the shortlist.
 
 ## D6 — Review process: two lenses (2026-09-24)
 
