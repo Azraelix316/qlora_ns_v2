@@ -435,7 +435,20 @@ are closed and re-verified by the reviewer. Report
   currently starts from a rank-2 projection of the IC and loses **65% of the
   kinetic energy before t=0** (7.796 vs 22.207), which is what the headline
   error actually measures.
+  **Reporting obligation (R5m):** the step-0 error must be *computed*, not
+  assumed. `run_long_time.py` hardcodes `relative_l2 = 0.0` at t=0 while the
+  true value is **0.319**, and `run_kolmogorov._run_projected` never evaluates
+  the step-0 comparison at all. The recorded curve therefore reads as
+  "agreement then decorrelation" when the truth is 0.319 → 0.324 over T=1 —
+  i.e. the error is almost entirely the initialisation offset and there is no
+  predictability horizon to read off this run. No error-versus-time figure may
+  be produced from the current artifacts.
 - **V2** — runs long enough to reach statistical stationarity (`T ≈ 20–100`)
+  *Confirmed by the driver audit (R5m): all three Re cases are built from
+  bit-identical IC parameters and differ only in `nu`, so the Re-independence of
+  the error is **not** an initial-condition artifact — viscosity simply barely
+  matters over `T=0.1`. Do not re-check the IC on that account.*
+
   with `E(t)`/`Z(t)` plateaus and Reynolds-dependent spectra. `T=0.1` is less
   than one eddy turnover; `max_cfl` is identical (0.0147) at Re=100/1000/5000,
   so the three Reynolds numbers are not yet distinguished.
