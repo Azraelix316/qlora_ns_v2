@@ -27,7 +27,7 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 - [x] Benchmarks: full-grid spectral vs static POD vs adaptive DLRA,
       Re ∈ {100, 1000, 5000}; track rank + max rel L2 vs full grid.
       Log summaries to `state/coder/results/` (one small file per run).
-- [ ] Send a readiness note to `writer` once the first numbers exist.
+- [x] Send a readiness note to `writer` once the first numbers exist.
 
 ## Log
 
