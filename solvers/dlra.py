@@ -112,6 +112,7 @@ class SVDProjector:
         rank_criterion: str = "amplitude",
         energy_fraction: float = 0.99,
         rank_basis: str = "state",
+        rank_window: int = 20,
     ):
         integer_values = (rank, min_rank, max_rank)
         if any(int(value) != value for value in integer_values):
@@ -122,12 +123,16 @@ class SVDProjector:
             raise ValueError("rank must lie between min_rank and max_rank")
         if not 0.0 < float(relative_amplitude_cutoff) < 1.0:
             raise ValueError("relative_amplitude_cutoff must lie in (0,1)")
-        if rank_criterion not in ("amplitude", "energy"):
-            raise ValueError("rank_criterion must be 'amplitude' or 'energy'")
+        if rank_criterion not in ("amplitude", "energy", "window_energy"):
+            raise ValueError(
+                "rank_criterion must be 'amplitude', 'energy' or 'window_energy'"
+            )
         if not 0.0 < float(energy_fraction) < 1.0:
             raise ValueError("energy_fraction must lie in (0,1)")
         if rank_basis not in ("state", "fluctuations"):
             raise ValueError("rank_basis must be 'state' or 'fluctuations'")
+        if int(rank_window) < 1:
+            raise ValueError("rank_window must be at least 1")
         if int(min_rank) > grid.N:
             raise ValueError("min_rank cannot exceed the physical matrix rank")
         self.grid = grid
@@ -139,6 +144,8 @@ class SVDProjector:
         self.rank_criterion = rank_criterion
         self.energy_fraction = float(energy_fraction)
         self.rank_basis = rank_basis
+        self.rank_window = int(rank_window)
+        self._window_fields: list[np.ndarray] = []
         self.last_stats: Optional[RankStats] = None
         self.last_singular_values = np.empty(0, dtype=float)
         self._last_u: Optional[np.ndarray] = None
@@ -173,6 +180,10 @@ class SVDProjector:
         self._last_vh = None
         self._last_centered = None
         self._stage_candidates = {}
+        # The windowed rank rule's own memory.  A retained candidate from an
+        # earlier run would make the new run's rank depend on where it started,
+        # which is exactly the state leakage `reset` exists to prevent.
+        self._window_fields = []
         self.svd_seconds = 0.0
         self.svd_calls = 0
 
@@ -208,6 +219,8 @@ class SVDProjector:
         extra spectrum is computed without singular vectors, and it is only
         computed when the rule actually needs it.
         """
+        if self.rank_criterion == "window_energy":
+            return self._window_spectrum(field)
         if self.rank_basis == "state" or self.rank_criterion != "energy":
             return s
         prime = np.asarray(field, dtype=float) - zonal_mean(field)
@@ -218,11 +231,59 @@ class SVDProjector:
         except np.linalg.LinAlgError:
             return s
 
+    def _window_spectrum(self, field: np.ndarray) -> np.ndarray:
+        r"""Spectrum of the **stacked** recent candidates, not of one field.
+
+        This is the quantity R26 measures: how many modes are needed to
+        represent a *window* of the trajectory.  A per-step rule reading one
+        state at a time cannot approach it -- measured, the instantaneous r99 at
+        t=8 is 2 against a windowed 14 -- so this rule keeps the last
+        ``rank_window`` candidates and takes the singular values of the matrix
+        they form as columns.
+
+        The spectrum of an ``N^2 x n`` stacked matrix is the square root of the
+        eigenvalues of its ``n x n`` Gram matrix, so no large factorization is
+        needed: the cost is ``n`` inner products of length ``N^2`` per candidate,
+        i.e. O(n N^2), which is negligible beside the four whole-field
+        factorizations the step already pays.  The Gram is formed from the
+        fluctuations when ``rank_basis="fluctuations"``, so the secularly growing
+        zonal mean cannot dominate the energy fraction.
+
+        The window is a *sliding* one over the candidates this projector has
+        seen, oldest dropped first.
+        """
+        n = int(self.rank_window)
+        if n < 1:
+            return np.zeros(0)
+        candidate = np.asarray(field, dtype=float)
+        if self.rank_basis == "fluctuations":
+            candidate = candidate - zonal_mean(candidate)
+        flat = candidate.reshape(-1)
+        if not np.isfinite(flat).all():
+            return np.zeros(0)
+        self._window_fields.append(flat)
+        if len(self._window_fields) > n:
+            self._window_fields = self._window_fields[-n:]
+        # Gram of the retained candidates, built column by column so the cost is
+        # one inner product per stored field rather than an N^2 x N^2 matrix.
+        k = len(self._window_fields)
+        gram = np.empty((k, k))
+        for i in range(k):
+            for j in range(i, k):
+                value = float(self._window_fields[i] @ self._window_fields[j])
+                gram[i, j] = value
+                gram[j, i] = value
+        try:
+            eigenvalues = np.linalg.eigvalsh(gram)
+        except np.linalg.LinAlgError:
+            return np.zeros(0)
+        return np.sqrt(np.clip(eigenvalues, 0.0, None))[::-1]
+
     def _target_from_spectrum(self, s: np.ndarray) -> int:
         """Retained rank for the configured criterion, clipped to the bounds."""
         if s.size == 0 or s[0] <= np.finfo(float).eps:
             return self.min_rank
-        if self.rank_criterion == "energy":
+        if self.rank_criterion in ("energy", "window_energy"):
             # Smallest r whose leading energy fraction reaches the target.  The
             # cumulative sum is taken in descending order, so this is the
             # Eckart--Young rank for the requested energy fraction.
@@ -353,6 +414,7 @@ class DLRA:
         rank_criterion: str = "amplitude",
         energy_fraction: float = 0.99,
         rank_basis: str = "state",
+        rank_window: int = 20,
         check_every: int = 5,
         adapt_initial: bool = False,
     ):
@@ -368,6 +430,7 @@ class DLRA:
             rank_criterion=rank_criterion,
             energy_fraction=energy_fraction,
             rank_basis=rank_basis,
+            rank_window=rank_window,
         )
         self.check_every = int(check_every)
         self.adapt_initial = bool(adapt_initial)
