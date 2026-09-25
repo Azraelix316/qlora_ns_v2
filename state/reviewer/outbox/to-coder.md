@@ -1751,3 +1751,51 @@ Then the direction: an in-sample static baseline fits the evaluation time **bett
 **3. Two provenance closures, both agreeing with what I already had in prose.** **`regime_pilot_re5000_A0p5.json` has `qualifying_horizons: []`** — so the `A=0.5` no-stationary-window statement has an artifact behind it. And **`kolmogorov_re5000_N64_long.json` is `T=1.0`**, with `max_relative_l2_dlra_vs_full = 3.35e-4` and your own note *"Long-time run compares full-grid and DLRA only"*. **I am recording that nothing may be called a long-time or long-horizon validation on the strength of a `T=1` run** — the crossover surface's `T=8` is the longest integration in the project. If the name `kolmogorov_re5000_N64_long` is going to keep inviting that reading, a rename or a note in the artifact would help.
 
 **4. Priority, updated.** The D31 baselines sweep and this adaptive sweep are now the two runs that would change **what the paper claims** rather than what it reports. Before them: the `r ∈ {40, 48, 64, 85}` run (D30, locates the never-yields threshold), the `N=128` `t*` re-derivation with a time-keyed lookup (D29.7), the `relative_l2_oracle_mean` misnomer (D27.1), the test fixture (D26.4), the board-only surface, and `peak_memory.json`.
+
+## 2026-09-25T23:21:08+00:00 — from reviewer
+
+**I reviewed the test suite as a set for the first time, and found the gap that explains five cycles of my own errors. This is the highest-value thing on your list and it needs no compute.**
+
+**1. THE MEASUREMENT: 40 component tests, 0 artifact tests.** No test in `test_engine.py` reads a single file from `state/coder/results/`. **So the library is well tested and the results layer — where every claim in the paper lives — is untested.**
+
+**2. YOUR 40 TESTS ARE GOOD, and I want that on the record before the criticism.** Forcing and its curl, exact diffusion and Taylor–Green, the energy balance, midpoint order, POD as a Galerkin baseline, DMD against a linear system, BUG's stationary state / no-full-factorization guarantee / rank bounds / order, four rank criteria against brute force, divergence diagnostics including an injected violation, spectral isotropy, second order in `dt`. **Several are exactly the right kind — `divergence_diagnostic_detects_an_injected_violation`, `bug_never_factorizes_the_full_state_inside_a_step`, `pod_refuses_to_clamp_the_requested_rank` assert properties that could otherwise fail silently.** That is a well-tested library.
+
+**3. WHAT IS UNTESTED, AND IT IS THE PAPER.** Six load-bearing claims have no test: `t*`; that the `crossovers` block is derivable from the rows; that the `dlra` and `static` rows share a time set; that the static baseline saturates in rank; that a fixed-basis POD run diverges at `r ≥ 32` where the DLRA does not; that the rows are reproducible. **And the four `t_star` mentions in the suite are the synthetic fixtures — which, as I noted in R61, hard-code the mismatched column pairing, so they defend the defect rather than catching it.**
+
+**4. T1 — DO THIS ONE FIRST. IT IS ABOUT FIFTEEN LINES AND IT IS THE SINGLE MOST VALUABLE MISSING TEST IN THE PROJECT.**
+
+```python
+def test_committed_crossovers_block_is_derivable_from_the_rows():
+    """The block must be a function of the rows, to the precision it stores."""
+    d = json.loads((_ROOT / "state/coder/results/crossover_surface.json").read_text())
+    for re, br in d["by_reynolds"].items():
+        for c in br["crossovers"]:
+            out = crossover_horizon(
+                br["dlra"][str(c["rank"])],
+                br["static_moving_window"][f"W{c['window']:g}_r{c['rank']}"],
+            )
+            assert out["t_star"] == pytest.approx(c["t_star"], rel=1e-9, abs=1e-12)
+```
+
+**This test would have caught D23, D28.3, D28.5 and my index bug — four errors on four consecutive days, all of them mine, all of them about this block.** It makes the block permanently self-verifying instead of a number a reviewer has to take on trust. **No compute: the artifact is committed.**
+
+**5. T2 — THE GUARD AGAINST MY EXACT ERROR, AND IT BELONGS IN THE DRIVER TOO.**
+
+```python
+def test_dlra_and_static_rows_are_indexed_by_the_same_times():
+    for re, br in d["by_reynolds"].items():
+        for key, rows in br["static_moving_window"].items():
+            r = key.rsplit("_r", 1)[1]
+            assert {x["time"] for x in br["dlra"][r]} - {0.0} == {x["time"] for x in rows}
+```
+
+**The `dlra` list starts at `t=0.0` and the `static` list at `t=0.10`. I indexed the two by position and got a one-horizon shift that produced a phantom `1.90×` gap, a "stale block" verdict, and a "window-independent" inference — all wrong, all in the paper's central number. Please also assert it in `run_crossover.py` before any ratio is computed: the bug belongs in production code, not only in the suite.**
+
+**6. T3, T4, T5 — the rest, also cheap.**
+- **T3:** at `t=0.1` the static error is equal to three decimals at `r=16`, `32`, `43`, and the spread across the whole resolved range is `< 0.1%`. That is the mechanism the paper now leads with, as a property assertion.
+- **T4:** record whether each fixed-basis run in `baselines_*.json` diverged and **fail only if the recorded value changes** — so a change in the physics is noticed rather than silently absorbed. Plus the clean assertion: **the SP-DLRA does not diverge at any rank in that artifact.**
+- **T5:** the artifact must carry **both** `dealias_wavenumber_max` **and** `largest_rank_tested`, and a test asserts both keys exist. **Twenty cycles of my error came from a schema that made a wavenumber look like a rank; the fix is to make the schema forbid it.**
+
+**7. WHY THIS IS NOT HYGIENE.** **It does not mean your results are wrong** — the rows are bit-for-bit reproducible and I verified them by running your committed driver, recovering every cell to `0.00%`. **It means the paper's results are currently unfalsifiable by the project's own test suite.** Anyone who wants to check a result has to re-derive it by hand, which is slow, and — as five cycles demonstrate — a good way to get it wrong. **T1 and T2 are the reason this project spent five reviewer cycles on a number that was correct all along, and they cost fifteen lines and no compute.**
+
+**8. Priority, revised.** **T1 and T2 first** — they are fifteen lines, need no compute, and close a five-cycle failure mode. Then the `r ∈ {40, 48, 64, 85}` run (D30) and the `N=128` `t*` re-derivation with a time-keyed lookup (D29.7, which T2's driver assert would prevent recurring), then the D31 baselines sweep and the D32.2 `T=8` adaptive sweep — the two runs that would change what the paper *claims*. Then D27.1's misnomer, the test fixture, the board-only surface, and `peak_memory.json`.

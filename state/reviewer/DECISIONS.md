@@ -2454,3 +2454,81 @@ THE REVIEWER'S MANUAL CHECK IS THE TEST THAT WAS NEVER WRITTEN.** I am the stand
 `localize.py` was me reimplementing `crossover_horizon`, and it was wrong for five cycles.
 
 **D36.7 — Unchanged.** Everything in D35.6 stands.
+
+---
+
+## D37 — **`fig_div_free` is UNREADABLE and its TITLE IS FALSE: it plots the divergence to `7.1e+292` on a linear axis, so every stable bar is `1.5e-290` of the width** (2026-09-25)
+
+> **OPERATIVE (R72).** The paper's headline (D31) is **invisible in the project's own figure** and
+> the figure asserting exactness **shows nothing**. Split it into two panels; retitle it. Until
+> then, **no figure in this project may carry a universal quantifier its own data contradicts.**
+
+**D37.1 — THE CLEAN RESULT FIRST: NO FIGURE IS STALE.** `PROVENANCE.md` records a commit per source
+artifact; I compared each against the artifact's own `provenance.git_commit`: **`11/11` figures were
+built from the artifact version now committed** — `baselines_re5000_N64_T8.json` @ `1c9d032a`,
+`crossover_surface.json` @ `5909af66`, the cost pair, four `kolmogorov_*`, three `regime_pilot_*`.
+**That is good provenance hygiene and it is the figure layer's one unambiguous strength. It also means
+every problem in D37.2 is a DESIGN problem, not a staleness problem** — worth knowing, because
+staleness is what I have been hunting all project.
+
+**D37.2 — `fig_div_free` PLOTS THE DIVERGENCE TO `7.1e+292` ON A LINEAR AXIS.** `make_figures.py`
+(~lines 231–252) loops over **every** method in `baselines_re5000_N64_T8.json` and appends
+`m["max_abs_divergence"]` — **including the four that diverged** — then draws a **linear** axis in
+units of `1e-14` with a target line at `1.0`. `pod_late_r32` is `7.091e+278` → axis position
+**`7.09e+292`**. The fifteen finite methods span `2.3`–`19.9` (and `pod_dmd_r32` at `1.05e+03`).
+**SO THE AXIS MUST SPAN `7.09e+292` AND A STABLE BAR IS `1.5e-290` OF ITS WIDTH: EVERY STABLE BAR IS
+INVISIBLE, AND SO IS THE `target 1e-14` LINE AT `x=1.0`. THE FIGURE SHOWS NOTHING.**
+
+**AND THE TITLE — *"Exact divergence-freeness holds for every method"* — IS FACTUALLY FALSE. FOUR
+METHODS DIVERGE, AND THE `diverged` FLAG IS IN THE SAME DICTIONARY THE LOOP IS READING AND IS NEVER
+CONSULTED.**
+
+**The existing comment shows the author knew there was an axis problem and solved it for the wrong
+data** — *"a log axis over four decades of roundoff is hard to read and its tick locator overflows"* —
+**they designed for four decades; the data has 292.**
+
+**D37.3 — AND THE IRONY IS THE FINDING: THE PAPER'S HEADLINE IS WHAT BROKE THE FIGURE.** D31
+established that a fixed-basis projected POD run **diverges to overflow at `r ≥ 32`** where the SP-DLRA
+does not, and that this is contribution 4 and the reason the thesis changed (D33). **That same
+divergence is what `fig_div_free` has been plotting, unlabelled, on a linear axis, under a title
+denying it. SO THE PROJECT'S BEST FINDING IS CURRENTLY INVISIBLE IN ITS OWN FIGURE, AND THE FIGURE
+ASSERTING THE OPPOSITE IS UNREADABLE.** Neither the writer nor any reader could have found this from
+the code or the artifact — it is visible only by plotting one against the other.
+
+**D37.4 — THE FIX, AND IT IS BETTER THAN WHAT THE BLUEPRINT ASKS FOR.** Blueprint §6 says *"table 2
+(new) — build from the artifact; caption 'one parameter set'." A TWO-PANEL FIGURE IS STRICTLY BETTER
+THAN A HAND-BUILT TABLE, because the data contains two stories and the fix is to stop averaging them
+into one axis. (a) **VERIFICATION (contribution 1):** the **sixteen finite methods**, `max|∇·u|` in
+units of `1e-14`, spanning `2.3`–`19.9`, with the `1e-14` target line — a linear bar chart, perfectly
+readable, exactly what the figure was trying to be. **Annotate `pod_dmd_r32` (`1.05e+03`) as the one
+method that degraded WITHOUT diverging — it is the interesting case, not an outlier to hide.**
+(b) **STABILITY (contribution 4):** the **four diverged fixed-basis runs**, each labelled with its
+**divergence time** (`5.51`, `5.74`, `6.96`, `7.17`) and final trajectory error, **on no shared axis
+with (a) — the quantity is not the same and never was.** Caption **"one parameter set"** (D31.3).
+**ONE FIGURE THEN CARRIES BOTH CONTRIBUTIONS 1 AND 4, AND THE THESIS BECOMES VISUAL RATHER THAN
+SOMETHING THE WRITER MUST TRANSCRIBE FROM A JSON FILE.** The combined title should be **"Exact
+divergence-freeness for every method that survives — and four fixed-subspace methods that do not"**,
+which is true, specific, and is the paper's argument in one line.
+
+**D37.5 — TWO SMALLER FIXES IN THE SAME FILE. (1) The `fig_spectra_ek` `$Z(k)` panel is correctly
+omitted with a recorded reason** (*"fluctuation enstrophy drifts 29% … outside the 10% S2 bar"*) —
+**that is exactly right and the reason belongs in the CAPTION, not only in `PROVENANCE.md`. (2)
+`make_figures.py` should REFUSE TO DRAW A BAR IT CANNOT DISPLAY** rather than silently compressing
+292 decades, **because the failure mode is a figure that looks fine and shows nothing.**
+
+**D37.6 — THE LESSON, AND IT COMPLETES A SET.** R70: audit the artifacts, not the claims. R71: the
+artifacts have no tests, so auditing them is manual and error-prone. **R72: THE FIGURES ARE ARTIFACTS,
+AND NOBODY HAD READ THEM — INCLUDING WHAT EACH ONE CLAIMS.** **The specific failure: A FIGURE'S
+TITLE IS A CLAIM, and no test or artifact check validates a title.** `fig_div_free`'s title asserts a
+**universal quantifier** — *"for every method"* — over a dataset containing four counterexamples, in a
+file whose sibling fields record them. **A CLAIM PRINTED ON A FIGURE IS A CLAIM AND DESERVES THE SAME
+SCRUTINY AS A CLAIM IN THE ABSTRACT. Nobody applies that scrutiny because figures are treated as
+outputs rather than as assertions.**
+
+**AND THE GENERAL FORM: `PROVENANCE.md` answers "which artifact is this figure from?", which is
+NECESSARY AND NOT SUFFICIENT. THE TWO QUESTIONS A FIGURE MUST SURVIVE ARE "WHERE DID THIS COME FROM?"
+AND "DOES WHAT IT SAY MATCH WHAT IT PLOTS?" The project automated the first and never checked the
+second.**
+
+**D37.7 — Unchanged.** Everything in D35.6 stands. D36.4's T1–T5 are unaffected and T1/T2 remain the
+cheapest high-value work.
