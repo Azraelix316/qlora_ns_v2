@@ -468,7 +468,7 @@
       "status": "projected_discrete_balance_with_projection_work"
     },
     "initial_energy": 7.795817415624005,
-    "initialization_seconds": 0.00027285097166895866,
+    "initialization_seconds": 0.00031191902235150337,
     "max_abs_divergence": 2.0696252650201176e-14,
     "max_cfl": 0.01314775678928715,
     "max_energy_increase": 0.002648816017824629,
@@ -477,7 +477,7 @@
     "max_relative_l2_vs_full": 0.3165330825330329,
     "max_scaled_energy_balance_residual": 0.0029680148342062546,
     "max_scaled_full_pde_energy_residual": 0.001665114947529269,
-    "offline_plus_online_seconds": 0.9149005091749132,
+    "offline_plus_online_seconds": 0.9204551519360393,
     "projection_energy_history": [
       -8.437952073947486e-06,
       -3.7272105739560857e-06,
@@ -1284,8 +1284,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 0.9146276582032442,
-    "wall_seconds_per_step": 0.004573138291016221
+    "wall_seconds": 0.9201432329136878,
+    "wall_seconds_per_step": 0.004600716164568439
   },
   "full": {
     "checkpoint_steps": [
@@ -2120,8 +2120,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 0.472622866043821,
-    "wall_seconds_per_step": 0.002363114330219105
+    "wall_seconds": 0.36859261291101575,
+    "wall_seconds_per_step": 0.0018429630645550787
   },
   "grid": {
     "L": 6.283185307179586,
@@ -2611,7 +2611,7 @@
     "final_energy": 258.95036073769944,
     "final_enstrophy": 212134.84117486415,
     "final_relative_l2_vs_full": 1.0694764839771087,
-    "fit_seconds": 0.0021002329885959625,
+    "fit_seconds": 0.002799859968945384,
     "forcing_aware_invariant": {
       "formula": "dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv> - projection_energy_increment/dt",
       "max_scaled_residual": 0.7918040305997245,
@@ -2626,7 +2626,7 @@
     "max_relative_l2_vs_full": 1.0789068521936525,
     "max_scaled_energy_balance_residual": 0.7918040305997245,
     "max_scaled_full_pde_energy_residual": 2.5321908225231073,
-    "offline_plus_online_seconds": 0.5841824831441045,
+    "offline_plus_online_seconds": 0.592742158100009,
     "projection_energy_history": [
       0.0805738677654233,
       0.08087202031333618,
@@ -3433,12 +3433,12 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 0.5820822501555085,
-    "wall_seconds_per_step": 0.0029104112507775427
+    "wall_seconds": 0.5899422981310636,
+    "wall_seconds_per_step": 0.002949711490655318
   },
   "provenance": {
     "driver": "experiments/run_kolmogorov.py",
-    "git_commit": "a0640a71685c25a7a254e6d1c9b8fbd919f5ef70"
+    "git_commit": "c5fc82747812713343626a564eda3be283b13134"
   },
   "reynolds": 5000,
   "viscosity": 0.0002
