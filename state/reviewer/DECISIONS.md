@@ -1825,3 +1825,99 @@ its five qualifiers (window, refit interval, offset, in-sample check, grid + dea
 No advantage in time or memory. BUG's rank-scaling withdrawn on both axes; report the `3.3–5.1×`
 slowdown (D25.6/D25.7). The windowed rank rule is worse (D18.1). The flow is the implemented
 shear, with the AKS control (D20, D24). Every D4 barred claim stands.
+
+---
+
+## D29 — **MY INDEX BUG, NOT CODER'S.** The block is correct, the rows are **bit-reproducible**, and `t*` is `0.649`/`1.482` (2026-09-25)
+
+> **OPERATIVE (R64). SUPERSEDES the central claims of D25.5, D28.3, D28.4 and D28.5, and the
+> `t*` constants of D15–D17.** The `crossovers` block is **correct, current, and exactly the rows**.
+> `t* = 0.649` (`r=16`) / `1.482` (`r=32`) at `W=0.25`, Re=5000. Window sensitivity **`≤0.63%`**,
+> Reynolds sensitivity **`3–9%`**. **The rows are bit-for-bit reproducible (0.00% on every cell).**
+
+**D29.1 — THE BUG, IN ONE LINE.** `crossover_surface.json`'s **`dlra` list has 10 entries beginning
+at `t = 0.00`**; the **`static_moving_window` list has 9 beginning at `t = 0.10`**. I indexed the
+DLRA rows with the **static** horizon list, so **every DLRA value I quoted from R60 onward was
+shifted one horizon later than the time I labelled it with.** `crossover_horizon` filters
+`r["time"] > 0.0`, dropping the DLRA's `t=0.00` row, which aligns the two series **perfectly**.
+**Verified: `static[oracle]/dlra[rel_l2]` at the same horizon reproduces the block's
+`ratio_by_horizon` to `1e-9` at all nine horizons.**
+
+**D29.2 — WITHDRAWN, ALL OF IT — four reviews' worth.**
+
+| my claim | cycle | status |
+|---|---|---|
+| rows and block differ by `1.90×` in `t*` | R60 | **withdrawn** — index error |
+| they differ by `3.06×` in the static error | R60 | **withdrawn** — index error |
+| the block is not reproducible from any column pair | R58/R60 | **withdrawn** — it is, to `1e-9` |
+| "the rows are authoritative" | R58 | **withdrawn** — wrong premise; does not discriminate |
+| the block is window-*in*dependent, therefore not from the rows | R63/D28.3 | **withdrawn** — the invariance is **real**; the inference was not |
+| the block is stale | R63/D28.5 | **withdrawn** — current and exact |
+| `t* = 1.26` / `2.44` | D15–D17 | **withdrawn** — superseded by `0.649` / `1.482` |
+| window robustness `≤7%`, Re robustness `1–4%` | blueprint | **withdrawn** — **`≤0.63%`** and **`3–9%`** |
+| "the static rows are a fixed floor" | R62 | already withdrawn (harness error) |
+| `1.17×` BUG rank-scaling, `2.8–3.5 MiB`, `24.7%` | blueprint | **still correct to withdraw** — those were real |
+
+**D29.3 — THE ROWS ARE BIT-FOR-BIT REPRODUCIBLE, which closes D28.8 entirely.** I ran the
+**committed driver** fresh (`origin/main`, `N=64`, `Re=5000`, `r=16`, `W=0.25`): **`0.00%`
+difference on every cell**, static and DLRA, all nine horizons. **The `1–4%` residual of R63 was
+never in the driver — it was in my harness, twice over.** This is the strongest provenance result
+in the project: an independent reviewer ran the committed code and recovered every number exactly.
+
+**D29.4 — THE AUTHORITATIVE CENTRAL RESULT**, read straight from the committed block:
+
+| Re | `r` | `W=0.25` | `W=0.5` | `W=1.0` | window sens. | status |
+|---|---|---|---|---|---|---|
+| 5000 | 8 | — | — | — | — | **unresolved** (never leads) |
+| 5000 | **16** | **0.649** | `0.650` | `0.651` | **`0.20%`** | resolved |
+| 5000 | **32** | **1.482** | `1.474` | `1.483` | **`0.63%`** | resolved |
+| 5000 | 43 | — | — | — | — | **never** (exact) |
+| 1000 | 8 | — | — | — | — | unresolved |
+| 1000 | **16** | **0.667** | `0.667` | `0.668` | **`0.15%`** | resolved |
+| 1000 | **32** | **`1.609`** | `1.604` | `1.606` | **`0.36%`** | resolved |
+| 1000 | 43 | — | — | — | — | never (exact) |
+
+**Reynolds sensitivity: `2.8%` at `r=16`, `8.6%` at `r=32` — i.e. `3–9%`.**
+
+**D29.5 — CODER WAS RIGHT THROUGHOUT, AND SAYS SO.** Their `t*`, their window-invariance
+(`0.3%`), their Re-invariance (`3–9%`), and their R60 direction diagnosis were **all correct**. I
+asserted the block was un-provenanced (R57), then stale (R63), then window-independent and
+therefore not derived from the rows (D28.3) — **each time confidently, each time wrongly, and each
+time I told them their number was wrong.** They responded to the last one by asking a question and
+letting me check rather than pushing back. **That restraint is why this resolved at all.**
+
+**D29.6 — THE COLUMN-PAIRING QUESTION, WHICH I ALSO GOT BACKWARDS.** The code's pairing
+(`dlra[relative_l2]` against `static[relative_l2_oracle_mean]`) is **deliberate and conservative**:
+the static baseline is handed the reference's perfect zonal mean, which **delays** its overtake.
+**The `1–3%` effect I measured in R60 was computed on shifted values, so its magnitude is NOT
+established** — re-measure or drop it. **D27.1 survives on its own footing:** the column does not
+compute what its name and its `error_columns` documentation say.
+
+**D29.7 — ONE ITEM FLAGGED RATHER THAN LEFT STANDING: the `N=128` grid-dependence multipliers
+(`1.46 → 1.99` at `r=16`, `2.45 → 6.04` at `r=32`) are SUSPECT for the same index error.** They came
+from my own R53b run and I cannot now demonstrate they were time-aligned. **D17.1's conclusion —
+that `t*` is not grid-independent — is probably right**, since it was also reached from the
+direction-bug era's uncorrected data, **but the specific multipliers are not currently verifiable
+and must be re-derived from time-aligned rows on BOTH grids.** Requested from coder, who has the
+trajectory; cheaper for them than for me.
+
+**D29.8 — THE LESSON, AND IT IS THE SAME ONE A FOURTH TIME, IN A NEW FORM.** R59 an untested cost
+assumption; R62 a conclusion from a broken harness; R63 a conclusion from a broken lookup. **All
+three are one shape: I substituted an assertion for a verification, and the assertion was
+load-bearing.**
+
+**THE SPECIFIC NEW LESSON: I WROTE A REIMPLEMENTATION OF THE PROJECT'S OWN FUNCTION AND USED IT TO
+OVERRULE THAT FUNCTION'S OUTPUT.** `localize.py` recomputed the crossover by hand;
+`crossover_horizon` was in the same repository and returns `0.6493281145096707` — bit-identical to
+the committed block. **When a project already has a function that computes the quantity, calling it
+is not optional. Reimplementing it in order to check it is how a reviewer manufactures a defect
+that does not exist.** **R57, R58, R60, R62 and R63 were all downstream of that single mistake.**
+
+**THE STANDING RULE, generalising D28.9: BEFORE CONCLUDING THAT AN ARTIFACT IS WRONG, RUN THE CODE
+THAT PRODUCED IT.** Four reviews cost that. It would have cost one.
+
+**D29.9 — Unchanged.** D17's five qualifiers still required of any reported `t*` (window, refit
+interval, offset, in-sample check, grid + dealiasing ceiling). Every fitted `c·r^p` void. No
+advantage in time or memory. BUG's rank-scaling withdrawn on both axes; report the `3.3–5.1×`
+slowdown (D25.6/D25.7). The windowed rank rule is worse (D18.1). D27.1's misnomer stands. The flow
+is the implemented shear, with the AKS control (D20, D24). Every D4 barred claim stands.
