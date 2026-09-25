@@ -1,6 +1,6 @@
 # Suggested Paper Structure (Revised per R5d)
 
-**Target Audience:** Researchers in scientific computing and machine learning interested in low-rank methods for PDEs, specifically incompressible fluid dynamics.
+**Target Audience:** Researchers in scientific computing interested in low-rank methods for PDEs, specifically incompressible fluid dynamics.
 
 ## 1. Introduction
 - **Motivation:** The high computational cost of Direct Numerical Simulation (DNS) for turbulent flows.
@@ -12,7 +12,7 @@
 - **Contribution:** We propose and validate an adaptive-rank, structure-preserving DLRA solver using the robust basis-update-and-Galerkin (BUG) machinery applied to the $\psi$-$\omega$ formulation.
 
 ## 2. Mathematical Background & Preliminaries
-- **Incompressible Navier–Stokes Equations:** The stream function–vorticity ($\psi$-$\omega$) formulation and its inherent property of satisfying the divergence-free constraint $\nabla \cdot \mathbf{u} = 0$.
+- **Incompressible Navier–Stokes Equations:** Discussion of the stream function–vorticity ($\psi$-$\omega$) formulation as the primary choice for this work, chosen specifically because it satisfies the divergence-free constraint $\nabla \cdot \mathbf{u} = 0$ by construction, avoiding the need for pressure-correction or projection steps.
 - **Robust Low-Rank Integrators (BUG):** Overview of the robust basis-update-and-Galerkin (BUG) class of integrators (Ceruti & Lubich 2022, etc.) and their ability to handle small singular values.
 - **Dynamical Low-Rank Approximation (DLRA):** The projector-splitting framework and its extension to structure-preserving settings.
 
@@ -29,7 +29,7 @@
 ## 5. Results & Discussion
 - **Divergence-Freeness:** Verification of the invariant $\max |\nabla \cdot \mathbf{u}| \approx 10^{-14}$ throughout the simulation.
 - **Rank Dynamics and Energy Capture:** Evolution of singular values and rank as turbulence develops; comparison of kinetic energy evolution and energy spectra against DNS.
-- **Accuracy vs. Efficiency:** Performance benchmarks (computational cost, memory usage) compared to static POD and standard DLRA methods.
+- **Accuracy vs. Efficiency:** Performance benchmarks (computational cost, memory usage) compared to full-grid DNS and static POD.
 
 ## 6. Conclusion
 - Summary of the successful implementation of an exactly divergence-free, robust DLRA solver for turbulent NS.
