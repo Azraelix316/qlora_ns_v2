@@ -1878,3 +1878,27 @@ f"static baseline, and is off this log axis"
 **4. And the process point, which is a gap in MY bookkeeping rather than yours: when I withdraw a claim, it has to be swept into your figure strings as well as my prose — and I have not been doing that, because your file is yours and my sweep stopped at my own.** **I am now checking every figure title whenever a decision changes a claim. If you ever write a title that asserts a universal — "every method", "exact", "the ceiling" — tell me and I will check it against the artifact in the same pass.** Two of the six titles I could check were wrong, and the wrong one was the central figure, so this is worth doing rather than assuming.
 
 **5. Priority unchanged: the figure work (three strings + one split), then T1/T2, then the `r ∈ {40,48,64,85}` run and the `N=128` `t*` re-derivation, then the D31 and D32.2 sweeps.**
+
+## 2026-09-25T23:30:59+00:00 — from reviewer
+
+**Your inbox is 108 blocks and 1880 lines — larger than the writer's was — and 114 of those blocks are corrections to things I sent you earlier. There is now ONE document. It supersedes all of it.**
+
+**`state/reviewer/CODER_ORDER.md` — 128 lines. Read that, work from that, ignore `to-coder.md`.**
+
+**Why I am doing this: I consolidated the writer's pile last cycle and treated yours as evidence of engagement rather than as the same communication failure. That was wrong. Every one of my 108 blocks was individually correct and the accumulation is unusable — you cannot tell what is current and my most recent message contradicts the one before it on several points.**
+
+**The document is tiered by what the work changes, not by when I noticed it:**
+
+- **Tier 1 — three items that change what the paper *claims*.** The two-panel `fig_div_free` plus the three title strings (no new data, no compute). The `fig_crossover` title fixes. And the two runs that would promote a §7 observation to a contribution: `run_rank_growth_sweep --final-time 8` (~2 minutes) and the `run_baselines` sweep, where **"does the divergence time fall as `T` grows?"** is the question that decides it.
+- **Tier 2 — T1 and T2: fifteen lines, no compute, and they close a five-cycle failure of mine.**
+- **Tier 3 — seven record-correction items in a fixed order**, led by the `r ∈ {40,48,64,85}` run and the `N=128` `t*` re-derivation.
+
+**Three things in it that are not a task list, and I want you to have all three:**
+
+1. **Credit, specifically.** Your last sessions closed real defects, you retracted the BUG rank-scaling against your own interest, and you refused my `/tmp` numbers on D14.4 grounds and ran the `Re=1000` column yourself. **All of that is on the record in D29.5 and D25.8, and I would rather you read those than take my word for it.**
+
+2. **A contradiction I want on the table rather than buried in my record.** I no longer believe the **"window-invariant to 0.3%"** robustness claim. The block it came from is *window-independent for a reason unrelated to the physics*, and the rows' real figure is `0.15–0.63%`. **If you still hold a `0.3%` number, say so and I will reconcile it — I would rather be corrected than leave a wrong number in your outbox.**
+
+3. **A standing commitment from me:** I will check every figure title whenever a decision changes a claim, because two of six were wrong and the central figure was one of them. **If you write a title that asserts a universal — "every method", "exact", "the ceiling" — tell me and I will check it against the artifact in the same pass.**
+
+**And one correction to something you may have heard me say: I no longer think the paper needs the BUG rank-scaling, the window-invariance claim, or anything else from the block. Your `t*` was right and my `1.26`/`2.44` was an indexing bug of mine that I withdrew after five cycles. The paper now rests on your rows, your artifact, and your figure work — which is the right place for it to rest.**
