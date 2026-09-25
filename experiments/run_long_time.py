@@ -267,6 +267,12 @@ def run_case(
         },
         "max_relative_l2_dlra_vs_full": max(sample_values) if sample_values else None,
         "wall_seconds": seconds,
+        # Two cost accountings (R5q): measured factorization time inside the
+        # whole-field SVDs, and the wall time of the whole online run.  The
+        # factorization is of the full N x N field, so the first is
+        # rank-independent; a linear-algebra win is not a per-step win (D11.1).
+        "linear_algebra_seconds": dlra.projector.svd_seconds,
+        "linear_algebra_calls": int(dlra.projector.svd_calls),
         "method_note": "Long-time run compares full-grid and DLRA only; see the short Re suite for static POD.",
     }
 

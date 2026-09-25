@@ -64,15 +64,11 @@ def main() -> None:
             "driver": "experiments/run_rank_growth_sweep.py",
         },
         "parameters": {
-            "N": args.N,
-            "re": args.re,
-            "dt": args.dt,
+            # run_case's own record is the authoritative one (P0 item 5: a
+            # default in a signature is not a record of what was run), so take
+            # it verbatim and add only what is specific to the sweep.
+            **result["parameters"],
             "steps": args.steps,
-            "initial_rank": 2,
-            "min_rank": 2,
-            "max_rank": 48,
-            "check_every": 5,
-            "dlra_adapt_initial": True,
             "relative_amplitude_cutoffs": [1e-6, 1e-8, 1e-10],
         },
         "initial_state": result["initial_state"],

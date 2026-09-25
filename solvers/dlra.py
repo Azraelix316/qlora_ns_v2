@@ -14,6 +14,7 @@ operators, so divergence-freeness is unaffected.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import time
 from typing import Optional
 
 import numpy as np
@@ -79,6 +80,10 @@ class SVDProjector:
         # The configured rank, restored by ``reset()`` so a reused projector
         # cannot start a new run at the rank a previous run adapted to.
         self.nominal_rank = self.rank
+        # Measured factorization time, for the two cost accountings R5q
+        # requires: linear algebra alone, and the full step.
+        self.svd_seconds = 0.0
+        self.svd_calls = 0
         self.reset()
 
     def reset(self) -> None:
@@ -99,6 +104,8 @@ class SVDProjector:
         self._last_vh = None
         self._last_centered = None
         self._stage_candidates = {}
+        self.svd_seconds = 0.0
+        self.svd_calls = 0
 
     def _svd(self, field: np.ndarray):
         centered = np.asarray(field, dtype=float)
@@ -109,7 +116,10 @@ class SVDProjector:
         if not np.isfinite(centered).all():
             raise FloatingPointError("cannot SVD-project a non-finite state")
         centered = centered - np.mean(centered)
+        start = time.perf_counter()
         u, s, vh = np.linalg.svd(centered, full_matrices=False)
+        self.svd_seconds += time.perf_counter() - start
+        self.svd_calls += 1
         return centered, u, s, vh
 
     def _target_from_spectrum(self, s: np.ndarray) -> int:

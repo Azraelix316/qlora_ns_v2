@@ -40,6 +40,48 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-25 Regenerated **every** committed result artifact from commit
+  `78607f3`, so the POD column is no longer void anywhere. Re-suite
+  (N=64, dt=5e-4, T=0.1, canonical args): all three Re bit-identical IC
+  (KE 22.206703312933374, rank 17, sha `ebcef128...`), max |∇·u| 2.3–2.9e-14,
+  POD IC projection 1.7–1.9e-17, DLRA rank 17→43. Corrected static-POD max
+  rel L2 is 1.08e-6 / 1.13e-8 / 1.00e-8 at Re=100/1000/5000 versus DLRA
+  9.8e-5 / 1.00e-4 / 1.01e-4 — the static baseline is *more* accurate at
+  T=0.1 (in-sample window, effective rank 3), which is the honest result.
+  Taylor–Green, long T=1, and the rank sweep regenerated too; the sweep now
+  records `run_case`'s own full parameter block instead of a hand-copied subset
+  (P0 item 5). Deleted `benchmark_summary_N64.json`, an orphan from an
+  accidental `bench.py` default run whose parameters contradict the canonical
+  suite.
+- 2026-09-25 **P0 item 3 was being violated by the two-grid comparison and is
+  now fixed.** With `default_rng(seed).normal(size=(N,N))`, changing `N`
+  redraws the perturbation, so N=128 was a *different realization* of the same
+  band (KE 22.1886 vs 22.2067), not the same physical problem at two
+  resolutions. Added `make_initial_state(reference_N=...)`: draw, filter and
+  normalize on a reference grid, then transfer the spectrum to the target grid
+  with the explicit (N_target/N_source)² factor that unnormalized rfft
+  coefficients require. N=128 with `reference_N=64` now reproduces the N=64 IC
+  exactly — KE 22.206703313 both, |u| rms equal to 9 digits, normalized spectra
+  agreeing to 9e-18, while the redrawn fine IC still differs. The default is
+  unchanged, so the verified N=64 fingerprint is untouched. The N=128 artifact
+  was regenerated under the full protocol: dt 2.5e-4 (scaled with dx), T=0.1
+  held, all method settings equal; reference KE agrees with N=64 to 6 digits
+  (22.671552 vs 22.671553).
+- 2026-09-25 Added measured two-accounting cost instrumentation and the R5q
+  gate driver `experiments/bench_cost.py`. `SVDProjector` now accumulates
+  `svd_seconds`/`svd_calls`, so "linear algebra alone" is measured rather than
+  estimated, and both accountings now appear in the artifacts. The driver pins
+  and *records* thread counts, discards a warm-up, takes the median of 7
+  repeats over a 2000-step region with min/max spread, holds the rank fixed so
+  cost is not confounded with adaptation, and reports the rank-independence
+  ratio r=64/r=2 at each N. Smoke test at N=64: reference 1.57 ms/step (0.2%
+  spread), reduced full step 1.65–2.12× the reference, linear algebra
+  0.85–0.94×, rank-independence within 1.25. No per-step speedup is claimed
+  anywhere (D11.1).
+- 2026-09-25 Noted for the record: at N=128 the DLRA reaches the *configured*
+  `max_rank=48`, not the dealias ceiling 85, so that run is rank-limited by
+  configuration. Any matched-rank comparison at N=128 needs `max_rank >= 85`.
+
 - 2026-09-25 **V2/V4 closed by root cause: `PODGalerkin.fit` never computed
   POD.** `X = arr.reshape(N*N, n)` on a snapshot-major `(n,N,N)` array fills in
   C order, so `X[p,k] = arr.flatten()[n*p+k]` — snapshots are interleaved, not
