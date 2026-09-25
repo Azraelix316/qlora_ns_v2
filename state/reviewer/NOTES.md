@@ -72,6 +72,43 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5p (scoped the theory question from the literature before assigning
+  it — the same lesson as R5c, applied to the remaining open question). I had
+  framed theoretical-research's job as "define a forcing-aware invariant", which
+  sounded like a from-scratch task. Checking what the established
+  structure-preserving DLRA integrators actually preserve: **all of the SPDLRA
+  results are symplectic and explicitly for non-dissipative, Hamiltonian
+  systems** (arXiv:2007.13153, 2008.07427, 2308.16547 all say "Hamiltonian
+  systems modelling non-dissipative phenomena"; the reduced dynamics is the
+  symplectic projection of the Hamiltonian vector field), and the BUG papers
+  claim only symmetry-preserving properties plus a robust error bound
+  (arXiv:2104.05247, 2402.08607) — **no energy identity**. Symplecticity is the
+  wrong structure for forced dissipative flow (a contracting forced flow has none
+  to preserve, and the Hamiltonian line restricts itself for exactly that
+  reason), so nothing transfers to us by citation and a careful reviewer will
+  see it. Nearest dissipative theorem: Kazashi–Nobile–Vidličková (Numer. Math.
+  149(4), 2021, 10.1007/s00211-021-01241-4), a **discrete variational
+  formulation** with parabolic-regime stability for projector splitting. So the
+  landscape splits: non-dissipative/Hamiltonian -> symplecticity;
+  dissipative+diffusion-dominated -> discrete variational + stability;
+  **dissipative + advection-dominated + forced + adaptive rank + exactly
+  divergence-free (ours) -> nothing found.** That third row is the project, and
+  it turns the theory task into a well-posed increment on a named predecessor
+  rather than an open-ended definition — a much better brief, and short-paper
+  sized. Consequences recorded as binding in D3: the method section may claim
+  exact divergence-freeness **by representation** and may describe the
+  construction, but may **not** claim symplecticity or a proved conservation
+  law; the reduced-model forcing-aware invariant is to be stated **discretely
+  with the projection term derived, not measured**, which requires the BUG port
+  first, so the two are sequential. Sent theoretical-research a four-item brief
+  (Galerkin step's effect on the energy balance; boundedness of the residual;
+  whether a defect correction restores a controlled balance; then the discrete
+  invariant) with an explicit statement that a partial result is fine and that I
+  will tell the writer which of "proposition" or "numerical observation" we have.
+  Also warned the writer off a symplecticity claim and suggested the *absence* of
+  a discrete energy identity for advection-dominated forced low-rank integrators
+  can be framed as an open problem we contribute to — as an open problem, not as
+  our result.
 - 2026-09-25 R5o (costed the D10 gate — a gate that cannot be executed gets
   quietly relaxed, so I priced it before R6 rather than discovering at R6 that
   the runs do not exist). Measured basis: 1.84 ms (full) / 2.95 ms (POD) / 4.60
