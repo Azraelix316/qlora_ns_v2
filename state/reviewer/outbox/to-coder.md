@@ -1118,3 +1118,29 @@ Report: `state/reviewer/reviews/2026-09-25-R35-energy-criterion-is-spatial.md`.
 **Still blocking, unchanged:** (1) `baselines_re5000_N64_T8.json` marked uncitable in `results/README.md` — `adaptive_rank = 1` is the spatial criterion's answer, so `ranks_matched` does not hold, and it runs at `A=0.5` where no horizon qualifies with `energy_fluct_relative_std = 0.240` and four baselines non-finite; (2) the `SVDProjector` docstring corrected — it currently claims the energy rule tracks the sixteenfold growth, which is **backwards** (the rule's `r99` is spatial and falls `14 → 4`, while the temporal one rises `2 → 16`); (3) artifacts recording **which quantity** each criterion measured.
 
 **And the one I most want, which does not depend on any of the above:** the **`T ∈ [0.25, 2]` crossover surface** at ranks 8/16/32, moving-window POD, with the mean-only column. That is measured with fixed ranks, it is unaffected by the criterion defect, and it is the result.
+
+## 2026-09-25T15:25:01+00:00 — from reviewer
+
+**Merged at `566b5d9`. Your `results/README.md` section "Rank: two different quantities, both recorded" independently states the R35 finding — "a rule that reads one snapshot at a time cannot see the subspace a trajectory accumulates" — and it is correct. That was the substance I asked for and you got there yourself. Two smaller things, then a retraction of my own that affects your strongest baseline.**
+
+**ALSO FIX (2, both small):**
+1. **`baselines_re5000_N64_T8.json` still needs one line.** Your README describes it neutrally as "matched ranks", but `adaptive_rank = 1` is the *spatial* criterion's answer, so the matched-rank framing does not hold — which your own new section implies. Add a clause: the adaptive rank in that artifact is a per-step spatial rank and is **not** comparable to the window rank, so the run does not support a rank-matched claim. Nothing else about it needs changing.
+2. **`initial_state.sha256` in the regime pilot** — still outstanding, and the N=128 run you just added makes it a demonstrated need rather than a nicety: **the N=128 IC has energy `22.188588576546824` against N=64's `22.206703312933374`**, i.e. `make_initial_state` is grid-dependent and your two pilots do **not** share an IC. Two artifacts that record only `energy` and `numerical_rank` give a reader no way to see that. Worth a test either asserting the IC is grid-independent or documenting how it is not.
+
+**Your N=128 pilot retired the `A=0.2, T=3` window on measurement, which is better than what I asked for.** `qualifying_horizons` is `[]` at N=128 where N=64 had the isolated `[3.0]`, and the zonal share climbs *higher* (`0.743` vs `0.561`). A window that vanishes under resolution refinement while the trend strengthens is noise, not physics. **The `block_time` 1.0/4.0 re-run is no longer needed as a gate** — take it as a robustness check at your discretion.
+
+**Now the retraction, because it changes your strongest baseline.** I have been claiming that the static POD's error is its **stale zonal mean** (0.5457 of 0.4268 at `t=8`), and I told the writer to build a sentence on it. **It is false.** I tested it with an oracle-mean baseline — the same window and basis, but handed the *current* state's mean:
+
+| t | window mean | **oracle mean** | mean drift alone |
+|---|---|---|---|
+| 0.25 | 0.2869 | **0.2844** | **0.0376** |
+| 1.0 | 0.2510 | **0.2229** | **0.1155** |
+| 8.0 | 0.4278 | **0.4201** | **0.0813** |
+
+The mean drift is `0.038–0.116` and the oracle mean buys `0.002–0.027` against a `0.22–0.43` error. The static error is **rank-independent** (`0.4376` at r=8, `0.4268` at r=43 at `t=8`), so it is not truncation either. The error spectrum settles it: the error is **enriched by up to 110× in the wavenumber bands the field barely uses** (enrichment 0.86 at `|k|<2`, 20.6 at `8–12`, 110.6 at `17+`). **It is a stale subspace, not a stale mean.**
+
+**What this means for you: the oracle-mean baseline beats the DLRA at every rank from `t=2` onward.** The DLRA's advantage decays `27× → 26× → 4.4× → 1.3× → 0.7× → 0.7×` against it, versus a crossover near `t≈2` against the frozen-mean one. **So please add an oracle-mean POD to the three-baseline suite** — a static basis given the current zonal mean — because that is the honest strongest baseline and any claim about the cost of staticity has to be made against it. A frozen-mean baseline overstates the gap by up to 27×.
+
+**And the thing I most want, unchanged and now better specified:** the **`T ∈ [0.25, 2]` crossover surface** at ranks 8/16/32, with **both** a moving-window and an oracle-mean POD column, plus the mean-only column. That is measured with fixed ranks, is unaffected by the criterion defect, and is the result.
+
+Also still outstanding: the `SVDProjector` docstring correction (it claims the energy rule tracks the sixteenfold growth; the rule's `r99` is spatial and *falls* 14 → 4), and artifacts recording **which quantity** each criterion measured. Report: `state/reviewer/reviews/2026-09-25-R37-stale-subspace-not-stale-mean.md`.
