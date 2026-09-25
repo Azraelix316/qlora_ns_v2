@@ -2180,3 +2180,59 @@ in time or memory. BUG's rank-scaling withdrawn on both axes; report the `3.3–
 D27.1's misnomer stands. D26.4's test fixture stands. The flow is the implemented shear, with the AKS
 control (D20, D24). Every D4 barred claim stands, **including "adaptive rank", now with D32.2's
 reason.**
+
+---
+
+## D33 — **THE PAPER'S THESIS IS CHANGED to "the subspace must evolve," and the paper is submittable today on three fully-supported contributions** (2026-09-25)
+
+> **OPERATIVE (R68).** `PAPER_BLUEPRINT.md` is rewritten around D31/D32. **Contributions 1, 2, 3 and 6
+> are supported by committed evidence and the paper can be submitted on them.** Contributions 4 and
+> 5 are **one cheap run each** and belong in §7 until they land. **The framing is no longer the
+> missing piece. The draft is.**
+
+**D33.1 — THE NEW THESIS, superseding R53's framing.** *"In a reduced Navier–Stokes solver, whether
+the subspace evolves is the difference between a method that runs and one that does not.
+Propagating a fixed low-dimensional basis through the nonlinear dynamics — same integrator, same
+splitting, orthonormal basis — is stable at rank 16 and does not survive to `t=8` at ranks 32 and 42,
+where it overflows. The same integrator with a time-dependent subspace holds roundoff divergence and
+error below 1.1 throughout. **What rank buys is not accuracy; it is the ability to run at all.** And
+the accuracy horizon this literature reports as a property of the method is a measurement that must
+carry five qualifiers or not be reported."*
+
+**D33.2 — WHY, AND WHY IT IS A BETTER FRAMING, NOT A RELABELLED ONE.** (i) It is the only framing
+under which the project's most striking measurement — an overflow to `1e+278` — is a contribution
+rather than an inconvenience. (ii) **It is a STABILITY result, and stability is what a reduced method
+is for**; a reader indifferent to crossover horizons still cares that their solver runs. (iii) **It
+gives a legitimate route to what `AGENTS.md` asks for with NO barred claim** — the project cannot
+say "adaptive rank", but "the subspace must evolve" is supportable today, in stability terms.
+(iv) **It makes the methodological contribution sharper rather than competing with it**: the
+crossover fragility becomes the second half of one argument — *the subspace must evolve, and here is
+how carefully the evolution-free comparison must be built to measure it.*
+
+**D33.3 — THE SINGLE MOST IMPORTANT OPERATIVE FACT FOR THE WRITER: THE PAPER IS SUBMITTABLE NOW.**
+**Contributions 1 (verified implementation), 2 (the five-qualifier protocol and the horizon's
+fragility), 3 (the rank-saturated mechanism) and 6 (honest costs and boundaries) are supported by
+committed artifacts.** Contributions 4 (stability) and 5 (the rank criterion) are **one cheap run
+each** — D31.5's baselines sweep and D32.2's `T=8` adaptive sweep — and **belong in §7 with their
+evidence status stated until they land.** **The writer has had a blocking list for fifteen hours and
+no thesis; this supplies the thesis and removes the false impression that the paper is blocked on
+measurements it does not have.**
+
+**D33.4 — THE ABSTRACT IS REWRITTEN and now leads with verification and stability rather than with
+the crossover.** **The two evidence-status hedges in it — the rank criterion's `0.1` horizon and the
+fixed-basis result's single artifact — are load-bearing honesty and must not be edited out.** The
+old abstract's closing claim that *"the rank that never yields is a property of the grid rather than
+of the method"* is **withdrawn** (D30.2/D30.5: `43` is the largest rank tested, and a wavenumber is
+not a rank).
+
+**D33.5 — AUDITED CLEAN.** The rewritten blueprint contains none of `1.26`, `2.44`, `≤7%`,
+`1.17×`, `2.8–3.5 MiB`, `0.5–14.6%`, or the `4.0×`/`4.2×` "dealiasing-ceiling" comparisons; the
+surviving occurrences of `1.26`, `2.44`, `24.7%`, "is the full-grid solver", "dealiasing ceiling" and
+`1.46→1.99`/`2.45→6.04` are **all in §7's prohibition list or §2's inventory, where they belong.**
+
+**D33.6 — Unchanged.** D29.4's `t* = 0.649`/`1.482`; D30's bracketed never-yields threshold and
+wavenumber/rank correction; D30.1's rank saturation; D31's fixed-basis divergence as a §7
+observation pending its sweep; D32.1's Taylor–Green verification; D32.2's 200-step bar on adaptive
+rank. Every fitted `c·r^p` void. No advantage in time or memory. BUG's rank-scaling withdrawn;
+report the `3.3–5.1×` slowdown. D27.1's misnomer stands. D26.4's test fixture stands. The flow is
+the implemented shear, with the AKS control (D20, D24). Every D4 barred claim stands.
