@@ -317,6 +317,9 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "a static subspace's floor is rank-independent" **without the horizon qualifier** | **D16.2** — true at `t ≤ 0.25` (0.0–0.1%), false by `t ≈ 2–3` (~40%), and stronger at low `Re` and on a finer grid |
 | reporting `t*` without the grid and its dealiasing ceiling | **D17.1–D17.2** — `t*` grows 1.4–2.5× from `N=64` to `N=128`, and the ceiling is 43 vs 85 |
 | "the rank that never yields is the ceiling" as a grid-free statement | **D17.2** — it is a statement about the *grid*; at `N=128`, `r=43` is half the ceiling and does yield |
+| `27.5%` / `1.5%` for the rank rules | **D18.6** — message-only, no artifact; not admissible until committed |
+| "a window-accumulating rank rule would fix the criterion" | **D18.1** — implemented and measured: it is **worse** (`1.5%` vs `27.5%` of fluctuation energy) |
+| "the window collapses because it fills with the method's own states" | **D18.3** — **refuted**: seeding with reference states gave `1.3%` vs `1.5%`. Record as refuted; do not tell it to a reader |
 | any memory or footprint advantage | **D16.4** — peak RSS is rank-independent and the reduced method costs **more** than the full grid |
 | quoting raw RSS as the memory figure | the ~34 MiB interpreter baseline dominates; report the **overhead over the full grid** |
 | quoting `crossover_surface.json`'s `crossovers` block | its reason string is **false** for `r = 2, 4, 16`; read the `dlra` / `static_moving_window` rows instead |
@@ -338,10 +341,17 @@ Everything below is measured, and none of it requires retracting a number:
 3. **The limit is structural, not numerical.** A static subspace cannot track a flow whose
    support moves, and its error floor is rank-independent; a refitting integrator can, until
    its own per-step truncation accumulates onto a saturation plateau.
-4. **Rank criteria measure different things.** The windowed `r99` is grid-independent and
-   measures the dynamics; a per-step rule reads the instantaneous rank, which moves the other
-   way; the amplitude rule measures the discretisation, and cannot be repaired by any fixed
-   cutoff.
+4. **Rank criteria measure different things, and a causal rule provably cannot reach the
+   cumulative one.** The windowed `r99` rises `1 → 16` and is grid-independent; a per-step rule
+   reads the *instantaneous* `r99`, which falls `14 → 4`; the amplitude rule measures the
+   discretisation and asks for `4.0×`/`4.2×` the dealiasing ceilings, so **no fixed cutoff can
+   repair it.** **A window-accumulating rule was implemented, measured, and does not work:** it
+   never exceeds rank 2 and keeps `1.5%` of the fluctuation energy against the per-step rule's
+   `27.5%`, because it measures *local* complexity — which genuinely is `≈2` — while `1 → 16`
+   is **cumulative**, reachable only by remembering the whole trajectory, which is what static
+   and offline methods do and **what a causal per-step method cannot do** (D18.2). *The
+   `27.5%`/`1.5%` figures are message-only and are **not yet citable** until they are in an
+   artifact (D18.6).*
 5. **There is no statistically steady fluctuation state** for forced 2-D NS at these
    parameters, at either forcing amplitude or either resolution — so the honest statistic is
    a quasi-steady fluctuation *energy*, and enstrophy-based and spectral statistics are not
