@@ -114,6 +114,30 @@ instead of the method. These are merge-blocking for any accuracy claim.
       the V6 port must invert it; (b) the number of full SVDs per step is counted
       and asserted, so that reducing 4 → 1 is a test that can fail.
 
+- [ ] **(R25) Fit-reproduces-its-own-input.** Every component that is *fitted*,
+      *reduced*, or *learned* from data must reproduce the data it was fitted on
+      to machine precision at full rank, and a committed test must assert it.
+      This is the one-line check that would have caught R24 at R5: `PODGalerkin`
+      reshapes its snapshot matrix wrongly, so it has never computed POD, and
+      projecting onto its own training snapshots gives relative error
+      **1.12–1.54** — worse than returning the zero field. It applies to POD, to
+      any future hyper-reduction, empirical interpolation, or learned operator,
+      and to the DLRA's own retained candidate. See
+      `reviews/2026-09-25-R25-contract-audit-of-solvers.md`.
+- [ ] **(R25) No warm-object reuse.** An object that carries learned or counter
+      state across `initialize()` must either fully reset or be reconstructed per
+      run, and tests must construct fresh objects. `DLRA.initialize()` currently
+      does **not** reset a warm object: after one `integrate`, `initialize` plus
+      five steps differs from a fresh `DLRA` by `maxerr = 0.432`. Any experiment
+      script that reuses a `DLRA` across runs is silently wrong. See
+      `reviews/2026-09-25-R25-contract-audit-of-solvers.md`.
+- [ ] **(R25) Independent checks are themselves validated before a disagreement
+      is believed.** In R25, four of five apparent engine failures were defects
+      in the check, not the code (component indexing, a transposed identity, a
+      dropped argument, a reused object). A check that disagrees with tested code
+      must first be shown to converge or to agree on a case where the answer is
+      known; only then is the disagreement evidence.
+
 ### 1.4a Timing methodology (R5q — every timing that reaches the paper)
 
 These are not style preferences. The committed timings were invalid on both counts
