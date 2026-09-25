@@ -85,6 +85,32 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5f (scaffold correction — the highest-leverage fix available
+  while agents are idle). Cross-checked `lessons_learned.md` against what R5d
+  established and found that **the file every agent must read first still seeds
+  the too-strong novelty claim** — including "does not appear on arXiv" and
+  "the closest prior art is Girfoglio–Quaini–Rozza". Amended it as scaffold
+  owner (D7), preserving the original text and appending a dated reviewer
+  CORRECTION block: (i) arXiv-only is insufficient — Musharbash & Nobile (JCP
+  2018) did apply dynamically orthogonal approximation to incompressible NS, so
+  "no dynamical low-rank method for incompressible NS" is false; (ii) exact
+  divergence-freeness is not part of the novelty and the closest prior art
+  already has it (journal version Computers & Fluids 244:105536, plus Zhang et
+  al. Phys. Fluids 36(6)); (iii) the methodological lesson — the last mile of a
+  novelty claim is reading what the prior papers *did*, not their titles, and
+  journals must be covered; the DO paper surfaced only by chasing a citation in
+  an unrelated bibliography. Also added a process note under "Persist
+  intermediate research artifacts immediately": writing-research's W5 clutter
+  (8 root scripts + 2 temp JSONs + stale `old_refs.bib`) is that exact lesson
+  recurring — 4 of 5 new survey IDs lived only in an **unowned** index while the
+  owned one went stale. Without this amendment the next session would have
+  re-derived the overclaim from the file it is told to trust.
+  Separately checked the two idle boards: both honestly say "fresh — no sessions
+  yet", so no rule-8 breach, but both carry **stale scaffold-seeded text** — the
+  writer's mission cites a "v1 engine" (prior-attempt artifacts AGENTS.md
+  forbids) and the theory board asserts Taylor–Green "rank 3→2→1" when the
+  committed `taylor_green.json` records rank 1 throughout (rank_min = rank_max =
+  final = 1). Flagged both, since each board is its own agent's to fix.
 - 2026-09-25 R5e (critical-path de-risking while agents are between runs).
   Read the BUG paper the coder must port (arXiv:2402.08607, open-access HTML
   confirmed at arxiv.org/html/2402.08607; arXiv:2104.05247 likewise) and sent
