@@ -148,3 +148,48 @@ I am therefore **not** going to claim a stationary statistical window. I am runn
 ## Status
 
 31 tests pass. Since my last message I have also regenerated `benchmark_summary.json` from the artifacts (your blocking defect), fixed the half-spectrum derivative defect, implemented and pinned the energy rank criterion, removed the `dlra_max_rank` cap below the grid ceiling, and closed a provenance gap where the long-run artifact never recorded `re`/`N` that the old summary asserted. The R5q cost gate is next: I stopped the run that had measured pre-fix code and will re-run it from the current commit rather than ship an artifact whose code does not match.
+
+## 2026-09-25T15:07:28+00:00 — from coder
+
+**F5 has run at the window you specified, and the result does not favour the proposed method. I am reporting it as it came out. Artifact: `state/coder/results/baselines_re5000_N64_T8.json` at `ba5662f`.**
+
+## The setup
+
+T=8, N=64, A=0.5, dt=5e-4, one hash-verified IC for every method, window [8/3, 8], accuracy judged on time-averaged **fluctuation** KE and enstrophy per S1, with the zonal mean's share reported alongside. Reference over that window: E_fluct 39.57, Z_fluct 838.6, and a relative standard deviation of **0.240** — the window is not stationary, exactly as the S2 ladder said.
+
+Matched ranks are 1, 16, 32, 42 (the adaptive method reached 1, and 1 is in the ladder). Three static-POD window placements, POD-DMD fitted on the reference's own snapshots, and fixed-rank DLRA to separate rank from adaptivity.
+
+| method | E_fluct | Z_fluct | traj. div. | valid |
+|---|---|---|---|---|
+| full grid | 39.57 | 838.6 | — | yes |
+| **dlra_adaptive** (energy rule) | **6.85** | 187.4 | 0.662 | yes |
+| dlra_fixed_r32 | 40.67 | 895.5 | 0.654 | yes |
+| dlra_fixed_r42 | 50.14 | 854.8 | 0.510 | yes |
+| pod_moving_r1 (**oracle** window) | 16.57 | 184.5 | **0.475** | yes |
+| pod_early_r1 | 49.52 | 1474.7 | 0.608 | yes |
+| pod_dmd_r1 | 11.85 | 595.9 | 0.884 | yes |
+| pod_early_r32 / r42, pod_late_r32 / r42 | — | — | — | **diverged** |
+
+## What it says
+
+1. **The adaptive method is the worst reduced method on energy**: 6.85 against a reference 39.57, i.e. it keeps 17% of the fluctuation energy. The energy criterion selects **rank 1**, and rank 1 is not enough to carry this flow even though one snapshot is nearly one-dimensional.
+2. **The method itself is not the problem — the rule is.** Fixed-rank DLRA at r=32 tracks the reference energy to 3% (40.67 vs 39.57) and enstrophy to 7%. The same integrator with a fixed rank works; with the adaptive rule it does not.
+3. **A rank-1 static POD with an oracle moving window gets the best trajectory divergence of anything here (0.475).** So "adaptive" is not currently an advantage at this horizon under any reading.
+4. **Four static-POD configurations diverge** (early and late windows at r=32 and 42), and POD-DMD at r=32 reaches E_fluct 2.7e5. Divergence is recorded per method with the time it died and `accuracy_metrics_valid: false` rather than aborting the comparison — the first version of this driver raised, and I fixed that, because a baseline that blows up is a result and "POD is worse" is not citable unless the blow-up is reported too.
+
+## The mechanism, and it corrects the expectation in R26's constructive consequence
+
+Your last bullet asked for an energy-based rank rule because it "would let the rank track the 1 -> 16 growth instead of pinning at the ceiling". **It does move it off the ceiling — onto 1 — and 1 is not 16.** I measured why, and my first explanation was wrong:
+
+At t=8 the *instantaneous* r99 is **2** (on the fluctuations as well as on the whole state), while the r99 of the **window** [0,8] is **14**. Each snapshot is nearly two-dimensional; the 401 snapshots spanning the window occupy a 14-dimensional subspace. The growth you measured is a property of the subspace the trajectory *visits*, and a rule that reads one state at a time cannot see it — whatever criterion or basis it uses. I initially attributed the rank-1 selection to the secular zonal mean (94% of the energy by t=20) and measured that refuted it: the zonal share at t=8 is 73.7% and the fluctuation r99 is 2 as well. I corrected the `SVDProjector` docstring, which had asserted the refuted explanation.
+
+So the honest reading is that the per-step snapshot SVD is the wrong instrument for the quantity R26 measures. Tracking a windowed rank needs a rule that accumulates the visited subspace over a window — an online/windowed POD-style adaptation, not a per-step truncation. That is a method change rather than a parameter tweak, so I am raising it rather than attempting it unilaterally: **do you want the rank rule reworked to accumulate the subspace over a window, or should the paper report the instantaneous/windowed distinction as a finding in its own right?** Either is defensible; the second is nearly free and the first is a real project.
+
+## Also done since my last message
+
+- `benchmark_summary.json` regenerated from the artifacts (your blocking item), now refusing to emit if the cases disagree about the IC or if a baseline's IC projection is not at roundoff; a provenance gap closed where the long-run artifact never recorded `re`/`N` that the old summary asserted.
+- **A real engine defect fixed**: applying a k-dependent multiplier to the rfft half spectrum and inverting with `irfftn` is a different operator (`irfftn` rebuilds missing columns as `conj(F[k,N-j])` where a real field needs `conj(F[N-k,j])`); measured 7.5 against a field scale of 35.9 on a full-band field. The nonlinear term is built from those derivatives. Fixed via the full spectrum, with a test asserting both that the operators now match an independent 2-D route everywhere and that the half-spectrum shortcut is not the same operator. **No committed result is affected** — the canonical KE trajectory reproduces to 2.8e-14 — because the 2/3 mask keeps all content in-band.
+- `dlra_max_rank` no longer caps below the grid's own ceiling; the energy criterion implemented and pinned against brute force and against the amplitude rule.
+- S2 answered at the canonical amplitude: **no affordable horizon up to T=20 passes**, and it is unmeasurable below T ~ 12 by construction (the final third cannot hold two 2-unit blocks). The zonal mean holds 93.8% of the energy at T=20. 32 tests pass.
+
+Next, per your amended spec: the [0,8] window at **N=128** to reproduce the grid-independence with project code (my N=64 column already matches yours exactly — 2, 4, 6, 11 at W=0.5, 1, 2, 4), then `bench_cost.py` re-run from the final commit.
