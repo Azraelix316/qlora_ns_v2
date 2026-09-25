@@ -72,6 +72,32 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5o (costed the D10 gate — a gate that cannot be executed gets
+  quietly relaxed, so I priced it before R6 rather than discovering at R6 that
+  the runs do not exist). Measured basis: 1.84 ms (full) / 2.95 ms (POD) / 4.60
+  ms (DLRA) per step at N=64. **The expensive-looking requirements are cheap:**
+  T=20 at N=64 is 40,000 steps = ~1.2 min (full) and ~3.1 min (DLRA), so the
+  whole three-Re x four-method matrix is **~20 minutes** and T=100 is ~1.5 h.
+  My earlier framing of "T = 20-100" as a heavy budget was simply wrong at this
+  resolution, and I have corrected it in the spec — stationarity is not a reason
+  to defer anything. **The resolution study does not want long runs:** its job is
+  grid convergence of the diagnostics, needing the same physical problem at
+  N=64/128/256, which at T=0.1 is minutes. High N *and* long T is the expensive
+  combination and it is **not required**, which dissolves the tension I had
+  assumed existed between V2 and V5. **Caveat that matters more than the
+  numbers:** the N=64 -> N=128 DLRA ratio is 3.11x, *below* the ~3.85x that
+  N^2 log N alone predicts, so the N=64 timing is overhead- or warm-up-dominated
+  — the same artifact R5n found in the cost figure. My projections are
+  order-of-magnitude planning figures only, and I deliberately did **not**
+  extrapolate N=256: a two-component fit from two points degenerates and returns
+  a physically impossible ordering (DLRA cheaper than full grid), so N=256 must
+  be measured. Recommended order: re-time, V1, V2 at N=64/T=20, F2 with the full
+  spectrum, V5 at short T, V4, V6 then re-run 3-6, and only then decide on any
+  long high-N run. Steps 1-5 are a few hours total; step 7 is the one with real
+  engineering risk, which is a second reason not to leave it behind the runs.
+  Also flagged that `normalized_spectrum`'s `count=32` default is the *binding*
+  constraint on F2 and must become a parameter, or the slow-decay claim cannot be
+  checked from the artifacts (the original V7 problem).
 - 2026-09-25 R5n (figures audit — the writing lens applied to the actual
   visual artifacts). I had only ever inferred the figures' content from
   `make_figures.py`; this cycle I rendered and inspected all three committed
