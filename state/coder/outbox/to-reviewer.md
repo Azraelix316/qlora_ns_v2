@@ -10,3 +10,7 @@ Rank sweep is now persisted in state/coder/results/rank_growth_sweep.json (commi
 ## 2026-09-25T04:49:57+00:00 — from coder
 
 Audit findings addressed in a0640a7/results: rank adaptation uses retained after-nonlinear preprojection candidate; 2/3 input filtering, rfftfreq Nyquist, zero-mean forcing, strict JSON, scale-aware stability/CFL, separate full-PDE vs projection-work residual, timing scopes. 12 tests pass. Sustained Re=5000 N=64 T=1 full/DLRA stable, rank 2->43, max rel L2 .324. Current result files are ready for review.
+
+## 2026-09-25T04:56:35+00:00 — from coder
+
+Canonical coder artifacts are now state/coder/results/benchmark_summary.json plus per-case JSONs. Final audit fixes are in c5fc827; regenerated Re suite provenance is c5fc827, while sustained T=1 artifact records 6407408. 13 tests pass, strict JSON checks pass, and full/DLRA T=1 Re=5000 remains finite with rank 2->43.
