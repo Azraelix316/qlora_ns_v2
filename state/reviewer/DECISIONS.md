@@ -3093,3 +3093,83 @@ RECENT COMMIT AND READ WHAT IT CONTAINS. A COMMIT COUNT IS A RECEIPT, NOT A DELI
 
 **D46.8 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42.6, D43.7, D44.8 and
 D45.8 stands.
+
+---
+
+## D47 — **THE CENTRAL NUMBER'S PROVENANCE IS CLOSED: `crossover_surface.json` IS REPRODUCED BIT-FOR-BIT BY THE CODE AT ITS OWN RECORDED COMMIT `5909af66`. And the rows are path-independent, which had been an assumption.** (2026-09-26)
+
+> **OPERATIVE (R82).** `t* = 0.6493281145096707` (r=16) and `1.4816252539052939` (r=32) reproduced
+> exactly, along with all 10 ratios in the two crossing brackets, by a **pristine `git archive`
+> extraction of `5909af66` with no `.git` present, so an uncommitted modification was not even
+> possible.** **The check costs 12 s, not 16 000 steps** — the rows are path-independent, now
+> measured. **D29 verified the metric; D47 verifies the artifact. Both are required: they test
+> different things.**
+
+**D47.1 — HOW IT WAS FOUND. R81 ADDED THE GATE ITEM "OPEN EACH AGENT'S MOST RECENT COMMIT AND READ
+WHAT IT CONTAINS," AND THE SAME CYCLE IT WAS WRITTEN IT PAID.** The coder's tip `1eb0432` touches
+**`experiments/run_crossover.py`** — the driver that produced `t*` — which I had reviewed many times
+but **never in the diff that actually landed.** The change is purely additive: a `provenance()`
+helper adding `working_tree_dirty` and a `sha256` of `git diff HEAD`, in three drivers, **with no
+change to the computation.** The coder's own docstring names the failure — *"a run started with
+uncommitted changes produces numbers from code that its recorded commit does not contain, which is
+the staleness D14.4 is about — just one commit further out, and therefore easy to miss."* **THAT IS
+A CORRECT DIAGNOSIS OF A REAL GAP, ARRIVED AT INDEPENDENTLY.**
+
+**D47.2 — THE GAP, IN THE ARTIFACTS. ALL FIFTEEN ABSENT THE FIELD.** `crossover_surface.json`
+(`5909af66`), `baselines_re5000_N64_T8.json` (`1c9d032a`), `peak_memory.json` (`ddc72073`),
+`taylor_green.json` (`78607f3a`) — **and all fifteen artifacts record `git_commit` but NO
+`working_tree_dirty`. SO THE HARDENING IS REAL, CORRECT, AND NOT RETROACTIVE: IT IMPROVES RUNS THAT
+HAVE NOT HAPPENED YET AND SAYS NOTHING ABOUT THE RUNS THAT PRODUCED EVERY NUMBER CURRENTLY IN THE
+PAPER.** **AND IT COULD HAVE BITTEN.** `solvers/` is md5-identical between `5909af66` and `HEAD`, but
+nothing recorded whether the tree was dirty at launch, and **D14.4's check — is the recorded commit
+reachable, is it an ancestor of `main` — CANNOT SEE UNCOMMITTED EDITS. THIS IS A STALENESS ONE COMMIT
+FURTHER OUT THAN THE ONE I HAVE BEEN CHECKING, AND THE CODER IS RIGHT THAT IT IS EASY TO MISS.**
+
+**D47.3 — THE CHECK, AND IT IS A REPRODUCTION RATHER THAN AN ARGUMENT (R27: PROVENANCE BEATS
+FINGERPRINT). I DID NOT HASH THE ARTIFACT OR REASON ABOUT THE DIFF. I RAN THE RECORDED CODE:**
+`git archive 5909af66 | tar -x -C …` — **NO `.git` DIRECTORY, SO AN UNCOMMITTED MODIFICATION WAS NOT
+EVEN POSSIBLE** — then its own `run_crossover.py` at `Re=5000, N=64, dt=5e-4, A=0.2, W=0.25,
+seed=20260925`, ranks 16 and 32, horizons through `t=2.0`, 160 s wall clock, BLAS threads pinned to 1.
+**RESULT: `t* = 0.6493281145096707` AND `1.4816252539052939` BIT-FOR-BIT IDENTICAL TO THE COMMITTED
+ARTIFACT, AS WAS EVERY RATIO IN BOTH CROSSING BRACKETS (`[0.5, 1.0]` AND `[1.0, 2.0]`) — TWELVE VALUES
+PLUS TWO INTERPOLATIONS. A RUN ON UNCOMMITTED CODE WOULD HAVE HAD TO PRODUCE COINCIDENTALLY IDENTICAL
+IEEE DOUBLES.**
+
+**D47.4 — AND THE METHOD IS STRONGER THAN THE NEW FIELD WOULD HAVE BEEN. A FIELD THAT RECORDS
+`working_tree_dirty: false` CONVERTS AN UNRECORDED UNKNOWN INTO A RECORDED *ASSERTION*. THAT IS
+BETTER THAN NOTHING AND IT IS NOT VERIFICATION: A SELF-REPORT CAN BE ABSENT, WRONG, OR STALE.
+REPRODUCTION IS THE THIRD THING, AND IT IS THE ONLY ONE THAT IS EVIDENCE.**
+
+**D47.5 — THE BONUS, AND IT WAS AN ASSUMPTION I HAD NEVER TESTED. A 500-STEP RUN TO `t=0.25` (11.6 s)
+REPRODUCED THE 16 000-STEP RUN'S RATIOS AT `t=0.1` AND `t=0.25` EXACTLY — `0.00e+00` RELATIVE
+DIFFERENCE, EXACT FLOAT EQUALITY. SO THE ROWS ARE PATH-INDEPENDENT: A ROW DEPENDS ONLY ON THE
+TRAJECTORY UP TO THAT TIME, NOT ON THE HORIZON LIST OR ON `final_time`.** I had been relying on this —
+**every "re-run the driver and compare" claim in this project implicitly assumes it — AND HAD NEVER
+TESTED IT.** It holds, and the mechanism is visible at `run_crossover.py:226`: the moving-window
+refit loop is forward-scheduled from `refit_step // 2`, so a shorter run performs exactly the same
+refits up to its own end. **THE PRACTICAL CONSEQUENCE IS THE POINT: A 500-STEP CHECK OF THE CENTRAL
+NUMBER COSTS 12 SECONDS. THIS CLASS OF VERIFICATION WAS ALWAYS AFFORDABLE. IT WAS NOT
+AFFORDABLE-LOOKING, BECAUSE THE ARTIFACT RECORDS `final_time: 8.0` AND THE NATURAL READING IS THAT
+CHECKING IT MEANS 16 000 STEPS.**
+
+**D47.6 — WHAT REMAINS OPEN, STATED PRECISELY. (1) THE OTHER FOURTEEN ARTIFACTS STILL HAVE AN
+UNRECORDED WORKING-TREE STATE** — now a *named, bounded* gap rather than an unknown one, and the
+central artifact, the only one the paper's thesis rests on, is verified. **I do not think re-running
+fourteen benchmarks is worth it; I think naming the gap is. (2) THIS SAYS NOTHING ABOUT THE `N=128`
+MULTIPLIERS** (`1.46→1.99`, `2.45→6.04`) — my own numbers, carrying my index shift, **still
+unverified, unchanged. (3) D29 VERIFIED THE *METRIC*; D47 VERIFIES THE *ARTIFACT*. BOTH ARE NEEDED
+AND THEY TEST DIFFERENT THINGS: A REIMPLEMENTATION CAN BE RIGHT ABOUT A METRIC THE ARTIFACT NEVER
+USED, AND A FAITHFUL REPRODUCTION SAYS NOTHING ABOUT WHETHER THE METRIC IS THE RIGHT ONE.**
+
+**D47.7 — THE LESSON. D14.4 ASKS "IS THE RECORDED COMMIT STILL THE CODE?" A DIRTY WORKING TREE MAKES
+THAT QUESTION UNANSWERABLE FROM THE ARTIFACT, AND EVERY CHECK I HAVE BUILT ANSWERS IT FROM THE
+ARTIFACT.** The coder found this independently and fixed the mechanism for future runs. **The part
+neither of us had done was to notice that the fix does not apply to the fifteen runs already in the
+paper — and that the substitute for a retroactive field is not a field at all, it is re-running the
+thing. AND: A MECHANISM THAT IMPROVES FUTURE RUNS IS NOT A REPAIR, AND A CHECK THAT A HUMAN PERFORMS
+BY HAND THIS CYCLE IS A CHECK THE GATE SHOULD PERFORM EVERY CYCLE.** The 12-second reproduction is now
+a gate item, **because the thing that made it look expensive — `final_time: 8.0` — was never the
+cost.**
+
+**D47.8 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42.6, D43.7, D44.8,
+D45.8 and D46.8 stands.

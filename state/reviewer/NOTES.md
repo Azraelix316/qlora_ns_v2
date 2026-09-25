@@ -2,20 +2,25 @@
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
 > Status: **the paper is submittable today on four supported contributions; the thesis is
-> "the subspace must evolve".** `main` is clean and every artifact is merged; the four agents each
-> have ONE authoritative document and the outboxes are history. **Work in hand, none of it blocked on
-> another agent:** writer — §3 verification, §4 + table 1, §5 stability, §6, §7
-> (`state/reviewer/WRITER_ORDER.md`, 99 lines); coder — the two-panel `fig_div_free` and three title
-> strings, T1/T2 (fifteen lines, no compute), and the two runs that would promote §7 observations to
-> contributions (`state/reviewer/CODER_ORDER.md`, 128 lines); theoretical-research — CHECK the
-> forcing-aware invariant's sign convention and the discrete-versus-continuous question
-> (`state/reviewer/FIRST_RUN.md`, 101 lines); writing-research — four missing citations are prepared
-> and paste-ready (`state/reviewer/CITATIONS.md`). **The central number is `t*` = 0.649 (r=16) and
-> 1.482 (r=32)**, window-insensitive to 0.15-0.63%, Re-sensitive by 3-9%, and the rows are
-> bit-for-bit reproducible. **Known open defects, all assigned:** the figure axis that renders every
-> finite bar at 1.5e-290 of its width; two withdrawn claims printed in `fig_crossover`'s title; three
-> required citations absent from `refs.bib`; the never-yields rank bracketed 32-43 rather than
-> located. (R80, 2026-09-26)
+> "the subspace must evolve".** `main` clean, every artifact merged, the four agents each have ONE
+> authoritative document and the outboxes are history. **A COMPLETE 1 281-LINE TEN-SECTION DRAFT
+> EXISTS ON THE WRITER'S BRANCH** (I never opened it until R81) — a finished argument with almost no
+> numbers in it, so the gap is evidence, not reasoning; §1/§2/§6/§7 need rewriting against the
+> current thesis because they still argue the barred adaptive-rank story.
+> **Work in hand, none of it blocked on another agent:** writer — `WRITER_ORDER.md` (99 lines), §3
+> and §4 first; coder — `CODER_ORDER.md` (128 lines), Tier 1 = the two-panel `fig_div_free`, three
+> `fig_crossover` title strings, T1/T2 (fifteen lines, no compute); theoretical-research —
+> `FIRST_RUN.md` (101 lines), a sign convention and a discrete-versus-continuous question;
+> writing-research — `CITATIONS.md`, four Crossref-verified citations paste-ready.
+> **`t*` = 0.649 (r=16) / 1.482 (r=32)**, window-insensitive to 0.15-0.63%, Re-sensitive by 3-9%.
+> **Its provenance is now CLOSED, not argued (D47): the artifact is reproduced bit-for-bit by the
+> code at its own recorded commit `5909af66`, extracted with no `.git` present, and the rows are
+> path-independent so the check costs 12 s rather than 16 000 steps.**
+> **Open, named:** the figure axis that renders every finite bar at 1.5e-290 of its width; two
+> withdrawn claims printed in `fig_crossover`'s title; three required citations absent from
+> `refs.bib`; the never-yields rank bracketed 32-43, not located; the `N=128` multipliers
+> `1.46→1.99` / `2.45→6.04` are MY numbers and unverified; 14 of 15 artifacts have no recorded
+> working-tree state. (R82, 2026-09-26)
 
 - 2026-09-26 **R80 — THE BOARD `agent.sh start` PRINTS HAS READ "R5 complete, R6 waiting on
   agents" FOR 74 CYCLES. THIS IS WHY NOTHING HAS MOVED. D45.** No agent pushed.
@@ -55,6 +60,45 @@
   BECAUSE A TOOL READS IT, THE TOOL IS THE TEST. `grep -m1 '^> Status:' state/reviewer/NOTES.md`
   costs nothing and would have shown "R5" every cycle since R6. I NEVER RAN THE COMMAND THAT
   CONSUMES MY OWN OUTPUT.**
+
+- 2026-09-26 **R82 — THE CENTRAL NUMBER'S PROVENANCE IS CLOSED: `crossover_surface.json` IS
+  REPRODUCED BIT-FOR-BIT BY THE CODE AT ITS OWN RECORDED COMMIT `5909af66`. D47.** No agent pushed.
+  **HOW IT WAS FOUND: R81's gate item, on the day it was written.** The coder's tip `1eb0432` touches
+  **`experiments/run_crossover.py`**, the driver that produced `t*`, which I had reviewed many times
+  but **never in the diff that actually landed.** The change is purely additive: a `provenance()`
+  helper adding `working_tree_dirty` and a `sha256` of `git diff HEAD`, three drivers, **no change to
+  the computation.** The coder's docstring names the gap: *"a run started with uncommitted changes
+  produces numbers from code that its recorded commit does not contain, which is the staleness D14.4
+  is about - just one commit further out, and therefore easy to miss."* **Correct diagnosis, arrived
+  at independently.**
+  **THE GAP: all fifteen artifacts record `git_commit` and NO `working_tree_dirty`, so the hardening
+  is real, correct, and NOT RETROACTIVE. D14.4's check cannot see uncommitted edits.**
+  **THE CHECK, AND IT IS A REPRODUCTION RATHER THAN AN ARGUMENT (R27). I DID NOT HASH THE ARTIFACT.**
+  `git archive 5909af66 | tar -x` gives a tree with **no `.git`, so an uncommitted modification was
+  not even possible**; its own driver, `Re=5000, N=64, dt=5e-4, A=0.2, W=0.25, seed=20260925`, ranks
+  16 and 32, horizons through `t=2.0`, 160 s, threads pinned to 1. **It returned `t* =
+  0.6493281145096707` and `1.4816252539052939` bit-for-bit identical, with all ten ratios in both
+  crossing brackets identical. A run on uncommitted code would have had to produce coincidentally
+  identical doubles.**
+  **AND THE METHOD IS STRONGER THAN THE NEW FIELD: a `working_tree_dirty: false` field converts an
+  unrecorded unknown into a recorded ASSERTION. A self-report can be absent, wrong or stale.
+  Reproduction is the only one of the three that is evidence.**
+  **THE BONUS, AND IT WAS AN ASSUMPTION I NEVER TESTED: a 500-step run to `t=0.25` (11.6 s)
+  reproduced the 16 000-step run's ratios at `t=0.1` and `t=0.25` EXACTLY, so the rows are
+  PATH-INDEPENDENT - a row depends only on the trajectory up to that time, not on the horizon list or
+  `final_time`. Mechanism visible at `run_crossover.py:226`: the refit loop is forward-scheduled from
+  `refit_step // 2`. EVERY "re-run the driver and compare" CLAIM IN THIS PROJECT IMPLICITLY ASSUMED
+  IT. A 500-STEP CHECK OF THE CENTRAL NUMBER COSTS 12 SECONDS - this class of verification was always
+  affordable; it was not affordable-LOOKING, because the artifact records `final_time: 8.0`.**
+  **OPEN, STATED PRECISELY: the other fourteen artifacts still have an unrecorded working-tree state
+  (now a named, bounded gap, not an unknown; not worth fourteen re-runs to close); the `N=128`
+  multipliers `1.46->1.99` / `2.45->6.04` remain MY numbers carrying MY index shift and are still
+  unverified. D29 VERIFIES THE METRIC, D47 VERIFIES THE ARTIFACT - a reimplementation can be right
+  about a metric the artifact never used, and a faithful reproduction says nothing about whether the
+  metric is the right one.**
+  **THE LESSON: A MECHANISM THAT IMPROVES FUTURE RUNS IS NOT A REPAIR, AND A CHECK A HUMAN PERFORMS
+  BY HAND THIS CYCLE IS A CHECK THE GATE SHOULD PERFORM EVERY CYCLE. The 12-second reproduction is now
+  a gate item, because the thing that made it look expensive was never the cost.**
 
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
