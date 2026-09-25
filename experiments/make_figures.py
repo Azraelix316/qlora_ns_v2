@@ -347,25 +347,28 @@ def main() -> None:
                         label=rf"$Z(k)$  (drift {100*d_z:.0f}%)")
         ax.axvline(entry["dealias_resolved_k_max"], color=colors["full"],
                    linestyle=":", linewidth=1.0)
-        ax.annotate("dealiased range", (entry["dealias_resolved_k_max"], 1e-3),
-                    textcoords="offset points", xytext=(-46, 0), fontsize=7,
-                    color=colors["full"])
+        ax.annotate("dealiased\nrange", (entry["dealias_resolved_k_max"], 3e-3),
+                    textcoords="offset points", xytext=(-30, 0), fontsize=6.5,
+                    color=colors["full"], ha="right")
         ax.set_xlabel("isotropic wavenumber $k$")
         ax.set_ylabel("normalised, time-averaged")
         ax.set_title(
-            rf"$\psi'=\psi-\overline{{\psi}}$, averaged over $t\in[{w0:g},{w1:g}]$",
+            rf"$\psi'=\psi-\overline{{\psi}}$, averaged over "
+            rf"$t\in[{w0:.4g},{w1:.4g}]$",
             fontsize=9,
         )
         if not z_defensible:
             # Dropping the panel is the honest option, and saying so on the
             # figure is better than leaving a legend entry a reader trusts.
-            note = (
-                rf"$Z(k)$ omitted: enstrophy drifts {100*d_z:.0f}%"
-                f" over this window (bar {100*bar:.0f}%)"
-                if d_z is not None else "$Z(k)$ omitted: drift not measurable"
+            # Two short lines, placed where the curve leaves room, so the note
+            # cannot overrun the axes or collide with the other annotation.
+            drift_pct = "not measurable" if d_z is None else f"{100*d_z:.0f}%"
+            ax.annotate(
+                f"$Z(k)$ omitted: enstrophy drifts\n{drift_pct} over this window "
+                f"(S2 bar {100*bar:.0f}%)",
+                (0.03, 0.30), xycoords="axes fraction", fontsize=6.2,
+                color=colors["dlra"], va="top",
             )
-            ax.annotate(note, (0.02, 0.04), xycoords="axes fraction", fontsize=6.5,
-                        color=colors["dlra"])
         ax.legend(fontsize=7, loc="upper right")
         fig.tight_layout()
         fig.savefig(args.output_dir / "fig_spectra_ek.pdf", bbox_inches="tight")
