@@ -41,13 +41,52 @@ recorded here and the earlier figure is struck, not quietly dropped.
 | `t*`, `W=0.25`, `Re=1000` | *never leads* | *never leads* | *never leads* | **1.24** | **2.53** | **never (exact)** |
 | `t*`, `W=1.0`, `Re=1000` | *never leads* | *never leads* | *never leads* | **1.33** | **2.53** | **never (exact)** |
 
+> ### ⚠ D25.5 — **every `t*` above is PROVISIONAL. Do not quote one until coder reconciles the
+> two static bases.**
+>
+> `fig_crossover` reads the **rows**; the artifact's `crossovers` block is a **different static
+> basis**. **The figure and the block differ by `1.90×` in `t*` and `3.06×` in the static error at
+> one horizon** (`t=0.25, r=16, W=0.25`: rows `0.118208` vs block-implied `0.038658`). **The error
+> columns explain only 1–3% of that, so it is a different basis, not a different definition.**
+>
+> **The block's gap has the direction an IN-SAMPLE static baseline produces** (better fit → lower
+> error → earlier crossover) — so **the block is the more in-sample of the two**, which is the
+> *opposite* of coder's reading, and it is the artifact D15.6 should distrust. **But I could not
+> reproduce either convention from the snapshots** (mine give `0.284`/`0.297` where the rows give
+> `0.118`), so **nothing is settled — see D25.2/D25.3.**
+>
+> **Coder's competing values are `0.649` (`r=16`) and `1.482` (`r=32`)**, i.e. the answer moves the
+> paper's central number by **`1.9–2.4×`**. **Write the sentence above only once the two agree;
+> until then state the qualitative claim (leads at `r ≥ 16`, never at `r ≤ 8`, ceiling is exact)
+> without a `t*` value.**
+
 `N=64`, `A=0.2`, full-field relative L2, `Re ∈ {1000, 5000}`, `W ∈ {0.25, 0.5, 1.0}`. Sources:
 `crossover_surface.json` @ `6571c46` (Re=5000, R51) and the reviewer's Re=1000 run on the same
-corrected driver (R52). **D16.1.** `r ≤ 8`'s `0.25` is the first measurable interval, so "never
+corrected driver (R52). **D16.1.** **These values are now confirmed by a THIRD independent
+route — the committed artifact @ `95f1859`, which carries both Reynolds numbers — and all three
+agree exactly (R58, D23.1).** The Re dependence is `0.989` (`r=16`) and `1.037` (`r=32`), a **1–4%**
+effect measured on committed data. `r ≤ 8`'s `0.25` is the first measurable interval, so "never
 leads" means *no resolvable lead*, not a measured zero.
 
-**Robustness, both axes, both measured (R52, D16.1): a 5× change in Reynolds number moves `t*`
-by 1–4%; a 4× change in the baseline's window by ≤7% (`r=16`) and ≤1% (`r=32`).**
+**Robustness — and the third axis fails (R53b, D17).** A 4× change in the baseline's window
+moves `t*` by ≤7% (`r=16`) and ≤1% (`r=32`); a 5× change in Reynolds number by 1–4%. **But a 2×
+refinement of the grid moves it by 37% at `r=16` and 146% at `r=32`:**
+
+| rank | `t*` at `N=64` | `t*` at `N=128` | `r`/ceiling at `N=64` | `r`/ceiling at `N=128` |
+|---|---|---|---|---|
+| 8 | *never leads* | *never leads* | 0.19 | 0.09 |
+| 16 | 1.46 | **1.99** | 0.37 | 0.19 |
+| 32 | 2.45 | **6.04** | 0.74 | 0.38 |
+| 43 | **never** | **6.41** | **1.00** | **0.51** |
+
+**THE CEILING IS GRID-DEPENDENT — `2·floor(N/3)+1` = 43 at `N=64`, 85 at `N=128` — so `r=43` is
+the full-grid solver at `N=64` and only half the ceiling at `N=128`. Never quote a rank ladder
+without the ceiling beside it (D17.2).**
+
+**A reported `t*` must therefore state FIVE things: the baseline's window length, its refit
+interval, its offset, the in-sample check, AND the grid with its dealiasing ceiling.**
+**The offset is now recorded in the artifact (`moving_window_refit_offset: 0.125`), so this
+requirement is satisfiable from the artifact rather than from the driver (D22.1).**
 
 **The corrected spine, which is a mechanism rather than a slogan** (R52, **D16.2–D16.3**):
 
@@ -57,10 +96,13 @@ by 1–4%; a 4× change in the baseline's window by ≤7% (`r=16`) and ≤1% (`r
 > while the reduced integrator's falls to `0.0002` at `r=32`, a factor of `941`. From
 > `t ≈ 1` the static subspace can begin to use rank and the crossover is when it does.
 
-**The static error is rank-independent at SHORT horizons only.** Its spread across rank is
-`0.0%` at `t=0.1`, `0.1%` at `t=0.25`, `8.7%` at `t=0.5`, `~24%` at `t=1`, and `~40%` by
-`t=2–3` — with the long-horizon sensitivity **stronger at low Reynolds** (`43–46%` at
-`Re=1000` against `16–41%` at `Re=5000` for `t ≥ 3`). **And it is not monotone in rank: the
+**The static error is rank-independent at SHORT horizons only — and that is GRID-INDEPENDENT.**
+Spread across rank at `t=0.1` is `0.0%` at **both** `N=64` and `N=128`, and `0.0–0.1%` at
+`t=0.25`; the floors are `0.0940`/`0.0980` and `0.1182`/`0.1238`. Beyond `t≈1` it becomes
+rank-sensitive (`~24%` at `t=1`, `~40%` by `t=2–3` at `N=64`), **more so on the finer grid**
+(`57.4%` against `91.5%` at `t=2`), and **more so at low Reynolds** (`43–46%` at `Re=1000`
+against `16–41%` at `Re=5000` for `t ≥ 3`). **A finer grid gives the static subspace more rank
+to spend at long horizons, so it catches up later — which is the mechanism behind D17.1.** **And it is not monotone in rank: the
 interior rank `r=8` is consistently the worst**, so comparing only the endpoints `r=2` and
 `r=43` **understates the spread by 8×** — which is what both coder and I did.
 
@@ -104,11 +146,28 @@ recorded in their driver: off-by-one sample; the initial basis fitted on the fut
 holding fewer snapshots than the rank silently skipping the refit; and **a refit at exactly an
 evaluation time being in-sample**.
 
-**Do not use `crossover_surface.json`'s `crossovers` block** — wrong for the third cycle
-(R48, R50, R51). All 18 entries report `t_star: null` and *"DLRA still ahead at the longest
-horizon"*, which is **false at `r=16` and `r=32` for every window**. Read the `dlra` and
-`static_moving_window` rows. **The committed artifact itself is current** — its
-`provenance.git_commit` is `6571c46`, matching the driver (**D14.4** verified).
+**Do not use `crossover_surface.json`'s `crossovers` block — under ANY revision, and it is now
+UN-PROVENANCED rather than merely mis-indexed (D23).** The regenerated block's ratios match
+**no** error column, **no** cross-column pair (all 16), **no** other rank, and **neither**
+`static[t]/dlra[t]` nor `static[t]/dlra[t+1]`, and **the entry names no error column** — so it is
+a number with no reproducible relationship to the rows beside it, and its `t_star` is
+`0.52–0.64×` the rows' value. It was also unchanged (byte-identical) between the two
+regenerations despite a commit message reading "corrected crossovers" (D23.2, D23.5).
+**`benchmark_summary.json`'s `crossover_surface.resolved_t_star` copies it verbatim and is
+equally unusable (D23.3).** The old committed version reported six nulls with a false reason
+string (D15.5). **In every revision: read the `dlra` and `static_moving_window` rows, and
+assert any derived block against them under a declared column (D22.5, D23.4).**
+**`fig_crossover` reads the rows, so the paper's central figure is correct (D23.3).**
+
+**Do not use `crossover_surface.json`'s `crossovers` block — under ANY revision (D22).** The
+committed one (generated at `6571c46`) reports six nulls with a false reason string (D15.5). The
+**regenerated** one is better-formatted but **off by one horizon — it pairs `static[t]` with
+`DLRA[t+1]`** — and would give `t*(r=16) = 0.649` where the rows give `1.256`, **a `1.9×` error in
+the central number**. The proof is at `t = 0.1`, where the rows say the DLRA error is **exactly
+`0.0`** (so the ratio is unbounded) and the block reports a finite `7.021`; the error it implies
+is the rows' value at `t = 0.25`. **This is coder's own R54 off-by-one, reintroduced in the
+derived block rather than the rows (D22.2–D22.3). Read the `dlra` and `static_moving_window`
+rows, and **assert any derived block against them** (D22.5).
 
 ### 1.3 The two structural facts, which do not drift with `Re`
 
@@ -163,7 +222,7 @@ do not write that it grows without limit. Source: R29.
 |---|---|---|
 | full-step ratio vs full grid, `N=64/128/256` | `1.78–2.18` | `cost_retiming.json`, `2a490d3` |
 | trend | **saturates at ≈2.1–2.2, does not approach parity** | R42 |
-| rank-independence, full step, `r=64`/`r=2` | `1.165 / 1.046 / 1.022` | R42 |
+| rank-independence, full step, `r=64`/`r=2` | `1.165 / 1.046 / 1.022` — **the `1.165` was noise; interleaved re-measure gives `1.013`/`1.012` (D25.6)** | R42, D25.6 |
 | rank-independence, reviewer's measurement | `6.7%` (N=64), `5.96%` (N=128) | R41 |
 | SVD share of the DLRA step | `43–48%` | R41 |
 | content-independence | ratios `0.94–1.03` | R42 |
@@ -179,7 +238,7 @@ The trade with the horizon, now at both measured Reynolds numbers:
 | 16 | **1.88×** | `t* ≈ 1.3`, leading by `8.9×` at `t = 0.25` |
 | 32 | **1.90×** | `t* ≈ 2.4`, leading by `506×` at `t = 0.25` |
 | 43 / 64 | **1.94–2.07×** | **never yields — exact at every horizon** |
-| any | — | **and no memory advantage: peak RSS is rank-independent and the reduced method uses 2.8–3.5 MiB _more_ than the full grid** |
+| any | — | **and no memory advantage: `+2.5 MiB` (N=64) to `+3.8 MiB` (N=128`) _more_ than the full-grid step, flat in rank to within 0.3 MiB** |
 
 **The trade: the lead grows linearly in rank and the cost is nearly rank-independent, so rank
 buys *lead time* rather than speed.** Going from `r=8` to `r=32` costs **~2% more per step**
@@ -191,11 +250,25 @@ runs out.**
 **The sentence to write:** *rank is nearly free, because per-step cost is dominated by a
 rank-independent factorization; what limits the method is the dynamics, not the budget.*
 
-**BUG port:** verified structurally (`large_svd_calls == 0`, `svd_max_dimension ≤ 4r`);
-stationary state held to `< 1e-12` over 25 steps; second order `1.98 / 1.95`. **BUG is
-`3.0–4.8×` slower per step** than the projected integrator (`0.208–0.334×` the projected
-time, `cost_bug_port.json`, `N ∈ {64,128}`, `r ∈ {2,16}`), so **its value is structural
-preservation, not speed**. Source: R42, R47, **D12.4**.
+**BUG port — report the SLOWDOWN, not a rank-scaling (D19.2 → D25.6/D25.7).**
+**What survives:** **BUG costs `3.3–5.1×` the projected step** (`bug_speedup_hi/lo` `0.195–0.303`,
+`cost_bug_port.json`, interleaved protocol with load recorded, `N ∈ {64,128}`, `r ∈ {2,16}`).
+Verified structurally (`large_svd_calls == 0`, `svd_max_dimension ≤ 4r`); stationary state held to
+`< 1e-12` over 25 steps; second order `1.98 / 1.95`. **Its value is structural preservation, not
+speed.** Source: R42, R47, D12.4, **D25.7**.
+
+**WITHDRAWN (D25.6) — the rank-scaling fails on both axes, on coder's own interleaved evidence:**
+
+- **Time: unresolved.** `bug_full_step_ratio_hi_over_lo = 1.366` at `N=64` (`rank_dependent: true`)
+  but `1.043` at `N=128` (`false`). The projected integrator's is `1.013`/`1.012`. **Resolved at one
+  grid and not the other is not a resolved result.** *(The earlier `1.165` was noise.)*
+- **Memory: the committed artifact is stale and contradicted.** `peak_memory.json` still carries
+  BUG spread `1.531 MiB` at `N=128` (`5.76×` the `0.1328 MiB` floor,
+  `rank_independence_resolved: true`) while the spread **moved `0.125 → 0.398 MiB` between two runs
+  of identical code.** **Not reproducible — do not quote `1.531`.**
+
+**So `CLAIMS.md` no longer calls this the project's best-evidenced positive claim. A slowdown is a
+negative result; it is still the honest one, and it is weaker than previously stated.**
 
 **One thing to know when reading the cost artifacts** (R47): `cost_bug_port.json` is a
 **separate artifact** and `make_summary.py` aggregates only `cost_retiming.json`, so the BUG
@@ -210,6 +283,41 @@ from its `rank_independence`.**
 because the truncation error is `O(1)` in `dt`. **An under-selecting rank rule costs observed
 order, not just accuracy.** Any convergence claim must state its rank. Source: R42,
 **D12.3**.
+
+---
+
+## 3a. The setup, and what it actually is (D20 — read this before describing the flow)
+
+> **The forcing is `f = (A sin(k y), 0)`: a single-mode periodic unidirectional shear, whose
+> curl is `zeta = -A k cos(k y)`. It is NOT the Arnold–Korkin–Sinitsyn Kolmogorov cellular
+> pump.** The naming is genuinely ambiguous in the literature, but **the paper must not call
+> this the Kolmogorov flow without stating the formula**, and the draft currently never does.
+
+| do not write | why |
+|---|---|
+| "Kolmogorov flow" as a description of this setup | D20.1 — the forcing is a unidirectional shear; the AKS flow is a cellular pump with a steady state and the Vinograd–Cullen–Clark boundary |
+| "the system possesses the Kolmogorov equilibrium" | D20.1 — that equilibrium belongs to the AKS pump, not to this force |
+| "classification of Kolmogorov flow of Vinograd, Cullen, and Clark" as applying here | D20.1 — that classification is about the AKS cellular flow |
+| "there is no statistically steady fluctuation state" **as a property of the flow** | **D20.3 — it is a property of the forcing.** The AKS flow *has* a steady cellular state; a periodic shear has no such attractor, so its absence is expected and is not evidence about Kolmogorov flow |
+
+**What the paper studies:** forced 2-D incompressible NS with a **single-mode periodic
+unidirectional shear**, `A ∈ {0.2, 0.5}`, `Re ∈ {100, 1000, 5000}`, `N ∈ {64, 128}`. The
+resolution is to describe the flow accurately, not to change it (D20.4).
+
+**And the stationarity negative now has a control (D24).** The AKS pump
+`f = (A sin ky, −A k sin kx cos ky)` **was tested, not assumed**: it admits a qualifying S2
+horizon where the shear admits **none** — `N=64, A=0.2, T=4` (`8.9% / 6.5%`) and
+`N=128, A=0.2, T=2` (`0.4% / 6.0%`). **But the window SHRINKS under refinement** (`T=4` fails
+at `N=128`, `Z` drift `12.2%`) and there is **none at `A = 0.5`**. So:
+
+> **Neither forcing admits a resolution-robust stationary fluctuation state at these parameters.**
+> The honest statistic is a **window-dependent quasi-steady fluctuation energy, reported with its
+> window and its measured drift.**
+
+**This is the negative result _plus_ the positive control that makes it credible** — and it is
+why "no stationary state" may be stated at all. **The AKS numbers are reviewer-measured and are
+NOT yet citable** (D24.6): no artifact, and the class is not in `solvers/forcing.py`. **Cite only
+the negative.**
 
 ---
 
@@ -257,8 +365,9 @@ bound of the form `< 0.5 · eps · N²` would hold with a 12–50× margin at al
 The `T=3` window vanished under resolution refinement while the trend strengthened — noise,
 not physics. **No qualifying horizon in any cell.** Sources: R32, R36.
 
-**Sharper, and what to write:** the flow reaches a **quasi-steady fluctuation energy** while
-continuing to **redistribute across scales**. At `N=128, A=0.2`: `T=4` gives E `8.79%` (inside
+**Sharper, and what to write** — and note the attribution, which D20.3 requires: this is a
+property of **this forcing**, not of the Kolmogorov flow. The flow reaches a **quasi-steady
+fluctuation energy** while continuing to **redistribute across scales**. At `N=128, A=0.2`: `T=4` gives E `8.79%` (inside
 the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 
 **Consequences, both binding on figures:**
@@ -281,6 +390,9 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "first projector-splitting integrator for DLRA" | **Kusch, Schotthöfer & Walter, SIMODS 8(3):820–849, 2026, `10.1137/25m1730673`** — the closest modern prior art on projector splitting, found by writing-research in R46. It targets DLRA *training* rather than a conservative PDE, so it does not refute the project's framing — but it is the reference a reviewer will raise, so **cite it and distinguish it**. |
 | "to our knowledge" on arXiv evidence alone | D4 |
 | "turbulent dynamics", "high-Re turbulence validation" | D11.2, closed by R32/R36 |
+| **"Kolmogorov flow"** as a name for this setup | **D20.1** — the force is a unidirectional shear `f=(A sin ky,0)`, not the AKS cellular pump. State the formula |
+| "the Kolmogorov equilibrium", "Vinograd–Cullen–Clark classification" | **D20.1** — those describe the AKS flow |
+| "no stationary state" attributed to the **flow** rather than the **forcing** | **D20.3** — the AKS flow has a steady cellular state, so the absence is expected here and is not evidence about Kolmogorov flow |
 | "adaptive rank growth", "adaptive rank beats static" | D11.3, D12; R31, R33, R35 |
 | "the cost of staticity is mean tracking" | **retracted R37** — it is a stale *subspace* |
 | any per-step **speedup** | D11.1; 1.78–2.18× slower at every rank measured |
@@ -296,10 +408,20 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "`r ≥ 32` wins at every horizon" / "`r ≤ 8` does not pay" (D13) | from the starvation-affected artifact |
 | quoting `crossover_surface.json`'s `crossovers` block | wrong for the third cycle; read the `dlra` / `static_moving_window` rows |
 | reporting `t*` without the baseline's window, refit interval and offset | **D15.3** — the number is meaningless without them |
-| "a static subspace's floor is rank-independent" **without the horizon qualifier** | **D16.2** — true at `t ≤ 0.25` (0.0–0.1%), false by `t ≈ 2–3` (~40%), and stronger at low `Re` |
-| any memory or footprint advantage | **D16.4** — peak RSS is rank-independent and the reduced method costs **more** than the full grid |
+| "a static subspace's floor is rank-independent" **without the horizon qualifier** | **D16.2** — true at `t ≤ 0.25` (0.0–0.1%), false by `t ≈ 2–3` (~40%), and stronger at low `Re` and on a finer grid |
+| reporting `t*` without the grid and its dealiasing ceiling | **D17.1–D17.2** — `t*` grows 1.4–2.5× from `N=64` to `N=128`, and the ceiling is 43 vs 85 |
+| "the rank that never yields is the ceiling" as a grid-free statement | **D17.2** — it is a statement about the *grid*; at `N=128`, `r=43` is half the ceiling and does yield |
+| `27.5%` / `1.5%` for the rank rules | **D18.6** — message-only, no artifact; not admissible until committed |
+| "a window-accumulating rank rule would fix the criterion" | **D18.1** — implemented and measured: it is **worse** (`1.5%` vs `27.5%` of fluctuation energy) |
+| "the window collapses because it fills with the method's own states" | **D18.3** — **refuted**: seeding with reference states gave `1.3%` vs `1.5%`. Record as refuted; do not tell it to a reader |
+| any memory or footprint advantage | **D16.4, D19.1** — the reduced method costs `+2.5` to `+3.8 MiB` **more** than the full grid; two independent measurements agree |
+| "peak memory is rank-independent" for the projected integrator | **D19.4** — resolved by only `9–10%` over the noise threshold; say **"flat to within 0.3 MiB"** |
+| "the BUG port costs more memory as well as more time" | **D19.3** — BUG's overhead is **smaller** (`+2.32` vs `+2.52`); it trades memory for time |
 | quoting raw RSS as the memory figure | the ~34 MiB interpreter baseline dominates; report the **overhead over the full grid** |
 | quoting `crossover_surface.json`'s `crossovers` block | its reason string is **false** for `r = 2, 4, 16`; read the `dlra` / `static_moving_window` rows instead |
+| **any `t*` value at all, until the two static bases are reconciled** | **D25.5** — the figure's rows and the block are different bases, `1.90×` apart; coder's values are `0.649`/`1.482`. **State the qualitative claim only.** |
+| "the rows are authoritative" (my R58 conclusion) | **withdrawn (D25.4)** — that assumed the block was computed from the rows; it was not |
+| **"BUG's cost scales with rank on both axes"** / "`1.165`" / "`1.531 MiB`" / "the project's best-evidenced positive claim" | **withdrawn (D25.6)** — time is `1.366` (N=64) vs `1.043` (N=128), unresolved; the memory spread moved `0.125 → 0.398 MiB` between identical runs. **Report the `3.3–5.1×` slowdown only.** |
 
 ---
 
@@ -318,10 +440,17 @@ Everything below is measured, and none of it requires retracting a number:
 3. **The limit is structural, not numerical.** A static subspace cannot track a flow whose
    support moves, and its error floor is rank-independent; a refitting integrator can, until
    its own per-step truncation accumulates onto a saturation plateau.
-4. **Rank criteria measure different things.** The windowed `r99` is grid-independent and
-   measures the dynamics; a per-step rule reads the instantaneous rank, which moves the other
-   way; the amplitude rule measures the discretisation, and cannot be repaired by any fixed
-   cutoff.
+4. **Rank criteria measure different things, and a causal rule provably cannot reach the
+   cumulative one.** The windowed `r99` rises `1 → 16` and is grid-independent; a per-step rule
+   reads the *instantaneous* `r99`, which falls `14 → 4`; the amplitude rule measures the
+   discretisation and asks for `4.0×`/`4.2×` the dealiasing ceilings, so **no fixed cutoff can
+   repair it.** **A window-accumulating rule was implemented, measured, and does not work:** it
+   never exceeds rank 2 and keeps `1.5%` of the fluctuation energy against the per-step rule's
+   `27.5%`, because it measures *local* complexity — which genuinely is `≈2` — while `1 → 16`
+   is **cumulative**, reachable only by remembering the whole trajectory, which is what static
+   and offline methods do and **what a causal per-step method cannot do** (D18.2). *The
+   `27.5%`/`1.5%` figures are message-only and are **not yet citable** until they are in an
+   artifact (D18.6).*
 5. **There is no statistically steady fluctuation state** for forced 2-D NS at these
    parameters, at either forcing amplitude or either resolution — so the honest statistic is
    a quasi-steady fluctuation *energy*, and enstrophy-based and spectral statistics are not

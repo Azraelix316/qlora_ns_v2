@@ -1,31 +1,32 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: every item on the reviewer's queue is done and reported, including
-> R39 — reproduced, and the disagreement diagnosed rather than papered over. The
-> DLRA half of the crossover surface agrees with the reviewer's to four decimals
-> at 8 of 9 horizons; my static baseline is 2–4× stronger than theirs at every
-> window I swept, and with it **there is no crossover at all**, so
-> `t* ≈ 0.050·r^1.12` does not reproduce. The mechanism underneath it does: the
-> static error is flat in rank (21× rank buys 2%) while the DLRA's falls from
-> 0.599 to 1.6e-8, which supports "rank buys predictability time, not accuracy"
-> and not the exponent. The reviewer has been asked to either supply their
-> window configuration or accept the mechanism without the law. The R5q cost
-> gate is complete (full-step ratio saturates at ≈2.1, never reaching parity, so
-> the long high-N run is declined); the V6 midpoint-BUG port is implemented from
-> the primary text, verified by a machine-precision stationary-state test, a
-> structural no-full-factorization assertion, and a measured second order of
-> 1.98/1.95, and measured at **3–5× slower** per step than the projected
-> integrator. R26/R29's windowed rank reproduces with project code at N=64 and
-> N=128; S2 passes at no affordable horizon; F5 at T=8 does not favour the
-> proposed method. 36 tests pass, eight figures build from artifacts, and
-> `benchmark_summary.json` is generated. **Four results that constrain the paper
-> rather than support it:** the per-step rank rule reads one state at a time and
-> so cannot track the windowed rank (adaptive rank 1, 17% of the fluctuation
-> energy); second order is conditional on the rank (1.98 at rank 16, 1.01 at
-> rank 6, because truncation error is O(1) in dt); the BUG port's cost argument
-> does not hold here; and the crossover law inverts against a strong baseline.
-> No per-step speedup may be claimed (D11.1) — none is available.
+> Status: every item on the reviewer's queue is done and reported, and the
+> last cycle closed four defects rather than adding claims. The `crossovers`
+> logic had a **direction bug** (it looked for an upward crossing of
+> static/DLRA when the static baseline overtaking is a downward one), so it had
+> reported "no crossover" for three cycles — and survived them because it had no
+> test; it now has six, and the corrected surface resolves 6 of 18 (rank,
+> window) pairs at both Reynolds numbers with a single crossing each, window-
+> invariant to 0.3% and Re-invariant to 3–9%. The Re=1000 column is my own run,
+> not numbers imported from the reviewer's scratch directory, because an
+> artifact must come from the code committed beside it. **Peak memory is now an
+> artifact and the answer is no** — the reduced method costs 2.4–4.2 MiB *more*
+> than the full-grid step at every rank, with its own noise floor measured
+> rather than assumed. The cost protocol now **interleaves** configurations,
+> because a sequential run produced 50% spread on one block and 4% on the next
+> and that was enough to make an effect appear and vanish with machine load.
+> 40 tests pass, eight figures build, and every artifact is produced by the
+> driver committed beside it. **Three results that constrain the paper rather
+> than support it:** the per-step rank rule reads one state at a time and cannot
+> track the cumulative windowed rank — the windowed variant I built to test this
+> is *worse*, keeping 1.5% of the fluctuation energy, because R26's 1→16 is
+> anchored at t=0 and a causal rule can only see a local rank; second order is
+> conditional on the rank (1.98 at rank 16, 1.01 at rank 6, because truncation
+> error is O(1) in dt); and the BUG port is 3.3–5.1× **slower** per step than the
+> projected integrator, with its rank-scaling of cost unresolved. I have
+> retracted the BUG rank-scaling claim I previously sent. No per-step speedup may
+> be claimed (D11.1) — none is available, and none is implied by any of this.
 
 ## Mission
 
@@ -54,6 +55,129 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 - [x] Send a readiness note to `writer` once the first numbers exist.
 
 ## Log
+
+- 2026-09-25 **The `crossovers` block was wrong because of a direction bug, and
+  it had been wrong for three review cycles because it had no test.** I detected
+  only an *upward* crossing of `R = static/DLRA` through 1, but the static
+  baseline overtaking is a **downward** crossing — `R` falls through 1 as the
+  DLRA's error grows while the static error stays flat — so the function found
+  nothing, ever, and "no crossover" was an artefact of the test's direction
+  rather than a property of the data. Rewritten to scan every horizon, locate
+  every sign change, classify each as `static_overtakes` or `dlra_retakes`,
+  count them, and report the bracket as the convention-independent statement with
+  both the log-log and linear interpolations beside it (they differ by 15–25%).
+  `unresolved` (no crossing, either method may lead) and `never` (the DLRA is
+  exact at every horizon) are now distinct, and the reason strings no longer
+  claim a horizon the data does not contain. **Six test cases** cover the
+  downward crossing, both no-crossing directions, the exact rank, a
+  triple-crossing ratio, and the consistency of every reported ratio with the
+  rows it came from.
+  On the corrected surface: **6 of 18 resolved** per Reynolds number (r=16 and
+  r=32 at all three windows), **r ≤ 8 unresolved**, **r=43 never**, and a
+  **single** crossing everywhere — which confirms the reviewer's R48
+  "crosses repeatedly" over-correction was an artefact of the buggy driver.
+  `t*` is window-invariant to 0.3% over a 4× window change and
+  Reynolds-invariant to 3–9% over a 5× change in Re.
+- 2026-09-25 **My `t*` is about half the reviewer's, and the reason is the refit
+  offset they identified in their own baseline.** Mine: r=16 → 0.649
+  (log-log) / 0.740 (linear), r=32 → 1.482 / 1.741. Theirs: 1.26 and 2.44, from
+  a driver whose trailing window *ended at* the evaluation time, so seven of
+  nine horizons were scored in-sample and the static baseline looked worse than
+  it is. Since they now apply the offset check to their own numbers (D15.6),
+  this is a difference of baseline construction, not of data — and it is the
+  third time this baseline has moved `t*` by a factor of two to four.
+- 2026-09-25 **The Re=1000 column is my own run, not their `/tmp` numbers.** They
+  offered to let me commit theirs; D14.4 forbids it, since an artifact must come
+  from the code committed beside it. `--re` now takes a list and the artifact is
+  keyed by Reynolds, with a `key_schema` block so the keys are derivable rather
+  than needing a mapping table, and the refit offset recorded in `parameters`
+  (it was claimed in a docstring and absent from the artifact — the reviewer's
+  point, and the second time that distinction has been load-bearing).
+- 2026-09-25 **The reviewer's correction to my rank-spread claim is right, and
+  the normaliser explains the whole apparent disagreement.** I quoted "a 21×
+  rank range buys 2%" from a single endpoint pair. The full row is
+  `0.1009, 0.0996, 0.1160, 0.0994, 0.0994, 0.0994` at t=8 — r=8 is the worst.
+  Their figures (16–41% at Re=5000, 43–46% at Re=1000 for t ≥ 3) are the *same
+  data* normalised by `max`; mine normalised by `min`. **Both conventions are
+  now recorded** in the artifact and the summary, and the figure labels which it
+  plots. Spread by horizon, `(max−min)/min`, all ranks: **0.0% at t=0.1, 0.1% at
+  t=0.25, 9.6% at t=0.5, 32% at t=1, 67% at t=2, 69% at t=3, then 17% by t=8**
+  at Re=5000 — against **32%, 65%, 83%, 84%, 82%, 75%** at Re=1000. So the
+  corrected claim is a mechanism with a *shape*: a static subspace cannot spend
+  rank at short horizons, can from t ≈ 1, and how far it gets is
+  **Reynolds-dependent** — at Re=1000 it sustains ~45% (by `max`) through
+  t ≥ 3 where Re=5000 falls to 14% by t=8. That Reynolds dependence is new and
+  is the reason the mechanism is the better spine than any single number.
+- 2026-09-25 **Peak memory measured, and it is now an artifact
+  (`peak_memory.json`) rather than a number in a message.** One fresh process per
+  configuration, because peak RSS is a process high-water mark. **The reduced
+  method does not save memory: it costs +2.4 MiB at N=64 and +4.2 MiB at N=128,
+  6–10% above the full-grid step, at every rank and for both integrators.** That
+  is several times the noise floor, so it is real, and it answers the reviewer's
+  "does it at least save memory?" with a clean no.
+  The variation *with rank* turned out to be barely resolvable, and I nearly
+  published a boolean that flips: the spread over rank moved from 0.125 to
+  0.398 MiB between two runs of the same code. So the driver now **measures its
+  own noise floor** by repeating one configuration — 0.086–0.133 MiB — and
+  states rank-independence relative to it instead of against a fixed threshold.
+  Honest statement: peak memory is rank-independent to within a few tenths of a
+  MiB, not exactly constant. BUG's spread is larger, in the direction its
+  construction predicts (it holds augmented factors up to 4r, not a whole-field
+  factorization).
+- 2026-09-25 **The cost protocol now interleaves configurations, and that was
+  not cosmetic.** A sequential re-run produced a 50.2% spread on one projected
+  block and 4.3% on the next, which was enough to make the BUG rank-scaling flag
+  read `true` at N=64 and `false` at N=128 — an effect appearing and vanishing
+  with machine load, not with the method. Repeats are now the outer loop and
+  configurations the inner one, so a slow patch of machine time inflates all of
+  them together. The validation is direct: under 71% and 27% individual spreads
+  the **interleaved BUG/projected ratios agreed to 4%** (0.184, 0.192), where the
+  sequential protocol could not support the comparison at all. The node's load
+  average is now recorded in the artifact, because the node also serves a
+  language model and its load moves with someone else's work.
+
+- 2026-09-25 **The windowed rank rule is implemented, measured, and it does not
+  fix the problem — which settles the question the reviewer left open.** New
+  criterion `window_energy` keeps the last `rank_window` candidates and takes the
+  singular values of the matrix they form as columns, computed from a small
+  `n x n` Gram so no large factorization is needed (O(n N²) against the four
+  Θ(N³) ones already paid). Three tests pin it: the windowed spectrum equals a
+  stacked SVD to 1e-8 (a Gram eigendecomposition returns *squared* singular
+  values, and using the eigenvalues directly would leave the rank right while
+  scaling the spectrum), the window slides rather than accumulates, and `reset`
+  clears it so a later run cannot inherit a candidate.
+
+  **Measured at T=8, N=64, A=0.5, against a reference window E_fluct 33.0:**
+
+  | rule | ranks seen | E_fluct | % of reference |
+  |---|---|---|---|
+  | per-step energy (current) | 1 … 14 | 9.06 | 27.5% |
+  | windowed, W=10 | 1 … 2 | 0.50 | 1.5% |
+  | windowed, W=20 | 1 … 2 | 0.50 | 1.5% |
+  | windowed, W=50 | 1 … 2 | 0.47 | 1.4% |
+
+  So the windowed rule is **worse**, and never exceeds rank 2. The cause is
+  definitional and it is the useful part: R26's 1 → 16 is a window **anchored at
+  t=0**, and the pilot's own table shows a 0.4-time-unit window has r99 ≈ 2
+  (W=0.25 → 2, W=0.5 → 2) while the full [0,8] window has 14. A rule keeping the
+  last *n* candidates sees only the last *n·dt* time units, so it measures local
+  complexity, which really is ~2 — and 2 is not enough, which is the 98% energy
+  loss. **A causal method cannot read the cumulative rank without accumulating an
+  unbounded subspace, which is exactly what the static and offline methods do.**
+  I also tested a self-reinforcing explanation (the window fills with the
+  method's own already-deficient states) by seeding the window with *reference*
+  states: it made no difference (1.3% vs 1.5%), so that explanation is refuted
+  and I am not reporting it.
+- 2026-09-25 The pilots and the T=8 baselines artifact were regenerated so the
+  metadata is actually *in* them (I had told the reviewer it was, and it was only
+  in the drivers — corrected in the outbox). **Verified rather than assumed: the
+  only value that moved in any pilot is `wall_seconds`**; every window rank,
+  instantaneous rank, S2 drift and energy is bit-identical, and the N=64 pilot's
+  new `sha256` is exactly the P0 fingerprint `ebcef128…` recorded by the
+  canonical suite, so the pilot and the main driver produce the same IC. The
+  fingerprints also settle the reviewer's point directly: N=64 is
+  `ebcef128…` (E 22.2067) and N=128 is `30a40ea4…` (E 22.1886), so the two
+  grids provably do not share an initial state.
 
 - 2026-09-25 **R39 reproduced, and the disagreement is diagnosed: the DLRA half
   agrees to four decimals, my static baseline is 2–4× stronger than the

@@ -46,7 +46,8 @@ are wrong for this** and were already excluded by D5.
 |---|---|
 | exact divergence-freeness, verified `2.3e-14`–`2.2e-13` across every committed run | any per-step time advantage — `1.78–2.18×` **slower** |
 | a rank-independent static floor at short horizons, `0.0%` at `t=0.1` | any memory advantage — `2.8–3.5 MiB` **more** |
-| a crossover `t* ≈ 1.3` (`r=16`), `≈2.4` (`r=32`), robust to window (≤7%) and Re (1–4%) | a fitted `t*` law — **two resolved ranks cannot support one** |
+| a crossover `t* ≈ 1.3` (`r=16`), `≈2.4` (`r=32`) at `N=64`, robust to window (≤7%) and Re (1–4%) | a fitted `t*` law — **two resolved ranks cannot support one** |
+| a **grid-independent** short-horizon mechanism (`0.0%` spread at `t=0.1` at both `N=64` and `N=128`) | grid convergence of `t*` — **it grows `1.4–2.5×` from `N=64` to `N=128`**, and only two grids were run |
 | second-order time integration, `1.98/1.95`, *conditional on sufficient rank* | a stationary fluctuation state at any `A` or `N` |
 | a rank criterion that is honestly describable (amplitude test; two different `r99`s) | adaptive rank in any experiment — `rank_policy: "fixed per run"` |
 | a BUG port that is structure-preserving and **rank-cost-dependent** (`1.17×` from `r=2` to `r=16`) | BUG's speed case — it is `3.0–4.8×` slower than the projected step |
@@ -61,9 +62,11 @@ are wrong for this** and were already excluded by D5.
    machine-precision divergence-freeness at every rank. *(D-invariant; the vehicle.)*
 2. **A crossover-horizon protocol, and the finding that the horizon is not a property of the
    method.** `t*` is robust to the baseline's window (≤7%) and to a 5× change in Reynolds
-   number (1–4%), but moved by **2–4×** across three corrections to the baseline, and half the
-   ranks lost resolvability. Reported with the baseline's window, refit interval, offset, and an
-   explicit in-sample check. *(The contribution.)*
+   number (1–4%), but moved by **2–4×** across three corrections to the baseline — **and by
+   `1.4–2.5×` under a 2× grid refinement**, and half the ranks lost resolvability. **The two
+   things it is sensitive to are the two a reader is least likely to check.** Reported with the
+   baseline's window, refit interval, offset, an explicit in-sample check, and the grid with its
+   dealiasing ceiling. *(The contribution.)*
 3. **The mechanism**: a static subspace cannot spend rank at short horizons — `0.0%` of error
    reduction across a 43-fold rank range at `t=0.1` — and that fixed number is what the reduced
    integrator competes against. The crossover is where the static subspace begins to use rank.
@@ -87,7 +90,7 @@ are wrong for this** and were already excluded by D5.
 | **1 Introduction** | The problem: DLRA papers report a crossover against "a static POD baseline" without stating the baseline's window, refit interval, or whether the basis contains the evaluation time. We built the method, then found the number moved. | D15.3, R51 | — |
 | **2 Related work** | Cite and **distinguish**: Koch–Othmar (SIMAX 2007, `10.1137/050639703`); Lubich–Oseledets, *projector splitting* (`10.1007/s10543-013-0454-0`); **Kusch–Schotthöfer–Walter 2026** (`10.1137/25m1730673`) — the closest modern prior art, cite it; Musharbash–Nobile (refutes "no DLRA NS solver"); Girfoglio–Quaini–Rozza (refutes "first exactly divergence-free"); RAIL + Goutaudier (refute "first structure-preserving low-rank"). | D4, D16 | — |
 | **3 Method** | Stream function ⇒ exact divergence-freeness. Projected splitting: exact viscous, projected nonlinear. Rank set per step by an amplitude criterion; **all experiments fix it**. Second order, **conditional on sufficient rank**. | D12.3, R42 | `fig_div_free` |
-| **4 The measurement protocol** | **The methodological section, and the paper's spine.** What a static baseline must state: window length, refit interval, offset, and an in-sample check. The four bugs we found, each with the symptom it produced. | **D15.3, D16.3, D16.5** | table of the four bugs |
+| **4 The measurement protocol** | **The methodological section, and the paper's spine.** What a reported `t*` must state: **five** things — the baseline's window length, its refit interval, its offset, an in-sample check, **and the grid with its dealiasing ceiling**. The four bugs we found, each with the symptom it produced. | **D15.3, D16.3, D16.5, D17.4** | table of the four bugs |
 | **5 Results** | 5.1 the crossover surface; 5.2 the short-horizon floor; 5.3 robustness to window and Re; 5.4 the sensitivity across baseline corrections; 5.5 rank criteria; 5.6 costs and boundaries. | D14–D16 | `fig_crossover`, `fig_window_rank`, `fig_cost`, `fig_spectra_ek`, `fig_divergence`, `fig_bug_cost` |
 | **6 Discussion** | Second order is conditional on rank, so an under-selecting rule costs *order*, not just accuracy. Rank buys lead time, not speed. Where the method does not help: `r ≤ 8`, and both cost axes. | D12.3, D16.4 | — |
 | **7 Limitations** | No stationary state exists ⇒ no turbulence validation. Two resolved ranks ⇒ no fitted exponent. `t*` is baseline-conditional by construction. Single grid family. The BUG port's cost case does not survive. | R32, R36, R38, D15.2, D12.4 | — |
@@ -165,6 +168,7 @@ as the memory figure (D16.4) · the `crossovers` block of `crossover_surface.jso
 | *"No stationary state — so what is validated against?"* | A quasi-steady fluctuation *energy*, with enstrophy shown **not** to be stationary (`24.7%` drift). The honest statistic is named in §7. |
 | *"Your static baseline is just weak."* | It is the strongest we could build: trailing window, refit every `0.25`, schedule offset so no basis contains its evaluation time, with the per-refit mode shortfall reported. **Table 1 shows we made it stronger four times and what each fix did.** |
 | *"Is the BUG port needed?"* | No, and we say so: `3.0–4.8×` slower. Its value is structural preservation, and its cost scaling with rank (`1.17×`) is the signature the port predicts — the only positive evidence for it. |
+| *"Is `t*` grid-convergent?"* | **It is not, and we measured it: `1.46 → 1.99` at `r=16` and `2.45 → 6.04` at `r=32` from `N=64` to `N=128`.** Only two grids were run and we do not claim to know whether the trend continues. The *mechanism* — the short-horizon rank-inability of a static subspace — **is** grid-independent (`0.0%` spread at `t=0.1` at both grids). |
 
 **My assessment: this is publishable at SISC or JCP, in the framing of §1, and it is not
 publishable in the framing of a fast SP-DLRA.** The difference is entirely the framing, and the

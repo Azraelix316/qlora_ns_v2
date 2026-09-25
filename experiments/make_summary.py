@@ -24,6 +24,58 @@ if str(ROOT) not in sys.path:
 RESULTS = ROOT / "state" / "coder" / "results"
 
 
+def static_error_spread(
+    static_rows_by_rank: dict, ranks: list, window: float
+) -> list[dict]:
+    """How much the static baseline's error can be reduced by rank, per horizon.
+
+    The definition matters, because two normalisations differ by a factor of
+    several and a paper quoting one against another's numbers would be
+    comparing conventions rather than results.  Both are reported here:
+
+    ``spread_over_min``
+        ``(max - min) / min`` -- the improvement available to the *worst* rank
+        relative to the best.  This is the conservative, largest number and is
+        what the figure plots.
+    ``spread_over_max``
+        ``(max - min) / max`` -- the same interval as a fraction of the worst
+        rank, which is smaller and is the more flattering of the two.
+
+    Every rank is included.  The rank at which the *DLRA* is exact must be
+    excluded from a comparison of the DLRA's curves, but the static baseline's
+    error at that rank is an ordinary measurement, and dropping it would quietly
+    change the quantity being summarised.
+    """
+    prefix = f"W{window:g}_"
+    out = []
+    horizons = None
+    for rank in ranks:
+        rows = static_rows_by_rank.get(f"{prefix}r{rank}")
+        if rows:
+            horizons = [r["time"] for r in rows]
+            break
+    if not horizons:
+        return out
+    for i, h in enumerate(horizons):
+        vals = []
+        for rank in ranks:
+            rows = static_rows_by_rank.get(f"{prefix}r{rank}")
+            if rows and i < len(rows):
+                vals.append(rows[i]["relative_l2_oracle_mean"])
+        if len(vals) < 2:
+            continue
+        lo, hi = min(vals), max(vals)
+        out.append({
+            "time": h,
+            "min": lo,
+            "max": hi,
+            "spread_over_min": (hi - lo) / lo if lo > 0 else None,
+            "spread_over_max": (hi - lo) / hi if hi > 0 else None,
+            "n_ranks": len(vals),
+        })
+    return out
+
+
 def _git_commit() -> str:
     try:
         return subprocess.check_output(
@@ -296,15 +348,31 @@ def main() -> None:
 
     crossover = None
     crossover_data = load("crossover_surface.json")
+    if crossover_data is not None and "by_reynolds" not in crossover_data:
+        # A stale artifact must not take the whole summary down with it.  Say what
+        # is wrong and which command regenerates it, rather than raising a
+        # KeyError that leaves the reviewer with no summary at all.
+        crossover = {
+            "status": "stale_schema",
+            "reason": (
+                "`crossover_surface.json` predates the `by_reynolds` layout, so "
+                "its numbers cannot be read here. Regenerate with "
+                "`experiments/run_crossover.py`; the committed artifact must come "
+                "from the committed driver (D14.4)."
+            ),
+            "git_commit": crossover_data["provenance"]["git_commit"],
+        }
+        crossover_data = None
     if crossover_data is not None:
         p = crossover_data["parameters"]
         crossover = {
             "file": "crossover_surface.json",
             "git_commit": crossover_data["provenance"]["git_commit"],
-            "re": p["re"],
+            "re": p.get("re"),
             "N": p["N"],
             "force_amplitude": p["force_amplitude"],
             "ranks": p["ranks"],
+            "reynolds_numbers": p.get("reynolds_numbers", [p.get("re")]),
             "horizons": p["horizons"],
             "dealias_ceiling": p["dealias_ceiling"],
             "moving_window_lengths": p.get(
@@ -312,11 +380,56 @@ def main() -> None:
             ),
             "moving_window_refit_interval": p["moving_window_refit_interval"],
             "rank_policy": p["rank_policy"],
-            "crossovers": crossover_data["crossovers"],
-            "dlra_surface": crossover_data["dlra"],
-            "static_moving_window_surface": crossover_data["static_moving_window"],
+            "moving_window_refit_offset": p.get("moving_window_refit_offset"),
+            "key_schema": crossover_data.get("key_schema"),
+            "by_reynolds": {
+                re_key: {
+                    "crossovers": re_case["crossovers"],
+                    "resolved_t_star": [
+                        {
+                            "rank": c["rank"],
+                            "window": c["window"],
+                            "t_star": c["t_star"],
+                            "t_star_linear": c.get("t_star_linear"),
+                            "bracket": c.get("bracket"),
+                            "status": c["status"],
+                            "crossings": c["crossings"],
+                        }
+                        for c in re_case["crossovers"]
+                    ],
+                    "dlra_surface": re_case["dlra"],
+                    "static_moving_window_surface": re_case["static_moving_window"],
+                    "static_error_spread": {
+                        f"W{w:g}": static_error_spread(
+                            re_case["static_moving_window"], p["ranks"], w
+                        )
+                        for w in p.get("moving_window_lengths", [])
+                    },
+                }
+                for re_key, re_case in crossover_data["by_reynolds"].items()
+            },
             "error_columns": crossover_data["error_columns"],
             "interpretation": crossover_data["interpretation"],
+        }
+
+    memory = None
+    memory_data = load("peak_memory.json")
+    if memory_data is not None:
+        memory = {
+            "file": "peak_memory.json",
+            "git_commit": memory_data["provenance"]["git_commit"],
+            "grids": memory_data["parameters"]["grids"],
+            "ranks": memory_data["parameters"]["ranks"],
+            "methods": memory_data["parameters"]["methods"],
+            "steps": memory_data["parameters"]["steps"],
+            "noise_floor_mib": memory_data.get("noise_floor_mib"),
+            "rank_scaling": memory_data["rank_scaling"],
+            "full_grid_peak_mib": {
+                f"N={r['N']}": r["peak_rss_mib"]
+                for r in memory_data["measurements"]
+                if r["method"] == "full" and r["repeat"] == 0
+            },
+            "interpretation": memory_data["interpretation"],
         }
 
     output = {
@@ -381,6 +494,7 @@ def main() -> None:
         "cost_retiming": cost,
         "regime_pilot": regime,
         "crossover_surface": crossover,
+        "peak_memory": memory,
         "honesty_note": (
             "The static-POD baseline is now correct (its fit had reshaped the "
             "snapshot stack in C order, interleaving snapshots); every number "

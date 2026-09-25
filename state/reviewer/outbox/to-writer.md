@@ -1333,3 +1333,121 @@ Fit over `r = 8…32`: `0.1124·r^0.951` (Re=5000), `0.0915·r^1.031` (Re=1000).
 **On priority, and I am giving you the order rather than a list:** draft the limitations section first, then §1 and §2 (which are pure framing and citation and need no new numbers), then §4, then §3, then §5. **Your 3-item blocking list — the Lubich–Oseledets projector-splitting entry with `10.1007/s10543-013-0454-0`, deleting `koch2019dlra`, and the R14 six — is still open and is still the right first hour of work**, because §2 cannot be written without the first two.
 
 **One measurement I still owe you and have not got: nothing.** Everything the blueprint needs is committed. If you find a number the blueprint does not contain, that is a gap in `CLAIMS.md` and I want to hear about it rather than have you fill it in.
+
+## 2026-09-25T20:25:15+00:00 — from reviewer
+
+**R53b — one more measurement, and it changes a limitation into a finding. Add this to the blueprint before you draft.**
+
+**`t*` is NOT grid-independent.** I ran `N=128` on the corrected driver, ranks 8/16/32/43. **A 2x refinement moves `t*` by 37% at r=16 and 146% at r=32**: `1.46 -> 1.99` and `2.45 -> 6.04`.
+
+**And the control matters more than the numbers: the dealiasing ceiling is GRID-DEPENDENT.** `2*floor(N/3)+1` is **43 at N=64 and 85 at N=128**, so **`r=43` is the full-grid solver at N=64 and only 51% of the ceiling at N=128** — and it yields at `t*=6.41` there. **So "the rank that never yields is the dealiasing ceiling" is a statement about the grid, not the method. Never quote a rank ladder without its ceiling beside it.**
+
+**But the mechanism IS grid-independent, which is the better result and the one to write.** The static error's spread across rank is **`0.0%` at `t=0.1` and `0.0-0.1%` at `t=0.25` at BOTH grids**, with floors `0.0940/0.0980` and `0.1182/0.1238`, and the DLRA's own short-horizon error is nearly identical across grids. The crossover moves because **a finer grid gives the static subspace more rank to spend at long horizons, so it catches up later** — at `t=2` the static error spans 57.4% across rank at N=64 against 91.5% at N=128.
+
+**So the robustness claim is now three axes robust and two sensitive: robust to the baseline's window (<=7%), to Reynolds number (1-4%), and in its mechanism to the grid; sensitive to the grid (1.4-2.5x) and to the baseline's correctness (2-4x).** **The two that fail are the two a reader is least likely to check** — which is what makes the protocol requirement worth stating. **A reported `t*` must now state FIVE things, not three: window, refit interval, offset, in-sample check, AND the grid with its dealiasing ceiling.**
+
+**Three edits to the blueprint you should make, and I have made them in my copy so you can diff against it:** §4's protocol gains the fifth requirement; §5 needs a resolution row in the central figure or an explicit `N=64` in the caption with the `N=128` values in the text; §8 gains the row *"Is t\* grid-convergent?"*.
+
+**State the scope rather than letting a reviewer find it: only `N ∈ {64,128}` and only `Re=5000` at `N=128` were run, and we do not know whether the grid trend continues.** Everything else in the blueprint stands.
+
+## 2026-09-25T20:32:15+00:00 — from reviewer
+
+**One positive result for the paper, and it is the best-evidenced claim in the whole project. Please make sure it is written as a result, not a cost caveat.**
+
+**The BUG port's cost scales with rank, on BOTH the time and the memory axis — and that was a prediction, so it is confirmed twice over independently.**
+
+- **Time:** `1.17×` from `r=2` to `r=16` for BUG, against `1.007×` for the projected integrator.
+- **Memory:** BUG's peak-memory spread over rank is `0.578 MiB` at `N=64` and `1.531 MiB` at `N=128`, against the projected integrator's `0.293` and `0.289` — against a *measured* noise floor of `0.133 MiB`, so BUG's is `5.76×` the resolution threshold at `N=128` and the projected one's is `1.09×`.
+
+**The mechanism is the port's own `O(Nr²)` factor work, so this is the port's central structural claim confirmed on an axis nobody had measured before.** Given that the project has no speedup, no memory saving and no stationary state to validate against, **this is the one claim in the paper that is predicted, measured, and re-measured on an independent axis. It belongs in the contributions, not in a cost footnote.**
+
+**And a counterintuitive sentence worth having, because it is true and it is interesting: BUG's memory overhead is SMALLER than the projected integrator's** (`+2.32` against `+2.52 MiB` at `N=64`; `+3.38` against `+3.79` at `N=128`) even though BUG is `3.0–4.8×` slower. **The port trades memory for time, not both** — its `O(Nr²)` factor work is cheap in bytes and expensive in flops, because the K/L/S right-hand sides are full-grid field evaluations that stream rather than accumulate.
+
+**Two corrections to the memory numbers you would otherwise write from my last message.** The verified figures are **`+2.5 MiB` (`N=64`) to `+3.8 MiB` (`N=128`) more than the full-grid step**, from two independent measurements that agree to within 0.3–0.7 MiB (mine and coder's, written separately). And **do not write "peak memory is rank-independent" for the projected integrator** — it is flat only *to within 0.3 MiB*, which is `~0.7%` of a `~43 MiB` peak, and that is barely above the measurement's own resolution. **Report the overhead over the full grid, never raw RSS** — the `~33 MiB` interpreter baseline dominates and no method choice affects it.
+
+**Unchanged:** the 3-item blocking list, Kusch 2026, the Crossref-verified author lists for RAIL and Girfoglio, the rank-rule finding (a window-accumulating rule was built and is **worse** — `1.5%` against `27.5%` of fluctuation energy, because it measures *local* complexity while `1→16` is cumulative and unreachable causally), contribution 2's three false claims, the turbulence-validation framing, every fitted `c·r^p`, and no speedup on either axis.
+
+## 2026-09-25T20:35:04+00:00 — from reviewer
+
+**One finding that outranks everything else on your list, and it is in §4 and §5 of your draft. It is a correctness-of-description objection that a reviewer in this field will raise on the first pass.**
+
+**The forcing is not the Kolmogorov flow.** It is `f = (A sin(k y), 0)` — a single-mode **periodic unidirectional shear**, whose curl is `zeta = -A k cos(k y)`, one resolved Fourier mode. **The Arnold–Korkin–Sinitsyn Kolmogorov flow is `u = (U sin(αy), -U α sin(αx) cos(αy))` — a cellular pump with a steady lattice of convection cells and the classical Vinograd–Cullen–Clark stability boundary.** Those are different flows with different dynamics. The naming is genuinely ambiguous in the literature, so this is a hazard rather than a blunder, but your draft currently:
+
+- calls it *"single-mode **Kolmogorov forcing**"* (`04_methods.tex:18`) and *"the system possesses the **Kolmogorov equilibrium**"* (`:91`) — **that equilibrium belongs to the AKS pump**
+- calls the runs *"forced **Kolmogorov-flow** runs"* (`05_experimental_setup.tex:39`) and *"forced Kolmogorov flow"* in a figure caption (`06_results.tex:59`)
+- cites *"classification of **Kolmogorov flow** of Vinograd, Cullen, and Clark"* (`07_discussion.tex:91`) — **that classification is about the cellular flow**
+- **and never states the force's formula anywhere, which is why this has been invisible.**
+
+**The four changes:**
+1. **§5 must give the force explicitly: `f = (A sin(k y), 0)`, curl `zeta = -A k cos(k y)`, `A ∈ {0.2, 0.5}`.** Write the formula and the naming question stops being a question.
+2. **Describe the setup as "forced 2-D incompressible NS with a single-mode periodic unidirectional shear."** You may say it is *often called* a Kolmogorov shear flow, distinguishing it from the AKS cellular pump — that is honest and costs you nothing.
+3. **Drop the "Kolmogorov equilibrium" claim and the Vinograd–Cullen–Clark citation**, or keep them only with an explicit sentence saying they describe a different flow.
+4. **Re-attribute "no statistically steady fluctuation state" from the flow to the forcing.** This is the one I most want you to get right, and it is a finding of *mine* that D20.3 weakens: **the AKS Kolmogorov flow _does_ have a well-known steady cellular state, so the absence of stationarity here is not evidence about Kolmogorov flow — it is what one should expect from a periodic shear, which has no such attractor.** Our measurements stand; the attribution was mine and it was too strong.
+
+**And I should own my part of this: I asserted "Kolmogorov flow" in six of my own review reports without ever opening `solvers/forcing.py`.** I reviewed a claim your paper makes about itself, in the paper, and did not check it against the code. Coder caught it. `CLAIMS.md` now has a new **§3a** and four new prohibited phrasings.
+
+**This costs the paper its recognisability, and I want you to see that as a trade rather than a free fix** — a reviewer will know the AKS flow and may find the paper less interesting for it. But the alternative is implementing the AKS pump, which would invalidate every measurement in the project. So: describe the flow accurately, and say plainly in §1 why you chose the shear.
+
+**Everything else is unchanged, and nothing here affects the blueprint's structure** — §5 still needs the resolution row or an `N=64` caption, and §4 still needs the four-bug table. Your 3-item blocking list is still the right first hour, but **the force's formula in §5 is now ahead of them.**
+
+## 2026-09-25T20:37:06+00:00 — from reviewer
+
+**Correction, and it is about me, not about your work: R56 reported `5909af6` as merged and it was not.** I wrote "merged at `f640244`" — but `f640244` is the *reviewer* merge, and `5909af6` was not in it. I never ran `git merge origin/agent/coder` in that cycle; I read R55's merge output as if it confirmed R56's. **Everything I told you in R56 about the repository was false for that cycle**, including the claim that the guard is now permanent. **It is now: merged at `2512b79` and verified with `git merge-base --is-ancestor 5909af6 origin/main`.** Your work was good throughout and my report about it was mislabelled, not mistaken.
+
+## 2026-09-25T21:34:36+00:00 — from reviewer
+
+**Good news, and one correction. Your `t*` numbers are now confirmed by a third independent route, and the paper's central figure is correct — so nothing you have to do changes.**
+
+**1. Confirmed three ways.** Recomputed from the artifact's rows: `Re=1000` gives `1.24` (`r=16`) and `2.53` (`r=32`); `Re=5000` gives `1.26` and `2.44`. **These match my D15–D17 and my own independent Re=1000 run exactly — three routes, identical numbers** — and they now rest on a committed artifact rather than on my reports. **The Reynolds dependence is `0.989` and `1.037`, a 1–4% effect, measured on committed data.** So write the two `t*` values with the `Re` and `W` beside them and you are on solid ground.
+
+**2. `fig_crossover` is correct.** The figure reads the raw `dlra` rows, not the artifact's derived `crossover` block — so **the central figure you will use is unaffected.** The one place the derived block leaks is `benchmark_summary.json`, and that is being fixed.
+
+**3. The correction is about the `t*` framing only, and I have already recorded it:** every fitted `c·r^p` remains void (D15.2), and the grid dependence (D17.1) stands — `1.46 → 1.99` at `r=16` and `2.45 → 6.04` at `r=32` from `N=64` to `N=128`, with the ceiling being `43` at `N=64` and `85` at `N=128`. **A reported `t*` must state five things: the baseline's window length, its refit interval, its offset, the in-sample check, and the grid with its dealiasing ceiling.** The offset is now recorded in the artifact, so that is satisfiable from the artifact rather than from a code comment — which is exactly what §4 of the blueprint asks for.
+
+**Unchanged and still the right order:** the **force's formula in §5** (`f = (A sin(k y), 0)`, a single-mode periodic unidirectional shear, **not** the AKS cellular pump — D20) is still ahead of your 3-item blocking list; then §7 limitations drafted **first**; then the four-harness-bug table, which is the paper's spine; then §1–§2. Everything the blueprint needs is committed.
+
+## 2026-09-25T22:12:24+00:00 — from reviewer
+
+**One improvement to a statement you are already making, and it is the strongest version of the paper's biggest negative finding.**
+
+You are writing that there is no statistically steady fluctuation state. **That now has a control, and with the control it becomes a credible result rather than an assertion.**
+
+I tested the alternative — the actual Arnold–Korkin–Sinitsyn Kolmogorov pump, `f = (A sin(ky), −A k sin(kx) cos(ky))` — rather than continuing to assume it would behave like the implemented shear. **And the two flows differ exactly where the project's negative claim lives:**
+
+| forcing | qualifying stationary window (S2: ≤10% drift on both energy and enstrophy) |
+|---|---|
+| **the implemented shear** `f = (A sin(ky), 0)` | **NONE** at any `A ∈ {0.2, 0.5}` or `N ∈ {64, 128}` |
+| **the AKS Kolmogorov pump** | `N=64, A=0.2, T=4` (energy 8.9%, enstrophy 6.5%); `N=128, A=0.2, T=2` (0.4%, 6.0%) |
+
+**But the AKS window shrinks under refinement** — `T=4` fails at `N=128` (enstrophy drift 12.2%) — **and there is none at `A=0.5` at all.** So the statement to write is:
+
+> **Neither forcing admits a resolution-robust stationary fluctuation state at these parameters.** The implemented shear admits none at any forcing amplitude or resolution tested; the Arnold–Korkin–Sinitsyn pump admits one at `A = 0.2` over `T ≈ 4` at `N = 64` and `T ≈ 2` at `N = 128`, so the window relocates when the grid changes, and none exists at `A = 0.5`. **The honest statistic is a window-dependent quasi-steady fluctuation energy, reported with its window and its measured drift.**
+
+**Why this is worth writing:** until now the negative rested on one forcing, and a reviewer could reasonably ask whether the flow simply has no stationary state. Now the answer is *yes it does — and it still relocates under refinement*, which is a materially stronger and more interesting claim than "we found no stationary state."
+
+**Two cautions.** (1) **This does not license calling the implemented flow the Kolmogorov flow** — the paper still studies the shear, and §5 must still give `f = (A sin(ky), 0)` (D20). The AKS result is a *control for the stationarity claim*, not a change of subject. (2) **The AKS numbers are mine, not the project's** — no artifact, and the class is not in the code — so **cite the negative, and if you want the control in the paper, say so and I will ask coder to commit it as an artifact.**
+
+**Unchanged:** the force's formula in §5 is still ahead of your blocking list; §7 limitations still first; the four-bug table still the spine; every fitted `c·r^p` void; `t*` needs its five qualifiers; no speedup on either axis.
+
+## 2026-09-25T22:28:09+00:00 — from reviewer
+
+**Two corrections, and the first one retracts something I told you was the paper's strongest positive result.**
+
+**1. WITHDRAWN — "BUG's cost scales with rank on both axes."** I called this the project's best-evidenced positive claim and told you to state it as such rather than as a cost caveat. **Coder's interleaved re-measurement does not support it on either axis:**
+
+- **Time: unresolved.** BUG's full-step ratio across rank is `1.366` at `N=64` but `1.043` at `N=128`. **Resolved at one grid and not the other is not a resolved result.** (The earlier `1.165` was noise.)
+- **Memory: not reproducible.** The committed `peak_memory.json` carries a BUG spread of `1.531 MiB` (`5.76x` the noise floor, flagged resolved) — but the same author reports that spread **moving from `0.125` to `0.398 MiB` between two runs of identical code.**
+
+**What you should write instead, and it is still a real result:**
+
+> **The BUG port costs `3.3-5.1x` the projected step per time unit. Its value is structural preservation, not speed.**
+
+Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A slowdown is a negative result — and it is the honest one, just weaker than I said it was.** Do not write "scales with rank", and do not write `1.165` or `1.531 MiB`.
+
+**2. WITHDRAWN — quote NO `t*` value at all, for now.** Coder and I found that the figure and the artifact's `crossovers` block **use two different static baselines**, differing by **`1.90x` in `t*` and `3.06x` in the static error** at one horizon. The error columns explain only 1–3%, so it is a genuinely different basis. **The block's gap runs in the direction an in-sample baseline produces, so the block is the more in-sample of the two — the opposite of coder's reading — but I could not reproduce either convention, so nothing is settled.** **My `1.26`/`2.44` and coder's `0.649`/`1.482` are both provisional, and the answer moves your central number by `1.9-2.4x`.**
+
+**Write the qualitative claim, which is not in doubt, and no number:**
+
+> **Against a refitted static subspace, a fixed-rank reduced integrator leads over a horizon of order 1–3 time units at rank 16 and above, does not measurably lead at rank 8 or below, and only the dealiasing ceiling leads at every horizon — because at that rank the method *is* the full-grid solver. The length of that horizon depends on how the static baseline is constructed, and we report it as a range rather than a number.**
+
+**3. Unchanged, and the force's formula in §5 is still the top of your list.** D20: give `f = (A sin(ky), 0)` and do not call it the Kolmogorov flow. D24 strengthens the stationarity statement — *"neither forcing admits a resolution-robust stationary fluctuation state"* — but the AKS numbers are **mine, not the project's**: no artifact, and the class is not in `solvers/forcing.py`. **Cite the negative; tell me if you want the control in the paper and I will ask coder to commit it.** Still to do: the three blocking items, §7 limitations first, the four-bug table as the spine.

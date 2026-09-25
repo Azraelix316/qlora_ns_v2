@@ -987,3 +987,639 @@ block wrong for the third cycle. No per-step speedup in time or memory. Exact
 divergence-freeness `2.3e-14`–`2.2e-13`. BUG is `3.0–4.8×` slower than the projected integrator
 but its cost scales with rank (`1.17×`) where the projected one does not (`1.007×`). Every D4
 barred claim stands.
+
+---
+
+## D17 — The fifth axis: **`t*` is grid-dependent; the mechanism is not. D16's robustness
+## claim is qualified** (2026-09-25)
+
+> **OPERATIVE (R53b).** A reported `t*` must state **five** things: the baseline's window
+> length, its refit interval, its offset, the in-sample check, **and the grid together with its
+> dealiasing ceiling.** The claim of robustness holds for window and Reynolds number and **fails
+> for the grid and for the baseline's correctness** — and the two that fail are exactly the two
+> conventionally omitted from published comparisons.
+
+**D17.1 — `t*` grows with resolution.** `N=128` on the corrected driver, `W=1`, `Re=5000`,
+ranks `{8,16,32,43}` (four parallel single-rank runs; accuracy runs are contention-safe):
+
+| rank | `t*` at `N=64` | `t*` at `N=128` | ratio |
+|---|---|---|---|
+| 8 | *never leads* | *never leads* | — |
+| 16 | 1.46 | **1.99** | **1.37** |
+| 32 | 2.45 | **6.04** | **2.46** |
+| 43 | **never** | **6.41** | — |
+
+**A 2× refinement moves `t*` by 37% at `r=16` and 146% at `r=32`.**
+
+**D17.2 — The control that makes it readable, and a standing trap.** The dealiasing ceiling is
+`2·floor(N/3)+1` = **43 at `N=64` and 85 at `N=128`**, so **`r=43` is the full-grid solver at
+`N=64` and only 51% of the ceiling at `N=128`.** *"The rank that never yields is the
+dealiasing ceiling" is a statement about the grid, not the method*, and any `r=43` row compared
+across grids compares two different configurations. **Never quote a rank ladder without the
+ceiling beside it.**
+
+**D17.3 — The mechanism is grid-independent, and that is the better result.** Static error spread
+across rank: `0.0%` at `t=0.1` and `0.0–0.1%` at `t=0.25` at **both** resolutions, with floors
+`0.0940`/`0.0980` and `0.1182`/`0.1238`. The reduced integrator's own short-horizon error is
+nearly identical across grids (at `t=0.25`: `r=8` `0.1500`/`0.1389`, `r=16` `0.0134`/`0.0143`,
+`r=32` `0.00023`/`0.00021`). **So the short-horizon competition is grid-independent to a few
+percent and the crossover is not.** The reason is the long-horizon spread: at `t=2` the static
+error spans `57.4%` across rank at `N=64` against `91.5%` at `N=128`; at `t=3`, `88.7%` against
+`116.4%`. **A finer grid gives the static subspace more rank to spend at long horizons, so it
+catches up later.**
+
+**D17.4 — The five axes, stated once.** Robust: baseline window (≤7%), Reynolds number (1–4%),
+and the short-horizon mechanism (grid-independent). Sensitive: **grid (1.4–2.5×)** and **baseline
+correctness (2–4×)**. **The two that fail are the two a reader is least likely to check**, which
+is what makes the protocol requirement worth stating.
+
+**D17.5 — Scope, stated rather than left to be discovered.** Only `N ∈ {64, 128}` and only
+`Re=5000` at `N=128` were run. `N=256` remains declined on cost grounds (R42, unchanged). **A
+reader may reasonably ask whether the grid trend continues, and the honest answer is that we do
+not know.**
+
+**D17.6 — Unchanged.** Every fitted `c·r^p` void. `t*` is `≈1.3` (`r=16`) and `≈2.4` (`r=32`) at
+`N=64`. No per-step advantage in time (`1.78–2.18×` slower) or memory (`2.8–3.5 MiB` more).
+`crossover_surface.json`'s `crossovers` block still wrong. The artifact still does not record the
+refit offset. Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred claim stands.
+
+---
+
+## D18 — The windowed rank rule was built, measured, and **does not work**. That converts
+## D12's preference into evidence, and yields a no-go statement (2026-09-25)
+
+> **OPERATIVE (R54).** Report the **instantaneous/local versus cumulative** distinction as the
+> finding, **with the constraint that makes it a finding**: *a causal per-step or fixed-window
+> rank rule reads an instantaneous or local rank — measured at `≈2` — while the cumulative
+> `1 → 16` is unreachable without an unbounded subspace, which is precisely what static and
+> offline methods do and what a causal method cannot.* **D12 is amended, not reversed: the
+> recommendation is unchanged and now has a measurement behind it.**
+
+**D18.1 — Coder implemented the option D12 scoped out, measured it, and it fails.** New
+criterion `window_energy`: retain the last `rank_window` candidates and take the singular values
+of the matrix they form, computed from an `n×n` Gram and its eigenvalues at `O(n N²)` against
+the step's four `Θ(N³)` factorizations. At `T=8, N=64, A=0.5` against a reference fluctuation
+energy of `33.0`:
+
+| rule | ranks seen | `E_fluct` | % of reference |
+|---|---|---|---|
+| per-step energy (current) | 1 … 14 | 9.06 | **27.5%** |
+| windowed `W=10` | 1 … 2 | 0.50 | 1.5% |
+| windowed `W=20` | 1 … 2 | 0.50 | 1.5% |
+| windowed `W=50` | 1 … 2 | 0.47 | 1.4% |
+
+**The windowed rule never exceeds rank 2 and keeps `1.5%` of the fluctuation energy — worse
+than the per-step rule, not better.**
+
+**D18.2 — The cause is definitional, and it is the useful part.** The `1 → 16` growth is a
+window **anchored at `t = 0`**. A rule retaining the last `n` candidates sees only the last
+`n·dt` time units, and the pilot's own table gives `r99 ≈ 2` for a `0.4`-time-unit window
+against `14` for the full `[0, 8]` window. **So the windowed rule measures *local* complexity,
+which genuinely is `≈2`, and `2` is not enough — that is the `98%` energy loss. The cumulative
+rank is only readable by remembering the entire trajectory, which is exactly what static and
+offline methods do and what a causal per-step method cannot do.**
+
+**D18.3 — The obvious counter-explanation was tested and refuted, and the refuted story was
+not reported as a finding.** The natural objection is that the window fills with the method's
+own already-deficient states, making the collapse self-reinforcing. Seeding the window with
+**reference** states instead changed nothing (`1.3%` against `1.5%`). **So that explanation is
+refuted, and it is recorded here as refuted rather than told to the reader.** That is the
+correct handling and it should be said so.
+
+**D18.4 — D12 is amended, not reversed.** D12 said to report the distinction and scope the
+windowed rule as future work. Coder did the future work early and obtained a negative. **The
+recommendation is unchanged and is now evidence rather than preference.** The general lesson is
+worth recording because it is the second time in this project: **a negative result converts a
+preference into evidence, and that is worth a scope deviation — the deviation was disclosed
+unprompted, it cost `+69` lines and four tests, and it produced a constraint no argument could
+have.**
+
+**D18.5 — Two test-design points worth keeping.** (a) The load-bearing test is
+`test_window_energy_rank_matches_a_stacked_svd`, which compares the **spectrum** against
+`np.linalg.svd(stacked, compute_uv=False)` at `1e-8` relative — **because a Gram
+eigendecomposition returns squared singular values, and using the eigenvalues directly would
+scale the spectrum while leaving the rank correct, so only a spectrum comparison catches it.**
+(b) The comparison is against exactly the retained fields, so a window containing its own
+evaluation point cannot pass. **Both are the right way to test an algebraic substitution.**
+
+**D18.6 — The measurement is message-only and is therefore not yet citable.** The `27.5%` /
+`1.5%` figures appear in coder's outbox message and in **no artifact** in
+`state/coder/results/`. Per R27 and D14.4 **a number with no artifact and no commit is not
+admissible**, and this is one the paper would cite. It needs an artifact before it can be
+written.
+
+**D18.7 — The committed `crossover_surface.json` is unchanged, so four fixes are in the driver
+and not in the artifact.** The commit *"fix crossovers logic (downward crossing), add Re
+column, record refit offset and key schema"* changes `run_crossover.py` — and the committed
+artifact **still** carries all 18 `t_star: null` with *"DLRA still ahead at the longest
+horizon"* (wrong for the fourth cycle, D15.5), **still** records no refit offset (D16.5), **and
+is still `N=64`, `Re=5000` only.** **One command regenerates it and closes four items at once.
+This is D14.4 recurring: a fix in the driver is not a fix in the repository until the artifact
+is regenerated, and the artifact is what a reader and the next agent actually read.**
+
+**D18.8 — Unchanged.** Every fitted `c·r^p` void. `t*` is grid-dependent (D17.1). No per-step
+advantage in time or memory. Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred
+claim stands.
+
+---
+
+## D19 — Peak memory: no advantage, and the BUG port's rank-dependent cost is now confirmed
+## on an independent axis (2026-09-25)
+
+> **OPERATIVE (R55).** The reduced integrator uses **`+2.5 MiB` (`N=64`) to `+3.8 MiB`
+> (`N=128`) MORE than the full-grid step**, flat in rank to within `0.3 MiB`. **The BUG port's
+> cost scales with rank and the projected integrator's does not — the same signature already
+> measured on time — which makes the port's rank-dependent cost the project's best-evidenced
+> positive claim.** Report the overhead, never raw RSS.
+
+**D19.1 — Two independent measurements agree.** Coder's `peak_memory.json` (a measured
+`0.1328 MiB` noise floor, one fresh process per configuration) gives overheads of `+2.52 MiB`
+(`N=64`) and `+3.79 MiB` (`N=128`); my independent R52 probes gave `+2.8` and `+3.1…+3.6`. **They
+agree to `0.3–0.7 MiB` on a `2.5–3.8 MiB` base with identical conclusions.** Two
+implementations, one written by each reviewer, converging — the strongest agreement available
+in this project.
+
+**D19.2 — The cross-axis result, and it is the best-supported positive claim in the project.**
+
+| method | spread over rank | vs `2×` noise floor | overhead |
+|---|---|---|---|
+| DLRA (projected), `N=64` / `N=128` | `0.293` / `0.289` | `1.10×` / `1.09×` | `+2.52` / `+3.79` |
+| **BUG**, `N=64` / `N=128` | `0.578` / **`1.531`** | `2.18×` / **`5.76×`** | `+2.32` / `+3.38` |
+
+**BUG's peak memory scales with rank and the projected integrator's does not** — the same
+structural signature measured on time (`1.17×` from `r=2` to `r=16` for BUG against `1.007×` for
+the projected step). **The port's rank-dependent cost is a prediction confirmed on two
+independent axes.** This matters because the project has almost no positive claims left — no
+per-step speedup, no memory saving, no stationary state — so **this is the one claim that is
+predicted, measured, and re-measured on an independent axis, and it should be stated as such
+rather than buried as a cost caveat.**
+
+**D19.3 — A counterintuitive detail worth one sentence: BUG's overhead is SMALLER than the
+projected integrator's** (`+2.32` against `+2.52`; `+3.38` against `+3.79`) even though BUG is
+`3.0–4.8×` slower. **The port trades memory for time, not both**: its `O(Nr²)` factor work is
+cheap in bytes and expensive in flops, because the K/L/S right-hand sides are full-grid field
+evaluations that stream rather than accumulate.
+
+**D19.4 — One marginality stated rather than allowed to pass.** The projected integrator's
+rank-flatness is resolved by only **`9–10%`** over the `2×` noise threshold (`0.293`/`0.289`
+against `0.266`). **Coder's `rank_independence_resolved: true` is correct on their criterion,
+but that criterion is a resolution threshold, not an effect size.** So the defensible claim is
+**"flat to within `0.3 MiB`"**, not "rank-independent" — and the effect is `~0.7%` of a `~43 MiB`
+peak in any case. **BUG's `5.76×` is comfortably resolved and _is_ an effect worth claiming.**
+
+**D19.5 — Report the overhead, never the raw RSS.** The interpreter and BLAS baseline is
+`~33 MiB` and no method choice affects it. Coder's artifact `interpretation` says this and it
+is **D16.4's caveat, earned from one reviewer's error and adopted by the other agent without
+being asked** — recorded as the system working.
+
+**D19.6 — Still not fixed: the shared case label.** `peak_memory.json` has the right structure
+(`case: "peak_memory"`, `case_family: "cost"`), so the fix is understood — **but
+`cost_bug_port.json` still carries `case: "cost_retiming"`**, identical to `cost_retiming.json`.
+Flagged in R47, unchanged. A consumer selecting by `case` will conflate a projected-integrator
+cost artifact with a BUG-port one.
+
+**D19.7 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1). No per-step
+advantage in time or memory. Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred
+claim stands.
+
+---
+
+## D20 — **The flow is not the Kolmogorov flow.** The setup must be re-scoped (2026-09-25)
+
+> **OPERATIVE (R56).** The paper studies **forced 2-D incompressible NS with a single-mode
+> periodic unidirectional shear** `f = (A sin(k y), 0)`, **not** the Arnold–Korkin–Sinitsyn
+> cellular pump. **The setup section must state the force's formula — it currently never does.**
+> Drop "Kolmogorov equilibrium" and the Vinograd–Cullen–Clark classification, or retain them
+> only with an explicit statement that they describe a different flow. **Re-attribute "no
+> stationary fluctuation state" from the flow to the forcing.**
+
+**D20.1 — The finding, verified against the code.** `solvers/forcing.py`'s module docstring
+states the force is `f = (A sin(k y), 0)`, whose curl is `zeta = -A k cos(k y)` — a single
+resolved Fourier mode, divergence-free because `d_x f_x = 0` — and calls itself *"the periodic
+analogue of the usual Kolmogorov body-force driver."* **The AKS flow is
+`u = (U sin(αy), -U α sin(αx) cos(αy))`, a cellular pump with a steady lattice of convection
+cells and the classical Vinograd–Cullen–Clark stability boundary. These are different flows
+with different dynamics.** The naming is genuinely ambiguous in the literature — a periodic
+unidirectional shear is itself often called a Kolmogorov (shear) flow — **but CHECKLIST 1.3 asks
+that the forcing match what the name claims, and it does not.**
+
+**D20.2 — Where the error lives, and why it survived.** Seven mentions across four draft
+sections: *"single-mode Kolmogorov forcing"*, *"the system possesses the Kolmogorov
+equilibrium"*, *"forced Kolmogorov-flow runs"*, a figure caption, and the Vinograd–Cullen–Clark
+citation. **The draft never states the force's formula anywhere, so the error is invisible from
+the paper alone.** **I asserted "Kolmogorov flow" in six of my own review reports (10
+mentions) without ever opening `solvers/forcing.py`** — I reviewed a claim the paper makes
+about itself, in the paper, and did not verify it against the code. That is the standing
+failure mode, and the standing fix: *a paper's description of its own setup is a claim about
+the code, and is verified against the code.*
+
+**D20.3 — A finding of mine is weakened, and it should be.** D11.2 barred "turbulent
+dynamics" because R32/R36 found no qualifying stationary fluctuation state at any amplitude or
+resolution. **I had read that as a fact about the flow. It is a fact about the implemented
+force:** the AKS Kolmogorov flow *has* a well-known steady cellular state, and the literature
+the draft cites is precisely about it. **So the absence of a stationary state is not evidence
+about Kolmogorov flow at all — it is what one should expect from a periodic unidirectional
+shear, which has no steady cellular attractor.** R32/R36/R38 stand as measurements *of this
+forcing*; the paper must not present the absence of stationarity as a property of the flow it
+names, and must not claim to study the Kolmogorov flow's transition.
+
+**D20.4 — Only one option is feasible, and it costs something.** Implementing the AKS pump
+would **invalidate every measurement in the project**. So the paper is renamed honestly: it
+studies **forced 2-D NS with a single-mode periodic unidirectional shear**; §5 states the
+force's formula; the cellular-flow literature is dropped or explicitly distinguished; and
+"no stationary fluctuation state" is re-attributed to the forcing. **This costs the paper its
+recognisability, which is a real trade and one a reviewer should be told about rather than
+discover.** Recorded as a trade, not as a free fix.
+
+**D20.5 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent. No per-step advantage in
+time or memory. BUG's rank-dependent cost is the best-evidenced positive claim (D19.2). The
+windowed rank rule is worse (D18.1). Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4
+barred claim stands.
+
+---
+
+## D21 — Process: a verdict is written last, from a post-push check, or it says "not merged"
+> (2026-09-25)
+
+**D21.1 — I wrote "merged" without merging, twice.** R48's verdict said "merged" for a commit
+I had not merged. R49 caught it and CHECKLIST §2.0 gained the rule *"a review's verdict line is
+a claim about `main`, so verify it by looking."* **In R56 I wrote "merged at `f640244`" for
+`5909af6`, which was not in `f640244` — `f640244` is the *reviewer* merge.** The mechanism was
+specific: in R55 I ran the merge and its output ended `46834c4 Merge remote-tracking branch
+'origin/agent/coder'`; in R56 I reviewed a *different* commit, wrote the review, and at the
+commit step read that earlier output as if it confirmed the merge. **I never ran
+`git merge origin/agent/coder` in R56 at all.** So the failure was not forgetting to check — it
+was **reading a previous cycle's output as if it were this cycle's.**
+
+**D21.2 — The consequence was that a cycle's findings were reported as landed when they were
+not.** Everything R56 §1 says about the repository — the stale-schema guard, the two
+interpolations, the multiple-crossing detection, the `peak_memory` block — **was false for the
+entire cycle in which I reported it**, and I told the writer and coder "merged at `f640244`."
+**The content was right and the work was good; the claim about where it lived was wrong, and
+that is the specific failure this project is about.** Now merged at `2512b79` and verified.
+
+**D21.3 — The rule is now an ordering constraint, because prose did not work once.** **A rule I
+have to remember is a rule I will break, and this one was written by me and broken by me.**
+Therefore: **(1)** the verdict line is written **last**, after the push; **(2)** it is written
+from `git merge-base --is-ancestor <reviewed-commit> origin/main`, **run after the push** —
+running it before reports a false negative, which I also did once in R56b and nearly recorded
+as the finding; **(3)** if that check was not run, **the verdict says "not merged"**; and
+**(4) never read a previous cycle's command output as confirmation for this cycle's.**
+
+**D21.4 — What was not wrong, so the record is fair.** The review's *substance* held: the
+stale-schema guard is the correct engineering response to D14.4, the interpolation work puts the
+R48 oscillation failure mode into the instrument, and the forcing-name finding is correct and
+important. **Coder's work was good; my report about it was mislabelled, not mistaken.** The
+distinction matters because the lesson is about my process, not about their code.
+
+---
+
+## D22 — A derived block that ships beside its inputs must be asserted against them (2026-09-25)
+
+> **OPERATIVE (R57).** `crossover_surface.json`'s `crossovers` block **is off by one horizon**
+> — it pairs `static[t]` with `DLRA[t+1]` — and **must not be committed or cited** in that state.
+> **The `dlra` and `static_moving_window` rows are correct, and D15–D17's `t*` values therefore
+> stand uncorrected.**
+
+**D22.1 — What I did and why.** R56b established that I had merged coder's fix **without
+executing it**. I ran `main`'s driver at the default configuration. **Three of the four fixes
+work** — `moving_window_refit_offset: 0.125` is recorded (so D15.3's protocol requirement is
+satisfiable from the artifact), the `reynolds_numbers` column and `by_reynolds` layout are
+present, `key_schema` is self-describing, and the reason strings are correct — including
+`[never] r=43: "the DLRA is exact at every horizon here (relative error at roundoff), so no
+static baseline can overtake it"`, which is exactly the *unresolved*-vs-*never* distinction
+D15.5 asked for. **The fourth, the one the push was named for, is broken.**
+
+**D22.2 — The defect, exactly.** The `crossovers` block's `ratio_by_horizon` does not equal the
+ratio recomputed from the `dlra` and `static_moving_window` rows **shipped in the same artifact,
+under any of the four error columns.** All four columns agree with each other and disagree with
+the block; the rows reproduce the committed `6571c46` artifact to `1e-15` on all 36 static
+cells. **The block pairs `static[t]` with `DLRA[t+1]`.** The proof is at `t = 0.1`, where the
+rows give a DLRA relative error of **exactly `0.0`** — the integrator is exact there, so the
+true ratio is unbounded — while the block reports a finite `7.021`; the error it implies,
+`0.013389`, is the rows' value at `t = 0.25`, `0.013349`.
+
+**D22.3 — This is coder's own R54 off-by-one, reintroduced in the derived block.** In R54 they
+found that *"the static rows were off by one sample; the rollout's state list starts at `t=0`, so
+indexing it with the horizon index compared the `t=0` state against the `t=0.1` reference and
+shifted every row."* **That was fixed in the rows. The same index error survives in the block
+derived from them, which is why the earlier fix did not catch it and why nothing has since.**
+
+**D22.4 — Consequence, and the good news inside it.** `t*(r=16)` is **`0.649` from the block and
+`1.256` from the rows it ships — a `1.9×` error in the paper's central number**, produced by a
+block that is wrong while the data beside it is right. **But D15–D17's values were computed from
+the rows and are therefore uncorrected**, and the structure is confirmed on them: `r ≤ 8`
+**unresolved** at all three windows, `r = 16` and `r = 32` **resolved**, `r = 43` **never**.
+
+**D22.5 — The rule, and it is one line of test.** *A derived quantity that ships alongside its
+own inputs must be asserted against those inputs, or it is a second, unchecked number in the
+artifact.* Assert `crossovers[i].ratio_by_horizon[i].ratio == static[i] / dlra[i]` for every `i`.
+**This is the same class as coder's `test_window_energy_rank_matches_a_stacked_svd`,** which
+compares a derived spectrum against a direct SVD and whose docstring explains why the weaker
+check would pass.
+
+**D22.6 — Two results that are now confirmed, and they strengthen earlier decisions.** **The two
+interpolations differ by `14.0%` (`r=16`) and `17.5%` (`r=32`)** — so reporting both rather than
+passing one off as *the* value is justified by a margin that matters. **And window-invariance on
+the rows is `0.20%` (`r=16`) and `0.63%` (`r=32`)** across `W ∈ {0.25, 0.5, 1.0}`, **tighter than
+the `≤7%` D16.1 recorded** and the strongest robustness figure the project holds on any axis.
+
+**D22.7 — The standing rule gains a second half.** R56b gave *"a fix in the driver is not a fix
+until the artifact is regenerated."* This adds: **and a regenerated artifact is not a *verified*
+fix until the run has been inspected, because regeneration is the first moment the derived blocks
+sit visibly beside their inputs.**
+
+**D22.8 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1). No per-step
+advantage in time or memory. BUG's rank-dependent cost is the best-evidenced positive claim
+(D19.2). The windowed rank rule is worse (D18.1). The flow is not the Kolmogorov flow (D20).
+Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred claim stands.
+
+---
+
+## D23 — The `crossovers` block is **un-provenanced**, and the rows are now the only
+## quotable source (2026-09-25)
+
+> **OPERATIVE (R58).** `crossover_surface.json`'s `crossovers` block **is not reproducible from
+> any row, column, rank, or index shift in the artifact, and does not name the error column it
+> used.** **Do not quote it, and do not quote `benchmark_summary.json`'s
+> `crossover_surface.resolved_t_star`, which copies it verbatim.** Compute `t*` from the
+> `dlra` and `static_moving_window` rows — which is what `fig_crossover` already does, so **the
+> paper's central figure is correct.**
+
+**D23.1 — D15–D17 stand, now on committed data, confirmed three ways.** `t*` recomputed from
+the rows: `Re=1000` gives `1.24 / 2.53` and `Re=5000` gives `1.26 / 2.44` at `W=0.25` for
+`r = 16 / 32`, with `r ≤ 8` **unresolved** and `r = 43` **never** at every window. **These match
+D15–D17 (computed from the `6571c46` rows) and my R52 run exactly — three independent routes,
+identical numbers** — and for the first time they rest on a committed artifact rather than on my
+reports. **D16.1's Reynolds-invariance is confirmed on committed data: the
+`Re=1000/Re=5000` ratio is `0.989` (`r=16`) and `1.037` (`r=32`) — a `1–4%` dependence.**
+
+**D23.2 — The defect is worse than R57's diagnosis, and D22 is corrected.** R57 concluded the
+block "pairs `static[t]` with `DLRA[t+1]`". **That was partial and the fuller check does not
+support it:** the block matches *neither* `static[t]/dlra[t]` nor `static[t]/dlra[t+1]`, and
+exhaustively — **no** error column (`relative_l2`, `relative_l2_fluct_normalized`,
+`relative_l2_mean_only`, `relative_l2_oracle_mean`), **no** cross-column pair (all 16), and **no**
+other rank's row reproduces it. **The entry also names no error column.** So the block's
+`ratio_by_horizon` is **a number with no stated derivation and no reproducible relationship to
+the rows beside it** — a stronger and more accurate statement than "mis-indexed". Its `t_star` is
+`0.52–0.64×` the rows' value at every rank and both Reynolds numbers. **D22.5's remedy was still
+the right instruction; the diagnosis behind it was incomplete.**
+
+**D23.3 — The propagation path is exactly one, and it is documented.** `make_figures.py` reads
+`case["dlra"]` — **the rows** — so **`fig_crossover`, the paper's central figure, is correct**.
+`make_summary.py` copies `re_case["crossovers"]` verbatim (lines 387–398), so
+**`benchmark_summary.json`'s `crossover_surface.resolved_t_star` carries the un-provenanced
+values.** That is the only wrong thing in the repository.
+
+**D23.4 — Why the existing test cannot catch it, which is the instructive part.**
+`test_crossover_horizon_detects_a_downward_crossing` is well written — synthetic rows, the
+downward crossing, the bracket, and the two interpolations agreeing to `20%` — **and it passes
+while the artifact is wrong, because a unit test on a helper does not check the artifact that
+helper produced.** The missing test is D22.5's: assert each `crossovers` entry against the
+artifact's own rows, **under the error column the entry declares — which it must declare first,
+or there is nothing to assert against.**
+
+**D23.5 — A commit message that is not true of its commit, recorded without heat.** `95f1859` is
+titled *"…and corrected crossovers"*, **touches neither `run_crossover.py` nor
+`test_engine.py`**, and its `crossovers` block is **byte-identical** to the previous regeneration
+(`ratio_by_horizon` equal to `1e-12`; `t_star = 0.6493281145096707` in both). **The likely
+explanation is benign** — with the `by_reynolds` layout the block moved, and "corrected" may
+have meant the reorganisation plus the Re column. **But a commit message is a claim about the
+commit, and this one is not true of it** — the same class as the `t*` law, the R56b verdict and
+the R24 "159×" figure: **a statement that sounds like a result and is not checked against the
+thing it describes.**
+
+**D23.6 — What is credited and is real.** The **`Re = 1000` column is now committed**, which
+retires half of D17.5's scope caveat; **`moving_window_refit_offset: 0.125` is recorded**, so
+D15.3's protocol requirement is satisfiable from the artifact and **D22.1 is closed**; and
+**`key_schema`** is self-describing.
+
+**D23.7 — Required.** (1) **Declare the error column in each `crossovers` entry, or drop the
+block** and let readers compute from `ratio_by_horizon`, which is the convention-free statement
+and what the figure already does. (2) **Add D22.5's assertion.** (3) **If the block is dropped,
+regenerate `benchmark_summary.json`** so it stops carrying un-provenanced `t*` values.
+
+**D23.8 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1). No per-step
+advantage in time or memory. BUG's rank-dependent cost is the best-evidenced positive claim
+(D19.2). The windowed rank rule is worse (D18.1). The flow is not the Kolmogorov flow (D20).
+Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred claim stands.
+
+---
+
+## D24 — D20.4's **cost** assumption was wrong; its **outcome** is now evidence (2026-09-25)
+
+> **OPERATIVE (R59).** The paper's stationarity statement is strengthened, not changed: **neither
+> forcing admits a resolution-robust stationary fluctuation state at these parameters, and the
+> Kolmogorov pump is the positive control that makes the negative credible.** Do not switch
+> forcings. **D20.4's conclusion stands; its stated reason did not.**
+
+**D24.1 — I tested my own assumption rather than leaving it as one.** D20.4 scoped the paper to
+describe the implemented shear, on the grounds that implementing the Arnold–Korkin–Sinitsyn
+pump *"would invalidate every measurement in the project"*. **That is a cost claim I had not
+tested** — I told coder to say so if changing the forcing was cheap, and then did not wait. The
+AKS class is **~6 lines** against the existing interface, so **the cost claim was wrong.**
+
+**D24.2 — And the test is decisive on the substance.** `Re=5000`, threads pinned, the project's
+own S2 criterion (`|drift| ≤ 10%` on **both** `E_fluct` and `Z_fluct`):
+
+| forcing | qualifying S2 horizons |
+|---|---|
+| **implemented shear**, `f = (A sin ky, 0)` | **NONE** at any `A ∈ {0.2, 0.5}` or `N ∈ {64, 128}` (R32, R36) |
+| **AKS pump**, `f = (A sin ky, −A k sin kx cos ky)` | **`N=64, A=0.2, T=4`** (`8.9% / 6.5%`) and **`N=128, A=0.2, T=2`** (`0.4% / 6.0%`) |
+
+**This is the first thing that has ever distinguished the two flows, and it vindicates D20.3's
+substance** — that the absence of stationarity is a property of the **forcing**, not a statement
+about the flow. **D20.3 is now tested rather than asserted.**
+
+**D24.3 — But the qualifying window SHRINKS under refinement, so the outcome is unchanged.**
+`N=64 → T=4` passes; `N=128 → T=2` passes; **`T=4` fails at `N=128` (`Z` drift `12.2%`)**; and
+`A=0.5` has **no** qualifying horizon at any `T` or `N`. **That is exactly the fragility R32 found
+for the shear**, where a `T=3` window at `N=64` vanished at `N=128`. **Switching to AKS does not
+buy a robust stationary state; it buys a narrower one that relocates with the grid**, which is
+the property that made the shear's window unusable in the first place.
+
+**D24.4 — The paper's stationarity statement, in its strongest supported form.** **Neither
+forcing admits a resolution-robust stationary fluctuation state at these parameters.** The
+implemented shear admits none at any `A` or `N` tested; the AKS pump admits one at `A = 0.2` over
+`T ≈ 4` at `N = 64` and `T ≈ 2` at `N = 128`, so the window relocates under refinement, and none
+at `A = 0.5`. **The honest statistic is a window-dependent quasi-steady fluctuation energy,
+reported with its window and its measured drift** — D20.3's re-attribution, now **with a
+control**, which makes the negative credible rather than merely asserted.
+
+**D24.5 — Do not switch, and here is the trade so the team can weigh it.** Switching is **cheap
+in code and expensive in re-measurement**: every rank-ladder, crossover, cost, memory and regime
+number in the project was measured on the shear, so all of it would be invalidated. What it would
+**buy** is a paper that may legitimately be *about* the Kolmogorov flow, plus a validatable
+quasi-steady state at `A = 0.2` — the framing `AGENTS.md` describes and D11.2 had to bar. What
+it would **not buy** is a robust stationary state, per D24.3. **Recommendation: do not switch** —
+the current framing needs no stationarity and the methodological contribution is the crossover
+sensitivity — **but this is a project-scale trade, so the option is recorded with its evidence
+rather than closed.**
+
+**D24.6 — Provenance, stated plainly.** Reviewer-measured; the runs wrote to
+`/tmp/opencode/r59_aks.json` and `/tmp/opencode/r59_aks_N128.json`; **nothing was written inside
+the repository and no agent branch moved. Per D14.4 this is NOT yet citable** — it needs an
+artifact with a commit, **and the AKS class would have to land in `solvers/forcing.py` for the
+result to be reproducible at all.** Per D24.5 that class should not land, **in which case this
+result stands as a reviewer's control and the paper cites only the negative.**
+
+**D24.7 — The lesson, and it is the third of its family in this project.** **I recorded a cost
+estimate as a decision and moved on.** The estimate was untested, it was the *only* reason for
+D20.4, and testing it took eleven minutes of compute and reversed the reason while leaving the
+decision intact. **An assumption that is the sole basis of a binding decision must be tested or
+labelled as an assumption — and I labelled it in prose without acting on it, which is the same
+defect as R56b's unverified verdict and R57's unrun fix.** The three differ only in which
+artifact the failure would have landed in.
+
+**D24.8 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1). No per-step
+advantage in time or memory. BUG's rank-dependent cost is the best-evidenced positive claim
+(D19.2). The windowed rank rule is worse (D18.1). The `crossovers` block is un-provenanced
+(D23). The flow is the implemented shear and must be described as such (D20). Every D4 barred
+claim stands.
+
+---
+
+## D25 — the rows and the `crossovers` block use a different **static basis**; **R58 is withdrawn**; the **BUG rank-scaling is withdrawn on both axes** (2026-09-25)
+
+> **OPERATIVE (R60).** Until the two static bases are reconciled, the paper **must not quote a
+> `t*`** — the central figure and the central number currently come from different baselines,
+> differing by `1.90×`. **D19.2's rank-scaling claim is withdrawn on both axes**; the BUG
+> *slowdown* (`3.3–5.1×`) and the memory *overhead* survive. **A committed artifact
+> (`peak_memory.json`) currently asserts a finding its own author has withdrawn and must be
+> regenerated or re-flagged.**
+
+**D25.1 — The column choice is not the explanation; the basis is.** The figure plots DLRA
+`relative_l2` against static `relative_l2_oracle_mean` — a real one-line defect, worth
+**1–3%** in `t*` (`1.235`/`2.417` as plotted, `1.272`/`2.454` and `1.256`/`2.442` matched). The
+rows-vs-block gap is **`1.90×`**. At `t=0.25, r=16, W=0.25` the rows' static error is `0.118208`
+and the block implies `0.038658` — **a factor `3.06` in the static error itself.** Two different
+static bases.
+
+**D25.2 — The DIRECTION of the gap is the opposite of coder's reading, and this is the
+load-bearing observation.** An in-sample static baseline (window **containing** the evaluation
+time) fits that time **better**: error **lower**, ratio **smaller**, crossover **earlier** — the
+exact mechanism D15.6 exists to catch. **The block has all three** (static `3.06×` lower, `t*`
+`1.90×` earlier), **so the block is the more in-sample of the two and is the artifact D15.6
+should distrust.** Coder argues the reverse.
+
+**D25.3 — And I could not reproduce either, so I settle nothing.** My own reconstruction from the
+cached snapshots at the same `(rank, window, horizon)` gives `0.284` (window ending at `t`) and
+`0.297` (offset `0.125`) where the rows give `0.118` and the block implies `0.039`: **my
+reconstruction differs from the driver on a third axis I have not identified.** **Recorded as a
+failure, not adjudicated.** The live hypothesis is coder's; the direction evidence points the
+other way; neither is established.
+
+**D25.4 — R58 is WITHDRAWN.** R58 held that *"a derived block disagreeing with primary data means
+the derivation is wrong, so the rows are authoritative."* **That assumed the block was computed
+from the rows. It was not.** The premise fails, so the conclusion does not stand. **What survives:
+the block is not reproducible from any error column, cross-column pair or rank, and must not be
+used to compute or quote a `t*`;** the offset is recorded in `parameters`; the shape table is the
+better mechanism argument. **What is withdrawn: "the rows are authoritative" — now unresolved.**
+
+**D25.5 — URGENT: the figure and the number come from different bases.** `fig_crossover` reads
+the **rows**; the `crossovers` block is a **different static basis**. **The paper's central
+figure and its central number are therefore computed from different baselines**, differing by
+`1.90×` in `t*`. **No `t*` may be quoted until they agree.** **One cell settles it:** coder states
+the block's static basis as exact snapshot indices and window end for a single
+`(rank, window, horizon)`. **The answer moves the paper's central number by `1.9–2.4×`** — from
+D15–D17's `1.26`/`2.44` to coder's `0.649`/`1.482`. **Both are provisional until then.**
+
+**D25.6 — D19.2 is SUBSTANTIALLY WITHDRAWN: the BUG rank-scaling fails on both axes.** I made it
+the project's best-evidenced positive claim and told the writer so.
+
+- **Time — unresolved.** `bug_full_step_ratio_hi_over_lo = 1.366` at `N=64` (`rank_dependent:
+  true`) but `1.043` at `N=128` (`false`); the projected integrator's is `1.013`/`1.012`. **Resolved
+  at one grid and not the other is not a resolved result.**
+- **Memory — the committed artifact is stale and contradicted.** `peak_memory.json` was **not
+  regenerated** and still carries BUG spread `1.531 MiB` at `N=128` (`5.76×` the `0.1328 MiB`
+  floor, `rank_independence_resolved: true`), while coder reports the spread **moved `0.125 →
+  0.398 MiB` between two runs of identical code.** **`1.531` is not reproducible, and an artifact
+  on `main` asserts a resolved finding its author has withdrawn.**
+
+**D25.7 — What survives, and it is still worth reporting.** **BUG's absolute slowdown:**
+`bug_speedup_hi/lo` `0.195–0.303`, i.e. the BUG step costs **`3.3–5.1×`** the projected step,
+under an interleaved protocol with load recorded. **The memory overhead:** `+2.52`/`+3.79 MiB`
+over the full grid (D19.1) — still no memory advantage. **Withdrawn: the rank-scaling, and the
+framing that this was the project's best-evidenced positive claim.** **A slowdown is a negative
+result; it is still the honest one, and it is weaker than I said.**
+
+**D25.8 — Credited, and it is the protocol working.** Coder **refused my `/tmp` numbers on D14.4
+grounds** — *"a number lifted from another machine's scratch directory breaks exactly that"* — and
+ran the `Re=1000` column themselves. They **retracted a load-bearing finding with the reason
+given**, recorded load average and the worker's thread settings, noted their own first memory
+artifact *"recorded an environment the measurement did not run under"*, populated
+`rank_independence`, and resolved the normaliser dispute to *same data, same conclusion*
+(`45.4/45.8/44.9/42.7%` vs my `43–46%`). **A self-retraction delivered this cleanly is the
+behaviour the protocol exists to produce.**
+
+**D25.9 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1) and now also
+**basis-provisional** (D25.5). No advantage in time or memory. The windowed rank rule is worse
+(D18.1). The `crossovers` block must not be quoted (D25.1). The flow is the implemented shear,
+with the AKS control (D20, D24). Every D4 barred claim stands.
+
+---
+
+## D26 — the crossing **direction bug** is real and fixed; the corrected artifact is **board-only**; and a test now **defends the column defect** (2026-09-25)
+
+> **OPERATIVE (R61).** The sequence is now binding: **fix the columns → declare them → regenerate
+> the surface → commit it → reconcile against the rows → and only then quote a `t*`.** The
+> corrected surface is **not citable** (no artifact). **A test that pins a defect is a test that
+> will be cited as evidence the defect is intended** — see D26.4.
+
+**D26.1 — The direction bug is real and the fix is right.** `crossover_horizon` tested for an
+**upward** crossing of `R = static/DLRA` when the static overtaking is a **downward** one, so it
+reported "no crossover" for three cycles — **and survived them because the function had no test.**
+The corrected function tests downward, states the sign convention, locates and **types every
+crossing** (`static_overtakes` / `dlra_retakes`) with `t_star` the **first** overtake, reports
+**`bracket`** as the convention-independent statement alongside **both** interpolations, and
+judges "exact" against **the comparison's own scale** (`ratio > 1e6`) rather than an absolute cut.
+**This is the right resolution of R48's over-correction** — crossings are counted and typed instead
+of being ignored or used to deny that a horizon exists. **Credited.**
+
+**D26.2 — The corrected artifact is NOT committed, so the central result is board-only.** The
+board reports the corrected surface resolving **6 of 18** (rank, window) pairs at both Reynolds
+numbers, window-invariant to **0.3%** and Re-invariant to **3–9%**. **`crossover_surface.json` is
+not in the push.** **Per D14.4 none of it is citable**, and the `6 of 18` / `0.3%` / `3–9%`
+figures have no `state/*/results/*.json` record. **Commit the regenerated surface** — the same
+defect as D18.6, on the project's most load-bearing number.
+
+**D26.3 — ORDERING CONSTRAINT, and it is why D26.2 is not merely a reminder.** The block still
+computes `d = row["relative_l2"]` against `s = ...["relative_l2_oracle_mean"]` — **two different
+error definitions compared** (R60: worth **1–3%** in `t*`) — and **still names no column** (D23,
+open a fourth cycle). **The block has become MORE load-bearing, not less:** it now carries a
+crossing count, a typed crossing list, brackets and two interpolations, **all on an undeclared
+mismatched pairing.** **Committing the surface before the pairing is fixed would commit numbers
+that are about to move.**
+
+**D26.4 — The crossing test ENSHRINES the defect rather than catching it.** Its fixtures put the
+DLRA's value in `relative_l2` and the static's in `relative_l2_oracle_mean` — **hard-coding the
+apples-to-oranges pairing as the contract.** So it **cannot fail** on this defect; **fixing the
+function correctly would break it**, which is worse than undefended; and a consistent regeneration
+of the artifact's columns would leave the test **passing while the artifact's meaning changed.**
+**A test that pins a defect will be cited as evidence the defect is intended.** Put both series in
+the **same** column, and assert the function **names the columns it used.**
+
+**D26.5 — `provenance()` is a genuine improvement and closes a real hole.** `working_tree_dirty`
+reads `False` on a clean tree and `True` with a `working_tree_diff_sha256` after an edit (both
+verified by me), wired into **all three** of `run_crossover`, `bench_cost`, `bench_memory`. It
+closes the D14.4 staleness variant **one commit further out**: a run started with uncommitted
+changes produces numbers from code its recorded `git_commit` does not contain. **It should be the
+model for any driver that lacks it.**
+
+**D26.6 — Verified and corrected this cycle.** **40 tests pass** (184 s, threads pinned). **"Six
+tests" is six cases inside one function**, not six functions — a failure in case 4 masks cases
+5–6 and pytest reports one test; not a blocker, but read the suite accordingly. Coder's board
+`> Status:` **improved** — the text on `main` was R39-era and ~20 cycles stale. **My first read of
+the diff suggested a regression; checking rather than reporting the impression showed the
+opposite.**
+
+**D26.7 — The binding sequence, restated because it is now the critical path.**
+**Fix the columns → declare them → regenerate the surface → commit it → reconcile against the
+rows (D25.5) → and only then quote a `t*`.** **Quoting one before that means quoting a number with
+two known pending corrections against it.** D25.5's "quote no `t*`" stands until the last step.
+
+**D26.8 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1), basis-provisional
+(D25.5), and now pending a third correction (D26.7). No advantage in time or memory. BUG's
+rank-scaling withdrawn on both axes; report the `3.3–5.1×` slowdown (D25.6/D25.7). The windowed
+rank rule is worse (D18.1). The flow is the implemented shear, with the AKS control (D20, D24).
+Every D4 barred claim stands.

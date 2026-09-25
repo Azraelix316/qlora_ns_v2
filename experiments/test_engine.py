@@ -4,7 +4,16 @@ Run from the repository root with ``~/.venvs/ns/bin/python -m pytest``.
 """
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 import numpy as np
+import pytest
+
+_ROOT = Path(__file__).resolve().parents[1]
+for _p in (str(_ROOT), str(_ROOT / "experiments")):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 from solvers import (
     BUGIntegrator,
@@ -18,6 +27,7 @@ from solvers import (
     StreamFunctionNS,
     SVDProjector,
     ZeroForcing,
+    fluctuations,
 )
 
 
@@ -673,6 +683,185 @@ def test_bug_is_second_order():
         f"observed convergence order {orders[-1]:.2f} "
         f"(errors {[f'{e:.3e}' for e in errors]}); midpoint BUG is second order"
     )
+
+
+def test_window_energy_rank_matches_a_stacked_svd():
+    """The windowed rule must measure the *stacked* spectrum, exactly.
+
+    The implementation takes square roots of the eigenvalues of a Gram matrix
+    instead of factorizing the stacked matrix, which is a real algebraic
+    substitution: a Gram eigendecomposition returns squared singular values, and
+    getting that wrong (or using eigenvalues directly) would scale the spectrum
+    but leave the *rank* right, so only a test that compares spectra catches it.
+    A window that includes its own evaluation point would also pass, so the
+    comparison is against the singular values of exactly the retained fields.
+    """
+    grid = Grid2D(16)
+    proj = SVDProjector(
+        grid, rank=2, min_rank=1, max_rank=16,
+        rank_criterion="window_energy", energy_fraction=0.99,
+        rank_basis="fluctuations", rank_window=4,
+    )
+    rng = np.random.default_rng(5)
+    fields = [
+        field(grid, "mixed") * (1.0 + 0.3 * i) + 0.01 * rng.normal(size=(grid.N, grid.N))
+        for i in range(6)
+    ]
+    for f in fields:
+        got = proj._rank_spectrum(f, np.zeros(0))
+    stacked = np.stack(
+        [fluctuations(f).reshape(-1) for f in fields[-4:]], axis=1
+    )
+    expected = np.linalg.svd(stacked, compute_uv=False)
+    assert got.shape == expected.shape, (got.shape, expected.shape)
+    scale = float(np.max(expected))
+    assert np.max(np.abs(got - expected)) < 1e-8 * scale, (
+        f"windowed spectrum differs from the stacked SVD by "
+        f"{np.max(np.abs(got - expected)):.3e} against a scale of {scale:.3e}"
+    )
+    # ...and the window must actually slide, not accumulate everything.
+    assert len(proj._window_fields) == 4
+
+
+def test_window_energy_rank_is_reset_between_runs():
+    """A retained candidate from an earlier run must not leak into a new one."""
+    grid = Grid2D(16)
+    proj = SVDProjector(
+        grid, rank=2, min_rank=1, max_rank=16, rank_criterion="window_energy",
+        rank_window=4,
+    )
+    f = field(grid, "mixed")
+    for _ in range(9):
+        proj._rank_spectrum(f, np.zeros(0))
+    assert len(proj._window_fields) == 4
+    proj.reset()
+    assert proj._window_fields == []
+    assert proj.rank == proj.nominal_rank
+
+
+def test_window_energy_rank_exceeds_the_instantaneous_one():
+    """The whole point: a window sees more directions than one state does.
+
+    For a trajectory that turns, the modes needed to represent a window of it
+    exceed the modes any single state needs.  If this failed, the windowed rule
+    would be indistinguishable from the per-step one and the distinction the
+    project keeps drawing would be vacuous.
+    """
+    grid = Grid2D(16)
+    X, Y = np.meshgrid(grid.x, grid.y, indexing="ij")
+    states = [np.sin((m + 1) * X) * np.cos((m + 1) * Y) for m in range(8)]
+    states = [s - s.mean() for s in states]
+    per_step = SVDProjector(
+        grid, rank=2, min_rank=1, max_rank=32,
+        rank_criterion="energy", energy_fraction=0.99, rank_basis="fluctuations",
+    )
+    windowed = SVDProjector(
+        grid, rank=2, min_rank=1, max_rank=32,
+        rank_criterion="window_energy", energy_fraction=0.99,
+        rank_basis="fluctuations", rank_window=8,
+    )
+    r_step = per_step._target_from_spectrum(
+        per_step._rank_spectrum(states[-1], np.zeros(0))
+    )
+    # The windowed rule only sees a window if it is *fed* one; a single call
+    # would leave its window holding a single field and the two rules identical.
+    for s in states:
+        windowed._rank_spectrum(s, np.zeros(0))
+    r_win = windowed._target_from_spectrum(
+        windowed._rank_spectrum(states[-1], np.zeros(0))
+    )
+    assert r_win > r_step, (
+        f"windowed rank {r_win} did not exceed the per-step rank {r_step}"
+    )
+
+
+def test_crossover_horizon_detects_a_downward_crossing():
+    """The advantage horizon is a *downward* crossing and must be found.
+
+    ``R = static/DLRA`` falls through 1 as the DLRA's error grows, so a detector
+    that only tests for an upward crossing finds nothing and reports "no
+    crossover" -- which is what happened for three review cycles, because this
+    function had no test.  Each case below is a shape the detector must handle.
+    """
+    from run_crossover import crossover_horizon
+
+    def rows(dlra, static, times):
+        d = [
+            {"time": t, "relative_l2": v, "relative_l2_oracle_mean": 0.0}
+            for t, v in zip(times, dlra)
+        ]
+        s = [
+            {"time": t, "relative_l2": 0.0, "relative_l2_oracle_mean": v}
+            for t, v in zip(times, static)
+        ]
+        return d, s
+
+    times = [0.1, 0.25, 0.5, 1.0, 2.0, 4.0]
+
+    # 1. A single downward crossing between t=0.25 and t=0.5.  The static error
+    #    is held flat and the DLRA's grows, which is the shape the real data has:
+    #    R = 3, 1.5, 0.75, 0.6, 0.6, 0.6.
+    d, s = rows([0.10, 0.20, 0.40, 0.50, 0.50, 0.50], [0.30, 0.30, 0.30, 0.30, 0.30, 0.30], times)
+    out = crossover_horizon(d, s)
+    assert out["status"] == "resolved", out
+    assert out["bracket"] == [0.25, 0.5], out["bracket"]
+    assert out["t_star_loglog"] == pytest.approx(out["t_star_linear"], rel=0.2)
+    assert 0.25 < out["t_star"] < 0.5
+    assert out["crossings"] == 1, out["all_crossings"]
+
+    # 2. DLRA leads everywhere: unresolved, and the reason must not invent a
+    #    horizon.
+    #    Ratios 9, 4.5, 3, 2.25, 1.8, 1.5 -- all above 1.
+    d, s = rows([0.1, 0.2, 0.3, 0.4, 0.5, 0.6], [0.9, 0.9, 0.9, 0.9, 0.9, 0.9], times)
+    out = crossover_horizon(d, s)
+    assert out["status"] == "unresolved", out
+    assert out["t_star"] is None
+    assert "no crossing" in out["reason"]
+
+    # 3. Static leads everywhere: also unresolved, with the *other* leader named.
+    d, s = rows([0.5, 0.5, 0.5, 0.5, 0.5, 0.5], [0.1, 0.1, 0.1, 0.1, 0.1, 0.1], times)
+    out = crossover_horizon(d, s)
+    assert out["status"] == "unresolved", out
+    assert "static baseline leads" in out["reason"], out["reason"]
+
+    # 4. An exact DLRA is "never", which is not the same as unresolved.  The
+    #    error need not be *zero*: at the dealiasing ceiling it is ~1e-8 against a
+    #    static error of ~0.1, which is a ratio of 1e6 and must still read as
+    #    exact rather than as an unresolved crossing.
+    d, s = rows([1e-8] * 6, [0.2, 0.2, 0.2, 0.2, 0.2, 0.2], times)
+    out = crossover_horizon(d, s)
+    assert out["status"] == "never", out
+    assert out["t_star"] is None
+    assert "exact" in out["reason"]
+
+    # 5. A ratio that crosses twice must report both, and t* is the first
+    #    downward one.
+    #    Ratios 3, 2, 0.667, 1.5, 0.6, 0.545: down through 1 then back up.
+    d, s = rows(
+        [0.10, 0.15, 0.45, 0.20, 0.50, 0.55],
+        [0.30, 0.30, 0.30, 0.30, 0.30, 0.30],
+        times,
+    )
+    out = crossover_horizon(d, s)
+    # 3, 2, 0.667, 1.5, 0.6, 0.545 changes sign three times.
+    assert out["crossings"] == 3, out["all_crossings"]
+    directions = [c["direction"] for c in out["all_crossings"]]
+    assert directions == [
+        "static_overtakes", "dlra_retakes", "static_overtakes"
+    ], directions
+    # t* is the *first* downward crossing, and the reason says the lead is not
+    # held throughout rather than presenting a single number.
+    assert out["bracket"] == [0.25, 0.5], out["bracket"]
+    assert "crosses 1 again" in out["reason"], out["reason"]
+
+    # 6. Every reported ratio is consistent with the rows it came from.
+    d, s = rows([0.10, 0.20, 0.40, 0.50, 0.50, 0.50], [0.30, 0.30, 0.30, 0.30, 0.30, 0.30], times)
+    out = crossover_horizon(d, s)
+    for entry, drow, srow in zip(out["ratio_by_horizon"], d, s):
+        assert entry["time"] == drow["time"]
+        assert entry["ratio"] == pytest.approx(
+            srow["relative_l2_oracle_mean"] / drow["relative_l2"]
+        )
 
 
 def test_baseline_rollouts_run_to_completion():
