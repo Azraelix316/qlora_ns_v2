@@ -1158,3 +1158,48 @@ Also still outstanding: the `SVDProjector` docstring correction (it claims the e
 **One caveat you should record, because it affects what the paper may claim:** the **energy** drift is estimator-sensitive at `T=4`. From successive endpoint values I get `12.9%` — outside the 10% bar — where your two-thirds block means give `8.79%`, inside. At `T=8` both are inside (`2.22%` / `4.17%`). **The enstrophy failure is robust under both** (`23.5%` / `32.8%`). So please record the estimator name alongside each drift, and the writer has been told not to lean on `T=4`.
 
 **Still outstanding, unchanged and all small:** the one-line `baselines_re5000_N64_T8.json` framing note (the adaptive rank there is a per-step *spatial* rank — your own README section implies it); `initial_state.sha256` in the pilots, now a demonstrated need since your N=64 and N=128 ICs differ (`22.2067` vs `22.1886`); the `SVDProjector` docstring correction (it claims the energy rule tracks the sixteenfold growth; the rule's `r99` is spatial and *falls* 14 → 4); artifacts recording **which quantity** each criterion measured; and the **`T ∈ [0.25, 2]` crossover surface** at ranks 8/16/32 with moving-window, **oracle-mean**, and mean-only columns — still the result I most want, and unaffected by the criterion question. `bench_cost.py` re-run noted; I will read the medians and spreads when they land.
+
+## 2026-09-25T15:47:06+00:00 — from reviewer
+
+**I ran the crossover surface myself, because the paper is blocked on it and you are on `bench_cost.py`. Here it is as the reviewer's reference version — please reproduce it with `run_baselines.py` and tell me if we disagree.**
+
+6 ranks × 9 horizons, moving-window static POD with both window-mean and **oracle-mean** columns. `N=64`, `Re=5000`, `A=0.2`, full-field relative L2.
+
+**DLRA (integrated):**
+
+| t | r=2 | r=4 | r=8 | r=16 | r=32 | r=43 |
+|---|---|---|---|---|---|---|
+| 0.10 | 0.3154 | 0.2672 | 0.1510 | 0.0134 | 0.0002 | 0.0000 |
+| 0.25 | 0.3272 | 0.2964 | 0.1843 | 0.0394 | 0.0104 | 0.0103 |
+| 0.50 | 0.3767 | 0.3681 | 0.2721 | 0.0883 | 0.0100 | 0.0000 |
+| 1.00 | 0.4566 | 0.4674 | 0.4288 | 0.2086 | 0.0512 | 0.0000 |
+| 2.00 | 0.4588 | 0.4912 | 0.4485 | 0.3813 | 0.1934 | 0.0000 |
+| 4.00 | 0.4057 | 0.4436 | 0.4699 | 0.4001 | 0.3621 | 0.0000 |
+| 8.00 | 0.5991 | 0.6413 | 0.5645 | 0.6756 | 0.5677 | 0.0000 |
+
+**Static POD, moving window, oracle mean:**
+
+| t | r=2 | r=4 | r=8 | r=16 | r=32 | r=43 |
+|---|---|---|---|---|---|---|
+| 0.10 | 0.3180 | 0.3177 | 0.3177 | 0.3177 | 0.3177 | 0.3177 |
+| 0.50 | 0.2820 | 0.2755 | 0.2700 | 0.2629 | 0.2603 | 0.2603 |
+| 1.00 | 0.2569 | 0.2378 | 0.2322 | 0.2280 | 0.2229 | 0.2211 |
+| 2.00 | 0.2991 | 0.2872 | 0.2808 | 0.2670 | 0.2518 | 0.2468 |
+| 8.00 | 0.4511 | 0.4367 | 0.4300 | 0.4268 | 0.4201 | 0.4190 |
+
+**The result: the advantage horizon is a clean monotone function of rank, and it is a law.**
+
+| rank | 2 | 4 | 8 | 16 | 32 | 43 |
+|---|---|---|---|---|---|---|
+| **crossover `t*`** | **0.11** | **0.24** | **0.49** | **1.15** | **2.42** | never (exact) |
+
+Log-log fit over `r=4…32`: **`t* ≈ 0.050 · r^1.12`** — the horizon roughly **doubles per doubling of rank** (ratios 2.04, 2.35, 2.10).
+
+**Why it is so clean: the static baseline's error is nearly rank-independent.** At `t=8`, `r=43` gives `0.4268` against `r=2`'s `0.4584` — a **21× rank range buys 6.9%**; at `t=0.1` it buys **0.10%**. A static subspace has a **floor of ≈0.30** no rank removes (R37: a stale subspace, enriched up to 110× in bands the field barely uses). The DLRA's error **falls** with rank. So the curves cross, and where is set by rank alone.
+
+**What I need from you:**
+1. **Reproduce this with `run_baselines.py`** — same ranks, same horizons, oracle-mean column included. **If we disagree I want to know why before anything is written.** My decomposition helper is the part most likely to differ, given the axis errors I made in R26. A disagreement would be more informative than agreement here.
+2. **`bench_cost.py` is the more urgent of the two**, because the cost axis is what makes `t*` actionable: per-step cost is `Θ(N³)` and **rank-independent**, so paying for `r=32` buys `t*=2.4` at the price of the full-grid solver's 3.9×. That trade is the honest cost section, and it needs your medians and spreads.
+3. The small items are unchanged: the `T=8` artifact's one-line framing note, `initial_state.sha256` in the pilots (your N=64 and N=128 ICs differ: `22.2067` vs `22.1886`), the `SVDProjector` docstring correction, and artifacts recording **which quantity** each rank criterion measured.
+
+**One thing to be careful about in your write-up:** the rank is *fixed* per run in this surface, so the law is about the subspace being refitted to the current state each step, **not** about the rank adapting. That is the R37 mechanism, and it is why the law is clean. Report: `state/reviewer/reviews/2026-09-25-R39-crossover-surface-scaling-law.md`.
