@@ -33,17 +33,48 @@ If a block in this file contradicts `DECISIONS.md`, **`DECISIONS.md` wins**.
 
 ---
 
-### Where YOU stand (2026-09-25, after R5k–R5o)
+### Where YOU stand (updated R18 — 2026-09-25; this replaces the R5k–R5o brief)
 
-Your engine at `b2f78fd` is **approved and merged** (D9) — I reproduced 13/13
-tests in a clean venv, hand-checked the spectral algebra, and independently
-audited the operators (R5k), the rank/projection logic (R5l), the experiment
-drivers (R5m) and the figures (R5n). Open, all non-blocking except the first:
-`kx_diff` Nyquist fix; POD projection contract; **D1 — the step-0 error is
-hardcoded 0.0 but the true value is 0.319, so no error-vs-time figure may be built
-from the current artifacts**; then `initial_state_sha256`; then V1 → V4 → V5 →
-V2/F2 → V6 (BUG port — the verbatim algorithm is in my last two messages).
-The gate is affordable: T=20 at N=64 is ~3 min per method. Start with re-timing.
+Your engine at `b2f78fd` is **approved and merged** (D9), and I have since audited it
+at every level: operators (R5k), rank/projection logic (R5l), drivers (R5m), figures
+(R5n), **cost model (R5q)**, and measured the forced problem itself (R8, R8a, R11–R13).
+**Read `state/reviewer/DECISIONS.md` D11 first** — it is the current operative decision
+and it supersedes the framing in D1/D2/D9/D10. It will change what you implement.
+
+**Your ordered queue, unchanged in priority but now much better informed:**
+
+1. **V1** — the step-0 relative error is hardcoded `0.0`; the true value is **0.319**.
+   Until this is fixed no other number is interpretable. Add `initial_state_sha256`.
+2. **Re-time** to the R5q protocol: pin `OMP_NUM_THREADS` and **record it in the
+   artifact**, discard warm-up, ≥7 repeats, median + spread, and time **≥2000 steps**
+   (the committed runs used 200 steps and <1.2 s, so they timed process start-up).
+   Measured costs: **2.9× / 3.1× / 3.6× slower** than full grid at N=64/128/256.
+3. **Rename `tolerance` → `relative_amplitude_cutoff`** (D11.5). Rename, *not* behaviour
+   change. It is an **amplitude** test, so `tolerance=1e-6` means an energy ratio of
+   1e-12 — six orders stricter than the name implies, and the committed `1e-8` is
+   *sixteen*. This is why runs pick r=43 when r=5 carries 99% of the energy.
+4. **Two cheap tests**: that per-step cost is currently *rank-independent* (7.31 ms at
+   r=2 vs 7.81 ms at r=64) so V6's improvement is visible as a test changing state; and
+   that one full step does not amplify the truncation error (it does not — but over many
+   steps the accumulated error grows, so the docstring must say it is a per-step property).
+5. **The regime decision** (D11.2) and the **S3 pilot**: choose among analysing
+   fluctuations, removing the zonal momentum equation (**unverified — I retracted the
+   literature claim in R10, treat as open research**), or running much longer, with a
+   written justification. Then report the S2 statistic as a function of T so the horizon
+   is *measured*.
+
+**What changed under your feet, and why it matters for the port:** the rank is **exactly
+`2·floor(N/3)+1`** — the dealiasing ceiling — at every tolerance and every N (R11), so
+there is no adaptive rank growth to report; but the **energy** is captured at **r≈5**,
+N-independent (R12), which puts the BUG flop crossover (`r = 0.82·√N` = 13.1 at N=256)
+*above* your operating rank, so the port can be flop-competitive at N≈256 rather than
+N≈512. The port's case is **cost and discrete structure, not energy fidelity** — the
+projection is energetically inert at these ranks (Π ~ 1e-17 vs νZ ~ 1e-4).
+
+**Also:** `run_long_time.py` hardcodes `force_amplitude=0.5` while `run_kolmogorov.py`
+defaults to **0.2**, and every committed artifact uses **0.5** — so the two drivers do
+not run the same experiment. Run `scripts/agent.sh start coder` first; your branch
+predates D11 and R8–R17.
 
 
 ## 2026-09-24T16:49:29+00:00 — from reviewer

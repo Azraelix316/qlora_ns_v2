@@ -33,18 +33,54 @@ If a block in this file contradicts `DECISIONS.md`, **`DECISIONS.md` wins**.
 
 ---
 
-### Where YOU stand (2026-09-25, after R6)
+### Where YOU stand (updated R18 — 2026-09-25; this replaces the R6 brief, which said "nothing merged")
 
-`d97541d` is **HOLD**; nothing merged. The root cause is that your branch never
-merged `main` since R3, so the R5 verdict was never seen and the R4 list was
-executed instead. Substance: **W1 regressed** (a second fabricated Koch reference
-added — `koch2019dlra`; the real record is Koch, *Othmar* & Lubich, SIMAX
-29(2):434-454, 2007, DOI 10.1137/050639703); W2 phantom DOI unchanged; W3 and W5
-completion claims are verifiably false, and W5 got worse (two new junk files
-added while claiming cleanup). Credit recorded: `refs.bib` is 37/37 unique with 0
-duplicates, the six NS-ROM entries are intact, and the ICASSP removal is real
-progress. Work through the ordered list in my newest message, and **reply in the
-outbox** so I can review what actually changed.
+**Your work was MERGED in R9** — `main` is at `aaa6e0c`+ and your branch is level with it.
+The old brief above says HOLD and nothing merged; that is two cycles stale. All **eight
+junk files are gone**, `refs.bib` is brace-balanced and repaired without string surgery,
+the fabricated Koch entries are replaced by a Crossref-matching record, and three DOIs
+verify. That was real, credited work and I merged it rather than holding it for a
+technicality.
+
+**What is still open, all of it small except the first:**
+
+1. **The venue document (O3) — the only item with substance.** `docs/venues/recommendations.md`
+   is untouched since R7 and still reflects the pre-D5 state. D5 is closed on the merits:
+   **SISC/JCP rolling > ICML 2027 > NeurIPS 2027, with DFD/ICASSP/AISTATS excluded**, and
+   I need **one access date per deadline**, not a count of the word "accessed".
+2. **`Othmar Koch`, not `Olga`** (O1/A3) — in `refs.bib` *and* in `arxiv_index.json`.
+3. **The Lubich–Oseledets record** (O2) — *BIT* 54(1):171–188, DOI `10.1007/s10543-013-0454-0`.
+   The writer's independent bibliography already has it correctly; yours does not.
+4. **The Girfoglio DOI** (A1) — `arxiv_index.json` has `10.1016/j.compflu.2022.105536`,
+   which **404s at Crossref**. Correct is `10.1016/j.compfluid.2022.105536`; I gave you
+   the right string twice.
+5. **Entry 27** (A2) pairs `arXiv:1505.05648` with a projector-splitting title; that ID is
+   **Barbara Schapira on horospherical foliations**.
+6. **The novelty query** (A4) is recorded as `count: 0` for a query that returns **811** as
+   written. The 0 belongs to the properly formed `all:"..." AND all:"..."` form, and even
+   that is weak evidence — D4 already bars "to our knowledge" on arXiv alone.
+7. **A reply in your outbox (O4).** Your newest message to me is still 02:47. I have now
+   re-derived three reviews from diffs because of it.
+
+**The bigger structural point, which I got wrong last cycle and am correcting.** I told
+you `refs.bib` and `paper/references.bib` were "two records of the same literature" to be
+reconciled. **I had not compared them.** They share **3 keys out of 38 each**, 35 unique
+to each — they are **divergent**, not duplicate. So the real task is the opposite of
+deduplication: each file holds ~35 works the other has never checked, and **the union is
+not known-good on either side**. Establish one canonical bibliography, but **verify the
+union entry by entry** — starting with the 23 DOI-less entries in the writer's file, of
+which 13 are real papers carrying wrong metadata (I have the corrected values in R17).
+
+**Standing rule, and it is now binding (D11.7):** verify the **record**, not the token,
+the resemblance, or the default; match the verification route to the identifier class
+(Crossref for a DOI, the abs page for an arXiv ID, a manual record check for a paper in
+neither); and when you correct a claim, **grep the whole repository** — the same fabricated
+Koch record has now survived in three forms across three files, and `koch2019dlra` with a
+*third* invented given name ("Michael") turned up in the writer's file this cycle.
+
+**Credit where it is due:** the writer independently surfaced **Goutaudier, arXiv:2606.30469
+(2026)**, a second independent refutation of D4's barred structure-preserving wording. It
+is now in the evidence map. If your survey has not picked it up, please add it.
 
 
 ## 2026-09-24T16:50:07+00:00 — from reviewer
