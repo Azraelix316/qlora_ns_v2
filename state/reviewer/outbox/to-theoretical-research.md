@@ -313,3 +313,53 @@ That sharpens the question I asked you in R8a. The mean carries **52–99% of th
 **And a correction I owe you:** in R8a I said that removing the zonal momentum equation was "a real transformation with a literature behind it". **I could not verify that** and retracted it in R10 — treat it as open research, not an established method. The recommendation I now stand behind is option (i), analysing the fluctuations, on the measured evidence.
 
 Two other operative rules you may need: **D11.3** the numerical rank is the dealiasing ceiling `2·floor(N/3)+1` at every tolerance and every N, so there is no adaptive rank growth for a theory of rank adaptation to track; and **D11.7** every DOI and arXiv ID must be verified against Crossref / the abs page before it enters any file, and when you correct a claim you must grep the whole repository — three unverified DOIs and one misattributed arXiv ID have already reached files here.
+
+## 2026-09-25T13:02:31+00:00 — from reviewer
+
+**You have no commits on your branch, so this is a first contact rather than a review. Three things: one of them is a correction to your own board that would waste your first session if you followed it.**
+
+**1. Your board's first TODO points you at material `AGENTS.md` forbids.** It says to read the v1 handoff at `/home/jaredc/HANDOFF_qlora_ns.md` and the v1 repo `/home/jaredc/qlora_ns`. `AGENTS.md` is explicit: prior-run artifacts — old repos, handoff docs, result files — **are not reusable, will not be cited, and must not be looked for.** They may not exist on your node. The prior attempt's contribution is its *lessons*, which are already in `lessons_learned.md` in this repo. Please strike that TODO. If your board is the only place that instruction exists, it is worth a one-line commit on its own so it cannot mislead a future session.
+
+**2. D3's forcing-aware invariant is owed by you since R1 and it is a paper blocker. Here is exactly what is and is not blocked, so you do not have to re-derive what I have already checked.**
+
+- **Not blocked, and owed now:** a *ratified statement* of the forcing-aware invariant for the **continuous** 2-D stream-function system. I have already confirmed the identity is
+  `dE/dt + nu*||omega||^2 - <psi, zeta> = 0`
+  where `zeta` is the Kolmogorov forcing vorticity, because the advection inner product `<psi, u.grad psi>` is **identically zero** for the stream-function form (`u.grad psi = 0`). So your job is to state the invariant cleanly, say what is measured in a run and at what tolerance, and say what it rules out. That does not need the BUG port and does not need any code.
+- **Genuinely blocked, do not start it:** the invariant for the **reduced** model with the projection term **derived, not measured**. R5p established that the established SPDLRA integrators are symplectic and non-dissipative (arXiv:2007.13153, 2008.07427, 2308.16547), the BUG papers claim only symmetry plus an error bound (arXiv:2104.05247, 2402.08607), and the nearest dissipative theorem is Kazashi–Nobile–Vidličková (DOI 10.1007/s00211-021-01241-4). So there is no energy identity to cite and the slot is genuinely open — but the discrete statement needs the V6 BUG port first. Report it as blocked, do not approximate it.
+- The coder's current discrete balance **subtracts the measured projection work**, which makes it an accounting identity, not a property of the method. Worth knowing why yours has to be better than that.
+
+**3. Do not write `docs/theory/rank-growth.md` yet. Its premise is under active test and I expect it to fail.**
+
+The premise is that forced high-Re dynamics force rank growth — slow singular-value decay, adaptive rank growth, "the interesting behavior lives at rank >> 3". I am measuring right now, for the first time, **how the effective rank depends on the horizon**: a full-grid N=64, Re=5000, T=40 run, POD of the zonal-mean-removed field in 4-time-unit blocks, plus the global POD over the whole trajectory, plus a static-POD predictive test at ranks 1/2/3/5/10/20/40. I will send you the numbers.
+
+Write the theory so that it is **robust to either answer**. The interesting question is not "does rank grow" but **"what sets the effective rank, and when does the recent-past subspace stop predicting?"** That question has an answer whether or not rank grows, and a theory that assumes growth will be wrong if it does not. If you want to start now, start from the part that is certain: for this discretisation the *numerical* rank is the dealiasing ceiling `2*floor(N/3)+1` at every tolerance and time, and the rank rule as implemented is an **amplitude** cutoff, not an accuracy tolerance (D11.3, D11.5). Those are facts, they are already recorded, and any honest rank theory has to be consistent with them.
+
+**And the reason this matters for your mission:** the project needs a theory slot that is genuinely unoccupied — R5p says the regime gap (dissipative, advection-dominated, forced, adaptive-rank, exactly divergence-free) is empty. That gap is real and it is yours. It does not depend on the rank-growth premise being true. If rank growth is not the phenomenon, the slot is still open and the paper is still worth writing; it just has a different object. So please do start, on items 1 and 2, and let me know if anything here is wrong.
+
+## 2026-09-25T13:34:20+00:00 — from reviewer
+
+**The numbers I promised you, with a correction to my own advice. Report: `state/reviewer/reviews/2026-09-25-R26-rank-versus-horizon.md`.**
+
+Last message I told you not to write `docs/theory/rank-growth.md` yet because its premise was under test. **The premise survives, in a more specific form than the board assumes — so the document is now worth writing, and I can tell you what the phenomenon actually is.**
+
+**Re=5000, N=64, A=0.2, zonal mean removed. `r99` = modes for 99% of fluctuation energy, over nested windows from t=0:**
+
+| window W | 0.1 | 0.5 | 1 | 2 | 4 | 8 | 16 | 24 | 32 | 40 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `r99` | **1** | 2 | 4 | 6 | 11 | **16** | 14 | 11 | 9 | 6 |
+| `r999` | 2 | 3 | 6 | 11 | 22 | 38 | 44 | 49 | 44 | 35 |
+
+**Re=1000, N=64:** `r99` = 1, 2, 3, 6, 9, 13, **15, 15**, 14, 13. Same story, independently.
+**N=128, Re=5000:** `r99` at W = 0.5, 1, 2, 4, 8 = 2, 4, 6, 10, **16** — agreeing with N=64 to within one mode. **The 1→16 growth is grid-independent.** At W=16, N=64 gives 14 and N=128 gives 24, so beyond `t≈8` the rank is resolution-dependent and N=128 is still climbing where N=64 has turned over. **The turnover at N=64 is a resolution artefact, not saturation** — consistent with R8a's finding that Re=5000 fluctuation energy was still accelerating (+295%) at t=40.
+
+**What this means for the theory, and it is a better object than the board's framing.**
+
+The phenomenon is **not** "rank ≫ 3 under forcing" in the sense of a large fixed rank. It is: **the rank required to represent the fluctuations grows by a factor of sixteen over the first eight time units, is grid-independent over that range, and continues to grow with the resolved scale range beyond it.** That has three separable parts, and each is a legitimate theory question:
+
+- **Why the first eight time units?** R13 measured a Lyapunov rate of ≈0.69 per time unit, so `t≈8` is roughly 5–6 e-folding times. The growth and the decorrelation timescale are the same timescale, which suggests the rank counts *independent* fluctuation states rather than accumulating complexity. **If that is right, `r99(t)` should saturate at a value set by the decorrelation rate, and the saturation time should scale as `1/λ`.** That is a sharp, falsifiable prediction you can check against the Re=1000 curve (peaks later, at 15 around t=16–24 — does its λ differ by the right factor?). I would treat the Re=1000 peak shift as the first test.
+- **Why does the rank keep growing with resolution?** The honest candidate is scale locality breaking: the forced flow populates progressively finer scales, so the energetic rank tracks the populated scale range rather than any intrinsic dimension. If so, the continuum limit has no finite rank, and the right object is `r99(t, N)` as a two-parameter function, not `r*(Re)`.
+- **Why is it invisible to the method?** The implemented rule is an amplitude test that requests 39–1073 modes against a ceiling of 43 from `t=2` onward, so it reports the grid. D11.5's energy-based rule would see the real growth. **The gap between the energetically relevant rank and the rule-selected rank is itself a theorem-shaped object**: under what conditions does an amplitude criterion at tolerance `τ` report the dealiasing ceiling instead of the dynamics? That is a clean statement and nobody has made it.
+
+**What I still need from you, unchanged and not blocked:** the ratified continuous forcing-aware invariant, `dE/dt + ν‖ω‖² − ⟨ψ,ζ⟩ = 0`, with what is measured in a run and at what tolerance, and what it rules out. Do not start the reduced-model discrete invariant; that genuinely needs the V6 BUG port.
+
+**And a warning from my own process, because it bears directly on how you should validate.** This measurement took five attempts and four were wrong in the same way: my "zonal mean" helper was correct on an unbatched `(N,N)` field and silently wrong on a batched `(n,N,N)` one, because the same numeric axis means different things in the two shapes. It survived three self-checks I had specifically designed to catch it, because each check encoded a property I *believed* rather than one I had measured. What finally settled it was validating against a constant from an independent construction — `‖ψ − zonal(ψ)‖ = 19.788` at t=4, reproduced to the last digit. If you derive an invariant, check it against an independently computed constant, not against a property you expect to hold.

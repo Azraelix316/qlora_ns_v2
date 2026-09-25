@@ -137,6 +137,19 @@ instead of the method. These are merge-blocking for any accuracy claim.
       dropped argument, a reused object). A check that disagrees with tested code
       must first be shown to converge or to agree on a case where the answer is
       known; only then is the disagreement evidence.
+- [ ] **(R27) Provenance beats fingerprint — never establish that a number is
+      stale by matching a remembered string.** In R27 I scanned artifacts for the
+      literals `"1.0802"` and `"147.53"` to find void POD values and reported a
+      file as clean; it held `1.07759`. The stale value was found only by
+      comparing each summary field against the per-run artifact it aggregates and
+      by reading `provenance.git_commit`. An artifact is stale if its recorded
+      `git_commit` differs from that of its siblings, or if any summary field
+      disagrees with the artifact it aggregates. This is D11.7 restated as an
+      operational test, after I broke D11.7 in the same review that wrote it.
+- [ ] **(R27) Every summary/aggregate artifact is regenerated in the same pass as
+      the records it aggregates.** `state/coder/results/benchmark_summary.json` was
+      the one file missed by an otherwise complete regeneration, and it is the file
+      a reader opens first.
 
 ### 1.4a Timing methodology (R5q — every timing that reaches the paper)
 
