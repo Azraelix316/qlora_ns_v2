@@ -44,6 +44,22 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-25 `make_figures.py` rewritten, because the committed figures
+  violated three binding rules rather than merely being stale. It titled a rank
+  trace "Adaptive rank growth" when that trace is the dealiasing ceiling
+  (D11.3 retires the claim); it labelled pointwise L2 as "error" when the P0
+  metric order makes it trajectory divergence; and it plotted the singular
+  values of the **rank-truncated reduced state** as a spectrum, which F2/R5
+  bar ("never the rank-truncated reduced state"). The two offending figure
+  files are deleted rather than left for the writer to pick up. The five new
+  figures are: the windowed-rank premise figure at two grids with the
+  amplitude rule's grid-scaling beside it, the full-grid state spectrum with
+  the IC's rank-17 cliff, trajectory divergence paired with the KE series and
+  labelled, max |∇·u| for every method including all F5 baselines, and the
+  fluctuation E(k)/Z(k) over the dealiased range. A `PROVENANCE.md` records
+  the artifact and commit behind every figure so a figure cannot outlive its
+  numbers. The cost figure appears when the gate lands.
+
 - 2026-09-25 **R29's grid-independence reproduced with project code, and it is
   the cleanest statement of the whole rank question.** Running the pilot at
   N=128 (dt scaled with dx per P0 item 3, snapshots every 0.02, fluctuations
