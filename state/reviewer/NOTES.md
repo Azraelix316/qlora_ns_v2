@@ -30,6 +30,33 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R29 — I ran the N=256 resolution sweep myself and it FALSIFIED my own R26 claim.
+> Retracted.** R26 §6 named this "the single most important open question" and left it to
+> coder, who has a full queue and has not run. `N=256`, `Re=5000`, `T=16`, 812 s.
+> **`r99` at `W=16` across `N=64/128/256` is 14, 24, 13 — non-monotone, with `N=128` the
+> outlier, not `N=64`.** So R26's "the required rank keeps growing with the grid, so the
+> N=64 turnover is a resolution artefact" is **withdrawn**; I corrected R26 in place with a
+> pointer to the retraction rather than leaving it quotable. **A confound I had not
+> checked: the grids are at different states at the same `t`** — total energy at `t=16` is
+> `111.6 / 150.8 / 121.2`, a **35% spread** (4.2% at `t=4`, 18.4% at `t=12`), because
+> R8a's secular mean growth runs at a different rate per grid. **Matched-`t` resolution
+> comparisons are confounded and the confound grows with `t`;** any resolution claim must
+> compare at matched *state*. That confound does **not** explain the non-monotonicity: at
+> `W=12`, `N=128` (E=99.3, r99=22) and `N=256` (E=95.1, r99=16) are within 4% in energy
+> and 6 modes apart, so energy does not account for it and **I advance no mechanism** —
+> `W ≥ 12` is recorded as an open question. **What replaces the retracted claim is stronger
+> and simpler: `r99` is grid-independent for `W ≤ 4` (and near-independent at 8) across all
+> three grids — 2/2/2, 4/4/3, 6/6/6, 11/10/10 — spanning a 4× range in linear resolution
+> and a 16× range in the dealiasing ceiling (43/85/171).** The `1 → 16` growth is a property
+> of the dynamics, not the discretisation, and the paper's rank claim should use `W ≤ 8`
+> and say nothing about after. Coder's `T ≥ 8` re-run is re-specified: window `[0,8]`, at
+> both `N=64` and `N=128`, reporting `r99`/`r999` of the **zonal-mean-removed** field over
+> nested windows. **The lesson, seventh instance and the most expensive: I asserted a
+> resolution mechanism from two points and attached it to a genuine finding because the
+> finding wanted a sequel — and the check that broke it cost ~37 minutes and I had already
+> costed it. The procedural error is the sharper one: "this is coder's" is not a reason not
+> to run a check that falsifies my own claim.** Delegating verification of my own
+> conclusion to an agent with a full queue is how a wrong claim survives three cycles.
 > **R28b — PROCESS FIX after user feedback: my messages were burying the actions.**
 > The user is right and the fault is mine, not the agents'. Long essay-style messages made
 > it impossible to tell high priority from background, and R28's three false completion
@@ -781,6 +808,59 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R29 — the N=256 resolution sweep falsified my own R26 claim. Retracted.**
+  R26 §6 named this the single most important open question in the project and assigned it
+  to `coder`, who has a three-item blocking queue and has not run. **I ran it myself.**
+  `N=256`, `Re=5000`, `A=0.2`, `dt=5e-4`, `T=16`, 320 snapshots, 812 s. Decomposition
+  helper validated as in R26e (ground truth `‖ψ−zonal(ψ)‖=84.9558` at `t=4`, reproduced to
+  the last digit by an independent broadcast construction, `match=True`; batched form
+  bit-for-bit equal to unbatched). Ceiling 43/85/171.
+
+  **`r99` at `W=16` across `N=64/128/256` = 14, 24, 13 — non-monotone, `N=128` the outlier.**
+  R26 concluded "the required rank keeps growing with the grid, so the `N=64` turnover is a
+  resolution artefact, not saturation" **from two resolutions.** The third destroys the
+  trend. **Retracted**, and corrected in place in R26 with a pointer to R29 rather than
+  left quotable. Same for R26's abstract-level "keeps growing with the resolved scale
+  range".
+
+  **A confound I had not checked.** The grids are not at the same state at the same `t`:
+  total energy at `t=16` is `111.6 / 150.8 / 121.2`, a **35.1% spread**, against 4.2% at
+  `t=4` and 18.4% at `t=12`, because R8a's secular mean growth proceeds at a different rate
+  per grid. **Matched-`t` resolution comparisons are confounded and the confound grows with
+  `t`.** Any resolution statement on this problem must compare at matched *state* (matched
+  `E` or `ū_bar`). I did not check this in R26 and did not notice.
+
+  **The confound does not explain the non-monotonicity, and I advanced no mechanism.** At
+  `W=12`, `N=128` has `E=99.30, r99=22` and `N=256` has `E=95.11, r99=16` — within 4% in
+  energy, 6 modes apart. Energy does not account for it. `r999` behaves the same way
+  (44/50/30 at `W=16`). **`W ≥ 12` is recorded as an open question**, not as growth and not
+  as saturation.
+
+  **What replaces the retracted claim is stronger and simpler.** For `W ≤ 4` (near-
+  independent at 8), `r99` is grid-independent across all three grids — 2/2/2, 4/4/3, 6/6/6,
+  11/10/10 at `W` = 0.5, 1, 2, 4 — spanning a **4× range in linear resolution and a 16×
+  range in the dealiasing ceiling**. The `1 → 16` growth that `AGENTS.md` asserts, and the
+  growth the paper needs, is **a property of the dynamics, not of the discretisation.** That
+  claim needs no resolution story, is supported by three resolutions, and is the one the
+  writer should use. The paper's rank claim should live inside `W ≤ 8`.
+
+  **Coder's re-run is re-specified** (blocking item 2, amended): window `[0, 8]`; at both
+  `N=64` and `N=128` so the grid-independence is reproduced by the project's own code and
+  not only by my scratch scripts; report `r99`/`r999` of the **zonal-mean-removed** field
+  over nested windows, since the zonal mean is rank 1 and grows secularly; and an
+  energy-based rank rule (D11.5) at the same time is the most useful addition, because it
+  is what would let the rank track `1 → 16` instead of pinning at the ceiling.
+
+  **The lesson, and it is the seventh instance and by far the most expensive.** I asserted
+  a resolution mechanism from two points and attached it to a genuine finding **because the
+  finding wanted a sequel** — I worked for the `1 → 16` growth, then wrote an unworked
+  resolution story on top of it. The check that broke the claim cost ~37 minutes and I had
+  already costed it, so the decision not to run it was not a budget judgement. The sharper,
+  procedural form: **"this is coder's" is not a reason not to run a check that falsifies my
+  own claim.** Delegating verification of my own conclusion to an agent with a full queue is
+  how a wrong claim survives three cycles, and it is the same shape as R24's
+  is-the-thing-real and R25's is-the-check-real: **verify the claim, including mine, before
+  building on it.**
 - 2026-09-25 **R28b — process fix: stop burying the actions.**
   The user reported that the agents cannot tell what is high priority, and that I am doing
   too much bureaucracy. Both are true and the fault is mine. Concretely: R28's three false

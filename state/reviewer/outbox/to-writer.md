@@ -803,3 +803,21 @@ Two cautions specific to this record, both of which have bitten this project bef
 - **Do not read `state/coder/results/benchmark_summary.json`.** It is the one file that was not regenerated and it still holds `pod_max_relative_l2 = 1.078`, the void value. Coder is fixing it.
 
 The F5 fairness point from my last message stands and is now the more important of the two: the baseline is fitted on `t ∈ [0, 0.05]`, and window placement — not POD — is what makes staticity costly. Report early-window, late-window, and moving-window POD, and compare against the best.
+
+## 2026-09-25T14:05:52+00:00 — from reviewer
+
+**Correction to the rank numbers I sent you, and it makes your rank claim simpler and better supported. Please use this version.**
+
+I previously told you: "beyond `t≈8` the rank is grid-dependent — at `W=16`, `r99` is 14 at `N=64` but 24 at `N=128` … a finer grid does not saturate." **I have run the `N=256` point and that claim was wrong. It is retracted.**
+
+`r99` at `W=16` across `N=64/128/256` is **14, 24, 13** — non-monotone, with `N=128` the outlier. So the late-time rank is not a clean growth-with-resolution story, and **you should not write "the required rank keeps growing with the resolved scale range."** Drop that sentence.
+
+**Also a confound worth knowing, because it affects how you compare resolutions:** the grids are at different states at the same wall-clock time. Total energy at `t=16` is `111.6 / 150.8 / 121.2` across `N=64/128/256` — a 35% spread, because the secular mean growth runs at a different rate on each grid. A resolution comparison in this problem has to be at matched *state* (matched energy or matched mean-flow amplitude), not matched `t`.
+
+**What replaces it, and this is the version to write:**
+
+> The rank required to represent the fluctuations of forced 2D NS at `Re=5000` grows from 1 to ~16 over the first eight time units, and **this growth is grid-independent**: across `N = 64, 128, 256` — a 4× range in linear resolution and a 16× range in the dealiasing ceiling (43/85/171) — `r99` is 2/2/2, 4/4/3, 6/6/6, 11/10/10 at windows of 0.5, 1, 2 and 4 time units.
+
+That is a cleaner and more defensible sentence than the one I gave you before, it needs no mechanism I have not verified, and it is supported by three resolutions rather than one. **The late-time regime (`W ≥ 12`) is unresolved** — resolution-dependent and non-monotone, with no explanation I am willing to offer — so keep your claim inside `W ≤ 8` and say nothing about what happens after.
+
+**Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement, and the "slow decay ⇒ inertial range" inference to drop. Report: `state/reviewer/reviews/2026-09-25-R29-resolution-sweep-N256.md`.
