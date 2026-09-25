@@ -168,23 +168,40 @@ def moving_window_schedule(
     grid: Grid2D, snap_times, snap_states, rank: int, window: float,
     interval: float, dt: float, final_time: float,
 ) -> dict:
-    """Refit a rank-``r`` basis on a trailing window, every ``interval``.
+    """Refit a rank-``r`` basis on a **trailing** window, every ``interval``.
 
     This is the oracle static baseline: at each refit the basis is built from the
     most recent window *of the reference trajectory*, so it is the best a
-    fixed-rank, offline-fitted subspace can do at that instant.  The window
-    length and refit interval are recorded in the artifact, because the static
-    error's floor is a function of them -- a floor that moves is a result about
-    the baseline's window, not about the method.
+    fixed-rank, offline-fitted subspace can do at that instant.
+
+    The window is trailing only -- ``[t - window, t]`` -- so the baseline never
+    uses a snapshot from the future.  That matters: a basis fitted on a window
+    containing the evaluation time reproduces the state there exactly and
+    reports an error of zero, which is a property of the harness rather than of
+    the method, and it is the difference between a *stale* subspace (R37's
+    mechanism, and the one that produces a rank-independent floor) and a
+    clairvoyant one.  The window length and refit interval are recorded in the
+    artifact, because the floor is a function of them.
     """
     schedule = {}
+    starved = 0
     for step in range(int(round(interval / dt)), int(round(final_time / dt)) + 1,
                       int(round(interval / dt))):
         t_now = step * dt
         snaps = select_window(snap_times, snap_states, max(0.0, t_now - window), t_now)
-        if len(snaps) >= rank:
-            schedule[step] = PODGalerkin(grid, rank).fit(snaps)
-    return schedule
+        if not snaps:
+            continue
+        # A window can hold fewer snapshots than the requested rank.  Skipping
+        # the refit in that case leaves the baseline stuck on whatever basis it
+        # started with, which silently turns a rank-r baseline into a rank-1 one
+        # and makes a short window look catastrophic for the wrong reason.  Fit
+        # as many modes as the window supports and record the shortfall.
+        effective = min(rank, len(snaps))
+        if effective < rank:
+            starved += 1
+        schedule[step] = PODGalerkin(grid, effective).fit(snaps)
+    schedule_starved_refits = starved
+    return schedule, schedule_starved_refits
 
 
 def crossover_horizon(
@@ -236,8 +253,13 @@ def main() -> None:
                         default=[0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 6.0, 8.0])
     parser.add_argument("--ranks", type=int, nargs="+",
                         default=[2, 4, 8, 16, 32, 43])
-    parser.add_argument("--window", type=float, default=1.0,
-                        help="trailing window length for the moving-window baseline")
+    parser.add_argument("--window", type=float, nargs="+", default=[1.0],
+                        help="trailing window length(s) for the moving-window "
+                             "baseline. More than one produces the surface as a "
+                             "function of the window as well as the rank, which "
+                             "is the honest shape of the result: a static "
+                             "baseline's accuracy is a property of its window, "
+                             "not of POD.")
     parser.add_argument("--refit-interval", type=float, default=0.25)
     parser.add_argument("--snapshot-stride", type=float, default=0.02)
     parser.add_argument("--base-speed", type=float, default=0.5)
@@ -273,12 +295,13 @@ def main() -> None:
     print(f"  done in {ref['wall_seconds']:.0f}s", flush=True)
 
     dlra_surface: dict[str, list[dict]] = {}
-    static_surface: dict[str, list[dict]] = {}
+    static_surface: dict[str, dict[str, list[dict]]] = {}
     crossovers: list[dict] = []
-    ceilings: dict[str, dict] = {}
+    diagnostics: dict[str, dict] = {}
+    windows = list(args.window)
 
     for rank in args.ranks:
-        print(f"crossover: rank {rank} ...", flush=True)
+        print(f"crossover: rank {rank} (DLRA) ...", flush=True)
         run = fixed_rank_dlra(
             grid, new_model(), initial, dt, final_time, rank, args.horizons
         )
@@ -292,48 +315,62 @@ def main() -> None:
             "relative_l2_fluct_normalized": 0.0,
         })
         dlra_surface[str(rank)] = dlra_rows
-
-        schedule = moving_window_schedule(
-            grid, ref["snap_times"], ref["snap_states"], rank,
-            args.window, args.refit_interval, dt, final_time,
-        )
-        init_snaps = select_window(
-            ref["snap_times"], ref["snap_states"], 0.0, args.window
-        )
-        initial_projector = (
-            PODGalerkin(grid, rank).fit(init_snaps) if len(init_snaps) >= rank else None
-        )
-        run_s = run_projected_moving(
-            grid, new_model(), initial, dt, final_time,
-            max(1, int(round(0.01 / dt))), schedule,
-            initial_projector=initial_projector,
-        )
-        static_rows = [
-            {"time": h, "rank": rank, **decompose(run_s["states"][idx], ref["snapshots"][h], grid)}
-            for idx, h in enumerate(args.horizons)
-        ]
-        static_surface[str(rank)] = static_rows
-
-        star = crossover_horizon(dlra_rows, static_rows)
-        star["rank"] = rank
-        crossovers.append(star)
-        ceilings[str(rank)] = {
+        diagnostics[str(rank)] = {
             "dlra": {
                 "wall_seconds": run["wall_seconds"],
                 "rank_actual": run["rank_actual"],
                 "max_abs_divergence": run["max_abs_divergence"],
-            },
-            "static_moving_window": {
+            }
+        }
+
+        # The DLRA run does not depend on the window, so it is computed once and
+        # compared against every window's baseline.
+        for window in windows:
+            print(f"crossover: rank {rank} static, window={window} ...", flush=True)
+            schedule, starved = moving_window_schedule(
+                grid, ref["snap_times"], ref["snap_states"], rank,
+                window, args.refit_interval, dt, final_time,
+            )
+            # Strictly causal initialisation: before the first refit the only
+            # snapshot that exists is the initial condition, so the only honest
+            # basis is rank 1 on the IC.  Fitting the initial basis on any longer
+            # window hands the baseline the future: a trailing window that *ends
+            # at* an evaluation time contains that time, so the baseline
+            # reproduces the state there exactly and reports an error of zero.
+            # That is a property of the harness, not of the method.
+            initial_projector = PODGalerkin(grid, 1).fit([initial])
+            run_s = run_projected_moving(
+                grid, new_model(), initial, dt, final_time,
+                max(1, int(round(0.01 / dt))), schedule,
+                initial_projector=initial_projector,
+            )
+            # Key the states by *time*, not by list index.  The rollout's state
+            # list starts at t=0, so indexing it with the horizon index silently
+            # compares the t=0 state against the t=0.1 reference.
+            lookup = {t: s for t, s in zip(run_s["times"], run_s["states"])}
+            static_rows = []
+            for h in args.horizons:
+                nearest = min(lookup, key=lambda t: abs(t - h))
+                static_rows.append(
+                    {"time": h, "rank": rank,
+                     **decompose(lookup[nearest], ref["snapshots"][h], grid)}
+                )
+            key = f"W{window:g}_r{rank}"
+            static_surface[key] = static_rows
+            star = crossover_horizon(dlra_rows, static_rows)
+            star.update({"rank": rank, "window": window})
+            crossovers.append(star)
+            diagnostics[key] = {
                 "wall_seconds": run_s["wall_seconds"],
                 "refits": len(schedule),
+                "refits_with_fewer_snapshots_than_rank": starved,
                 "max_abs_divergence": run_s["max_abs_divergence"],
                 "diverged": run_s["diverged_at_step"] is not None,
-            },
-        }
-        print(
-            f"  t* = {star['t_star'] if star['t_star'] is None else round(star['t_star'], 3)}",
-            flush=True,
-        )
+            }
+            print(
+                f"  t* = {star['t_star'] if star['t_star'] is None else round(star['t_star'], 3)}",
+                flush=True,
+            )
 
     artifact = {
         "case": "crossover_surface",
@@ -354,7 +391,7 @@ def main() -> None:
             "horizons": args.horizons,
             "ranks": args.ranks,
             "dealias_ceiling": 2 * (args.N // 3) + 1,
-            "moving_window_length": args.window,
+            "moving_window_lengths": windows,
             "moving_window_refit_interval": args.refit_interval,
             "snapshot_stride": args.snapshot_stride,
             "base_speed": args.base_speed,
@@ -384,7 +421,7 @@ def main() -> None:
         "dlra": dlra_surface,
         "static_moving_window": static_surface,
         "crossovers": crossovers,
-        "run_diagnostics": ceilings,
+        "run_diagnostics": diagnostics,
         "interpretation": (
             "An accuracy surface, not a cost surface. The rank is fixed per run, so "
             "the advantage comes from re-fitting the subspace to the current state "

@@ -382,6 +382,128 @@ def main() -> None:
                 "time-averaged $Z(k)$ there would average a moving quantity",
             ))
 
+    # ---------------------------------------------------------------- figure 7
+    # The BUG port's cost, on the same protocol, beside the projected one.  It is
+    # the port's whole motivation, so it belongs in the same figure rather than
+    # in prose: the port removes every full-size factorization and is still
+    # slower, because the K/L/S right-hand sides are full-grid field evaluations.
+    bug_cost = load(R / "cost_bug_port.json")
+    if bug_cost is None:
+        skipped.append((
+            "fig_bug_cost",
+            "`cost_bug_port.json` is absent, so the BUG port's cost against the "
+            "projected integrator is unmeasured",
+        ))
+    else:
+        used.append("cost_bug_port.json")
+        # Grouped bars, one group per (N, rank).  A line per point would give
+        # every (N, rank) pair its own legend entry and read as four methods.
+        groups, proj_vals, bug_vals = [], [], []
+        for g in bug_cost["grids"]:
+            for r in sorted(g["rows"], key=lambda r: r["rank"]):
+                if "bug" not in r:
+                    continue
+                groups.append(f"N={g['N']}\nr={r['rank']}")
+                proj_vals.append(r["full_step_ratio_vs_reference"])
+                bug_vals.append(r["bug"]["full_step_ratio_vs_reference"])
+        if groups:
+            x = np.arange(len(groups), dtype=float)
+            width = 0.36
+            fig, ax = plt.subplots(figsize=(1.45 * len(groups) + 1.3, 3.0))
+            ax.bar(x - width / 2, proj_vals, width, color=colors["full"],
+                   label="projected (full-field SVD)")
+            ax.bar(x + width / 2, bug_vals, width, color=colors["dlra"],
+                   label="midpoint BUG (no full-field SVD)")
+            for xi, pv, bv in zip(x, proj_vals, bug_vals):
+                ax.annotate(f"{bv/pv:.1f}x", (xi + width / 2, bv),
+                            textcoords="offset points", xytext=(0, 2),
+                            ha="center", fontsize=6.5, color=colors["dlra"])
+            ax.axhline(1.0, color=colors["ref"], linestyle=":", linewidth=1.0)
+            ax.annotate("full grid", (-0.45, 1.0), textcoords="offset points",
+                        xytext=(0, 2), fontsize=7, color=colors["ref"])
+            ax.set_yscale("log", base=2)
+            ax.set_xticks(x)
+            ax.set_xticklabels(groups, fontsize=7)
+            ax.set_ylabel("full-step time / full grid")
+            ax.set_title(
+                "BUG removes every full-size factorization\nand is still 3-5x slower",
+                fontsize=9,
+            )
+            ax.legend(fontsize=7, loc="upper left")
+            fig.tight_layout()
+            fig.savefig(args.output_dir / "fig_bug_cost.pdf", bbox_inches="tight")
+            fig.savefig(args.output_dir / "fig_bug_cost.png", bbox_inches="tight")
+            plt.close(fig)
+
+    # ---------------------------------------------------------------- figure 8
+    # The crossover surface.  Two panels, because the *crossing* is the result:
+    # the DLRA's error falls with rank while the static baseline's barely moves,
+    # so where they cross is set by rank alone.  A surface without the crossing
+    # marked would be a table.
+    xover = load(R / "crossover_surface.json")
+    if xover is None:
+        skipped.append((
+            "fig_crossover",
+            "`crossover_surface.json` is absent, so the advantage horizon is "
+            "unmeasured",
+        ))
+    else:
+        used.append("crossover_surface.json")
+        ranks = sorted(int(r) for r in xover["dlra"])
+        fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.9))
+        ax = axes[0]
+        cmap = plt.get_cmap("viridis")
+        for i, rank in enumerate(ranks):
+            shade = cmap(i / max(len(ranks) - 1, 1))
+            dl = [r for r in xover["dlra"][str(rank)] if r["time"] > 0]
+            st = xover["static_moving_window"][str(rank)]
+            ax.plot([r["time"] for r in dl], [r["relative_l2"] for r in dl],
+                    color=shade, linewidth=1.3)
+            ax.plot([r["time"] for r in st], [r["relative_l2_oracle_mean"] for r in st],
+                    color=shade, linewidth=1.3, linestyle="--")
+            star = next((c["t_star"] for c in xover["crossovers"] if c["rank"] == rank), None)
+            if star:
+                ax.plot([star], [next(r["relative_l2"] for r in dl
+                                      if r["time"] >= star)], marker="o",
+                        markersize=3.5, color=shade)
+        ax.plot([], [], color=colors["full"], linewidth=1.3, label="DLRA, fixed rank")
+        ax.plot([], [], color=colors["full"], linewidth=1.3, linestyle="--",
+                label="static, moving window (oracle mean)")
+        ax.plot([], [], linestyle="none", marker="o", markersize=3.5,
+                color=colors["full"], label=r"crossover $t^*$")
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xlabel("time $t$")
+        ax.set_ylabel("relative $L^2$ against the full grid")
+        ax.set_title("Error against horizon, by rank", fontsize=9)
+        ax.legend(fontsize=6.5, loc="lower right")
+        ax = axes[1]
+        pts = [(c["rank"], c["t_star"]) for c in xover["crossovers"] if c["t_star"]]
+        if len(pts) >= 2:
+            rr = [p[0] for p in pts]
+            tt = [p[1] for p in pts]
+            ax.loglog(rr, tt, "o", markersize=4, color=colors["dlra"], label="measured $t^*$")
+            slope, intercept = np.polyfit(np.log(rr), np.log(tt), 1)
+            grid = np.array([min(rr) * 0.9, max(rr) * 1.1])
+            ax.loglog(grid, np.exp(intercept) * grid ** slope, "-", linewidth=1.2,
+                      color=colors["a"],
+                      label=rf"fit $t^*\approx{np.exp(intercept):.3f}\,r^{{{slope:.2f}}}$")
+            ratios = [tt[i + 1] / tt[i] for i in range(len(tt) - 1)]
+            ax.annotate(
+                "horizon per doubling of rank: "
+                + ", ".join(f"{v:.2f}" for v in ratios),
+                (0.03, 0.04), xycoords="axes fraction", fontsize=6.2,
+                color=colors["full"],
+            )
+        ax.set_xlabel("rank $r$")
+        ax.set_ylabel("advantage horizon $t^*$")
+        ax.set_title("The horizon scales with the rank", fontsize=9)
+        ax.legend(fontsize=6.5, loc="upper left")
+        fig.tight_layout()
+        fig.savefig(args.output_dir / "fig_crossover.pdf", bbox_inches="tight")
+        fig.savefig(args.output_dir / "fig_crossover.png", bbox_inches="tight")
+        plt.close(fig)
+
     provenance(R, args.output_dir, sorted(set(used)), skipped)
     print(f"figures written to {args.output_dir}")
 

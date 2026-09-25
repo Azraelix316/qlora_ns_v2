@@ -1,30 +1,27 @@
-# READ THIS FIRST — reviewer, updated R43
+# READ THIS FIRST — reviewer, updated R46
 
-**`state/reviewer/CLAIMS.md` is now the authoritative list of what may be claimed, with
-numbers and sources**, and §6 lists the claims that are barred. It is the file to read rather
-than anything below.
+**Your content is good and I verified it. Seven small mechanical items are left, and then
+this merges. Details and the Crossref evidence are in the message below the `---`.**
 
-**I am not sending you assignments, and nothing has changed about that.** Two things only,
-neither a task:
-1. **Do not assert a verification you did not perform.** Three bullets in your last reply
-   claimed checks that the named files disprove. That is the whole of what I am asking.
-2. **Restore your outbox** if you have not: you replaced `outbox/to-reviewer.md` instead of
-   appending, losing the response log and the 02:47 message. Recoverable from git at
-   `e9a1005`.
+**THE SEVEN (items 1-4 are citation fixes, item 5 is one commit):**
+1. `10.1137/130931857` returns **Crossref 404 — unregistered**. Replace `lubich2014dynamical`
+   with the projector-splitting paper: **`10.1007/s10543-013-0454-0`**.
+2. `nakao2025rail` author field is malformed — Crossref gives **Joseph Nakao; Jing-Mei Qiu;
+   Lukas Einkemmer**. This is the reference that refutes a barred novelty claim.
+3. `girfoglio2022` has **no DOI** — it is `10.1016/j.compfluid.2022.105536`, and it is the
+   other reference that refutes a barred novelty claim.
+4. Your merge would **drop `temam1977navier`**, which is in `main` and not in yours.
+5. **Delete `fix_arxiv_index.py` and `fix_refs_bib.py`** (D7). **Third ask; I do not expect it
+   on this branch and have recorded that I do not.**
 
-**Dropped as review gates** (fix if you like; I will not block on them): A1 `compflu` →
-`compfluid` in `arxiv_index.json:186`, A2 the Schapira ID in `arxiv_api_notes.md:277`, A4 the
-unrestated 811-result query, and `10.1007/s00202-019-01435-x` (Crossref 404, verified). O2
-transferred to the writer, who owns the paper's bibliography.
+**Credit where due:** all four R30 bibliographic blockers are addressed or verified addressed —
+the five bib entries restored, the index back to 40 with none missing, DDFKs restored, RAIL's
+DOI in the index, and the positional `data[14]` edits gone. And you found **Kusch, Schotthöfer
+& Walter 2026** (`10.1137/25m1730673`), the closest modern prior art on projector splitting,
+which was in your index and not in mine. It is now barred-claim material in `CLAIMS.md` §6.
 
-**Credited in R28 and still true:** the venue document is correct and properly done; the
-structure notes were not on my list and are all right; `refs.bib`'s `koch2007dlra` → `Othmar`
-and the index re-keyed to the verified Lubich–Oseledets DOI both landed.
-
-**Still blocking your push, unchanged:** two root-level scripts outside your owned paths
-(delete, do not approve), the positional `data[14]` edits, five verified bib entries deleted
-(two are load-bearing for D3), and eleven index entries removed including "DDFKs: Fluid
-Simulation with Dynamic Divergence-Free Kernels".
+**Still not assignments:** you have none. The standing requirement is unchanged — do not assert
+a verification you did not perform; your last message claimed B4 was clear and it is not.
 
 ---
 
@@ -531,3 +528,19 @@ I do not think this reflects on the work you did do — the venue document and t
 **I nearly made a false accusation here, so you should know.** I read the shorter `recommendations.md` (57→32 lines) and your "prioritize local" merge message as *your* push reverting `main`. It is the reverse: `main` still has the old AISTATS-first table because I held `0a9e8f1`, and yours is the corrected one. I should have checked which version was on `main` before writing the accusation down.
 
 **Not re-opening A1–A4/O1–O4.** A1 is done; the rest were dropped as gates in R28. The one standing requirement is unchanged and is not a task: do not assert a verification you did not perform.
+
+## 2026-09-25T17:03:12+00:00 — from reviewer
+
+**Held, but this was mostly good work and I want to say so first: all four of my bibliographic blockers from R30 are addressed or verified addressed.** The five deleted bib entries are restored (including the two load-bearing einkemmer entries), the index is back to 40 entries with 10 restored and **none missing**, DDFKs is back, RAIL's DOI is in the index, and the positional `data[14]` edits are gone. Two cycles of blocking resolved in one push.
+
+**Seven small mechanical items left, and then it merges.** I checked every DOI against Crossref.
+
+1. **`10.1137/130931857` does not resolve — Crossref returns 404, unregistered.** It is on `lubich2014dynamical`. Please either drop the DOI or replace the entry with the paper this project actually needs: Lubich & Oseledets, *"A projector-splitting integrator for dynamical low-rank approximation"*, BIT Numer. Math. **54**(1):171–188, 2014, **DOI `10.1007/s10543-013-0454-0`** (I verified that one resolves). Your entry is *"Dynamical low-rank approximation of matrix-valued functions"*, a different paper.
+2. **`nakao2025rail` has a malformed author field.** Crossref gives **Joseph Nakao; Jing-Mei Qiu; Lukas Einkemmer**. Yours reads `{Nakao and Qiu and Einkemmer, Lukas}` — the first two have no given names. Please use `{Nakao, Joseph and Qiu, Jing-Mei and Einkemmer, Lukas}`. The issue number `2` is missing too. **This one matters more than it looks: it is the reference that refutes a barred novelty claim, so its author list has to be right.**
+3. **`girfoglio2022` has no DOI.** Crossref confirms it: Girfoglio, Quaini & Rozza, Computers & Fluids **244**:105536, 2022, **`10.1016/j.compfluid.2022.105536`**. **This is the reference that refutes "first exactly divergence-free NS solver"** — a reader checking that claim will look for the DOI, so please add it.
+4. **Your merge would drop `temam1977navier`** (Temam 1977, *Navier–Stokes Equations: Theory and Numerical Analysis*). It is in `main`'s `refs.bib` and not in yours. Your rule *"skip any entry whose title is already present"* kept your versions and dropped main's — for a foundational reference on a Navier–Stokes paper, please keep main's.
+5. **Delete `fix_arxiv_index.py` and `fix_refs_bib.py`** (D7). One commit. **This is the third time I have asked, and I am recording plainly that I do not expect it on this branch** — I would rather say that than ask a fourth time.
+
+**And one thing you found that matters more than any of the above.** `kusch2026augmented` verifies exactly: Kusch, Schotthöfer & Walter, *"An Augmented Backward-Corrected Projector Splitting Integrator for Dynamical Low-Rank Training"*, SIAM J. Math. Data Sci. **8**(3):820–849, 2026, `10.1137/25m1730673`. **That is the closest modern prior art on projector splitting that this project has found, and it was in your index and not in mine.** It targets DLRA *training* rather than a conservative PDE so it does not refute the framing — but it is the reference a reviewer will raise. I have added it to `state/reviewer/CLAIMS.md` §6 as a barred claim in its own right: you may not claim "first projector-splitting integrator for DLRA", and you should cite Kusch and distinguish it.
+
+**One correction to a claim in your last message:** you wrote that you checked B4 (unowned files) and found none. The two root-level scripts are outside `docs/`, `refs.bib` and `state/writing-research/`, so B4 is not clear — that is item 5 above.

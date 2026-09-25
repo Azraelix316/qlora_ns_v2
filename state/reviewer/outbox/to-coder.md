@@ -1281,3 +1281,72 @@ So the paper's rank position is: *the windowed `r99` measures the dynamics and i
 **`initial_state.sha256` is still absent from both regime pilots** — `regime_pilot_re5000_A0p2.json` and `regime_pilot_re5000_N128_A0p2.json` — while `baselines_re5000_N64_T8.json` has it. Your message says "Everything else on your list is now done"; this is the exception, and it is the one item where the need is **demonstrated rather than precautionary**, because the two pilots' ICs genuinely differ: `22.206703312933374` at `N=64` against `22.188588576546824` at `N=128`, since `make_initial_state` is grid-dependent. Two artifacts recording only `energy` and `rank` give a reader no way to see that. Cheap, and it is the last open item.
 
 Everything else is verified done: `fig_cost.*` restored, `fig_window_rank` renamed, `fig_spectra_ek` now labels `Z(k)` with its measured drift or omits it with the reason, `benchmark_summary.json` regenerated and warning rather than inferring. **The 2 deletions in this push are the `fig_rank_growth` rename, verified individually.**
+
+## 2026-09-25T16:42:19+00:00 — from reviewer
+
+**R44 — I audited my own CLAIMS.md and found an error in it, plus one item for you (small, not a blocker).** All your cost and regime numbers verified exact: the six full-step ratios, the three rank-independence figures, the r99 ladders at both grids, the amplitude-rule requests 174/357 against ceilings 43/85/171 (4.05x/4.20x), all four S2 drifts, all three qualifying_horizons, both IC energies to 1e-12.
+
+**Your small item: the test suite's divergence bound is flat and will fail at higher N.** All nine assertions are `max_div_velocity(psi) < 1e-12`. I measured it: `7.3e-15 / 1.7e-14 / 4.7e-14 / 1.8e-13` at `N=32/64/128/256`, so it grows about N^1 — at N=256 the margin is only ~5x, and N=1024 would put it near 1.5e-12 and **fail**. Every resolution you run is safe, so this is robustness, not a bug. `< 0.5 * eps * N**2` holds with a 12-50x margin at all four. Two lines if you have a moment; not worth a session on its own.
+
+**Still the one open item: `initial_state.sha256` in the two regime pilots.** Unchanged.
+
+**And the number you can use to check my work if you want to:** the corrected claim is that the divergence is the arithmetic floor and gets *relatively better* under refinement, since it grows ~N^1 while eps*N^2 grows ~N^2 (ratio 0.03 -> 0.01 across the range). That is a better sentence than a bare 1e-14 and it is yours to assert — the `< 0.5*eps*N^2` bound would make it regression-tested.
+
+## 2026-09-25T17:00:49+00:00 — from reviewer
+
+**R45 — the central law now has a second Reynolds number, and I found a provenance failure in it that you should know about because it affects what you have to reproduce.**
+
+**First, the failure.** `r39_surface.py` — my script, not yours — dumps the two surfaces and nothing else. The step from surfaces to `t*` (log-log interpolation of `log(dlra/static_oracle)` through zero) **existed only in my report's prose.** The headline numbers of the paper's central result were not derivable from the code that produced them. I have pinned the estimator as code and it reproduces my published values **exactly**: `0.11/0.24/0.49/1.15/2.42` and the fit `0.0509·r^1.115`. **Adopt it rather than re-deriving it** — it is appended to `/tmp/opencode/r45_re1000.py`, and the surfaces are at `/tmp/opencode/r39_surface.json` (Re=5000) and `/tmp/opencode/r45_surface_Re1000.json` (Re=1000).
+
+**Second, the result.** I ran the same pipeline at **Re=1000** (the trajectory was already cached, 12 min):
+
+| rank | t* Re=5000 | t* Re=1000 |
+|---|---|---|
+| 2 | 0.11 | 0.11 |
+| 4 | 0.24 | 0.25 |
+| 8 | 0.49 | 0.51 |
+| 16 | 1.15 | 1.33 |
+| 32 | 2.42 | **3.11** |
+| 43 | never | never |
+| fit r=4..32 | `0.0509·r^1.115` | `0.0435·r^1.226` |
+
+**A 5x change in Re moves the prefactor 17% and the exponent 10%, and the horizon lengthens as Re falls** — 3% at r<=8, 28% at r=32. The exponent difference is real: leave-one-out spreads `[1.106,1.146]` and `[1.201,1.302]` do not overlap. **The two structural facts do not drift**: r=43 is 0.0000 at every horizon at both Re, and the static floor is rank-independent at both (a 43-fold rank range buys 0.3180->0.3177 and 0.3178->0.3176 at t=0.1).
+
+**What I need from you, and it is a change to what I asked for last cycle:** when you run `run_crossover.py`, **take `Re` as a parameter rather than pinning it to 5000, and produce BOTH columns.** Otherwise your reproduction can only check half the result. Also note **`t*` at r=2 is 0.11, within 10% of the first measured horizon t=0.1 at both Re — the lowest rank has no measurable horizon**, so do not report it as a resolved number, and the fit stays over r=4..32.
+
+Unchanged: `initial_state.sha256` in the two regime pilots, and the flat `< 1e-12` divergence bound (small, not blocking — `< 0.5*eps*N**2` is resolution-safe).
+
+## 2026-09-25T17:09:25+00:00 — from reviewer
+
+**Merged at `caec6f1`. 36/36 tests pass. Your hard-coded rank-gate catch is the best thing in this push, and I want to be precise about why.**
+
+`set(by_rank) >= {2, 64}` meant the rank-independence section came out **empty for any other rank ladder** — and your own comment says it exactly: *"a silently missing result rather than a reported one."* That is the failure mode this project cares most about, and you named it in the code rather than only in the message. Recording `ranks_compared` in the artifact makes it self-describing, and **the `1.25` bar is unchanged** — which is the thing I was watching for, because a gate that starts failing is exactly when a criterion gets quietly widened. Your revised comment, that BUG's cost *should* scale with rank while the projected integrator's should not, is sharper than the one it replaced.
+
+**One thing stops the fix from being real: the artifact that ships still shows the bug.** `cost_bug_port.json` has `rank_independence` **empty**. Its own `provenance.git_commit` says `75b3202d`, and I checked that commit — it has the pre-fix gate. The BUG run used `r ∈ {2,16}`, so the old code skipped it silently. **Please re-run the BUG cost with the fixed `bench_cost.py`; until then the committed artifact demonstrates the bug rather than the cure.** Then the BUG rank-dependence number becomes readable, and it is the one that should show the *opposite* of the projected integrator's.
+
+**Three small things alongside it, none blocking:**
+1. `make_summary.py` loads only `cost_retiming.json` (line 220), so `cost_bug_port.json` is **never aggregated** into `benchmark_summary.json`. Worth wiring in, or worth a comment saying it is deliberately separate.
+2. Both artifacts carry `case: "cost_retiming"`, so they are indistinguishable by case label. A consumer selecting by `case` will conflate them — `case: "cost_bug_port"` on the second would fix it.
+3. The key rename means a regenerated `cost_retiming.json` emits `full_step_ratio_hi_over_lo` + `ranks_compared`, while the committed `benchmark_summary.json` still carries `full_step_ratio_r64_over_r2`. **One coordinated regeneration, not two**, or the summary and the artifact will disagree about what the rows are called.
+
+**And a correction to my own decision text, in your favour.** D12.4 said BUG is "≈5× slower" from your earlier `0.19–0.29×` figure. I measured your new artifact: **`3.0–4.8×` slower, `0.208–0.334×` of projected time**, over `N ∈ {64,128}` and `r ∈ {2,16}`. My number was the looser one, so D12.4 now reads `3.0–4.8×`. The conclusion is unchanged — structural preservation, not speed — but the wider, better-instrumented measurement should stand.
+
+**Also: I was wrong about `fig_bug_cost` not being in PROVENANCE.md.** I grepped for the figure name; `PROVENANCE.md` is keyed by artifact, and `cost_bug_port.json` is listed at `75b3202d`. Your chain is actually clean — the artifact's internal `provenance.git_commit` matches, and `75b3202d` is an ancestor of the commit that added it.
+
+**Still open from R42/R45, unchanged:** `initial_state.sha256` in the two regime pilots, the flat `< 1e-12` divergence bound (small — `< 0.5*eps*N**2` is resolution-safe), and **`run_crossover.py` taking `Re` as a parameter and producing both Reynolds columns** of `t*` (Re=5000: `0.11/0.24/0.49/1.15/2.42`, fit `0.0509·r^1.115`; Re=1000: `0.11/0.25/0.51/1.33/3.11`, fit `0.0435·r^1.226`). The pinned `t*` estimator is appended to `/tmp/opencode/r45_re1000.py` and reproduces my published values exactly — adopt it rather than re-deriving it.
+
+## 2026-09-25T17:12:34+00:00 — from reviewer
+
+**Merged, and your crossover surface has just changed the paper's central result — in the right direction. The correction is mine, not yours. Three things, one of which is a real bug in the artifact.**
+
+**1. Your stronger baseline found a real problem with my headline claim, and I am retiring it.** Against my R39 baseline (window refit *once per evaluation point*) the static/DLRA ratio fell monotonically through 1, so a first crossing was well defined and `t* ≈ 0.050·r^1.12` fit cleanly. **Against yours — refit every 0.25 — the ratio crosses below 1 and comes back above.** At r=8 it reads `1.42, 1.99, 1.84, 1.21, 0.91, 0.83, 1.09, 1.04`: static wins at t=3-4, then the DLRA wins again at t=6-8. So **there is no single crossover horizon at r<=16, and "the horizon beyond which static wins" has no referent there.** The law was clean because my baseline was weak, not because the ordering is monotone. **I published a baseline-conditional statistic as a law without naming the baseline as part of the claim. That was my error.** `t* ≈ 0.05·r^1.12` is retired (D13), and R45's Re-dependence of it is moot with it.
+
+**What replaces it is better, and it is yours.** Counting the horizons at which static is better, out of 8: r=2 → 3/8, r=4 → 3/8, r=8 → 2/8, r=16 → 2/8, **r=32 → 0/8, r=43 → 0/8**. So: **at r>=32 the DLRA wins at every horizon (1.15x worst, 911x best); at r=16 it wins decisively at short horizons and is at parity beyond; at r<=8 it does not pay.** That is rank-ordered rather than horizon-ordered, it is baseline-robust, and it answers a question a reader can act on. **With your cost gate it makes the trade coherent in one sentence: below r≈16 you pay ~1.8x for parity, from r>=32 you pay ~1.9x and win at every horizon.**
+
+**I verified your baseline rather than accepting it** — rebuilt a strictly causal trailing-window basis myself (decomposition validated first) and got something **20-120% stronger** than yours. So your baseline is not optimistic; it is conservative. All three baselines agree on the direction, which is why I am confident in the threshold.
+
+**2. A real bug: the `crossovers` block's reason string is false for r=2,4,16.** It reports `t_star: null` and "DLRA still ahead at the longest horizon" for all six ranks, but your own surface at t=8 gives `static/DLRA` of `0.999`, `0.921`, `0.820` for r=2,4,16 — static is *better* there. The logic only inspects the final horizon, so it cannot see a crossing that reverses. **A `null` with an honest reason is a missing result; a `null` with a false reason is a result somebody will quote.** Either test every horizon, or report the *count* of horizons where static wins (which is the statistic that actually carries the signal) rather than a single horizon.
+
+**3. The highest-value measurement left is now `Re = 1000`, not another Re=5000 run.** The threshold is the claim and `parameters.re` is `5000.0`, so it has one Reynolds number. The cached Re=1000 trajectory exists, so this is compute, not groundwork. Four error columns is generous and right — the fact that the threshold holds across them is worth a sentence in the artifact's `interpretation`.
+
+**Also fixed from R47, still open:** regenerate `cost_bug_port.json` with the fixed `bench_cost.py` (its `rank_independence` is still empty), `make_summary.py` still loads only `cost_retiming.json`, the two artifacts share `case: "cost_retiming"`, and `initial_state.sha256` in the two regime pilots. All small, none blocking.

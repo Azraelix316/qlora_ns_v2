@@ -21,6 +21,8 @@ refuses to emit a summary whose members disagree about the initial state.
 | `regime_pilot_re5000_A0p2.json` | `run_regime_pilot.py` | S1-S3 pilot at A=0.2: the grid-independent `r99` growth R26 measured, reproduced independently |
 | `regime_pilot_re5000_A0p5.json` | `run_regime_pilot.py` | the same at the canonical A=0.5, plus the S2 ladder to T=20 |
 | `baselines_re5000_N64_T8.json` | `run_baselines.py` | F5: full grid, static POD on early/late/moving windows, POD-DMD and fixed-rank DLRA at matched ranks, T=8 |
+| `crossover_surface.json` | `run_crossover.py` | the advantage horizon `t*` as a function of rank, 6 ranks × 9 horizons, with the error split into mean and fluctuation parts |
+| `cost_bug_port.json` | `bench_cost.py` | the BUG port's cost on the same protocol as `cost_retiming.json`, against the projected integrator |
 | `cost_retiming.json` | `bench_cost.py` | R5q re-timing: pinned threads, warm-up discarded, median of repeats with spread, two accountings, rank-independence |
 | `taylor_green.json` | `run_taylor_green.py` | F1 laminar exactness and monotone decay |
 
@@ -36,8 +38,21 @@ a trajectory accumulates. Both are in the artifacts
 (`window_rank_table` and `instantaneous_rank_series`, plus each run's
 `rank_history`), and the two must not be conflated in the paper.
 
-## What a result is not allowed to mean
+## A rank without its quantity is ambiguous
 
+Three different quantities are called "rank" in this project's artifacts, and
+conflating them is how the dealiasing ceiling came to be read as adaptivity:
+
+| quantity | where | what it is |
+|---|---|---|
+| per-step spatial rank | `dlra`'s `rank_history`, `baselines_*.json`'s `adaptive_rank` | the dimension one candidate field needs at one stage; what an adaptive rule can return |
+| windowed rank | `regime_pilot_*.json` → `window_rank_table` | the modes needed to represent a whole window of the trajectory; grows 1 → 16 over [0, 8] and is grid-independent |
+| dealiasing ceiling | `2·floor(N/3)+1` | 43 at N=64, 85 at N=128; what the amplitude rule returns, because its request tracks the grid |
+
+Only the middle one is a property of the dynamics. The `rank_quantities` block
+in each artifact states which one its own numbers are.
+
+## What a result is not allowed to mean
 - **`max_trajectory_divergence`** (relative L2 against the reference) is
   *trajectory divergence*, not accuracy: once two solutions decorrelate it
   measures phase. The accuracy metrics are time-averaged KE/enstrophy and

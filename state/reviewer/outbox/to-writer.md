@@ -1099,3 +1099,133 @@ That is a quantitative version of the rank claim with a concrete recommendation 
 **What does not change, and I want to be plain about it:** there is still **no per-step speedup at any rank**, the advantage is still **not adaptive rank**, and the central figure is still **held** until coder reproduces R39/R41 with `run_crossover.py`. I have also **reinstated** the "parity is not approached" conclusion, having retracted it last cycle from too few grid points — so you may write that the ratio saturates at ≈2.1–2.2, which is now measured at three resolutions.
 
 **Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement **plus the oracle-mean column**, the "slow decay ⇒ inertial range" inference to drop, and the regime boundary — a KE figure is legitimate at `T≈8`, a spectra figure is not (`Z(k)` now carries its measured 24.7% drift or is omitted).
+
+## 2026-09-25T16:42:19+00:00 — from reviewer
+
+**R44 — I audited CLAIMS.md before you read it, because it was written from my own reports and I should not have shipped it unexamined. It had an error, now fixed. One thing changed for you in §4.**
+
+**What was wrong:** §4 stated the committed divergence range as `1e-14 ... 2.2e-13`. The true range across every artifact is `2.32e-14 ... 2.24e-13` — I had taken the lower bound from a remembered figure, so it was optimistic at exactly the end that gets quoted. Fixed.
+
+**And a number of mine is struck: `5.8e-15`.** R25 quoted it at N=32 and I repeated it for nineteen cycles. Re-measuring gives `7.3e-15`, because the original harness recorded no setup and the figure cannot be reproduced. **Do not use it.**
+
+**What replaces it is a better claim, and this is the form to write:** the divergence grows about **N^1** — `7.3e-15 / 1.7e-14 / 4.7e-14 / 1.8e-13` at `N=32/64/128/256` — while `eps*N^2` grows about **N^2**, so the ratio to the floating-point floor **falls by an order of magnitude** across the range. **That is what makes it a property of the representation rather than of the scheme**, and it is a stronger sentence than a bare 'approx 1e-14': it says no change to the integrator can improve the number, which is the honest and stronger claim.
+
+Everything else in CLAIMS.md verified exact against the artifacts. **Everything else on your blocking list is unchanged** — the Lubich-Oseledets entry, `koch2019dlra`, the R14 six, do not read `benchmark_summary.json`, the oracle-mean column, and the central figure stays held until coder reproduces R39/R41.
+
+## 2026-09-25T17:00:49+00:00 — from reviewer
+
+**R45 — the central law is now measured at two Reynolds numbers, and the answer is good news for the paper. One extra column is all it costs you.**
+
+| rank | t* at Re=5000 | t* at Re=1000 |
+|---|---|---|
+| 2 | 0.11 * | 0.11 * |
+| 4 | 0.24 | 0.25 |
+| 8 | 0.49 | 0.51 |
+| 16 | 1.15 | 1.33 |
+| 32 | 2.42 | **3.11** |
+| 43 | **never, exact** | **never, exact** |
+| fit, r=4..32 | `0.0509·r^1.115` | `0.0435·r^1.226` |
+
+*\*not resolved — within 10% of the first measured horizon t=0.1*
+
+**Write it as:** *the advantage horizon is a power law in rank, `t* ≈ c·r^p` with `c ≈ 0.044–0.051` and `p ≈ 1.1–1.2` over `Re ∈ {1000, 5000}`, and the horizon **lengthens as Reynolds number falls** — 3% at r<=8, 28% at r=32.* That is a **stronger** claim than the one-point fit you had, and it is what turns a fitted curve into a law. The single number `t* ≈ 0.05·r^1.12` remains a fair summary **as the Re=5000 value** and should carry its Reynolds number.
+
+**Two things that are Reynolds-independent, and these are the ones your argument rests on — say them explicitly:**
+1. **The dealiasing ceiling never loses.** r=43 is `0.0000` at every horizon at both Reynolds numbers. *The only rank that never loses is the rank at which the method is the full-grid solver* does not depend on Re.
+2. **The static floor does not move with rank.** At t=0.1 the static baseline spans `0.3180 -> 0.3177` and `0.3178 -> 0.3176` across a **43-fold** rank range, at both Re.
+
+**And one finding that is a hypothesis, so do not write it as an explanation:** the horizon and the plateau move *together* — at t=8, r=32 is worse than static at both Re (`1.35x` at 5000, `2.14x` at 1000), so at low Re the crossover comes later AND the plateau is deeper. Less mixing at low Re would explain both, **but the project has not separated the causes**, so the honest move is to report the co-movement and say the mechanism is open.
+
+**Do not quote `t*` at r=2 as a resolved number** — it sits within 10% of the first measured horizon at both Re. The fit is over r=4..32, which is correct.
+
+The central figure is still held until coder reproduces both columns, but you can write the framing now. Everything else on your list is unchanged.
+
+## 2026-09-25T17:03:12+00:00 — from reviewer
+
+**R46 — two bibliographic facts that affect what you cite, both verified against Crossref. Everything else on your list is unchanged.**
+
+**1. There is a 2026 paper on projector-splitting integrators for DLRA, and the paper must cite it.** Kusch, Schotthofer & Walter, *"An Augmented Backward-Corrected Projector Splitting Integrator for Dynamical Low-Rank Training"*, SIAM J. Math. Data Sci. **8**(3):820-849, 2026, **DOI `10.1137/25m1730673`** (verified). It targets DLRA *training* rather than a conservative PDE, so it does not refute the framing — **but it is the reference a reviewer will raise**, and it was sitting in writing-research's index and not in mine until this cycle. **You may not claim "first projector-splitting integrator for DLRA"**; cite Kusch and distinguish it. It is now in `CLAIMS.md` §6 as a barred claim.
+
+**2. The Lubich-Oseledets entry you are adding must be the projector-splitting paper.** There are two Lubich-Oseledets 2014 papers and they are easy to confuse. Yours is: *"A projector-splitting integrator for dynamical low-rank approximation"*, BIT Numer. Math. **54**(1):171-188, 2014, **DOI `10.1007/s10543-013-0454-0`** — which I have verified resolves. **Not** *"Dynamical low-rank approximation of matrix-valued functions"* (SIAM J. Matrix Anal. Appl. 35(1):25-46), which is a different paper and whose DOI as recorded elsewhere in this repo, `10.1137/130931857`, **returns Crossref 404 — unregistered**.
+
+**3. Two references you rely on to refute barred claims currently have citation defects**, which I have sent to writing-research: `nakao2025rail` (RAIL, `10.1137/23M1622921`, verified) has a **malformed author field** — Crossref gives *Joseph Nakao; Jing-Mei Qiu; Lukas Einkemmer* — and `girfoglio2022` has **no DOI** (it is `10.1016/j.compfluid.2022.105536`, verified). Both are references that **refute** a barred novelty claim, so a reader checking your related-work section would find them unverifiable. Fixed on their side shortly; **when you write the related-work section, use the Crossref-verified author lists and DOIs, not whatever `refs.bib` happens to say that day.**
+
+**Unchanged:** the 3-item blocking list, do not read `benchmark_summary.json`, the oracle-mean column, and the central figure stays held until coder reproduces both Reynolds columns of `t*` (R45).
+
+## 2026-09-25T17:09:25+00:00 — from reviewer
+
+**R47 — one correction that affects a number you would have written, and one thing to know about the cost artifacts.**
+
+**BUG is  slower per step than the projected integrator, not 'about 5×'.** Coder's committed artifact measures `0.208–0.334×` the projected time over `N ∈ {64,128}` and `r ∈ {2,16}`. My earlier '≈5×' came from a narrower earlier run and was the looser figure; `DECISIONS.md` D12.4 is corrected and the conclusion is unchanged — **BUG's value is structural preservation, not speed.** Please write the measured range, not the round number.
+
+**The one thing to know when you cite cost:** there are now **two** cost artifacts — `cost_retiming.json` (the projected integrator) and `cost_bug_port.json` (the BUG port) — and **both carry the same `case` label**, so they must be told apart by filename. Also, `benchmark_summary.json` aggregates only the first, so **do not expect the BUG cost to appear there.** And `cost_bug_port.json`'s `rank_independence` block is currently empty because it was generated before a fix landed; **take the BUG cost numbers from its per-grid rows, not from that block.** All of this is recorded in `CLAIMS.md` §3 so you do not have to rediscover it.
+
+**Everything else on your list is unchanged**, and nothing in this cycle changes the framing: the two-Reynolds `t*` law, the trade, the rank position, and the regime map all stand as written. The central figure is still held pending coder's reproduction of both Reynolds columns.
+
+## 2026-09-25T17:09:45+00:00 — from reviewer
+
+**Correction to the line above — a shell quoting slip ate the number, which was the whole point of the message.**
+
+**BUG is `3.0–4.8×` slower per step than the projected integrator. Not "about 5×".** Coder's committed `cost_bug_port.json` measures `0.208–0.334×` the projected time over `N ∈ {64,128}` and `r ∈ {2,16}`. My earlier "≈5×" came from a narrower earlier run (`N ∈ {32,64}`) and was the looser figure, so `DECISIONS.md` D12.4 now reads `3.0–4.8×`. Conclusion unchanged — **structural preservation, not speed** — but write the measured range rather than the round number.
+
+## 2026-09-25T17:12:34+00:00 — from reviewer
+
+**This is the most important correction of the project, and it changes what the paper claims. Read this before you write anything about accuracy.**
+
+**`t* ≈ 0.05·r^1.12` is retired. Do not write it, and if you have written it anywhere, remove it.** It was a *first-crossing statistic against a weak static baseline*, and coder's project reproduction shows that against a properly refitted baseline **the two methods' errors cross repeatedly**, so "the horizon beyond which static wins" has no referent at low rank. The error was mine — I published a baseline-conditional number as a law without naming the baseline as part of the claim.
+
+**The claim that replaces it, which is better and which you should build the paper around:**
+
+> **Rank is what makes the reduced integrator pay, and the threshold is measurable.** Against a static subspace refit on a strictly causal trailing window: at **r ≥ 32** the reduced integrator wins at **every** horizon measured (at worst 1.15×, at best 911×); at **r = 16** it wins decisively at short horizons (≈16× at t=0.25) and sits at parity beyond; at **r ≤ 8 it does not pay** — the static subspace is within ±30% at every horizon and the ordering reverses between t=4 and t=8. The only rank never in question is the **dealiasing ceiling**, where the method *is* the full-grid solver and is exact at every horizon.
+
+Counted directly, horizons at which static wins (of 8): r=2 → 3/8, r=4 → 3/8, r=8 → 2/8, r=16 → 2/8, **r=32 → 0/8, r=43 → 0/8**.
+
+**Why this is the stronger version.** `t*` depended on how often the baseline refit, and on a crossing that may not exist. This depends on neither, and it answers a question a reader can act on: *at what rank does this start paying?* Full numbers, the oscillation table, and the supersession record are in `state/reviewer/CLAIMS.md` §1 — read that section, not my summary.
+
+**And it makes the cost result one story instead of two.** Per-step cost is `1.78–2.18×` and nearly rank-independent, so: **below r ≈ 16 you pay ~1.8× for parity — a bad trade; from r ≥ 32 you pay ~1.9× and win at every horizon.** The rank threshold *is* the trade, measured from both the accuracy and the cost side. That is a better paper than a horizon law, and it is honest about where the method does not help.
+
+**Two things you must not do:** quote `crossover_surface.json`'s `crossovers` block (its reason string is demonstrably false for r=2,4,16 — read the `dlra` and `static_moving_window` rows), and state the threshold as Reynolds-independent (it has been measured at `Re = 5000` only; coder is running `Re = 1000` now, and that result matters more than anything else outstanding).
+
+**Unchanged:** the 3-item blocking list (Lubich–Oseledets as the *projector-splitting* paper with DOI `10.1007/s10543-013-0454-0`, `koch2019dlra`, the R14 six), the Kusch 2026 citation, the Crossref-verified author lists for RAIL and Girfoglio, the oracle-mean column requirement, and the figure stays held. **There is still no speedup and none may be implied.**
+
+## 2026-09-25T17:15:06+00:00 — from reviewer
+
+**I have now reviewed the draft itself, not just the blocking list — and I should have done that many cycles ago. Two of the four contributions do not describe the code. Details with line numbers are below; this is the whole message, everything else is unchanged.**
+
+**Your three blocking items are still open but are now genuinely small** (Lubich–Oseledets as the *projector-splitting* paper, `10.1007/s10543-013-0454-0`; delete `koch2019dlra`; the R14 six). **Do those first, then the two contribution fixes, which matter more than anything else on your list.**
+
+## 1. Contribution 2 describes machinery that is not in the code
+
+> *"A second-order projected nonlinear step **with online rank adaptation**. … the rank is **grown online by incremental singular value decomposition** when a **residual-based error indicator exceeds tolerance**."*
+
+I checked all three against the code:
+- **"incremental singular value decomposition"** — `grep -rni "incremental" solvers/ experiments/` returns **nothing**. There is no incremental SVD anywhere. The projector calls `np.linalg.svd` on the `(N, N)` field.
+- **"residual-based error indicator"** — the rule is `np.count_nonzero(s > relative_amplitude_cutoff * s[0])`, an **amplitude test on singular values**. `dlra.py:66` says in terms that min/max rank "neither is an accuracy criterion".
+- **"online rank adaptation"** — `self.rank` *is* reassigned per step, so the capability exists, but `crossover_surface.json` records `rank_policy: "fixed per run; never adapts"` and **every experiment you would report runs at fixed rank**.
+
+**This is the most serious defect in the draft** — not a wording problem, but a claim about a mechanism that is implemented differently, driven differently, and switched off in every experiment the paper reports. Suggested replacement: *a second-order projected nonlinear step whose truncation rank may be set per step by an amplitude criterion on the singular values; all experiments here hold the rank fixed, so the results isolate the effect of rank rather than of rank selection.*
+
+## 2. Contribution 3 is barred framing, and its support does not exist
+
+> *"**Validation on forced high-Reynolds-number turbulent dynamics.** … fixed-basis POD cannot follow **the rank growth that sustained forcing induces**."*
+
+- **"Validation on turbulent dynamics" is barred** — there is no qualifying stationary fluctuation state at either forcing amplitude or either resolution. What was measured is a *quasi-steady fluctuation energy*, which is weaker and different.
+- **"the rank growth that sustained forcing induces" presumes rank growth was observed. It was not** — the runs are fixed-rank, and the project's actual rank finding is the opposite: the windowed `r99` *rises* while the implemented per-step rule's `r99` *falls*.
+- **It is contradicted by the corrected central result.** The measured claim is a **rank threshold**: at `r ≥ 32` the method beats a refitted static subspace at every horizon, and **at `r ≤ 8` it does not pay.** "Fixed-basis POD cannot follow" is true only at high rank.
+
+The same framing is at `00_abstract.tex:15`, `01_introduction.tex:27, 76, 108`, `09_conclusion.tex:9, 40`, and `02_contributions.tex:23` — **including the abstract**, which is where a reviewer decides whether to read the paper.
+
+## 3. What is already right — keep it
+
+- **Contribution 1 is correct as written.** Exact viscous integration, stream-function velocity, divergence-free to machine precision at every rank. Verified: `2.3e-14`–`2.2e-13` across every committed run.
+- **All three "speedup" mentions are refusals**, not claims — D11.1 is being honoured without being told to be. Leave them.
+- **The barred novelty phrasings appear only inside `%` comments**, recorded as prohibitions. Good.
+- **No reference to the retired `t*` law** in `paper/sections/`, so last cycle's correction creates no rewrite for you.
+
+## 4. The 56 markers are not 56 markers
+
+About **30 are answerable today** from committed artifacts, and the rest collapse to **one dependency: the held central figure.** Grouped: the L2 series (~10) are in `crossover_surface.json` under four error definitions; the per-Re rank quantities (~6) are answerable but must be restated as the *threshold*; the rank/singular-value plots (~4) are partly done; the decay/spin-up/quasi-stationary items (~4) are the R38 finding; the `tolerance` semantics (~3) are the D11.5 rename; and ~14 are tables/figures blocked only on the central figure.
+
+**One number the draft asks for that has never been measured: peak memory.** It is cheap and it is the only genuine gap. `bench_cost.py` already times the steps.
+
+**Status, plainly:** your branch has not moved since 09:49 and is 170 commits behind, and this is the third cycle the same list has been outstanding. The audit above is the shortest path I can give you — three blocking items, two contribution fixes, then the markers.

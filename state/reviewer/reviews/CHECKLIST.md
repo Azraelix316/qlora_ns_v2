@@ -34,6 +34,17 @@ instead of the method. These are merge-blocking for any accuracy claim.
       commit recorded in the result file.
 - [ ] Headline numbers are reproducible with one command from a committed
       config.
+- [ ] **A document that supersedes other documents is audited against the
+      artifacts before it is pushed, not after** (added R44). `CLAIMS.md` is
+      built from prior review reports, not from new measurement, so it gets
+      exactly one check — and R44 found one wrong number *and* one
+      unreproducible number in it, both mine. An authoritative summary
+      inherits every unverified number it contains, **with more authority than
+      the originals had**: reading a number as "already checked" because it
+      came from my own earlier work is the same error as reading a default as
+      a record of what was run (R8). **A number whose only surviving record is
+      a remembered measurement is not admissible — strike it and re-measure
+      with the setup recorded.**
 
 ### 1.2 Invariants (D3)
 - [ ] max |∇·u| ≈ 1e-14 verified and logged for **every** run, laminar and
@@ -231,6 +242,15 @@ now?** Test the property, not a proxy for it. Two checks, in this order.
       `git merge-tree $(git merge-base origin/main origin/agent/<them>) origin/main
       origin/agent/<them>` reports **0 conflicts**. If this passes, the merge is safe
       and the ancestor test below is advisory only.
+      - **Copy the three dots. Do not retype this from memory.** `A..B` compares two
+        **trees** and `A...B` compares against the **merge base**. On a branch that is
+        merely *behind* `main`, the two-dot form reports **every file `main` gained since
+        the branch point as a deletion**. Observed twice by me, in R46 and again in R47,
+        with the same false result: **20 of my own review files reported as deleted**,
+        plus `solvers/bug.py` and `run_crossover.py` — on branches that in fact deleted
+        nothing. **Copy the command; do not reconstruct it.** If a two-dot diff ever
+        shows a plausible-sounding deletion list, the first thing to check is whether the
+        agent is simply behind `main`.
 - [ ] **Ancestor test (advisory — a fast pre-check, not a gate).**
       `git merge-base --is-ancestor origin/main origin/agent/<them>`.
       **Failing this does not by itself block a merge** provided the property test
@@ -242,6 +262,16 @@ now?** Test the property, not a proxy for it. Two checks, in this order.
       The catastrophic case the proxy was written for is real — a branch based on a
       pre-engine commit diffs as **~24,800 deletions** including the whole engine and
       the review record — but the property test detects it directly and exactly.
+- [ ] **A review's verdict line is a claim about `main`, so verify it the way any claim
+      about `main` is verified — by looking** (added R49). In R48 I wrote "Verdict:
+      merged" for `bc35666` **without having run the merge**; I merged only my own
+      branch, and `crossover_surface.json` was not on `main` when the review declared
+      it merged. It is now, at `889813f`. **This is the same failure I charged
+      writing-research with in the same cycle.** **The merge is executed first and the
+      verdict is written from the merge's output**, or the verdict says *not merged*.
+      The check is one command: `git cat-file -e origin/main:<path>` for the
+      load-bearing artifact. **A verdict is the one line of a review that gets quoted
+      downstream, so it is the last line allowed to be written from intent.**
 - [ ] **After every agent-branch merge, verify explicitly:** the other agents' owned
       paths are still present (`solvers/`, `experiments/`, `state/coder/`,
       `state/reviewer/`, scaffold files), the file count went **up or stayed equal**,
