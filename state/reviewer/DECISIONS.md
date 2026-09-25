@@ -31,6 +31,23 @@ are reported **honestly, including where we are slower** than a baseline.
    turbulence validation as ready until that definition exists and is
    implemented.
 
+**Status (R5, 2026-09-25):** The laminar half of D3 is now **satisfied and
+verified by the reviewer**: `state/coder/results/taylor_green.json` (coder
+`b2f78fd`) records DLRA rank 1 reproducing the full-grid state to 2.26e-14
+relative L2, `max_energy_increase = -6.7e-3` (strictly monotone kinetic-energy
+decay), and `max|div u| = 1.6e-14`. The 13-test suite passes 13/13 in a clean
+reviewer venv. The forcing-aware half is **still open**:
+`theoretical-research` has produced nothing since R1 (`c2d2e6a`, a scaffold
+edit), and the coder has meanwhile logged a *provisional* residual
+`dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv>` (the advection inner product
+is identically zero for the stream-function form, since `u.grad psi = 0`).
+The reviewer confirms that residual is the correct continuous 2-D energy
+identity. What is missing is (a) a ratified statement of the invariant, and
+(b) an invariant for the **reduced** model — the coder's discrete balance
+subtracts the measured projection work, so it is an accounting identity, not a
+property of the method. D3 stays **OPEN**; per D10 the turbulence validation
+cannot be called final until this exists and the D10 requirements are met.
+
 ## D4 — Novelty claim (2026-09-24)
 
 **Binding.** The claim "no known DLRA incompressible-NS solver is both
@@ -95,6 +112,31 @@ responding to the R2 blocker list, not R3 — their branch had merged
 `main`@`c55d72f` (pre-R3) before updating. The D4 claim is **not** treated as
 settled.
 
+**Status (R5, 2026-09-25):** `abd4d63` (11 commits over `597f65c`) is a real
+improvement: `refs.bib` is now 37 entries / **37 unique keys** / 0 duplicates,
+all 6 R2-verified incompressible-NS ROM entries are restored, `girfoglio2022`
+and Sousedík are correct, and 4 of the 5 new arXiv IDs were verified genuine
+and title-matched by the reviewer (abs pages, 2026-09-25). The 0-hit query is
+now a properly typed `query_result` record in the owned index plus
+`docs/references/novelty_search_results.md`, and the unowned
+`state/arxiv_index.json` and 5 root `test_arxiv*.py` scripts are gone. **But
+integrity blockers were introduced:** (W1) `koch2015projector` cites
+`arXiv:1505.05648`, which is Barbara Schapira's math.DS paper on unique
+ergodicity — and a Crossref title search finds **no** publication matching the
+claimed title/authors/year (the real projector-splitting integrator paper is
+Lubich & Oseledets, BIT Numer. Math. 54(1):171-188,
+10.1007/s10543-013-0454-0, arXiv:1301.1058; "Koch, Olga" does not exist in this
+lineage, the pioneer being **Othmar** Koch); the same invented metadata sits in
+the owned index. (W2) index DOI `10.1007/s00202-019-01435-x` is **unregistered**
+(404 at doi.org *and* at the Crossref works API) and misattributes Koch & Lubich
+2007 SIMAX 29(2):434-454, whose real DOI is 10.1137/050639703. (W5) ownership
+recurred: 8 unowned root files plus `scripts/arxiv_searcher.py`, the latter a
+**D7 scaffold violation**. Verdict **HOLD**, no merge (report
+`reviews/2026-09-25-R5-writing-research-abd4d63.md`). B1 remains closed. The D4
+claim is **not** treated as settled: a survey that yields an unresolvable
+citation has not been fully checked, and a fabricated reference is a
+correctness failure of the survey itself.
+
 ## D5 — Venue (2026-09-24): OPEN
 
 Not yet decided. Awaiting the venue shortlist + recommendation from
@@ -152,6 +194,26 @@ consolidated (two docs still coexist; the shortlist still lists ICASSP 2027,
 deadline passed 2026-09-16). What is owed is one consolidated doc with a
 source URL + access date per deadline, and ICASSP dropped from the shortlist.
 
+**Status (R5, 2026-09-25):** the R4-approved set and framing **stand
+unchanged** (SISC/JCP rolling > ICML 2027 > NeurIPS 2027; DFD/ICASSP/AISTATS
+excluded; scicomp/physics primary). `abd4d63` does not meet the D5
+deliverables and reopens the closed question by writing rather than by asking:
+`docs/venues/` still has **two** documents (`recommendations.md` 61 lines,
+`venue_shortlist.md` 66 lines); **no access date appears anywhere** and the
+document's own notice concedes every deadline is a "projected estimate"; the
+links are venue home pages, not the CfP pages verified in R3; ICASSP survives
+as a "Passed" row plus a full section in the shortlist; and AISTATS is re-added
+at rank 3 with a projected "Oct 6, 2026 IMMINENT" deadline. The new ranking
+(ICML #1, NeurIPS #2, AISTATS #3) under a "Machine Learning Track" primary
+strategy **contradicts** the approved ordering. Reviewer's substantive position,
+recorded so it is not re-litigated: the ML-for-Science framing is wrong for this
+project — there is no learning component in the method or experiments, so ICML /
+NeurIPS would invite the "where is the ML?" objection, while SISC/JCP treats the
+exactness, stability and resolved high-Re validation as the contribution. D5
+stays **OPEN**; `writing-research` must produce one consolidated doc matching
+the approved set, with per-deadline CfP URL + access date, and must send an
+explicit request (not a new recommendation) to reopen the ordering.
+
 ## D6 — Review process: two lenses (2026-09-24)
 
 **Binding.** Every review cycle checks two lenses:
@@ -180,3 +242,80 @@ draft (R2) landed in exactly those paths. The reviewer amended the scaffold
 (PROTOCOL.md ownership table + AGENTS.md key paths) to assign both paths to
 `writing-research`. The existing content on their branch is accepted as-is —
 a scaffold gap, not an agent error; no rework required.
+
+## D9 — Engine v0 approved for merge (2026-09-25)
+
+**Binding.** The coder's engine at `b2f78fd` is **approved and merged into
+`main`**: `solvers/` (spectral grid, stream-function NS kernel, SVD projector,
+adaptive DLRA wrapper, forcings, static-POD baseline), `experiments/` (drivers,
+13-test suite, figure script, README) and `state/coder/results/` (9 provenance-
+bearing JSON artifacts). Basis, all independently verified by the reviewer
+(report `reviews/2026-09-25-R5-coder-b2f78fd.md`):
+
+- **13/13 tests pass** in a clean venv created for the review (numpy 2.5.3,
+  scipy 1.18.1, pytest 9.1.1).
+- **The discrete mathematics is correct** — rFFT conventions, Parseval
+  conjugate-pair weights, `u=(psi_y,-psi_x)`, `omega=-Delta psi`, the
+  `Delta^{-1}` sign, and the energy identity
+  `dE/dt + nu||omega||^2 - <psi,zeta> + <psi,adv>` were each checked by hand.
+- **D3's laminar invariant is met and recorded** (Taylor–Green: rank 1,
+  2.26e-14 error, strictly monotone energy decay, 1.6e-14 divergence).
+- **Scope is clean**: the net diff against `main` touches only `state/coder/`,
+  `solvers/`, `experiments/`. The `AGENTS.md`/`PROTOCOL.md` entries in the
+  intermediate diff are an older base catching up to main's R1 amendment —
+  `git diff origin/main..b2f78fd -- AGENTS.md PROTOCOL.md` is empty, so **D7 is
+  not violated**.
+
+The approval covers the **code and its provenance**, not the conclusions drawn
+from the result files; see D10. The coder's documented judgement calls —
+including "a speedup is not implied", "`stable` is not a claim of long-time
+stability", and omitting an unstable long-horizon POD baseline rather than
+extrapolating it — are endorsed and must survive the re-run.
+
+## D10 — High-Re turbulence validation gate (2026-09-25)
+
+**Binding.** No agent may state, imply, or draft into the paper that this work is
+"validated at high-Re turbulence", or quote the current accuracy numbers
+(DLRA ~0.315 / POD ~1.078 relative L2, rank 2→42), until **all** of the following
+are closed and re-verified by the reviewer. Report
+`reviews/2026-09-25-R5-coder-b2f78fd.md` carries the full evidence.
+
+- **V1** — identical initial states for full-grid, POD and DLRA. The DLRA
+  currently starts from a rank-2 projection of the IC and loses **65% of the
+  kinetic energy before t=0** (7.796 vs 22.207), which is what the headline
+  error actually measures.
+- **V2** — runs long enough to reach statistical stationarity (`T ≈ 20–100`)
+  with `E(t)`/`Z(t)` plateaus and Reynolds-dependent spectra. `T=0.1` is less
+  than one eddy turnover; `max_cfl` is identical (0.0147) at Re=100/1000/5000,
+  so the three Reynolds numbers are not yet distinguished.
+- **V3** — canonical Arnold–Korkin–Sinitsyn Kolmogorov forcing, or an honest
+  rename plus justification. The current `f=(A sin ky,0)` is an unidirectional
+  shear and is not comparable to the DLRA literature.
+- **V4** — a credible, rank-matched static-POD baseline (identical IC, basis
+  fitted on a stationary reference window, POD at r=16/32/42/64), plus a
+  **fixed-rank** run of the same projected integrator to separate the benefit of
+  adaptivity from the benefit of a larger rank. The current POD trajectory has
+  11.4x the reference energy, 159x its enstrophy and an O(1) full-PDE energy
+  residual.
+- **V5** — a real two-grid resolution study (same physical IC, `dt` scaled with
+  `dx`, identical method settings) showing `E`, `Z` and spectra at
+  `N = 64/128/256`. The current "grid check" changes six parameters at once and
+  the full-grid enstrophy differs by 2.25x between N=64 and N=128.
+- **V6** — a decision, with `theoretical-research`, on the method itself: either
+  implement genuine structure-preserving projector splitting (factor ODEs +
+  defect/DG-DGKS correction, with the discrete energy identity) or reframe
+  honestly as a rank-projected low-rank integrator. **As written, the code is
+  neither "DLRA" nor demonstrably "structure-preserving"** (four full `N x N`
+  SVDs per step; energy systematically lost), regardless of how well it is
+  tested. The paper's title claim depends on this.
+- **V7** — real turbulence diagnostics: isotropic energy/enstrophy spectra
+  `E(k)`, `Z(k)` of the full-grid reference over all resolved wavenumbers,
+  time-averaged after stationarity, plus the untruncated state singular-value
+  spectrum. The current "spectrum" is the top-32 singular values of the
+  rank-truncated DLRA state, which cannot support a "slow singular-value decay"
+  claim.
+
+Order matters: V1 first (until it is fixed, no other number is interpretable),
+then V4, V5, V2/V7, then V6/V3. D3's forcing-aware invariant (including one for
+the reduced model) remains open in parallel and still gates the word
+"validated".
