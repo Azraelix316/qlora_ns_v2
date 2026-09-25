@@ -272,9 +272,23 @@ order, not just accuracy.** Any convergence claim must state its rank. Source: R
 | "there is no statistically steady fluctuation state" **as a property of the flow** | **D20.3 — it is a property of the forcing.** The AKS flow *has* a steady cellular state; a periodic shear has no such attractor, so its absence is expected and is not evidence about Kolmogorov flow |
 
 **What the paper studies:** forced 2-D incompressible NS with a **single-mode periodic
-unidirectional shear**, `A ∈ {0.2, 0.5}`, `Re ∈ {100, 1000, 5000}`, `N ∈ {64, 128}`. **The
-implementation of the true AKS pump would invalidate every measurement in the project**, so the
+unidirectional shear**, `A ∈ {0.2, 0.5}`, `Re ∈ {100, 1000, 5000}`, `N ∈ {64, 128}`. The
 resolution is to describe the flow accurately, not to change it (D20.4).
+
+**And the stationarity negative now has a control (D24).** The AKS pump
+`f = (A sin ky, −A k sin kx cos ky)` **was tested, not assumed**: it admits a qualifying S2
+horizon where the shear admits **none** — `N=64, A=0.2, T=4` (`8.9% / 6.5%`) and
+`N=128, A=0.2, T=2` (`0.4% / 6.0%`). **But the window SHRINKS under refinement** (`T=4` fails
+at `N=128`, `Z` drift `12.2%`) and there is **none at `A = 0.5`**. So:
+
+> **Neither forcing admits a resolution-robust stationary fluctuation state at these parameters.**
+> The honest statistic is a **window-dependent quasi-steady fluctuation energy, reported with its
+> window and its measured drift.**
+
+**This is the negative result _plus_ the positive control that makes it credible** — and it is
+why "no stationary state" may be stated at all. **The AKS numbers are reviewer-measured and are
+NOT yet citable** (D24.6): no artifact, and the class is not in `solvers/forcing.py`. **Cite only
+the negative.**
 
 ---
 

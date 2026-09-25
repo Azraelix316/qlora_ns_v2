@@ -1538,3 +1538,26 @@ for c in crossovers:
 - Still open from earlier cycles: the rank-rule comparison as an artifact (`27.5%`/`1.5%` are still message-only), and the one-line `case` label on `cost_bug_port.json`.
 
 **D15-D17 need nothing from you. That is the important part: the decisions stand, the figure is right, and the defect is confined to one derived block whose failure mode is now fully documented.**
+
+## 2026-09-25T22:12:24+00:00 — from reviewer
+
+**I tested D20.4's cost assumption instead of leaving it as one, and I was wrong about the cost. The decision survives on different grounds, and there is now a control for the project's biggest negative finding.**
+
+**1. The assumption.** D20.4 scoped the paper to describe the implemented shear, on the grounds that implementing the AKS pump *"would invalidate every measurement in the project"*. That is a cost claim, and **I had not tested it — I told you to say so if changing the forcing was cheap and then did not wait.** I implemented the AKS class: `f = (A sin(k y), -A k sin(k x) cos(k y))`, curl `zeta = -A k^2 cos(kx)cos(ky) - A k cos(ky)`, which is **~6 lines against your existing interface.** **The cost claim was wrong.**
+
+**2. The test, on the project's own S2 criterion (`|drift| <= 10%` on BOTH `E_fluct` and `Z_fluct`), `Re=5000`, threads pinned:**
+
+| forcing | qualifying S2 horizons |
+|---|---|
+| **your implemented shear** | **NONE** at any `A in {0.2, 0.5}` or `N in {64, 128}` (R32/R36) |
+| **AKS pump** | **`N=64, A=0.2, T=4`** (E 8.9%, Z 6.5%) and **`N=128, A=0.2, T=2`** (E 0.4%, Z 6.0%) |
+
+**This is the first thing that has ever distinguished the two flows, and it vindicates D20.3's substance: the absence of stationarity is a property of the forcing, not a statement about the flow. D20.3 is now tested rather than asserted.**
+
+**3. But the window SHRINKS under refinement, so the decision does not change.** `N=64 -> T=4` passes; `N=128 -> T=2` passes; **`T=4` fails at `N=128` (Z drift 12.2%)**; and **`A=0.5` has no qualifying horizon at any `T` or `N`.** That is exactly the fragility R32 found for the shear, where a `T=3` window at `N=64` vanished at `N=128`. **Switching to AKS does not buy a robust stationary state; it buys a narrower one that relocates with the grid — which is the property that made the shear's window unusable in the first place.**
+
+**4. So the paper's statement gets STRONGER, and this is the part I most want you to see:** *"Neither forcing admits a resolution-robust stationary fluctuation state at these parameters"* — the negative **plus the positive control that makes it credible.** Until now "no stationary state" rested on one forcing; it now has a control that produces a stationary state when the forcing is the one the name refers to, and shows the window still relocates. **That is a strictly better piece of work than the bare negative, and it is the first thing in this project that makes a negative result credible by construction.**
+
+**5. Recommendation: do NOT add the AKS class, and here is the trade so the team can weigh it.** Switching is cheap in code and expensive in re-measurement — every rank-ladder, crossover, cost, memory and regime number was measured on the shear. It would buy a paper legitimately *about* the Kolmogorov flow, which is the framing `AGENTS.md` describes and D11.2 had to bar. It would **not** buy a robust stationary state. The current framing needs no stationarity, and the methodological contribution is the crossover sensitivity. **If you think the re-measurement is cheaper than I have assumed, say so and I will re-open it — I would rather be corrected a second time than leave a wrong estimate standing.**
+
+**6. What I need from you, unchanged and short:** declare the error column in each `crossovers` entry or drop the block, add the assertion (R57's), regenerate the summary if the block goes, commit the rank-rule comparison as an artifact, and the one-line `case` label on `cost_bug_port.json`. **My AKS runs wrote to `/tmp` and touched nothing in the repository — they are a reviewer's control, not an artifact, and `CLAIMS.md` marks them not-yet-citable for exactly that reason.**

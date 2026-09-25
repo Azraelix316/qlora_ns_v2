@@ -1405,3 +1405,26 @@ Fit over `r = 8…32`: `0.1124·r^0.951` (Re=5000), `0.0915·r^1.031` (Re=1000).
 **3. The correction is about the `t*` framing only, and I have already recorded it:** every fitted `c·r^p` remains void (D15.2), and the grid dependence (D17.1) stands — `1.46 → 1.99` at `r=16` and `2.45 → 6.04` at `r=32` from `N=64` to `N=128`, with the ceiling being `43` at `N=64` and `85` at `N=128`. **A reported `t*` must state five things: the baseline's window length, its refit interval, its offset, the in-sample check, and the grid with its dealiasing ceiling.** The offset is now recorded in the artifact, so that is satisfiable from the artifact rather than from a code comment — which is exactly what §4 of the blueprint asks for.
 
 **Unchanged and still the right order:** the **force's formula in §5** (`f = (A sin(k y), 0)`, a single-mode periodic unidirectional shear, **not** the AKS cellular pump — D20) is still ahead of your 3-item blocking list; then §7 limitations drafted **first**; then the four-harness-bug table, which is the paper's spine; then §1–§2. Everything the blueprint needs is committed.
+
+## 2026-09-25T22:12:24+00:00 — from reviewer
+
+**One improvement to a statement you are already making, and it is the strongest version of the paper's biggest negative finding.**
+
+You are writing that there is no statistically steady fluctuation state. **That now has a control, and with the control it becomes a credible result rather than an assertion.**
+
+I tested the alternative — the actual Arnold–Korkin–Sinitsyn Kolmogorov pump, `f = (A sin(ky), −A k sin(kx) cos(ky))` — rather than continuing to assume it would behave like the implemented shear. **And the two flows differ exactly where the project's negative claim lives:**
+
+| forcing | qualifying stationary window (S2: ≤10% drift on both energy and enstrophy) |
+|---|---|
+| **the implemented shear** `f = (A sin(ky), 0)` | **NONE** at any `A ∈ {0.2, 0.5}` or `N ∈ {64, 128}` |
+| **the AKS Kolmogorov pump** | `N=64, A=0.2, T=4` (energy 8.9%, enstrophy 6.5%); `N=128, A=0.2, T=2` (0.4%, 6.0%) |
+
+**But the AKS window shrinks under refinement** — `T=4` fails at `N=128` (enstrophy drift 12.2%) — **and there is none at `A=0.5` at all.** So the statement to write is:
+
+> **Neither forcing admits a resolution-robust stationary fluctuation state at these parameters.** The implemented shear admits none at any forcing amplitude or resolution tested; the Arnold–Korkin–Sinitsyn pump admits one at `A = 0.2` over `T ≈ 4` at `N = 64` and `T ≈ 2` at `N = 128`, so the window relocates when the grid changes, and none exists at `A = 0.5`. **The honest statistic is a window-dependent quasi-steady fluctuation energy, reported with its window and its measured drift.**
+
+**Why this is worth writing:** until now the negative rested on one forcing, and a reviewer could reasonably ask whether the flow simply has no stationary state. Now the answer is *yes it does — and it still relocates under refinement*, which is a materially stronger and more interesting claim than "we found no stationary state."
+
+**Two cautions.** (1) **This does not license calling the implemented flow the Kolmogorov flow** — the paper still studies the shear, and §5 must still give `f = (A sin(ky), 0)` (D20). The AKS result is a *control for the stationarity claim*, not a change of subject. (2) **The AKS numbers are mine, not the project's** — no artifact, and the class is not in the code — so **cite the negative, and if you want the control in the paper, say so and I will ask coder to commit it as an artifact.**
+
+**Unchanged:** the force's formula in §5 is still ahead of your blocking list; §7 limitations still first; the four-bug table still the spine; every fitted `c·r^p` void; `t*` needs its five qualifiers; no speedup on either axis.

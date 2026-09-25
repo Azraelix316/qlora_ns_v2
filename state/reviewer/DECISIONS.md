@@ -1403,3 +1403,76 @@ regenerate `benchmark_summary.json`** so it stops carrying un-provenanced `t*` v
 advantage in time or memory. BUG's rank-dependent cost is the best-evidenced positive claim
 (D19.2). The windowed rank rule is worse (D18.1). The flow is not the Kolmogorov flow (D20).
 Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred claim stands.
+
+---
+
+## D24 — D20.4's **cost** assumption was wrong; its **outcome** is now evidence (2026-09-25)
+
+> **OPERATIVE (R59).** The paper's stationarity statement is strengthened, not changed: **neither
+> forcing admits a resolution-robust stationary fluctuation state at these parameters, and the
+> Kolmogorov pump is the positive control that makes the negative credible.** Do not switch
+> forcings. **D20.4's conclusion stands; its stated reason did not.**
+
+**D24.1 — I tested my own assumption rather than leaving it as one.** D20.4 scoped the paper to
+describe the implemented shear, on the grounds that implementing the Arnold–Korkin–Sinitsyn
+pump *"would invalidate every measurement in the project"*. **That is a cost claim I had not
+tested** — I told coder to say so if changing the forcing was cheap, and then did not wait. The
+AKS class is **~6 lines** against the existing interface, so **the cost claim was wrong.**
+
+**D24.2 — And the test is decisive on the substance.** `Re=5000`, threads pinned, the project's
+own S2 criterion (`|drift| ≤ 10%` on **both** `E_fluct` and `Z_fluct`):
+
+| forcing | qualifying S2 horizons |
+|---|---|
+| **implemented shear**, `f = (A sin ky, 0)` | **NONE** at any `A ∈ {0.2, 0.5}` or `N ∈ {64, 128}` (R32, R36) |
+| **AKS pump**, `f = (A sin ky, −A k sin kx cos ky)` | **`N=64, A=0.2, T=4`** (`8.9% / 6.5%`) and **`N=128, A=0.2, T=2`** (`0.4% / 6.0%`) |
+
+**This is the first thing that has ever distinguished the two flows, and it vindicates D20.3's
+substance** — that the absence of stationarity is a property of the **forcing**, not a statement
+about the flow. **D20.3 is now tested rather than asserted.**
+
+**D24.3 — But the qualifying window SHRINKS under refinement, so the outcome is unchanged.**
+`N=64 → T=4` passes; `N=128 → T=2` passes; **`T=4` fails at `N=128` (`Z` drift `12.2%`)**; and
+`A=0.5` has **no** qualifying horizon at any `T` or `N`. **That is exactly the fragility R32 found
+for the shear**, where a `T=3` window at `N=64` vanished at `N=128`. **Switching to AKS does not
+buy a robust stationary state; it buys a narrower one that relocates with the grid**, which is
+the property that made the shear's window unusable in the first place.
+
+**D24.4 — The paper's stationarity statement, in its strongest supported form.** **Neither
+forcing admits a resolution-robust stationary fluctuation state at these parameters.** The
+implemented shear admits none at any `A` or `N` tested; the AKS pump admits one at `A = 0.2` over
+`T ≈ 4` at `N = 64` and `T ≈ 2` at `N = 128`, so the window relocates under refinement, and none
+at `A = 0.5`. **The honest statistic is a window-dependent quasi-steady fluctuation energy,
+reported with its window and its measured drift** — D20.3's re-attribution, now **with a
+control**, which makes the negative credible rather than merely asserted.
+
+**D24.5 — Do not switch, and here is the trade so the team can weigh it.** Switching is **cheap
+in code and expensive in re-measurement**: every rank-ladder, crossover, cost, memory and regime
+number in the project was measured on the shear, so all of it would be invalidated. What it would
+**buy** is a paper that may legitimately be *about* the Kolmogorov flow, plus a validatable
+quasi-steady state at `A = 0.2` — the framing `AGENTS.md` describes and D11.2 had to bar. What
+it would **not buy** is a robust stationary state, per D24.3. **Recommendation: do not switch** —
+the current framing needs no stationarity and the methodological contribution is the crossover
+sensitivity — **but this is a project-scale trade, so the option is recorded with its evidence
+rather than closed.**
+
+**D24.6 — Provenance, stated plainly.** Reviewer-measured; the runs wrote to
+`/tmp/opencode/r59_aks.json` and `/tmp/opencode/r59_aks_N128.json`; **nothing was written inside
+the repository and no agent branch moved. Per D14.4 this is NOT yet citable** — it needs an
+artifact with a commit, **and the AKS class would have to land in `solvers/forcing.py` for the
+result to be reproducible at all.** Per D24.5 that class should not land, **in which case this
+result stands as a reviewer's control and the paper cites only the negative.**
+
+**D24.7 — The lesson, and it is the third of its family in this project.** **I recorded a cost
+estimate as a decision and moved on.** The estimate was untested, it was the *only* reason for
+D20.4, and testing it took eleven minutes of compute and reversed the reason while leaving the
+decision intact. **An assumption that is the sole basis of a binding decision must be tested or
+labelled as an assumption — and I labelled it in prose without acting on it, which is the same
+defect as R56b's unverified verdict and R57's unrun fix.** The three differ only in which
+artifact the failure would have landed in.
+
+**D24.8 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1). No per-step
+advantage in time or memory. BUG's rank-dependent cost is the best-evidenced positive claim
+(D19.2). The windowed rank rule is worse (D18.1). The `crossovers` block is un-provenanced
+(D23). The flow is the implemented shear and must be described as such (D20). Every D4 barred
+claim stands.

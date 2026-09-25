@@ -30,6 +30,56 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R59 — I TESTED D20.4's COST ASSUMPTION INSTEAD OF LEAVING IT AS ONE, AND I WAS WRONG
+> ABOUT THE COST. The decision survives on different grounds, and the project's biggest negative
+> finding now has a control. D24.** No agent pushed, so I tested the assumption. D20.4 scoped the
+> paper to describe the implemented shear, on the grounds that implementing the AKS pump *"would
+> invalidate every measurement in the project"* — **a cost claim I had not tested. I told coder
+> to say so if changing the forcing was cheap, and then did not wait.** The AKS class is **~6
+> lines** against the existing interface, so **the cost claim was wrong.**
+> **THE TEST, on the project's own S2 criterion (`|drift| <= 10%` on BOTH `E_fluct` and
+> `Z_fluct`), `Re=5000`, threads pinned:**
+
+| forcing | qualifying S2 horizons |
+|---|---|
+| **implemented shear** `f=(A sin ky,0)` | **NONE** at any `A in {0.2,0.5}` or `N in {64,128}` (R32/R36) |
+| **AKS pump** `f=(A sin ky,-A k sin kx cos ky)` | **`N=64, A=0.2, T=4`** (8.9%/6.5%) and **`N=128, A=0.2, T=2`** (0.4%/6.0%) |
+
+**THIS IS THE FIRST THING THAT HAS EVER DISTINGUISHED THE TWO FLOWS, AND IT VINDICATES
+D20.3'S SUBSTANCE** — the absence of stationarity is a property of the forcing, not a statement
+about the flow. **D20.3 is now tested rather than asserted.**
+> **BUT THE WINDOW SHRINKS UNDER REFINEMENT, SO THE DECISION DOES NOT CHANGE.** `N=64 -> T=4`
+> passes, `N=128 -> T=2` passes, **`T=4` FAILS at `N=128`** (Z drift `12.2%`), and **`A=0.5` has
+> no qualifying horizon at any `T` or `N`.** That is **exactly the fragility R32 found for the
+> shear**, where a `T=3` window at `N=64` vanished at `N=128`. **Switching to AKS does not buy a
+> robust stationary state; it buys a narrower one that relocates with the grid — the very
+> property that made the shear's window unusable.**
+> **SO THE PAPER'S STATEMENT GETS STRONGER, and this is the part I most want on the record:
+> *"Neither forcing admits a resolution-robust stationary fluctuation state at these parameters."*
+> That is the negative PLUS the positive control that makes it credible.** Until now "no stationary
+> state" rested on one forcing and a reviewer could reasonably ask whether the flow simply has
+> none. **Now the answer is *yes it does — and it still relocates under refinement* — which is a
+> stronger and more interesting claim than the bare negative, and the first thing in this project
+> that makes a negative result credible by construction.**
+> **RECOMMENDATION: DO NOT SWITCH, and the trade is recorded so the team can weigh it.** Cheap in
+> code, expensive in re-measurement — every rank-ladder, crossover, cost, memory and regime number
+> was measured on the shear. It would buy a paper legitimately *about* the Kolmogorov flow, which
+> is the framing `AGENTS.md` describes and D11.2 had to bar. It would **not** buy a robust
+> stationary state. The current framing needs no stationarity. **I have asked coder to say so if
+> the re-measurement is cheaper than I have assumed — I would rather be corrected a second time
+> than leave a wrong estimate standing.**
+> **PROVENANCE STATED PLAINLY: reviewer-measured, wrote to `/tmp`, touched nothing in the
+> repository, no agent branch moved. Per D14.4 this is NOT yet citable** — it needs an artifact
+> with a commit, **and the AKS class would have to land in `solvers/forcing.py` for the result to
+> be reproducible at all.** `CLAIMS.md` marks it not-yet-citable and instructs citing only the
+> negative.
+> **THE LESSON, AND IT IS THE THIRD OF ITS FAMILY IN THIS PROJECT: I recorded a cost estimate as
+> a decision and moved on.** The estimate was untested, it was the *only* reason for D20.4, and
+> testing it took eleven minutes of compute and **reversed the reason while leaving the decision
+> intact**. **An assumption that is the sole basis of a binding decision must be tested or
+> labelled as an assumption — and I labelled it in prose without acting on it, which is the same
+> defect as R56b's unverified verdict and R57's unrun fix.** The three differ only in which
+> artifact the failure would have landed in.
 > **R58 — CODER'S Re COLUMN IS MERGED AND THE ROWS CONFIRM D15–D17 EXACTLY. But the
 > `crossovers` block is UNCHANGED, and my R57 diagnosis of it was incomplete. D23.**
 > `95f1859` (14 files, +13445/−2357), **merged at `5bdb5e1`, verified post-push per D21**; 159
@@ -1950,6 +2000,65 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R59 — I tested D20.4's cost assumption instead of leaving it as one, and I was
+  wrong about the cost. The decision survives on different grounds, and the project's biggest
+  negative finding now has a control. D24.**
+  No agent pushed, so I tested the assumption. D20.4 scoped the paper to describe the implemented
+  shear, on the grounds that implementing the AKS pump *"would invalidate every measurement in
+  the project"* — **a cost claim I had not tested. I told coder to say so if changing the forcing
+  was cheap, and then did not wait.** The AKS class is **~6 lines** against the existing
+  interface, so **the cost claim was wrong.**
+
+  **The test**, on the project's own S2 criterion (`|drift| ≤ 10%` on **both** `E_fluct` and
+  `Z_fluct`), `Re=5000`, threads pinned:
+
+  | forcing | qualifying S2 horizons |
+  |---|---|
+  | **implemented shear**, `f = (A sin ky, 0)` | **NONE** at any `A ∈ {0.2, 0.5}` or `N ∈ {64, 128}` (R32/R36) |
+  | **AKS pump**, `f = (A sin ky, −A k sin kx cos ky)` | **`N=64, A=0.2, T=4`** (E 8.9%, Z 6.5%) and **`N=128, A=0.2, T=2`** (E 0.4%, Z 6.0%) |
+
+  **This is the first thing that has ever distinguished the two flows, and it vindicates D20.3's
+  substance** — the absence of stationarity is a property of the *forcing*, not a statement about
+  the flow. **D20.3 is now tested rather than asserted.**
+
+  **But the window shrinks under refinement, so the decision does not change.** `N=64 → T=4`
+  passes; `N=128 → T=2` passes; **`T=4` fails at `N=128`** (Z drift `12.2%`); and **`A=0.5` has
+  no qualifying horizon at any `T` or `N`.** That is **exactly the fragility R32 found for the
+  shear**, where a `T=3` window at `N=64` vanished at `N=128`. **Switching to AKS does not buy a
+  robust stationary state; it buys a narrower one that relocates with the grid — the very
+  property that made the shear's window unusable in the first place.**
+
+  **So the paper's statement gets stronger, and this is the part I most want on the record:
+  *"Neither forcing admits a resolution-robust stationary fluctuation state at these parameters."*
+  That is the negative _plus the positive control that makes it credible._** Until now "no
+  stationary state" rested on one forcing, and a reviewer could reasonably ask whether the flow
+  simply has none. **Now the answer is *yes it does — and it still relocates under refinement* —
+  which is a stronger and more interesting claim than the bare negative, and the first thing in
+  this project that makes a negative result credible by construction.**
+
+  **Recommendation: do not switch, and the trade is recorded so the team can weigh it.** Cheap in
+  code, expensive in re-measurement — every rank-ladder, crossover, cost, memory and regime
+  number was measured on the shear. It would buy a paper legitimately *about* the Kolmogorov
+  flow, which is the framing `AGENTS.md` describes and D11.2 had to bar. It would **not** buy a
+  robust stationary state. The current framing needs no stationarity, and the methodological
+  contribution is the crossover sensitivity. **I have asked coder to say so if the
+  re-measurement is cheaper than I have assumed — I would rather be corrected a second time than
+  leave a wrong estimate standing.**
+
+  **Provenance, stated plainly.** Reviewer-measured; the runs wrote to
+  `/tmp/opencode/r59_aks.json` and `/tmp/opencode/r59_aks_N128.json`; **nothing was written inside
+  the repository and no agent branch moved. Per D14.4 this is not yet citable** — it needs an
+  artifact with a commit, **and the AKS class would have to land in `solvers/forcing.py` for the
+  result to be reproducible at all.** `CLAIMS.md` marks it not-yet-citable and instructs citing
+  only the negative.
+
+  **The lesson, and it is the third of its family in this project: I recorded a cost estimate as
+  a decision and moved on.** The estimate was untested, it was the *only* reason for D20.4, and
+  testing it took eleven minutes of compute and **reversed the reason while leaving the decision
+  intact.** **An assumption that is the sole basis of a binding decision must be tested or
+  labelled as an assumption — and I labelled it in prose without acting on it, which is the same
+  defect as R56b's unverified verdict and R57's unrun fix.** The three differ only in which
+  artifact the failure would have landed in.
 - 2026-09-25 **R58 — coder's Re column is merged and the rows confirm D15–D17 exactly. But
   the `crossovers` block is unchanged, and my R57 diagnosis of it was incomplete. D23.**
   `95f1859` (14 files, +13445/−2357), **merged at `5bdb5e1`, verified post-push per D21**;
