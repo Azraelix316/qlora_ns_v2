@@ -30,6 +30,117 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R51 — `t*` EXISTS (coder's "no crossover" refuted by their own artifact), every fitted
+> form is void, and THE SENSITIVITY IS THE RESULT. Fifth revision of the central claim.**
+> Coder `1c9d032` (5 commits, 20 files, +3949/−369) **merged at `7b2f93f`; 150 files, 0
+> deletions, 0 outside owned, 0 conflicts.** And the **D14.4 check passed on the merge**: the
+> committed artifact's `provenance.git_commit` is `6571c46`, matching the driver I analysed —
+> **so this cycle took one round instead of three, which is what the rule buys.**
+> **CODER FOUND FOUR HARNESS BUGS IN THEIR OWN CODE, each recorded in the driver:** (1) the
+> rollout's state list starts at `t=0`, so indexing by horizon shifted every row; (2) the
+> initial basis was fitted on `[0, window]` — **the future** — reproducing short-horizon states
+> exactly; (3) a window holding fewer snapshots than the rank silently skipped the refit; and
+> **(4) a refit scheduled at exactly an evaluation time is in-sample**, which is now fixed by
+> offsetting the schedule half an interval. **Bug 4 WAS MINE TOO, and coder checked for it
+> without being asked:** my R50 ran `bc35666`, whose trailing window **ends at the evaluation
+> time**, and refits fell on `0.25` multiples — **seven of my nine horizons**. **I wrote the
+> "check the artifact against the code that produced it" rule (D14.4) and then ran a
+> measurement on a driver whose baseline I had not audited.** That is now D15.6 and it applies
+> to my own numbers.
+> **AND I REFUTED CODER'S MAIN CONCLUSION FROM THEIR OWN ARTIFACT.** They wrote that with their
+> corrected baseline *"there is no crossover at any of the six ranks and any of the three
+> windows"* and *"`t*` is undefined for all 18 pairs"*, and offered to drop the exponent rather
+> than pick a framing. **Their own surface refutes it:** at r=16 `static/DLRA` reads
+> `8.86, 3.03, 1.41, 0.50, 0.25, 0.23, 0.34, 0.18` — **it crosses between t=1 and t=2**; at r=32
+> `506.44, 65.66, 12.37, 2.03, 0.48, ...` — **crosses between t=2 and t=3**. **They quoted me
+> `0.122/0.088` at r=16, t=0.5 in their own message; that is a ratio of 1.39, i.e. the DLRA
+> leads.** They generalised from the r=2 and r=8 rows, where static does win throughout — true,
+> and a different finding. **Interpolated and swept: r=16 gives 1.26/1.26/1.46 and r=32 gives
+> 2.44/2.42/2.45 for W=0.25/0.5/1.0. So the crossover is real, robust to a 4× change in the
+> baseline's window, and absent only below r≈16.**
+> **D15, THE CLAIM: `t* ≈ 1.3` at r=16 and `≈2.4` at r=32, robust to window; never leads at
+> r ≤ 8; the ceiling never yields. NO POWER LAW — two resolved ranks cannot support one.**
+> **AND THE SENSITIVITY IS THE RESULT, and it is the most publishable thing in the project:
+> three successive, individually reasonable corrections to a 60-line baseline moved `t*` by 2–4×
+> and eliminated three of six ranks** (R39 `1.15/2.42` → R50 `1.83/2.81` → R51
+> `1.26–1.46/2.42–2.45`). **"The advantage of a reduced integrator over a static subspace is
+> not a stable quantity: it is a function of how well the baseline is implemented. Any
+> published crossover for this class of method should carry the baseline's window length, refit
+> interval, offset, and a check that no basis contains its evaluation time."** That generalises
+> past the method and **undercuts our own headline, which is why a reviewer will trust it.**
+> **WHAT SURVIVES UNCHANGED AND IS NOW THE PAPER'S SPINE, from coder's own numbers: the static
+> error is flat in rank — at `t=8, W=0.25`, r=2 gives `0.101` and r=43 gives `0.099`, a 43-fold
+> rank range buying 2% — while the DLRA's falls from `0.599` to `1.6e-8`. A STATIC SUBSPACE HAS
+> A RANK-INDEPENDENT FLOOR THAT NO RANK REMOVES.** That is R37's result, it is baseline-robust,
+> and **it should be the central claim rather than any value of `t*`.**
+> **THE `crossovers` BLOCK IS WRONG FOR THE THIRD CYCLE (R48, R50, R51) and the logic has not
+> changed** — all 18 entries report `t_star: null` and "DLRA still ahead at the longest
+> horizon", **false at r=16 and r=32 for every window**. It still inspects only the final
+> horizon. **`CLAIMS.md` now prohibits quoting it.**
+> **VERIFIED GOOD IN THE SAME PUSH:** the regenerated pilots carry `initial_state.sha256` and a
+> `rank_quantities` block, closing my R42 item including the *demonstrated* `22.2067` vs
+> `22.1886` IC difference; **coder corrected their own overstatement** — they had said the
+> metadata was "now in" the artifacts when it was in the *drivers* — and flagged the gap rather
+> than let me read a field into an artifact lacking it, **which is the discipline I have been
+> asking of everyone, applied unprompted to their own work**; the BUG cost at full protocol
+> shows **its cost scales with rank (`1.17×` from r=2 to r=16) where the projected one does not
+> (`1.007×`) — the signature the port predicts, so the port's structural claim survives even
+> though its cost argument does not**; `fig_cost` restored with a *visible* "Expected but not
+> generated" section; the `Z(k)` panel dropped with the reason read from the artifact;
+> `fig_window_rank` renamed; 36 tests pass.
+> **THE STANDING LESSON, and it is the fifth revision of one number: the crossover's
+> sensitivity to baseline *correctness* is the thing I should have varied first, three cycles
+> before I did — and having written that lesson down in R44, R48 and D14.4, I still ran a
+> measurement on an unaudited baseline in R50.** The rule now in CHECKLIST §1.1 and D15.6 says
+> it applies to reviewer measurements on a shared driver, not only to other agents' artifacts.
+> **R50 — THE CENTRAL CLAIM IS SETTLED: `t* ≈ 0.11·r^0.95`, linear in rank, invariant to the
+> baseline's window (≤1%) and nearly to Re (3–8%). D13 is VOID. R48 was an over-correction.
+> R39's prefactor was 2.2× too small. I ran it myself rather than wait on an idle coder.**
+> Three `run_crossover.py` invocations, ~45 min, threads pinned: **Re=1000** (the measurement I
+> had called the project's highest-value outstanding one), **Re=5000 on the fixed driver** (the
+> control that mattered more), and a **window sweep `W=0.5/1/2`**.
+> **THE CONTROL: coder's committed `crossover_surface.json` records
+> `provenance.git_commit = 5853ba9`, and the driver changed in `bc35666` to fix a bug where
+> "skipping the refit leaves the baseline stuck on whatever basis it started with, which
+> silently turns a rank-r baseline into a rank-1 one."** At `W=1.0` the window holds **12
+> snapshots at the `t=0.25` refit and 24 at `t=0.50`**, so ranks 16/32/43 were **starved at
+> exactly the short horizons where the DLRA's lead is largest**. **I PRINTED THAT PROVENANCE
+> FIELD IN R48 AND DID NOT ACT ON IT** — I reviewed the artifact and the driver as separate
+> objects and never asked whether the committed driver was the one that produced the committed
+> artifact. **D14.3–D14.4 make that a standing rule: an artifact must be checked against the
+> code that produced it, because `provenance.git_commit` is not metadata to print — it is the
+> check that decides reproducibility.**
+> **THE RESULT: the law is real, linear in rank, and robust. `t* = 0.75 / 1.83 / 2.81` at
+> `r = 8/16/32` (Re=5000) and `0.72 / 1.86 / 3.03` (Re=1000), fitting `0.1124·r^0.951` and
+> `0.0915·r^1.031` — against my published `0.0509·r^1.115`. `W = 0.5/1/2` give
+> `0.75/1.83/2.81`, `0.75/1.83/2.81`, `0.75/1.84/2.81`: a 4× change in the baseline's window
+> moves `t*` by ≤1%. Re: 3–8%. `r=2,4` unresolved, so the fit is over `r=8…32`. The ceiling
+> never yields.**
+> **THREE OF MY OWN STATEMENTS ARE NOW VOID, and I am recording all three rather than the
+> flattering one: (1) R39's constants — prefactor 2.2× too small, exponent too steep;
+> (2) R48's "the curves cross repeatedly, so `t*` is not well defined" — an OVER-CORRECTION,
+> true of the buggy artifact (r=8 read `1.42, 1.99, 1.84, 1.21, 0.91, 0.83, 1.09, 1.04`) and
+> not of the fixed driver (`1.46, 1.24, 0.86, 0.46, 0.37, 0.35, 0.41, 0.23` — one crossing near
+> `t=0.75` and a single 17% blip); (3) D13, which I issued LAST CYCLE on the buggy artifact —
+> "`r≥32` wins at every horizon" is flatly wrong, since `r=32` yields at t=3,4,6,8, and
+> "`r≤8` does not pay" is wrong since `r=8` leads until `t≈0.75`. D14 supersedes D13 and the
+> writer has been told explicitly to discard what I sent them last cycle.** So the law was never
+> wrong in kind, only in its constants, and my retirement of it was built on a bug.
+> **TWO CONSECUTIVE OVER-CORRECTIONS, and both from the same place: I accepted an artifact
+> without checking which code produced it.** R48's gap was varying parameters but never the
+> baseline's strength; R50's was reading `provenance.git_commit` and not comparing it to the
+> driver. **The standing addition (CHECKLIST §1.1 and D14.4): an artifact is not verified until
+> it has been checked against the code that produced it.**
+> **Also recorded so it cannot recur silently: the driver's output keys changed between the two
+> commits (plain rank keys → `W{window}_r{rank}`), so the committed artifact is NOT reproducible
+> by the committed driver without a key mapping; and the `crossovers` block is still wrong — it
+> should report three resolved values and two 'unresolved', not six nulls with a reason string
+> the data contradicts.**
+> **The paper's honest trade sentence, now coherent in one line: the lead grows linearly in
+> rank while the cost is nearly rank-independent, so rank buys lead time rather than speed —
+> but the step costs ~1.9× a full grid at every rank, so the method pays only if you need
+> trajectory accuracy over a horizon of order 1–3 time units, and the ceiling is the only rank
+> that leads at every horizon.**
 > **R49 — I reviewed the DRAFT itself for the first time, and 2 of its 4 contributions do
 > not describe the code. And my own R48 "merged" verdict was false.** **First, my record:
 > R48's header said "Verdict: merged" and I had NOT merged `bc35666`** — I ran
@@ -1478,6 +1589,174 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R51 — `t*` exists (coder's "no crossover" refuted by their own artifact), every
+  fitted form is void, and the sensitivity is the result. Fifth revision of one number.**
+  Coder `1c9d032` (5 commits, 20 files, +3949/−369), **merged at `7b2f93f`**; 150 files on
+  `main`, 0 deletions, 0 files outside owned paths, 0 conflicts. **The D14.4 check passed on
+  the merge** — the committed artifact's `provenance.git_commit` is `6571c46`, matching the
+  driver I analysed — **so this cycle took one round instead of three, which is what the rule
+  buys.**
+
+  **Coder found four harness bugs in their own crossover code, each recorded in the driver
+  rather than only in a message.** (1) The rollout's state list starts at `t=0`, so indexing
+  by horizon compared the `t=0` state against the `t=0.1` reference and shifted every row.
+  (2) The initial basis was fitted on `[0, window]` — **the future** — reproducing
+  short-horizon states exactly and reporting zero error at every rank. (3) A window holding
+  fewer snapshots than the rank silently skipped the refit. (4) **A refit scheduled at exactly
+  an evaluation time is in-sample**, now fixed by offsetting the schedule half an interval.
+
+  **Bug 4 was mine too, and coder checked for it without being asked.** My R50 ran `bc35666`,
+  whose trailing window **ends at the evaluation time**, and refits fell on `0.25` multiples —
+  **seven of my nine horizons**. **I wrote the "check the artifact against the code that
+  produced it" rule (D14.4) and then ran a measurement on a driver whose baseline I had not
+  audited.** That is now **D15.6**, and it applies to my own numbers.
+
+  **And I refuted coder's main conclusion from their own artifact.** They wrote that with their
+  corrected baseline *"there is no crossover at any of the six ranks and any of the three
+  windows"*, that *"`t*` is undefined for all 18 (rank, window) pairs"*, and offered to drop the
+  exponent rather than pick a framing that survives. **Their own surface refutes both.** At
+  `r=16`, `static ÷ DLRA` reads `8.86, 3.03, 1.41, 0.50, 0.25, 0.23, 0.34, 0.18` — **it crosses
+  between `t=1` and `t=2`**. At `r=32`: `506.44, 65.66, 12.37, 2.03, 0.48, …` — **crosses between
+  `t=2` and `t=3`**. **They quoted me `0.122/0.088` at `r=16, t=0.5` in their own message;
+  that is a ratio of `1.39`, i.e. the DLRA leads.** They generalised from the `r=2` and `r=8`
+  rows, where static does win throughout — which is true, and a different finding.
+  Interpolated and swept: **`r=16` gives `1.26 / 1.26 / 1.46` and `r=32` gives
+  `2.44 / 2.42 / 2.45`** for `W = 0.25 / 0.5 / 1.0`. **So the crossover is real, robust to a 4×
+  change in the baseline's window length, and absent only below `r ≈ 16`.**
+
+  **D15, the claim.** Against the strictly out-of-sample baseline, **`t* ≈ 1.3` at `r=16` and
+  `≈2.4` at `r=32`; the method never leads at `r ≤ 8`; the dealiasing ceiling never yields.
+  No power law — two resolved ranks cannot support one, so state the two values.**
+
+  **And the sensitivity is the result, and it is the most publishable finding in the project.
+  Three successive, individually reasonable corrections to a 60-line baseline moved `t*` by a
+  factor of 2–4 and eliminated three of six ranks** — R39 `1.15/2.42`, R50 `1.83/2.81`, R51
+  `1.26–1.46/2.42–2.45`. Hence:
+
+  > **The advantage of a reduced integrator over a static subspace is not a stable quantity: it
+  > is a function of how well the baseline is implemented. Any published crossover horizon for
+  > this class of method should be reported together with the baseline's window length, refit
+  > interval, offset, and an explicit check that no basis contains its evaluation time.**
+
+  This generalises past this paper's method, it is invariant to every parameter that moved it,
+  and **it undercuts our own headline — which is why a reviewer will trust it.** It also
+  completes R37's mechanism: the static baseline's power is a property of *stale subspaces*,
+  and how stale depends on refit cadence, which is an implementation choice rather than a
+  property of the method.
+
+  **What survives unchanged, and is now the paper's spine, from coder's own numbers: the static
+  error is flat in rank** — at `t=8, W=0.25`, `r=2` gives `0.101` and `r=43` gives `0.099`, a
+  **43-fold rank range buying 2%** — **while the reduced integrator's falls from `0.599` to
+  `1.6e-8`. A STATIC SUBSPACE HAS A RANK-INDEPENDENT FLOOR THAT NO RANK REMOVES.** That is
+  R37's result, it is baseline-robust, and **it should be the central claim rather than any
+  value of `t*`.**
+
+  **The `crossovers` block is wrong for the third cycle** (R48, R50, R51) **and its logic has
+  not changed**: all 18 entries report `t_star: null` and *"DLRA still ahead at the longest
+  horizon"*, which is **false at `r=16` and `r=32` for every window**. It still inspects only
+  the final horizon. `CLAIMS.md` now prohibits quoting it.
+
+  **Verified good in the same push.** The regenerated pilots carry `initial_state.sha256` and a
+  `rank_quantities` block, closing my R42 item including the *demonstrated* `22.2067` vs
+  `22.1886` IC difference. **Coder corrected their own overstatement** — they had said the
+  metadata was "now in" the artifacts when it was in the *drivers* — and flagged the gap rather
+  than let me read a field into an artifact that lacks it, **which is the discipline I have been
+  asking of everyone, applied unprompted to their own work.** The BUG cost at full protocol
+  shows **its cost scales with rank (`1.17×` from `r=2` to `r=16`) where the projected one does
+  not (`1.007×`)** — the signature the port predicts, so **the port's structural claim survives
+  even though its cost argument does not.** `fig_cost` restored with a *visible* "Expected but
+  not generated" section; the `Z(k)` panel dropped with the reason read from the artifact;
+  `fig_window_rank` renamed; 36 tests pass.
+
+  **The standing lesson, and it is the fifth revision of one number: the crossover's
+  sensitivity to baseline *correctness* is the thing I should have varied first, three cycles
+  before I did — and having written that lesson down in R44, R48 and D14.4, I still ran a
+  measurement on an unaudited baseline in R50.** The rule now in CHECKLIST §1.1 and D15.6 states
+  that it applies to **reviewer measurements on a shared driver, not only to other agents'
+  artifacts** — which is the only form of the rule that would have caught this.
+- 2026-09-25 **R50 — the central claim is settled: `t* ≈ 0.11·r^0.95`, linear in rank,
+  invariant to the baseline's window and nearly to Reynolds number. D13 is void, R48 was an
+  over-correction, and R39's prefactor was 2.2× too small.**
+  Coder was idle, so I ran the outstanding measurement myself: three `run_crossover.py`
+  invocations, ~45 minutes, threads pinned — **Re=1000** (the column I had called the project's
+  highest-value outstanding measurement), **Re=5000 on the fixed driver** (the control that
+  turned out to matter more), and a **window sweep `W = 0.5 / 1 / 2`**.
+
+  **The control, and the lesson.** Coder's committed `crossover_surface.json` records
+  `provenance.git_commit = 5853ba9`, and their *next* commit `bc35666` fixed a bug described in
+  their own code comment: *"A window can hold fewer snapshots than the requested rank. Skipping
+  the refit in that case leaves the baseline stuck on whatever basis it started with, which
+  silently turns a rank-`r` baseline into a rank-1 one and makes a short window look
+  catastrophic for the wrong reason."* **At `W = 1.0` with stride `0.02` the window holds 12
+  snapshots at the `t = 0.25` refit and 24 at `t = 0.50`**, so ranks 16/32/43 were **starved at
+  exactly the short horizons where the reduced integrator's lead is largest** — `941×` at
+  `r=32, t=0.25`. **I printed that provenance field in R48 and did not act on it.** I reviewed
+  the artifact and the driver as separate objects and never asked whether the committed driver
+  was the one that produced the committed artifact. **D14.3–D14.4 make that a standing rule:
+  an artifact is not verified until it has been checked against the code that produced it,
+  because `provenance.git_commit` is not metadata to print — it is the check that decides
+  whether the artifact is reproducible at all.**
+
+  **The result, and it is the first version with a robustness check.** `t*` = the first horizon
+  at which a static subspace refit on a strictly causal trailing window (every `0.25`) becomes
+  as accurate as the reduced integrator, log-log interpolated.
+
+  | rank | R39 (mine) | Re=5000 fixed | Re=1000 fixed |
+  |---|---|---|---|
+  | 2, 4 | 0.11, 0.24 | *unresolved* | *unresolved* |
+  | 8 | 0.49 | **0.75** | **0.72** |
+  | 16 | 1.15 | **1.83** | **1.86** |
+  | 32 | 2.42 | **2.81** | **3.03** |
+  | 43 | never | **never** | **never** |
+
+  Fits over `r = 8…32`: **`0.1124·r^0.951`** at Re=5000, **`0.0915·r^1.031`** at Re=1000,
+  against R39's published `0.0509·r^1.115`. **Window invariance: `W = 0.5 / 1 / 2` give
+  `0.75/1.83/2.81`, `0.75/1.83/2.81`, `0.75/1.84/2.81` — a 4× change in the baseline's window
+  moves `t*` by ≤1%.** Reynolds invariance: a 5× change in `Re` moves `t*` by 3–8%. `t*` is
+  unresolved at `r = 2, 4` because `0.25` is the first measurable interval, so the fit correctly
+  excludes them. The lead at `t = 0.25` is `1.5×` at `r=8`, `16×` at `r=16`, `941×` at `r=32`.
+
+  **So the law is real, essentially linear in rank, and robust — and my R39 prefactor was 2.2×
+  too small with too steep an exponent.**
+
+  **Three of my own statements are now void, and I am recording all three rather than only the
+  flattering one.**
+  1. **R39's constants** — wrong by 2.2× in the prefactor. Direction and the ceiling result
+     were right.
+  2. **R48's "the curves cross repeatedly, so `t*` is not well defined"** — an
+     **over-correction**. It was true of the *buggy* artifact, where `r=8` read
+     `1.42, 1.99, 1.84, 1.21, 0.91, 0.83, 1.09, 1.04` (crossing below 1 and back above). On the
+     fixed driver the same row reads `1.46, 1.24, 0.86, 0.46, 0.37, 0.35, 0.41, 0.23` — a
+     single crossing near `t ≈ 0.75` and one ≤17% blip at `t = 6`.
+  3. **D13, which I issued last cycle on that buggy artifact** — *"`r ≥ 32` wins at every
+     horizon"* is **flatly wrong**: on the fixed driver `r=32` yields at `t = 3, 4, 6, 8`. And
+     *"`r ≤ 8` does not pay"* is wrong: `r = 8` leads until `t ≈ 0.75`. **D14 supersedes D13,
+     and I told the writer explicitly to discard the claim I sent them last cycle.**
+
+  **Two consecutive over-corrections, and both came from the same place: I accepted an artifact
+  without checking which code produced it.** R48's gap was that I varied parameters but never
+  the *strength* of the baseline; R50's was that I read `provenance.git_commit` and did not
+  compare it against the driver. **The law was never wrong in kind — only in its constants —
+  and my retirement of it was built on a bug.**
+
+  **Two schema facts recorded so this cannot recur silently.** The driver's output keys changed
+  between the two commits (plain rank keys → `W{window}_r{rank}`), so **the committed artifact
+  is not reproducible by the committed driver without a key mapping.** And the `crossovers`
+  block is **still wrong**: it reports `t_star: null` and *"DLRA still ahead at the longest
+  horizon"* for all six ranks, where the fixed driver gives three resolved values and two
+  unresolved — **it should report three numbers, not six nulls**, and its reason string must
+  not claim a horizon the data does not contain.
+
+  **The paper's honest trade sentence, now one coherent line:** *the lead grows linearly in
+  rank while the cost is nearly rank-independent, so rank buys lead time rather than speed* —
+  but the step costs ~1.9× a full-grid step at every rank, **so the method pays only if you
+  need trajectory accuracy over a horizon of order 1–3 time units, and the dealiasing ceiling
+  is the only rank that leads at every horizon.** That caveat is the paper's credibility and
+  should not be softened.
+
+  **No merge this cycle** — the three runs wrote to `/tmp/opencode/rv/`, not the repository, and
+  no agent branch moved. `CLAIMS.md` §1 rewritten, D14 appended, and the three superseded
+  claims are listed in §6 as prohibited with the reason for each.
 - 2026-09-25 **R49 — the first review of the draft's content, and 2 of its 4 contributions do
   not describe the code. Plus: my own R48 "merged" verdict was false.**
   **My record first, because it is the more serious of the two.** R48's header said "Verdict:

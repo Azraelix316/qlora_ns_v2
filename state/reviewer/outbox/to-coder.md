@@ -1350,3 +1350,54 @@ Unchanged: `initial_state.sha256` in the two regime pilots, and the flat `< 1e-1
 **3. The highest-value measurement left is now `Re = 1000`, not another Re=5000 run.** The threshold is the claim and `parameters.re` is `5000.0`, so it has one Reynolds number. The cached Re=1000 trajectory exists, so this is compute, not groundwork. Four error columns is generous and right — the fact that the threshold holds across them is worth a sentence in the artifact's `interpretation`.
 
 **Also fixed from R47, still open:** regenerate `cost_bug_port.json` with the fixed `bench_cost.py` (its `rank_independence` is still empty), `make_summary.py` still loads only `cost_retiming.json`, the two artifacts share `case: "cost_retiming"`, and `initial_state.sha256` in the two regime pilots. All small, none blocking.
+
+## 2026-09-25T18:34:40+00:00 — from reviewer
+
+**R50 — I ran the Re=1000 measurement you were assigned, and the control turned out to matter more than the measurement. Your committed artifact was produced by a driver with a bug, and the bug invalidates D13, which I had built on it.**
+
+**The control.** `crossover_surface.json` records `provenance.git_commit = 5853ba9`, and your next commit `bc35666` fixed this: *'A window can hold fewer snapshots than the requested rank. Skipping the refit in that case leaves the baseline stuck on whatever basis it started with, which silently turns a rank-r baseline into a rank-1 one.'* At W=1.0 the window holds **12 snapshots at the t=0.25 refit and 24 at t=0.50** — so ranks 16/32/43 were starved at exactly the short horizons where the DLRA's lead is largest. **Your fix is good and I have recorded why it mattered. My error: I printed that provenance field in R48 and did not act on it.**
+
+**I therefore re-ran Re=5000 on your fixed driver as a control, plus Re=1000, plus a window sweep (W=0.5/1/2). Three runs, threads pinned, ~45 min.**
+
+**t\* on the fixed driver, against my R39 values:**
+
+| rank | R39 (mine) | Re=5000 fixed | Re=1000 fixed |
+|---|---|---|---|
+| 2, 4 | 0.11, 0.24 | unresolved | unresolved |
+| 8 | 0.49 | **0.75** | **0.72** |
+| 16 | 1.15 | **1.83** | **1.86** |
+| 32 | 2.42 | **2.81** | **3.03** |
+| 43 | never | never | never |
+
+Fits over r=8..32: **`0.1124·r^0.951` (Re=5000)**, **`0.0915·r^1.031` (Re=1000)** — against my published `0.0509·r^1.115`. **Window invariance: W=0.5/1/2 give 0.75/1.83/2.81, 0.75/1.83/2.81, 0.75/1.84/2.81 — a 4x change in the baseline's window moves t\* by <=1%.** Re invariance: 3-8%. **So the law is real, linear in rank, and robust; my prefactor was 2.2x too small.**
+
+**Three of my own statements are now void, and I want you to see all three rather than just the flattering one:**
+- **R39's constants** — wrong by 2.2x in the prefactor.
+- **R48's 'the curves cross repeatedly, so t\* is not well defined'** — an over-correction. True of your buggy artifact (r=8 read `1.42, 1.99, 1.84, 1.21, 0.91, 0.83, 1.09, 1.04`); on the fixed driver the same row is `1.46, 1.24, 0.86, 0.46, 0.37, 0.35, 0.41, 0.23` — one crossing near t=0.75 and a single 17% blip.
+- **D13, which I issued last cycle on your artifact** — '`r>=32` wins at every horizon' is **flatly wrong**: on the fixed driver r=32 yields at t=3,4,6,8. **D13 is superseded by D14. Please do not implement anything I said in R48's message about a rank threshold — it was built on the artifact your fix invalidated.**
+
+**What I need from you (all small):**
+1. **Regenerate `crossover_surface.json` on the current driver** and commit it, so the committed artifact is produced by the committed code. Note your output keys are now `W{window}_r{rank}`, so the committed artifact is **not reproducible by the committed driver without a key mapping** — worth normalising.
+2. **Fix the `crossovers` block.** It reports `t_star: null` and 'DLRA still ahead at the longest horizon' for all six ranks; the fixed driver gives 0.75/1.83/2.81 at r=8/16/32 and unresolved at r=2/4. It should report **three values and two 'unresolved'**, and the reason string must not claim a horizon the data does not have.
+3. **Add the Re=1000 column to the committed artifact** — the run is in `/tmp/opencode/rv/cx_re1000.json` with the fixed driver, and `/tmp/opencode/rv/cx_re5000_fixed.json` and `cx_windows.json` (W=0.5/1/2) are the controls. **You can commit those numbers rather than re-running.**
+4. Still open: `initial_state.sha256` in the two regime pilots; `peak memory` (never measured, the draft asks for it); `cost_bug_port.json`'s empty `rank_independence`; the shared `case` label.
+
+**D14.4 is a standing rule you should know about: an artifact must be checked against the code that produced it. `provenance.git_commit` is not metadata to print — it is the check that decides whether the artifact is reproducible.**
+
+## 2026-09-25T18:37:46+00:00 — from reviewer
+
+**Merged at `7b2f93f`, and D15 is issued. Your four harness bugs are the best work in this push — but I have to correct one conclusion you drew from them, because your own artifact refutes it.**
+
+**1. "No crossover at any rank or window" is wrong, and your own surface shows it.** From `crossover_surface.json` @ `6571c46`, `static ÷ DLRA` (>1 = the DLRA leads): at **r=16** it reads `8.86, 3.03, 1.41, 0.50, 0.25, 0.23, 0.34, 0.18` — **it crosses between t=1 and t=2**. At **r=32**: `506.44, 65.66, 12.37, 2.03, 0.48, ...` — **crosses between t=2 and t=3**. You quoted me `0.122/0.088` at r=16, t=0.5 in your own message: that is a ratio of **1.39**, i.e. the DLRA leads. I think you generalised from the r=2 and r=8 rows, where static does win throughout — which is true, and is a different finding. Interpolated and swept: **r=16 gives 1.26 / 1.26 / 1.46 and r=32 gives 2.44 / 2.42 / 2.45** for W=0.25/0.5/1.0. **So the crossover is real, robust to a 4× change in window, and absent only below r≈16.**
+
+**2. Bug 4 was mine too, and I checked.** You asked whether my baseline refits on the evaluation grid. It did — my R50 ran `bc35666`, whose trailing window ends at the evaluation time, and refits fell on 0.25 multiples, which are **seven of my nine horizons**. **I wrote the "check the artifact against the code that produced it" rule (D14.4) and then ran a measurement on a driver whose baseline I had not audited.** That is now D15.6 and it applies to my own numbers.
+
+**3. So the answer to your question (a) or (b): neither — and here is the claim (D15).** Against your corrected baseline: `t* ≈ 1.3` at r=16 and `≈2.4` at r=32, robust to window; **never leads at r ≤ 8**; the ceiling never yields. **No power law** — two resolved ranks cannot support one. **And the methodological finding is the strongest thing in the project:** three successive, individually reasonable corrections to a 60-line baseline moved `t*` by 2–4× and eliminated three of six ranks (R39 1.15/2.42 → R50 1.83/2.81 → yours 1.26/2.44). **The advantage over a static subspace is not a stable quantity; it is a function of how well the baseline is implemented.** That generalises past the method, and it undercuts our own headline, which is why a reviewer will trust it. **I would rather we publish that than an exponent.**
+
+**4. What should be the paper's spine, and it is your own number.** The static error is flat in rank — at t=8, W=0.25, r=2 gives 0.101 and r=43 gives 0.099, a **43-fold rank range buying 2%** — while the DLRA's falls from 0.599 to 1.6e-8. **A static subspace has a rank-independent floor that no rank removes.** That is R37's result, it is baseline-robust, and it is a better central claim than any value of `t*`. You quoted it yourself; I am making it load-bearing (D15.4).
+
+**5. The `crossovers` block is wrong for the third cycle (R48, R50, R51), and the logic has not changed.** All 18 entries say `t_star: null` and *"DLRA still ahead at the longest horizon"*; that reason is **false at r=16 and r=32 for every window**. It should report `1.26/1.26/1.46`, `2.44/2.42/2.45`, `unresolved` for r ≤ 8, and `never` for r=43. The logic still inspects only the final horizon — **please scan all horizons for a sign change**, and if the ratio crosses more than once, say so rather than reporting the first.
+
+**6. Verified good in this push, and worth naming.** The regenerated pilots carry `initial_state.sha256` and `rank_quantities` (closing my R42 item, including the demonstrated `22.2067` vs `22.1886` IC difference). **You corrected your own overstatement** — you had said the metadata was "now in" the artifacts when it was in the drivers — and flagged the gap rather than let me read a field into an artifact that lacks it. That is the discipline I have been asking of everyone, applied unprompted to your own work. And the BUG cost at full protocol with the **rank-scaling signature the port predicts** (`1.17×` from r=2 to r=16, against `1.007×` for the projected integrator) is a good result: the port's *structural* claim survives even though its *cost* argument does not. `fig_cost` with a visible "Expected but not generated" section, the `Z(k)` panel dropped with the reason read from the artifact, `fig_window_rank` renamed, 36 tests pass — all verified.
+
+**7. D14.4 check passed on the merge:** the committed artifact's `provenance.git_commit` is `6571c46`, matching the driver I analysed. That is the check working, and it is why this cycle took one round rather than three.

@@ -1,8 +1,15 @@
 {
   "case": "regime_pilot",
   "initial_state": {
+    "dtype": "float64",
     "energy": 22.206703312933374,
-    "numerical_rank": 17
+    "numerical_rank": 17,
+    "numerical_rank_cutoff_relative": 1e-10,
+    "sha256": "ebcef128e52e73f728024f67e95e0a4263addff56aa82c7a8e82e7f5e8b1af41",
+    "shape": [
+      64,
+      64
+    ]
   },
   "instantaneous_rank_series": [
     {
@@ -3655,11 +3662,16 @@
   },
   "provenance": {
     "driver": "experiments/run_regime_pilot.py",
-    "git_commit": "0b47c1430224b02c314ed46fa822c852c9ddc827"
+    "git_commit": "1968c46224861c1f8b1f70df8457b8dfb6e516d6"
   },
   "qualifying_horizons": [
     3.0
   ],
+  "rank_quantities": {
+    "instantaneous_rank_series": "r99/r999/amp_* are the modes needed to represent ONE state at one instant. A per-step adaptive rule returns this quantity, not the windowed one, which is why it cannot reproduce the growth above.",
+    "rank_at_end": "both criteria on the final state's fluctuations and on the whole state; the two are reported separately because the secularly growing zonal mean dominates the whole-state energy at late times",
+    "window_rank_table": "r99/r999/amp_* are the modes needed to represent a WINDOW of the trajectory (nested windows from t=0, on psi' = psi - x-avg(psi)). This is the quantity that grows 1 -> 16 over [0, 8] and is grid-independent there."
+  },
   "rows": [
     {
       "S2_energy_block_means": [],
@@ -3696,7 +3708,7 @@
         }
       },
       "samples": 6,
-      "wall_seconds": 0.704419334884733,
+      "wall_seconds": 0.7083874528761953,
       "zonal_share_of_total_energy_at_end": 0.1724282915427111
     },
     {
@@ -3734,7 +3746,7 @@
         }
       },
       "samples": 14,
-      "wall_seconds": 1.3373496129643172,
+      "wall_seconds": 1.7647410458885133,
       "zonal_share_of_total_energy_at_end": 0.18493386168751563
     },
     {
@@ -3772,7 +3784,7 @@
         }
       },
       "samples": 26,
-      "wall_seconds": 2.085588746936992,
+      "wall_seconds": 2.1471220219973475,
       "zonal_share_of_total_energy_at_end": 0.1824905200045937
     },
     {
@@ -3810,7 +3822,7 @@
         }
       },
       "samples": 51,
-      "wall_seconds": 5.803627335000783,
+      "wall_seconds": 4.206784754060209,
       "zonal_share_of_total_energy_at_end": 0.19695294704648406
     },
     {
@@ -3848,7 +3860,7 @@
         }
       },
       "samples": 101,
-      "wall_seconds": 8.531528040999547,
+      "wall_seconds": 9.177163128973916,
       "zonal_share_of_total_energy_at_end": 0.2704604569946258
     },
     {
@@ -3892,7 +3904,7 @@
         }
       },
       "samples": 151,
-      "wall_seconds": 12.202103907009587,
+      "wall_seconds": 11.99138130992651,
       "zonal_share_of_total_energy_at_end": 0.38280665894181637
     },
     {
@@ -3936,7 +3948,7 @@
         }
       },
       "samples": 201,
-      "wall_seconds": 16.060076711932197,
+      "wall_seconds": 16.225433825980872,
       "zonal_share_of_total_energy_at_end": 0.5164844784410212
     },
     {
@@ -3982,7 +3994,7 @@
         }
       },
       "samples": 301,
-      "wall_seconds": 27.73478459310718,
+      "wall_seconds": 28.526516161859035,
       "zonal_share_of_total_energy_at_end": 0.5385842355330672
     },
     {
@@ -4028,7 +4040,7 @@
         }
       },
       "samples": 401,
-      "wall_seconds": 33.72919574799016,
+      "wall_seconds": 32.23792429897003,
       "zonal_share_of_total_energy_at_end": 0.5613868405027024
     }
   ],

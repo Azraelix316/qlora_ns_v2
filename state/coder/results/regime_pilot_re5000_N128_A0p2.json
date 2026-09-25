@@ -1,8 +1,15 @@
 {
   "case": "regime_pilot",
   "initial_state": {
+    "dtype": "float64",
     "energy": 22.188588576546824,
-    "numerical_rank": 17
+    "numerical_rank": 17,
+    "numerical_rank_cutoff_relative": 1e-10,
+    "sha256": "30a40ea4bb24b74294e1b205e24dbe4dd7b07810c04d4a3c0ee657a145d3cb35",
+    "shape": [
+      128,
+      128
+    ]
   },
   "instantaneous_rank_series": [
     {
@@ -7251,9 +7258,14 @@
   },
   "provenance": {
     "driver": "experiments/run_regime_pilot.py",
-    "git_commit": "f9ade4f8693df0b13c939890790fc2e97ed5b11f"
+    "git_commit": "1968c46224861c1f8b1f70df8457b8dfb6e516d6"
   },
   "qualifying_horizons": [],
+  "rank_quantities": {
+    "instantaneous_rank_series": "r99/r999/amp_* are the modes needed to represent ONE state at one instant. A per-step adaptive rule returns this quantity, not the windowed one, which is why it cannot reproduce the growth above.",
+    "rank_at_end": "both criteria on the final state's fluctuations and on the whole state; the two are reported separately because the secularly growing zonal mean dominates the whole-state energy at late times",
+    "window_rank_table": "r99/r999/amp_* are the modes needed to represent a WINDOW of the trajectory (nested windows from t=0, on psi' = psi - x-avg(psi)). This is the quantity that grows 1 -> 16 over [0, 8] and is grid-independent there."
+  },
   "rows": [
     {
       "S2_energy_block_means": [],
@@ -7290,7 +7302,7 @@
         }
       },
       "samples": 51,
-      "wall_seconds": 17.913174216868356,
+      "wall_seconds": 17.496477122884244,
       "zonal_share_of_total_energy_at_end": 0.19436134685060888
     },
     {
@@ -7328,7 +7340,7 @@
         }
       },
       "samples": 101,
-      "wall_seconds": 33.67982934694737,
+      "wall_seconds": 34.06093276105821,
       "zonal_share_of_total_energy_at_end": 0.22338205161569952
     },
     {
@@ -7366,7 +7378,7 @@
         }
       },
       "samples": 201,
-      "wall_seconds": 66.00669366610236,
+      "wall_seconds": 65.63097931607626,
       "zonal_share_of_total_energy_at_end": 0.2946893425394793
     },
     {
@@ -7410,7 +7422,7 @@
         }
       },
       "samples": 401,
-      "wall_seconds": 130.42863189405762,
+      "wall_seconds": 130.56323959399015,
       "zonal_share_of_total_energy_at_end": 0.5218913124575163
     },
     {
@@ -7456,7 +7468,7 @@
         }
       },
       "samples": 801,
-      "wall_seconds": 258.2652219799347,
+      "wall_seconds": 259.9210331989452,
       "zonal_share_of_total_energy_at_end": 0.7425005048722252
     }
   ],
