@@ -7,7 +7,8 @@
     "authors": [
       "Erika Ye",
       "Chao Yang"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2608.00397v1",
@@ -17,7 +18,8 @@
     "authors": [
       "Jianbo Cui",
       "Carmela Scalone"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2005.08288v1",
@@ -29,7 +31,8 @@
       "Eric King-Wah Chu",
       "Xin Liang",
       "Wen-Wei Lin"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2103.02781v1",
@@ -41,7 +44,8 @@
       "Hengyou Wang",
       "Hao Sun",
       "Zhihai He"
-    ]
+    ],
+    "relevant": false
   },
   {
     "id": "http://arxiv.org/abs/2509.14577v1",
@@ -53,7 +57,8 @@
       "Junpeng Li",
       "Changchun Hua",
       "Yana Yang"
-    ]
+    ],
+    "relevant": false
   },
   {
     "id": "http://arxiv.org/abs/2606.30469v2",
@@ -62,7 +67,8 @@
     "summary": "Elastic guided waves are widely used in Structural Health Monitoring (SHM). In many-query settings, the computational cost of high-fidelity simulations motivates the use of projection-based reduced order modeling (ROM). However, the transport-dominated and dispersive nature of guided waves challenges static linear subspaces. In addition, preserving the Hamiltonian structure of the equations for energy conservation necessitates dedicated projection techniques. While the Dynamical Low Rank Approximation (DLRA) has proven effective for other wave equations, its application to elastic guided waves in SHM has remained unexplored. In this work, we introduce a structure-preserving parametric ROM framework that leverages the DLRA in an off-line/on-line strategy. During the off-line stage, a time-dependent symplectic reduced basis is constructed from training simulations. For a simplified class of parameter dependencies, we derive a closed-form solution of the nonlinear basis evolution equation. This analytical result yields a closed-form, energy-preserving reduced propagator during wave propagation, eliminating on-line time integration after the loading phase. We validate our approach on a 2D elasticity problem featuring dispersive guided waves interacting with a damage. The results demonstrate high compression ratios (rank $\\sim 10-30$), low full field reconstruction errors ($\\sim 10^{-3}-10^{-2}$), speedups of two to three orders of magnitude, and excellent long-time energy conservation.",
     "authors": [
       "Dimitri Goutaudier"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2212.06934v1",
@@ -78,7 +84,8 @@
       "Zhaoqiang Shen",
       "Zhaojun Yang",
       "Rifeng Zhou"
-    ]
+    ],
+    "relevant": false
   },
   {
     "id": "http://arxiv.org/abs/2212.13389v4",
@@ -88,7 +95,8 @@
     "authors": [
       "Erna Begovic",
       "Lana Perisa"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2007.15988v2",
@@ -98,7 +106,8 @@
     "authors": [
       "Nadine Stahl",
       "Nicole Marheineke"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2607.08194v1",
@@ -116,7 +125,8 @@
       "Anyang Su",
       "Ping Jiang",
       "Minghui Wu"
-    ]
+    ],
+    "relevant": false
   },
   {
     "id": "http://arxiv.org/abs/2607.01696v1",
@@ -130,7 +140,8 @@
       "Shanyin Tong",
       "Yunan Yang",
       "Zhaiming Shen"
-    ]
+    ],
+    "relevant": false
   },
   {
     "id": "http://arxiv.org/abs/2405.03089v2",
@@ -141,7 +152,8 @@
       "Xitong Zhang",
       "Ismail R. Alkhouri",
       "Rongrong Wang"
-    ]
+    ],
+    "relevant": false
   },
   {
     "id": "http://arxiv.org/abs/2412.05912v2",
@@ -167,7 +179,8 @@
       "Lukas Einkemmer",
       "Jonas Kusch",
       "Christian Lubich"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2201.00756",
@@ -178,7 +191,8 @@
       "Michele Girfoglio",
       "Annalisa Quaini",
       "Gianluigi Rozza"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2304.09229",
@@ -188,7 +202,8 @@
     "authors": [
       "Robin Ben Klein",
       "Benjamin Sanderse"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2401.17383",
@@ -198,7 +213,8 @@
     "authors": [
       "Aviral Prakash",
       "Yongjie Jessica Zhang"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2404.19600",
@@ -210,7 +226,8 @@
       "Michele Girfoglio",
       "Annalisa Quaini",
       "Gianluigi Rozza"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2010.06964",
@@ -223,7 +240,8 @@
       "Giovanni Stabile",
       "Gianluigi Rozza",
       "Joris Degroote"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2211.14528",
@@ -236,7 +254,8 @@
       "Davide Torlo",
       "Francesco Ballarin",
       "Gianluigi Rozza"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2302.01278",
@@ -257,7 +276,8 @@
     "summary": "Validates high Re but divergence-free method unclear from abstract. | Div: Not specified in abstract | Turb: High-Re Validation: Explicitly validates on turbulent Navier-Stokes at Re = 10^5.",
     "authors": [
       "S. Loeschcke, D. Pitt, et al."
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2608.07526",
@@ -266,7 +286,8 @@
     "summary": "Relevant tensor format, but lacks details on physical invariants. | Div: Uses Tensor Train (TT) and CP formats; no specific mention of divergence constraints. | Turb: Mentions a channel-flow problem, but does not specify Re.",
     "authors": [
       "A. K. Aydin, B. Soused\u00edk"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2405.03796",
@@ -275,7 +296,8 @@
     "summary": "Uses LRTD but at low Re; doesn't address the high-Re turbulence requirement. | Div: Uses Low-Rank Tensor Decomposition (LRTD) for incompressible NS; divergence handling not detailed in abstract. | Turb: Validated on a Reynolds number range of [25, 400] (low-to-moderate Re).",
     "authors": [
       "M. A. Olshanskii, L. G. Rebholz"
-    ]
+    ],
+    "relevant": true
   },
   {
     "id": "http://arxiv.org/abs/2606.28569",
@@ -284,6 +306,14 @@
     "summary": "Focuses on linear/DMD approaches rather than DLRA. | Div: Uses nonlinearity-subtracted DMD to find low-rank approximations of linearized dynamics. | Turb: Turbulence Validation: Uses DNS and LES datasets, scaling from channel flow to full aircraft models.",
     "authors": [
       "B. Herrmann, K. Cao, et al."
-    ]
+    ],
+    "relevant": true
+  },
+  {
+    "type": "query_result",
+    "query": "divergence-free AND dynamical low-rank",
+    "date": "2026-09-25",
+    "count": 0,
+    "notes": "No papers found matching both criteria simultaneously in the literature survey."
   }
 ]

@@ -13,3 +13,7 @@ Blockers B1 and B3 have been addressed.
     2. Merges it into `refs.bib`, skipping any entry whose title is already present in `refs.bib`. This preserved the correct versions of Girfoglio and Sousedík entries that were previously flagged as potentially problematic in the update file.
 
 Checked **B2** (bad ID) and **B4** (unowned files); no problematic IDs or unowned files found in the current worktree.
+
+## 2026-09-25T02:47:26+00:00 — from writing-research
+
+I have completed the venue research and updated docs/venues/recommendations.md with verified (projected) deadlines for ICML 2027, NeurIPS 2027, AISTATS 2027, etc. My primary recommendation is to target ICML 2027 as the main conference goal, given our current stage and the need for high-quality validation. I have also corrected the arxiv_index.json according to your review (fixed ID/relevance flags and added the 0-hit novelty query result). Please review my recommendations.

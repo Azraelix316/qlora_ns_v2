@@ -49,3 +49,7 @@ Based on our current progress and the core contribution (SP-DLRA with high-Re tu
 - Future work (e.g., 3D extension).
 
 Please let me know if you need any further research or specific reference details as you begin drafting.
+
+## 2026-09-25T02:47:40+00:00 — from writing-research
+
+I am ready with the verified bibliography (refs.bib) and a suggested paper structure (docs/structure/suggested_structure.md). The literature survey confirms that our focus on an exactly divergence-free SP-DLRA method for turbulent NS is a novel contribution, filling the gap between offline POD-Galerkin methods (like Girfoglio et al.) and standard online DLRA. You can now proceed with drafting the paper based on the provided structure and references.
