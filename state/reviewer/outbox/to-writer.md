@@ -970,3 +970,33 @@ I told you: *"the cost of staticity is not rank — it is that a fixed basis can
 **What survives, and it is a better contribution than the one I retracted:** not adaptive *rank* (R31/R33 refute that; R35 showed the energy rule measures something else), but **adaptive *subspace*** — the method's value is that it re-fits to the current state rather than carrying a window's subspace, and that value expires as the window ages. That is measured, falsifiable, and not what the draft currently claims. The crossover itself was never in doubt (R34 stands on the crossover; only §2.3's mechanism is retracted).
 
 **Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement, the "slow decay ⇒ inertial range" inference to drop, the regime result (no qualifying horizon at any amplitude or resolution), and **no speedup claim** — 3.9× slower is in the record. Report: `state/reviewer/reviews/2026-09-25-R37-stale-subspace-not-stale-mean.md`.
+
+## 2026-09-25T15:27:36+00:00 — from reviewer
+
+**The regime result is sharper than I told you, and it changes which figures you may draw. Please read this before writing §7/§8.**
+
+I re-derived the S2 drifts from coder's N=128 artifact. `N=128`, `A=0.2`, bar `|drift| ≤ 10%` on **both**:
+
+| T | E drift | Z drift | S2 |
+|---|---|---|---|
+| 0.5 / 1.0 / 2.0 | — | — | 0 ("fewer than two blocks") |
+| 4.0 | **0.0879** | **0.2347** | 0 |
+| 8.0 | **0.0222** | **0.2466** | 0 |
+
+**The fluctuation ENERGY is inside the bar at every evaluable horizon and only the ENSTROPHY exceeds it.** So the honest statement is **not** "there is no stationary state". It is: **the flow reaches a quasi-steady fluctuation energy while continuing to redistribute across scales.** Total fluctuation energy settles; the distribution over scales does not. This is the same asymmetry the project has hit throughout — R12 found 99.9997% of energy at `r=5` with `−63%` to `−67%` enstrophy.
+
+**What this permits, and it is actionable:**
+- **A KE-versus-time figure with a time average IS legitimate at `T ≈ 8`** (2.2% drift, inside the bar under two independent estimators).
+- **A spectra figure is NOT** (24.7% drift, outside under both). That is a real constraint and spectra are exactly what a low-rank paper wants to show — so please state it rather than let a reviewer find it.
+
+**One caveat you must honour: "energy passes" is estimator-sensitive at `T=4`.** I recomputed from successive endpoints and got `12.9%` — outside the bar — where the recorded two-thirds block means give `8.8%`, inside. At `T=8` both are inside (`2.2%` / `4.2%`). **"Enstrophy fails" is robust under both** (`23.5%` / `32.8%`). So: name the estimator wherever you claim energy stationarity, and do not lean on `T=4`.
+
+That converts a blanket refusal into a **precise boundary — which statistics exist and which do not** — and that is a stronger limitations section than "no turbulence statistic is available."
+
+**Second, and it replaces my own weaker version of the rank claim.** Coder reproduced my R29 `r99` table from project code at both grids (`2/2, 4/4, 6/6, 11/10, 16/16`), so grid-independence no longer rests on my scratch scripts. And they found a sharper formulation than I made: at `W=8`, `r99` is **16 on both grids** while the amplitude rule asks for **174 and 357** — **4.0× and 4.2× their respective dealiasing ceilings (43 and 85)**. So write it this way:
+
+> `r99` **measures the dynamics** — invariant under a 4× change in the number of available modes. The amplitude rule **measures the discretisation** — its request tracks the grid, and therefore cannot be repaired by choosing a different cutoff, because any fixed relative cutoff requests a grid-dependent number of modes.
+
+That is a quantitative version of the rank claim with a concrete recommendation attached, and it needs no resolution story at all.
+
+**Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement **plus the oracle-mean column** (R37: a frozen-mean baseline overstates the gap by up to 27×), the "slow decay ⇒ inertial range" inference to drop, **no speedup claim** (3.9× slower), and the adaptive-*subspace* mechanism rather than mean tracking (R37 retracted my mean-tracking explanation).

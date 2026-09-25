@@ -30,6 +30,38 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R38 — the regime result is SHARPER than "no stationary state": the fluctuation ENERGY is
+> quasi-steady and only the ENSTROPHY fails, robustly, at every evaluable horizon. Coder's
+> message-only push `a316ae2` merged (`94a9c82`).** `N=128`, `A=0.2`, bar `|drift| <= 10%` on
+> **both**: `T=4` gives E **`0.0879`** (inside) vs Z **`0.2347`** (outside); `T=8` gives E
+> **`0.0222`** vs Z **`0.2466`**. `T <= 2` is recorded as **"fewer than two blocks"** — not
+> evaluable, which is not the same as failed, and coder distinguishes them where my own
+> measurements repeatedly have not. So the honest statement is **not** "there is no stationary
+> state": it is **the flow reaches a quasi-steady fluctuation energy while continuing to
+> redistribute across scales.** Total fluctuation energy settles; the distribution over scales
+> does not. Consistent with R12 from the start (99.9997% of energy at `r=5` with −63% to −67%
+> enstrophy). **Consequence, and it is actionable for the writer:** a **KE-versus-time figure
+> with a time average is legitimate at `T≈8`**; a **spectra figure is not** — and spectra are
+> what a low-rank paper most wants, so this is a real constraint to state rather than be found.
+> **Caveat recorded: the energy drift is estimator-sensitive at `T=4`** — I recomputed from
+> successive endpoints and got `12.9%` (outside the bar) against the recorded two-thirds block
+> means' `8.79%` (inside); at `T=8` both are inside (`2.22%` / `4.17%`), and the **enstrophy
+> failure is robust under both** (`23.5%` / `32.8%`). So "energy passes" must never be claimed
+> at `T=4`. **My own near-miss, caught by checking before reporting:** I went looking for a
+> provenance gap, could not find the S2 evidence in the pilots, and assumed the artifact
+> recorded a boolean without its derivation. **It does not** — every row carries
+> `S2_energy_fluct_drift`, `S2_enstrophy_fluct_drift`, both block-mean series, and a `*_note`
+> with the reason when not evaluable, so the verdict is fully recomputable. My concern was a
+> wrong guess about the schema, borrowed from the F5 artifact's `reference` key.
+> **Also adopted, and it is a better claim than mine:** coder reproduced my R29 `r99` table
+> from **project code** at both grids (`2/2, 4/4, 6/6, 11/10, 16/16`), so grid-independence no
+> longer rests on my scratch scripts — and they found the sharper formulation: at `W=8`, `r99`
+> is **16 on both grids** while the amplitude rule asks for **174 and 357**, i.e. **4.0x and
+> 4.2x their respective dealiasing ceilings (43 and 85)**. So **`r99` measures the dynamics**
+> (invariant under a 4x change in available modes) and **the amplitude rule measures the
+> discretisation** (its request tracks the grid, so no fixed relative cutoff can repair it —
+> any such cutoff requests a grid-dependent number of modes). That is a quantitative version of
+> D11.3 I did not have, and I have dropped my weaker phrasing for it.
 > **R37 — RETRACTION: R34's "cost of staticity is mean tracking" is FALSE. The static
 > baseline's error is a stale SUBSPACE, and the oracle-mean baseline beats the DLRA from
 > `t=2` onward.** I told the writer to build a sentence on R34 §2.3 and have now tested it.
@@ -1026,6 +1058,61 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R38 — the regime result is sharper than "no stationary state", and coder
+  found a better rank claim than mine.**
+  Coder's message-only push `a316ae2` merged at `94a9c82`. I re-derived the S2 drifts from the
+  N=128 artifact to check their numbers.
+
+  **`N=128`, `A=0.2`, bar `|drift| ≤ 10%` on both:**
+
+  | `T` | E drift | Z drift | S2 | note |
+  |---|---|---|---|---|
+  | 0.5 / 1.0 / 2.0 | — | — | 0 | **"fewer than two blocks"** |
+  | 4.0 | **0.0879** | **0.2347** | 0 | |
+  | 8.0 | **0.0222** | **0.2466** | 0 | |
+
+  **S2 fails on enstrophy alone.** The fluctuation *energy* is inside the bar at every
+  evaluable horizon. So the honest statement is not "there is no stationary state" but **the
+  flow reaches a quasi-steady fluctuation energy while continuing to redistribute across
+  scales** — total fluctuation energy settles, the distribution over scales does not.
+  Consistent with R12 from the beginning (99.9997% of energy at `r=5`, `−63%` to `−67%`
+  enstrophy).
+
+  **Consequence, actionable for the writer:** a **KE-versus-time figure with a time average is
+  legitimate at `T ≈ 8`**; a **spectra figure is not** (`24.7%` drift). Spectra are exactly what
+  a low-rank paper most wants to show, so this is a real constraint to state rather than have a
+  reviewer find. It converts a blanket refusal into a **precise boundary — which statistics
+  exist and which do not** — which is a stronger limitations section.
+
+  **Caveat recorded.** The **energy** drift is **estimator-sensitive at `T=4`**: recomputing
+  from successive endpoints gives `12.9%` (outside the bar) against the recorded two-thirds
+  block means' `8.79%` (inside). At `T=8` both are inside (`2.22%` / `4.17%`), and the
+  **enstrophy failure is robust under both** (`23.5%` / `32.8%`). So "energy passes" must never
+  be claimed at `T=4`, and the estimator must be named wherever it is.
+
+  **My own near-miss, caught by checking before reporting.** I went looking for a provenance
+  gap, could not find the S2 evidence in the pilots, and assumed the artifact recorded a boolean
+  without its derivation. **It does not** — every row carries `S2_energy_fluct_drift`,
+  `S2_enstrophy_fluct_drift`, both block-mean series, and a `*_note` giving the reason when the
+  statistic is not evaluable, so the verdict is fully recomputable. The concern was a wrong
+  guess about the schema, borrowed from the F5 artifact's `reference` key. **Coder's recording
+  of "fewer than two blocks" at `T ≤ 2` is credited as good practice:** a verdict that cannot be
+  evaluated is not a verdict that fails, and their artifact distinguishes the two where my own
+  measurements repeatedly have not.
+
+  **Adopted: a better rank claim than mine.** Coder reproduced my R29 `r99` table from
+  **project code** at both grids (`2/2, 4/4, 6/6, 11/10, 16/16`), so grid-independence over
+  `[0,8]` no longer rests on my scratch scripts. And they found the sharper formulation: at
+  `W=8`, `r99` is **16 on both grids** while the amplitude rule asks for **174 and 357** —
+  **4.0× and 4.2× their respective dealiasing ceilings (43 and 85)**. So:
+
+  - **`r99` measures the dynamics** — invariant under a 4× change in available modes.
+  - **the amplitude rule measures the discretisation** — its request tracks the grid, so it
+    cannot be repaired by choosing a different cutoff, because *any* fixed relative cutoff
+    requests a grid-dependent number of modes.
+
+  That is a quantitative version of D11.3 that I did not have, it needs no resolution story,
+  and it comes with a concrete recommendation. I have dropped my weaker phrasing for it.
 - 2026-09-25 **R37 — retraction: the static baseline's error is a stale subspace, not a stale
   mean, and the oracle-mean baseline beats the DLRA from `t=2` onward.**
   Coder `13e1876` merged at `566b5d9` (121 files, 0 deleted, coder paths only, all 49 review
