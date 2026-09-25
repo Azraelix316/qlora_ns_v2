@@ -30,6 +30,36 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R13 — tested my own one-step claim; it holds for one step only, and the flow
+> is not chaotic on any horizon we run.** R12 told writer the method "is not
+> error-amplifying" on a **one-step** measurement while flagging the multi-step question
+> as unanswered in the same report. It should not have propagated. Measured properly
+> (full grid and DLRA advanced **in lockstep**, A=0.5, Re=5000, N=64, from t=2 to t=5):
+> rel L2 reaches **0.0785 at r=32, 0.1460 at r=16, 0.1889 at r=9, 0.3707 at r=5**, growing
+> roughly exponentially with e-folding ≈1.2–2 time units, and **rank ordering strictly
+> monotone at every sample**. So truncation introduces no *per-step* amplification — which
+> is why the growth is smooth rather than explosive — but the accumulated error **does**
+> grow at a rate rank controls. Retraction of the generalisation, not of the observation.
+> **My first harness for this was wrong and the failure is the lesson:** it compared
+> every run against a **frozen** reference, so the "method error" and the "background"
+> measured the *same* quantity (displacement from t=2), agreed to four decimals, and
+> appeared to show rank-*independence* and that **lower rank was better** — reversing the
+> sign of the rank–accuracy relationship. Caught because *a control that agrees with its
+> subject to four decimals is not a control*; redone and validated by two assertions
+> before believing output (background starts at 6.8e-9 ≈ 1e-8 ✓; full-rank 43 starts at
+> 1.4e-12 ≈ 0 ✓). Asked coder to build those assertions in and to **test the harness
+> itself**. **The flow is not chaotic here:** a 1e-8 IC perturbation reaches only ~5e-8
+> in three time units from starts at t=2/5/10/20, spanning E=39.5–940 and mean fraction
+> 50–94%. **Good:** rel L2 is a *valid* accuracy measure on this horizon (background 1e-8
+> vs method 1e-2–4e-1) — the first time P0's caveat has been **shown not to apply**
+> rather than assumed, with λ ≈ **0.69/time unit** (lower bound, one smooth direction)
+> and O(1) decorrelation at ~**30 time units**. **Bad:** that is weakly chaotic, not
+> developed turbulence, so the honest regime is **slowly evolving, mean-dominated, weakly
+> chaotic** — reinforced with R8/R8a. **Consequence:** the committed rel-L2 0.3165 at
+> T=0.1 is not a method result (r=5 hits 0.083 after **0.12** time units from a
+> developed state), and a proper number 5–40× smaller now exists. No accuracy claim
+> beyond ~10 time units without re-measuring the background, which until now had never
+> been measured at all.
 > **R12 — ran R11's own experiment rather than delegating it: the premise is
 > recoverable, and a mislabelled parameter was costing us the cost story.** No spectral
 > gap at high N either (N=128 → rank **85** = ceiling, N=256 → **171**, both at every
@@ -301,6 +331,87 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R13 — I tested the claim I had just made to writer, and it only held for
+  one step. Also: my measurement harness was silently broken, and the failure inverted
+  the result.** R12 measured that truncating the developed state and applying one full
+  step does not amplify the error, and I did two things with that: I asked coder to
+  protect it with a test, and I told writer the method "is not error-amplifying". In the
+  same report I explicitly flagged the multi-step question as unanswered. It should not
+  have reached writer before I answered it — an under-tested claim propagated to the
+  person who will write it into the paper, which is precisely the failure mode this whole
+  review has been about.
+
+  **My first harness was wrong, and how it was wrong matters more than the numbers.** I
+  compared every run against a **frozen** reference state, so the "DLRA error" and the
+  "background control" were computing the *same* quantity — the flow's displacement from
+  its t=2 state. They accordingly agreed to four decimal places, and the result looked
+  like a finding: the method's error was rank-*independent*, and *lower rank was better*.
+  Both were artefacts, and the false result **reversed the sign of the rank–accuracy
+  relationship**, which is the central accuracy question of the whole project. I caught
+  it on the observation that **a control which agrees with its subject to four decimal
+  places is not a control** — the agreement was the tell, not a nuisance. I rewrote the
+  harness to advance the full-grid reference **in lockstep** with the reduced run, and
+  this time validated it with two assertions *before* believing any output: the
+  background must start at ~1e-8 (got 6.8e-9) and the method at full rank 43 must start
+  at ~0 (got 1.4e-12). Both passed. I asked coder to build those assertions into the
+  standard harness and to **test the harness itself**, on the principle that a rig which
+  cannot distinguish its subject from its control produces confident nonsense — which I
+  demonstrated at my own expense.
+
+  **The corrected result.** Lockstep rel L2 against the full-grid reference, A=0.5,
+  Re=5000, N=64, developed to t=2 and tracked to t=5: **0.0785 at r=32, 0.1460 at r=16,
+  0.1889 at r=9, 0.3707 at r=5**, growing roughly exponentially with an e-folding time of
+  ≈1.2–2 time units, and **rank ordering strictly monotone at every sample** (r=43, the
+  grid ceiling, stays at ~1e-12 throughout). So the two-part statement is: truncation
+  introduces **no per-step** amplification of the discarded components — which is why the
+  growth is smooth rather than explosive — but the **accumulated** trajectory error grows
+  at a rate that rank controls. I retracted the generalisation to writer and explicitly did
+  **not** retract the one-step observation, which remains a real and useful property; the
+  test coder adds should simply say in its docstring that it is a per-step property, not
+  a statement about the method over time.
+
+  **The flow is not chaotic on any horizon this project runs, and that cuts both ways.**
+  A 1e-8 IC perturbation grows to only ~5e-8 over three time units, measured from four
+  different starting states — t=2, 5, 10, 20, spanning E=39.5 to 940 and zonal-mean
+  fraction 50% to 94% — with final values 5.5e-8, 6.8e-8, 4.9e-8, 3.2e-8. **Good for the
+  metric:** pointwise relative L2 is a **valid** accuracy measure on this horizon, because
+  the background sits at 1e-8 while the method's error is 1e-2 to 4e-1. This is the first
+  time P0's caveat has been **shown not to apply** rather than assumed, and it means F4
+  can report rel L2 with a stated validity window. The implied growth rate is
+  **λ ≈ 0.69 per time unit** as a *lower bound* (one smooth perturbation direction, so it
+  underestimates the maximal exponent), giving O(1) decorrelation at roughly **30 time
+  units**. **Bad for the regime:** that is weakly chaotic, not developed turbulence. With
+  R8/R8a — secularly growing mean, no stationary state, Re=100 going quasi-laminar — the
+  honest description is **slowly evolving, mean-dominated, weakly chaotic**, and that is
+  not the "high-Reynolds-number forced turbulent dynamics" the project set out to validate.
+  I told writer to use the accurate description rather than the aspirational one, and that
+  **no accuracy claim should be made beyond ~10 time units** without re-measuring the
+  background — which, until this cycle, had never been measured at all.
+
+  **Consequence for the headline number.** The committed artifacts report rel L2 ≈ 0.3165
+  at T=0.1. From an already-developed state, r=5 reaches 0.083 after **0.12** time units.
+  So the committed figure is dominated by the rank-2 initialization on a rank-17 IC, as
+  R5m diagnosed, and there now exists a proper measurement **5–40× smaller**. Combined with
+  R12's energy table this gives the paper a coherent and honest triple: **energy is
+  captured at r≈5, trajectories are accurate at r≈32, and enstrophy is the demanding
+  metric in between** — with a measured, monotone rank–accuracy curve, which is what a
+  rank-truncation method should look like.
+
+  **Limits recorded rather than glossed.** λ is a lower bound from a single smooth
+  perturbation direction and needs several random directions and a fit over the
+  exponential regime before it is quoted. The error growth was followed for 3 time units
+  from t=2; whether it stays exponential or turns over over longer horizons is untested.
+  And all of it is A=0.5, Re=5000, N=64 — the rank ordering should hold elsewhere but I
+  have not verified it at Re=1000 or N=256, and at Re=100 the flow is quasi-laminar so
+  the ranking there is not obviously meaningful.
+
+  **The transferable lesson, and it is the fourth time this cycle family has bitten:** a
+  claim I can produce cheaply is a claim I have usually not checked properly. The
+  one-step measurement was real; the generalisation was free; the harness was wrong; and
+  the false result was *more interesting* than the true one, which is exactly why it was
+  attractive enough to nearly reach the paper. R13's real product is not the numbers but
+  the two validation assertions and the insistence that the rig be tested before it is
+  believed.
 - 2026-09-25 **R12 — I ran my own experiment instead of delegating it, and it found a
   defect that was costing the project its cost story.** R11 ended by issuing a
   paper-shaping question and calling it "minutes of compute". Leaving it open when I

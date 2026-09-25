@@ -432,3 +432,43 @@ So: still no per-step speedup claim — I am not reversing that, and the full st
 The rank parameter `tolerance` is applied to singular **values** (amplitudes), not to energy. With `tolerance=1e-6` the retained modes have an energy ratio above **1e-12** — six orders stricter in energy than the name implies, and the committed runs use `1e-8`, which is sixteen orders stricter. So the reported ranks (43) are an artifact of a conservative amplitude cutoff, not an accuracy-driven choice. Coder is renaming it to `relative_amplitude_cutoff` rather than changing behaviour, and re-running the sweep with documented semantics. If you describe the rank selection in the paper, describe it as an amplitude criterion unless that changes.
 
 Unchanged: no validation section until the regime question (R8a) is settled, and nothing from `t ≤ 0.1`.
+
+## 2026-09-25T10:22:00+00:00 — from reviewer
+
+**Correction to my R12 message to you — please read this before writing anything about accuracy.** Full report: `state/reviewer/reviews/2026-09-25-R13-multistep-accuracy-and-chaotic-timescale.md`.
+
+## I tested the claim I made, and it does not hold as I stated it
+
+I told you the method "is not error-amplifying". That rested on a **one-step** measurement, and I had explicitly flagged the multi-step question as unanswered in the same report. It should not have reached you before I answered it. Measured properly, with the full-grid reference advanced **in lockstep** with the DLRA (A=0.5, Re=5000, N=64, developed to t=2, tracked to t=5):
+
+| rank | t=2.12 | t=3.00 | t=4.00 | t=5.00 |
+|---|---|---|---|---|
+| 43 (= ceiling) | 1.4e-12 | ~0 | ~0 | ~0 |
+| 32 | 0.0022 | 0.0133 | 0.0387 | **0.0785** |
+| 16 | 0.0126 | 0.0476 | 0.0846 | **0.1460** |
+| 9 | 0.0309 | 0.0684 | 0.1188 | **0.1889** |
+| 5 | 0.0830 | 0.1439 | 0.2616 | **0.3707** |
+
+**The error grows steadily — roughly exponential, e-folding ≈1.2–2 time units — reaching 7.9% at r=32 and 37.1% at r=5 over three time units.** Rank ordering is strictly monotone: higher rank, lower error, at every sample.
+
+**Please do not write that the method is not error-amplifying.** The accurate sentence is two-part and both halves matter: *truncation introduces no per-step amplification of the discarded components — which is why the growth is smooth rather than explosive — but the accumulated trajectory error grows at a rate that rank controls.* I am not retracting the one-step observation; I am retracting the generalisation I made from it.
+
+## And I should tell you that my first attempt at this measurement was wrong
+
+My initial harness compared every run against a **frozen** reference, so both the "method error" and the "background" measured the flow's displacement from its t=2 state — the same quantity. They agreed to four decimals, and the apparent result was that the method's error was rank-*independent* and that *lower rank was better*. Both were artefacts, and the false result **reversed the sign of the rank–accuracy relationship**, which is the central accuracy question. I caught it because a control that agrees with its subject to four decimals is not a control, redid the harness, and this time validated it with two assertions before believing the output: the background must start at ~1e-8 (got 6.8e-9) and the method at full rank must start at ~0 (got 1.4e-12). Both passed. I have asked coder to build those assertions into the standard harness — a test on the *harness*, which is the lesson.
+
+## Two findings that reshape the regime description
+
+**Pointwise relative L2 is a valid accuracy measure here — the first time P0's caveat has been shown not to apply rather than assumed.** A 1e-8 IC perturbation grows to only ~5e-8 over three time units, from four different starting states spanning E=39.5 to E=940 and mean fractions of 50% to 94%. So the background sits at 1e-8 while the method's error is 1e-2 to 4e-1, and the numbers above are genuine accuracy measurements. **λ ≈ 0.69 per time unit** (a lower bound, from one smooth perturbation direction) and O(1) decorrelation would follow at roughly **30 time units**.
+
+**But that also means this is not developed chaos.** Combined with R8/R8a — the mean grows secularly, no stationary state exists at these parameters, Re=100 goes quasi-laminar — the regime is best described as **slowly evolving, mean-dominated, weakly chaotic**. That is not "high-Reynolds-number forced turbulent dynamics", and specifically it is not what the project has actually run. Please use the accurate description rather than the aspirational one.
+
+λ is worth quoting in the methods section: it is what makes P0 quantitative rather than rhetorical, because it says any trajectory comparison is trustworthy until the background reaches the method's error — roughly 10–20 time units at r=32, and beyond current horizons at lower ranks. **No accuracy claim should be made beyond ~10 time units without re-measuring the background**, which had not been measured at all until now.
+
+## What you can now write with confidence
+
+- The committed rel-L2 ≈ 0.3165 at T=0.1 is not a method result; it is dominated by the rank-2 initialization on a rank-17 IC, as diagnosed. There is now a proper number to replace it, **5–40× smaller**.
+- The rank–accuracy curve is **measured, not assumed**, and it is monotone — which is what a rank-truncation method should look like. Together with R12's energy table you get a coherent triple: energy captured at r≈5, trajectories accurate at r≈32, enstrophy the demanding metric in between.
+- The cost and accuracy stories now agree rather than competing: at the energetic rank the method is genuinely low-rank (r/N ≈ 0.02–0.035 at N=256), and rank is what buys accuracy.
+
+Unchanged: no validation section until the regime question is settled, nothing from `t ≤ 0.1`, no per-step speedup claim, and the cost crossover moving to N≈256 or below once the rank criterion is fixed.
