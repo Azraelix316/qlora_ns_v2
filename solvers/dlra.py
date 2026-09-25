@@ -20,7 +20,7 @@ from typing import Optional
 import numpy as np
 
 from .ns_psi import StreamFunctionNS
-from .spectral import Grid2D
+from .spectral import Grid2D, zonal_mean
 
 
 @dataclass
@@ -58,6 +58,30 @@ class SVDProjector:
     Both are clamped to ``[min_rank, max_rank]``.  Neither is an accuracy
     criterion: they say how many modes to keep, not how close the result is.
 
+    **``rank_basis`` decides whose energy is counted.**  This is not cosmetic
+    at late times: the zonal mean grows secularly and holds 94% of the total
+    energy by t=20 (measured), so an energy fraction of the *whole state* is
+    eventually reached by the mean alone, while the fluctuation fraction -- the
+    one R26 measured and the one S1 requires of every statistic here -- does
+    not.  ``rank_basis="fluctuations"`` ranks on the zonal-mean-removed field,
+    costing one extra spectrum computation (``compute_uv=False``, so no
+    singular vectors are formed) per projection; the projection itself is
+    unchanged and still acts on the whole state.
+
+    **What no choice of criterion or basis can do, measured.**  A per-step rule
+    reads one state at a time, so it can only ever select the *instantaneous*
+    rank.  On the canonical case at t=8 the final state's own r99 is **2** (on
+    the fluctuations as well as on the whole state), while the r99 of the
+    *window* [0, 8] -- the modes needed to represent the 401 snapshots the
+    trajectory passes through -- is **14**.  The growth R26 measures is
+    therefore a property of the subspace the trajectory *visits*, not of any
+    single state, and a per-step instantaneous rule does not approach it: the
+    energy criterion moves the selection off the dealiasing ceiling and onto a
+    physically meaningful ~2, but 2 is not 16 and no threshold on one snapshot
+    will make it so.  Tracking the windowed rank needs a method that
+    accumulates the visited subspace over a window, which this per-step
+    truncation is not.
+
     **Cost model, as implemented (this is today's behaviour, not a design
     goal).** ``_svd`` factorizes the **whole N x N field** at four stage
     boundaries per step, so per-step cost is Theta(N^3) and
@@ -79,6 +103,7 @@ class SVDProjector:
         relative_amplitude_cutoff: float = 1e-6,
         rank_criterion: str = "amplitude",
         energy_fraction: float = 0.99,
+        rank_basis: str = "state",
     ):
         integer_values = (rank, min_rank, max_rank)
         if any(int(value) != value for value in integer_values):
@@ -93,6 +118,8 @@ class SVDProjector:
             raise ValueError("rank_criterion must be 'amplitude' or 'energy'")
         if not 0.0 < float(energy_fraction) < 1.0:
             raise ValueError("energy_fraction must lie in (0,1)")
+        if rank_basis not in ("state", "fluctuations"):
+            raise ValueError("rank_basis must be 'state' or 'fluctuations'")
         if int(min_rank) > grid.N:
             raise ValueError("min_rank cannot exceed the physical matrix rank")
         self.grid = grid
@@ -103,6 +130,7 @@ class SVDProjector:
         self.relative_amplitude_cutoff = float(relative_amplitude_cutoff)
         self.rank_criterion = rank_criterion
         self.energy_fraction = float(energy_fraction)
+        self.rank_basis = rank_basis
         self.last_stats: Optional[RankStats] = None
         self.last_singular_values = np.empty(0, dtype=float)
         self._last_u: Optional[np.ndarray] = None
@@ -163,6 +191,24 @@ class SVDProjector:
         self.svd_seconds += time.perf_counter() - start
         self.svd_calls += 1
         return centered, u, s, vh
+
+    def _rank_spectrum(self, field: np.ndarray, s: np.ndarray) -> np.ndarray:
+        """The singular values the *rank rule* reads.
+
+        Equal to the projection's own spectrum unless ``rank_basis`` asks for
+        the fluctuations, in which case the zonal mode is removed first.  The
+        extra spectrum is computed without singular vectors, and it is only
+        computed when the rule actually needs it.
+        """
+        if self.rank_basis == "state" or self.rank_criterion != "energy":
+            return s
+        prime = np.asarray(field, dtype=float) - zonal_mean(field)
+        if not np.isfinite(prime).all():
+            return s
+        try:
+            return np.linalg.svd(prime, compute_uv=False)
+        except np.linalg.LinAlgError:
+            return s
 
     def _target_from_spectrum(self, s: np.ndarray) -> int:
         """Retained rank for the configured criterion, clipped to the bounds."""
@@ -235,7 +281,7 @@ class SVDProjector:
         centered, u, s, vh = self._svd(field)
         self._record_svd(centered, u, s, vh, stage=stage)
         if adapt:
-            self.rank = self._target_from_spectrum(s)
+            self.rank = self._target_from_spectrum(self._rank_spectrum(field, s))
         return self._reconstruct(centered, u, s, vh)
 
     def project_stage(self, field: np.ndarray, stage: str) -> np.ndarray:
@@ -250,7 +296,9 @@ class SVDProjector:
 
     def _set_rank_from_candidate(self, candidate) -> None:
         centered, u, s, vh = candidate
-        self.rank = self._target_from_spectrum(s)
+        # ``centered`` is spatially mean-free but still carries the zonal mode,
+        # so it is the right input for the fluctuation spectrum.
+        self.rank = self._target_from_spectrum(self._rank_spectrum(centered, s))
         self._last_centered, self._last_u, self._last_s, self._last_vh = candidate
         numerical = (
             int(np.count_nonzero(s > self.relative_amplitude_cutoff * s[0]))
@@ -296,6 +344,7 @@ class DLRA:
         relative_amplitude_cutoff: float = 1e-6,
         rank_criterion: str = "amplitude",
         energy_fraction: float = 0.99,
+        rank_basis: str = "state",
         check_every: int = 5,
         adapt_initial: bool = False,
     ):
@@ -310,6 +359,7 @@ class DLRA:
             relative_amplitude_cutoff=relative_amplitude_cutoff,
             rank_criterion=rank_criterion,
             energy_fraction=energy_fraction,
+            rank_basis=rank_basis,
         )
         self.check_every = int(check_every)
         self.adapt_initial = bool(adapt_initial)

@@ -176,13 +176,22 @@ def run_projected(
     grid: Grid2D, model: StreamFunctionNS, initial: np.ndarray, dt: float,
     final_time: float, sample_every: int, projector, reference_checkpoints: dict,
 ) -> dict:
-    """A projected run: static POD or fixed-rank DLRA share this path."""
+    """A projected run: static POD or fixed-rank DLRA share this path.
+
+    A baseline that goes non-finite is a *result*, not a harness failure: it is
+    recorded with the step it died at and the time it reached, and the accuracy
+    metrics are reported over the window it actually covered.  Aborting the
+    whole comparison because one baseline diverged would discard every other
+    method's numbers, and "POD is worse" is not a citable claim unless the
+    divergence is itself reported (R24's lesson).
+    """
     state = projector(initial.copy())
     times = [0.0]
     states = [state.copy()]
     max_div = grid.max_div_velocity(state)
     max_residual = 0.0
     projection_energy = 0.0
+    diverged_at_step = None
     nsteps = int(round(final_time / dt))
     start = time.perf_counter()
     for step in range(1, nsteps + 1):
@@ -190,7 +199,8 @@ def run_projected(
         before = grid.ke(old)
         state = model.step(old, dt, t=(step - 1) * dt, projector=projector)
         if not np.isfinite(state).all():
-            raise FloatingPointError(f"projected run non-finite at step {step}")
+            diverged_at_step = step
+            break
         projection_energy += grid.ke(state) - before
         max_div = max(max_div, grid.max_div_velocity(state))
         if step % sample_every == 0 or step == nsteps:
@@ -203,6 +213,8 @@ def run_projected(
         "max_scaled_energy_balance_residual": max_residual,
         "projection_energy_total": projection_energy,
         "wall_seconds": time.perf_counter() - start,
+        "diverged_at_step": diverged_at_step,
+        "final_time_reached": times[-1],
     }
 
 
@@ -281,12 +293,12 @@ def run_projected_moving(
     comparison that only reports the early window measures the choice of window
     rather than the method.
     """
-    state = projector_state = None
     state = (start_state if start_state is not None else initial).copy()
     times = [0.0]
     states = [state.copy()]
     max_div = grid.max_div_velocity(state)
     projection_energy = 0.0
+    diverged_at_step = None
     nsteps = int(round(final_time / dt))
     start = time.perf_counter()
     for step in range(1, nsteps + 1):
@@ -297,7 +309,8 @@ def run_projected_moving(
         before = grid.ke(old)
         state = model.step(old, dt, t=(step - 1) * dt, projector=projector_state)
         if not np.isfinite(state).all():
-            raise FloatingPointError(f"moving-window run non-finite at step {step}")
+            diverged_at_step = step
+            break
         projection_energy += grid.ke(state) - before
         max_div = max(max_div, grid.max_div_velocity(state))
         if step % sample_every == 0 or step == nsteps:
@@ -310,6 +323,8 @@ def run_projected_moving(
         "max_scaled_energy_balance_residual": None,
         "projection_energy_total": projection_energy,
         "wall_seconds": time.perf_counter() - start,
+        "diverged_at_step": diverged_at_step,
+        "final_time_reached": times[-1],
     }
 
 
@@ -356,6 +371,14 @@ def main() -> None:
              "is the historical rule that saturates at the dealias ceiling",
     )
     parser.add_argument("--energy-fraction", type=float, default=0.99)
+    parser.add_argument(
+        "--rank-basis", choices=("state", "fluctuations"), default="fluctuations",
+        help="whose energy the rank rule counts. 'fluctuations' ranks on "
+             "psi - x-avg(psi), which is what R26 measured and what S1 "
+             "requires of every statistic here; 'state' ranks on the whole "
+             "field, which the secularly growing zonal mean eventually "
+             "dominates",
+    )
     parser.add_argument(
         "--dlra-max-rank", type=int, default=0,
         help="largest retained rank; 0 selects the grid's dealiasing ceiling",
@@ -432,6 +455,14 @@ def main() -> None:
         metrics = window_metrics(grid, run["states"], run["times"], window)
         div = divergence_series(run["times"], run["states"], ref["times"], ref["states"])
         finite = [d["relative_l2"] for d in div if d["relative_l2"] is not None]
+        diverged = run.get("diverged_at_step")
+        reached = run.get("final_time_reached", run["times"][-1])
+        # A method that died early has statistics over a shorter window, and
+        # saying so is the difference between a result and a misread one.
+        covered_full = reached >= args.T - 1e-9
+        if metrics:
+            metrics["covers_requested_window"] = covered_full
+            metrics["window_actually_covered_end"] = reached
         entry = {
             "metrics": metrics,
             "max_abs_divergence": run["max_abs_divergence"],
@@ -439,15 +470,22 @@ def main() -> None:
             "max_trajectory_divergence": max(finite) if finite else None,
             "final_trajectory_divergence": finite[-1] if finite else None,
             "wall_seconds": run.get("wall_seconds"),
+            "diverged": diverged is not None,
+            "diverged_at_step": diverged,
+            "diverged_at_time": (diverged * dt) if diverged else None,
+            "final_time_reached": reached,
+            "covers_requested_window": covered_full,
+            "accuracy_metrics_valid": covered_full,
         }
         if extra:
             entry.update(extra)
         methods[name] = entry
+        flag = "" if covered_full else f"  [DIVERGED at t={reached:.3f}]"
         print(
             f"  {name}: E_fluct={metrics.get('energy_fluct_mean')} "
             f"Z_fluct={metrics.get('enstrophy_fluct_mean')} "
             f"maxdiv={run['max_abs_divergence']:.2e} "
-            f"traj_div={entry['max_trajectory_divergence']}",
+            f"traj_div={entry['max_trajectory_divergence']}{flag}",
             flush=True,
         )
 
@@ -464,6 +502,7 @@ def main() -> None:
         relative_amplitude_cutoff=args.dlra_relative_amplitude_cutoff,
         rank_criterion=args.rank_criterion,
         energy_fraction=args.energy_fraction,
+        rank_basis=args.rank_basis,
         check_every=args.dlra_check_every,
         adapt_initial=True,
     )
@@ -473,10 +512,12 @@ def main() -> None:
     dlra_div = grid.max_div_velocity(dlra_state)
     dlra_start = time.perf_counter()
     nsteps = int(round(args.T / dt))
+    dlra_diverged = None
     for step in range(1, nsteps + 1):
         dlra_state = adaptive.step(dlra_state, dt, t=(step - 1) * dt)
         if not np.isfinite(dlra_state).all():
-            raise FloatingPointError(f"DLRA non-finite at step {step}")
+            dlra_diverged = step
+            break
         dlra_div = max(dlra_div, grid.max_div_velocity(dlra_state))
         if step % sample_every == 0 or step == nsteps:
             dlra_times.append(step * dt)
@@ -489,6 +530,8 @@ def main() -> None:
             "states": dlra_states,
             "max_abs_divergence": dlra_div,
             "wall_seconds": time.perf_counter() - dlra_start,
+            "diverged_at_step": dlra_diverged,
+            "final_time_reached": dlra_times[-1],
         },
         {
             "rank_final": adaptive_rank,
@@ -645,6 +688,7 @@ def main() -> None:
             relative_amplitude_cutoff=args.dlra_relative_amplitude_cutoff,
             rank_criterion=args.rank_criterion,
             energy_fraction=args.energy_fraction,
+            rank_basis=args.rank_basis,
             check_every=10**9,        # never adapt: this isolates the rank
             adapt_initial=False,
         )
@@ -653,10 +697,12 @@ def main() -> None:
         states = [state.copy()]
         div = grid.max_div_velocity(state)
         start = time.perf_counter()
+        fixed_diverged = None
         for step in range(1, nsteps + 1):
             state = fixed.step(state, dt, t=(step - 1) * dt)
             if not np.isfinite(state).all():
-                raise FloatingPointError(f"fixed-rank DLRA non-finite at step {step}")
+                fixed_diverged = step
+                break
             div = max(div, grid.max_div_velocity(state))
             if step % sample_every == 0 or step == nsteps:
                 times.append(step * dt)
@@ -668,6 +714,8 @@ def main() -> None:
                 "states": states,
                 "max_abs_divergence": div,
                 "wall_seconds": time.perf_counter() - start,
+                "diverged_at_step": fixed_diverged,
+                "final_time_reached": times[-1],
             },
             {
                 "rank_requested": rank,
@@ -684,6 +732,17 @@ def main() -> None:
     }
     if len(fingerprints) > 1:
         raise SystemExit(f"methods disagree about the initial state: {fingerprints}")
+
+    diverged = sorted(
+        name for name, entry in methods.items() if entry.get("diverged")
+    )
+    if diverged:
+        print(
+            f"\n{len(diverged)} method(s) went non-finite and are reported as "
+            f"such, with their statistics over the window they actually "
+            f"covered: {diverged}",
+            flush=True,
+        )
 
     output = {
         "case": "baselines",
@@ -706,6 +765,7 @@ def main() -> None:
             "dmd_ridge": args.dmd_ridge,
             "rank_criterion": args.rank_criterion,
             "energy_fraction": args.energy_fraction,
+            "rank_basis": args.rank_basis,
             "dlra_max_rank": args.dlra_max_rank or 2 * (args.N // 3) + 1,
             "dlra_relative_amplitude_cutoff": args.dlra_relative_amplitude_cutoff,
             "dlra_check_every": args.dlra_check_every,
@@ -719,14 +779,19 @@ def main() -> None:
         "initial_state": fingerprint,
         "reference": ref_metrics,
         "methods": methods,
+        "diverged_methods": diverged,
         "interpretation": (
             "Ranks are matched by construction: the adaptive rank is read from "
             "the DLRA run and then requested explicitly from static POD and "
             "POD-DMD. Accuracy is judged on time-averaged fluctuation KE and "
             "enstrophy over the statistical window and on the spectra over the "
             "resolved range; pointwise L2 is reported last and is labelled "
-            "trajectory divergence. If the adaptive method does not win at "
-            "matched rank, that is recorded here rather than argued away."
+            "trajectory divergence. A method marked diverged went non-finite "
+            "part way through: its statistics cover only the window it reached "
+            "and accuracy_metrics_valid is false, so it is reported as a "
+            "divergence rather than as an accuracy. If the adaptive method does "
+            "not win at matched rank, that is recorded here rather than argued "
+            "away."
         ),
     }
     output_path.parent.mkdir(parents=True, exist_ok=True)
