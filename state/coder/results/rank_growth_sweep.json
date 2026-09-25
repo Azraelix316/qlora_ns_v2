@@ -1,55 +1,78 @@
 {
   "case": "rank_growth_sweep",
+  "initial_state": {
+    "dtype": "float64",
+    "initial_energy": 22.206703312933374,
+    "numerical_rank": 17,
+    "sha256": "ebcef128e52e73f728024f67e95e0a4263addff56aa82c7a8e82e7f5e8b1af41",
+    "shape": [
+      64,
+      64
+    ]
+  },
   "interpretation": "The unprojected candidate is inspected at each check; tighter thresholds retain more slowly decaying singular directions and therefore grow rank.",
   "parameters": {
-    "N": 64,
-    "check_every": 5,
+    "base_speed": 0.5,
+    "compare_stride": 20,
+    "cutoff": 8,
+    "dlra_adapt_initial": true,
+    "dlra_check_every": 5,
+    "dlra_initial_rank": 2,
+    "dlra_max_rank": 48,
+    "dlra_min_rank": 2,
+    "dlra_relative_amplitude_cutoff": 1e-10,
     "dt": 0.0005,
-    "initial_rank": 2,
-    "max_rank": 48,
-    "min_rank": 2,
-    "re": 5000,
-    "steps": 200,
-    "tolerances": [
+    "final_time": 0.1,
+    "force_amplitude": 0.5,
+    "nsteps": 200,
+    "perturbation_velocity_rms": 1.0,
+    "pod_fit_includes_ic": true,
+    "pod_rank": 16,
+    "relative_amplitude_cutoffs": [
       1e-06,
       1e-08,
       1e-10
-    ]
+    ],
+    "seed": 20260925,
+    "snapshot_stride": 5,
+    "spectrum_count": null,
+    "steps": 200,
+    "train_steps": 100
   },
   "provenance": {
     "driver": "experiments/run_rank_growth_sweep.py",
-    "git_commit": "a0640a71685c25a7a254e6d1c9b8fbd919f5ef70"
+    "git_commit": "78607f3aa9c34987536823afca2eeb02702d4edc"
   },
   "rows": [
     {
-      "max_relative_l2_vs_full": 0.3165350925555205,
-      "max_scaled_invariant_residual": 0.0029680147774447867,
-      "rank_final": 20,
-      "rank_max": 20,
-      "rank_min": 2,
-      "seconds_per_step": 0.004939254615455866,
-      "stable": true,
-      "tolerance": 1e-06
+      "max_relative_l2_vs_full": 0.0001723771741037479,
+      "max_scaled_invariant_residual": 0.0007700258082712,
+      "rank_final": 36,
+      "rank_max": 36,
+      "rank_min": 17,
+      "relative_amplitude_cutoff": 1e-06,
+      "seconds_per_step": 0.007888318215264008,
+      "stable": true
     },
     {
-      "max_relative_l2_vs_full": 0.3165330810766307,
-      "max_scaled_invariant_residual": 0.002968014833128505,
-      "rank_final": 38,
-      "rank_max": 38,
-      "rank_min": 2,
-      "seconds_per_step": 0.006772506324341521,
-      "stable": true,
-      "tolerance": 1e-08
+      "max_relative_l2_vs_full": 0.00010107120885342302,
+      "max_scaled_invariant_residual": 0.0007700257924652773,
+      "rank_final": 43,
+      "rank_max": 43,
+      "rank_min": 17,
+      "relative_amplitude_cutoff": 1e-08,
+      "seconds_per_step": 0.007571065285010264,
+      "stable": true
     },
     {
-      "max_relative_l2_vs_full": 0.3165330825330329,
-      "max_scaled_invariant_residual": 0.0029680148342062546,
-      "rank_final": 42,
-      "rank_max": 42,
-      "rank_min": 2,
-      "seconds_per_step": 0.005689017234835773,
-      "stable": true,
-      "tolerance": 1e-10
+      "max_relative_l2_vs_full": 0.00010108416677905397,
+      "max_scaled_invariant_residual": 0.0007700257924652773,
+      "rank_final": 43,
+      "rank_max": 43,
+      "rank_min": 17,
+      "relative_amplitude_cutoff": 1e-10,
+      "seconds_per_step": 0.007664874924812466,
+      "stable": true
     }
   ]
 }

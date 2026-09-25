@@ -3,16 +3,26 @@
   "dlra_rank_final": 1,
   "dlra_rank_max": 1,
   "dlra_rank_min": 1,
-  "dlra_seconds": 0.586744975997135,
-  "dlra_seconds_per_step": 0.002933724879985675,
+  "dlra_seconds": 0.7361491969786584,
+  "dlra_seconds_per_step": 0.0036807459848932924,
   "final_energy": 8.410322089942198,
-  "full_seconds": 0.2588308199774474,
-  "full_seconds_per_step": 0.001294154099887237,
+  "full_seconds": 0.2132489960640669,
+  "full_seconds_per_step": 0.0010662449803203345,
   "grid": {
     "L": 6.283185307179586,
     "N": 64
   },
   "initial_energy": 9.869604401089358,
+  "initial_state": {
+    "dtype": "float64",
+    "initial_energy": 9.869604401089358,
+    "numerical_rank": 1,
+    "sha256": "29f47df36a8a9a71b35b285a210489133de6362cd4b48ff00f040678f162f27b",
+    "shape": [
+      64,
+      64
+    ]
+  },
   "max_abs_divergence": 1.6283367361393053e-14,
   "max_energy_increase": -0.006730949692846266,
   "max_relative_l2_error_dlra": 2.257304013319803e-14,
@@ -26,6 +36,6 @@
   },
   "provenance": {
     "driver": "experiments/run_taylor_green.py",
-    "git_commit": "a0640a71685c25a7a254e6d1c9b8fbd919f5ef70"
+    "git_commit": "78607f3aa9c34987536823afca2eeb02702d4edc"
   }
 }

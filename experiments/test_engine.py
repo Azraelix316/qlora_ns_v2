@@ -429,6 +429,50 @@ def test_nyquist_row_keeps_velocity_exactly_divergence_free():
     assert grid.enstrophy(psi) > 0.0
 
 
+def test_initial_state_reference_grid_holds_the_same_field():
+    """A two-grid comparison must hold the identical field, not just the band.
+
+    With the default the Gaussian draw has shape (N, N), so changing N gives a
+    different realization of the same band.  Passing the coarse N as
+    ``reference_N`` evaluates the same band-limited field on the finer grid.
+    """
+    from run_kolmogorov import make_initial_state
+
+    coarse, fine = Grid2D(64), Grid2D(128)
+    a = make_initial_state(coarse, base_speed=0.5, perturbation_velocity_rms=1.0, cutoff=8)
+    same_field = make_initial_state(
+        fine, base_speed=0.5, perturbation_velocity_rms=1.0, cutoff=8, reference_N=64
+    )
+    redrawn = make_initial_state(
+        fine, base_speed=0.5, perturbation_velocity_rms=1.0, cutoff=8
+    )
+    # The resampled field is the identical band-limited field: unnormalized
+    # rfft coefficients scale with N^2, so compare them normalized.
+    Fa, Fb = coarse.fft(a - np.mean(a)), fine.fft(same_field - np.mean(same_field))
+    kx_ok = np.abs(fine.kx) <= 8
+    ky_ok = fine.ky <= 8
+    idx_x = np.rint(fine.kx).astype(int) % coarse.N
+    idx_y = np.rint(fine.ky).astype(int)
+    lhs = Fa[np.ix_(idx_x[kx_ok], idx_y[ky_ok])] / coarse.n
+    rhs = Fb[np.ix_(kx_ok, ky_ok)] / fine.n
+    assert np.max(np.abs(lhs - rhs)) < 1e-12 * np.max(np.abs(lhs))
+    # Everything outside the box is empty on both grids.
+    assert np.max(np.abs(Fb[~kx_ok, :])) < 1e-12 * np.max(np.abs(Fb))
+    assert np.max(np.abs(Fb[:, ~ky_ok])) < 1e-12 * np.max(np.abs(Fb))
+    # ...and it is genuinely a different field from the redrawn one.
+    Fr = fine.fft(redrawn - np.mean(redrawn))
+    assert np.max(np.abs(Fb - Fr)) > 1e-3 * np.max(np.abs(Fb))
+    # The default is unchanged, so the verified N=64 fingerprint still holds.
+    assert abs(coarse.ke(a) - 22.206703312933374) < 1e-12
+    # A reference grid too coarse to resolve the band is rejected.
+    try:
+        make_initial_state(fine, cutoff=8, reference_N=8)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("an under-resolving reference grid must raise")
+
+
 def test_initial_state_mask_is_a_box_with_rank_2c_plus_1():
     """cutoff is a box half-width: rank 2c+1, max radial |k| floor(c*sqrt2)."""
     from run_kolmogorov import make_initial_state
