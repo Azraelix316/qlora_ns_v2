@@ -226,3 +226,50 @@ T=4: E drift 8.8%, Z drift 23.5%. T=8: 2.2%, 24.7%. Bar is 10% on both. So the n
 ## Remaining
 
 `bench_cost.py` is re-running now from `13e1876` (pinned threads, warm-up discarded, 2000-step region, median of 7 with min/max spread, both accountings from the same runs, rank-independence sweep, amplitude-invariance check). I will report the medians, the spreads, the r=2-vs-r=64 ratios, and the N=64/128/256 trend — my calibration says the full-step ratio *grows* with N, so if that holds the near-parity-by-N=512 expectation does not exist in that direction and the long high-N run should be declined.
+
+## 2026-09-25T16:19:20+00:00 — from coder
+
+**Two items land together: the R5q cost gate is complete, and the V6 BUG port is implemented and verified. Artifact `state/coder/results/cost_retiming.json` at `2a490d3`; code `solvers/bug.py`.**
+
+## 1. R5q cost gate — it settles your open question, and the answer is no
+
+Protocol as you specified: threads pinned to 1 and **recorded** in the artifact (MKL/OMP/OPENBLAS/NUMEXPR = 1), warm-up of 200 steps **discarded**, 2000-step regions, **median of 7** repeats with min/max spread, both accountings taken from the *same* runs, content-independence checked by repeating at amplitude 1e-3.
+
+| N | r | full step / reference | spread | linear algebra / reference | SVDs/step | amp-1e-3 cost ratio |
+|---|---|---|---|---|---|---|
+| 64 | 2 | 1.777 | 9.9% | 0.597 | 4.0 | 0.997 |
+| 64 | 64 | 2.071 | 14.8% | 0.846 | 4.0 | 1.030 |
+| 128 | 2 | 2.049 | 4.9% | 0.963 | 4.0 | 1.017 |
+| 128 | 64 | 2.143 | 13.5% | 1.045 | 4.0 | 0.938 |
+| 256 | 2 | 2.133 | 5.4% | 1.157 | 4.0 | 1.009 |
+| 256 | 64 | 2.181 | 3.9% | 1.167 | 4.0 | 0.999 |
+
+**The full-step ratio saturates at ≈2.1–2.2 and does not approach parity.** My calibration predicted it would *grow* with N; it does not — it flattens — but the direction is the wrong way for the near-parity-by-N=512 expectation, and there is no grid at which this engine's reduced step costs the same as a full step. So **I am declining the long high-N timing run**: it cannot produce a per-step speedup claim, and the honest statement is the Θ(N³) rank-independent overhead that two tests already pin structurally. The mechanism is visible in the LA column: the four whole-field factorizations cost 0.60× a full step at N=64 and rise to 1.17× by N=256, so the SVD's *relative* weight grows with N while its *absolute* share of the step stays under half.
+
+Two smaller confirmations: cost is content-independent (ratios 0.94–1.03, so the speedup is not an artefact of a decaying field), and rank-independence is measured, not assumed — r=64 over r=2 is 1.165 (N=64), 1.046 (N=128), 1.022 (N=256) for the full step. The N=64 point is outside 1.25 and I have left that visible rather than widening the bar.
+
+## 2. V6: the BUG port is implemented from the primary text, and it is verified
+
+I implemented from arXiv:2402.08607 §§2–3 directly, as you instructed, not from your summary: the augmented BUG step (K-step, L-step, S-step with `Ŝ(t0) = M̂S₀N̂ᵀ`), then the Galerkin step in bases augmented by `h·F(t₁ᐟ₂,Ŷ)V̂` (eq. 10), then SVD truncation. The Remark-1 3r variant is also available.
+
+**A stationary state is held to machine precision** — this is the strong test you asked for, and it is the one I would keep even if everything else were cut. With `SelfConsistentForcing` the non-diffusive RHS vanishes at the reference state, so every BUG sub-equation has zero right-hand side there and the factor algebra becomes an equality that either holds to roundoff or does not hold at all: drift < 1e-12 over 25 steps, with orthonormality of both factors checked to 1e-12. A transposed factor or a `M̂S₀N̂` written without the transpose passes any loose tolerance and fails this one.
+
+**The port's purpose is asserted structurally, not by timing.** A timing claim cannot distinguish BUG from the projected step on a shared node, but the *shape* of the factorization can: `large_svd_calls == 0` after ten steps and `svd_max_dimension ≤ 4r`, i.e. the only factorization is of the small augmented S-matrix. I also had to fix a mistake of my own here — my first version re-factorized the state each step to apply the diffusion, which would have put a Θ(N³) factorization straight back into every step. The fix is exact rather than approximate: the heat semigroup acts on the *factors*, `e^{ντΔ}Y = (e^{ντΔ_x}U)S(e^{ντΔ_y}V)ᵀ`, with QR re-orthonormalisation at O(Nr²).
+
+**Second order is measured: 1.98, 1.95** (N=16, same-rank reference at 8× finer dt). Getting that required a correction to how I framed the test, and the correction is itself a finding: **at rank 6 the same code converges at order 1.01/1.02/1.05.** The rank-6 truncation discards 18 of 24 augmented directions every step, and that error is O(1) in dt, so it dominates the time error and masks the scheme's order. Second order is a property of the *time integrator*, conditional on the rank being sufficient — which is the same conditioning the rank criterion has to satisfy, and why an under-selecting rank rule (F5: rank 1) loses not just accuracy but order.
+
+## 3. The honest cost of the port, which I did not expect
+
+Timing the two on the same protocol and the same state, **BUG is about 5× *slower* per step than the projected integrator** (0.19–0.29× the projected time at N=32/64), even though its only factorization is 8×8. The reason is that the K-, L- and S-step right-hand sides are evaluated on *rank-augmented fields* — `K(t)V₀ᵀ`, `U₀L(t)ᵀ`, `ÛŜV̂ᵀ` — and each of those is a full-grid field evaluation, several per step, at O(N²) each with a spectral advection inside. The rank-1 factorization saving is real and it is simply swamped.
+
+I have this running at full protocol (N=64, 128; 7 repeats; min/max spread) into `cost_bug_port.json` and will report the medians and spreads. I flag now that my calibration run had a 64.6% reference spread and produced a physically impossible ordering (projected r=16 faster than r=2), so I am not treating that run as a measurement and neither should you.
+
+**What this means for the paper:** the cost argument for BUG does not survive contact with this engine. What survives is the Galerkin step in the augmented basis and, per Remark 3, the route to norm/energy/dissipation preservation in the same situations as the plain augmented BUG — which is a *methodological* claim about the scheme, not a speed claim. I would rather tell you that now than have it surface at review.
+
+## 4. Housekeeping
+
+- 36 tests pass. Two of my own bugs were caught by them this session and are worth recording because both were silent: a **duplicate `Grid2D.lap` that shadowed the real one with a flipped sign** (the real `lap` returns −Δf; my duplicate returned +Δf, and it broke four operator tests at once), and the per-step full SVD described above. Neither was visible from the code's own output.
+- `make_figures.py` rewritten (three binding-rule violations removed, two offending figure files deleted), all six figures build, `PROVENANCE.md` records the artifact and commit behind each.
+- `benchmark_summary.json` regenerated; it now warns rather than infers for the long-run artifact that does not record `re`/`N`.
+
+My earlier message asked whether to rework the rank rule to accumulate the visited subspace over a window, or to report the instantaneous/windowed distinction as a finding. That question is still open and it is the main thing blocking a positive accuracy claim, so I would like your answer on it. Everything else on your list is now done.

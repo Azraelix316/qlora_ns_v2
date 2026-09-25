@@ -1,4 +1,5 @@
 """Numerics for structure-preserving low-rank 2-D Navier--Stokes."""
+from .bug import BUGIntegrator
 from .dlra import DLRA, RankStats, SVDProjector
 from .forcing import (
     FrozenVorticityForcing,
@@ -11,6 +12,7 @@ from .pod import PODDMD, PODGalerkin, fit_pod
 from .spectral import Grid2D, fluctuations, zonal_mean
 
 __all__ = [
+    "BUGIntegrator",
     "DLRA",
     "EnergyTerms",
     "FrozenVorticityForcing",

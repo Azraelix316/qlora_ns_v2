@@ -1,20 +1,23 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: the static-POD baseline is repaired (its root cause was a reshape bug
-> in `PODGalerkin.fit`), every result artifact is regenerated post-fix, and the
-> stale `benchmark_summary.json` R27 flagged as blocking is now generated from
-> the artifacts. 31 tests pass. Two further real defects found and fixed since:
-> the first-derivative operators applied a k-multiplier to the rfft *half*
-> spectrum (wrong for any field that is not k-symmetric; inert for every
-> committed run, which is measured, not assumed), and `dlra_max_rank` capping
-> the rank trace below the grid's own ceiling. R26's energy-based rank
-> criterion is implemented and pinned. **In flight:** the R5q cost gate is
-> running; because the operator fix changes the code the gate measured, it will
-> be re-run from the final commit. Next: the T=8 run R26/R27 ask for, which is
-> where the 1→16 rank growth is actually visible (at T=0.1, r99=1). No
-> per-step speedup may be claimed (D11.1); F5 is blocked behind the regime
-> decision (D11.2).
+> Status: every item on the reviewer's queue is done and reported. The R5q cost
+> gate is complete (full-step ratio saturates at ≈2.1 and never reaches parity,
+> so the long high-N run is declined); the V6 midpoint-BUG port is implemented
+> from the primary text and verified by a machine-precision stationary-state
+> test, a structural no-full-factorization assertion, and a measured second
+> order of 1.98/1.95; R26/R29's windowed rank is reproduced with project code at
+> N=64 and N=128 (r99 = 16 on both at W=8, while the amplitude rule asks 174 and
+> 357); S2 passes at no affordable horizon; and F5 at T=8 is reported as not
+> favouring the proposed method. 36 tests pass, six figures build from
+> artifacts, and `benchmark_summary.json` is generated. **Two results that
+> constrain the paper rather than support it:** the per-step rank rule reads one
+> state at a time so it cannot track the windowed rank (adaptive rank 1, 17% of
+> the fluctuation energy), and the BUG port is ~5× *slower* per step than the
+> projected integrator, so its cost argument does not hold here. **Open
+> question put to the reviewer:** rework the rank rule to accumulate the visited
+> subspace over a window, or report the instantaneous/windowed distinction as a
+> finding. No per-step speedup may be claimed (D11.1) — none is available.
 
 ## Mission
 
@@ -43,6 +46,75 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 - [x] Send a readiness note to `writer` once the first numbers exist.
 
 ## Log
+
+- 2026-09-25 **V6 done: midpoint BUG implemented from the primary text
+  (arXiv:2402.08607 §§2–3) and verified three ways.** `solvers/bug.py`. The
+  augmented step (K/L/S with `Ŝ(t0)=M̂S₀N̂ᵀ`), then the Galerkin step in bases
+  augmented by `h·F(t₁ᐟ₂,Ŷ)V̂`, then SVD truncation; the Remark-1 3r variant
+  too. Verified by: (a) a stationary state held to **machine precision** over
+  25 steps (the `SelfConsistentForcing` test — every sub-equation has zero
+  RHS there, so the factor algebra either holds to roundoff or not at all, and
+  a transposed factor fails it while passing any loose tolerance); (b) a
+  **structural** assertion that the only factorization in a step is of the
+  ≤4r augmented S-matrix (`large_svd_calls == 0`), which is what a timing
+  claim cannot establish on a shared node; (c) **measured second order, 1.98
+  and 1.95**.
+- 2026-09-25 Two bugs of mine, both silent, both caught by tests rather than by
+  output. A **duplicate `Grid2D.lap` shadowed the real one with a flipped sign**
+  (real `lap` returns −Δf, mine returned +Δf) and broke four operator tests at
+  once. And my first BUG `step` re-factorized the state every step to apply the
+  diffusion — which would have put Θ(N³) back into every step and defeated the
+  port. The fix is exact, not approximate: the heat semigroup acts on the
+  factors, `e^{ντΔ}Y = (e^{ντΔ_x}U)S(e^{ντΔ_y}V)ᵀ`, re-orthonormalised by QR at
+  O(Nr²). Both axes of the factor semigroup act on **axis 0** (U's rows are x,
+  V's rows are y) — my first version applied the y-semigroup to V's *columns*,
+  which is a different operator.
+- 2026-09-25 **Second order is conditional on the rank, and that is a finding.**
+  Same code, same test: at rank 6 the observed order is 1.01/1.02/1.05, at
+  rank 16 it is 1.98/1.95. The rank-6 truncation discards 18 of 24 augmented
+  directions every step and that error is O(1) in dt, so it dominates the time
+  error and masks the scheme's order. So an under-selecting rank rule does not
+  merely lose accuracy — it loses the scheme's order too, which is the same
+  conditioning F5's rank-1 result runs into.
+- 2026-09-25 **R5q cost gate complete and it settles the reviewer's open
+  question in the negative.** Pinned threads (recorded), warm-up discarded,
+  2000-step regions, median of 7 with min/max spread, both accountings from the
+  same runs. Full-step ratio 1.78/2.07 (N=64), 2.05/2.14 (N=128), 2.13/2.18
+  (N=256) for r=2/64: it **saturates at ≈2.1 and never approaches parity**, so
+  the near-parity-by-N=512 expectation does not exist and I declined the long
+  high-N run. The LA column shows why: 0.60× a full step at N=64 rising to
+  1.17× at N=256, so the SVD's relative weight grows with N while its absolute
+  share stays under half. Cost is content-independent (0.94–1.03) and
+  rank-independence is measured (r=64/r=2 = 1.165/1.046/1.022), with the N=64
+  point outside 1.25 left visible rather than hidden by a wider bar.
+- 2026-09-25 **The BUG port is ~5× slower per step than the projected
+  integrator** (0.19–0.29× the projected time), despite factorizing only an 8×8
+  matrix. The K/L/S right-hand sides are evaluated on *rank-augmented fields*
+  (`K(t)V₀ᵀ`, `U₀L(t)ᵀ`, `ÛŜV̂ᵀ`) and each is a full-grid field evaluation with a
+  spectral advection inside, several times per step. The rank-1 factorization
+  saving is real and is swamped. So the **cost** argument for BUG does not
+  survive contact with this engine; what survives is the Galerkin step in the
+  augmented basis and, per Remark 3, the route to norm/energy/dissipation
+  preservation. My calibration run had a 64.6% reference spread and produced a
+  physically impossible ordering (projected r=16 faster than r=2), so it is
+  discarded, not reported; a full-protocol re-measurement is running into
+  `cost_bug_port.json`.
+
+- 2026-09-25 `make_figures.py` rewritten, because the committed figures
+  violated three binding rules rather than merely being stale. It titled a rank
+  trace "Adaptive rank growth" when that trace is the dealiasing ceiling
+  (D11.3 retires the claim); it labelled pointwise L2 as "error" when the P0
+  metric order makes it trajectory divergence; and it plotted the singular
+  values of the **rank-truncated reduced state** as a spectrum, which F2/R5
+  bar ("never the rank-truncated reduced state"). The two offending figure
+  files are deleted rather than left for the writer to pick up. The five new
+  figures are: the windowed-rank premise figure at two grids with the
+  amplitude rule's grid-scaling beside it, the full-grid state spectrum with
+  the IC's rank-17 cliff, trajectory divergence paired with the KE series and
+  labelled, max |∇·u| for every method including all F5 baselines, and the
+  fluctuation E(k)/Z(k) over the dealiased range. A `PROVENANCE.md` records
+  the artifact and commit behind every figure so a figure cannot outlive its
+  numbers. The cost figure appears when the gate lands.
 
 - 2026-09-25 **R29's grid-independence reproduced with project code, and it is
   the cleanest statement of the whole rank question.** Running the pilot at

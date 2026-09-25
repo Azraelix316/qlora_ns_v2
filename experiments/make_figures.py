@@ -52,7 +52,17 @@ def git_commit() -> str:
         return "unknown"
 
 
-def provenance(results: Path, out: Path, names: list[str]) -> None:
+def provenance(
+    results: Path, out: Path, names: list[str], skipped: list[tuple[str, str]]
+) -> None:
+    """Record which artifact backs each figure -- *and* which figure is missing.
+
+    A figure that silently failed to generate is indistinguishable from one that
+    was never asked for, so an expected-but-skipped figure is stated with the
+    reason.  That is the whole point of recording provenance: a figure must not
+    be able to disappear between one commit and the next without a line here
+    saying so.
+    """
     lines = ["# Figure provenance", ""]
     for name in names:
         path = results / name
@@ -62,6 +72,10 @@ def provenance(results: Path, out: Path, names: list[str]) -> None:
                 f"- `{name}` -- commit "
                 f"`{data.get('provenance', {}).get('git_commit', '?')[:8]}`"
             )
+    if skipped:
+        lines += ["", "## Expected but not generated", ""]
+        for figure, reason in skipped:
+            lines.append(f"- **{figure}** -- {reason}")
     lines += ["", f"figures generated at commit `{git_commit()}`", ""]
     (out / "PROVENANCE.md").write_text("\n".join(lines) + "\n")
 
@@ -80,6 +94,7 @@ def main() -> None:
     colors = {"full": "#264653", "pod": "#8C8C8C", "dlra": "#E76F51",
               "ref": "#0072B2", "a": "#2A9D8F", "b": "#E9C46A"}
     used: list[str] = []
+    skipped: list[tuple[str, str]] = []
 
     plt.rcParams.update({
         "font.family": "serif", "font.serif": ["DejaVu Serif"], "font.size": 9,
@@ -132,8 +147,8 @@ def main() -> None:
         ax.set_title("The amplitude rule asks for the grid")
         ax.legend(fontsize=7)
         fig.tight_layout()
-        fig.savefig(args.output_dir / "fig_rank_growth.pdf", bbox_inches="tight")
-        fig.savefig(args.output_dir / "fig_rank_growth.png", bbox_inches="tight")
+        fig.savefig(args.output_dir / "fig_window_rank.pdf", bbox_inches="tight")
+        fig.savefig(args.output_dir / "fig_window_rank.png", bbox_inches="tight")
         plt.close(fig)
 
     # ---------------------------------------------------------------- figure 2
@@ -235,6 +250,13 @@ def main() -> None:
     # ---------------------------------------------------------------- figure 5
     # Cost, two accountings, median with spread, annotated with the threading.
     cost = load(R / "cost_retiming.json")
+    if cost is None:
+        skipped.append((
+            "fig_cost",
+            "`cost_retiming.json` is absent, so the per-step cost axis is "
+            "missing. The crossover law is uninterpretable without it: a "
+            "reader cannot tell what a rank costs.",
+        ))
     if cost:
         used.append("cost_retiming.json")
         grids = [g for g in cost["grids"] if g["N"] in (64, 128, 256)]
@@ -280,6 +302,11 @@ def main() -> None:
             spec_source = (name, data)
             used.append(name)
             break
+    if spec_source is None:
+        skipped.append((
+            "fig_spectra_ek",
+            "no pilot artifact carried time-averaged fluctuation spectra",
+        ))
     if spec_source:
         name, data = spec_source
         entry = next(iter(data["windowed_spectra"].values()))
@@ -287,11 +314,37 @@ def main() -> None:
         e = np.asarray(entry["E_fluct"], dtype=float)
         z = np.asarray(entry["Z_fluct"], dtype=float)
         ok = k <= entry["dealias_resolved_k_max"]
-        fig, ax = plt.subplots(figsize=(3.6, 2.7))
+        w0, w1 = entry["window_start"], entry["window_end"]
+
+        # Whether a time-averaged spectrum is legitimate is a *measurement*, not
+        # a matter of taste, and the measurement is already in the artifact: the
+        # S2 drift of each quantity over exactly this window.  A quantity that
+        # drifts by more than the S2 bar over the averaging interval is not
+        # stationary there, so averaging it reports the average of a moving
+        # thing.  The drift is read from the pilot's own rows rather than
+        # hardcoded, so the figure cannot claim a window the artifact does not
+        # support.
+        def drift_of(key: str) -> float | None:
+            for row in data.get("rows", []):
+                if abs(row["final_time"] - w1) < 1e-9:
+                    return row.get(key)
+            return None
+
+        d_e = drift_of("S2_energy_fluct_drift")
+        d_z = drift_of("S2_enstrophy_fluct_drift")
+        bar = 0.10
+        # The window may start after the run began, in which case the S2 row at
+        # its end measures drift over the final third, not this window; the
+        # conservative reading is that this window is at least that non-stationary.
+        note_e = "drift n/a" if d_e is None else f"drift {100*d_e:.0f}%"
+        z_defensible = d_z is not None and d_z <= bar
+
+        fig, ax = plt.subplots(figsize=(3.6, 2.8))
         ax.semilogy(k[ok], e[ok] / max(e.max(), 1e-300), color=colors["a"],
-                    label=r"$E(k)$")
-        ax.semilogy(k[ok], z[ok] / max(z.max(), 1e-300), color=colors["b"],
-                    label=r"$Z(k)$")
+                    label=rf"$E(k)$  ({note_e})")
+        if z_defensible:
+            ax.semilogy(k[ok], z[ok] / max(z.max(), 1e-300), color=colors["b"],
+                        label=rf"$Z(k)$  (drift {100*d_z:.0f}%)")
         ax.axvline(entry["dealias_resolved_k_max"], color=colors["full"],
                    linestyle=":", linewidth=1.0)
         ax.annotate("dealiased range", (entry["dealias_resolved_k_max"], 1e-3),
@@ -299,14 +352,34 @@ def main() -> None:
                     color=colors["full"])
         ax.set_xlabel("isotropic wavenumber $k$")
         ax.set_ylabel("normalised, time-averaged")
-        ax.set_title(r"Fluctuation spectra $\psi'=\psi-\overline{\psi}$")
-        ax.legend(fontsize=7)
+        ax.set_title(
+            rf"$\psi'=\psi-\overline{{\psi}}$, averaged over $t\in[{w0:g},{w1:g}]$",
+            fontsize=9,
+        )
+        if not z_defensible:
+            # Dropping the panel is the honest option, and saying so on the
+            # figure is better than leaving a legend entry a reader trusts.
+            note = (
+                rf"$Z(k)$ omitted: enstrophy drifts {100*d_z:.0f}%"
+                f" over this window (bar {100*bar:.0f}%)"
+                if d_z is not None else "$Z(k)$ omitted: drift not measurable"
+            )
+            ax.annotate(note, (0.02, 0.04), xycoords="axes fraction", fontsize=6.5,
+                        color=colors["dlra"])
+        ax.legend(fontsize=7, loc="upper right")
         fig.tight_layout()
         fig.savefig(args.output_dir / "fig_spectra_ek.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_spectra_ek.png", bbox_inches="tight")
         plt.close(fig)
+        if not z_defensible:
+            skipped.append((
+                "fig_spectra_ek: $Z(k)$ panel",
+                f"fluctuation enstrophy drifts {100*d_z:.0f}% over the averaging "
+                f"window [{w0:g}, {w1:g}], outside the 10% S2 bar, so a "
+                "time-averaged $Z(k)$ there would average a moving quantity",
+            ))
 
-    provenance(R, args.output_dir, sorted(set(used)))
+    provenance(R, args.output_dir, sorted(set(used)), skipped)
     print(f"figures written to {args.output_dir}")
 
 

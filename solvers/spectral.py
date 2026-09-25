@@ -153,6 +153,45 @@ class Grid2D:
         """Vorticity omega = curl(u) = -Lap(psi) for u=(psi_y,-psi_x)."""
         return self.ifft(self.k2 * self.fft(psi))
 
+    def factor_semigroup(
+        self, factor: np.ndarray, tau: float, nu: float
+    ) -> np.ndarray:
+        r"""Exact heat semigroup applied to one low-rank factor.
+
+        Writing the state as ``Y = U S V^T`` with ``U``'s rows indexing ``x``
+        and ``V``'s rows indexing ``y``, a field-level diffusion is a
+        left-multiplication by ``A_x = nu * Delta_x`` and a right-multiplication
+        by ``A_y = nu * Delta_y``, so
+
+            e^{\nu\tau\Delta}Y
+                = (e^{\nu\tau\Delta_x}U)\,S\,(e^{\nu\tau\Delta_y}V)^{T},
+            \qquad (e^{\nu\tau\Delta_y}V)^{T} = V^{T}e^{\nu\tau\Delta_y T}.
+
+        **Both factors are therefore transformed along axis 0** -- the leading
+        axis is the spatial one in each case, with ``U`` carrying ``x`` and ``V``
+        carrying ``y``.  Applying the ``y`` semigroup along ``V``'s columns
+        would be transforming its ``r`` singular-value directions instead, which
+        is a different operator.
+
+        This is what lets a BUG step avoid any full-size factorization: the
+        factors keep their rank exactly and the cost is two length-``N`` FFTs per
+        factor column, O(N r log N).
+
+        The full-grid wavenumber array ``kx`` is used with a full ``fft``/``ifft``,
+        matching :meth:`_deriv`: the rfft half-axis is not a valid multiplier for
+        a full-spectrum inversion.
+        """
+        arr = np.asarray(factor)
+        if arr.ndim != 2:
+            raise ValueError(f"expected a 2-D factor, got shape {arr.shape}")
+        if arr.shape[0] != self.N:
+            raise ValueError(
+                f"factor's leading axis is {arr.shape[0]}, expected N={self.N}"
+            )
+        spectrum = np.fft.fft(arr, axis=0)
+        mult = np.exp(-nu * self.kx ** 2 * tau)[:, None]
+        return np.fft.ifft(spectrum * mult, axis=0).real
+
     # -- norms / diagnostics ------------------------------------------------
     def l2_sq(self, f: np.ndarray) -> float:
         """L2 norm squared on [0,L)^2 (real-space)."""

@@ -792,6 +792,25 @@ def main() -> None:
             "dealias_resolved_k_max": grid.N // 3,
         },
         "initial_state": fingerprint,
+        "framing_note": (
+            "The adaptive rank reported here is a per-step SPATIAL rank: the "
+            "dimension the candidate field needs at one stage, which is what an "
+            "adaptive rule can return. It is NOT the windowed rank (the modes a "
+            "trajectory sweeps through over a window, which grows 1 -> 16 over "
+            "[0, 8] and is grid-independent) and the two must not be compared or "
+            "interchanged. On this case the rule selected rank "
+            f"{adaptive_rank}, and the matched-rank baselines are run at that rank "
+            "so the comparison isolates adaptivity from rank."
+        ),
+        "rank_quantities": {
+            "adaptive_rank": (
+                "per-step spatial rank from the rank_criterion below, applied to "
+                "one candidate field per check"
+            ),
+            "windowed_rank": (
+                "not measured here; see regime_pilot_*.json -> window_rank_table"
+            ),
+        },
         "reference": ref_metrics,
         "methods": methods,
         "diverged_methods": diverged,

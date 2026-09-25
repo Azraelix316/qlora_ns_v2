@@ -39,7 +39,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from solvers import DLRA, Grid2D, StreamFunctionNS, ZeroForcing
+from solvers import BUGIntegrator, DLRA, Grid2D, StreamFunctionNS, ZeroForcing
 
 
 def _git_commit() -> str:
@@ -122,6 +122,36 @@ def reduced_step_seconds(
     return elapsed, dlra.projector.svd_seconds, dlra.projector.svd_calls
 
 
+def bug_step_seconds(
+    N: int, rank: int, dt: float, steps: int, amplitude: float = 1.0
+) -> tuple[float, float, int, int]:
+    """Return (full_step_seconds, svd_seconds, svd_calls, svd_max_dimension).
+
+    Same protocol as :func:`reduced_step_seconds` -- same unforced state, same
+    held rank, warm-up discarded by the caller -- so the BUG timing and the
+    projected timing are directly comparable.  The rank is held fixed by
+    ``min_rank == max_rank``; this measures cost, not adaptation.
+    """
+    grid = Grid2D(N)
+    model = StreamFunctionNS(grid, nu=0.02, forcing=ZeroForcing(), dealias=True)
+    bug = BUGIntegrator(
+        model,
+        rank=rank,
+        min_rank=rank,
+        max_rank=rank,
+        relative_amplitude_cutoff=1e-10,
+        substeps=2,
+    )
+    state = bug.initialize(make_state(grid, amplitude=amplitude))
+    start = time.perf_counter()
+    for i in range(steps):
+        state = bug.step(dt=dt, t=i * dt)
+    elapsed = time.perf_counter() - start
+    if not np.isfinite(state).all():
+        raise FloatingPointError("BUG step went non-finite")
+    return elapsed, bug.svd_seconds, bug.svd_calls, bug.svd_max_dimension
+
+
 def measure(
     N: int,
     ranks: list[int],
@@ -130,6 +160,7 @@ def measure(
     warmup: int,
     dt: float,
     amplitude_check: bool = True,
+    bug_ranks: list[int] | None = None,
 ) -> dict:
     grid = Grid2D(N)
     model = StreamFunctionNS(grid, nu=0.02, forcing=ZeroForcing(), dealias=True)
@@ -173,6 +204,30 @@ def measure(
                 "amplitude_cost_ratio": red_med / amp_med,
             }
         )
+        # The BUG port, on the same protocol and the same state, so the two
+        # timings differ only in the integrator.
+        if bug_ranks is not None and rank in bug_ranks:
+            bug_step_seconds(N, rank, dt, warmup)          # discarded warm-up
+            bug_runs = [bug_step_seconds(N, rank, dt, steps) for _ in range(repeats)]
+            bug_secs = [b[0] for b in bug_runs]
+            bug_med = statistics.median(bug_secs)
+            rows[-1]["bug"] = {
+                "full_step_seconds_median": bug_med,
+                "full_step_seconds_min": min(bug_secs),
+                "full_step_seconds_max": max(bug_secs),
+                "full_step_seconds_per_step": bug_med / steps,
+                "full_step_relative_spread": (max(bug_secs) - min(bug_secs)) / bug_med,
+                "svd_seconds_median": statistics.median([b[1] for b in bug_runs]),
+                "svd_calls_per_step": bug_runs[0][2] / steps,
+                "svd_max_dimension": bug_runs[0][3],
+                "full_step_ratio_vs_reference": bug_med / full_med,
+                "speedup_over_projected_same_rank": red_med / bug_med,
+                "note": (
+                    "same state, same held rank, same warm-up and repeat count; "
+                    "the only factorization inside a BUG step is of the "
+                    "augmented S-matrix, so svd_max_dimension is at most 4r"
+                ),
+            }
     return {
         "N": N,
         "steps_per_repeat": steps,
@@ -200,6 +255,11 @@ def main() -> None:
     parser.add_argument("--steps", type=int, default=2000)
     parser.add_argument("--repeats", type=int, default=7)
     parser.add_argument("--warmup", type=int, default=200)
+    parser.add_argument(
+        "--bug-ranks", type=int, nargs="*", default=None,
+        help="ranks at which to also time the BUG port, on the same protocol; "
+             "omit to time the projected integrator only",
+    )
     parser.add_argument("--dt", type=float, default=None)
     parser.add_argument(
         "--output",
@@ -215,7 +275,10 @@ def main() -> None:
         dt = args.dt if args.dt is not None else 5e-4 * (64.0 / N)
         print(f"timing N={N} ranks={args.ranks} ...", flush=True)
         grids.append(
-            measure(N, args.ranks, args.steps, args.repeats, args.warmup, dt)
+            measure(
+                N, args.ranks, args.steps, args.repeats, args.warmup, dt,
+                bug_ranks=args.bug_ranks,
+            )
         )
 
     rank_independence = []
@@ -226,14 +289,22 @@ def main() -> None:
             hi = by_rank[64]["full_step_seconds_median"]
             lo_la = by_rank[2]["linear_algebra_seconds_median"]
             hi_la = by_rank[64]["linear_algebra_seconds_median"]
-            rank_independence.append(
-                {
-                    "N": entry["N"],
-                    "full_step_ratio_r64_over_r2": hi / lo,
-                    "linear_algebra_ratio_r64_over_r2": hi_la / lo_la,
-                    "within_1p25": bool(hi / lo <= 1.25 and hi_la / lo_la <= 1.25),
-                }
-            )
+            row = {
+                "N": entry["N"],
+                "full_step_ratio_r64_over_r2": hi / lo,
+                "linear_algebra_ratio_r64_over_r2": hi_la / lo_la,
+                "within_1p25": bool(hi / lo <= 1.25 and hi_la / lo_la <= 1.25),
+            }
+            # The port's claim is the opposite one: its cost should *scale* with
+            # the rank, because that is what the O(N r^2) factor work means.
+            if "bug" in by_rank[2] and "bug" in by_rank[64]:
+                b_lo = by_rank[2]["bug"]["full_step_seconds_median"]
+                b_hi = by_rank[64]["bug"]["full_step_seconds_median"]
+                row["bug_full_step_ratio_r64_over_r2"] = b_hi / b_lo
+                row["bug_rank_dependent"] = bool(b_hi / b_lo > 1.25)
+                row["bug_speedup_r2"] = by_rank[2]["bug"]["speedup_over_projected_same_rank"]
+                row["bug_speedup_r64"] = by_rank[64]["bug"]["speedup_over_projected_same_rank"]
+            rank_independence.append(row)
 
     output = {
         "case": "cost_retiming",

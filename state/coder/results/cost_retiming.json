@@ -1,0 +1,184 @@
+{
+  "case": "cost_retiming",
+  "environment": {
+    "numpy": "2.5.3",
+    "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.3",
+    "thread_settings": {
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": null
+    }
+  },
+  "grids": [
+    {
+      "N": 64,
+      "benchmark_state": "unforced multi-mode decay (nu=0.02, ZeroForcing) at amplitude 1, with an amplitude-1e-3 repeat to measure content-independence",
+      "dealias_rank_ceiling": 43,
+      "dt": 0.0005,
+      "reference_full_step_seconds_median": 2.8504797799978405,
+      "reference_full_step_seconds_per_step": 0.0014252398899989203,
+      "reference_relative_spread": 0.4837645075459939,
+      "repeats": 7,
+      "rows": [
+        {
+          "amplitude_1e_3_seconds_median": 5.0824005380272865,
+          "amplitude_cost_ratio": 0.996762564090302,
+          "full_step_ratio_vs_reference": 1.77722593493431,
+          "full_step_relative_spread": 0.09860804309714508,
+          "full_step_seconds_max": 5.427956697996706,
+          "full_step_seconds_median": 5.065946592018008,
+          "full_step_seconds_min": 4.928413618123159,
+          "full_step_seconds_per_step": 0.002532973296009004,
+          "linear_algebra_ratio_vs_reference": 0.5968334440444159,
+          "linear_algebra_seconds_median": 1.70126166427508,
+          "linear_algebra_seconds_per_step": 0.00085063083213754,
+          "rank": 2,
+          "svd_calls_per_step": 4.005
+        },
+        {
+          "amplitude_1e_3_seconds_median": 5.731146795093082,
+          "amplitude_cost_ratio": 1.029968680627779,
+          "full_step_ratio_vs_reference": 2.0708449659764354,
+          "full_step_relative_spread": 0.1480456836330977,
+          "full_step_seconds_max": 6.710151867009699,
+          "full_step_seconds_median": 5.902901703026146,
+          "full_step_seconds_min": 5.836252748966217,
+          "full_step_seconds_per_step": 0.0029514508515130727,
+          "linear_algebra_ratio_vs_reference": 0.8458121957538771,
+          "linear_algebra_seconds_median": 2.410970561672002,
+          "linear_algebra_seconds_per_step": 0.001205485280836001,
+          "rank": 64,
+          "svd_calls_per_step": 4.005
+        }
+      ],
+      "steps_per_repeat": 2000,
+      "warmup_steps_discarded": 200
+    },
+    {
+      "N": 128,
+      "benchmark_state": "unforced multi-mode decay (nu=0.02, ZeroForcing) at amplitude 1, with an amplitude-1e-3 repeat to measure content-independence",
+      "dealias_rank_ceiling": 85,
+      "dt": 0.00025,
+      "reference_full_step_seconds_median": 11.062913564965129,
+      "reference_full_step_seconds_per_step": 0.0055314567824825646,
+      "reference_relative_spread": 0.1105964361716597,
+      "repeats": 7,
+      "rows": [
+        {
+          "amplitude_1e_3_seconds_median": 22.285400398541242,
+          "amplitude_cost_ratio": 1.0173198080634993,
+          "full_step_ratio_vs_reference": 2.049313602870373,
+          "full_step_relative_spread": 0.048558930746338894,
+          "full_step_seconds_max": 23.271429024171084,
+          "full_step_seconds_median": 22.67137925606221,
+          "full_step_seconds_min": 22.170531088951975,
+          "full_step_seconds_per_step": 0.011335689628031104,
+          "linear_algebra_ratio_vs_reference": 0.9626868100422048,
+          "linear_algebra_seconds_median": 10.650120969628915,
+          "linear_algebra_seconds_per_step": 0.005325060484814457,
+          "rank": 2,
+          "svd_calls_per_step": 4.005
+        },
+        {
+          "amplitude_1e_3_seconds_median": 25.292055873549543,
+          "amplitude_cost_ratio": 0.9375768176955018,
+          "full_step_ratio_vs_reference": 2.1434900597972946,
+          "full_step_relative_spread": 0.1346419638881286,
+          "full_step_seconds_max": 25.949993015034124,
+          "full_step_seconds_median": 23.713245258899406,
+          "full_step_seconds_min": 22.757195103215054,
+          "full_step_seconds_per_step": 0.011856622629449703,
+          "linear_algebra_ratio_vs_reference": 1.0451126409023541,
+          "linear_algebra_seconds_median": 11.561990811955184,
+          "linear_algebra_seconds_per_step": 0.0057809954059775915,
+          "rank": 64,
+          "svd_calls_per_step": 4.005
+        }
+      ],
+      "steps_per_repeat": 2000,
+      "warmup_steps_discarded": 200
+    },
+    {
+      "N": 256,
+      "benchmark_state": "unforced multi-mode decay (nu=0.02, ZeroForcing) at amplitude 1, with an amplitude-1e-3 repeat to measure content-independence",
+      "dealias_rank_ceiling": 171,
+      "dt": 0.000125,
+      "reference_full_step_seconds_median": 49.215774114010856,
+      "reference_full_step_seconds_per_step": 0.024607887057005427,
+      "reference_relative_spread": 0.08243692241375818,
+      "repeats": 7,
+      "rows": [
+        {
+          "amplitude_1e_3_seconds_median": 104.10024936241098,
+          "amplitude_cost_ratio": 1.008615077407518,
+          "full_step_ratio_vs_reference": 2.1334030188284547,
+          "full_step_relative_spread": 0.05375513467172562,
+          "full_step_seconds_max": 109.52022972004488,
+          "full_step_seconds_median": 104.99708106881008,
+          "full_step_seconds_min": 103.8760974870529,
+          "full_step_seconds_per_step": 0.05249854053440504,
+          "linear_algebra_ratio_vs_reference": 1.1569971333545421,
+          "linear_algebra_seconds_median": 56.942509565735236,
+          "linear_algebra_seconds_per_step": 0.02847125478286762,
+          "rank": 2,
+          "svd_calls_per_step": 4.005
+        },
+        {
+          "amplitude_1e_3_seconds_median": 107.48483417590614,
+          "amplitude_cost_ratio": 0.998507399188617,
+          "full_step_ratio_vs_reference": 2.1806911332245096,
+          "full_step_relative_spread": 0.03881893282896514,
+          "full_step_seconds_max": 109.93983683292754,
+          "full_step_seconds_median": 107.32440222520381,
+          "full_step_seconds_min": 105.77361807203852,
+          "full_step_seconds_per_step": 0.05366220111260191,
+          "linear_algebra_ratio_vs_reference": 1.1674288445844367,
+          "linear_algebra_seconds_median": 57.45591430924833,
+          "linear_algebra_seconds_per_step": 0.028727957154624163,
+          "rank": 64,
+          "svd_calls_per_step": 4.005
+        }
+      ],
+      "steps_per_repeat": 2000,
+      "warmup_steps_discarded": 200
+    }
+  ],
+  "interpretation": "Per-step cost is reported as a ratio against the pinned-thread full-grid reference under both accountings. No per-step speedup is claimed anywhere: the reduced method pays the same full-grid nonlinear evaluation as the reference plus its own factorization.",
+  "method": {
+    "accountings": {
+      "full_step": "wall time of a complete reduced step, including the full-grid nonlinear evaluation and all projections",
+      "linear_algebra": "measured time inside the whole-field SVD calls"
+    },
+    "benchmark_state": "unforced multi-mode decay; the forced IC is not used because a fixed low rank on a forced field grows unboundedly and makes LAPACK fail, which is a property of that configuration and not of cost. An amplitude-1e-3 repeat measures the content-independence claim rather than assuming it.",
+    "rank_held_fixed": "check_every is set beyond the run, so cost is measured at a fixed rank rather than under adaptation",
+    "why": "the factorization is of the whole N x N field, so it is rank-independent and Theta(N^3); a linear-algebra win is not a per-step win"
+  },
+  "provenance": {
+    "driver": "experiments/bench_cost.py",
+    "git_commit": "d85c9800bdf80c59351d7be8719113d8d16e1cbe"
+  },
+  "rank_independence": [
+    {
+      "N": 64,
+      "full_step_ratio_r64_over_r2": 1.16521198867885,
+      "linear_algebra_ratio_r64_over_r2": 1.4171662198121264,
+      "within_1p25": false
+    },
+    {
+      "N": 128,
+      "full_step_ratio_r64_over_r2": 1.0459551221418788,
+      "linear_algebra_ratio_r64_over_r2": 1.0856206089045053,
+      "within_1p25": true
+    },
+    {
+      "N": 256,
+      "full_step_ratio_r64_over_r2": 1.0221655795828126,
+      "linear_algebra_ratio_r64_over_r2": 1.0090161945342506,
+      "within_1p25": true
+    }
+  ]
+}
