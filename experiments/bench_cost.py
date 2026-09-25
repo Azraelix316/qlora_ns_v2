@@ -267,6 +267,7 @@ def main() -> None:
         default=Path("state/coder/results/cost_retiming.json"),
     )
     args = parser.parse_args()
+    bug_ranks = args.bug_ranks
 
     grids = []
     for N in args.grids:
@@ -315,7 +316,18 @@ def main() -> None:
         rank_independence.append(row)
 
     output = {
+        # One shared family label so the cost artifacts are recognisably the same
+        # kind of measurement, plus a variant so a reader can tell which
+        # integrators a given file actually timed.  Two files both labelled
+        # "cost_retiming" with nothing else is how a reader ends up comparing
+        # them without knowing they timed different code.
         "case": "cost_retiming",
+        "case_family": "cost",
+        "case_variant": "projected+bug" if bug_ranks else "projected_only",
+        "integrators_timed": (
+            ["full_grid_reference", "projected_dlra", "midpoint_bug"]
+            if bug_ranks else ["full_grid_reference", "projected_dlra"]
+        ),
         "provenance": {
             "git_commit": _git_commit(),
             "driver": "experiments/bench_cost.py",
