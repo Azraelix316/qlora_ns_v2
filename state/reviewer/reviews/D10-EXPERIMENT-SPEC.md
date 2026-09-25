@@ -104,13 +104,18 @@ resolution study says that Re is resolved. *Closes V2, V1.*
 
 **F5 — Baselines, rank- and work-matched.**
 Full-grid spectral; static POD at r = 16/32/42 and at the adaptive rank;
-the method itself; a fixed-rank variant to isolate adaptivity from rank.
+**POD-DMD (dynamic data-driven ROM) at the same matched ranks** — added at R5h
+because a 2017+ scicomp venue will expect it and Peherstorfer & Willcox
+(CMAME 291:21–41, 2015, DOI 10.1016/j.cma.2015.03.018) is its reference; the
+method itself; a fixed-rank variant to isolate adaptivity from rank.
 **Bar:** identical IC (hash-verified), same dt policy, same forcing and
-spectrum. The method must beat static POD at matched rank on time-averaged E/Z
-and on spectra in the resolved range — if it does not, report that; it is a
-publishable result but the claim must change. The current POD numbers
-(11.4× energy, 159× enstrophy, rel L2 > 1, O(1) PDE residual) are a broken
-baseline and may not be cited. *Closes V4.*
+spectrum. The method must beat both static POD and POD-DMD at matched rank on
+time-averaged E/Z and on spectra in the resolved range — if it does not, report
+that; it is a publishable result but the claim must change. The current POD
+numbers (11.4× energy, 159× enstrophy, rel L2 > 1, O(1) PDE residual) are a
+broken baseline and may not be cited. POD-DMD is cheap: project the snapshot
+window onto a POD basis, fit the linear operator, advance the modal
+coefficients, reconstruct — it reuses `solvers/pod.py`. *Closes V4.*
 
 **F6 — Cost and memory.**
 Wall time and peak memory versus `N` and versus `r`, for full grid, POD, and the
@@ -172,3 +177,9 @@ others.
 - A rank-2 start on a rank-19 IC throws away 65% of the energy before `t=0`.
 - An SVD of the truncated state will always look like it has slow decay.
 - Comparing a reduced method at rank 42 against a baseline at rank 16.
+- Comparing only against *static* POD: a scicomp reviewer will ask why DMD /
+  dynamic data-driven ROM is absent (R5h).
+- Citing a DMD or operator-inference record from memory: the Williams–Kevrekidis–
+  Rowley paper is in *J. Nonlinear Sci.*, not SIAM JADS, and the
+  Peherstorfer–Willcox reference to use is *Dynamic data-driven reduced-order
+  models*, CMAME 291 (2015), DOI 10.1016/j.cma.2015.03.018.
