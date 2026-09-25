@@ -251,17 +251,6 @@
     "is_query_result": true
   },
   {
-    "id": "NOVELTY_QUERY",
-    "title": "Search Result: \"divergence-free\" AND \"dynamical low-rank\"",
-    "updated": "2026-09-24T12:00:00Z",
-    "summary": "No existing papers found in arXiv for this specific combination of terms (exact query string: \"divergence-free\" AND \"dynamical low-rank\"), supporting our claim of novelty regarding an exactly divergence-free DLRA solver for incompressible Navier\u2013Stokes.",
-    "authors": [],
-    "relevant": false,
-    "is_query_result": true,
-    "query": "\"divergence-free\" AND \"dynamical low-rank\"",
-    "result_count": 0
-  },
-  {
     "id": "http://arxiv.org/abs/2501.02379",
     "title": "TensorGRaD: Tensor Gradient Robust Decomposition for Memory-Efficient Neural Operator Training",
     "updated": "2026-09-24T00:00:00Z",
