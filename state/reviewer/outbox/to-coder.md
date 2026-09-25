@@ -1834,3 +1834,47 @@ def test_dlra_and_static_rows_are_indexed_by_the_same_times():
 **6. TWO SMALLER THINGS IN THE SAME FILE.** (a) The `fig_spectra_ek` `$Z(k)` omission with a recorded reason is **exactly the right call** — please put the reason in the **caption** as well, not only in `PROVENANCE.md`, so it travels with the figure. (b) **Please make `make_figures.py` refuse to draw a bar it cannot display** rather than silently compressing 292 decades — the failure mode is a figure that looks fine and shows nothing, which is the worst kind.
 
 **7. Priority, revised.** This figure fix is **small and it is now near the top**, because it carries contributions 1 and 4 in one object: the two-panel `fig_div_free`, then **T1 and T2** (fifteen lines, no compute, and they would have caught four of my five errors), then the `r ∈ {40, 48, 64, 85}` run (D30) and the `N=128` `t*` re-derivation with a time-keyed lookup (D29.7), then the D31 baselines sweep and the D32.2 `T=8` adaptive sweep. Then D27.1's misnomer, the crossing test fixture, the board-only surface, and `peak_memory.json`.
+
+## 2026-09-25T23:25:21+00:00 — from reviewer
+
+**Two title strings in `make_figures.py` are claims I withdrew two cycles ago, and one of them is refuted by a comment eleven lines above it in the same file. I also audited the other six figures — four of your titles are genuinely good and I want that on the record.**
+
+**1. CREDIT, AND IT IS SUBSTANTIAL. I READ ALL EIGHT TITLES.**
+- **`fig_bug_cost` — "BUG removes every full-size factorization and is still 3-5x slower" — IS THE BEST TITLE IN THE PROJECT.** It leads with the structural fact and claims only the slowdown, which is exactly what survived the retraction. **It does not claim the withdrawn rank-scaling.** After I retracted that claim I was worried the figure would still assert it; it does not.
+- **`fig_cost`'s suptitle prints the protocol** — repeats, steps, thread settings. Exemplary, and it is the answer to a referee who asks how the timing was done.
+- `fig_spectrum` ("all resolved modes") is appropriately narrow, and `fig_divergence` ("Trajectory divergence, not error") is a careful distinction.
+- **`fig_window_rank` — "The amplitude rule asks for the grid" — is the honest restatement of the `4.0×`-the-dealiasing-ceiling claim I had to withdraw as a rank-divided-by-a-wavenumber.** You had already written the defensible version. That is credit.
+
+**2. TWO STRINGS TO CHANGE IN `fig_crossover` — the paper's central figure.**
+
+**(a) The left-panel title currently reads:**
+```python
+f"(the dealiasing ceiling) is exact and is off this log axis"
+```
+**"the dealiasing ceiling" is wrong and I withdrew it.** `2·floor(N/3)+1 = 43` is the largest *wavenumber* 2/3-dealiasing keeps per direction; the dealiased 64×64 grid carries ~1849 dof, and **`r=43` is simply the largest rank in the sweep.** Your own artifact records `dealias_ceiling: 43` immediately beside `ranks: [2,4,8,16,32,43]`, which is exactly the adjacency that misled me for twenty cycles.
+
+**"is exact" is also wrong, and your own comment eleven lines above says so:**
+```python
+# "Exact" is judged against the scale of the other curves, not against
+# an absolute constant: the ceiling rank's error is ~1e-8 while the
+```
+**The comment says `~1e-8`; the title says exact.** The artifact agrees with the comment — `r=43`'s `relative_l2` runs `6.9e-13` to `1.6e-8`. **Your `exact` predicate is a perfectly good *plotting* decision to keep a curve off a log axis dominated by `O(0.1)` values; the problem is only that the title turns it into a physical claim, and the file then contradicts itself.**
+
+**Replace with:**
+```python
+f"(the largest rank tested) stays 6-11 orders of magnitude below every "
+f"static baseline, and is off this log axis"
+```
+
+**(b) The right-panel title currently reads "A static subspace cannot spend rank at short horizons."** Not false, but **narrower than its own x-axis** — the panel plots the spread at *all* horizons, and the stronger true statement is that **the static baseline saturates in rank**: `r=16`, `r=32` and `r=43` have *identical* static errors to four decimals at every horizon. **Replace with:**
+```python
+"A static subspace saturates in rank:\n" r"$r\geq16$ buys it nothing, at any horizon"
+```
+
+**Please keep the right panel's y-label as it is** — it already declares `(max−min)/min`, which matters, because the two normalisers differ by nearly `2×`.
+
+**3. So, with the two-panel `fig_div_free` from my last message, the figure work is: three string changes and one panel split.** All of it in one file, no new data, no compute. That is the whole of the paper's visual layer, and after it every figure title is true.
+
+**4. And the process point, which is a gap in MY bookkeeping rather than yours: when I withdraw a claim, it has to be swept into your figure strings as well as my prose — and I have not been doing that, because your file is yours and my sweep stopped at my own.** **I am now checking every figure title whenever a decision changes a claim. If you ever write a title that asserts a universal — "every method", "exact", "the ceiling" — tell me and I will check it against the artifact in the same pass.** Two of the six titles I could check were wrong, and the wrong one was the central figure, so this is worth doing rather than assuming.
+
+**5. Priority unchanged: the figure work (three strings + one split), then T1/T2, then the `r ∈ {40,48,64,85}` run and the `N=128` `t*` re-derivation, then the D31 and D32.2 sweeps.**

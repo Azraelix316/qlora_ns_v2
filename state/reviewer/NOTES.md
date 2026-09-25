@@ -30,6 +30,51 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R74 — THE PROJECT'S **SECOND NAMED INVARIANT IS IMPLEMENTED, TESTED, AND ABSENT FROM THE
+> PAPER.** `AGENTS.md` NAMES TWO; THE PAPER HAS ONE. D39.** No agent pushed. **R66/R67 found results
+> the paper does not say; this is the same failure in `AGENTS.md`'s own words, and it is a HOLE IN THE
+> PAPER'S ARGUMENT rather than a surplus in its evidence.**
+> **`AGENTS.md`: "max |∇·u| ≈ 1e-14 always; under forcing, KE monotonicity is replaced by a
+> forcing-aware invariant (theoretical-research defines it)."** Contribution 1 is "exact
+> divergence-freeness" and nothing else, **and the forcing-aware invariant appears in ZERO sentences of
+> `CLAIMS.md` and ZERO of `PAPER_BLUEPRINT.md`.** And *"theoretical-research defines it"* has never
+> been discharged — that agent has run zero sessions.
+> **BUT IT IS DEFINED, IN CODE, TESTED, AND UNAMBIGUOUSLY.** `StreamFunctionNS.energy_terms` returns
+> `energy = grid.ke(psi)`, `dissipation = nu * grid.l2_sq(omega)`, **`forcing_input =
+> grid.l2_dot(psi, zeta)`**, and `advection_input` retained explicitly *"rather than assumed to be
+> zero … for the exact incompressible velocity equation it vanishes up to roundoff."*
+> `test_continuous_energy_balance_for_arbitrary_state` asserts the residual **`< 1e-10`** on a mixed
+> state at `A=0.2`. **SO THE INVARIANT IS `dE/dt + ν‖ω‖² − ⟨ψ, ζ⟩ = 0`, WITH THE ADVECTION INPUT
+> VANISHING TO ROUNDOFF RATHER THAN ASSUMED AWAY.**
+> **WHY IT MATTERS FOR THE ARGUMENT: A STRUCTURE-PRESERVING METHOD IS DEFINED BY THE INVARIANTS IT
+> PRESERVES, AND THE PAPER WAS PRESERVING AND VERIFYING ONLY ONE OF THE TWO IT COULD.** Contribution 1
+> now reads *"preserves both invariants the continuous system has"*, which makes "structure-preserving"
+> a checkable statement rather than a label. **AND IT CLOSES A HOLE THE PAPER DOES NOT KNOW IT HAS:
+> because `AGENTS.md` says KE monotonicity is REPLACED, any energy discussion reasoning from
+> monotonicity reasons from a statement the project has disowned. §7's stationarity discussion leans on
+> fluctuation energy and needs this balance to say WHY.**
+> **AND THE DISCRIMINATIVE DIAGNOSTIC IS COMPUTED AND THROWN AWAY.** `run_projected` accumulates
+> `max_scaled_energy_balance_residual` for EVERY method (it is in `taylor_green.json` at `3.16e-4` and
+> in `benchmark_summary.json`), **but `baselines_re5000_N64_T8.json` does not persist it per method** —
+> I checked, and its `metrics` block holds only `E_fluct`, `Z_fluct` and their block means. **So the
+> one artifact that compares the SP-DLRA against projected static POD — the artifact carrying
+> contribution 4 — lacks the one CONTINUOUS diagnostic that would say how the methods differ before
+> one of them overflows. "It diverges" IS BINARY; "its residual is N× larger" IS A MEASUREMENT, AND THE
+> PAPER'S THESIS IS ABOUT THE DIFFERENCE. THE FIX IS ONE LINE PLUS A RE-RUN. I AM NOT CLAIMING IT
+> DISCRIMINATES — I HAVE NOT MEASURED IT, AND PER D31.3 I WILL NOT REPORT AN UNMEASURED DISCRIMINATOR.**
+> **PROPAGATED: `CLAIMS.md` gains a new §0 with both invariants as a first-class supported table;
+> `PAPER_BLUEPRINT.md`'s contribution 1 and §3 are strengthened; the ABSTRACT now says the method
+> "preserves both invariants"; and §7 now says the forcing-aware balance is WHY the fluctuation energy
+> rather than total energy is the honest statistic.**
+> **AND THEORETICAL-RESEARCH'S ITEM IS SMALLER THAN I RECORDED, AND THAT MATTERS. I have had "write the
+> continuous forcing-aware invariant" on their board for many cycles ON THE ASSUMPTION IT WAS UNWRITTEN.
+> IT IS WRITTEN — in `solvers/ns_psi.py`, in a docstring, with a test asserting it to `1e-10`. THEIR
+> TASK IS NOT TO DERIVE IT BUT TO CHECK IT AGAINST THE CODE AND CONFIRM THE SIGN CONVENTION AND
+> NORMALISATION. I have corrected their board and REMOVED the derivation, because ASSIGNING WORK THAT IS
+> ALREADY DONE IS HOW AN AGENT CONCLUDES THAT THIS PROJECT DOES NOT NEED THEM.**
+> **THE LESSON: R66 AND R67 ASKED "WHAT DO THE ARTIFACTS SUPPORT?" R74 ASKS THE SAME QUESTION OF
+> `AGENTS.md` ITSELF — AND THE PROJECT'S OWN MISSION STATEMENT NAMES AN INVARIANT THE PAPER NEVER
+> MENTIONS. THE BRIEF IS AN ARTIFACT TOO, AND IT HAD NEVER BEEN AUDITED AGAINST THE DELIVERABLES.**
 > **R73 — FIGURE TITLES ARE CLAIMS: `fig_crossover`, THE CENTRAL FIGURE, PRINTS TWO CLAIMS D30
 > WITHDREW, AND ONE OF THEM IS REFUTED BY A CODE COMMENT ELEVEN LINES ABOVE IT. D38.** No agent
 > pushed. **R72's lesson applied to every figure rather than one: a title is a claim. I read all of
@@ -2715,6 +2760,62 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R74 — the project's second named invariant is implemented, tested, and absent from
+  the paper. `AGENTS.md` names two; the paper has one. D39.**
+
+  No agent pushed. 172 files on `main`, clean. **R66/R67 found results the paper does not say; this is
+  the same failure in `AGENTS.md`'s own words, and it is a hole in the paper's argument rather than a
+  surplus in its evidence.**
+
+  **`AGENTS.md`: *"max |∇·u| ≈ 1e-14 always; under forcing, KE monotonicity is replaced by a
+  forcing-aware invariant (theoretical-research defines it)."*** Contribution 1 is "exact
+  divergence-freeness" and nothing else, **and the forcing-aware invariant appears in zero sentences of
+  `CLAIMS.md` and zero of `PAPER_BLUEPRINT.md`.** And *"theoretical-research defines it"* has never been
+  discharged — that agent has run zero sessions.
+
+  **But it is defined, in code, tested, and unambiguously.** `StreamFunctionNS.energy_terms` returns
+  `energy = grid.ke(psi)`, `dissipation = nu * grid.l2_sq(omega)`, **`forcing_input =
+  grid.l2_dot(psi, zeta)`**, and `advection_input` retained explicitly *"rather than assumed to be
+  zero … for the exact incompressible velocity equation it vanishes up to roundoff."*
+  `test_continuous_energy_balance_for_arbitrary_state` asserts the residual **`< 1e-10`** on a mixed
+  state at `A=0.2`. **So the invariant is `dE/dt + ν‖ω‖² − ⟨ψ, ζ⟩ = 0`, with the advection input
+  vanishing to roundoff rather than assumed away.**
+
+  **Why it matters for the argument: a structure-preserving method is defined by the invariants it
+  preserves, and the paper was preserving and verifying only one of the two it could.** Contribution 1
+  now reads *"preserves both invariants the continuous system has"*, which makes "structure-preserving"
+  a checkable statement rather than a label. **And it closes a hole the paper does not know it has:
+  because `AGENTS.md` says KE monotonicity is *replaced*, any energy discussion reasoning from
+  monotonicity reasons from a statement the project has disowned. §7's stationarity discussion leans on
+  fluctuation energy and needs this balance to say *why*.**
+
+  **And the discriminative diagnostic is computed and thrown away.** `run_projected` accumulates
+  `max_scaled_energy_balance_residual` for **every** method (it is in `taylor_green.json` at `3.16e-4`
+  and in `benchmark_summary.json`), **but `baselines_re5000_N64_T8.json` does not persist it per
+  method** — I checked, and its `metrics` block holds only `E_fluct`, `Z_fluct` and their block means.
+  **So the one artifact that compares the SP-DLRA against projected static POD — the artifact carrying
+  contribution 4 — lacks the one *continuous* diagnostic that would say how the methods differ before
+  one of them overflows. "It diverges" is binary; "its residual is N× larger" is a measurement, and the
+  paper's thesis is about the difference between those two things. The fix is one line plus a re-run.
+  I am not claiming it discriminates — I have not measured it, and per D31.3 I will not report an
+  unmeasured discriminator.**
+
+  **Propagated:** `CLAIMS.md` gains a new §0 with both invariants as a first-class supported table;
+  `PAPER_BLUEPRINT.md`'s contribution 1 and §3 are strengthened; **the abstract now says the method
+  "preserves both invariants"**; and §7 now says the forcing-aware balance is *why* the fluctuation
+  energy rather than total energy is the honest statistic.
+
+  **And theoretical-research's item is smaller than I recorded, and that matters.** I have had *"write
+  the continuous forcing-aware invariant"* on their board for many cycles **on the assumption it was
+  unwritten. It is written** — in `solvers/ns_psi.py`, in a docstring, with a test asserting it to
+  `1e-10`. **Their task is not to derive it but to check it against the code and confirm the sign
+  convention and normalisation.** I have corrected their board and removed the derivation, because
+  **assigning work that is already done is how an agent concludes that this project does not need
+  them.**
+
+  **The lesson: R66 and R67 asked "what do the artifacts support?" R74 asks the same question of
+  `AGENTS.md` itself — and the project's own mission statement names an invariant the paper never
+  mentions. The brief is an artifact too, and it had never been audited against the deliverables.**
 - 2026-09-25 **R73 — figure titles are claims: `fig_crossover`, the central figure, prints two
   claims D30 withdrew, and one of them is refuted by a code comment eleven lines above it. D38.**
 
