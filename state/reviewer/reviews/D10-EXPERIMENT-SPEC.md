@@ -181,6 +181,36 @@ others.
   `reviews/2026-09-25-R5c-premise-and-v6-literature.md` and the reviewer's
   message to `coder`; sources are open access.
 
+## Figures — per-figure requirements (R5n)
+
+The three committed figures were rendered and inspected by the reviewer. **None
+is usable as committed.** These are the requirements; the reasoning and the
+evidence are in `reviews/2026-09-25-R5n-figures-audit.md`.
+
+- **Rank/error figure.** The error panel must be labelled *trajectory
+  divergence*, not accuracy, and must start from the **computed** step-0 value
+  (0.319, not 0). It must be accompanied by the accuracy measures (time-averaged
+  E and Z, spectral agreement). The broken POD baseline must not be shown as a
+  comparison result. If the rank panel is shown, note the achieved rank as a
+  fraction of the cap and the fraction of the run spent there — "adaptive rank
+  growth" that saturates at 88% of the cap in the first 3% of the run is not
+  support for the claim, and the figure should say so rather than imply
+  otherwise. Do not fade non-primary curves to invisibility while claiming them.
+- **Spectrum figure (the premise figure).** Plot the **untruncated full-grid**
+  state spectrum, never the rank-truncated reduced state — a rank-r state has r
+  retained values and decays smoothly by construction. Use the measured
+  reference values: sigma_32/sigma_1 = 1.45e-3, sigma_10/sigma_1 = 3.17e-2 at
+  the developed state. The preferred version pairs the IC spectrum (exactly rank
+  17, with a clean cliff) against the developed-state spectrum (no cliff out to
+  32 modes), which is the before/after statement that motivates adaptive rank.
+- **Cost figure.** Discard warm-up and repeat timings; report a median with a
+  spread bar. Annotate N, dt, achieved rank, and thread pinning. Do not present
+  a Re-dependence that is a measurement artifact — the three Re cases are
+  computationally identical except for `nu`, so cost should be Re-independent.
+- **All figures.** No paper-quality typesetting on a provisional figure: either
+  mark it superseded in `experiments/README.md` or move it out of
+  `experiments/figures/`.
+
 ## Known traps, collected
 
 - The reduced state spectrum is not a spectrum of the problem (V7/F2).
