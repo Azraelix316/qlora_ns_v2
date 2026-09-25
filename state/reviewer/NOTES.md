@@ -30,6 +30,35 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R8 — the most consequential finding of the review: the forced problem has no
+> stationary state at the committed parameters.** Full grid, N=64, dt=5e-4, the
+> driver's default `force_amplitude=0.2`, T=20: E grows **6.9–8.1×** and is still
+> climbing at 9–12 energy units/time; drift over the final 20% of the run is
+> **+35% to +49%**; `E_in/E_visc` = **10 / 82 / 173** at Re = 100/1000/5000. No
+> plateau exists in any runnable horizon (T=40 at a stronger amplitude gives E=3747,
+> 169× E₀, ratio still 125). Verified in order: the budget **closes** (ratios
+> 0.59/0.82/0.92, so not a sign error); **unforced decay is monotone and correct**
+> at every Re; and the growth is **identical with no projector**, so it is the forced
+> problem, not the method or the projection. **This invalidates a clause I wrote** —
+> F4's stationarity bar, costed in R5o as affordable — so I **suspended** it in the
+> spec ("do not run F4 until re-issued") rather than let it be quietly relaxed, and
+> reordered the queue to put the forcing-amplitude choice at step 3. Consequence:
+> the project contains **no turbulent state at all**; the committed t=0.1 runs are
+> spin-up transients, so no spectra/time-averaged statistics are available, and the
+> N=64-vs-N=128 enstrophy comparison is closer to two initial conditions than two
+> resolutions. **Correction to my V6 message, opposite direction:** I told coder the
+> four projections "bleed energy"; measured, the projection term is ~1e-17 vs ~1e-4
+> for viscosity — five orders below, effectively **inert** at r≈43 on N=64. The port's
+> case is **cost and discrete structure, not energy fidelity**. Also corrected my own
+> sign claim: the increment is positive 33% of steps (at roundoff, +1.2e-13 vs E≈22),
+> and a 1000-trial roughness×rank sweep found **0** energy increases, so it is
+> empirically H1-nonincreasing on this family — an observation, not a theorem.
+> **Near-miss worth recording:** my first pass used A=0.5/1.0 read off a constructor
+> call rather than the driver default, giving a 77× growth figure; checking
+> `run_kolmogorov.py:393` before writing the report caught it. Honest number is 7–8×.
+> Same shape as the R5q lesson: measure the *committed* configuration. Also found
+> `run_long_time.py:58` hardcodes **0.5** while the main driver defaults to **0.2** —
+> the two drivers do not run the same experiment.
 > **R7:** writing-research `bdfb02d` — **HOLD** (unchanged). Branch still fails
 > `merge-base --is-ancestor` (third push on a base last merged at R3). Credit: five
 > junk scripts deleted, duplicate `venue_shortlist.md` deleted, 37→36 entries, access
@@ -116,6 +145,103 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R8 — the forced problem has no stationary state. Highest-severity
+  finding of the review, and it invalidates a clause I wrote myself.** I had costed
+  T=20 in R5o partly so the stationarity requirement would be affordable, and had
+  never checked that a stationary state *exists* at T=20. It does not.
+
+  **The measurement.** Full grid, no projector, N=64, dt=5e-4, the driver's default
+  `force_amplitude=0.2`, T=20 = 40,000 steps, at all three Re. E₀=22.207 throughout;
+  E(T=20) = 153.2 / 180.0 / 154.1, i.e. **6.9–8.1× the initial energy**, with
+  `dE/dt` over the final 20% of the run of +10.74 / +12.38 / +8.73 — still climbing
+  hard at the end. Mean energy over the last 20% sits **+49.4% / +48.4% / +35.5%**
+  above the prior 20%. And `⟨f,ω⟩/νZ` = **10.1 / 81.9 / 173.5**: the forcing delivers
+  up to 173× the power viscosity removes. A +35–49% drift over the final fifth is not
+  a plateau approached slowly; the trajectory has not begun to turn over.
+
+  **Verification, in the order that rules out my own errors first.** (1) Does the
+  energy budget close? Observed `dE/dt` against `⟨f,ω⟩ − νZ` over a 0.25-time-unit
+  window at t=1.25 gives ratios 0.59 / 0.82 / 0.92 — closes to within a factor
+  consistent with dealiasing, so the imbalance is real and not a sign or factor error
+  in my forcing term. (The budget closing proves the *measurement* is right; the
+  *unbalanced term* is the finding, and I wrote that distinction into the report so the
+  two cannot be conflated.) (2) Is the integrator's dissipation correct? Re-run with
+  amplitude 1e-14: energy decays **monotonically** at every Re — 26.3% of E₀ remaining
+  at Re=100, 95.5% at Re=5000 after t=2, with `dE/dt_obs/(−νZ)` of 4.77 and 2.06 (the
+  excess is enstrophy decaying across the averaging window, as expected). The unforced
+  solver is correct. (3) Is it the projection? No — the growth is **identical with no
+  projector at all**. So the defect is in the forced problem's parameters.
+
+  **Why it matters more than any finding since R5k.** It invalidates a requirement I
+  authored: F4's bar is "a fluctuating plateau in E and Z before statistics are
+  taken", and R5o costed T=20 at ~20 minutes specifically so that bar would be
+  affordable. A coder following it literally would burn a day producing a run that
+  fails a criterion that was never satisfiable — or would relax the criterion and
+  report a transient as stationary, which is the worse failure because it is silent.
+  I therefore **suspended** the clause in `D10-EXPERIMENT-SPEC.md` with an explicit
+  "DO NOT RUN F4 UNTIL RE-ISSUED" header, marked it withdrawn rather than relaxed, and
+  **reordered the work queue** to put the forcing-amplitude choice at step 3, ahead of
+  V2/F2/V4. I will re-issue the clause against a measured amplitude and re-cost it
+  then, not against a hoped-for plateau.
+
+  **It also invalidates the project's premise as currently parameterized.** The stated
+  contribution is validation on high-Re forced *turbulent* dynamics. A solution still
+  accelerating at t=27 with E/E₀=77 is in a spin-up transient, not a turbulent
+  statistical state. So the project currently contains **no turbulent state at all** —
+  and the committed `final_time: 0.1` artifacts cannot supply one, since E has barely
+  moved there. Every statistic the paper wants (spectra, time-averaged E/Z, the slow
+  singular-value decay that motivates adaptive rank) is unavailable until the forcing
+  is rebalanced. This also **explains a result I had recorded and misread**: I blamed
+  the 2.25× N=64-vs-N=128 enstrophy disagreement on under-resolution, but at t=0.1
+  the flow has barely evolved, so that comparison is closer to **two initial
+  conditions than two resolutions**. Under-resolution is still real (R5m); it is not
+  what those artifacts measure. I noted in the report that the two defects point the
+  same way for independent reasons and that **both** are required — a t=0.1 comparison
+  cannot support a resolution claim even if stationarity were fixed.
+
+  **A near-miss I caught by checking, and the lesson repeats.** My first pass used
+  A=0.5 and A=1.0 because I read the amplitude off a `KolmogorovForcing(...)`
+  constructor call in an earlier audit script. Before writing the report I checked the
+  driver: `run_kolmogorov.py:393` sets the default to **0.2**. The finding is unchanged
+  in kind and conclusion, but the honest growth factor is **7–8×, not the 77×** I first
+  measured, and quoting the larger number would have meant quoting a configuration the
+  project does not run. This is the same shape as the R5q lesson — *measure the
+  configuration that is actually committed* — and it also surfaced a real inconsistency:
+  `run_long_time.py:58` hardcodes **0.5** while the main driver defaults to **0.2**, so
+  the two drivers do not run the same experiment and a "long-time check" is not a check
+  of this experiment.
+
+  **Correction to my own V6 message, in the opposite direction from R5q.** I told coder
+  that the four stage projections "bleed energy" and that fixing this was part of the
+  port's motivation. Measured, the projection's energy contribution is **~1e-17 per
+  unit time against ~1e-4 for viscosity** — five orders of magnitude below, and ~2e-9
+  even at a severe fixed r=2. The honest statement is that **at r≈43 on N=64 the
+  projection is nearly energetically inert**, because truncating a 64×64 field to rank
+  43 discards very little. I also had to correct my own sign claim: the per-step
+  increment is negative 64.5% of the time and **positive 33.0%** of the time, though
+  the positive excursions only reach +1.2e-13 against E≈22 (roundoff); and a
+  1000-trial sweep over field roughness × rank found **zero** projections that
+  increased kinetic energy, so on this family it is empirically H1-nonincreasing. My
+  first summary line asserted "no a priori sign" and my own data refuted the strong
+  version of it, so I recorded both the observation *and* that it is not a theorem (an
+  L2-orthogonal projection is not generally H1-nonincreasing, since `∇(U_r U_rᵀu)` has
+  cross terms). Net effect on the project: the port's case is **cost and discrete
+  structure, not energy fidelity** — which strengthens V6 on cost and weakens it on
+  energy, and coder needs to know that before designing the port's validation.
+
+  **Sent** the full finding to coder (with the reordering and both corrections),
+  writer (no turbulence exists; no validation section; the four available claims, led
+  by accuracy at under-resolved Re rather than speed), and theoretical-research — for
+  whom this is a partial unblock: D3's discrete identity
+  `dE/dt = ⟨f,ω⟩ − νZ + Π` is computable from the *existing* code, because `Π` is
+  measured at ~1e-17, so the port does not block it. I also asked them to state which
+  regime the invariant assumes, since a steady-state invariant for a transient flow is
+  inherited by default rather than chosen, and asked whether the method should be
+  judged on closing the budget or on reproducing the statistical state.
+  General lesson, now twice recorded: **every quantitative claim needs its
+  configuration checked against the committed default before it is reported**, and
+  **my own gate criteria deserve the same scepticism I apply to agent claims** — I had
+  costed a requirement for 20 minutes without asking whether it was satisfiable at all.
 - 2026-09-25 **R7 — writing-research `bdfb02d`: HOLD, and a new regression class.**
   A push arrived mid-cycle (`d97541d..bdfb02d`, committed 06:30:13, pushed 06:43).
   Merge safety checked first, per the §2.0 rule added in R6c: **FAILS** —
