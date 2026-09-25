@@ -174,19 +174,29 @@ def moving_window_schedule(
     most recent window *of the reference trajectory*, so it is the best a
     fixed-rank, offline-fitted subspace can do at that instant.
 
-    The window is trailing only -- ``[t - window, t]`` -- so the baseline never
-    uses a snapshot from the future.  That matters: a basis fitted on a window
-    containing the evaluation time reproduces the state there exactly and
-    reports an error of zero, which is a property of the harness rather than of
-    the method, and it is the difference between a *stale* subspace (R37's
-    mechanism, and the one that produces a rank-independent floor) and a
-    clairvoyant one.  The window length and refit interval are recorded in the
-    artifact, because the floor is a function of them.
+    The window is trailing only -- ``[t - window, t]`` -- and the refit times are
+    offset by half an interval, so **no basis ever contains the time it is being
+    scored at**.  Both matter: a trailing window that ends at the evaluation time
+    contains it, the baseline reproduces the state exactly, and the reported
+    error is in-sample.  That is a property of the harness rather than of the
+    method, and it is the difference between a *stale* subspace (R37's mechanism,
+    and the one that produces a rank-independent floor) and a clairvoyant one.
+    The window length, refit interval and offset are recorded in the artifact,
+    because the floor is a function of them.
     """
     schedule = {}
     starved = 0
-    for step in range(int(round(interval / dt)), int(round(final_time / dt)) + 1,
-                      int(round(interval / dt))):
+    refit_step = max(1, int(round(interval / dt)))
+    # Refits are offset by half an interval from the evaluation times on purpose.
+    # A refit at exactly t = evaluation time would fit its trailing window on
+    # data that *includes* that time, so the baseline reproduces the state it is
+    # being scored on and reports an in-sample error.  With the offset, every
+    # evaluation is at least ``interval/2`` beyond the newest snapshot any basis
+    # could have seen, which is what makes this a prediction comparison at all.
+    for step in range(refit_step // 2, int(round(final_time / dt)) + refit_step,
+                      refit_step):
+        if step < 1 or step > int(round(final_time / dt)):
+            continue
         t_now = step * dt
         snaps = select_window(snap_times, snap_states, max(0.0, t_now - window), t_now)
         if not snaps:
@@ -200,8 +210,7 @@ def moving_window_schedule(
         if effective < rank:
             starved += 1
         schedule[step] = PODGalerkin(grid, effective).fit(snaps)
-    schedule_starved_refits = starved
-    return schedule, schedule_starved_refits
+    return schedule, starved
 
 
 def crossover_horizon(
