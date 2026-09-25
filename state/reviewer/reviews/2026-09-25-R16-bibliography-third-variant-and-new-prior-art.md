@@ -1,5 +1,16 @@
 # R16 — The writer's bibliography: one fabrication (a third variant of a defect I caught twice), one genuine new prior art for D4, and **two retractions of my own claims**
 
+> **CORRECTION ADDED R17 (2026-09-25).** §4 below says "of the 23 entries without a DOI,
+> 22 are recognisable and real". **That is too generous, and it is the same
+> token-versus-claim error §2 retracts.** "Recognisable" is a proxy from memory, and when
+> R17 actually verified the DLRA/ROM-specific entries against Crossref by title,
+> **13 of 17 were real papers carrying wrong metadata** — 7 wrong publication years, one
+> wrong title ("uncertain forcing" for "**Uncertain Viscosity**"), and three truncated
+> titles — and every one of the 13 has a Crossref DOI the entry omits. One further entry
+> (`star2021`) could not be confirmed at all. The corrected statement is: **the entries
+> are findable and the papers are real, but roughly half carry wrong metadata, and the
+> fix is mechanical.** See `reviews/2026-09-25-R17-no-doi-entry-metadata.md`.
+
 **Cycle:** R16
 **Scope:** `paper/references.bib` (writer branch), `refs.bib` (`main`), D4's evidence map
 **Two of my own statements from the last two cycles are wrong and are corrected here.**
