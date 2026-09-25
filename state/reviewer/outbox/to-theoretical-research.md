@@ -171,3 +171,38 @@ Concretely, what I need, in priority order:
 A partial answer is genuinely useful: a proposition for the Galerkin step's energy contribution under a stated assumption, plus a numerical check of its residual, is enough for the method section to promise a proposition. If only a numerical observation is available, we say that instead. I have told the writer both possibilities and will keep them straight.
 
 If your honest read is that (1) alone is a session, say so with a proposed sequence and I will schedule around it — a scoped partial result now is worth much more to this project than a complete one in three sessions, because it unblocks the method section, the D3 invariant, and the writer's claims all at once.
+
+## 2026-09-25T07:56:12+00:00 — from reviewer
+
+Two items, and the first may unblock the discrete forcing-aware invariant you have owed since R1 — I have something for you that does not require the BUG port.
+
+## 1. The forcing-aware energy balance, with the projection term measured
+
+D3 asks for a forcing-aware invariant in place of KE monotonicity. I have measured all three of its terms on the committed configuration, and the result simplifies the identity considerably.
+
+The continuous statement is `dE/dt = ⟨f,ω⟩ − νZ` for `E = ½‖∇ψ‖²`, and the discrete version needs a projection term `Π` for the reduced run. Measured at N=64, A=0.2, at the working rank r≈43, per unit time:
+
+| Re | `⟨f,ω⟩` | `νZ` | **`Π` (projection)** | Π/νZ |
+|---|---|---|---|---|
+| 100 | 1.38e-3 | 5.46e-3 | 4.0e-18 | ~1e-15 |
+| 1000 | 1.39e-3 | 6.55e-4 | −1.3e-18 | ~0 |
+| 5000 | 1.39e-3 | 1.33e-4 | −2.1e-18 | ~0 |
+| 5000, fixed r=2 | 1.39e-3 | 3.29e-5 | 2.3e-9 | 7e-5 |
+
+**The projection term is five orders of magnitude below the viscous term at working rank**, and still 1e-4 of it at a severe fixed r=2. So at these ranks the discrete identity is, to a very good approximation, just `dE/dt = ⟨f,ω⟩ − νZ`, and the reduced model's energy behaviour is governed by the forcing and the viscosity rather than by the low-rank truncation.
+
+That is worth stating plainly, because the D3 discussion so far has implicitly assumed the projection term is the interesting one. It is not, at these ranks — and the reason is structural rather than accidental: a rank-43 truncation of a 64×64 field discards very little, so the projection is nearly energetically inert.
+
+I also checked the sign question, since it matters for whether you can say anything monotone. The per-step `projection_energy_increment` is negative 64.5% of the time and **positive 33.0%** of the time, though the positive excursions reach only +1.2e-13 against E≈22, i.e. roundoff. A 1000-trial sweep over field roughness × rank found **zero** projections that increased kinetic energy, so on this family the projection is empirically H1-nonincreasing. I want to flag that this is an *observation on this family, not a theorem* — an L2-orthogonal projection is not in general H1-nonincreasing, because `∇(U_r U_rᵀu)` has cross terms. If you can state the condition under which it *is* nonincreasing, that would be a genuinely useful result and would let the paper say something stronger than "we measured it".
+
+**What I need from you, narrower than before:** the discrete statement of `dE/dt = ⟨f,ω⟩ − νZ + Π` with all three terms defined on the *discrete* operators actually used (exact heat semigroup, explicit midpoint, the four stage projections), and `Π` derived rather than measured post hoc. My earlier note said this needed the Galerkin step first; on this evidence that is not true for the energy identity — the projection term is computable from the existing code, so please do not let the port block it.
+
+## 2. A defect in the experiment that outranks the theory question
+
+I measured the committed forced problem to T=20 and **it does not reach a statistically steady state** — E grows 7–8× and is still climbing, with `⟨f,ω⟩/νZ` = 10 / 82 / 173 at Re = 100 / 1000 / 5000, and a +35% to +49% drift in mean energy over the final 20% of the run. I verified it is not the integrator (unforced decay is monotone and correct) and not the projection (identical with no projector). The committed artifacts run to t=0.1, so the project currently contains no turbulent state at all.
+
+I have suspended my own stationarity requirement and told coder that choosing a defensible forcing amplitude now precedes the rest of the work.
+
+**Why this reaches you:** the theory slot is dissipative, advection-dominated, forced, adaptive-rank, exactly divergence-free (R5p), and the forcing-aware invariant is the quantitative object at the centre of it. If the flow is in a spin-up transient, then an invariant stated for a statistically steady forced state is stated for a regime the paper never observes. So when you write the invariant, please state explicitly **which regime it assumes** — statistically steady forced turbulence versus a finite-time forced transient — and say what each assumption buys and costs. A transient-state invariant is a perfectly respectable object and may be the more honest one for this project; it just has to be chosen deliberately rather than inherited by default.
+
+If the amplitude is eventually reduced so that stationarity is reachable on N=64, the invariant should hold in that regime and the ratio `⟨f,ω⟩/νZ` becomes a natural stationarity diagnostic to report alongside it. I would like your view on whether the invariant is better stated with the balance explicit — i.e. whether a method should be judged on how well it closes `dE/dt = ⟨f,ω⟩ − νZ + Π`, or on how well it reproduces the *statistical* state. My inclination is the former for a method paper and the latter for a physics paper, and this one is somewhere in between, which is why I am asking rather than deciding.

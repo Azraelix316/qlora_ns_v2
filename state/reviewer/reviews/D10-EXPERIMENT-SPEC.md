@@ -111,8 +111,30 @@ insensitive to rank, which is itself the finding that must be explained, not
 hidden). *Closes V2 (partly).*
 
 **F4 — Validation against the reference, at each Re.**
-Re ∈ {100, 1000, 5000}, per the P0 metric order. **Bar:** runs reach a
-fluctuating plateau in E and Z before statistics are taken (operationally:
+Re ∈ {100, 1000, 5000}, per the P0 metric order.
+
+> **STATIONARITY CLAUSE SUSPENDED BY R8 — DO NOT RUN F4 UNTIL RE-ISSUED.**
+> The bar below ("a fluctuating plateau in E and Z before statistics are taken") is
+> **not achievable at the committed parameters.** Measured full-grid, A=0.2, N=64,
+> T=20: E grows 6.9–8.1× over the initial energy and the mean energy over the final
+> 20% of the run is still **+35% to +49%** above the prior 20%, with
+> `E_in/E_visc` = 10 / 82 / 173 at Re = 100 / 1000 / 5000. The trajectory has not begun
+> to turn over, so no plateau exists at T=20 and the operational test below cannot be
+> satisfied. T=20 is **withdrawn as a target**, not relaxed: a coder following this
+> clause literally would burn a day on a matrix that fails a criterion that was never
+> satisfiable, or would quietly relax the criterion and report a transient as
+> stationary. I will re-issue this clause against a *measured* forcing amplitude and
+> re-cost it then. Evidence and reasoning:
+> `reviews/2026-09-25-R8-no-stationary-state.md`.
+>
+> **Consequences already binding, pending re-issue:** no turbulence statistic
+> (spectra, time-averaged E/Z, singular-value decay) may be reported from the
+> committed `final_time: 0.1` runs, which are pure spin-up transients; and the
+> full-grid reference must itself be stationary before it can adjudicate a reduced
+> model at all.
+
+**Bar (to be re-issued):** runs reach a fluctuating plateau in E and Z before
+statistics are taken (operationally:
 relative standard deviation of E over the final quarter of the run below ~5%);
 the three Re are actually distinguished (they must not produce near-identical
 trajectories, which is what happens now); results reported at N where the
@@ -244,12 +266,16 @@ artifact*; warm-up discarded; ≥7 repeats; median plus spread; and a timed regi
 dominates process start-up — at `dt=5e-4` that means **≥2000 steps, not the 200 the
 committed runs used**. A timing that does not meet this is not a measurement.
 
-**Order of work:** (1) re-time properly, to the R5q protocol; (2) V1; (3) V2 at N=64, T=20; (4) F2
+**Order of work:** (1) re-time properly, to the R5q protocol; (2) V1; (3) **R8:
+choose a forcing amplitude that actually reaches stationarity on N=64, with a
+one-paragraph physical justification, and re-issue the F4 stationarity clause —
+this now precedes every other item, because F4 and everything downstream of it are
+blocked on it**; (4) V2 at N=64, T=20; (5) F2
 with the full spectrum recorded — `normalized_spectrum` currently caps at 32
 values, which is the binding constraint on the slow-decay claim and must become
-a parameter; (5) V5 at short T; (6) V4; (7) V6, then re-run 3–6 with the new
-integrator; (8) decide any long high-N run from the measured cost. Steps 1–5 are
-a few hours in total. **Added at R5q, and cheap enough to do during step 1:** a
+a parameter; (6) V5 at short T; (7) V4; (8) V6, then re-run 4–7 with the new
+integrator; (9) decide any long high-N run from the measured cost. Steps 1–2 and 4–6
+are a few hours in total. **Added at R5q, and cheap enough to do during step 1:** a
 test asserting that per-step cost is currently *rank-independent* (`r=2` versus
 `r=64` within 1.25×), with a docstring saying this is today's behaviour and that V6
 must invert it — so the port's improvement shows up as a test going from pass to fail

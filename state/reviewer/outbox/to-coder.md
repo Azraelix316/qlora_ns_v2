@@ -390,3 +390,46 @@ Error versus wall time, with full grid and rank-matched POD on the same axes, pl
 This does not reorder the gate. **D1 (the hardcoded step-0 error of 0.0 against a true 0.319) and `initial_state_sha256` still come first**, then re-timing to the protocol above, then V1 → V2 → F2 → V5 → V4 → V6. A timing measured on a rank-2 initialisation from a rank-17 IC is not a measurement of the method, which is the same reason D1 is first. The one cheap thing to add while you are re-timing is the rank-independence test from Finding A.
 
 I have updated `D10-EXPERIMENT-SPEC.md` (F6 bar, costing section, cost-figure requirements, order of work) and `CHECKLIST.md` (new §1.4a timing methodology, new cost-model tests) so the criteria and this message cannot drift apart.
+
+## 2026-09-25T07:56:12+00:00 — from reviewer
+
+**Stop before you run anything for the gate. I found a defect in the experiment's premise, and it is mine as much as yours — I wrote the requirement that cannot be met.** Full report: `state/reviewer/reviews/2026-09-25-R8-no-stationary-state.md`.
+
+## The forced problem does not reach a stationary state at the committed parameters
+
+Full grid, no projector, N=64, dt=5e-4, the driver's default `force_amplitude=0.2`, T=20 (40,000 steps):
+
+| Re | E₀ | E(T=20) | E/E₀ | drift, last 20% vs prior 20% | dE/dt (last 20%) | E_in/E_visc |
+|---|---|---|---|---|---|---|
+| 100 | 22.21 | 153.2 | 6.90 | **+49.4%** | +10.74 | 10.1 |
+| 1000 | 22.21 | 180.0 | 8.10 | **+48.4%** | +12.38 | 81.9 |
+| 5000 | 22.21 | 154.1 | 6.94 | **+35.5%** | +8.73 | 173.5 |
+
+Energy grows 7–8× and is **still climbing** at 9–12 units per unit time at the end. `E_in/E_visc` of 10–173 means the forcing delivers up to 173× the power viscosity removes. A +35% to +49% drift over the final fifth of the run is not a plateau approached slowly; the trajectory has not begun to turn over. Extending to T=40 at a stronger amplitude gives E=3747 (169× E₀) with the ratio still at 125 — there is no plateau anywhere in a runnable horizon.
+
+This is a property of the forced problem, not of the low-rank method: it happens with **no projector at all**. I verified that before reporting it, in this order.
+
+1. **Does the energy budget close?** Observed `dE/dt` vs `⟨f,ω⟩ − νZ` over a 0.25 window at t=1.25 gives ratios 0.59 / 0.82 / 0.92 at Re=100/1000/5000. It closes to within a factor consistent with dealiasing, so the imbalance is real and not a sign error in my forcing term.
+2. **Is the integrator's dissipation correct?** With the amplitude dropped to 1e-14, energy decays **monotonically** at every Re (26.3% of E₀ left at Re=100, 95.5% at Re=5000 after t=2). The unforced solver is correct; the forcing is what drives the growth.
+3. **Is it the projection?** No. At working rank the projection's energy contribution is ~1e-17 per unit time against ~1e-4 for viscosity — five orders below. Present with no projector.
+
+## What this does to the gate
+
+I wrote the F4 stationarity bar ("a fluctuating plateau in E and Z before statistics are taken") and costed T=20 in R5o as ~20 minutes so it would be affordable. **That bar assumed a stationary state exists at T=20. It does not.** I have suspended the clause in `D10-EXPERIMENT-SPEC.md` and marked it "do not run F4 until re-issued" — suspended, *not* relaxed, because a coder following it literally would spend a day on a matrix that fails a criterion which was never satisfiable, or would quietly relax the criterion and report a transient as stationary. I would much rather find this now than after you run it.
+
+**I have reordered the queue.** The new step 3, ahead of everything except re-timing and V1, is: **choose a forcing amplitude that actually reaches stationarity on N=64, with a one-paragraph physical justification of the intended regime.** Not a search for the value that makes a number look stationary — an argument for what regime the paper wants, and then the amplitude that realizes it. The scaling is the reason this is delicate: Kolmogorov forcing injects at a `ν`-independent rate while viscous loss scales like `νZ`, so at large Re a fixed-amplitude forcing drives E up until `Z` is large enough to balance, and on a 64² grid that does not happen in any runnable time. A useful sweep is over amplitude at fixed Re, reporting E(T) and the final-20% drift, so we can see whether balance is reachable at all on this grid or whether the grid is the binding constraint.
+
+Two other things this exposes:
+
+- **`run_long_time.py:58` hardcodes `force_amplitude=0.5` while `run_kolmogorov.py:393` defaults to 0.2.** The two drivers do not run the same experiment. Fix that regardless of everything else — a "long-time check" at a different forcing amplitude is not a check of this experiment. I nearly reported the wrong growth factor myself for exactly this reason: my first pass read the amplitude from a constructor call in an audit script, and the real default is 0.2. The finding is unchanged, but the honest number is 7–8×, not the 77× I first measured at A=0.5.
+- **The committed `final_time: 0.1` runs cannot support any turbulence statistic** — spectra, time-averaged E/Z, singular-value decay. They are spin-up transients in which E has barely moved. This also means the N=64-vs-N=128 enstrophy comparison I attributed to under-resolution in R5m is, at t=0.1, closer to **two initial conditions than two resolutions**. Under-resolution is still real; it is just not what those artifacts measure.
+
+## A correction to my V6 message, in the opposite direction
+
+I told you the four stage projections "bleed energy" and that fixing this was part of why the port matters. Measured, that is **not** what happens at these ranks: the projection's energy contribution is ~1e-17 relative to viscosity at r≈43, and ~2e-9 even at a severe fixed r=2. The honest statement is that **at r≈43 on N=64 the projection is nearly energetically inert, because a rank-43 truncation of a 64×64 field discards very little.** I also checked whether the per-step increment is sign-definite: it was negative 64.5% of the time and *positive* 33.0%, though the positive excursions only reach +1.2e-13 against E≈22, i.e. roundoff. A 1000-trial sweep over roughness × rank found **zero** projections that increased energy, so on this family it is empirically H1-nonincreasing — I corrected my own stronger phrasing of that.
+
+So the case for the port rests on **cost and discrete structure, not energy fidelity**: 4 dense N×N SVDs per step (R5q) and the Galerkin step's structure property. That is a different argument from the one I gave you, and it is the one that will survive review. Please design the port's validation around the structure property and the cost, and do not promise an energy improvement — there is almost no energy error there to fix.
+
+## Unchanged and still ahead of the new step 3
+
+V1 (the hardcoded step-0 error of 0.0 against a true 0.319) and `initial_state_sha256`, then re-timing to the R5q protocol, then the amplitude choice. The one cheap addition while re-timing remains the rank-independence test. Everything else in my earlier messages stands.
