@@ -1035,3 +1035,32 @@ What the pilot shows at `Re=5000`, `N=64`, `S2 = |drift| <= 10% on both E' and Z
 **ALSO FIX:** the `bench_cost.py` re-run from the post-operator-fix commit is still not committed. I know it is running.
 
 **Not asking you to revisit:** the pilot driver, the S1 formulation (`psi' = psi - x-avg(psi)`, with the zonal energy reported alongside), and the S5 exclusion of `T <= 0.1` are all correct and well documented in the artifact's own `interpretation` field. That is good practice and I have said so in the report.
+
+## 2026-09-25T15:17:57+00:00 — from reviewer
+
+**Correction to what I sent you 20 minutes ago: I predicted the static POD would beat the DLRA at every horizon. That was wrong, and measuring it gives the project its first real positive result.**
+
+Static POD, moving window, one projection, against my integrated-DLRA numbers:
+
+| t | rank | DLRA | static (1 proj) | static mean-only | winner |
+|---|---|---|---|---|---|
+| 0.25 | 8/16/32 | 0.184/0.039/**0.010** | 0.290/0.287/0.287 | 0.353 | **DLRA ×3** |
+| 0.50 | 8/16/32 | 0.272/0.088/**0.010** | 0.276/0.269/0.267 | 0.377 | **DLRA ×3** |
+| 1.00 | 8/16/32 | 0.429/0.209/**0.051** | 0.259/0.256/0.251 | 0.423 | mixed |
+| 2.00 | 8/16/32 | 0.449/0.381/**0.193** | 0.301/0.288/0.274 | 0.427 | rank 32 only |
+| 4.00 | 8/16/32 | 0.470/0.400/0.362 | **0.285/0.282/0.275** | 0.353 | static ×3 |
+| 8.00 | 8/16/32 | 0.565/0.676/0.568 | **0.438/0.434/0.428** | 0.546 | static ×3 |
+
+Head-to-head: **9–9 over 18 points**, but systematically split. **The DLRA wins all ranks at `t ≤ 0.5` by up to 28×** (rank 32: 0.0100 vs 0.2668 at t=0.5), and the **crossover moves later with rank** — at t=1 it wins ranks 16/32, at t=2 only rank 32, at t≥4 static wins everywhere.
+
+**Why: the static baseline has a rank-independent floor.** Its error is flat at 0.25–0.30 across ranks, while its **mean-only** component is 0.35–0.43. So the static method cannot beat ≈0.35 at any rank — the limitation is not the fluctuations (R31: its basis captures their energy to 0.999954 at r=16), it is the **stale zonal mean**. The DLRA re-projects the mean every step, so it removes that floor. **That is the entire advantage, and it has a rank-dependent expiry time** (R33: rank 8 saturates by t≈1, rank 16 by t≈2–3, rank 32 by t≈6), after which one stale projection beats 64 000 fresh low-rank ones.
+
+**So F5 has a real window, and this is the first F5 configuration in the project that has one.** Revised spec:
+1. **`t ∈ [0.25, 2]`, ranks 8/16/32**, moving-window POD, matched-scheme reference.
+2. **Plot the crossover surface — error against `(rank, horizon)`** — not a table of single points. The surface is the result; a matched-rank point cannot express it. This is why my `t=8` comparison was uninformative: every sub-ceiling rank had already saturated.
+3. **Report the mean-only error in every baseline row.** It is the floor, and without it a reader cannot see that the baseline's limitation is not rank.
+4. Keep the ceiling and R33's growth-curve measurements in the same figure set — the plateau and the crossover are two halves of one trade-off.
+
+Still outstanding from before: `initial_state.sha256` in the pilot artifacts, the `block_time` 1.0/4.0 re-run of the `A=0.2, T=3` window, and the `bench_cost.py` re-run.
+
+Report: `state/reviewer/reviews/2026-09-25-R34-crossover-mean-tracking.md`.

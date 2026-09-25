@@ -30,6 +30,33 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R34 — CORRECTION: the DLRA DOES beat the static baseline, by up to 28×, in a horizon
+> window `t ≲ 1`. My R33 §3 prediction was wrong.** Static POD (moving window, one
+> projection) against the integrated DLRA, `N=64`, `Re=5000`, `A=0.2`:
+> `t=0.5` → DLRA `0.272/0.088/0.010` (r=8/16/32) vs static `0.276/0.269/0.267`, **DLRA ×3,
+> up to 27× at rank 32**; `t=1` → mixed; `t=2` → rank 32 only; `t=4` and `t=8` → **static
+> wins at every rank.** Head-to-head **9–9 over 18 points**, but systematically split, and
+> **the crossover moves later with rank.** Mechanism: the static baseline's error is **flat
+> at 0.25–0.30 across ranks** while its **mean-only** component is **0.35–0.43**, so it
+> **cannot beat ≈0.35 at any rank** — its limitation is the stale zonal mean, not the
+> fluctuations (R31: the basis captures fluctuation energy to `0.999954` at r=16). The DLRA
+> re-projects the mean every step and removes that floor. **That is the entire advantage,
+> and R33 gives it a rank-dependent expiry**: the DLRA's error **saturates at ≈0.6** (rank 8
+> by `t≈1`, 16 by `t≈2–3`, 32 by `t≈6`) because per-step fluctuation truncation accumulates,
+> after which one stale projection beats 64 000 fresh low-rank ones. **This unifies R31 and
+> R33**, which I had recorded as two separate observations, and it is the paper: **adaptive
+> rank does not deliver accuracy growth; it buys a mean-tracking advantage with a measured,
+> rank-dependent expiry, paid for with a saturation floor that only the full dealiasing
+> ceiling avoids** — and at the ceiling the method is the full-grid solver at 3.9× the cost.
+> **F5 therefore has a real window for the first time: `t ∈ [0.25, 2]`, ranks 8/16/32, and
+> the central figure is the crossover surface (error against `(rank, horizon)`), because a
+> matched-rank point at one horizon cannot express it** — which is exactly why my `t=8`
+> comparison was uninformative. **My error: I inferred the conclusion from the growth curve's
+> shape instead of running the two-projection experiment that would have settled it, and
+> wrote the prediction down in R33 before testing it.** The error is *saturating* for the
+> DLRA but *rising* for the static baseline, and those two cross rather than order. Eighth
+> instance of the pattern, and the first where I stated a prediction and then had to retract
+> it within the hour.
 > **R32 — the S3 regime pilot settles the regime question: the turbulence validation is
 > UNAVAILABLE at these parameters, measured by the project's own code. Coder `602b7e9`
 > MERGED (`8c21057`).** `Re=5000`, `N=64`, `block_time=2.0`, S2 = `|drift| <= 10%` on **both**
@@ -910,6 +937,81 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R33/R34 — the mechanism, and a retraction of my own prediction. The project
+  gets its first real positive result.**
+  R31 measured the *endpoint* of the DLRA's failure (exact at rank 43, `O(0.6)` below) and
+  noted the per-step projection error at `t=8` is `~1e-15`, so the error is accumulated
+  during the run. **Nobody had measured how it grows**, and the growth shape decides whether
+  this is a paper: exponential amplification at R13's `λ≈0.69` would mean `t=8` is past the
+  predictability horizon; steady accumulation would mean it is a property of the scheme's
+  projection count.
+
+  **R33, the growth.** Fixed-rank DLRA against the reference, error sampled over the run:
+
+  | rank | t=0.1 | 0.5 | 1 | 2 | 4 | 8 | growth |
+  |---|---|---|---|---|---|---|---|
+  | 8 | 0.1510 | 0.2721 | 0.4288 | 0.4485 | 0.4699 | 0.5645 | ×3.7 |
+  | 16 | 0.0134 | 0.0883 | 0.2086 | 0.3813 | 0.4001 | 0.6756 | ×50.5 |
+  | 32 | **0.0002** | 0.0100 | 0.0512 | 0.1934 | 0.3621 | 0.5677 | ×2432 |
+
+  `log(err)` is **strongly concave** in `t` at every rank (slopes fall from 1.33/7.20/25.33
+  early to 0.01–0.18 late), and R13's `λ` predicts `exp(0.69×7.9) = 244×` growth from `t=0.1`
+  to `t=8` where rank 8 grew only **3.7×**. So: **not exponential amplification. The error
+  rises for one to six time units depending on rank, then flattens onto a common plateau of
+  ≈0.6.** **Rank buys predictability time, not accuracy**: at `t=0.1` rank 32 is **755×**
+  better than rank 8 (`2e-4` vs `0.151`); at `t=8` they are indistinguishable. The plateau is
+  rank-independent. That is a directly usable engineering statement and the first positive,
+  quantitative result this project has produced about its own method — and it retires
+  "adaptive rank growth" as an *accuracy* mechanism for good.
+
+  **R33 §3 predicted, and I wrote the prediction down before testing it, that "a one-shot
+  static POD is at least as good as the DLRA at any rank below the ceiling, at every horizon
+  where both are measurable."** I inferred it from the growth curve's shape instead of
+  running the two-projection experiment that would have settled it, and called it the last
+  measurement that would decide whether the method has any accuracy advantage at all.
+
+  **R34, the measurement, and the prediction was wrong.**
+
+  | t | rank | DLRA | static (1 proj) | static mean-only | winner |
+  |---|---|---|---|---|---|
+  | 0.25 | 8/16/32 | 0.184/0.039/**0.010** | 0.290/0.287/0.287 | 0.353 | **DLRA ×3** |
+  | 0.50 | 8/16/32 | 0.272/0.088/**0.010** | 0.276/0.269/0.267 | 0.377 | **DLRA ×3** |
+  | 1.00 | 8/16/32 | 0.429/0.209/**0.051** | 0.259/0.256/0.251 | 0.423 | mixed |
+  | 2.00 | 8/16/32 | 0.449/0.381/**0.193** | 0.301/0.288/0.274 | 0.427 | rank 32 only |
+  | 4.00 | 8/16/32 | 0.470/0.400/0.362 | **0.285/0.282/0.275** | 0.353 | static ×3 |
+  | 8.00 | 8/16/32 | 0.565/0.676/0.568 | **0.438/0.434/0.428** | 0.546 | static ×3 |
+
+  **9–9 over 18 matched points, but systematically split: the DLRA wins all ranks at `t ≤ 0.5`
+  by up to 28×, and the crossover moves later with rank.** The reason my inference failed is
+  precise and worth keeping: **the DLRA's error is saturating while the static baseline's is
+  rising, and those two cross rather than order** — a shape argument could not have told me
+  where.
+
+  **The mechanism, which unifies R31 and R33.** The static baseline's error is **flat at
+  0.25–0.30 across ranks 8/16/32** while its **mean-only** component is **0.35–0.43**. So a
+  static method **cannot beat ≈0.35 at any rank** — its limitation is the **stale zonal
+  mean**, not the fluctuations (R31: the basis captures fluctuation energy to `0.999954` at
+  r=16). The DLRA re-projects the mean every step and removes that floor. **That is the whole
+  advantage**, and R33 gives it a **rank-dependent expiry**: the DLRA's own per-step
+  fluctuation truncation accumulates until its error saturates at ≈0.6 (rank 8 by `t≈1`,
+  rank 16 by `t≈2–3`, rank 32 by `t≈6`), after which one stale projection beats 64 000 fresh
+  low-rank ones.
+
+  **So the paper's contribution is a measured trade-off: adaptive rank does not deliver
+  accuracy growth; it buys a mean-tracking advantage with a rank-dependent expiry, paid for
+  with a saturation floor that only the full dealiasing ceiling avoids — and at the ceiling
+  the method is the full-grid solver at 3.9× the cost (D11.1).** That is defensible, novel,
+  falsifiable, and needs no speedup claim.
+
+  **F5 has a real window for the first time: `t ∈ [0.25, 2]` at ranks 8/16/32, and the central
+  figure is the crossover surface — error against `(rank, horizon)` — because a matched-rank
+  point at one horizon cannot express it.** That is precisely why the `t=8` comparison was
+  uninformative: every sub-ceiling rank had already saturated there.
+
+  **Eighth instance of the standing pattern, and the first where I stated a prediction and
+  retracted it within the hour.** The general rule earns one more clause: **a shape argument
+  about two competing error curves cannot locate their crossover; run the experiment, because
+  it is two projections and snapshots I already had.**
 - 2026-09-25 **R32 — the S3 regime pilot closes the regime question, and not in the project's
   favour.**
   Coder `602b7e9` (5 commits, 10 files, +14 800) **merged at `8c21057`.** The pilot is the
