@@ -238,15 +238,15 @@ def run_dmd(
     nsteps = int(round(final_time / dt))
     start = time.perf_counter()
     applications = 0
+    diverged_at_step = None
     for step in range(1, nsteps + 1):
         if step % steps_per_application == 0:
             coefficients = dmd.step(coefficients)
             applications += 1
             state = dmd.reconstruct(coefficients)
             if not np.isfinite(state).all():
-                raise FloatingPointError(
-                    f"POD-DMD non-finite after {applications} applications"
-                )
+                diverged_at_step = step
+                break
             max_div = max(max_div, grid.max_div_velocity(state))
         if step % sample_every == 0 or step == nsteps:
             times.append(step * dt)
@@ -258,6 +258,8 @@ def run_dmd(
         "wall_seconds": time.perf_counter() - start,
         "applications": applications,
         "seconds_per_application": (time.perf_counter() - start) / max(applications, 1),
+        "diverged_at_step": diverged_at_step,
+        "final_time_reached": times[-1],
     }
 
 
@@ -281,7 +283,7 @@ def divergence_series(
 def run_projected_moving(
     grid: Grid2D, model: StreamFunctionNS, initial: np.ndarray, dt: float,
     final_time: float, sample_every: int, schedule: dict[int, object],
-    start_state: np.ndarray | None = None,
+    initial_projector=None, start_state: np.ndarray | None = None,
 ) -> dict:
     """A static baseline whose basis is refitted on a moving window.
 
@@ -292,7 +294,12 @@ def run_projected_moving(
     early window is near-optimal, at t=8 the same window is useless -- so a
     comparison that only reports the early window measures the choice of window
     rather than the method.
+
+    ``initial_projector`` is used until the first refit, so the baseline is
+    projected from t=0 (which also keeps P0: its start is the exact projection
+    of the IC) rather than running unprojected for the first interval.
     """
+    projector_state = initial_projector
     state = (start_state if start_state is not None else initial).copy()
     times = [0.0]
     states = [state.copy()]
@@ -611,9 +618,17 @@ def main() -> None:
         print(f"moving-window (oracle) static POD at r={rank}, "
               f"refit every {args.refit_interval} ...", flush=True)
         if schedule:
+            early_snaps = select_window(
+                ref["snap_times"], ref["snap_states"], 0.0, train_time
+            )
+            initial_projector = (
+                PODGalerkin(grid, rank).fit(early_snaps)
+                if len(early_snaps) >= rank else None
+            )
             run = run_projected_moving(
                 grid, new_model(grid, args.re, args.force_amplitude), initial, dt,
                 args.T, sample_every, schedule,
+                initial_projector=initial_projector,
             )
             record(
                 f"pod_moving_r{rank}",
