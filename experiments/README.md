@@ -15,7 +15,8 @@ static POD-Galerkin, and adaptive SVD-DLRA at a chosen Reynolds number.
 singular-value threshold is tightened.  `run_long_time.py` provides a
 full-grid/DLRA sustained-time check without the unstable long-horizon POD
 baseline; its histories are sampled by `--history-stride` to keep result
-JSON compact.
+JSON compact.  `make_figures.py` renders the rank/error, singular-value, and
+cost figures from the committed JSON (requires matplotlib).
 
 Typical commands (from the worktree root, with the project venv):
 
