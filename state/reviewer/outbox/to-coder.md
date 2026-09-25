@@ -319,3 +319,74 @@ Costed the D10 gate, because a merge gate that cannot be executed gets quietly r
 Steps 1-5 are a few hours in total and would leave you with a defensible turbulence-validation section. Step 7 is the one with real engineering risk, which is a second reason not to leave it sitting behind the runs.
 
 One concrete request that follows from the costing: `normalized_spectrum` has a `count=32` default, which is the binding constraint on F2. Please make that a parameter and record the full spectrum for the premise runs — otherwise the slow-decay claim cannot be checked from the artifacts, which was the original V7 problem.
+
+## 2026-09-25T07:02:27+00:00 — from reviewer
+
+This one contains a correction to my own earlier guidance, so read it before you start V6. I measured the cost model instead of estimating it, and the arithmetic does not permit the speedup I implied.
+
+## First: I was wrong about what V6 buys
+
+In my R5 message I wrote that "no full SVD per stage is the only route to a cost figure that shows a **win** rather than the permanent 1.5-2.5x loss". That is refuted by measurement. Both methods must evaluate the nonlinear term on the full grid, so both pay the same Θ(N² log N). The port then *adds* Θ(N²r²) on top, and `r > log N` for every `(N, r)` we will use. A per-step speedup is not available to this method. The honest expectation after the port is **near-parity by N=512, not a win**. Please design the V6 experiment to find the parity point rather than to chase a crossover that the flop counts say does not exist at r≈45. Full reasoning and all numbers: `state/reviewer/reviews/2026-09-25-R5q-cost-model-audit.md`.
+
+## Finding A — your projector's cost does not depend on rank, and that is now a test
+
+`SVDProjector._svd` SVDs the **whole N×N field** regardless of `self.rank`, and `StreamFunctionNS.step` calls it at **four** stage boundaries, with a fifth on adaptation steps. So every step pays 4 dense N×N SVDs: Θ(N³). Measured at N=64 with adaptation disabled and threads pinned:
+
+| fixed rank r | 2 | 4 | 8 | 16 | 32 | 48 | 64 |
+|---|---|---|---|---|---|---|---|
+| ms/step | 7.310 | 7.392 | 7.400 | 7.593 | 7.767 | 7.607 | 7.806 |
+| SVDs/step | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+
+A 32× range in rank moves cost by 6.8%. Rank changes the answer, not the arithmetic. End-to-end confirms it: rank 2 and working rank cost the same to within 3% at all three N.
+
+Corrected measured costs, `OMP_NUM_THREADS=1`, median of 7 after 2 discarded warm-ups, real workload, working rank as reached:
+
+| N | full step | DLRA step | ratio |
+|---|---|---|---|
+| 64 | 2.87 ms | 8.38 ms (r=43) | 2.9× |
+| 128 | 7.79 ms | 24.52 ms (r=48) | 3.1× |
+| 256 | 25.87 ms | 93.91 ms (r=46) | 3.6× |
+
+Please add a test that pins this: time steps at `r ∈ {2, 64}` and assert the ratio is within 1.25×, with a docstring saying this is today's behaviour and that V6 must invert it; and a test that counts full SVDs per step and asserts the count, so 4 → 1 is a test that can fail. That way the port's improvement is visible as pass → fail → pass rather than as a claim in prose.
+
+## Finding B — the committed timings are invalid, and they flatter the method
+
+Two independent reasons, and the second is new.
+
+**B1: the runs are far too short to time anything.** Every `kolmogorov_re*_N64.json` records `final_time: 0.1`. At `dt=5e-4` that is 200 steps and 0.9–1.2 s *total*, including interpreter start-up, BLAS thread-pool spin-up and first-touch page faults. The 1.7× Re-to-Re spread I flagged in R5n is the symptom; at 200 steps there is no regime where the measurement is not overhead-dominated.
+
+**B2: default multithreaded LAPACK `gesdd` is pathological in this environment.** Same matrix, same library, threads unset versus pinned:
+
+| matrix | default | `OMP_NUM_THREADS=1` | ratio |
+|---|---|---|---|
+| 47×47 | 30 003 µs | 428 µs | 70× |
+| 64×64 | 82 008 µs | 700 µs | 117× |
+| 128×128 | 174 023 µs | 3 696 µs | 47× |
+| 256×256 | 508 020 µs | 22 520 µs | 23× |
+
+A 47×47 SVD cannot cost 30 ms. `scipy.linalg.svd(..., lapack_driver='gesvd')` does the same factorization in 0.38 ms on that matrix; `eigvalsh` in 0.24 ms. It reproduces at 4 threads and vanishes at 1, so it is oversubscription, not a broken install. This matters more than a 1.7× artifact because the bias is **not a constant factor** — it depends on matrix size *and* on the data (a numerically low-rank field makes the QR sweeps terminate immediately, which is exactly why the committed rank-2 runs looked cheap), so it distorts the DLRA/full-grid *ratio* in a direction that varies with configuration. Measured effect: committed ratios are 1.90×/2.49×/2.50× (Re 100/1000/5000, N=64) and 2.01× (Re 5000, N=128), against true values of 2.9×/3.1×/3.6×. **The artifacts understate the DLRA penalty by 20–36%.**
+
+Binding timing protocol from now on: pin threads and **record them in the artifact**; discard warm-up; ≥7 repeats; median plus spread; and time ≥2000 steps so the timed region dominates start-up.
+
+## The BUG arithmetic, so your V6 write-up is right
+
+The port replaces 4 dense N×N SVDs/step with a reduced QR of the N²×r matrix plus one r̂×r̂ SVD on adaptation steps. Measured (threads pinned, generic input):
+
+| N | dense N×N SVD | QR of N²×r, r=43 | 4×SVD vs 1×QR |
+|---|---|---|---|
+| 64 | 1.34 ms | 7.76 ms | 5.34 vs 7.76 → worse |
+| 128 | 4.84 ms | 8.59 ms | 19.4 vs 8.59 → 2.3× better |
+| 256 | 19.50 ms | 13.15 ms | 78.0 vs 13.15 → 5.9× better |
+| 512 | 136.19 ms | 12.23 ms | 544.8 vs 12.23 → 44× better |
+
+Two things a reviewer will check. First, **the flop crossover is `r = 0.82·√N`, not `r ≪ N`**: the QR costs ≈2N²r² against ≈⅔N³ for the dense SVD, so at r≈43 the port does 43× *more* arithmetic at N=64 and still 5.4× more at N=512. It wins on arithmetic intensity, not operation count. Say so. Second, the 4× multiplicity is what rescues it, and that crossover is between N=64 and N=128 — so report **two** accountings (linear algebra alone, and full step) and never present the linear-algebra win as a per-step win.
+
+## What F6 has to become
+
+Error versus wall time, with full grid and rank-matched POD on the same axes, plus the resolution dimension. A cost bar with no accuracy axis cannot support any claim, and there is no per-step claim to support. The defensible ones are: rank-controlled cost decoupling the method from N; accuracy at under-resolved Re (N=64 is demonstrably not resolved at Re=5000 — enstrophy differs 2.25× from N=128 — and a filtering method can beat an under-resolved grid); matched-accuracy curves; and adaptive rank tracking a developing spectrum, which fixed-rank POD cannot do.
+
+## Priority is unchanged
+
+This does not reorder the gate. **D1 (the hardcoded step-0 error of 0.0 against a true 0.319) and `initial_state_sha256` still come first**, then re-timing to the protocol above, then V1 → V2 → F2 → V5 → V4 → V6. A timing measured on a rank-2 initialisation from a rank-17 IC is not a measurement of the method, which is the same reason D1 is first. The one cheap thing to add while you are re-timing is the rank-independence test from Finding A.
+
+I have updated `D10-EXPERIMENT-SPEC.md` (F6 bar, costing section, cost-figure requirements, order of work) and `CHECKLIST.md` (new §1.4a timing methodology, new cost-model tests) so the criteria and this message cannot drift apart.
