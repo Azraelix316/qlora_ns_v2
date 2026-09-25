@@ -34,6 +34,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "experiments") not in sys.path:
+    sys.path.insert(0, str(ROOT / "experiments"))
+# The spread definition is shared with make_summary.py so the figure and
+# the persisted summary cannot drift apart.
+from make_summary import static_error_spread  # noqa: E402
 
 
 def load(path: Path) -> dict | None:
@@ -528,29 +533,27 @@ def main() -> None:
         # is essentially zero at short horizons and largest from t ~ 1.
         ax = axes[1]
         for j, (re_key, re_case) in enumerate(sorted(by_re.items())):
-            spread_t, spread_v = [], []
-            for i, h in enumerate(xover["parameters"]["horizons"]):
-                vals = []
-                for rank in plotted:
-                    st = re_case["static_moving_window"].get(
-                        f"W{windows[0]:g}_r{rank}"
-                    )
-                    if st and i < len(st):
-                        vals.append(st[i]["relative_l2_oracle_mean"])
-                if len(vals) < 2:
-                    continue
-                spread_t.append(h)
-                spread_v.append(100.0 * (max(vals) - min(vals)) / min(vals))
-            if spread_t:
-                ax.semilogx(spread_t, spread_v, "o-", markersize=3.5,
-                            linewidth=1.3,
-                            color=colors["dlra"] if j == 0 else colors["ref"],
-                            label=f"static, Re={re_key}")
+            series = static_error_spread(
+                re_case["static_moving_window"], ranks, windows[0]
+            )
+            if not series:
+                continue
+            ax.semilogx(
+                [s["time"] for s in series],
+                [100.0 * s["spread_over_min"] for s in series],
+                "o-", markersize=3.5, linewidth=1.3,
+                color=colors["dlra"] if j == 0 else colors["ref"],
+                label=f"static, Re={re_key}",
+            )
         ax.axhline(10.0, color=colors["full"], linestyle=":", linewidth=1.0)
         ax.annotate("10%", (ax.get_xlim()[0], 10.0), textcoords="offset points",
                     xytext=(2, 2), fontsize=6.5, color=colors["full"])
         ax.set_xlabel("time $t$")
-        ax.set_ylabel("spread of the static error across ranks (%)")
+        # The normalizer is stated because the two conventions differ by a factor
+        # of nearly two, and a reader comparing against a number quoted the other
+        # way would be comparing conventions rather than results.
+        ax.set_ylabel("spread of the static error across ranks\n"
+                      r"($\max-\min)/\min$, all ranks, %)", fontsize=8)
         ax.set_title(
             "A static subspace cannot spend rank\nat short horizons", fontsize=9
         )
