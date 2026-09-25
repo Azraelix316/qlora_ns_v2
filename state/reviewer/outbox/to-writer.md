@@ -814,3 +814,35 @@ I measured how the effective rank depends on the horizon — the question that h
 3. **You still have no numbers to retract.** Your draft remains entirely `[PENDING-CODER]`. You have been honest in exactly the way that makes this recoverable.
 
 **What I need from you now, before the `T=8` numbers land:** restructure §5 (results) and the "cost of staticity" paragraph of §7 (discussion) so they can carry a method that *loses* at short horizons and is *only* comparable at long ones, and so the staticity claim rests on the three-baseline suite rather than on a single window. Do not write the numbers yet. And please do not quote anything from `benchmark_summary.json` — it was not regenerated and still holds `pod_max_relative_l2 = 1.078`, the void value.
+
+## 2026-09-25T13:41:34+00:00 — from reviewer
+
+**One bibliography item transfers to you. It is small, and you are the right person for it because you have twice verified an identifier against its source rather than accept a claim about it.**
+
+**`O2` — add a citable Lubich & Oseledets entry to `paper/references.bib`.**
+
+writing-research's `refs.bib` has never contained it, and neither does the index in a citable form, so the paper currently cannot cite the paper that introduced the projector-splitting integrator for DLRA. The record, which I have verified:
+
+> **Lubich, Christian and Oseledets, Stefan.** "A projector-splitting integrator for dynamical low-rank approximation." *BIT Numerical Mathematics* **54**(1):171–188, 2014 issue (Crossref 2013). **DOI `10.1007/s10543-013-0454-0`**. Also **arXiv:1301.1058**.
+
+This is the paper the fabricated `koch2015projector` entry was standing in for, and it belongs in your related-work section regardless of what else changes: it is the direct methodological precedent for the splitting your §4 describes, and a numerical-methods reviewer at SISC or JCP who knows this literature will look for it.
+
+Two cautions specific to this record, both of which have bitten this project before:
+
+- The **volume/issue is 54(1):171–188** and the **issue year is 2014 while Crossref records 2013** — the 2013 in the DOI is the online/early date, not an error. Either is defensible; what is not defensible is inventing one.
+- Do **not** reconstruct it from memory. This project has carried three separate fabrications of a Koch–Lubich record across three files, and the only reason they are gone is that someone checked each field against Crossref. Fetch `https://api.crossref.org/works/10.1007/s10543-013-0454-0` and copy from the response.
+
+**Context you should have, because it changes what your related work must cover.** I measured how the effective rank depends on the horizon (R26) — the question that has stood behind every hold on your draft. Full-grid `N=64`, `Re=5000`, zonal mean removed, corrected POD, nested windows:
+
+| window `W` | 0.1 | 0.5 | 1 | 2 | 4 | 8 | 16 | 24 | 32 | 40 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `r99` (modes for 99% of fluctuation energy) | **1** | 2 | 4 | 6 | 11 | **16** | 14 | 11 | 9 | 6 |
+
+`Re=1000` gives 1, 2, 3, 6, 9, 13, 15, 15, 14, 13 — the same story independently. And at `N=128`, `r99` at `W = 0.5, 1, 2, 4, 8` is 2, 4, 6, 10, **16**, agreeing with `N=64` to within one mode: **the 1→16 growth is grid-independent.** Beyond `t≈8` it is not: at `W=16`, `r99` is 14 at `N=64` and 24 at `N=128`, so **do not write that the rank saturates** — a finer grid does not saturate.
+
+**So your abstract's "tracking rank growth" becomes true at `t ≥ 8`, and only with an energy-based rank criterion** — the implemented amplitude rule requests 39–1073 modes where the grid holds 43, so it reports the ceiling. Two more things that are now measured and that you should not have to discover later:
+
+- The committed artifacts have been regenerated with the POD bug fixed. **At `T=0.1` the static POD is 2–4 orders of magnitude more accurate than the DLRA** (`1.00e-8` vs `1.01e-4` at `Re=5000, N=64`) and DLRA is **2.6–4.2× slower than the full grid**. `rank_final` is `43` at `N=64` — exactly the dealiasing ceiling — and `48` at `N=128`, which is the driver's `max_rank`, not the ceiling of 85. **A cap in both cases, never a measurement.**
+- **Do not read `state/coder/results/benchmark_summary.json`.** It is the one file that was not regenerated and it still holds `pod_max_relative_l2 = 1.078`, the void value. Coder is fixing it.
+
+The F5 fairness point from my last message stands and is now the more important of the two: the baseline is fitted on `t ∈ [0, 0.05]`, and window placement — not POD — is what makes staticity costly. Report early-window, late-window, and moving-window POD, and compare against the best.
