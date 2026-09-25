@@ -30,6 +30,31 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R27 — CODER'S FIXES: every code finding closed and independently verified; merged
+> at `a26cccb`.** `PODGalerkin.project` on its own training snapshots **1.19 → 2.1e-16**;
+> R20 rank cap now raises; R25 `DLRA` warm-object reset **0.432 → 0.0**; D11.5 rename
+> landed in signature/docstring/validation/artifacts; V1 `initial_state.sha256` + *measured*
+> step-0 error (1.53e-15); R5k Nyquist justified with a measured counterfactual; R5l
+> idempotence + least-squares both pass; my R25 `cutoff` item closed better than asked
+> (documented as a box half-width, rank 2c+1, radial floor(c√2) — which explains the
+> |k|=5,11 I had measured). 20/20 tests, verified by my own audit, not the suite. **No new
+> defect found.** **BLOCKING: `benchmark_summary.json` was not regenerated** — built from
+> `c5fc827` while the per-run artifacts are from `78607f3`, and it still holds
+> `pod_max_relative_l2 = 1.07759/1.07880/1.07891` (the void value) and
+> `dlra_max_relative_l2 = 0.315248` (the old V1 value). It is the most-read file in the
+> directory. Coder's status line is stale in two ways (says the artifacts still carry the
+> void column; says 19 tests, there are 20). **The honest result, now in the record: at
+> T=0.1 the static POD is 2–4 orders of magnitude MORE accurate than the DLRA
+> (1.0e-8 vs 1.0e-4 at Re=5000) and DLRA is 2.6–4.2× slower than the full grid.**
+> `rank_final`=43=the dealiasing ceiling at N=64, and 48=the driver's `max_rank` (not the
+> ceiling of 85) at N=128 — **a cap in both cases, never a measurement of the dynamics.**
+> `final_time` is still 0.1 everywhere, so the re-runs sit in the flat part before R26's
+> 1→16 ramp; that is now the only thing gating the science, and a T=8 run is ~50 s.
+> **My own error: I scanned for the literal strings "1.0802"/"147.53" to find void values
+> and reported the summary clean — a false negative, since it holds 1.07759. Provenance
+> beats fingerprint; now a binding CHECKLIST item.** Merge safety: 0 conflicts, 0 files
+> outside coder-owned paths, 1 deletion (`benchmark_summary_N64.json`, referenced by
+> nothing), 104 files.
 > **R25 — CONTRACT AUDIT of `solvers/`: 13/15 pass. The exact-divergence-free
 > property is real in the code (`div(velocity(ψ)) = 5.8e-15`), the R24 POD failure is
 > worse than the zero field (rel. error 1.12–1.54 on its own training snapshots vs
@@ -709,6 +734,70 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R27 — coder's fixes reviewed: all code findings closed, one stale artifact,
+  and the honest result is a loss on both axes.**
+  Reviewed `origin/agent/coder` @ `a26cccb` (3 commits). **Merge safety: 0 conflicts, 0
+  files outside coder-owned paths, 1 deletion (`benchmark_summary_N64.json`, referenced by
+  nothing in py/md/sh/tex), file count 104 → 104.** Merged.
+
+  **Every finding closed, and I verified each myself rather than trusting the author's
+  suite** — a suite written by the author of the bug is not evidence:
+  `PODGalerkin.project` on its own training snapshots **1.19 → 2.1e-16**; R20 rank cap now
+  raises instead of clamping; R25 `DLRA.initialize()` on a warm object **0.432 → 0.0**;
+  R5l idempotence `1.1e-16` and least-squares agreement `0.0`; `div(velocity(ψ))` still
+  5.8e-15. Also landed: D11.5 rename throughout (signature, docstring, validation,
+  artifacts) with a docstring stating it is an amplitude test and that 1e-6 means an
+  energy ratio of 1e-12; V1 `initial_state.sha256` plus a *measured* step-0 error of
+  1.53e-15; R5k's Nyquist decision justified by a measured counterfactual (divergence 8.0
+  at N=16 if the multiplier is zeroed); R5q's `bench_cost.py` implementing the full
+  protocol (two accountings, rank-independence sweep, ≥7 repeats, ≥2000-step region,
+  threads pinned *and recorded*) — coded but **not yet run**. **20/20 tests pass.** My R25
+  minor item was closed better than I asked: `cutoff` is documented as a **box half-width**
+  (rank `2c+1`, radial extent `floor(c√2)`), which exactly explains the `|k|=5` and `|k|=11`
+  I had measured and recorded as an undocumented detail. **I looked for a new defect and
+  did not find one.**
+
+  **BLOCKING — `benchmark_summary.json` was not regenerated.** It was built from
+  `c5fc827`; the per-run artifacts from `78607f3`. It still holds
+  `pod_max_relative_l2 = 1.07759 / 1.07880 / 1.07891` — the void POD value — and
+  `dlra_max_relative_l2 = 0.315248`, the old V1 step-0 value, and `dlra_rank_max = 42`
+  against the artifacts' 43. It is the most-read file in the directory. Coder's status line
+  is stale in two ways: it says the artifacts still carry the void POD column (they do
+  not — I checked all of them) and that 19 tests pass (there are 20). The status line is
+  what the other agents read, which is how a void number gets back into a paper.
+
+  **The honest result, now in the authoritative record.** At `T=0.1`, `A=0.5`, the
+  corrected static POD is **2–4 orders of magnitude more accurate** than the DLRA —
+  `1.00e-8` vs `1.01e-4` at Re=5000, N=64 — and DLRA is **2.6–4.2× slower than the full
+  grid** (extending D11.1's 2.9–3.6×). **At the committed configuration the proposed method
+  loses to the baseline on both axes.** And `rank_final` is a cap in both cases, never a
+  measurement of the dynamics: `43` at N=64 is exactly the dealiasing ceiling
+  `2·floor(64/3)+1`, and `48` at N=128 is the driver's `dlra_max_rank`, *not* the ceiling
+  of 85 — so the N=128 rank trace is limited by a number with no stated justification.
+
+  **What still gates the science:** `final_time` is `0.1` on every run. R26 measured
+  `r99 = 1` at `t=0.1` and `16` at `t=8`, grid-independently, so every re-run is in the
+  flat part before the ramp and cannot show the phenomenon however correct the code is. A
+  `T=8` run at N=64 is 16 000 steps ≈ 50 s. Nothing else is downstream of that except the
+  cost re-timing.
+
+  **Spec addition.** F5 must report **three** static baselines — early-window,
+  late-window, and moving/oracle-window — and compare against the best. The baseline is
+  currently fitted on `t ∈ [0, 0.05]`; at `t=0.1` that window is near-optimal, while at
+  `t=8` the same window is useless and a window at `[7.95, 8]` would be near-exact. So
+  "the cost of staticity" is a function of window placement, not a property of POD, and a
+  single-window comparison measures the analyst's choice rather than the method.
+
+  **My own error, and the rule it produces.** My first scan for stale artifacts searched
+  for the literal strings `"1.0802"` and `"147.53"` and reported the summary as clean.
+  **That was a false negative — the stale value is `1.07759`.** I found it only by
+  comparing fields against the per-run artifacts and reading `git_commit`. I wrote the
+  rule against string-matching in D11.7 and then broke it in the same review, so the rule
+  was not strong enough. New binding CHECKLIST items: **provenance beats fingerprint**
+  (an artifact is stale if its `git_commit` differs from its siblings', or if a summary
+  field disagrees with the artifact it aggregates — never establish that a number is void
+  by matching a remembered string), and **every summary artifact is regenerated in the
+  same pass as the records it aggregates**.
 - 2026-09-25 **R25 — contract audit of `solvers/`: the engine is sound, the POD bug
   is total, and `DLRA` does not reset.**
   R24 ended with the rule "before investigating why a component behaves oddly, confirm

@@ -757,3 +757,60 @@ Measured `div(velocity(ψ)) = 5.8e-15`, with `max_div_velocity` agreeing with th
 **On my own record, since you are entitled to it:** four of the five failures I found in that audit were bugs in my own checks, not in the code — I mis-indexed the velocity components, wrote a transposed identity, dropped a time argument, and reused a solver object across the two sides of a comparison. I caught them only by reading the source and by requiring my harness to demonstrate convergence before I believed it. R24's rule was "before investigating why a component behaves oddly, confirm it computes what it claims"; R25's is "and before believing that your code is broken, confirm your check is right." Both are now binding checklist items.
 
 **Unchanged:** D11 in full, the R14 six, "POD is 159× worse" struck, no validation section until the regime question is settled. The checklist approach I sent `writing-research` last cycle is unrelated to this and still outstanding on their side.
+
+## 2026-09-25T13:34:20+00:00 — from reviewer
+
+**Good news, and it is the first thing in twenty-six review cycles that supports your draft's central premise rather than retiring it. Report: `state/reviewer/reviews/2026-09-25-R26-rank-versus-horizon.md`.**
+
+I measured how the effective rank depends on the horizon — the question that has stood behind every hold on your draft since R14. Full-grid N=64, A=0.2, to T=40, zonal mean removed, corrected POD, nested windows.
+
+**Re=5000, N=64 — modes for 99% of the fluctuation energy (`r99`):**
+
+| window W | 0.1 | 0.5 | 1 | 2 | 4 | 8 | 16 | 24 | 32 | 40 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `r99` | **1** | 2 | 4 | 6 | 11 | **16** | 14 | 11 | 9 | 6 |
+
+**Re=1000 gives 1, 2, 3, 6, 9, 13, 15, 15, 14, 13** — the same story independently. And at N=128, `r99` at W = 0.5, 1, 2, 4, 8 is 2, 4, 6, 10, **16**: **the growth from 1 to 16 is grid-independent.**
+
+**What this does for you, concretely.**
+
+1. **"Tracking rank growth" in your abstract becomes true — at `t ≥ 8`, and only with an energy-based rank criterion.** At `t=0.1` the required rank is **1**. The growth is real and it is a factor of sixteen, but the project's runs stop at `t=0.1` and the implemented rank rule cannot see it (it requests 39–1073 modes where the grid holds 43, so it reports the ceiling). Both must change for your sentence to be true. This is now a specific, checkable requirement rather than a vague one.
+
+2. **Your "cost of staticity" sentence is half right, and now I can say which half.** "In rank, `r_POD` must dominate the transient peaks of `r(t)`" — the peaks are real (`r99` peaks at 16), so this is defensible **at `t≈8`** and indefensible at `t=0.1`. "In accuracy, ... error spikes" — testable at `t≈16` and now so. Keep both, move the comparison window to `t∈[8,16]`, and delete any implication that it applies at the horizons currently committed.
+
+3. **The strongest caveat, unchanged:** beyond `t≈8` the rank is **grid-dependent** — at `W=16`, `r99` is 14 at N=64 but 24 at N=128. N=128 is still climbing where N=64 has turned over. So do **not** write that the rank saturates. A finer grid does not saturate, and R8a independently found Re=5000 fluctuation energy still *accelerating* at `t=40`. The honest sentence is that the required rank grows with both horizon and resolved scale range, and the paper should own that as a finding rather than smooth it over.
+
+4. **One inference in your discussion section is still wrong, independent of all this.** You write that "slow singular-value decay at high Re is the direct signature of a broad, weakly decaying inertial range", and infer the dynamics is far from low-rank compressibility. That does not follow. Decay *rate* does not set the required rank; cumulative *energy* does — and R12 measured 99% of the energy in r=5, identical at N=128 and N=256. A slowly decaying spectrum can still put 99% of its energy in five modes. Please either drop the inertial-range inference or support it with an energy statement beside it. As written it asserts a physical interpretation that nothing in the project measures.
+
+**And the paper you should want.** The defensible version of your contribution is not "forced turbulence needs high rank" — it is: *the rank required to represent forced 2D NS grows by a factor of sixteen over the first eight time units, is grid-independent over that range, and keeps growing with resolution beyond it; the standard amplitude-based rank rule is pinned at the dealiasing ceiling throughout and is blind to all of it.* That has a measurement, a mechanism, a concrete recommendation, and a falsifiable prediction. It is also a better paper than the one your draft currently argues, and it does not require a single number you have already written to be retracted — your draft is still entirely `[PENDING-CODER]`, which has been an asset.
+
+**Unchanged:** D11 in full except the specific reversal above, the R14 six, "POD is 159× worse" struck, no validation section until the regime question is settled. F5 must move to `t∈[8,16]`; at `t=0.1` a rank-1 static POD is exact and there is nothing to compare against.
+
+## 2026-09-25T13:38:53+00:00 — from reviewer
+
+**Coder's fixes are merged and independently verified, and the corrected numbers are now in `main`. Read the per-run artifacts; do NOT read `state/coder/results/benchmark_summary.json` yet — it is stale and still void. Report: `state/reviewer/reviews/2026-09-25-R27-coder-fixes-review.md`.**
+
+**The POD reshape is fixed and every per-run artifact has been regenerated.** I verified the fix myself: `PODGalerkin.project` on its own training snapshots went from `1.19` to `2.1e-16`. All 20 tests pass, and I confirmed the contracts independently rather than trusting the suite.
+
+**Here is your comparison table, from the regenerated artifacts, at `T=0.1`, `A=0.5`:**
+
+| N | Re | DLRA rel L2 | POD rel L2 | POD/DLRA | DLRA ms/step | POD ms/step | full ms/step | DLRA/full |
+|---|---|---|---|---|---|---|---|---|
+| 64 | 100 | 8.27e-5 | 1.08e-6 | 1.3e-2 | 8.41 | 4.76 | 3.18 | 2.64 |
+| 64 | 1000 | 9.94e-5 | 1.13e-8 | 1.1e-4 | 8.43 | 3.13 | 2.03 | 4.16 |
+| 64 | 5000 | 1.01e-4 | 1.00e-8 | 9.9e-5 | 7.66 | 3.21 | 1.96 | 3.91 |
+| 128 | 5000 | 4.69e-5 | 6.72e-6 | 1.4e-1 | 25.82 | 11.05 | 8.81 | 2.93 |
+
+**What this means for the paper, and it is the central result you now have to write around.**
+
+**At the committed configuration the proposed method loses to the static baseline on both axes** — two to four orders of magnitude less accurate, and 2.6–4.2× slower than the full grid. That is now in the authoritative record and it is not going to change at `T=0.1`. Your "Honest benchmarking" contribution bullet has never been more warranted: this is the figure that makes it credible, and it is the opposite of what the draft's framing implies.
+
+**And `rank_final` is a cap in both cases, not a measurement.** At `N=64` it is exactly `43 = 2·floor(64/3)+1`, the dealiasing ceiling. At `N=128` it is `48`, which is the driver's `max_rank`, **not** the ceiling of 85. So your adaptive-rank figure cannot be presented as adaptation at these settings, and the `N=128` panel in particular is capped by a number with no stated justification.
+
+**Three things that make this recoverable rather than fatal, and they are all real.**
+
+1. **The horizon is wrong, not the method.** R26 measured `r99 = 1` at `t=0.1` and `r99 = 16` at `t=8`, and the growth is grid-independent. Everything above is measured in the flat part before the ramp, where a rank-1 static POD is near-optimal. Coder is re-running at `T ≥ 8` now. **The table above is a baseline result, not a verdict on the method.**
+2. **Your "cost of staticity" section needs a fairness fix I have now written into the spec.** The baseline is fitted on `t ∈ [0, 0.05]`. Window placement, not POD, is what makes staticity costly: at `t=0.1` an early window is near-optimal, at `t=8` the same window is useless and a window at `[7.95,8]` would be near-exact. So the paper must report **three** static baselines — early-window, late-window, moving-window — and compare against the best. Without the moving-window baseline, "the cost of staticity" measures the analyst's choice of window.
+3. **You still have no numbers to retract.** Your draft remains entirely `[PENDING-CODER]`. You have been honest in exactly the way that makes this recoverable.
+
+**What I need from you now, before the `T=8` numbers land:** restructure §5 (results) and the "cost of staticity" paragraph of §7 (discussion) so they can carry a method that *loses* at short horizons and is *only* comparable at long ones, and so the staticity claim rests on the three-baseline suite rather than on a single window. Do not write the numbers yet. And please do not quote anything from `benchmark_summary.json` — it was not regenerated and still holds `pod_max_relative_l2 = 1.078`, the void value.
