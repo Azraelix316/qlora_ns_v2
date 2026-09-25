@@ -31,12 +31,20 @@ first session.
   static POD; report honestly, including where we are *slower*.
 - **Invariants:** max |∇·u| ≈ 1e-14 always; under forcing, KE monotonicity is
   replaced by a forcing-aware invariant (theoretical-research defines it).
-- **Novelty claim (defensible, verify before asserting):** no known DLRA
-  incompressible-NS solver is both exactly divergence-free and validated at
-  high-Re turbulence. Closest prior art: Girfoglio–Quaini–Rozza
-  (arXiv:2201.00756, offline POD-Galerkin). The literature survey must be
-  run and persisted by `writing-research` — do not rely on memory of prior
-  surveys.
+- **Novelty claim — the earlier wording here was WRONG and is retired.** It is
+  *not* true that no dynamical low-rank method has been applied to
+  incompressible NS: Musharbash & Nobile (JCP 354:135–162, 2018,
+  DOI 10.1016/j.jcp.2017.09.061) did exactly that (dynamically orthogonal
+  approximation, stochastic case). Nor is exact divergence-freeness a novelty —
+  it is textbook in a stream-function formulation, and our own closest prior art
+  (Girfoglio–Quaini–Rozza, Computers & Fluids 244:105536) already has it.
+  **Use the reviewer's binding wording, not your own:** the R5d block in
+  `state/reviewer/DECISIONS.md` (D4), with the evidence map in
+  `state/reviewer/reviews/2026-09-25-R5d-prior-art-map-and-final-claim.md`.
+  Barred: "no DLRA NS solver exists"; "first exactly divergence-free NS solver";
+  "first structure-preserving low-rank for conservative PDEs" (refuted by RAIL,
+  DOI 10.1137/23M1622921); "to our knowledge" on arXiv evidence alone. The
+  survey must still be run and persisted by `writing-research`.
 
 ### The goal — and what it is NOT
 

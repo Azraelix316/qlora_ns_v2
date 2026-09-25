@@ -22,6 +22,12 @@ are reported **honestly, including where we are slower** than a baseline.
 
 ## D3 — Invariants (2026-09-24)
 
+> **OPERATIVE STATUS (R5, 2026-09-25):** the **laminar** half is satisfied and
+> verified (Taylor–Green: rank 1, 2.26e-14, strictly monotone energy decay,
+> divergence 1.6e-14). The **forcing-aware** half is **still OPEN** — owed by
+> `theoretical-research` since R1, including an invariant for the *reduced*
+> model. Until both exist, no run may be called turbulence-validated (see D10).
+
 **Binding.** Every run must verify:
 1. **max |∇·u| ≈ 1e-14** — always, in all tests (this is the structural claim).
 2. **Taylor–Green (laminar, unforced):** KE monotone non-increasing.
@@ -50,7 +56,21 @@ cannot be called final until this exists and the D10 requirements are met.
 
 ## D4 — Novelty claim (2026-09-24)
 
-**Binding.** The claim "no known DLRA incompressible-NS solver is both
+> ### ⚠ OPERATIVE TEXT = the R5d block at the end of this section, and only that
+> Everything earlier here is **history**. The original claim quoted just below is
+> **SUPERSEDED and BARRED** (too strong; refuted by Musharbash & Nobile, JCP
+> 2018). The R5b "Binding refinement" is superseded by R5c, which is superseded
+> by **R5d (final)**. Barred: "no known DLRA incompressible-NS solver …"; "no
+> dynamical low-rank method for incompressible NS" (DOI
+> 10.1016/j.jcp.2017.09.061); "first exactly divergence-free NS solver"; "first
+> structure-preserving low-rank for conservative PDEs" (DOI
+> 10.1137/23M1622921); any "to our knowledge" on arXiv evidence alone. D4 is
+> **OPEN** pending W1–W5 + the journal-venue survey. About to write a novelty
+> sentence? Use R5d's wording and see
+> `reviews/2026-09-25-R5d-prior-art-map-and-final-claim.md`.
+
+**Binding (SUPERSEDED — the operative wording is the R5d block below).** The
+claim "no known DLRA incompressible-NS solver is both
 exactly divergence-free and validated at high-Re turbulence" may be asserted
 in the paper **only after** `writing-research` has run the fresh arXiv survey
 and persisted it (`state/writing-research/arxiv_index.json`), with the
@@ -216,6 +236,15 @@ The report also lists the sixteen verified references the survey must contain.
 
 ## D5 — Venue (2026-09-24): OPEN
 
+> **OPERATIVE STATUS (R5, 2026-09-25):** the approved set and framing **stand
+> unchanged** — **SISC/JCP rolling > ICML 2027 > NeurIPS 2027**;
+> DFD/ICASSP/AISTATS **excluded**; scicomp/physics primary; the ML-for-Science
+> framing is **rejected on the merits** (there is no learning component in this
+> project). The target debate is **closed**. D5 stays **OPEN** only on
+> documentation: one consolidated `docs/venues/` doc, every deadline with a CfP
+> URL **and** an access date, ICASSP and AISTATS absent. A new recommendation
+> does not reopen it — an explicit request to the reviewer does.
+
 Not yet decided. Awaiting the venue shortlist + recommendation from
 `writing-research` (`docs/venues/`). The reviewer will record the venue
 decision here within one review cycle of receiving the recommendation.
@@ -350,6 +379,15 @@ stability", and omitting an unstable long-horizon POD baseline rather than
 extrapolating it — are endorsed and must survive the re-run.
 
 ## D10 — High-Re turbulence validation gate (2026-09-25)
+
+> **OPERATIVE.** Requirements **V1–V7** below are all open. V6's *direction* is
+> settled (port the BUG integrator, see the R5c block) but the port is not done.
+> What counts as passing, figure by figure, is specified in
+> `reviews/D10-EXPERIMENT-SPEC.md` (F1–F7, T1–T2, plus the P0 comparability
+> protocol) — check against that document, not against this summary. Every
+> quantitative claim in this gate was machine-verified against the committed
+> artifacts (R5i); one reviewer error was found and corrected there (the initial
+> condition is numerical rank **17**, not 19).
 
 **Binding.** No agent may state, imply, or draft into the paper that this work is
 "validated at high-Re turbulence", or quote the current accuracy numbers
