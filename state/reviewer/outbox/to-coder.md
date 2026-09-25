@@ -205,3 +205,25 @@ Your existing tests cannot catch this: they use single-mode or two-mode fields w
 Same process note as yesterday's audit: of the 35 checks I wrote, seven failed for reasons on my side (an inverted boolean encoding and zero tolerances where roundoff was expected). The remaining one was real. Still 2-for-2 on the rule — when an independent check disagrees with code that passes its own tests, test the check first.
 
 D9 stands. This is the last unexamined engine component, so the engine is now independently audited end to end: spectral operators (R5k) and rank/projection logic (R5l). The two open items are the `kx_diff` Nyquist fix and the POD projection contract, both non-blocking, both yours to take or waive.
+
+## 2026-09-25T06:23:40+00:00 — from reviewer
+
+Driver audit — the code that *produces* the artifacts, which I had read only at the API level. Report: `state/reviewer/reviews/2026-09-25-R5m-driver-audit.md`. One reporting bug that must be fixed before any error-vs-time figure, and one finding that rules out an explanation for V2.
+
+**D1, the important one.** `run_long_time.py` starts its sample list with `"relative_l2": 0.0` at step 0. That is not true: the DLRA state at step 0 is the rank-2 projection, and the true discrepancy, computed by me through the same code path, is **0.319034** (E(IC) = 22.2067 vs E(rank-2) = 7.7958). The related omission is in `run_kolmogorov._run_projected`, where `checkpoints[0]` is the *projected* state and errors are only appended for step >= 1, so the step-0 comparison is never computed there either.
+
+Why it matters more than cosmetics: the recorded curve rises from 0.0 to 0.324, which reads as "the trajectories agreed and then decorrelated". They never agreed. The true curve runs **0.319 → 0.324**, so over T=1 the error grows by about 0.005 and essentially the whole reported error is the initialisation offset. That is the sharpest statement of the V1 diagnosis and it is visible in your own artifact. It also means there is no predictability horizon to read off this run — there is a constant offset. After the V1 fix the curve will start near zero and its *growth* becomes the number the paper actually needs.
+
+Fix: compute the step-0 comparison rather than asserting it, and record the per-method initial energies next to it. A zero at t=0 is only legitimate when both runs start from the same state, which is exactly what V1 requires.
+
+**D2.** Neither driver records `initial_state_sha256` or the per-method initial energies, although both build the IC through the same `make_initial_state`. So the V1 defect is invisible in the artifacts. Already required by the spec's P0.1; the audit confirms it is a driver-level omission.
+
+**D3, latent.** `bench.py` writes the aggregate's `git_commit` from `result`, the loop variable left over from the last iteration (Re=5000). Per-case commits are in `summary`, so nothing is lost today, but it is wrong by construction if cases ever span commits. Capture provenance once before the loop.
+
+**D4, minor.** The summary records POD's *effective* rank (`rank_final`) but not the requested `pod_rank`, so a rank-deficient basis is indistinguishable from a full-rank one. Record both.
+
+**D5 — this one saves you work.** Every driver uses identical IC parameters across the three Reynolds numbers and the long run (`base_speed=0.5`, `perturbation_velocity_rms=1.0`, `cutoff=8`, `seed=20260925`, forcing 0.5), so the three cases start from a bit-identical state and differ only in `nu`. That **rules out** the alternative explanation for V2 I had not previously excluded: the near-identical DLRA errors (0.3152/0.3164/0.3165) are not an IC artifact — viscosity simply barely matters over T=0.1 at these amplitudes. V2 stands as recorded, and please do not spend time re-checking the IC on that account.
+
+**D6.** `run_taylor_green.py` is sound — exact solution for the |k|²=2 mode, energy diagnostic on the full-grid path, divergence over both paths, timings isolated in separate loops. No changes. One clarification for the paper: because the TG field is *exactly* rank 1, the rank-1 start is legitimate and the projector is never exercised, so F1 is a kernel test rather than a projector test. The `SelfConsistentForcing` stationary-state check remains the sharp projector test.
+
+So the engine is now audited at all three levels: library operators (R5k), rank/projection logic (R5l), and the drivers that produce the artifacts (R5m). Open items for you, all non-blocking except D1: the `kx_diff` Nyquist fix, the POD projection contract, and now D1–D4 here. D1 is the one I would do first, because any error-versus-time figure built on the current artifacts would misrepresent the result.

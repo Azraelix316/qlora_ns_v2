@@ -72,6 +72,41 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 R5m (audit of the experiment **drivers** — the last unreviewed
+  layer). R5k/R5l audited the library; the code that *produces the artifacts*
+  had only been read at the API level, and the R5 IC-mismatch finding is exactly
+  the class of defect a driver can hide. Read `run_long_time.py`,
+  `bench.py`, `run_rank_growth_sweep.py`, `run_taylor_green.py` in full.
+  **D1 (must fix before any error-vs-time figure):** `run_long_time.py`
+  hardcodes `samples[0]["relative_l2"] = 0.0`, but the DLRA state at t=0 is the
+  rank-2 projection — the true value, computed by me through the same code path,
+  is **0.319034** (E(IC) 22.2067 vs E(rank-2) 7.7958). `run_kolmogorov`'s
+  `_run_projected` compounds it: `checkpoints[0]` is the *projected* state and
+  errors are appended only for step >= 1, so the step-0 comparison is never
+  computed. Consequence: the recorded curve rises 0.0 → 0.324 and reads as
+  "agreement then decorrelation", when the truth is **0.319 → 0.324** — the
+  error grows by ~0.005 over T=1, so essentially all of it is the
+  initialisation offset and there is **no predictability horizon to read off
+  this run at all**. After the V1 fix the curve starts near zero and its
+  *growth* becomes the quantity the paper needs. Sharpest statement of V1 yet,
+  and it is visible in the coder's own artifact.
+  **D2:** no driver records `initial_state_sha256` or per-method initial
+  energies despite both using the same `make_initial_state`, so the V1 defect
+  is invisible in the artifacts (confirms the spec's P0.1 as a driver-level
+  omission). **D3 (latent):** `bench.py` takes the aggregate `git_commit` from
+  the loop variable left over from the last iteration (Re=5000). **D4 (minor):**
+  the summary records POD's *effective* rank but not the requested one.
+  **D5 — strengthens V2 and saves rework:** every driver uses identical IC
+  parameters across the three Re and the long run, so the cases start from a
+  bit-identical state and differ only in `nu`. That **rules out** the
+  alternative explanation for V2 I had not excluded — the Re-independence
+  (0.3152/0.3164/0.3165) is not an IC artifact; viscosity barely matters over
+  T=0.1. V2 stands; do not re-check the IC on that account. **D6:** the
+  Taylor–Green driver is sound, but F1 is a *kernel* test, not a projector test
+  (the field is exactly rank 1, so the projector is never exercised); the
+  `SelfConsistentForcing` stationary-state check remains the sharp projector
+  test. Net: the engine is now audited at all three levels — operators, rank
+  logic, drivers. D1 recorded as a binding reporting obligation under D10-V1.
 - 2026-09-25 R5l (independent audit of the rank/projection logic — the last
   unexamined engine component, and the one the adaptive-rank claim rests on).
   35 checks written, 27 passed as written; **7 of the 8 failures were defects in
