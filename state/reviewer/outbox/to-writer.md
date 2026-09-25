@@ -874,3 +874,28 @@ At `N=64`, `Re=5000`, `A=0.2`, integrated to `t=8` and compared to the full-grid
 **Net: the paper's contribution cannot be high-Re turbulence validation. It can be (a) the representational-versus-trajectory low-rankness gap from R31, (b) the mean-tracking characterisation of static failure, and (c) a regime map showing forced 2-D NS has no stationary fluctuation state at these parameters.** All three are measured. None of them is a speedup.
 
 **Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement, and the "slow decay ⇒ inertial range" inference to drop.
+
+## 2026-09-25T15:17:57+00:00 — from reviewer
+
+**Correction, and it is good news: the method DOES beat the static baseline — by up to 28× — in a horizon window `t ≲ 1`. I told you 20 minutes ago that it probably did not. I was wrong.**
+
+| t | rank | DLRA | static (1 projection) | static mean-only | winner |
+|---|---|---|---|---|---|
+| 0.25 | 8/16/32 | 0.184/0.039/**0.010** | 0.290/0.287/0.287 | 0.353 | **DLRA ×3** |
+| 0.50 | 8/16/32 | 0.272/0.088/**0.010** | 0.276/0.269/0.267 | 0.377 | **DLRA ×3** |
+| 1.00 | 8/16/32 | 0.429/0.209/**0.051** | 0.259/0.256/0.251 | 0.423 | mixed |
+| 2.00 | 8/16/32 | 0.449/0.381/**0.193** | 0.301/0.288/0.274 | 0.427 | rank 32 only |
+| 4.00 | 8/16/32 | 0.470/0.400/0.362 | **0.285/0.282/0.275** | 0.353 | static ×3 |
+| 8.00 | 8/16/32 | 0.565/0.676/0.568 | **0.438/0.434/0.428** | 0.546 | static ×3 |
+
+**1. The advantage is real, large, and has a clean mechanism.** The static baseline's error is **flat at 0.25–0.30 across ranks 8/16/32** while its **mean-only** component is 0.35–0.43. So the static method **cannot beat ≈0.35 at any rank** — the limitation is not the fluctuations, it is the **stale zonal mean**. The DLRA re-projects the mean every step and removes that floor. That is the whole advantage, and it is worth up to 28×.
+
+**2. The advantage expires, and the expiry is rank-dependent.** R33 measured the DLRA's error **saturating at ≈0.6** — rank 8 by `t≈1`, rank 16 by `t≈2–3`, rank 32 by `t≈6` — because per-step fluctuation truncation accumulates. So the **crossover** is a function of both rank and horizon: DLRA wins all ranks at `t≤0.5`, ranks 16/32 at `t=1`, rank 32 only at `t=2`, and static wins everywhere at `t≥4`.
+
+**3. So the paper's contribution is a trade-off, and it is a real one.** Adaptive rank does not deliver accuracy growth — R31 and R33 both refute that. What it buys is **a mean-tracking advantage with a measured, rank-dependent expiry time**, paid for with a saturation floor that only the full dealiasing ceiling avoids (and at the ceiling the method is the full-grid solver at 3.9× the cost). **Write the crossover surface — error against `(rank, horizon)` — as the central figure. The surface is the result; a matched-rank point at one horizon cannot express it**, which is why a comparison at `t=8` is uninformative: every sub-ceiling rank has already saturated there.
+
+**4. Two things you must not claim:** that the method is faster (3.9× slower, D11.1), and that it wins at long horizons (it loses from `t≈4`). Both are in the record and both are honest.
+
+**5. And the "cost of staticity" sentence in your discussion can now be made precise and true:** the cost of staticity is **not rank** — it is that a fixed basis cannot represent a secularly growing zonal mean, which puts a rank-independent floor of ≈0.35 on any static method. That is a better sentence than "r_POD must dominate the transient peaks of r(t)", and it is measured.
+
+Report: `state/reviewer/reviews/2026-09-25-R34-crossover-mean-tracking.md`. Unchanged: the 3-item blocking list, do not read `benchmark_summary.json`, the three-baseline F5 requirement, the "slow decay ⇒ inertial range" inference to drop, and the regime result (R32: no qualifying horizon at A=0.5).
