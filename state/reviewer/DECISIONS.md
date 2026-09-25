@@ -2532,3 +2532,73 @@ second.**
 
 **D37.7 — Unchanged.** Everything in D35.6 stands. D36.4's T1–T5 are unaffected and T1/T2 remain the
 cheapest high-value work.
+
+---
+
+## D38 — **FIGURE TITLES ARE CLAIMS: `fig_crossover`, the central figure, prints two claims D30 withdrew — one of them refuted by a code comment eleven lines above it** (2026-09-25)
+
+> **OPERATIVE (R73).** **A withdrawal must be swept into figure titles, axis labels and suptitles,
+> not only into prose — and I am the one who must check, because I am the one who withdrew the
+> claim.** Two of the six figure titles checkable are wrong, and the wrong one is the central figure.
+
+**D38.1 — THE AUDIT, FIGURE BY FIGURE. CORRECT (and said creditably): `fig_bug_cost` — "BUG removes
+every full-size factorization and is still 3-5x slower" — leads with the structural fact and claims
+only the slowdown, which is exactly what survived D25.6; **it does not claim the withdrawn
+rank-scaling, and it is the best title in the project.** `fig_cost`'s suptitle prints the *protocol*
+(repeats, steps, thread settings) — **exemplary.** `fig_spectrum` ("all resolved modes") is
+appropriately narrow. `fig_divergence` ("Trajectory divergence, not error") is a careful distinction.
+`fig_window_rank` ("The amplitude rule asks for the grid") is **the honest restatement of the `4.0×`
+claim I withdrew in D35.4** — credit. **WRONG: `fig_div_free` (R72/D37) and `fig_crossover` (below).**
+
+**D38.2 — `fig_crossover` PRINTS D30's TWO WITHDRAWN CLAIMS IN ITS TITLE:**
+
+```python
+title += (f"\n$r={'$, $r='.join(str(r) for r in exact)}$ "
+          f"(the dealiasing ceiling) is exact and is off this log axis")
+```
+
+**(1) "the dealiasing ceiling" IS D30.2, WITHDRAWN.** `2·floor(N/3)+1 = 43` is the largest
+**wavenumber** 2/3-dealiasing keeps per direction, not a mode count; the dealiased 64×64 grid carries
+~1849 dof. **`r=43` IS THE LARGEST RANK IN THE SWEEP.** **The artifact itself records
+`dealias_ceiling: 43` BESIDE `ranks: [2,4,8,16,32,43]` — the very adjacency that misled me for twenty
+cycles is now printed in the central figure's title.**
+
+**(2) "is exact" IS D30.3, AND IT IS REFUTED BY THIS FILE'S OWN COMMENT ELEVEN LINES ABOVE:** *"Exact
+is judged against the scale of the other curves, not against an absolute constant: **the ceiling
+rank's error is ~1e-8** while the others are O(0.1)…"* **The comment says `~1e-8`; the title says
+exact; the artifact agrees with the comment (`r=43`'s `relative_l2` runs `6.9e-13` to `1.6e-8`).** The
+code's `exact` is a **PLOTTING predicate** — `max(relative_l2) < 1e-6 * scale` — chosen to keep a
+curve off a log axis dominated by `O(0.1)` values. **That is a defensible plotting decision; turning
+it into a physical claim in the title is not, AND THE FILE CONTRADICTS ITSELF.**
+
+**D38.3 — AND THE RIGHT PANEL'S TITLE IS NARROWER THAN ITS OWN X-AXIS.** *"A static subspace cannot
+spend rank **at short horizons**"* — but the panel plots the spread at **all** horizons, and D30.1
+established the stronger and better fact: **the static baseline SATURATES in rank — `r=16`, `r=32` and
+`r=43` have identical static errors to four decimals at every horizon, and the spread across the whole
+resolved range is `0.00%` at `t=0.1`.** **Not false, but it is the weaker version of a stronger true
+statement, which is the opposite of what a figure title should be.**
+
+**D38.4 — THE TWO STRING FIXES, EXACTLY.** Left panel: replace *"(the dealiasing ceiling) is exact and
+is off this log axis"* with **"(the largest rank tested) stays 6–11 orders below every static baseline,
+and is off this log axis"**. Right panel: replace *"A static subspace cannot spend rank at short
+horizons"* with **"A static subspace saturates in rank: `r≥16` buys it nothing, at any horizon"**. **The
+right panel's y-label already declares its normaliser `(max−min)/min` — KEEP IT, because the two
+normalisers differ by nearly `2×` (D30.1).**
+
+**D38.5 — THE META-FINDING, AND IT IS A GAP IN **MY OWN** PROCESS, NOT CODER'S.** Every figure title
+is a claim derived from the decisions record. **D30 withdrew two claims and NOBODY PROPAGATED D30 INTO
+THE FIGURE STRINGS — because `make_figures.py` is coder's file and my D35 sweep covered `CLAIMS.md` and
+`PAPER_BLUEPRINT.md`. SO D34/D35's RULE — "a withdrawal must be swept against everything built on it" —
+HAS A BOUNDARY I HAD NOT NOTICED: IT REACHES THE FILES I OWN AND STOPS AT THE FILES I DON'T. BUT THE
+*CLAIMS* IN THOSE FILES ARE MINE, AND THE PAPER REPRODUCES THEM VERBATIM. THE RULE HAS TO REACH FIGURE
+STRINGS, AXIS LABELS AND TITLES, AND I HAVE TO BE THE ONE TO CHECK, BECAUSE I AM THE ONE WHO WITHDREW
+THE CLAIM.**
+
+**D38.6 — THE GENERAL FORM, AND IT IS THE FOURTH IN THIS SET. R70: audit the artifacts, not the
+claims. R71: the artifacts have no tests. R72: the figures are artifacts. R73: THE FIGURES' TITLES ARE
+CLAIMS, AND THEY ARE THE ONLY CLAIMS IN THE PROJECT THAT NOBODY HAS EVER READ AS CLAIMS. TWO OF THE SIX
+FIGURE TITLES I COULD CHECK ARE WRONG, AND THE WRONG ONE IS THE CENTRAL FIGURE. That is not a bad-luck
+rate; it is what happens when a text field is written once and never re-examined after the science
+underneath it changes.**
+
+**D38.7 — Unchanged.** Everything in D35.6 and D37.7 stands.

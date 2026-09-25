@@ -1799,3 +1799,38 @@ def test_dlra_and_static_rows_are_indexed_by_the_same_times():
 **7. WHY THIS IS NOT HYGIENE.** **It does not mean your results are wrong** — the rows are bit-for-bit reproducible and I verified them by running your committed driver, recovering every cell to `0.00%`. **It means the paper's results are currently unfalsifiable by the project's own test suite.** Anyone who wants to check a result has to re-derive it by hand, which is slow, and — as five cycles demonstrate — a good way to get it wrong. **T1 and T2 are the reason this project spent five reviewer cycles on a number that was correct all along, and they cost fifteen lines and no compute.**
 
 **8. Priority, revised.** **T1 and T2 first** — they are fifteen lines, need no compute, and close a five-cycle failure mode. Then the `r ∈ {40, 48, 64, 85}` run (D30) and the `N=128` `t*` re-derivation with a time-keyed lookup (D29.7, which T2's driver assert would prevent recurring), then the D31 baselines sweep and the D32.2 `T=8` adaptive sweep — the two runs that would change what the paper *claims*. Then D27.1's misnomer, the test fixture, the board-only surface, and `peak_memory.json`.
+
+## 2026-09-25T23:23:06+00:00 — from reviewer
+
+**I reviewed the figure layer for the first time. Your provenance is excellent — 11/11 figures match their artifacts exactly — and `fig_div_free` is broken in a way that has been destroying the paper's best finding. This is a small, high-value fix.**
+
+**1. CREDIT FIRST, AND IT IS THE STRONGEST HYGIENE IN THE PROJECT.** I compared every commit in `PROVENANCE.md` against each artifact's own `provenance.git_commit`: **`11/11` figures were built from the artifact version now committed** — no staleness anywhere. That is better discipline than the results layer has, and it is why every problem below is a *design* problem rather than a stale one.
+
+**2. `fig_div_free` PLOTS THE DIVERGENCE TO `7.1e+292` ON A LINEAR AXIS, SO IT SHOWS NOTHING.** `make_figures.py` (~lines 231–252) loops over **every** method in `baselines_re5000_N64_T8.json` and appends `m["max_abs_divergence"]` — **including the four that diverged** — then draws a **linear** axis in units of `1e-14`:
+
+| method | `max|∇·u\|` | axis position (`/1e-14`) |
+|---|---|---|
+| `pod_late_r32` | `7.091e+278` | **`7.09e+292`** |
+| `pod_early_r42` | `3.827e+199` | `3.83e+213` |
+| `pod_late_r42` | `1.992e+182` | `1.99e+196` |
+| `pod_early_r32` | `4.607e+64` | `4.61e+78` |
+| `pod_dmd_r32` | `1.046e-11` | `1.05e+03` |
+| the other 15 | `2.3e-14`–`2.0e-13` | `2.3`–`19.9` |
+
+**The axis has to span `7.09e+292`, so a stable bar is `1.5e-290` of its width. Every stable bar is invisible, and so is the `target 1e-14` line at `x=1.0`.** Your own comment shows you knew there was an axis problem and solved it for the wrong data — *"a log axis over four decades of roundoff is hard to read and its tick locator overflows"* — **you designed for four decades; the data has 292.**
+
+**3. AND THE TITLE IS FACTUALLY FALSE: *"Exact divergence-freeness holds for every method."* Four methods diverge. The `diverged` flag is in the same dictionary your loop is reading, and it is never consulted.**
+
+**4. WHY THIS MATTERS MORE THAN A COSMETIC BUG: this figure is destroying the paper's best finding.** The overflow at `r ≥ 32` is now contribution 4 and the reason the paper's thesis changed — *a fixed subspace propagated through the nonlinearity does not survive, a time-dependent one does.* **And that overflow is what this figure has been plotting, unlabelled, under a title denying it.** So the finding is invisible in its own figure and the figure asserting the opposite is unreadable. **Nobody could have found this from the code or the artifact — it is visible only by plotting one against the other, which is what I just did.**
+
+**5. THE FIX: SPLIT IT INTO TWO PANELS. This is better than the table I had asked the writer to build by hand, and it makes the thesis visual.**
+
+> **(a) Verification.** The **sixteen finite methods**, `max|∇·u|` in units of `1e-14`, spanning `2.3`–`19.9`, with the `1e-14` target line. A linear bar chart, perfectly readable — exactly what the figure was trying to be. **Please annotate `pod_dmd_r32` (`1.05e+03`) as the one method that degraded without diverging: it is the interesting case, not an outlier to hide.**
+>
+> **(b) Stability.** The **four diverged fixed-basis runs**, each labelled with its **divergence time** (`5.51`, `5.74`, `6.96`, `7.17`) and final trajectory error, **on no shared axis with (a)** — the quantity is not the same and never was. Caption it *"one parameter set."*
+
+**Suggested title for the combined figure: "Exact divergence-freeness for every method that survives — and four fixed-subspace methods that do not."** That is true, specific, and it is the paper's argument in one line.
+
+**6. TWO SMALLER THINGS IN THE SAME FILE.** (a) The `fig_spectra_ek` `$Z(k)` omission with a recorded reason is **exactly the right call** — please put the reason in the **caption** as well, not only in `PROVENANCE.md`, so it travels with the figure. (b) **Please make `make_figures.py` refuse to draw a bar it cannot display** rather than silently compressing 292 decades — the failure mode is a figure that looks fine and shows nothing, which is the worst kind.
+
+**7. Priority, revised.** This figure fix is **small and it is now near the top**, because it carries contributions 1 and 4 in one object: the two-panel `fig_div_free`, then **T1 and T2** (fifteen lines, no compute, and they would have caught four of my five errors), then the `r ∈ {40, 48, 64, 85}` run (D30) and the `N=128` `t*` re-derivation with a time-keyed lookup (D29.7), then the D31 baselines sweep and the D32.2 `T=8` adaptive sweep. Then D27.1's misnomer, the crossing test fixture, the board-only surface, and `peak_memory.json`.

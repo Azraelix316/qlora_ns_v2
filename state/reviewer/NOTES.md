@@ -30,6 +30,57 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R73 — FIGURE TITLES ARE CLAIMS: `fig_crossover`, THE CENTRAL FIGURE, PRINTS TWO CLAIMS D30
+> WITHDREW, AND ONE OF THEM IS REFUTED BY A CODE COMMENT ELEVEN LINES ABOVE IT. D38.** No agent
+> pushed. **R72's lesson applied to every figure rather than one: a title is a claim. I read all of
+> them.**
+> **THE AUDIT. CORRECT, AND SAID CREDITABLY: `fig_bug_cost` — "BUG removes every full-size
+> factorization and is still 3-5x slower" — LEADS WITH THE STRUCTURAL FACT AND CLAIMS ONLY THE
+> SLOWDOWN, WHICH IS EXACTLY WHAT SURVIVED D25.6; IT DOES NOT CLAIM THE WITHDRAWN RANK-SCALING, AND IT
+> IS THE BEST TITLE IN THE PROJECT. `fig_cost`'s suptitle PRINTS THE PROTOCOL (repeats, steps, thread
+> settings) — EXEMPLARY. `fig_spectrum` ("all resolved modes") IS APPROPRIATELY NARROW.
+> `fig_divergence` ("Trajectory divergence, not error") IS A CAREFUL DISTINCTINCTION.
+> `fig_window_rank` ("The amplitude rule asks for the grid") IS THE HONEST RESTATEMENT OF THE `4.0×`
+> CLAIM I WITHDREW IN D35.4 — CREDIT. WRONG: `fig_div_free` (R72/D37) AND `fig_crossover` (below).**
+> **`fig_crossover` PRINTS D30's TWO WITHDRAWN CLAIMS IN ITS TITLE.** (1) **"the dealiasing ceiling"
+> IS D30.2, WITHDRAWN** — `2·floor(N/3)+1 = 43` is the largest WAVENUMBER 2/3-dealiasing keeps per
+> direction, not a mode count; the dealiased 64×64 grid carries ~1849 dof, and `r=43` IS THE LARGEST
+> RANK IN THE SWEEP. **THE ARTIFACT ITSELF RECORDS `dealias_ceiling: 43` BESIDE
+> `ranks: [2,4,8,16,32,43]` — THE VERY ADJACENCY THAT MISLED ME FOR TWENTY CYCLES IS NOW PRINTED IN
+> THE CENTRAL FIGURE'S TITLE.** (2) **"is exact" IS D30.3, AND IT IS REFUTED BY THIS FILE'S OWN
+> COMMENT ELEVEN LINES ABOVE** — *"Exact is judged against the scale of the other curves, not against
+> an absolute constant: **the ceiling rank's error is ~1e-8** while the others are O(0.1)…"* **THE
+> COMMENT SAYS `~1e-8`; THE TITLE SAYS EXACT; THE ARTIFACT AGREES WITH THE COMMENT (`r=43`'s
+> `relative_l2` runs `6.9e-13` to `1.6e-8`).** The code's `exact` is a **PLOTTING predicate** —
+> `max(relative_l2) < 1e-6 * scale` — chosen to keep a curve off a log axis dominated by `O(0.1)`
+> values. **THAT IS A DEFENSIBLE PLOTTING DECISION; TURNING IT INTO A PHYSICAL CLAIM IN THE TITLE IS
+> NOT, AND THE FILE CONTRADICTS ITSELF.**
+> **AND THE RIGHT PANEL'S TITLE IS NARROWER THAN ITS OWN X-AXIS: "A static subspace cannot spend rank
+> **at short horizons**" — BUT THE PANEL PLOTS THE SPREAD AT ALL HORIZONS, AND D30.1 ESTABLISHED THE
+> STRONGER FACT: the static baseline SATURATES in rank, `r=16`/`r=32`/`r=43` having IDENTICAL static
+> errors to four decimals at every horizon, with the spread across the whole resolved range `0.00%`
+> at `t=0.1`. NOT FALSE, BUT IT IS THE WEAKER VERSION OF A STRONGER TRUE STATEMENT, WHICH IS THE
+> OPPOSITE OF WHAT A FIGURE TITLE SHOULD BE.**
+> **THE TWO STRING FIXES, EXACTLY. LEFT PANEL: replace "(the dealiasing ceiling) is exact and is off
+> this log axis" with "(the largest rank tested) stays 6–11 orders below every static baseline, and is
+> off this log axis". RIGHT PANEL: replace "A static subspace cannot spend rank at short horizons" with
+> "A static subspace saturates in rank: `r≥16` buys it nothing, at any horizon". THE RIGHT PANEL'S
+> Y-LABEL ALREADY DECLARES ITS NORMALISER `(max−min)/min` — KEEP IT, BECAUSE THE TWO NORMALISERS
+> DIFFER BY NEARLY `2×` (D30.1).**
+> **THE META-FINDING, AND IT IS A GAP IN **MY OWN** PROCESS, NOT CODER'S. EVERY FIGURE TITLE IS A
+> CLAIM DERIVED FROM THE DECISIONS RECORD. D30 WITHDREW TWO CLAIMS AND NOBODY PROPAGATED D30 INTO THE
+> FIGURE STRINGS — BECAUSE `make_figures.py` IS CODER'S FILE AND MY D35 SWEEP COVERED `CLAIMS.md` AND
+> `PAPER_BLUEPRINT.md`. SO D34/D35's RULE — "a withdrawal must be swept against everything built on
+> it" — HAS A BOUNDARY I HAD NOT NOTICED: IT REACHES THE FILES I OWN AND STOPS AT THE FILES I DON'T.
+> BUT THE *CLAIMS* IN THOSE FILES ARE MINE, AND THE PAPER REPRODUCES THEM VERBATIM. THE RULE HAS TO
+> REACH FIGURE STRINGS, AXIS LABELS AND TITLES, AND I HAVE TO BE THE ONE TO CHECK, BECAUSE I AM THE ONE
+> WHO WITHDREW THE CLAIM.**
+> **AND THE GENERAL FORM, THE FOURTH IN THIS SET: R70 audit the artifacts, not the claims; R71 the
+> artifacts have no tests; R72 the figures are artifacts; R73 THE FIGURES' TITLES ARE CLAIMS, AND THEY
+> ARE THE ONLY CLAIMS IN THE PROJECT THAT NOBODY HAS EVER READ AS CLAIMS. TWO OF THE SIX FIGURE TITLES I
+> COULD CHECK ARE WRONG, AND THE WRONG ONE IS THE CENTRAL FIGURE. That is not a bad-luck rate; it is
+> what happens when a text field is written once and never re-examined after the science underneath it
+> changes.**
 > **R72 — `fig_div_free` IS UNREADABLE AND ITS TITLE IS FALSE: IT PLOTS THE DIVERGENCE TO
 > `7.1e+292` ON A LINEAR AXIS, SO EVERY STABLE BAR IS `1.5e-290` OF THE WIDTH. D37.** No agent
 > pushed. **Nobody has reviewed the figure layer. Reading the artifact layer found the paper's
@@ -2664,6 +2715,65 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R73 — figure titles are claims: `fig_crossover`, the central figure, prints two
+  claims D30 withdrew, and one of them is refuted by a code comment eleven lines above it. D38.**
+
+  No agent pushed. 171 files on `main`, clean. **R72's lesson applied to every figure rather than
+  one: a title is a claim. I read all of them.**
+
+  **The audit. Correct, and said creditably.** `fig_bug_cost` — *"BUG removes every full-size
+  factorization and is still 3-5x slower"* — **leads with the structural fact and claims only the
+  slowdown, which is exactly what survived D25.6; it does not claim the withdrawn rank-scaling, and it
+  is the best title in the project.** `fig_cost`'s suptitle **prints the protocol** (repeats, steps,
+  thread settings) — exemplary. `fig_spectrum` ("all resolved modes") is appropriately narrow.
+  `fig_divergence` ("Trajectory divergence, not error") is a careful distinction. `fig_window_rank`
+  ("The amplitude rule asks for the grid") is **the honest restatement of the `4.0×` claim I withdrew
+  in D35.4** — credit. **Wrong: `fig_div_free` (R72/D37) and `fig_crossover` (below).**
+
+  **`fig_crossover` prints D30's two withdrawn claims in its title.**
+  1. **"the dealiasing ceiling" is D30.2, withdrawn** — `2·floor(N/3)+1 = 43` is the largest
+     **wavenumber** 2/3-dealiasing keeps per direction, not a mode count; the dealiased 64×64 grid
+     carries ~1849 dof, and `r=43` is **the largest rank in the sweep**. **The artifact itself records
+     `dealias_ceiling: 43` beside `ranks: [2,4,8,16,32,43]` — the very adjacency that misled me for
+     twenty cycles is now printed in the central figure's title.**
+  2. **"is exact" is D30.3, and it is refuted by this file's own comment eleven lines above** —
+     *"Exact is judged against the scale of the other curves, not against an absolute constant: **the
+     ceiling rank's error is ~1e-8** while the others are O(0.1)…"* **The comment says `~1e-8`; the
+     title says exact; the artifact agrees with the comment** (`r=43`'s `relative_l2` runs `6.9e-13`
+     to `1.6e-8`). The code's `exact` is a **plotting predicate** — `max(relative_l2) < 1e-6 * scale`
+     — chosen to keep a curve off a log axis dominated by `O(0.1)` values. **That is a defensible
+     plotting decision; turning it into a physical claim in the title is not, and the file contradicts
+     itself.**
+
+  **And the right panel's title is narrower than its own x-axis:** *"A static subspace cannot spend
+  rank **at short horizons**"* — but the panel plots the spread at **all** horizons, and D30.1
+  established the stronger fact: the static baseline **saturates** in rank, `r=16`/`r=32`/`r=43` having
+  **identical** static errors to four decimals at every horizon, with the spread across the whole
+  resolved range `0.00%` at `t=0.1`. Not false, but it is the weaker version of a stronger true
+  statement, which is the opposite of what a figure title should be.
+
+  **The two string fixes, exactly.** Left panel: replace *"(the dealiasing ceiling) is exact and is
+  off this log axis"* with **"(the largest rank tested) stays 6–11 orders below every static baseline,
+  and is off this log axis"**. Right panel: replace *"A static subspace cannot spend rank at short
+  horizons"* with **"A static subspace saturates in rank: `r≥16` buys it nothing, at any horizon"**.
+  **The right panel's y-label already declares its normaliser `(max−min)/min` — keep it, because the
+  two normalisers differ by nearly `2×` (D30.1).**
+
+  **The meta-finding, and it is a gap in *my own* process, not coder's.** Every figure title is a
+  claim derived from the decisions record. **D30 withdrew two claims and nobody propagated D30 into the
+  figure strings** — because `make_figures.py` is coder's file and my D35 sweep covered `CLAIMS.md` and
+  `PAPER_BLUEPRINT.md`. **So D34/D35's rule — "a withdrawal must be swept against everything built on
+  it" — has a boundary I had not noticed: it reaches the files I own and stops at the files I don't.
+  But the *claims* in those files are mine, and the paper reproduces them verbatim. The rule has to
+  reach figure strings, axis labels and titles, and I have to be the one to check, because I am the one
+  who withdrew the claim.**
+
+  **And the general form, the fourth in this set.** R70: audit the artifacts, not the claims. R71: the
+  artifacts have no tests. R72: the figures are artifacts. **R73: the figures' titles are claims, and
+  they are the only claims in the project that nobody has ever read as claims. Two of the six figure
+  titles I could check are wrong, and the wrong one is the central figure.** That is not a bad-luck
+  rate; it is what happens when a text field is written once and never re-examined after the science
+  underneath it changes.
 - 2026-09-25 **R72 — `fig_div_free` is unreadable and its title is false: it plots the divergence
   to `7.1e+292` on a linear axis, so every stable bar is `1.5e-290` of the width. D37.**
 
