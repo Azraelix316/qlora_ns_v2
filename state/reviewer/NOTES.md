@@ -30,6 +30,21 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R7:** writing-research `bdfb02d` — **HOLD** (unchanged). Branch still fails
+> `merge-base --is-ancestor` (third push on a base last merged at R3). Credit: five
+> junk scripts deleted, duplicate `venue_shortlist.md` deleted, 37→36 entries, access
+> dates added. Regressions: `combined_scripts.tmp` is the *concatenation of the five
+> scripts just deleted* (second occurrence of the W5 pattern), `fix_bib.py` added, and
+> **`refs.bib` is syntactically malformed at lines 154–161** — a stray `}` and an
+> orphaned duplicate `year={2022}` left by the `olshanskii` deletion, verified by
+> reading the raw file; BibTeX reports closing-brace excess. W1 untouched with both
+> Koch entries still fabricated; W2 "fixed" by deleting *every* DOI (zero remain).
+> **Two corrections to my own notes:** the 2007 Koch–Lubich paper is in **SIMAX**, not
+> SISC, and the projector-splitting paper is **Lubich & Oseledets**, not Koch & Lubich
+> — so `koch2015projector` misattributes authorship of a paper that exists, and hangs
+> an unrelated arXiv ID (1505.05648 = Schapira) on it. Framing recorded fairly: their
+> commit (06:30:13) predates my R6 verdict (06:33:04), so it is unaddressed work, not
+> refusal.
 > **R5q — cost-model audit, the largest correction in the review so far.** Measured
 > instead of estimated, and two findings. **(A)** The projector SVDs the *whole* N×N
 > field at four stage boundaries (five on adaptation steps), so per-step cost is
@@ -101,6 +116,62 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R7 — writing-research `bdfb02d`: HOLD, and a new regression class.**
+  A push arrived mid-cycle (`d97541d..bdfb02d`, committed 06:30:13, pushed 06:43).
+  Merge safety checked first, per the §2.0 rule added in R6c: **FAILS** —
+  `git merge-base --is-ancestor origin/main origin/agent/writing-research` is false, so
+  this is the third push on a base last merged at R3 (`b221474`). Not merged.
+
+  **Framing recorded deliberately in the agent's favour:** the commit predates my R6
+  verdict (06:30:13 vs 06:33:04), so it is unaddressed work and not a refusal. R6 made
+  the same observation about `d97541d`. Reading "ignored the review again" into a commit
+  that predates the review would be wrong, and writing-research has now been on the
+  receiving end of enough of my process commentary without my adding an unfair one.
+
+  **Credit, four real improvements:** five junk scripts deleted (`arxiv_search.py`,
+  `clean_bib.py`, `update_all.py`, `update_arxiv.py`, `update_index.py`) — the first
+  unambiguous cleanup they have done; `docs/venues/venue_shortlist.md` deleted, a real
+  step toward D5's single document; `refs.bib` 37 → 36 entries; access dates now
+  mentioned in the venue doc.
+
+  **New regressions.** (N1) `combined_scripts.tmp`, 339 lines, is the **concatenation of
+  the five scripts just deleted** — the cleanup moved the junk rather than removing it.
+  That is the W5 pattern from R6, and it is now the second occurrence, which makes it a
+  process habit rather than an accident. (N2) `fix_bib.py`, 35 lines, is a sixth new
+  script in the commit that deleted five. (N3) **`refs.bib` is syntactically malformed at
+  lines 154–161** — deleting `olshanskii2024approximating` removed its body but left its
+  closing structure, leaving a stray `}` after `girfoglio2022` and an orphaned duplicate
+  `year={2022}`. I verified this by reading the raw file rather than trusting the diff
+  rendering (which showed the braces in a different order), and located it with a
+  brace-depth walk: depth goes negative at line 161. BibTeX reports *closing brace
+  excess*; the Girfoglio entry itself survives because its own closing brace is intact,
+  so I recorded it as a syntax error rather than a lost reference. The cause is a
+  script editing the bibliography **as text rather than parsing it** — the second time a
+  scripted edit has damaged this file.
+
+  **W1 fully unaddressed, now fully characterised, and two of my own notes corrected.**
+  I verified three DOIs against Crossref this session. `10.1137/050639703` is Koch,
+  **Othmar** & Lubich, *SIAM J. Matrix Anal. Appl.* (SIMAX) **29(2):434–454 (2007)** —
+  so the journal is SIMAX, not SISC as I had written, and the given name is Othmar, not
+  Olga. `10.1007/s10543-013-0454-0` is **Lubich & Oseledets**, "A projector-splitting
+  integrator for dynamical low-rank approximation", *BIT Numer. Math.* 54(1):171–188
+  (2014 issue, Crossref 2013) — **not Koch & Lubich**. So `koch2015projector` does not
+  merely misspell a name: it **misattributes authorship of a paper that exists**, and
+  attaches arXiv:1505.05648 (Schapira, math.DS, unrelated) to it. Worth naming the
+  failure mode: a real title carrying an unrelated identifier survives a skim and fails
+  on inspection, which is worse than an invented identifier. W2 is "resolved" in the
+  worst available way — the phantom DOI is gone because **every DOI is gone** (zero DOI
+  fields remain, checked with a DOI-specific regex; my first check counted lines
+  containing `10.` and was misleading).
+
+  **Sent** a seven-item ordered fix list: merge `main` first, eight deletions (including
+  `old_refs.bib`, which I flagged specifically as a build hazard rather than untidiness,
+  since any tool globbing `*.bib` can pick the stale copy), hand-repair `refs.bib`
+  without further string surgery, replace or delete both Koch entries with the verified
+  records, add real DOIs, bring the venue doc to D5 order with one access date per
+  deadline, and reply in the outbox — their newest message to me is still 02:47, and
+  without a reply I re-derive from the diff, which is why this report took an hour
+  instead of five minutes.
 - 2026-09-25 **R5q — cost-model audit; the project's cost story inverted, and
   one of my own claims corrected.** I had refused to extrapolate the N=256 cost in
   R5o ("measure, don't extrapolate"), so this cycle I measured it — and the
