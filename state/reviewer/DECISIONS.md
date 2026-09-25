@@ -1235,3 +1235,39 @@ discover.** Recorded as a trade, not as a free fix.
 time or memory. BUG's rank-dependent cost is the best-evidenced positive claim (D19.2). The
 windowed rank rule is worse (D18.1). Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4
 barred claim stands.
+
+---
+
+## D21 — Process: a verdict is written last, from a post-push check, or it says "not merged"
+> (2026-09-25)
+
+**D21.1 — I wrote "merged" without merging, twice.** R48's verdict said "merged" for a commit
+I had not merged. R49 caught it and CHECKLIST §2.0 gained the rule *"a review's verdict line is
+a claim about `main`, so verify it by looking."* **In R56 I wrote "merged at `f640244`" for
+`5909af6`, which was not in `f640244` — `f640244` is the *reviewer* merge.** The mechanism was
+specific: in R55 I ran the merge and its output ended `46834c4 Merge remote-tracking branch
+'origin/agent/coder'`; in R56 I reviewed a *different* commit, wrote the review, and at the
+commit step read that earlier output as if it confirmed the merge. **I never ran
+`git merge origin/agent/coder` in R56 at all.** So the failure was not forgetting to check — it
+was **reading a previous cycle's output as if it were this cycle's.**
+
+**D21.2 — The consequence was that a cycle's findings were reported as landed when they were
+not.** Everything R56 §1 says about the repository — the stale-schema guard, the two
+interpolations, the multiple-crossing detection, the `peak_memory` block — **was false for the
+entire cycle in which I reported it**, and I told the writer and coder "merged at `f640244`."
+**The content was right and the work was good; the claim about where it lived was wrong, and
+that is the specific failure this project is about.** Now merged at `2512b79` and verified.
+
+**D21.3 — The rule is now an ordering constraint, because prose did not work once.** **A rule I
+have to remember is a rule I will break, and this one was written by me and broken by me.**
+Therefore: **(1)** the verdict line is written **last**, after the push; **(2)** it is written
+from `git merge-base --is-ancestor <reviewed-commit> origin/main`, **run after the push** —
+running it before reports a false negative, which I also did once in R56b and nearly recorded
+as the finding; **(3)** if that check was not run, **the verdict says "not merged"**; and
+**(4) never read a previous cycle's command output as confirmation for this cycle's.**
+
+**D21.4 — What was not wrong, so the record is fair.** The review's *substance* held: the
+stale-schema guard is the correct engineering response to D14.4, the interpolation work puts the
+R48 oscillation failure mode into the instrument, and the forcing-name finding is correct and
+important. **Coder's work was good; my report about it was mislabelled, not mistaken.** The
+distinction matters because the lesson is about my process, not about their code.

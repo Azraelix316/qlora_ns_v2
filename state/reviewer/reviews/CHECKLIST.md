@@ -285,6 +285,21 @@ now?** Test the property, not a proxy for it. Two checks, in this order.
       The check is one command: `git cat-file -e origin/main:<path>` for the
       load-bearing artifact. **A verdict is the one line of a review that gets quoted
       downstream, so it is the last line allowed to be written from intent.**
+      - **BROKEN TWICE — so this is now an ORDERING constraint, not a reminder** (R56b).
+        R48: wrote "merged" without merging; R49 caught it and added this item.
+        **R56: wrote "merged at `f640244`" for `5909af6`, which was not in `f640244` at
+        all** — `f640244` is the *reviewer* merge. The mechanism: R55's merge output
+        ended `46834c4 Merge remote-tracking branch 'origin/agent/coder'`, and in R56 I
+        read *that* as confirming the merge of a *different* commit. **I never ran
+        `git merge origin/agent/coder` in R56.** The failure was not forgetting to
+        check — it was **reading a previous cycle's output as this cycle's.**
+        **A rule I have to remember is a rule I will break, and this one was written by
+        me and broken by me.** Therefore: **(1)** the verdict is written **last**,
+        after the push; **(2)** from `git merge-base --is-ancestor <reviewed-commit>
+        origin/main`, **run after the push** — run before, it reports a false negative,
+        as I also did once in R56b; **(3)** if that check was not run, the verdict says
+        *not merged*; **(4)** never read a previous cycle's command output as
+        confirmation for this cycle's.
 - [ ] **After every agent-branch merge, verify explicitly:** the other agents' owned
       paths are still present (`solvers/`, `experiments/`, `state/coder/`,
       `state/reviewer/`, scaffold files), the file count went **up or stayed equal**,
