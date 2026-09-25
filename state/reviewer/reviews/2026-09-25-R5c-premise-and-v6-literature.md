@@ -1,0 +1,181 @@
+# R5c — reviewer homework: premise check + the V6 literature answer
+
+**Date:** 2026-09-25 · **Reviewer cycle:** R5 (addendum 2) · **Scope:** two
+questions the reviewer could answer without waiting on the agents —
+(a) does the committed data support the *project's own premise* (AGENTS.md:
+"rank ≫ 3, slow singular-value decay, adaptive rank growth"), and (b) for D10-V6,
+is a genuine structure-preserving DLRA a moonshot or standard execution?
+
+Both answers are now known, and (b) materially changes the recommendation I gave
+in R5.
+
+---
+
+## Part 1 — Premise check against the committed long run
+
+Source: `state/coder/results/kolmogorov_re5000_N64_long.json` on `main`
+(Re=5000, N=64, dt=5e-4, T=1, rank tolerance 1e-10, `max_rank=48`).
+
+**1. "rank ≫ 3" — supported.** The adaptive rank goes **2 → 40 by step 50**
+(t=0.025), 42 by step 100, and plateaus at **43** for the remaining 96% of the
+run. It never reaches the `max_rank=48` cap (0 steps at the cap), so the growth
+is a genuine measurement and not a ceiling artifact. This is real evidence and
+the paper can use it.
+
+**2. "slow singular-value decay" — supported, and now quantified.** The
+*untruncated full-grid* state spectrum at the developed state (step 2000),
+normalized by σ₁:
+
+| σ₂ | σ₃ | σ₅ | σ₁₀ | σ₂₀ | σ₃₀ | σ₃₂ |
+|---|---|---|---|---|---|---|
+| 1.6e-1 | 1.4e-1 | 7.9e-2 | 3.2e-2 | 4.8e-3 | 1.8e-3 | **1.5e-3** |
+
+Less than three decades of decay across 32 modes — genuinely slow, and it is the
+justification for "a low rank is not ≪ 3 here". Note the recorded spectrum stops
+at 32 values, so the tail is unmeasured (this is part of D10-V7), and the
+state is a transient at t=1, not a stationary turbulent state.
+
+Two related observations worth having on record:
+- At t=0 the full-grid spectrum has σ₂₀ ≈ 2e-17, i.e. the initial condition is
+  **numerical rank 17** (σ₁₇ = 2.5e-4, σ₁₈ = 8.2e-17; rank 17 at every
+  tolerance from 1e-8 to 1e-14). That is expected: a field spectrally
+  band-limited to |k_x|,|k_y| ≤ 8 has matrix rank ≤ 17, since it factors as
+  U·C·Vᵀ through the 17 resolved modes in each direction, and the bound is
+  attained. It also means the IC *is* exactly low-rank, so a rank-adaptive
+  method should capture it at initialization — which is exactly the V1 defect
+  (starting at rank 2 and throwing away 65% of the energy) rather than a
+  property of the problem.
+
+  > **ERRATUM (reviewer, 2026-09-25, found by a machine re-verification pass of
+  > every quantitative claim in this report).** This bullet originally read
+  > "numerical rank ≈ 19 … plus the rank-1 shear". That was wrong: the base
+  > Kolmogorov shear `ψ = −U cos y` is supported at `(0,±1)`, which lies *inside*
+  > the |k| ≤ 8 box, so it contributes no additional rank. The measured value is
+  > **17**, not 19. The operative conclusion is unchanged and slightly
+  > strengthened — the IC is *exactly* rank 17, so the 65% loss is a harness
+  > choice — but the number was wrong and is corrected here and in
+  > `D10-EXPERIMENT-SPEC.md`. The other 26 quantitative claims in this report
+  > were re-verified against the committed artifacts and all pass.
+- The **DLRA's own spectrum decays faster than the reference** at the same time
+  (σ₃₂ = 3.2e-4 vs 1.5e-3 for the full grid): the projection is discarding real
+  spectral content, consistent with the energy/enstrophy deficit (E 15.05 vs
+  28.72; Z 323.7 vs 1274.5).
+
+**3. "adaptive rank growth" — not yet demonstrated as a *dynamic*.** The
+trajectory is a monotone jump to ~43 within t=0.025 followed by a static
+plateau. The interesting behaviour the project is after — rank fluctuating with
+the cascade as a stationary state develops — is absent, and cannot appear in a
+T=0.1–1 transient. This is a D10-V2 dependency, not a defect in the rank
+logic, which works.
+
+**Net:** the premise is sound on two of three axes, and the third is blocked on
+stationarity. The paper has a defensible quantitative statement available now
+("σ₃₂/σ₁ ≈ 1.5e-3 at the developed state, so truncation at the 1e-3 level still
+requires >32 modes") and should pair it with the reference-spectrum caveat.
+
+---
+
+## Part 2 — V6 answered: structure-preserving DLRA is standard execution, with a named method family
+
+This is the finding that changes the R5 recommendation. **Structure-preserving
+DLRA is an established, active research line, and our engine is a hand-rolled,
+non-robust early member of it.** Reviewer searches (arXiv all-fields, 2026-09-25;
+abs pages read directly for each ID cited below):
+
+**The method family we need already exists — BUG integrators.**
+
+- **arXiv:2402.08607** — Ceruti, Einkemmer, Kusch & Lubich, *"A robust
+  second-order low-rank BUG integrator based on the midpoint rule"* (13 Feb 2024).
+  Abstract (verbatim): the BUG class "require no steps that evolve the solution
+  backward in time, often have favourable structure-preserving properties, and
+  allow for parallel time-updates of the low-rank factors"; the paper delivers a
+  **robust second-order midpoint-rule BUG integrator**.
+- **arXiv:2104.05247** — Ceruti, Kusch & Lubich, *"A rank-adaptive robust
+  integrator for dynamical low-rank approximation"* (12 Apr 2021). The method:
+  "first updates the evolving bases and then does a Galerkin step in the
+  subspace generated by both the new and old bases, which is followed by rank
+  truncation to a given tolerance", retaining "exactness, robustness and
+  symmetry-preserving properties".
+- **arXiv:2608.27749** — Hauck, Kusch & Schotthöfer, *"High-order robust
+  basis-update & Galerkin integrators for dynamical low-rank approximation"*
+  (27 Aug 2026): BUG integrators "enable implicit time integration and
+  structure-preservation"; general-order BUG integrators exist.
+
+Compare with what `solvers/dlra.py` does today: a full `N×N` SVD at four stage
+boundaries, no QR-based basis update, no robustness to small singular values,
+no defect correction, and an energy residual that is an accounting identity.
+That is a naive Galerkin-projection integrator, not a BUG integrator, and the
+distance between the two is a known, published gap — not a research problem.
+
+**Consequences, in order of importance:**
+
+1. **V6 is settled in direction; the implementation path is now concrete.** The
+   recommendation to `coder` (cc `theoretical-research`) is to port the
+   rank-adaptive robust BUG construction — basis update by QR (or CholeskyQR)
+   instead of a full SVD, Galerkin step in the span of old+new bases, then
+   tolerance-based truncation — to the stream-function NS setting, and to keep
+   the factorisation in Fourier space so the truncation is mode-aware. This is
+   exactly the kind of "standard, well-understood approach" AGENTS.md says to
+   prefer over improvising, and it simultaneously answers the cost objection
+   (no per-step full SVD ⇒ the cost figure can show a win instead of a
+   permanent 1.5–2.5× loss), the accuracy objection (Galerkin in the basis
+   span instead of repeated rank-r state truncation), and the structure claim.
+2. **The novelty claim gets sharper and more defensible, and it changes.** SPDLRA
+   is established for Hamiltonian systems (arXiv:2007.13153, 2008.07427,
+   2308.16547), stochastic Vlasov–Poisson (arXiv:2608.00397, already cited),
+   elastic guided waves (arXiv:2606.30469, already cited), and time-dependent
+   kinetic simulations (review: arXiv:2412.05912, whose ID WR had wrong and has
+   now fixed) — and for **nothing** in incompressible Navier–Stokes (R5b Part 1:
+   0 relevant hits). So the honest and much stronger claim is:
+
+   > Structure-preserving dynamical low-rank approximation is established for
+   > Hamiltonian, kinetic, Vlasov–Poisson and wave equations, and we are not
+   > aware of any application to the incompressible Navier–Stokes equations. We
+   > provide one: an exactly divergence-free, factorisation-based integrator in
+   > the stream function–vorticity formulation, validated on resolved
+   > high-Reynolds-number forced turbulence with adaptive rank.
+
+   Note what this does *not* require: it does not depend on divergence-freeness
+   being novel (it is not — see R5b), and it does not depend on inventing a new
+   integrator (we port a published one, which is what makes it credible). It
+   does depend on D10-V6 actually being implemented, so the claim is gated on
+   the work, not asserted ahead of it.
+3. **Related work must grow.** `refs.bib` currently contains two papers from
+   this line (cui2026, goutaudier2026) and the kinetic review's ID is now
+   correct, but the *method* papers that a reviewer will demand are missing.
+   Verified additions for `writing-research` (all four abs pages read by the
+   reviewer on 2026-09-25):
+   - `arXiv:2402.08607` — robust second-order BUG integrator (midpoint rule) —
+     **the method we will port**.
+   - `arXiv:2104.05247` — rank-adaptive robust integrator — **the rank logic we
+     need**.
+   - `arXiv:2608.27749` — high-order robust BUG integrators.
+   - `arXiv:2412.05912` — review of low-rank methods for kinetic simulations
+     (cross-domain positioning; ID corrected from WR's earlier 2412.05988).
+   Plus, from R5, the non-arXiv records already verified via Crossref: Kazashi,
+   Nobile & Vidličková, *Numer. Math.* 149(4):973–1024, 2021,
+   DOI 10.1007/s00211-021-01241-4 (stability of projector splitting) and Kusch,
+   Schotthöfer & Walter, *SIAM J. Math. Data Sci.* 8(3):820–849, 2026,
+   DOI 10.1137/25m1730673.
+4. **The writer's method section now has a citable architecture** to describe
+   rather than a bespoke scheme to invent — which is better for acceptance, not
+   worse. A paper that says "we apply the rank-adaptive robust BUG integrator of
+   Ceruti–Kusch–Lubich to the stream function–vorticity formulation, with exact
+   divergence-freeness by representation and validated at high Re" is
+   considerably more attractive to a SISC/JCP reviewer than one that presents a
+   projection scheme as a new contribution.
+
+**What remains genuinely open for `theoretical-research`:** whether a
+factorisation-based BUG integrator in the ψ formulation admits a *discrete*
+energy identity that is worth stating as a theorem (rather than only inherited
+"favourable structure-preserving properties"), and what the honest error
+statement is for adaptive-rank truncation in a turbulent regime. That is a
+genuine theory contribution slot for this project — and a much better one than
+the divergence-free observation.
+
+## Reviewer note
+
+I should have run this search before writing the R5 V6 message; I framed the
+choice as an open research question when the literature had already answered the
+direction. The correction is cheap now and the agents have not started V6 work
+yet. Recorded in `state/reviewer/NOTES.md` so the next cycle does not repeat it.
