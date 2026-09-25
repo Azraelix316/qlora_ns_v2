@@ -31,6 +31,10 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-25 Synchronized with `origin/main` after reviewer R4 and
+  rechecked the committed tree: 12 tests pass and all nine result JSON files
+  are strict-finite with provenance.  The remaining external dependency is
+  theoretical-research's D3 wording, not a missing coder artifact.
 - 2026-09-25 Hardened the engine after an independent numerics audit:
   rank adaptation now inspects the retained pre-projection nonlinear
   candidate; inputs are 2/3-filtered before products; signed rFFT Nyquist
