@@ -26,7 +26,11 @@ def main() -> None:
     parser.add_argument("--dlra-tolerance", type=float, default=1e-6)
     parser.add_argument("--compare-stride", type=int, default=10)
     parser.add_argument("--force-amplitude", type=float, default=0.2)
+    parser.add_argument("--base-speed", type=float, default=0.5)
+    parser.add_argument("--perturbation-velocity-rms", type=float, default=0.25)
     parser.add_argument("--cutoff", type=int, default=8)
+    parser.add_argument("--seed", type=int, default=20260925)
+    parser.add_argument("--snapshot-stride", type=int, default=5)
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -42,8 +46,12 @@ def main() -> None:
             dt=args.dt,
             nsteps=args.steps,
             force_amplitude=args.force_amplitude,
+            base_speed=args.base_speed,
+            perturbation_velocity_rms=args.perturbation_velocity_rms,
             cutoff=args.cutoff,
+            seed=args.seed,
             train_steps=args.train_steps,
+            snapshot_stride=args.snapshot_stride,
             compare_stride=args.compare_stride,
             pod_rank=args.pod_rank,
             dlra_rank=args.dlra_rank,

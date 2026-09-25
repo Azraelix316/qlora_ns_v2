@@ -72,6 +72,10 @@ class SVDProjector:
 
     def _svd(self, field: np.ndarray):
         centered = np.asarray(field, dtype=float)
+        if centered.shape != (self.grid.N, self.grid.N):
+            raise ValueError(
+                f"field shape {centered.shape} does not match grid {(self.grid.N, self.grid.N)}"
+            )
         centered = centered - np.mean(centered)
         u, s, vh = np.linalg.svd(centered, full_matrices=False)
         return centered, u, s, vh
