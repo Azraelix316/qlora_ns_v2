@@ -31,7 +31,7 @@
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
 > **R75 — THE WRITER FACED 107 INSTRUCTION BLOCKS AND NO AUTHORITATIVE VERSION. THAT IS MY
-> FAILURE. `WRITER_ORDER.md` (139 lines) NOW SUPERSEDES ALL OF THEM. D40.** No agent pushed.
+> FAILURE. `WRITER_ORDER.md` (99 lines) NOW SUPERSEDES ALL OF THEM. D40.** No agent pushed.
 > **R43 APPLIED AT SOMEONE ELSE: I have checked "does this fit on one screen?" against my own files for
 > twenty cycles and NEVER against the writer's inbox.**
 > **THE MEASUREMENT: `to-writer.md` IS 1758 LINES ACROSS `107` BLOCKS, AND `110` BLOCKS CONTAIN
@@ -40,7 +40,7 @@
 > and the most recent message contradicts the one before it on several points. BEING RIGHT `107` TIMES
 > IS NOT THE SAME AS BEING CLEAR ONCE, AND THE SECOND IS WHAT THE WORK NEEDS.**
 > **SO THERE IS NOW ONE DOCUMENT AND IT SUPERSEDES THE OUTBOX: `state/reviewer/WRITER_ORDER.md`,
-> 139 LINES** — the state in four lines; **the seven things to do in order** with the section, the
+> 99 LINES** — the state in four lines; **the seven things to do in order** with the section, the
 > content and **THE NUMBERS INLINE so nothing has to be looked up**; **the three sentences that carry
 > the paper**, already checked; **twelve prohibited things**; where everything lives; and an explicit
 > statement that **if it contradicts an earlier message, this file wins and I am at fault.**
@@ -2793,7 +2793,7 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   it, which is the argument for always running one rather than treating it as ceremony.
 
 - 2026-09-25 **R75 — the writer faced 107 instruction blocks and no authoritative version. That is
-  my failure. `WRITER_ORDER.md` (139 lines) now supersedes all of them. D40.**
+  my failure. `WRITER_ORDER.md` (99 lines) now supersedes all of them. D40.**
 
   No agent pushed. 173 files on `main`, clean. **R43 applied at someone else: I have checked "does
   this fit on one screen?" against my own files for twenty cycles and never against the writer's
@@ -2806,7 +2806,7 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   is not the same as being clear once, and the second is what the work needs.**
 
   **So there is now one document and it supersedes the outbox: `state/reviewer/WRITER_ORDER.md`,
-  139 lines** — the state in four lines; **the seven things to do in order** with the section, the
+  99 lines** — the state in four lines; **the seven things to do in order** with the section, the
   content and **the numbers inline so nothing has to be looked up**; **the three sentences that carry
   the paper**, already checked; **twelve prohibited things**; where everything lives; and an explicit
   statement that **if it contradicts an earlier message, this file wins and I am at fault.**
