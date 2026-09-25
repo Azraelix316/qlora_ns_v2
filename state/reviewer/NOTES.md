@@ -30,6 +30,34 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R32 — the S3 regime pilot settles the regime question: the turbulence validation is
+> UNAVAILABLE at these parameters, measured by the project's own code. Coder `602b7e9`
+> MERGED (`8c21057`).** `Re=5000`, `N=64`, `block_time=2.0`, S2 = `|drift| <= 10%` on **both**
+> `E_fluct` and `Z_fluct`. **`qualifying_horizons` is EMPTY at A=0.5 and `[3.0]` only at
+> A=0.2** (horizons `T=0.1…20`). At A=0.5 by `T=20`: **zonal share of total energy
+> `0.938`**, `Z_fluct` 1283 → **213** (6× down), `E_total` 22.7 → **940** (41× up),
+> `E_fluct` 18.5 → 58.3 non-monotone. `max_abs_divergence` holds at 1e-14 … 2.2e-13
+> throughout, so the runs are sound and **this is physics, not a defect.** R8/R8a confirmed
+> *systematically by the project's own code* rather than inferred from a few horizons, and
+> D11.2's regime question is now closed: at the forcing amplitude every committed run uses,
+> **no horizon supports a time-averaged turbulence statistic.** It also bounds R31 — my
+> `t=8` comparison was at A=0.2 where the flow is 56% zonal and fails S2; trajectory
+> accuracy does not need stationarity so that comparison stands, but **no time-averaged
+> number can be extracted at `t=8`.** **I am not accepting the one candidate window:**
+> `A=0.2, T=3` passes but is flanked by failures at `T=2` and `T=4` with `E_fluct` running
+> 19.09 → 18.01 → 15.97 → 19.69 → 23.84, so an isolated pass on a ±20% wobble is the
+> signature of **threshold-crossing noise, not a physical window**; coder must re-run at
+> `block_time` 1.0 and 4.0, and if `T=3` does not survive then **no horizon qualifies at
+> either amplitude**, which is the stronger result. **A provenance gap in the artifact whose
+> whole purpose is to be the record: both pilots omit `initial_state.sha256`**, identifying
+> the IC only by `energy = 22.206703312933374` and `rank = 17` — both match the canonical
+> field to all digits, which is very likely the same IC and is **not a claim**; two matching
+> numbers are a token (D11.7, R27), and these are the artifacts a reviewer will cite to
+> argue no stationary state exists. **Credited: the pilot driver documents S1/S2/S3/S5 in the
+> artifact's own `interpretation` field** — the criterion is in the record, not only in my
+> head, so a reader can check the gate without trusting me — and records
+> `window_rank_table` and `instantaneous_rank_series`, which is what lets R26/R29's rank
+> numbers be checked against the project's own runs.
 > **R31 — THE DECISIVE F5 MEASUREMENT, run by me: at `t=8` any rank below the dealiasing
 > ceiling fails, and a one-shot stale static POD beats all of them. The cost of staticity is
 > MEAN TRACKING, not rank.** `N=64`, `Re=5000`, `A=0.2`, 16 000 steps. rel L2 vs the
@@ -882,6 +910,63 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R32 — the S3 regime pilot closes the regime question, and not in the project's
+  favour.**
+  Coder `602b7e9` (5 commits, 10 files, +14 800) **merged at `8c21057`.** The pilot is the
+  S1–S3 gate from the D10 spec, run by the project's own code rather than by me.
+
+  `Re=5000`, `N=64`, `block_time=2.0`, **S2 = `|drift| ≤ 10%` on both `E_fluct` and
+  `Z_fluct`**, horizons `T=0.1…20`:
+
+  | | A=0.2 | A=0.5 |
+  |---|---|---|
+  | **`qualifying_horizons`** | **`[3.0]` only** | **empty** |
+  | zonal share of total energy at `T=20` | — | **0.938** |
+  | `E_fluct`, `T=0.1 → 20` | 18.50 → 23.84 (±20% wobble) | 18.50 → 58.31, non-monotone |
+  | `Z_fluct`, `T=0.1 → 20` | 1282.6 → 624.5 | 1282.6 → **212.9** |
+  | `E_total`, `T=0.1 → 20` | 22.35 → 54.35 | 22.67 → **939.73** |
+  | `max_abs_divergence` | 2.5e-14 → 5.1e-14 | 2.5e-14 → **2.2e-13** |
+
+  **At the forcing amplitude every committed run uses, no horizon from `T=0.1` to `T=20`
+  supports a time-averaged turbulence statistic, and by `T=20` the flow is 94% zonal mean
+  with fluctuation enstrophy down 6×.** Divergence holding at `1e-14`–`2.2e-13` throughout
+  confirms the runs are numerically sound: **this is physics, not a defect.** R8/R8a is thus
+  confirmed *systematically by the project's own code* rather than inferred from a handful
+  of sampled horizons, and **D11.2's regime question is closed.**
+
+  **It also bounds R31.** My `t=8` comparison was at `A=0.2`, where the pilot shows the flow
+  56% zonal and failing S2. Trajectory accuracy does not require stationarity, so the
+  comparison stands — but **no time-averaged number can be extracted at `t=8`**, which limits
+  what the results section may claim there.
+
+  **The one candidate window is not accepted.** `A=0.2, T=3` passes but is **flanked by
+  failures at `T=2` and `T=4`**, with `E_fluct` running 19.09 → 18.01 → 15.97 → 19.69 → 23.84.
+  An isolated pass on a ±20% wobble is the signature of **threshold-crossing noise, not a
+  physical window.** Coder must re-run at `block_time` 1.0 and 4.0; if `T=3` does not survive,
+  **no horizon qualifies at either amplitude**, which is the cleaner result and the one I
+  would rather have.
+
+  **A provenance gap in the artifact whose entire purpose is to be the record:** both pilot
+  artifacts **omit `initial_state.sha256`**, identifying the initial condition only by
+  `energy = 22.206703312933374` and `numerical_rank = 17`. Both match the canonical IC to
+  every recorded digit — very likely the same field, and **not a claim**. Two matching
+  numbers are a token (D11.7, R27), and these are precisely the artifacts a reviewer will
+  cite to argue that no stationary state exists. Required.
+
+  **Credited, and it is the standard I have been asking for:** the pilot driver documents
+  **S1, S2, S3 and S5 in the artifact's own `interpretation` field** — the fluctuations-only
+  statistic with the zonal energy reported alongside, the two-thirds block-mean drift test on
+  both quantities, the horizon chosen from the table rather than assumed, and the explicit
+  exclusion of `T ≤ 0.1`. **The criterion is in the record, not only in my head, so a reader
+  can check the gate without trusting me.** `window_rank_table` and
+  `instantaneous_rank_series` are recorded too, which is what will let R26/R29's rank numbers
+  be checked against the project's own runs rather than only against my scratch scripts.
+
+  **What the paper can now claim, and it is not what the draft promises:** not high-Re
+  turbulence validation. Three measured, defensible things — (1) the
+  representational-versus-trajectory low-rankness gap, (2) mean tracking rather than rank as
+  the thing a static method cannot do, and (3) this regime map. None is a speedup, and none
+  requires a number already in the draft to be retracted.
 - 2026-09-25 **R31 — the decisive F5 measurement, run by me. It inverts the story.**
   R26 said the rank grows `1 → 16` by `t=8`; R24 said a static POD is exact at `t ≤ 0.1`;
   nobody had measured a static POD where the rank means something. Coder flagged the

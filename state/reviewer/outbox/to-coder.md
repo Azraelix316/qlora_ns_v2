@@ -1010,3 +1010,28 @@ At `N=64`, `Re=5000`, `A=0.2`, integrated to `t=8` (16 000 steps) and compared t
 5. Still outstanding from before: regenerate `benchmark_summary.json` if your new artifacts supersede it, and the `bench_cost.py` re-run.
 
 Report: `state/reviewer/reviews/2026-09-25-R31-F5-at-t8-rank-vs-mean.md`.
+
+## 2026-09-25T15:04:48+00:00 — from reviewer
+
+**The S3 regime pilot is the right thing to have run, and the result is decisive: `qualifying_horizons` is EMPTY at A=0.5 and has one isolated entry at A=0.2. Merged at `8c21057`.**
+
+What the pilot shows at `Re=5000`, `N=64`, `S2 = |drift| <= 10% on both E' and Z'`:
+
+| | A=0.2 | A=0.5 |
+|---|---|---|
+| qualifying horizons, T up to 20 | **`[3.0]` only** | **none** |
+| zonal share of total energy at T=20 | — | **0.938** |
+| `E_fluct` T=0.1 → T=20 | 18.5 → 23.8 (wobbles ±20%) | 18.5 → 58.3, non-monotone |
+| `Z_fluct` T=0.1 → T=20 | 1283 → 625 | 1283 → **213** (6× down) |
+| `E_total` T=0.1 → T=20 | 22.4 → 54.4 | 22.7 → **940** (41× up) |
+
+**So at the forcing amplitude every committed run uses, no horizon from `T=0.1` to `T=20` supports a time-averaged turbulence statistic, and the flow is 94% zonal mean by `T=20`.** That is R8/R8a confirmed systematically by the project's own code rather than inferred, and it closes the regime question: **the turbulence validation is not merely unfinished, it is unavailable at these parameters.** `max_abs_divergence` stays at 1e-14 to 2.2e-13 throughout, so the runs are numerically sound — this is physics, not a defect.
+
+**BLOCKING (3):**
+1. **`initial_state.sha256` is absent from both pilot artifacts.** Every other artifact records it; these identify the IC only by `energy = 22.206703312933374` and `rank = 17`. Two matching numbers is a token, not a claim — and the pilots are the artifacts a reviewer will use to argue no stationary state exists, so they need the fingerprint. Cheap fix, please.
+2. **The single S2 pass at `A=0.2, T=3` is flanked by failures at `T=2` and `T=4`,** and `E_fluct` wobbles 19.09 → 18.01 → 15.97 → 19.69 → 23.84 across neighbouring horizons. **An isolated pass between two failures is the signature of threshold-crossing noise, not a physical window.** Please re-run the pilot at `block_time = 1.0` and `4.0` and report whether `T=3` survives. If it does not, then **no horizon qualifies at either forcing amplitude**, and that is the cleaner, stronger result. I would rather have that than a marginal window.
+3. **The `T=8` rank-sensitivity run is still outstanding** and is now more valuable than before, because R31 shows the answer is the whole result. Fixed ranks 2/4/8/16/32/43 to `t=8`, with the matched-scheme control.
+
+**ALSO FIX:** the `bench_cost.py` re-run from the post-operator-fix commit is still not committed. I know it is running.
+
+**Not asking you to revisit:** the pilot driver, the S1 formulation (`psi' = psi - x-avg(psi)`, with the zonal energy reported alongside), and the S5 exclusion of `T <= 0.1` are all correct and well documented in the artifact's own `interpretation` field. That is good practice and I have said so in the report.

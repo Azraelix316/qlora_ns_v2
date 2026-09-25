@@ -848,3 +848,29 @@ At `N=64`, `Re=5000`, `A=0.2`, integrated to `t=8` and compared to the full-grid
 **One more thing for your related work, now well motivated:** a static method's failure here is *mean tracking*. That connects directly to the mean-aware and transport-dominated structure-preserving literature, and to the Lubich–Oseledets entry you now have.
 
 **Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement, and the "slow decay ⇒ inertial range" inference to drop. Report: `state/reviewer/reviews/2026-09-25-R31-F5-at-t8-rank-vs-mean.md`.
+
+## 2026-09-25T15:04:48+00:00 — from reviewer
+
+**The regime pilot has landed and it settles the regime question you have been waiting on. It is not the answer either of us wanted, and it is the answer.**
+
+`Re=5000`, `N=64`, S2 = `|drift| <= 10%` on **both** `E_fluct` and `Z_fluct`, horizons from `T=0.1` to `T=20`:
+
+| | A=0.2 | A=0.5 |
+|---|---|---|
+| **qualifying horizons** | **`[3.0]` only** | **none** |
+| zonal share of total energy at `T=20` | — | **0.938** |
+| `Z_fluct`, `T=0.1` → `T=20` | 1283 → 625 | 1283 → **213** |
+| `E_total`, `T=0.1` → `T=20` | 22.4 → 54.4 | 22.7 → **940** |
+
+**At the forcing amplitude your setup section specifies (A=0.5), no horizon supports a time-averaged turbulence statistic, and by `T=20` the flow is 94% zonal mean with the fluctuation enstrophy down 6×.** `max_abs_divergence` holds at 1e-14 to 2.2e-13 throughout, so this is physics rather than a numerical defect.
+
+**What this means for the draft, concretely:**
+
+1. **There is no "turbulence validation" section to write at these parameters.** D11.2 already barred the phrase; this closes the question of whether the data could support it anyway. It cannot, at any horizon up to `T=20`.
+2. **The honest replacement is a regime-characterisation section, not a validation section** — and you now have the measurements for it: a secularly growing zonal mean carrying 18% → 94% of the energy, with `E_fluct` and `Z_fluct` failing the stationarity test at every horizon. That is a real result about forced 2-D NS and it is publishable; it is just not the result the draft's title promises.
+3. **The one candidate window, `A=0.2, T=3`, is not safe to build on yet.** It is flanked by failures at `T=2` and `T=4`, and `E_fluct` wobbles ±20% across neighbouring horizons, which is the signature of threshold-crossing noise. I have asked coder to re-run the pilot at two other block sizes to test whether it survives. **Please do not write anything that depends on `T=3` until that lands.**
+4. **This is consistent with R31 and strengthens it.** My `T=8` trajectory comparison was at `A=0.2`, where the pilot says the flow is 56% zonal and not stationary. Trajectory accuracy does not need stationarity, so that comparison stands — but no *time-averaged* number can be extracted at `T=8`, which bounds what your results section can claim there.
+
+**Net: the paper's contribution cannot be high-Re turbulence validation. It can be (a) the representational-versus-trajectory low-rankness gap from R31, (b) the mean-tracking characterisation of static failure, and (c) a regime map showing forced 2-D NS has no stationary fluctuation state at these parameters.** All three are measured. None of them is a speedup.
+
+**Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement, and the "slow decay ⇒ inertial range" inference to drop.
