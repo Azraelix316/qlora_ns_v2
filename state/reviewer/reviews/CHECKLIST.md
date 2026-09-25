@@ -271,6 +271,12 @@ no cycle behind it is an item nobody has tested.**
 - [ ] **(R78) Does a mechanical check over prose know where that file's legitimate
       withdrawal regions are?** Distinguish *"this number is void, here is why"* from
       *"this number is my claim"* **by structure, not by keyword.**
+- [ ] **(R81) Did this cycle open each agent's most recent commit and read what it CONTAINS?**
+      **A commit count is a receipt, not a delivery.** `rev-list --count` read `1 ahead` for a dozen
+      cycles while a complete 1 281-line paper sat unread on the writer's branch (D46.1).
+- [ ] **(R80) Does `grep -m1 \`^> Status:\` on EVERY agent's board return something current?**
+      Not just the reviewer's — `agent.sh start <agent>` prints each board, and the writer's read
+      "fresh — no sessions yet" after a session that drafted the whole paper.
 - [ ] **(R77) Was the standing instruction list itself measured rather than trusted?** Two
       instructions in this project named work that did not exist. **Measuring the list is
       cheap; a phantom instruction costs cycles.**
