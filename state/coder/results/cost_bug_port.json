@@ -1,0 +1,173 @@
+{
+  "case": "cost_retiming",
+  "environment": {
+    "numpy": "2.5.3",
+    "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.3",
+    "thread_settings": {
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": null,
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": null
+    }
+  },
+  "grids": [
+    {
+      "N": 64,
+      "benchmark_state": "unforced multi-mode decay (nu=0.02, ZeroForcing) at amplitude 1, with an amplitude-1e-3 repeat to measure content-independence",
+      "dealias_rank_ceiling": 43,
+      "dt": 0.0005,
+      "reference_full_step_seconds_median": 1.414338146103546,
+      "reference_full_step_seconds_per_step": 0.001414338146103546,
+      "reference_relative_spread": 0.6705797052387021,
+      "repeats": 7,
+      "rows": [
+        {
+          "amplitude_1e_3_seconds_median": 2.4794708021217957,
+          "amplitude_cost_ratio": 1.0669169536570984,
+          "bug": {
+            "full_step_ratio_vs_reference": 7.72512526813811,
+            "full_step_relative_spread": 0.13605706523158423,
+            "full_step_seconds_max": 11.662790268892422,
+            "full_step_seconds_median": 10.925939350156114,
+            "full_step_seconds_min": 10.1762390260119,
+            "full_step_seconds_per_step": 0.010925939350156113,
+            "note": "same state, same held rank, same warm-up and repeat count; the only factorization inside a BUG step is of the augmented S-matrix, so svd_max_dimension is at most 4r",
+            "speedup_over_projected_same_rank": 0.24212009147238311,
+            "svd_calls_per_step": 1.0,
+            "svd_max_dimension": 8,
+            "svd_seconds_median": 0.03683624533005059
+          },
+          "full_step_ratio_vs_reference": 1.8704080365572173,
+          "full_step_relative_spread": 0.23095581886248842,
+          "full_step_seconds_max": 3.1687595720868558,
+          "full_step_seconds_median": 2.6453894348815084,
+          "full_step_seconds_min": 2.5577914889436215,
+          "full_step_seconds_per_step": 0.002645389434881508,
+          "linear_algebra_ratio_vs_reference": 0.6130664192483981,
+          "linear_algebra_seconds_median": 0.8670832228381187,
+          "linear_algebra_seconds_per_step": 0.0008670832228381187,
+          "rank": 2,
+          "svd_calls_per_step": 4.005
+        },
+        {
+          "amplitude_1e_3_seconds_median": 2.578589105512947,
+          "amplitude_cost_ratio": 1.032943423704717,
+          "bug": {
+            "full_step_ratio_vs_reference": 9.054014851589779,
+            "full_step_relative_spread": 0.10849635779430802,
+            "full_step_seconds_max": 13.670337488874793,
+            "full_step_seconds_median": 12.80543857999146,
+            "full_step_seconds_min": 12.280994042987004,
+            "full_step_seconds_per_step": 0.01280543857999146,
+            "note": "same state, same held rank, same warm-up and repeat count; the only factorization inside a BUG step is of the augmented S-matrix, so svd_max_dimension is at most 4r",
+            "speedup_over_projected_same_rank": 0.20800042437734323,
+            "svd_calls_per_step": 1.0,
+            "svd_max_dimension": 64,
+            "svd_seconds_median": 0.29123570513911545
+          },
+          "full_step_ratio_vs_reference": 1.8832389314494422,
+          "full_step_relative_spread": 0.04423577154162986,
+          "full_step_seconds_max": 2.6881193241570145,
+          "full_step_seconds_median": 2.663536658976227,
+          "full_step_seconds_min": 2.570295725017786,
+          "full_step_seconds_per_step": 0.002663536658976227,
+          "linear_algebra_ratio_vs_reference": 0.6885605349691689,
+          "linear_algebra_seconds_median": 0.9738574305083603,
+          "linear_algebra_seconds_per_step": 0.0009738574305083603,
+          "rank": 16,
+          "svd_calls_per_step": 4.005
+        }
+      ],
+      "steps_per_repeat": 1000,
+      "warmup_steps_discarded": 200
+    },
+    {
+      "N": 128,
+      "benchmark_state": "unforced multi-mode decay (nu=0.02, ZeroForcing) at amplitude 1, with an amplitude-1e-3 repeat to measure content-independence",
+      "dealias_rank_ceiling": 85,
+      "dt": 0.00025,
+      "reference_full_step_seconds_median": 5.398753696121275,
+      "reference_full_step_seconds_per_step": 0.005398753696121275,
+      "reference_relative_spread": 0.27155206988277,
+      "repeats": 7,
+      "rows": [
+        {
+          "amplitude_1e_3_seconds_median": 11.074868719908409,
+          "amplitude_cost_ratio": 1.0394690481805893,
+          "bug": {
+            "full_step_ratio_vs_reference": 6.37511102675011,
+            "full_step_relative_spread": 0.0872868283171864,
+            "full_step_seconds_max": 36.225332103902474,
+            "full_step_seconds_median": 34.41765421885066,
+            "full_step_seconds_min": 33.22112422902137,
+            "full_step_seconds_per_step": 0.03441765421885066,
+            "note": "same state, same held rank, same warm-up and repeat count; the only factorization inside a BUG step is of the augmented S-matrix, so svd_max_dimension is at most 4r",
+            "speedup_over_projected_same_rank": 0.33447901980208244,
+            "svd_calls_per_step": 1.0,
+            "svd_max_dimension": 8,
+            "svd_seconds_median": 0.045155201107263565
+          },
+          "full_step_ratio_vs_reference": 2.132340887356824,
+          "full_step_relative_spread": 0.08929296308948366,
+          "full_step_seconds_max": 12.15345999202691,
+          "full_step_seconds_median": 11.511983247008175,
+          "full_step_seconds_min": 11.125520896865055,
+          "full_step_seconds_per_step": 0.011511983247008174,
+          "linear_algebra_ratio_vs_reference": 1.00447408222961,
+          "linear_algebra_seconds_median": 5.4229081640951335,
+          "linear_algebra_seconds_per_step": 0.005422908164095134,
+          "rank": 2,
+          "svd_calls_per_step": 4.005
+        },
+        {
+          "amplitude_1e_3_seconds_median": 11.020814612042159,
+          "amplitude_cost_ratio": 0.9963930148153584,
+          "bug": {
+            "full_step_ratio_vs_reference": 8.301526821336648,
+            "full_step_relative_spread": 0.06510327656041022,
+            "full_step_seconds_max": 47.22700967709534,
+            "full_step_seconds_median": 44.81789861014113,
+            "full_step_seconds_min": 44.309217629022896,
+            "full_step_seconds_per_step": 0.04481789861014113,
+            "note": "same state, same held rank, same warm-up and repeat count; the only factorization inside a BUG step is of the augmented S-matrix, so svd_max_dimension is at most 4r",
+            "speedup_over_projected_same_rank": 0.24501511756575553,
+            "svd_calls_per_step": 1.0,
+            "svd_max_dimension": 64,
+            "svd_seconds_median": 0.3335451183374971
+          },
+          "full_step_ratio_vs_reference": 2.0339995701050717,
+          "full_step_relative_spread": 0.10276613156478719,
+          "full_step_seconds_max": 12.070889455033466,
+          "full_step_seconds_median": 10.98106269701384,
+          "full_step_seconds_min": 10.942408121190965,
+          "full_step_seconds_per_step": 0.01098106269701384,
+          "linear_algebra_ratio_vs_reference": 0.9695784188683704,
+          "linear_algebra_seconds_median": 5.234515072545037,
+          "linear_algebra_seconds_per_step": 0.005234515072545036,
+          "rank": 16,
+          "svd_calls_per_step": 4.005
+        }
+      ],
+      "steps_per_repeat": 1000,
+      "warmup_steps_discarded": 200
+    }
+  ],
+  "interpretation": "Per-step cost is reported as a ratio against the pinned-thread full-grid reference under both accountings. No per-step speedup is claimed anywhere: the reduced method pays the same full-grid nonlinear evaluation as the reference plus its own factorization.",
+  "method": {
+    "accountings": {
+      "full_step": "wall time of a complete reduced step, including the full-grid nonlinear evaluation and all projections",
+      "linear_algebra": "measured time inside the whole-field SVD calls"
+    },
+    "benchmark_state": "unforced multi-mode decay; the forced IC is not used because a fixed low rank on a forced field grows unboundedly and makes LAPACK fail, which is a property of that configuration and not of cost. An amplitude-1e-3 repeat measures the content-independence claim rather than assuming it.",
+    "rank_held_fixed": "check_every is set beyond the run, so cost is measured at a fixed rank rather than under adaptation",
+    "why": "the factorization is of the whole N x N field, so it is rank-independent and Theta(N^3); a linear-algebra win is not a per-step win"
+  },
+  "provenance": {
+    "driver": "experiments/bench_cost.py",
+    "git_commit": "75b3202daf1f046973ae2fbe5f9af6c72a5bf449"
+  },
+  "rank_independence": []
+}
