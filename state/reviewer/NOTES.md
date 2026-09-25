@@ -30,6 +30,31 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R23 — writing-research `e9a1005` MERGED; four real references in, one DOI
+> lost, list unchanged for the fourth push. And I am changing my own approach.** Property
+> test passed; merged at `cb5a897`. **I verified all four new arXiv IDs myself rather than
+> asking — titles and authors match in every case** (2502.08951 Einkemmer/Hu/Zhang;
+> 1302.1594 Moarref/Sharma/Tropp/McKeon; 2302.01391 Koellermeier/Krah/Kusch; 2411.15990
+> Dektor/Einkemmer). The survey is genuinely being extended and the IDs are clean.
+> **Two defects, both new.** (1) **A verified DOI was lost:** `koellermeier2024`, which
+> carried `10.1007/s10444-024-10175-y` (verified R20), was *replaced* by
+> `koellermeier2024macro` citing the preprint with no DOI — and arXiv's own metadata for
+> 2302.01391 carries exactly that DOI. An entry went from verified-and-DOI-bearing to
+> preprint-only. (2) **An author-order error, R18's class:** `einkemmer2025interpolatory`
+> lists "Einkemmer and Dektor"; arXiv gives **Alec Dektor, Lukas Einkemmer**. That is the
+> third time an author field has been wrong on a real paper. Two of the four also omit
+> available DOIs (`10.1017/jfm.2013.457` for 1302.1594). **The list is unchanged for the
+> fourth consecutive push** — A1 Girfoglio `compflu` (404), A2 Schapira ID, A3 "Olga Koch",
+> A4 the 811-vs-0 query, O2 Lubich–Oseledets absent, O3 venue doc 0 files touched, O4 reply
+> still 02:47, now the **sixth** cycle. **And I am changing my own approach, because six
+> cycles of the same request have failed and the cause may be mine.** My messages to this
+> agent have grown longer every cycle — context, credit, mechanism, rationale. **A long
+> message is not a clearer one**, and the items are one-line edits. I have switched to a bare
+> checklist with no preamble, no credit and no explanation, on the assumption that
+> explanation is not what has been missing. Recorded in advance so the test is honest: **if
+> that also fails, the conclusion is that these items are not going to be completed by this
+> agent on this branch, and I will say so plainly to the user rather than produce a sixth
+> version of the same request.**
 > **R22 — retracted R21's mechanism, and did not replace it.** Testing R21's own open
 > question, I found its stated mechanism was measured in the **wrong subspace**: I took the
 > SVD of *mean-subtracted snapshots* where `PODGalerkin.fit` takes the SVD of
@@ -637,6 +662,48 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R23 — writing-research `e9a1005` merged; four real references in, one
+  verified DOI lost, and I am changing my own approach.** Property test passed (0 deletions,
+  0 outside owned paths, 0 conflicts) and I merged at `cb5a897`. **I verified all four new
+  arXiv IDs myself rather than asking, because asking has not worked for six cycles** — all
+  four are real, with titles and author lists matching: 2502.08951 (Einkemmer, Hu, Zhang),
+  1302.1594 (Moarref, Sharma, Tropp, McKeon), 2302.01391 (Koellermeier, Krah, Kusch),
+  2411.15990 (Dektor, Einkemmer). The survey is genuinely being extended and this push's IDs
+  are clean, which is worth saying plainly.
+
+  **Two defects, both new and both small.** (1) **A verified DOI was lost.**
+  `koellermeier2024`, carrying `10.1007/s10444-024-10175-y` (verified in R20), was
+  *replaced* by `koellermeier2024macro` citing the arXiv preprint with no DOI — and arXiv's
+  own metadata for 2302.01391 carries exactly that DOI. So an entry moved from
+  verified-and-DOI-bearing to preprint-only. Nothing is permanently lost (the DOI is in my
+  R20 report and in the writer's bibliography) but the file got worse on that line.
+  (2) **An author-order error, R18's class:** `einkemmer2025interpolatory` lists
+  "Einkemmer, Lukas and Dektor" where arXiv gives **Alec Dektor, Lukas Einkemmer**. That is
+  the **third** time an author field has been wrong on a real paper (after R18's two
+  wrong-given-name entries), and the second time in a brand-new entry. Two of the four also
+  omit available DOIs: `10.1017/jfm.2013.457` for 1302.1594 (*J. Fluid Mech.* 734:275–316).
+
+  **The list, verified individually on their branch, unchanged for the fourth consecutive
+  push:** A1 Girfoglio `compflu.` (Crossref 404) · A2 `arXiv:1505.05648` attached to a
+  projector-splitting title (it is Schapira on horospherical foliations) · A3 "Olga Koch" ·
+  A4 the novelty query recorded `count: 0` for a query returning **811** as written · O2
+  Lubich–Oseledets DOI absent · O3 venue document, 0 files touched · O4 reply still the
+  02:47 message, now the **sixth** cycle.
+
+  **The part that is mine to fix.** My messages to this agent have grown longer every cycle
+  — context, credit, mechanism, rationale, and increasingly an account of my own errors.
+  Six cycles of that have not changed which items get done, and every one of items 1–5 is a
+  one-line edit. **A long message is not a clearer one.** So this cycle I sent a bare
+  numbered checklist: no preamble, no credit, no explanation, no evidence table. The
+  hypothesis is that the explanation is not what has been missing — six paragraphs of
+  "here is why this matters" have not moved a one-character edit.
+
+  I have **recorded the test in advance so it cannot be reinterpreted after the fact**: if
+  the checklist also fails, the conclusion is not that I need a clearer message but that
+  **these items are not going to be completed by this agent on this branch**, and I should
+  say so plainly to the user rather than produce a seventh version of the same request.
+  That is the honest reading of six cycles of evidence, and continuing to vary the wording
+  while hoping would be treating my own persistence as a strategy.
 - 2026-09-25 **R22 — retracted R21's mechanism, and deliberately did not replace it.**
   R21 left one open question — whether a training window spanning the evaluation period
   fixes the POD baseline — and answering it is reviewer work even though choosing the
