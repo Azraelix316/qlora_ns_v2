@@ -41,6 +41,25 @@ recorded here and the earlier figure is struck, not quietly dropped.
 | `t*`, `W=0.25`, `Re=1000` | *never leads* | *never leads* | *never leads* | **1.24** | **2.53** | **never (exact)** |
 | `t*`, `W=1.0`, `Re=1000` | *never leads* | *never leads* | *never leads* | **1.33** | **2.53** | **never (exact)** |
 
+> ### ⚠ D25.5 — **every `t*` above is PROVISIONAL. Do not quote one until coder reconciles the
+> two static bases.**
+>
+> `fig_crossover` reads the **rows**; the artifact's `crossovers` block is a **different static
+> basis**. **The figure and the block differ by `1.90×` in `t*` and `3.06×` in the static error at
+> one horizon** (`t=0.25, r=16, W=0.25`: rows `0.118208` vs block-implied `0.038658`). **The error
+> columns explain only 1–3% of that, so it is a different basis, not a different definition.**
+>
+> **The block's gap has the direction an IN-SAMPLE static baseline produces** (better fit → lower
+> error → earlier crossover) — so **the block is the more in-sample of the two**, which is the
+> *opposite* of coder's reading, and it is the artifact D15.6 should distrust. **But I could not
+> reproduce either convention from the snapshots** (mine give `0.284`/`0.297` where the rows give
+> `0.118`), so **nothing is settled — see D25.2/D25.3.**
+>
+> **Coder's competing values are `0.649` (`r=16`) and `1.482` (`r=32`)**, i.e. the answer moves the
+> paper's central number by **`1.9–2.4×`**. **Write the sentence above only once the two agree;
+> until then state the qualitative claim (leads at `r ≥ 16`, never at `r ≤ 8`, ceiling is exact)
+> without a `t*` value.**
+
 `N=64`, `A=0.2`, full-field relative L2, `Re ∈ {1000, 5000}`, `W ∈ {0.25, 0.5, 1.0}`. Sources:
 `crossover_surface.json` @ `6571c46` (Re=5000, R51) and the reviewer's Re=1000 run on the same
 corrected driver (R52). **D16.1.** **These values are now confirmed by a THIRD independent
@@ -203,7 +222,7 @@ do not write that it grows without limit. Source: R29.
 |---|---|---|
 | full-step ratio vs full grid, `N=64/128/256` | `1.78–2.18` | `cost_retiming.json`, `2a490d3` |
 | trend | **saturates at ≈2.1–2.2, does not approach parity** | R42 |
-| rank-independence, full step, `r=64`/`r=2` | `1.165 / 1.046 / 1.022` | R42 |
+| rank-independence, full step, `r=64`/`r=2` | `1.165 / 1.046 / 1.022` — **the `1.165` was noise; interleaved re-measure gives `1.013`/`1.012` (D25.6)** | R42, D25.6 |
 | rank-independence, reviewer's measurement | `6.7%` (N=64), `5.96%` (N=128) | R41 |
 | SVD share of the DLRA step | `43–48%` | R41 |
 | content-independence | ratios `0.94–1.03` | R42 |
@@ -231,15 +250,25 @@ runs out.**
 **The sentence to write:** *rank is nearly free, because per-step cost is dominated by a
 rank-independent factorization; what limits the method is the dynamics, not the budget.*
 
-**BUG port — the project's best-evidenced positive claim (D19.2):** its cost **scales with
-rank on BOTH axes** — `1.17×` in time from `r=2` to `r=16`, and a peak-memory spread of
-`1.531 MiB` (`5.76×` the noise floor) against the projected integrator's `0.289 MiB` (`1.09×`) —
-**a prediction confirmed on two independent axes.** State it as such rather than as a cost
-caveat. Verified structurally (`large_svd_calls == 0`, `svd_max_dimension ≤ 4r`);
-stationary state held to `< 1e-12` over 25 steps; second order `1.98 / 1.95`. **BUG is
-`3.0–4.8×` slower per step** than the projected integrator (`0.208–0.334×` the projected
-time, `cost_bug_port.json`, `N ∈ {64,128}`, `r ∈ {2,16}`), so **its value is structural
-preservation, not speed**. Source: R42, R47, **D12.4**.
+**BUG port — report the SLOWDOWN, not a rank-scaling (D19.2 → D25.6/D25.7).**
+**What survives:** **BUG costs `3.3–5.1×` the projected step** (`bug_speedup_hi/lo` `0.195–0.303`,
+`cost_bug_port.json`, interleaved protocol with load recorded, `N ∈ {64,128}`, `r ∈ {2,16}`).
+Verified structurally (`large_svd_calls == 0`, `svd_max_dimension ≤ 4r`); stationary state held to
+`< 1e-12` over 25 steps; second order `1.98 / 1.95`. **Its value is structural preservation, not
+speed.** Source: R42, R47, D12.4, **D25.7**.
+
+**WITHDRAWN (D25.6) — the rank-scaling fails on both axes, on coder's own interleaved evidence:**
+
+- **Time: unresolved.** `bug_full_step_ratio_hi_over_lo = 1.366` at `N=64` (`rank_dependent: true`)
+  but `1.043` at `N=128` (`false`). The projected integrator's is `1.013`/`1.012`. **Resolved at one
+  grid and not the other is not a resolved result.** *(The earlier `1.165` was noise.)*
+- **Memory: the committed artifact is stale and contradicted.** `peak_memory.json` still carries
+  BUG spread `1.531 MiB` at `N=128` (`5.76×` the `0.1328 MiB` floor,
+  `rank_independence_resolved: true`) while the spread **moved `0.125 → 0.398 MiB` between two runs
+  of identical code.** **Not reproducible — do not quote `1.531`.**
+
+**So `CLAIMS.md` no longer calls this the project's best-evidenced positive claim. A slowdown is a
+negative result; it is still the honest one, and it is weaker than previously stated.**
 
 **One thing to know when reading the cost artifacts** (R47): `cost_bug_port.json` is a
 **separate artifact** and `make_summary.py` aggregates only `cost_retiming.json`, so the BUG
@@ -390,6 +419,9 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "the BUG port costs more memory as well as more time" | **D19.3** — BUG's overhead is **smaller** (`+2.32` vs `+2.52`); it trades memory for time |
 | quoting raw RSS as the memory figure | the ~34 MiB interpreter baseline dominates; report the **overhead over the full grid** |
 | quoting `crossover_surface.json`'s `crossovers` block | its reason string is **false** for `r = 2, 4, 16`; read the `dlra` / `static_moving_window` rows instead |
+| **any `t*` value at all, until the two static bases are reconciled** | **D25.5** — the figure's rows and the block are different bases, `1.90×` apart; coder's values are `0.649`/`1.482`. **State the qualitative claim only.** |
+| "the rows are authoritative" (my R58 conclusion) | **withdrawn (D25.4)** — that assumed the block was computed from the rows; it was not |
+| **"BUG's cost scales with rank on both axes"** / "`1.165`" / "`1.531 MiB`" / "the project's best-evidenced positive claim" | **withdrawn (D25.6)** — time is `1.366` (N=64) vs `1.043` (N=128), unresolved; the memory spread moved `0.125 → 0.398 MiB` between identical runs. **Report the `3.3–5.1×` slowdown only.** |
 
 ---
 

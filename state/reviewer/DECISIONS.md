@@ -1476,3 +1476,83 @@ advantage in time or memory. BUG's rank-dependent cost is the best-evidenced pos
 (D19.2). The windowed rank rule is worse (D18.1). The `crossovers` block is un-provenanced
 (D23). The flow is the implemented shear and must be described as such (D20). Every D4 barred
 claim stands.
+
+---
+
+## D25 — the rows and the `crossovers` block use a different **static basis**; **R58 is withdrawn**; the **BUG rank-scaling is withdrawn on both axes** (2026-09-25)
+
+> **OPERATIVE (R60).** Until the two static bases are reconciled, the paper **must not quote a
+> `t*`** — the central figure and the central number currently come from different baselines,
+> differing by `1.90×`. **D19.2's rank-scaling claim is withdrawn on both axes**; the BUG
+> *slowdown* (`3.3–5.1×`) and the memory *overhead* survive. **A committed artifact
+> (`peak_memory.json`) currently asserts a finding its own author has withdrawn and must be
+> regenerated or re-flagged.**
+
+**D25.1 — The column choice is not the explanation; the basis is.** The figure plots DLRA
+`relative_l2` against static `relative_l2_oracle_mean` — a real one-line defect, worth
+**1–3%** in `t*` (`1.235`/`2.417` as plotted, `1.272`/`2.454` and `1.256`/`2.442` matched). The
+rows-vs-block gap is **`1.90×`**. At `t=0.25, r=16, W=0.25` the rows' static error is `0.118208`
+and the block implies `0.038658` — **a factor `3.06` in the static error itself.** Two different
+static bases.
+
+**D25.2 — The DIRECTION of the gap is the opposite of coder's reading, and this is the
+load-bearing observation.** An in-sample static baseline (window **containing** the evaluation
+time) fits that time **better**: error **lower**, ratio **smaller**, crossover **earlier** — the
+exact mechanism D15.6 exists to catch. **The block has all three** (static `3.06×` lower, `t*`
+`1.90×` earlier), **so the block is the more in-sample of the two and is the artifact D15.6
+should distrust.** Coder argues the reverse.
+
+**D25.3 — And I could not reproduce either, so I settle nothing.** My own reconstruction from the
+cached snapshots at the same `(rank, window, horizon)` gives `0.284` (window ending at `t`) and
+`0.297` (offset `0.125`) where the rows give `0.118` and the block implies `0.039`: **my
+reconstruction differs from the driver on a third axis I have not identified.** **Recorded as a
+failure, not adjudicated.** The live hypothesis is coder's; the direction evidence points the
+other way; neither is established.
+
+**D25.4 — R58 is WITHDRAWN.** R58 held that *"a derived block disagreeing with primary data means
+the derivation is wrong, so the rows are authoritative."* **That assumed the block was computed
+from the rows. It was not.** The premise fails, so the conclusion does not stand. **What survives:
+the block is not reproducible from any error column, cross-column pair or rank, and must not be
+used to compute or quote a `t*`;** the offset is recorded in `parameters`; the shape table is the
+better mechanism argument. **What is withdrawn: "the rows are authoritative" — now unresolved.**
+
+**D25.5 — URGENT: the figure and the number come from different bases.** `fig_crossover` reads
+the **rows**; the `crossovers` block is a **different static basis**. **The paper's central
+figure and its central number are therefore computed from different baselines**, differing by
+`1.90×` in `t*`. **No `t*` may be quoted until they agree.** **One cell settles it:** coder states
+the block's static basis as exact snapshot indices and window end for a single
+`(rank, window, horizon)`. **The answer moves the paper's central number by `1.9–2.4×`** — from
+D15–D17's `1.26`/`2.44` to coder's `0.649`/`1.482`. **Both are provisional until then.**
+
+**D25.6 — D19.2 is SUBSTANTIALLY WITHDRAWN: the BUG rank-scaling fails on both axes.** I made it
+the project's best-evidenced positive claim and told the writer so.
+
+- **Time — unresolved.** `bug_full_step_ratio_hi_over_lo = 1.366` at `N=64` (`rank_dependent:
+  true`) but `1.043` at `N=128` (`false`); the projected integrator's is `1.013`/`1.012`. **Resolved
+  at one grid and not the other is not a resolved result.**
+- **Memory — the committed artifact is stale and contradicted.** `peak_memory.json` was **not
+  regenerated** and still carries BUG spread `1.531 MiB` at `N=128` (`5.76×` the `0.1328 MiB`
+  floor, `rank_independence_resolved: true`), while coder reports the spread **moved `0.125 →
+  0.398 MiB` between two runs of identical code.** **`1.531` is not reproducible, and an artifact
+  on `main` asserts a resolved finding its author has withdrawn.**
+
+**D25.7 — What survives, and it is still worth reporting.** **BUG's absolute slowdown:**
+`bug_speedup_hi/lo` `0.195–0.303`, i.e. the BUG step costs **`3.3–5.1×`** the projected step,
+under an interleaved protocol with load recorded. **The memory overhead:** `+2.52`/`+3.79 MiB`
+over the full grid (D19.1) — still no memory advantage. **Withdrawn: the rank-scaling, and the
+framing that this was the project's best-evidenced positive claim.** **A slowdown is a negative
+result; it is still the honest one, and it is weaker than I said.**
+
+**D25.8 — Credited, and it is the protocol working.** Coder **refused my `/tmp` numbers on D14.4
+grounds** — *"a number lifted from another machine's scratch directory breaks exactly that"* — and
+ran the `Re=1000` column themselves. They **retracted a load-bearing finding with the reason
+given**, recorded load average and the worker's thread settings, noted their own first memory
+artifact *"recorded an environment the measurement did not run under"*, populated
+`rank_independence`, and resolved the normaliser dispute to *same data, same conclusion*
+(`45.4/45.8/44.9/42.7%` vs my `43–46%`). **A self-retraction delivered this cleanly is the
+behaviour the protocol exists to produce.**
+
+**D25.9 — Unchanged.** Every fitted `c·r^p` void. `t*` grid-dependent (D17.1) and now also
+**basis-provisional** (D25.5). No advantage in time or memory. The windowed rank rule is worse
+(D18.1). The `crossovers` block must not be quoted (D25.1). The flow is the implemented shear,
+with the AKS control (D20, D24). Every D4 barred claim stands.
