@@ -685,3 +685,61 @@ checked".
 - **R8** stated the committed amplitude was 0.2, having read the driver *default*; every
   committed artifact uses **0.5**. **Standing rule: a default in a signature is not a
   record of what was run — `state/*/results/*.json` is.**
+
+---
+
+## D12 — Rank criterion and the BUG port (2026-09-25)
+
+> **OPERATIVE (R42).** The **windowed** rank is the quantity the accuracy law is stated
+> in, and the **per-step** rank rule reads a different quantity. Report the distinction as
+> the paper's methodological finding; **do not** re-engineer the rank rule to accumulate a
+> visited subspace in this project. The BUG port stays, as a **structure** claim with **no
+> speed claim**, and the project declines the long high-`N` timing run.
+
+**D12.1 — Two different `r99`s, and they move in opposite directions.** The windowed `r99`
+(counts *time-varying directions* over a window) rises `1 → 16` over `t ∈ [0,8]` and is
+**grid-independent** (`16` at `N=64` and `N=128`, verified from project code). The per-step
+rule's `r99` (an SVD of **one field**, so *spatial* rank) **falls** `14 → 4` over the same
+interval. A rule that reads one snapshot at a time cannot see the subspace a trajectory
+accumulates. **Neither number is wrong; they are different quantities, and any artifact or
+sentence must say which.** D11.3 stands for the *implemented* rule; this decision is about
+which quantity the paper's claims are stated in.
+
+**D12.2 — The accuracy law is stated in the windowed rank, at fixed rank.** R39 measured
+`t* ≈ 0.050 · r^1.12` — the horizon over which a rank-`r` integrator beats a static
+subspace, with the rank **fixed per run**. The law is clean *because* the rank is fixed.
+**An adaptive rank rule would vary the rank within a run and dissolve the law.** So the
+paper's central result is a statement about the windowed rank at fixed truncation, and a
+window-accumulating rank rule is **future work with the motivating measurement attached**, not
+a prerequisite for the current claims.
+
+**D12.3 — Why an adaptive rule is not merely unfinished here but actively risky.** Second
+order (`1.98`, `1.95` measured) is a property of the **time integrator conditional on the
+rank being sufficient**. At rank 6 the same code converges at order `1.01 / 1.02 / 1.05`,
+because the rank-6 truncation discards 18 of 24 augmented directions every step and that
+error is `O(1)` in `dt`, so it masks the scheme's order. **An under-selecting rank rule
+degrades the observed order, not just the accuracy** (R5, F5: `adaptive_rank = 1`). The
+amplitude rule's conservatism is therefore a **safety property**, not an inconvenience.
+
+**D12.4 — The BUG (V6) port is merged and verified, and its cost argument does not
+survive.** Verified structurally, which is the right test and not a timing one:
+`large_svd_calls == 0` after ten steps and `svd_max_dimension ≤ 4r`, so the only
+factorization inside a step is of the small augmented `S`-matrix. A stationary state is held
+to `< 1e-12` over 25 steps with both factors orthonormal to `1e-12`. **BUG is ≈5× slower per
+step than the projected integrator** (`0.19–0.29×` the projected time at `N=32/64`), because
+the K-, L- and S-step right-hand sides are evaluated on rank-augmented fields, several per
+step, each a full-grid field evaluation with a spectral advection inside. **So BUG's value
+is structural preservation, not speed**, and the paper may say so and may not say otherwise.
+D10-V6's port requirement is **discharged**; its *cost* motivation is **withdrawn on
+measurement**.
+
+**D12.5 — No per-step speedup at any rank, and the long high-`N` timing run is declined.**
+The R5q gate measures the full-step ratio at `1.78–2.18` over `N ∈ {64,128,256}` and
+`r ∈ {2,64}`, **saturating at ≈2.1–2.2 and not approaching parity**; the four whole-field
+factorizations cost `0.60×` a full step at `N=64`, rising to `1.17×` by `N=256`. Per-step cost
+is **rank-independent** for the full step (`r=64` over `r=2`: `1.165`, `1.046`, `1.022`), with
+the `N=64` point left visible rather than the bar widened. **There is no grid at which this
+engine's reduced step costs the same as a full step, so a long high-`N` timing run cannot
+produce a per-step speedup claim and is declined.** Combined with R41's cost measurement, the
+trade is: **`r=2 → r=32` costs 4.4% more per step and buys 22× the advantage horizon**;
+`r=43` costs 6.6% more than `r=2` and is exact at every horizon.

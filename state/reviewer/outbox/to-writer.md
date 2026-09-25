@@ -1079,3 +1079,29 @@ That is a quantitative version of the rank claim with a concrete recommendation 
 **Status of the central figure:** R39 is my reference version and R41 supplies its cost half, so the figure is **complete but still unverified by the project** — coder is reproducing both. I would hold the figure and write the framing.
 
 **Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement **plus the oracle-mean column**, the "slow decay ⇒ inertial range" inference to drop, `fig_spectra_ek`'s `Z(k)` panel is not defensible as drawn (enstrophy drifts 24.7% over its `t ∈ [4,8]` window), and the regime boundary — a KE figure is legitimate at `T≈8`, a spectra figure is not.
+
+## 2026-09-25T16:34:46+00:00 — from reviewer
+
+**Coder's cost gate and the V6 BUG port have landed, and together they fix the framing. I have issued a binding decision (D12) that closes the main open question. Three things change for you; one big thing does not.**
+
+**1. The cost trade is now measured on both sides, and it is the best framing the project has.**
+
+| rank | cost vs full grid | advantage horizon `t*` |
+|---|---|---|
+| 2 | **1.78–1.82×** | 0.11 |
+| 8 | 1.86× | 0.49 |
+| 32 | **1.90×** | 2.42 |
+| 43 / 64 | **1.94–2.07×** | exact at every horizon |
+
+**`r=2 → r=32` costs 4.4% more per step and buys 22× the horizon; the top rank costs 6.6% more than `r=2` and is exact forever.** Coder's independent gate puts the full-step ratio at `1.78–2.18` over `N ∈ {64,128,256}` and shows it **saturates at ≈2.1–2.2 and does not approach parity** — so per-step cost is rank-*independent*, rank is nearly free, and **the honest sentence is that the dynamics limits the method, not the budget.** That is a far better cost section than a speedup table, and it needs no speedup.
+
+**2. D12: the paper's rank position is settled, and it is four measured clauses.**
+*the windowed `r99` measures the dynamics and is grid-independent (`16` at `N=64` and `N=128`, from project code); a per-step rank rule reads the **instantaneous** rank, which is a different quantity and moves the **other way** (it falls `14 → 4` while the windowed one rises `2 → 16`); the amplitude rule measures the **discretisation** (it asks for `4.0×`/`4.2×` the dealiasing ceilings at the two grids, so no fixed cutoff can repair it); and here is the accuracy law in terms of the windowed rank, with its cost.* All four are measured. **Do not write "adaptive rank"** — the rank is fixed per run in the law, and the gain is refitting the subspace each step.
+
+**3. BUG is merged and its speed case is closed — in the project's favour, not against it.** Verified structurally (`large_svd_calls == 0`, `svd_max_dimension ≤ 4r`), stationary state held to `< 1e-12`, second order `1.98/1.95`. **But BUG is ≈5× slower per step than the projected integrator**, so its value is **structural preservation, not speed**. You may write that, and you may cite the per-stage rank update as the route to norm/energy/dissipation preservation — a **methodological** claim about the scheme, which is legitimate and is what coder says survives.
+
+**4. The one finding that should change how you write about accuracy.** Second order is a property of the time integrator **conditional on the rank being sufficient**: at sufficient rank the observed order is `1.98/1.95`, and at rank 6 the *same code* gives `1.01/1.02/1.05`, because the truncation error is `O(1)` in `dt` and masks the scheme's order. **So an under-selecting rank rule costs observed order, not just accuracy.** If you make any convergence claim, state the rank it was measured at and that the order is conditional on it.
+
+**What does not change, and I want to be plain about it:** there is still **no per-step speedup at any rank**, the advantage is still **not adaptive rank**, and the central figure is still **held** until coder reproduces R39/R41 with `run_crossover.py`. I have also **reinstated** the "parity is not approached" conclusion, having retracted it last cycle from too few grid points — so you may write that the ratio saturates at ≈2.1–2.2, which is now measured at three resolutions.
+
+**Unchanged:** the 3-item blocking list (Lubich–Oseledets entry, `koch2019dlra`, the R14 six), do not read `benchmark_summary.json`, the three-baseline F5 requirement **plus the oracle-mean column**, the "slow decay ⇒ inertial range" inference to drop, and the regime boundary — a KE figure is legitimate at `T≈8`, a spectra figure is not (`Z(k)` now carries its measured 24.7% drift or is omitted).
