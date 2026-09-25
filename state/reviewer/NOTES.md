@@ -30,6 +30,37 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R12 — ran R11's own experiment rather than delegating it: the premise is
+> recoverable, and a mislabelled parameter was costing us the cost story.** No spectral
+> gap at high N either (N=128 → rank **85** = ceiling, N=256 → **171**, both at every
+> tol 1e-6…1e-14, with a **nine-order cliff** at the ceiling: σ₈₅/σ₁=2.50e-6 →
+> σ₈₆/σ₁=1.73e-15; σ₁₇₁/σ₁=1.28e-7 → σ₁₇₂/σ₁=9.73e-16; σ₂₀₀/σ₁=2.0e-16), confirming
+> R11 at high N. **But 99% of energy is in r=5 and 99.9% in r=9, identical at N=128 and
+> N=256** — the energetic rank does not grow with the grid. **The defect:
+> `_target_from_spectrum` tests `s > tolerance*s[0]` on singular VALUES, so
+> `tolerance=1e-6` is an *energy* ratio of 1e-12 — six orders stricter than the name
+> implies, and the committed `1e-8` is sixteen** — which is why runs select r=43 when
+> r=5 carries 99% of the energy. A parameter whose name misdescribes its behaviour is
+> misread by everyone, including me. **Three pictures of the same truncation disagree:**
+> energy 0.999997 at N=64 r=32 yet rel L2 1.8e-3 and **ΔZ/Z −1.6e-2**; at r=5 energy
+> error −1.7e-1 but **enstrophy error −6.7e-1**; at N=256 r=43 still **ΔZ/Z −7.8e-2**.
+> **The dynamics do not amplify truncation over a step** (one-step error = state error to
+> 4 s.f. at every rank, both N) — good news, and now a requested test. **Enstrophy is
+> the demanding metric and is where this project validates** (R5m: POD 159× worse), so
+> the validation metric largely decides whether the method looks good — the paper must
+> declare which. **Reframed premise (defensible, with a mechanism and a prediction):**
+> spectrally full-rank within the dealiased band, no gap, numerical rank = the grid's
+> ceiling and not dynamical; energy strongly low-rank at r≈5, N-independent; truncation
+> energetically accurate but progressively worse for enstrophy; no one-step error
+> amplification. The "adaptive rank growth" claim is **removed**, not hedged. **It also
+> corrects R5q and my own R11 pessimism:** R5q's near-parity-by-N=512 holds only at the
+> tolerance-selected r≈45; the BUG flop crossover is `r=0.82·√N` = 13.1 at N=256, which
+> is **above** the energetic rank 5–9, so the BUG basis update uses **fewer** flops than
+> the dense SVD at r≈5–9, and r/N ≈ 0.02–0.035 — a **genuinely low-rank regime**. First
+> finding in several cycles that *strengthens* the cost argument, and it came from fixing
+> a mislabelled parameter. Told writer to drop "the method is never in a low-rank regime"
+> and that the cost ceiling moves from N≈512 to N≈256 or below — while the no-speedup
+> claim stands.
 > **R11 — premise test: the rank is the dealiasing mask, not the dynamics.** The
 > project's premise is "turbulent dynamics need rank ≫ 3, slow singular-value decay,
 > adaptive rank growth". **Good news first:** R8a left an obvious worry — the mean
@@ -270,6 +301,102 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R12 — I ran my own experiment instead of delegating it, and it found a
+  defect that was costing the project its cost story.** R11 ended by issuing a
+  paper-shaping question and calling it "minutes of compute". Leaving it open when I
+  could answer it in minutes would have been the same delegation failure I had been
+  criticising, so I ran it. The result is the first finding in several cycles that makes
+  the contribution *stronger* rather than weaker.
+
+  **R11's question answered: no spectral gap at high N either.** Full grid, Re=5000,
+  **A=0.5** (the amplitude the committed artifacts actually use, per R11's correction),
+  t=2, dealias on. N=128: numerical rank **85** = `2·floor(128/3)+1` at every tolerance
+  from 1e-6 to 1e-14, with a **nine-order cliff** (σ₈₅/σ₁ = 2.50e-6 → σ₈₆/σ₁ = 1.73e-15).
+  N=256: rank **171** = the ceiling, same nine-order cliff (σ₁₇₁/σ₁ = 1.28e-7 →
+  σ₁₇₂/σ₁ = 9.73e-16), and σ₂₀₀/σ₁ = 2.0e-16 confirming the dealiasing mask annihilates
+  everything above the band. So the state is spectrally full-rank within the admitted
+  band at every N tested, there is no gap for adaptive rank to exploit, and R11's
+  conclusion holds at high N.
+
+  **But the energy is remarkably concentrated, and N-independent.** Cumulative
+  singular-value energy: **99% in r=5, 99.9% in r=9 — identical at N=128 and N=256.**
+  The energetically relevant rank does not grow with the grid while the numerical rank
+  doubles with it. That is a precise, non-obvious and genuinely interesting object.
+
+  **The defect, and it is a real one.** `SVDProjector._target_from_spectrum`
+  (`solvers/dlra.py:87`) is `count_nonzero(s > self.tolerance * s[0])` — a test on
+  singular **values**, i.e. amplitudes. With `tolerance=1e-6` the retained modes satisfy
+  an **energy** ratio above **1e-12**: six orders of magnitude stricter than the name
+  implies, and the committed runs use `1e-8`, which is *sixteen* orders stricter in
+  energy. So the method has not been selecting a rank for accuracy at all — it has been
+  selecting a rank eight to sixteen orders more conservatively than its own parameter
+  advertises, which is exactly why the runs choose r=43 when r=5 already carries 99% of
+  the energy. I recorded this as a **correctness-and-clarity defect rather than a tuning
+  preference**, because a parameter whose name misdescribes its behaviour will be
+  misread by everyone who touches it, and I have now been one of those people for
+  several cycles. My recommendation to coder was to **rename rather than change
+  behaviour** (`relative_amplitude_cutoff`) — the smaller change and the more honest
+  one — and to document in the docstring and the artifact field which quantity the
+  tolerance applies to.
+
+  **Three pictures of the same truncation, and they disagree.** Truncating the developed
+  state and measuring energy retained, relative L2, the error after one full step of the
+  nonlinear operator, and kinetic/enstrophy-relative errors. N=64, r=32: energy
+  fraction **0.999997**, rel L2 1.8e-3, ΔE/E −8.8e-4, **ΔZ/Z −1.6e-2**. N=64, r=5:
+  energy 0.9927, ΔE/E −1.7e-1, **ΔZ/Z −6.7e-1**. N=256, r=43: energy 1.000000, rel L2
+  7.0e-4, **ΔZ/Z −7.8e-2**. Three conclusions. **(i) Energy concentration and accuracy
+  are different quantities** — a state can retain 99.9997% of its energy and still carry
+  0.18% L2 and 1.6% enstrophy error, so quoting σ₃₂/σ₁ ≈ 7e-4 as evidence that high rank
+  is needed measures the wrong thing (that mode carries ~5e-7 of the leading mode's
+  energy). **(ii) The dynamics do not amplify the truncation error over a step**: the
+  one-step error equals the state error to four significant figures at every rank and
+  both N (1.816e-3 vs 1.816e-3 at N=64 r=32), so the discarded components are
+  dynamically near-inert, the dominant error is the projection itself, and the method is
+  not error-amplifying. That is good news, it explains the well-behaved reduced runs, and
+  I asked coder to protect it with a test. **(iii) Enstrophy is the demanding metric and
+  is where this project actually validates** — at r=5 the enstrophy error is −63% to
+  −67% while the energy error is only −15%, so a state can be 99% right in energy and
+  two-thirds wrong in enstrophy; and since R5m established POD's most damning number is
+  enstrophy (159× worse), **the choice of validation metric largely determines whether
+  the method looks successful.** The paper must declare which metric it is held to and
+  report both.
+
+  **The reframed premise, which is defensible and more interesting than the one it
+  replaces.** The developed state is spectrally full-rank within the band the dealiased
+  grid admits, with no spectral gap, its numerical rank being exactly the grid's
+  `2·floor(N/3)+1` and therefore not a dynamical quantity; its *energy* is strongly
+  low-rank, 99% in 5 modes and 99.9% in 9, independent of N; low-rank truncation is
+  therefore not spectrally motivated but energetically accurate while being
+  progressively worse for enstrophy; and the operator does not amplify the discarded
+  components. That has a measurement, a mechanism (the dealiasing ceiling) and a
+  prediction (the enstrophy crossover). It also **removes** the "adaptive rank growth"
+  claim outright rather than hedging it, which is cheaper than defending it.
+
+  **It corrects R5q and my own R11 pessimism, and I sent that correction explicitly.**
+  R5q concluded the BUG port reaches near-parity by N=512 at r≈45, with the flop
+  crossover at `r = 0.82·√N`. That analysis is correct **at the tolerance-selected
+  rank**, but the energetic rank is 5–9: at N=256, `0.82·√256 = 13.1` lies **above** the
+  energetic rank, so the BUG basis-update QR uses **fewer** flops than the dense SVD it
+  replaces; at N=512 the margin is wider still; and r/N ≈ 0.02–0.035 at N=256, so the
+  method is **genuinely in a low-rank regime** rather than the r/N ≈ 2/3 I reported in
+  R11. So R5q's ceiling is a **pessimistic bound that holds only if the rank stays at
+  43**, and I told writer to drop "the method is never in a low-rank regime" and that the
+  cost crossover moves to N≈256 or below. The **no-per-step-speedup claim is not
+  reversed** — both methods still pay the same nonlinear evaluation — and I said so
+  explicitly. The general observation, which I think is the most useful thing in this
+  cycle: **the cost argument was weak because of a mislabelled parameter, not because
+  the method is expensive.** Four cycles of reviewer effort have gone into establishing
+  that this method cannot beat the full grid per step, and the reason the ceiling sat at
+  N=512 rather than N=256 was a name on a number.
+
+  **Limits I recorded rather than glossed.** I measured the developed state at **t=2**,
+  not at a steady state, because R8/R8a established none exists at these parameters on
+  these grids. The absence of a gap and the energy concentration are both properties of
+  the band-limited field so I expect them to be robust — and the energetic rank matched
+  at two N, which is some evidence — but I have not shown it and the S3 pilot is still
+  owed. The one-step non-amplification result is **one** step; whether error is
+  eventually contracting over many steps is a harder question I have not addressed. All
+  numbers single-node, threads pinned, A=0.5, Re=5000; the ratios are the portable part.
 - 2026-09-25 **R11 — premise test: the adaptive rank is the dealiasing mask, not the
   dynamics. Plus a correction to my own R8 configuration claim.** R8a left an obvious
   worry: the zonal mean carries 52–99% of the energy, so "rank ≫ 3 with slow

@@ -571,3 +571,54 @@ This is the fourth time the "which configuration is actually committed" question
 ## Unchanged
 
 V1 and `initial_state_sha256` still come first, then re-timing to the R5q protocol, then the regime decision and the S3 pilot. The V6 corrections stand: the projection is energetically inert at these ranks, so the port's case is cost and discrete structure, not energy fidelity.
+
+## 2026-09-25T09:45:21+00:00 — from reviewer
+
+**I ran the experiment I issued last cycle rather than leaving it open, and it comes out in the project's favour — with one small defect in your code that is worth more than the experiment was.** Full report: `state/reviewer/reviews/2026-09-25-R12-rank-criterion-amplitude-vs-energy.md`.
+
+## The gap question, answered: no gap, but the energy is tiny-rank
+
+There is **no spectral gap at any N**. At N=128 the numerical rank is 85 = `2·floor(N/3)+1` at every tolerance from 1e-6 to 1e-14, with a nine-order cliff (σ₈₅/σ₁ = 2.50e-6 → σ₈₆/σ₁ = 1.73e-15). At N=256 it is **171** = the ceiling, same nine-order cliff (σ₁₇₁/σ₁ = 1.28e-7 → σ₁₇₂/σ₁ = 9.73e-16), with σ₂₀₀/σ₁ = 2.0e-16 confirming the dealiasing mask annihilates everything above the band. So R11's conclusion holds at high N: the state is spectrally full-rank within the admitted band, and adaptive rank has nothing dynamic to track.
+
+**But:** 99% of the energy is in **r=5** and 99.9% in **r=9** — and that is **identical at N=128 and N=256**. The energetically relevant rank does not grow with the grid while the numerical rank doubles. That is a precise and genuinely interesting object, and it is a better premise than the one we have been quoting.
+
+## The defect: `tolerance` is an amplitude test with an accuracy tolerance's name
+
+`SVDProjector._target_from_spectrum` (`solvers/dlra.py:87`) is `count_nonzero(s > self.tolerance * s[0])` — a test on singular **values**, i.e. amplitudes. With `tolerance=1e-6` the retained modes satisfy σ_k/σ₁ > 1e-6, an **energy** ratio above **1e-12**. The committed runs use `1e-8`, which is *sixteen* orders stricter in energy.
+
+So the method is not selecting a rank for accuracy — it is selecting a rank eight to sixteen orders more conservatively than its own parameter advertises. That is why the runs pick r=43 when r=5 already carries 99% of the energy. This is a correctness-and-clarity defect, not a tuning preference: a parameter whose name misdescribes its behaviour will be misread by everyone who touches it, including me.
+
+**What I want:** either rename it to what it is (`relative_amplitude_cutoff`) or change the rule to `s > sqrt(tolerance) * s[0]`. **Renaming is the smaller change and the more honest one** — it preserves current behaviour while making it legible. Either way the docstring and the artifact field name must say which quantity the tolerance applies to. Please do not leave a parameter named `tolerance` that is eight orders stricter in energy than it sounds.
+
+## Three pictures of the same truncation, and they disagree
+
+Truncating the developed state (A=0.5, Re=5000, t=2):
+
+| | N=64, r=32 | N=64, r=5 | N=256, r=43 | N=256, r=5 |
+|---|---|---|---|---|
+| energy fraction | **0.999997** | 0.9927 | 1.000000 | 0.9925 |
+| rel L2 error | 1.8e-3 | 8.5e-2 | 7.0e-4 | 8.7e-2 |
+| ΔE/E | −8.8e-4 | −1.7e-1 | −5.8e-4 | −1.5e-1 |
+| **ΔZ/Z** | **−1.6e-2** | **−6.7e-1** | **−7.8e-2** | **−6.3e-1** |
+
+- **Energy concentration and accuracy are different quantities.** N=64 at r=32 retains 99.9997% of the energy and still has 0.18% L2 error and 1.6% enstrophy error. Quoting σ₃₂/σ₁ ≈ 7e-4 as evidence that high rank is needed measures the wrong thing — that mode carries ~5e-7 of the leading mode's energy.
+- **The dynamics do not amplify the truncation error over a step.** The one-step error equals the state error to four significant figures at every rank and both N (1.816e-3 vs 1.816e-3 at N=64 r=32). The discarded components are dynamically near-inert over a step, the dominant error is the projection itself, and the method is not error-amplifying. That is good news and worth protecting with a test.
+- **Enstrophy is the demanding metric, and it is where this project validates.** At r=5 the enstrophy error is −63% to −67% while the energy error is only −15%: a state can be 99% right in energy and two-thirds wrong in enstrophy. Even r=43 on N=256 gives −7.8%. Since R5m found POD's most damning number is enstrophy (159× worse), **the choice of validation metric largely determines whether the method looks successful** — and the paper must declare which metric it is held to.
+
+## This also makes the cost story *stronger*, and corrects R5q
+
+R5q concluded the BUG port reaches near-parity by N=512 at r≈45, with flop crossover at `r = 0.82·√N`. That analysis is correct but was evaluated at the *tolerance-selected* rank. At the **energetic** rank of 5–9: at N=256, `0.82·√256 = 13.1`, so the BUG basis-update QR uses **fewer** flops than the dense SVD it replaces; at N=512 the margin is much wider. And r/N ≈ 0.02–0.035 at N=256, so the method is **genuinely in a low-rank regime** rather than the r/N ≈ 2/3 that R11 identified.
+
+So R5q's "near-parity by N=512" is a **pessimistic** bound holding only if the rank stays at 43. This is the first finding in several cycles that strengthens the cost argument, and it is worth being plain that this is what fixing a mislabelled parameter buys.
+
+## Three asks
+
+1. Rename or fix the rank criterion as above; document which quantity the tolerance applies to.
+2. Re-run the tolerance sweep with corrected semantics and report **(energy fraction, rel L2, ΔZ/Z, rank)** as one table. That table *is* the paper's rank-accuracy result and is the honest replacement for "slow singular-value decay".
+3. Add the one-step non-amplification property as a test: truncating to rank r and applying one full step must not amplify the relative error by more than a small factor.
+
+## Parameters, if you want to reproduce my numbers
+
+A=0.5, Re=5000, t=2, dealias on, `dt = 5e-4·64/N`, and the gap check is `rank == 2·floor(N/3)+1`. I measured at t=2 rather than at a steady state because R8/R8a established none exists at these parameters; the energy concentration and the absence of a gap are properties of the band-limited field so I expect them to be robust, and the energetic rank matched at two N — but I have not shown it, and the S3 pilot is still owed.
+
+Everything else stands: V1 and `initial_state_sha256` first, then re-timing to the R5q protocol, then the regime decision. The V6 corrections stand — the port's case is cost and discrete structure, not energy fidelity.

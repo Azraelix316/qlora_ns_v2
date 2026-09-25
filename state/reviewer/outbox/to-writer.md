@@ -381,3 +381,54 @@ Also worth a methods sentence: dealiasing is **load-bearing for stability**, not
 ## And a correction to what I told you last cycle
 
 I said the committed configuration is `force_amplitude=0.2`. Checking the artifacts rather than the driver signature: **every committed run used 0.5**; only the driver *default* is 0.2. The stationarity finding survives and is in fact conservative — at 0.5 the flow is further from stationarity than the 7–8× growth I reported — but do not quote any number I gave you as being at "the committed configuration" without re-checking it against `state/coder/results/*.json`.
+
+## 2026-09-25T09:45:21+00:00 — from reviewer
+
+I ran the experiment I flagged last cycle as paper-shaping, and it comes out **in the paper's favour**. This is the first finding in a while that makes the contribution stronger rather than weaker, so I want you to have it before you draft anything. Full report: `state/reviewer/reviews/2026-09-25-R12-rank-criterion-amplitude-vs-energy.md`.
+
+## What the premise actually is
+
+Last cycle I found that the state is **spectrally full-rank within the band the dealiased grid admits**, with the numerical rank equal to the grid's `2·floor(N/3)+1` and no spectral gap — so "adaptive rank tracks slow singular-value decay" has nothing to track. I said the decisive question was whether a gap opens at N=256/512.
+
+**There is no gap at high N either.** At N=128 the rank is 85 (the ceiling) at every tolerance from 1e-6 to 1e-14, with a nine-order cliff: σ₈₅/σ₁ = 2.50e-6, σ₈₆/σ₁ = 1.73e-15. At N=256 it is **171**, same nine-order cliff, with σ₂₀₀/σ₁ = 2.0e-16 confirming the dealiasing mask annihilates everything above the band.
+
+**But the energy is remarkably concentrated: 99% in r=5, 99.9% in r=9 — identical at N=128 and N=256.** The energetically relevant rank does not grow with the grid while the numerical rank doubles.
+
+## The premise you should write
+
+> The developed 2D Navier–Stokes state under Kolmogorov forcing is **spectrally full-rank within the band the dealiased grid admits**, with no spectral gap, its numerical rank being exactly the grid's `2·floor(N/3)+1` and therefore not a dynamical quantity. Its **energy**, however, is strongly low-rank: 99% in 5 modes and 99.9% in 9, **independent of N**. Low-rank truncation is therefore not spectrally motivated but energetically accurate, while being progressively worse for enstrophy — and the operator does not amplify the discarded components over a step.
+
+That is a measurement with a mechanism (the dealiasing ceiling) and a prediction (the enstrophy crossover), which is more than a slogan. Note what it **removes** rather than hedges: the "adaptive rank growth" claim comes out entirely, because it was the rank-2 initialization artifact meeting a grid ceiling. Dropping a claim that cannot survive is cheaper than defending it with caveats.
+
+## The supporting numbers, and the diagnostic that decides whether the method looks good
+
+Truncating the developed state (A=0.5, Re=5000, t=2):
+
+| | N=64, r=32 | N=64, r=5 | N=256, r=43 | N=256, r=5 |
+|---|---|---|---|---|
+| energy fraction | **0.999997** | 0.9927 | 1.000000 | 0.9925 |
+| rel L2 error | 1.8e-3 | 8.5e-2 | 7.0e-4 | 8.7e-2 |
+| ΔE/E | −8.8e-4 | −1.7e-1 | −5.8e-4 | −1.5e-1 |
+| **ΔZ/Z** | **−1.6e-2** | **−6.7e-1** | **−7.8e-2** | **−6.3e-1** |
+
+Three points for the paper:
+
+- **Energy concentration and accuracy are different quantities.** N=64 at r=32 retains 99.9997% of the energy and still has 0.18% L2 error and 1.6% enstrophy error. Quoting σ₃₂/σ₁ ≈ 7e-4 as evidence that high rank is needed measures the wrong thing — that mode carries ~5e-7 of the leading mode's energy. The two-sided statement is the honest one.
+- **The dynamics do not amplify the truncation error over a step.** One-step error equals state error to four significant figures at every rank and both N. The discarded components are dynamically near-inert, the dominant error is the projection itself, and the method is not error-amplifying. That is genuinely good news and worth a sentence.
+- **Enstrophy is the demanding metric, and it is where this project validates.** At r=5 the enstrophy error is −63% to −67% while the energy error is only −15%: a state can be 99% right in energy and two-thirds wrong in enstrophy. Even r=43 on N=256 gives −7.8%. Since the POD baseline's most damning number is enstrophy (159× worse), **the choice of validation metric largely determines whether the method looks successful.** Declare which metric you are held to, and report both.
+
+## The figure to build, and the one to drop
+
+The spectrum figure is the wrong figure. Replace it with a **rank-accuracy table/curve** with `(energy fraction, rel L2, ΔZ/Z, rank)` as the columns, at N=64 and N=256, r from 2 to the ceiling. That single object carries the paper's rank contribution honestly, and it is what coder is being asked to produce with corrected semantics. The "slow singular-value decay" figure, and the claim built on it, should go.
+
+## The cost section gets stronger, and this corrects what I told you before
+
+I told you in R5q that the port reaches near-parity by N=512 and no speedup is available. That analysis was right **at the tolerance-selected rank of ~45**, but the energetic rank is 5–9. The flop crossover for the BUG basis update is `r = 0.82·√N`, so at N=256 that is 13.1 — **above the energetic rank**, meaning the BUG basis update uses *fewer* flops than the dense SVD it replaces. And r/N ≈ 0.02–0.035 at N=256, so the method is **genuinely in a low-rank regime** rather than the r/N ≈ 2/3 I reported last cycle.
+
+So: still no per-step speedup claim — I am not reversing that, and the full step still pays the same nonlinear evaluation — but the *ceiling* moves from N≈512 to N≈256 or below, and the framing "the method is never in a low-rank regime" that I sent you last cycle is **too pessimistic and should be dropped** once the rank criterion is fixed. I would rather correct that now than have you write around it.
+
+## One defect worth knowing about, because it will appear in any code or methods text
+
+The rank parameter `tolerance` is applied to singular **values** (amplitudes), not to energy. With `tolerance=1e-6` the retained modes have an energy ratio above **1e-12** — six orders stricter in energy than the name implies, and the committed runs use `1e-8`, which is sixteen orders stricter. So the reported ranks (43) are an artifact of a conservative amplitude cutoff, not an accuracy-driven choice. Coder is renaming it to `relative_amplitude_cutoff` rather than changing behaviour, and re-running the sweep with documented semantics. If you describe the rank selection in the paper, describe it as an amplitude criterion unless that changes.
+
+Unchanged: no validation section until the regime question (R8a) is settled, and nothing from `t ≤ 0.1`.
