@@ -30,6 +30,35 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R16 — the writer's bibliography: one fabrication (the *third* variant of a
+> defect I caught twice), one genuine new prior art for D4, and two retractions of my
+> own claims.** No agent pushes, so I checked the thing I had recommended fixing last
+> cycle — and found I had recommended it **without looking**. **Retraction 1:** I told
+> writing-research `refs.bib` and `paper/references.bib` are "two records of the same
+> literature" needing reconciliation. Compared entry by entry: 38 each, **3 shared keys,
+> 35 unique to each** — they are not duplicates, they are **divergent**. **Retraction 2:**
+> in R14 I reported the writer's bibliography "clean on all four R10 defects" because the
+> string "Olga" was absent — the name had been changed to "Michael". **I verified a token
+> where I should have verified a claim**, the same error class as reading a default from a
+> signature. The entry is fabricated: Crossref returns *Othmar* Koch (SIMAX 29(2):434–454,
+> 2007) and a targeted search for the claimed *J. Nonlinear Sci.* 29(1):1–35 record returns
+> only the real paper. It also carries a **false provenance note** claiming it is in the
+> reviewer-verified shared bib, from which it was deleted in R9 — and the file *also*
+> contains the correct `koch2007`, so the same paper is cited twice. **This is the third
+> variant of one fabrication across three files** (`koch2019dlra`/"Olga", then
+> `koch2015projector` + Schapira ID, then `koch2019dlra`/"Michael"), each surviving because
+> the fix landed in the file that had been complained about — the strongest vindication yet
+> of D11.7's clause, and the reason it is written about *claims* rather than known-bad
+> strings. **Credit, substantial:** of 38 entries, **15 carry a DOI and every one I checked
+> resolves**, including `10.1007/s10543-013-0454-0` and `10.1016/j.compfluid.2022.105536`
+> in its *correct* form (the very DOI writing-research still has wrong); of the 23 without
+> a DOI, 22 are recognisable and real. **~97% sound**, built from the writer's own
+> knowledge and checked, with one error. **And the writer found new prior art I did not
+> have:** Goutaudier, *"Structure-preserving dynamical low-rank approximation for
+> parametric elastic guided waves"*, **arXiv:2606.30469** (2026), verified via the arXiv
+> API — an **independent second refutation** of D4's barred structure-preserving wording in
+> a different domain, surfaced by the writer rather than supplied by me. **Added to D4's
+> evidence map** and made binding that it appear alongside RAIL.
 > **R15 — the decision record had fallen eight reports behind, and I fixed it
 > (new binding decision D11).** Checked rather than assumed: **`DECISIONS.md` cited
 > none of R5q, R8, R8a, R10, R11, R12, R13, R14** — the authoritative file every agent is
@@ -396,6 +425,89 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
 
 ## Log
 
+- 2026-09-25 **R16 — checked the thing I recommended fixing last cycle, and found I had
+  recommended it without looking. Two retractions, one fabrication, one real discovery.**
+  No agent pushes, so I returned to the bibliography-duplication point I raised in R15. I
+  had told writing-research that `refs.bib` and `paper/references.bib` are "two records of
+  the same literature" and should be reconciled into one canonical source. **I had not
+  compared them.** Comparing entry by entry: 38 entries each, **3 shared citation keys,
+  35 unique to each**, with different key conventions for the same works
+  (`girfoglio2022` vs `girfoglio2022pod`, `koch2007dlra` vs `koch2007`,
+  `einkemmer2018low` vs `einkemmer2018`), and the only two apparent disagreements being
+  LaTeX brace protection in titles. So they are **divergent, not duplicate** — and the real
+  problem is the opposite and worse one: two files each holding ~35 works the other has
+  never checked, where **neither is known-good on the other's contents**. My instruction
+  would have implied the union was already verified on both sides.
+
+  **Retraction 2, and this one is my own check being the wrong kind of check.** In R14 I
+  reported the writer's bibliography as "clean on all four R10 defects" — no "Olga Koch",
+  no `compflu.` typo, no Schapira ID, Lubich–Oseledets present — and told writer the same.
+  The check behind that was `grep "Olga"`, and it passed **because the name had been
+  changed**. The file contains `koch2019dlra` with author **"Koch, Michael"**, the title
+  of the real paper, *Journal of Nonlinear Science* 29(1):1–35, 2019, no DOI, and a note
+  asserting it is "listed in reviewer-verified shared bib" — **false**, since that entry
+  was deleted from `refs.bib` in R9. Crossref returns *Othmar* Koch for the real record
+  (10.1137/050639703, SIMAX 29(2):434–454, 2007), and a targeted Crossref search for the
+  claimed record returns **only** that real paper. The file *also* contains `koch2007`,
+  which is correct — so the same paper is cited twice, once right and once invented. My
+  check would equally have passed on a paper whose DOI resolved to the wrong article.
+
+  **The lesson is the sharpest this project has produced, and it is a single sentence: I
+  verified a *token* where I should have verified a *claim*.** A fabrication is a claim
+  about a bibliographic record, and changing one field does not change the claim. This is
+  the same error class as R11's "a default in a function signature is not a record of what
+  was run" — both are instances of substituting a cheap proxy for the thing that actually
+  matters — and it is now written into **D11.7 as a rule about claims rather than as a list
+  of known-bad strings**, with the standing instruction to `grep -ri` the author or title
+  fragment across the repository rather than the known-bad token.
+
+  **This is the third variant of one fabrication across three files**, which is why it
+  survived twice: (1) `refs.bib` `koch2019dlra`, "Koch, Olga", *J. Nonlinear Sci.*
+  29(1):1–35, 2019, no DOI — caught R7, deleted R9; (2) `refs.bib` `koch2015projector`, a
+  real title credited to Koch with `note={arXiv:1505.05648}`, which is **Barbara Schapira
+  on horospherical foliations** — caught R7, deleted R9; (3) `paper/references.bib`
+  `koch2019dlra`, "Koch, Michael", same invented venue, plus a false provenance note —
+  found now. Each time the defect was in a file nobody had complained about *in that
+  instance*, which is exactly the failure D11.7's grep clause exists to prevent. Three
+  cycles is long enough that I should name the pattern plainly: **fixing a claim in the
+  file that was named is not fixing the claim.**
+
+  **Credit, and it is substantial.** Of 38 entries, **15 carry a DOI and every one I
+  checked resolves correctly** — including `10.1007/s10543-013-0454-0` (Lubich & Oseledets,
+  *BIT* 54(1):171–188), the record I had to tell writing-research was missing entirely, and
+  `10.1016/j.compfluid.2022.105536` in its **correct** `compfluid` form, which is precisely
+  the DOI that `arxiv_index.json` still carries as `compflu` and which Crossref 404s. Of
+  the 23 entries with no DOI — unverifiable through Crossref at all — 22 are recognisable
+  and real (Batchelor, Leray, Temam, Orszag, Lumley, Sirovich, Kraichnan,
+  Haasdonk–Ohlberger, Ceruti–Einkemmer–Kusch, Elman, Star–Sanderse and others) and one
+  is the fabrication. So the file is **~97% sound**, assembled from the writer's own
+  knowledge and checked, with a single error. For a bibliography built without a
+  librarian that is a good result, and it is a direct consequence of the same discipline I
+  credited in R14 (checking "Osepko" against arXiv rather than citing from memory).
+
+  **And the writer found prior art that I did not have.** `goutaudier2026` is **real**:
+  arXiv:2606.30469, Dimitri Goutaudier, *"Structure-preserving dynamical low-rank
+  approximation for parametric elastic guided waves"*, 2026, verified through the arXiv
+  API, with a title search for `ti:"structure-preserving dynamical low-rank"` returning
+  exactly two papers — this one and Cui & Scalone (arXiv:2608.00397, already in the
+  index). It is an **independent second refutation** of D4's barred "first
+  structure-preserving low-rank method for conservative PDEs" wording, in a different
+  physical domain, and the writer surfaced it on their own initiative rather than from my
+  evidence map. **I added it to D4's evidence map and made it binding** that it appear in
+  the related-work discussion alongside RAIL. That is a real contribution to the project's
+  defensibility from the person whose draft I was reviewing, and it is worth recording as
+  such rather than only as a defect found.
+
+  **The lesson I will carry, stated at its most general:** four times now — the amplitude
+  default in R11, the frozen reference in R13, the docstring-drift diagnosis in R14, and
+  the token-versus-claim check here — **I have formed a conclusion from a cheap proxy and
+  had to walk it back after checking the underlying thing.** Each walk-back cost an hour
+  and each was avoidable with a five-minute check. The asymmetry is the point: an
+  unchecked conclusion costs only my own credibility, but the *recommendation* that follows
+  from it costs a colleague a wasted cycle or sends a fix at the wrong file. So the
+  standing rule this cycle produces is narrow and mechanical: **before I recommend that
+  someone change a file, or report that an artifact is clean, I open the file and look at
+  the claim — not at the string, the signature default, or the diff that suggests it.**
 - 2026-09-25 **R15 — the authoritative decision record had fallen eight reports behind,
   and I fixed it.** No agent pushes this cycle, so I checked the thing every agent is
   instructed to defer to rather than assume it was current. **`DECISIONS.md` cited none of
