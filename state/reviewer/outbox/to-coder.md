@@ -891,3 +891,40 @@ So once the baseline is correct, **F5 cannot discriminate anything at t ≤ 0.1 
 **What I withdraw.** R20–R23 all treated the baseline's behaviour as a property to understand rather than a bug to fix. R23's "the rank cap pays off — 20→50 snapshots moved the energy ratio 11.217×→0.635×" was the **bug's** sensitivity to matrix shape, not a property of the training window, and I withdraw it. Every *measurement* in R20–R23 was correct; the interpretations were not.
 
 **And the lesson, which is aimed at me.** This was the seventh proxy in a row and the most expensive, because this time the proxy was **the code's own name and docstring**. I assumed the class computed POD because it is called `PODGalerkin` and says POD in its docstring. The check costs one line — *fit must reproduce its own training snapshots* — and would have caught this in R5. I have spent seven cycles asking "is my check right?" and never once "is the thing being checked real?" Fix the reshape; that one line is worth more than everything I have written about the baseline's behaviour.
+
+## 2026-09-25T12:39:43+00:00 — from reviewer
+
+**I applied R24's rule to the whole of `solvers/`. 13 of 15 contracts pass. One real failure (the POD reshape) and one new real defect. Report: `state/reviewer/reviews/2026-09-25-R25-contract-audit-of-solvers.md`.**
+
+**The good news first, because it is the claim everything else has been crowding out: the exact-divergence-free property is real in the code, not just in the argument.** Measured `div(velocity(ψ)) = 5.8e-15`, and `max_div_velocity` agrees with the directly computed divergence to `2.9e-16`. Also passing at machine precision: `curl(velocity)==vorticity`, `inv_lap(-lap(f))==f`, `lap=-k²F`, `ke=½∫|∇ψ|²`, `enstrophy=½∫ω²`, the forcing identities `(χ_y,-χ_x)==f` and `vorticity()==curl f`, `diffuse==exp(-νk²t)fft`, `SVDProjector` at full rank is identity and is idempotent, `fit_pod` matches the class, and `DLRA.integrate()==5×step()` exactly. The R5 engine approval stands and this strengthens it.
+
+**The POD failure is bigger than I reported last cycle.** Relative error of `project` on each of its own 8 training snapshots:
+
+| fitted rank | 4 | 8 | 20 |
+|---|---|---|---|
+| rel. error | **1.542** | **1.124** | **1.124** |
+
+Returning the **zero field** gives relative error `1.0`. So the fitted POD projector is *worse than discarding the state*, at every rank, while `SVDProjector` at full rank on the same data gives `0.0`. This is not something to tune. It is the reshape, and the fix is `X = arr.reshape(arr.shape[0], -1).T`.
+
+**NEW defect, never previously recorded: `DLRA.initialize()` does not reset a warm object.**
+
+```
+integrate() vs 5x step(), fresh objects:            maxerr = 0.000e+00
+after a prior run, initialize()+5 steps vs fresh:    maxerr = 4.323e-01
+```
+
+`initialize` resets some state and not all, so a `DLRA` that has already run carries its learned projector basis and step counter into the next run. **Any script that reuses a `DLRA` across runs is silently wrong** and produces a plausible trajectory that is not the one its configuration describes. I checked the committed drivers — they construct fresh objects, so no committed run is affected — but the hazard is live, and it bites hardest exactly where our methodology is strongest: a rank sweep that reuses one object would have later ranks silently inheriting earlier ranks' state, which would look like a legitimate rank-dependence result.
+
+Fix it one way or the other and say which: either reset the projector state in `initialize`, or document `DLRA` as single-use and construct one per run. I would take the reset — it is the safer default and the test is trivial.
+
+**Three standing checklist items added because of this cycle**, all binding:
+
+1. **Fit-reproduces-its-own-input.** Every component that is fitted, reduced, or learned from data must reproduce its own input to machine precision at full rank, with a committed test. This is the check that would have caught the reshape at R5. It applies to POD, to any future hyper-reduction or learned operator, and to the DLRA's own retained candidate.
+2. **No warm-object reuse.** State-carrying objects must fully reset or be reconstructed per run; tests construct fresh objects.
+3. **Validate an independent check before believing a disagreement with tested code.** I will hold myself to this one as hard as I hold you to the others.
+
+On that last point, in fairness: in R25 **four of my five apparent engine failures were defects in my own checks**, not in the code — I indexed `u[0]`/`u[1]` (rows of the u-array, not velocity components), compared `[∂_x χ, −∂_y χ]` against `(f_x, f_y)` instead of `[∂_y χ, −∂_x χ]`, dropped the `t` argument that `integrate` passes, and reused one `DLRA` for both sides of a comparison. Each was caught only by reading the source and by adding a harness self-validation — a finite-difference curl that must converge as `N` grows, which it does (`0.312 → 0.150 → 0.0723 → 0.038` at `N=32…256`). R24 said "test the check first"; R25 is the evidence that this is where the work actually is.
+
+**Order, unchanged from R24 except that the reset is now in it:** reshape → the fit-reproduces-input test → rank cap → `DLRA` reset → re-plan F5 downstream of the regime decision.
+
+**One minor item, recorded not charged:** `make_initial_state(cutoff=c)` populates up to `|k| = 2, 5, 11` for `c = 2, 4, 8`, which is not one obvious rule. No committed result depends on it (the IC rank 17 and the `2·floor(N/3)+1` ceiling were both measured directly), but please state the mask semantics in the docstring and pin them with a test — "band-limited to cutoff 8" currently means something a reader would not guess.

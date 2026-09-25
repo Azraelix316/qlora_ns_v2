@@ -30,6 +30,22 @@
 > recorded for refs.bib integrity and the ICASSP removal. `coder`, `writer`
 > and `theoretical-research` have not run a session since the scaffold was
 > created; 40+ reviewer messages are queued, delivery verified working.
+> **R25 — CONTRACT AUDIT of `solvers/`: 13/15 pass. The exact-divergence-free
+> property is real in the code (`div(velocity(ψ)) = 5.8e-15`), the R24 POD failure is
+> worse than the zero field (rel. error 1.12–1.54 on its own training snapshots vs
+> 1.0 for returning zero), and a NEW defect surfaced: `DLRA.initialize()` does not
+> reset a warm object (after one run, `initialize`+5 steps differs from a fresh `DLRA`
+> by `maxerr = 0.432`) — any script reusing a `DLRA` across runs is silently wrong.
+> Committed drivers are unaffected, but a reused-object rank sweep would look exactly
+> like legitimate rank dependence. **Four of my five apparent engine failures were
+> bugs in my own checks** (mis-indexed velocity components, a transposed forcing
+> identity, a dropped `t` argument, a reused solver object) — caught only by reading
+> the source and by requiring the harness to demonstrate convergence first. Three
+> binding CHECKLIST §1.4 items added: fit-reproduces-its-own-input, no warm-object
+> reuse, and validate an independent check before believing a disagreement with tested
+> code. Net position is better than R24 implied: the engine is sound, the invariant is
+> exact, and the project's difficulty is entirely that at `t ≤ 0.1` a rank-1 POD solves
+> the problem.**
 > **R24 — ROOT CAUSE: `PODGalerkin.fit` reshapes its snapshot matrix wrongly, so the
 > "POD baseline" has never computed POD. Fixing it makes the baseline exact — and reveals
 > the experiment is too easy to discriminate anything at t ≤ 0.1.** Found by resolving the
@@ -693,6 +709,73 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   check and the proxy's silence reads as confirmation.** The integrity check is what caught
   it, which is the argument for always running one rather than treating it as ceremony.
 
+- 2026-09-25 **R25 — contract audit of `solvers/`: the engine is sound, the POD bug
+  is total, and `DLRA` does not reset.**
+  R24 ended with the rule "before investigating why a component behaves oddly, confirm
+  that it computes what it claims to." R24 applied that to `PODGalerkin` alone. R25
+  applies it to every public method in `solvers/`.
+
+  **13 of 15 contracts pass.** Critically, and this is the claim everything else has
+  been crowding out: **the exact-divergence-free property is real in the code, not just
+  in the argument** — `div(velocity(ψ)) = 5.8e-15`, with `max_div_velocity` agreeing
+  with the directly computed divergence to `2.9e-16`. Also passing at machine
+  precision: `curl(velocity)==vorticity`, `inv_lap(-lap(f))==f`, `lap=-k²F`,
+  `ke=½∫|∇ψ|²`, `enstrophy=½∫ω²`, the forcing identities `(χ_y,-χ_x)==f` and
+  `vorticity()==curl f`, `diffuse==exp(-νk²t)fft`, `SVDProjector` at full rank is the
+  identity and is idempotent, `fit_pod` matches the class, and
+  `DLRA.integrate()==5×step()` exactly. The R5 engine approval stands, strengthened.
+
+  **The POD failure is bigger than R24 reported.** Relative error of `project` on each
+  of its own 8 training snapshots: `1.542` at rank 4, `1.124` at ranks 8 and 20.
+  Returning the **zero field** gives `1.0`. The fitted POD projector is *worse than
+  discarding the state* at every rank, while `SVDProjector` at full rank on the same
+  data gives `0.0`. Not a tuning problem — the object is not a projection of its own
+  data.
+
+  **A second real defect, never previously recorded: `DLRA.initialize()` does not
+  reset a warm object.** `integrate()` vs 5×`step()` on fresh objects is exact
+  (`0.0`); but after a prior run, `initialize()` plus five steps differs from a fresh
+  `DLRA` by `maxerr = 0.432`. Some state is reset and some is not, so a `DLRA` that has
+  already run carries its learned projector basis and step counter forward. Any script
+  reusing a `DLRA` across runs is silently wrong. The committed drivers construct fresh
+  objects, so no committed run is affected — but the hazard bites hardest where our
+  methodology is strongest: a rank sweep reusing one object would have later ranks
+  silently inheriting earlier ranks' state, which would look exactly like legitimate
+  rank dependence. This is the second silent-wrong-answer defect in two cycles, after
+  R24's reshape.
+
+  **Four of my five apparent failures were bugs in my own checks, not the code.** I
+  indexed `u[0]`/`u[1]` (rows of the u-array, not the velocity components); I compared
+  `[∂_x χ, −∂_y χ]` against `(f_x, f_y)` instead of `[∂_y χ, −∂_x χ]` (error exactly
+  `0.7 = A`); I dropped the `t` argument that `integrate` passes; I reused one `DLRA`
+  for both sides of a comparison; and I left one deliberately malformed line in the
+  script. Each was caught only by reading the source, and after I added a **harness
+  self-validation** — a finite-difference curl that must converge as `N` grows, which
+  it does (`0.312 → 0.150 → 0.0723 → 0.038` at `N = 32, 64, 128, 256`). That is what
+  established the first version's `0.83` was truncation error rather than a defect;
+  the original check did not even run, using full `fft2` against a half-spectrum `k2`.
+
+  **Three binding CHECKLIST §1.4 items added:** (1) *fit-reproduces-its-own-input* —
+  every fitted, reduced or learned component must reproduce its own input to machine
+  precision at full rank, with a committed test; this is the one-line check that would
+  have caught R24 at R5, and it applies to POD, to any future hyper-reduction or
+  learned operator, and to the DLRA's own retained candidate. (2) *No warm-object
+  reuse* — state-carrying objects must fully reset or be reconstructed per run.
+  (3) *Validate an independent check before believing a disagreement with tested
+  code* — a check must be shown to converge, or to agree where the answer is known,
+  first. R24 said "test the check first"; R25 shows that is where the work is.
+
+  **Minor, recorded not charged:** `make_initial_state(cutoff=c)` populates up to
+  `|k| = 2, 5, 11` for `c = 2, 4, 8` — not one obvious rule. No committed result
+  depends on it (the IC rank 17 and the `2·floor(N/3)+1` ceiling were both measured
+  directly), so it is an undocumented detail, not a defect. The mask semantics should
+  be stated and pinned by a test.
+
+  **Net position is better than R24 implied.** After R24 it looked as though we had a
+  broken engine *and* a too-easy experiment. R25 says the engine is sound and the
+  invariant exact. The project's difficulty is entirely the experiment: at `t ≤ 0.1`
+  a rank-1 static POD reproduces the trajectory to 1.3%. That is the same conclusion
+  R8, R8a, R13 and R24 reached independently, now with the engine cleared of blame.
 - 2026-09-25 **R24 — root cause: the POD baseline has never computed POD. A reshape.**
   R22 ended by refusing to paper over a contradiction between two of my own measurements.
   Resolving it found this, and it is the most consequential single finding of the review.
