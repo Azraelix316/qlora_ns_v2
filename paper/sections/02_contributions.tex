@@ -1,0 +1,38 @@
+% Contributions
+
+\section{Contributions}
+\label{sec:contributions}
+
+Our contributions are:
+
+\begin{enumerate}
+  \item \textbf{A structure-preserving DLRA scheme for the 2D incompressible
+  NS equations in stream-function form.} The viscous part of the dynamics is
+  integrated \emph{exactly} along a separable exponential flow that preserves
+  the low-rank ansatz (Section~\ref{sec:methods}, Proposition~\ref{prop:viscous});
+  the velocity is represented through a stream function, so the discrete
+  velocity is exactly divergence-free at every time step and for every rank,
+  to machine precision (Invariant I1, Section~\ref{sec:invariants}).
+
+  \item \textbf{A second-order projected nonlinear step with online rank
+  adaptation.} The nonlinear (advective plus forcing) part is advanced by a
+  midpoint step on the projected dynamics, and the rank is grown online by
+  incremental singular value decomposition when a residual-based error
+  indicator exceeds tolerance (Section~\ref{sec:rank-adaptation}).
+
+  \item \textbf{Validation on forced high-Reynolds-number turbulent dynamics.}
+  We run the method on forced 2D turbulence at Reynolds numbers
+  $100$, $1000$, and $5000$ (Section~\ref{sec:setup}), verify the invariants
+  (I1--I4), and compare against (a) a full-grid spectral reference for
+  accuracy and (b) a static POD baseline for the cost of staticity:
+  fixed-basis POD cannot follow the rank growth that sustained forcing
+  induces (Section~\ref{sec:results}).
+
+  \item \textbf{Honest benchmarking.} We report per-step and total cost
+  against the full-grid spectral reference and the POD baseline, including
+  the regimes in which SP-DLRA is \emph{slower}
+  (Section~\ref{sec:cost}, Figure~\ref{fig:cost}).
+\end{enumerate}
+
+% [PENDING-CODER: contribution 3 and 4 become quantitative once results land;
+% keep the qualitative framing until then.]

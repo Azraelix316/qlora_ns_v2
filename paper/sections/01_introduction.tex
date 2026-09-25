@@ -1,0 +1,123 @@
+% Introduction
+
+\section{Introduction}
+\label{sec:intro}
+
+The incompressible Navier--Stokes (NS) equations govern fluid motion across
+scales, from geophysical flows to industrial aerodynamics. At high Reynolds
+numbers their dynamics are turbulent: energy cascades across a broad range of
+scales and the flow field must be resolved on a fine grid for every time step
+of a long simulation \cite{batchelor1969,orszag1971}. Even in two
+dimensions, where the problem is comparatively tractable, the cost of a
+full-resolution simulation grows steeply with the Reynolds number
+\cite{vinograd2026}. Reduced representations offer a way out when the
+\emph{dynamically active} degrees of freedom --- the directions in which the
+solution actually moves --- are few.
+
+Two families of methods are central here. \emph{Proper orthogonal
+decomposition} (POD) constructs a fixed orthonormal basis of dominant
+spatial modes from data and truncates the dynamics onto it
+\cite{sirovich1987,lumley1967}. POD-based reduced order models (ROMs) for the
+incompressible NS equations are mature: POD--Galerkin projections
+\cite{loorenzi2016,hijazi2020,girfoglio2022pod}, stabilized and
+hyper-reduced variants \cite{siena2024,star2021,klein2023}, and
+closure-based extensions \cite{prakash2024}. Their limitation is
+staticity: the basis is built offline on a training set and cannot follow the
+dynamics when the relevant modes change over time --- exactly what happens in
+sustained turbulent forcing, where new structures continually appear
+\cite{vinograd2026}.
+
+\emph{Dynamical low-rank approximation} (DLRA) makes the representation
+dynamic: the solution is kept in factored form $X(t) \approx U(t)\,S(t)\,V(t)^\top$
+with a small rank $r(t)$, and the factors are advanced in time so that the
+basis \emph{follows} the dynamics \cite{koch2019dlra}. Projector-splitting
+and structure-preserving variants integrate the linear part of the dynamics
+exactly, which makes DLRA both accurate and efficient for stiff problems
+\cite{einkemmer2023,ceruti2024,einkemmer2024review}. Rank adaptation ---
+growing the rank when the residual demands it --- is standard via incremental
+singular value decomposition \cite{haasdonk2012}.
+
+The incompressible constraint changes the picture. The divergence-free
+condition $\nabla \cdot u = 0$ is a hard geometric constraint of the
+dynamics: any reduced method that violates it, even slightly, can corrupt
+long-time invariants such as the energy balance. Existing low-rank approaches
+to NS-type problems fall short in different ways. POD--Galerkin ROMs enforce
+divergence only in a variational sense of the underlying discretization and
+use static bases \cite{loorenzi2016,hijazi2020,star2021}. Reduced models in
+the stream function--vorticity formulation are divergence-free by
+construction, but to date they are offline or hybrid and have been validated
+only at low to moderate Reynolds number: the POD--Galerkin model of Girfoglio
+et al.~\cite{girfoglio2022pod} is built offline on a fixed training set, and
+the hybrid model of Zhang et al.~\cite{zhang2024} combines
+neural-network-corrected POD modes with DMD-based sampling for a parametric
+problem; neither is rank-adaptive. Low-rank solvers for NS with uncertain or
+stochastic parameters target a different problem and are not adaptive in time
+\cite{lee2017,elman2019low,olshanskii2024}. The one dynamical low-rank method
+applied to the incompressible equations that we are aware of is the
+dynamically orthogonal (DO) approximation of Musharbash and
+Nobile~\cite{musharbash2018} for stochastic problems with random boundary
+conditions, with an error analysis by Musharbash, Nobile and
+Zhou~\cite{musharbash2015}; it is a first cousin of DLRA --- a method of the
+same family of tangent-projected, factorisation-based, on-the-fly low-rank
+reduction --- but it uses a different projection and targets a stochastic
+problem, not the deterministic turbulent dynamics studied here. A low-rank
+projector-splitting method for weakly compressible
+flow~\cite{einkemmer2018} recovers the incompressible limit as a low-rank
+regime of a weakly compressible system, where the divergence constraint is not
+enforced.
+
+\paragraph{This work.}
+We develop a \emph{structure-preserving} dynamical low-rank method for the
+\emph{incompressible} NS equations in which (i) the viscous part is
+integrated exactly, preserving the rank; (ii) the velocity is represented by a
+stream function, so divergence-freeness holds \emph{by construction} to
+machine precision; and (iii) the rank is adapted online as turbulent
+structures form and decay. We validate the method on forced two-dimensional
+turbulent dynamics at Reynolds numbers $100$, $1000$, and $5000$ --- the
+regime of rank growth beyond a handful of modes and slow singular-value decay
+--- against a full-grid spectral reference and a static POD baseline, and we
+benchmark cost honestly, including regimes where the method is slower than
+full-grid computation.
+
+% [FLAG-D4 / REVIEWER: Short form of the BINDING R5d claim wording (see
+% state/reviewer/reviews/2026-09-25-R5d-prior-art-map-and-final-claim.md,
+% Section 2); the full form is stated in Section~\ref{sec:positioning}.
+% GATED on D10-V6 implemented + V1/V2/V5/V7 closed before submission; the
+% final sentence describes the validation target, not achieved results.
+% Barred: "no DLRA NS solver exists" (refuted by musharbash2018); "first
+% exactly divergence-free NS solver" (refuted by girfoglio2022pod and the
+% classical stream-function formulation); any gap phrased as a failure to
+% preserve divergence-freeness; "first structure-preserving low-rank for
+% conservative PDEs" (refuted by RAIL, DOI 10.1137/23M1622921); "to our
+% knowledge" on arXiv evidence alone. DO-NS is a "first cousin" of DLRA,
+% never a competitor. CHECKLIST 2.1's "DLRA (Osepko et al.)" could not be
+% located on arXiv (0 author hits, 2026-09-25) - flagged below and in
+% README.md.]
+% [FLAG-WRITING-RESEARCH: confirm Osepko et al. citation, if it exists]
+Our novelty claim is deliberately narrow and is stated in full in
+Section~\ref{sec:positioning}.  In short: for the incompressible
+Navier--Stokes equations, the existing dynamical low-rank work we are aware
+of is the dynamically orthogonal approximation of Musharbash and
+Nobile~\cite{musharbash2018} for stochastic problems with random boundary
+conditions, and the existing reduced models in the stream
+function--vorticity formulation are offline and hybrid
+\cite{girfoglio2022pod,zhang2024}; we are not aware of a structure-preserving,
+exactly divergence-free, factorisation-based low-rank integrator for the
+deterministic incompressible Navier--Stokes equations, or of any dynamical
+low-rank method for that setting validated in a resolved
+high-Reynolds-number forced-turbulent regime.  We provide one: we apply the
+established robust basis-update-and-Galerkin machinery to the stream
+function--vorticity formulation, in which divergence-freeness holds exactly
+by representation, and validate it against a full-grid spectral reference at
+Reynolds numbers $\mathrm{Re} \in \{100, 1000, 5000\}$ with adaptive rank.
+
+\paragraph{Paper organization.}
+Section~\ref{sec:contributions} states our contributions.
+Section~\ref{sec:related} reviews related work. Section~\ref{sec:methods}
+develops the method: the stream-function formulation and energy identity
+(4.1--4.2), the structure-preserving split and exact viscous lemma
+(4.3), the projected nonlinear step (4.4), rank adaptation (4.5), the
+invariants (4.6), and cost (4.7). Section~\ref{sec:setup} describes the
+experimental setup and validation ladder; Section~\ref{sec:results} reports
+results; Sections~\ref{sec:discussion}--\ref{sec:limitations} discuss
+interpretation and limitations; Section~\ref{sec:conclusion} concludes.

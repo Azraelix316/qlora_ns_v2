@@ -1,0 +1,329 @@
+% Methods
+
+\section{Method}
+\label{sec:methods}
+
+\subsection{Problem setup and notation}
+\label{sec:problem}
+
+We consider the two-dimensional incompressible Navier--Stokes equations on the
+periodic torus $\T^2 = [0,2\pi]^2$:
+\begin{equation}
+  \partial_t u + (u\cdot\grad)u = \nu\,\Delta u + f,
+  \qquad \grad\cdot u = 0,
+  \label{eq:ns}
+\end{equation}
+where $u = (u_1,u_2): \T^2 \to \R^2$ is the velocity, $\nu > 0$ the kinematic
+viscosity, and $f$ an externally prescribed body force. Throughout we use
+single-mode Kolmogorov forcing
+\begin{equation}
+  f = F \sin y \; e_x, \qquad F > 0,
+  \label{eq:forcing}
+\end{equation}
+whose curl is $\grad \times f = -F\cos y$. The Reynolds number is defined with
+respect to the forced equilibrium (Section~\ref{sec:energy}),
+$\mathrm{Re} = 2\pi F / \nu^2$;
+% [PENDING-CODER: confirm the Re definition and the exact (F, nu) pairing for
+% Re in {100, 1000, 5000} used in all runs (Table 2).]
+
+Since the domain is periodic, the force has zero mean, and $\grad \cdot u = 0$,
+there exists a zero-mean stream function $\psi$ with
+\begin{equation}
+  u = (\partial_y \psi, -\partial_x \psi),
+  \qquad \omega := \grad \times u = -\Delta \psi,
+  \label{eq:stream}
+\end{equation}
+where $\omega$ is the vorticity. This sign convention is used throughout.
+Substituting \eqref{eq:stream} into \eqref{eq:ns} and taking the curl yields
+the stream-function formulation
+\begin{equation}
+  \partial_t \psi
+  = \nu\,\Delta \psi + \Delta^{-1} J(\psi, \Delta \psi) - F \cos y,
+  \qquad
+  J(\psi, \varphi) := \partial_x \psi\, \partial_y \varphi
+                      - \partial_y \psi\, \partial_x \varphi,
+  \label{eq:stream-ns}
+\end{equation}
+where $\Delta^{-1}$ is the exact Fourier inverse on the zero-mean subspace.
+The velocity is recovered from $\psi$ via \eqref{eq:stream} at every step, so
+the discrete velocity is divergence-free by construction (Invariant I1,
+Section~\ref{sec:invariants}).
+
+All fields are represented on an $N \times N$ tensor-product Fourier
+collocation grid ($n = N^2$ grid points); $\Delta$ and $\Delta^{-1}$ are the
+spectral operators, and all $L^2$ norms below are the discrete
+ell-two norms, which are spectrally equivalent on the collocation grid.
+Identifying a field with its $N \times N$ matrix of values (rows indexed by
+$x$, columns by $y$), the Laplacian separates as
+\begin{equation}
+  \Delta = D_x \otimes I + I \otimes D_y,
+  \qquad D_x := -\partial_{xx}, \quad D_y := -\partial_{yy},
+  \label{eq:lap-sep}
+\end{equation}
+with $[D_x \otimes I, \; I \otimes D_y] = 0$. This separation is the
+structural fact exploited by the scheme.
+
+\subsection{Energy identity}
+\label{sec:energy}
+
+Let $E(t) = \tfrac{1}{2}\norm{u}_2^2 = \tfrac{1}{2}\norm{\grad\psi}_2^2$ be the
+kinetic energy. Taking the $L^2$ inner product of \eqref{eq:stream-ns} with
+$\Delta \psi$ (equivalently, pairing the vorticity equation with
+$\Delta^{-1}\omega$) gives
+\begin{equation}
+  \frac{\dd E}{\dd t}
+  = \underbrace{\inner{u}{f}}_{P_{\mathrm{in}}(t)}
+  \;-\;
+  \underbrace{\nu\, \norm{\Delta \psi}_2^2}_{P_{\mathrm{diss}}(t)},
+  \label{eq:energy}
+\end{equation}
+where the advective term is exactly energy-neutral (a standard identity for
+periodic, divergence-free flows; see Temam~\cite{temam1977}) and the forcing
+power is
+\begin{equation}
+  P_{\mathrm{in}}(t)
+  = \inner{u}{f}
+  = F\,\inner{\psi_y}{\sin y}
+  = -F\,\inner{\psi}{\cos y},
+  \label{eq:pin}
+\end{equation}
+with the last equality by integration by parts on the torus. The forced
+system possesses the Kolmogorov equilibrium
+\begin{equation}
+  \psi_K = -\frac{F}{\nu}\cos y,
+  \qquad
+  u_K = \frac{F}{\nu}\sin y \; e_x,
+  \label{eq:kolmogorov}
+\end{equation}
+at which \eqref{eq:energy} gives $P_{\mathrm{in}} = P_{\mathrm{diss}}
+= 2\pi^2 F^2/\nu$; for the definition
+$\mathrm{Re} = 2\pi F/\nu^2$ this reads $P_{\mathrm{in}}(\psi_K) =
+\mathrm{Re}\cdot \nu^2 \, \|\cos y\|_2^2/(2\pi)$.
+% [PENDING-CODER: confirm the discrete energy identity (de-aliasing policy,
+% e.g.\ 2/3 rule) and that P_in is computed as -F <psi, cos y> in the code.]
+
+Two consequences matter for the validation design. First, under forcing the
+kinetic energy is \emph{not} monotone: $E(t)$ relaxes toward the forced
+statistical regime with $P_{\mathrm{in}}(t) \approx P_{\mathrm{diss}}(t)$ on
+average, and the relevant forcing-aware invariant is developed by the theory
+work (Invariant I2, Section~\ref{sec:invariants};
+% [PENDING-THEORETICAL-RESEARCH: forcing-aware invariant, docs/theory/
+% stability-error.md]).
+Second, the unforced limit $F = 0$ reduces \eqref{eq:energy} to
+$\dd E/\dd t = -P_{\mathrm{diss}} \le 0$, so the laminar Taylor--Green decay
+test must exhibit monotone non-increasing $E(t)$ (Section~\ref{sec:setup}).
+
+\subsection{SP-DLRA ansatz and the exact viscous step}
+\label{sec:spd}
+
+We seek $\psi$ in the rank-$r$ ansatz
+\begin{equation}
+  \Psi := \psi \approx U S V^{\top},
+  \qquad U, V \in \R^{N \times r}, \quad S \in \R^{r \times r},
+  \label{eq:ansatz}
+\end{equation}
+with orthonormal columns $U^{\top}U = V^{\top}V = I_r$ and $S \succeq 0$
+symmetric ($\Psi = USV^{\top}$ is its thin SVD; $r \ll N$). The
+\emph{structure-preserving} property we exploit is that the viscous flow
+preserves this ansatz \emph{exactly}.
+
+\begin{proposition}[Exact, rank-preserving viscous step]
+\label{prop:viscous}
+Let $\Psi = USV^{\top}$ have rank $r$ with full-rank factors, and let
+$\Delta = D_x \otimes I + I \otimes D_y$ as in \eqref{eq:lap-sep}. Then for
+all $t \ge 0$,
+\begin{equation}
+  e^{\nu t \Delta}\, \Psi
+  =
+  \left(e^{\nu t D_x} U\right)\, S \,
+  \left(e^{\nu t D_y} V\right)^{\top}.
+  \label{eq:viscous-exact}
+\end{equation}
+In particular the viscous flow preserves the rank-$r$ ansatz exactly: the
+evolved factors are $\hat U = e^{\nu t D_x} U$ and
+$\hat V = e^{\nu t D_y} V$, and the singular values $S$ are unchanged.
+\end{proposition}
+
+\begin{proof}
+$D_x \otimes I$ and $I \otimes D_y$ commute, so
+$e^{\nu t \Delta} = e^{\nu t (D_x \otimes I)}\, e^{\nu t (I \otimes D_y)}$.
+For any matrix $X$, $e^{\nu t (D_x \otimes I)} X = (e^{\nu t D_x} X)$, since
+$D_x \otimes I$ applies $D_x$ row-wise; and, since $D_y$ is symmetric,
+$X\, e^{\nu t (I \otimes D_y)} = X\, (e^{\nu t D_y})^{\top}$, since
+$I \otimes D_y$ applies $D_y$ column-wise. Applying both to
+$\Psi = USV^{\top}$ gives \eqref{eq:viscous-exact}.
+\end{proof}
+
+\begin{remark}[Cost of the viscous step]
+$e^{\nu t D_x} U$ is computed column-wise by one-dimensional FFTs in the $x$
+direction at cost $O(r N \log N) = O(r n \log n)$ (likewise for $V$). The full
+viscous step is therefore $O(r n \log n)$, exact, and requires no SVD.
+\end{remark}
+
+\begin{remark}[What is preserved]
+Equation~\eqref{eq:viscous-exact} says that the viscous semigroup is
+invariant under the ansatz: the approximation error of the viscous step is
+\emph{zero}, not merely small. This is the sense in which the scheme is
+structure-preserving with respect to the viscous part, in the spirit of
+separable/projector-splitting low-rank methods
+\cite{koch2019dlra, einkemmer2023, cui2026, goutaudier2026}. The nonlinear
+part is \emph{not} invariant under the ansatz and is handled by a projected
+step (Section~\ref{sec:proj-step}).
+\end{remark}
+
+\subsection{The projected nonlinear step}
+\label{sec:proj-step}
+
+Let $\Psi^n = USV^{\top}$ be the rank-$r$ approximation at time $t_n$ and let
+$\Delta t$ be the time step. One SP-DLRA step is:
+
+\begin{enumerate}
+  \item \textbf{Exact viscous half-step (midpoint state).}
+  \begin{equation}
+    \Psi_m := e^{\nu \Delta t\, \Delta / 2}\, \Psi^n
+    = \hat U S \hat V^{\top},
+    \qquad
+    \hat U := e^{\nu \Delta t D_x/2}\, U,
+    \quad
+    \hat V := e^{\nu \Delta t D_y/2}\, V,
+    \label{eq:midpoint}
+  \end{equation}
+  by Proposition~\ref{prop:viscous} with $t = \Delta t/2$.
+  \item \textbf{Nonlinear residual on the full grid.}
+  \begin{equation}
+    N(\Psi_m) := \Delta^{-1} J(\Psi_m, \Delta \Psi_m) - F \cos y.
+    \label{eq:nonlin}
+  \end{equation}
+  \item \textbf{Projected midpoint update.} With the projection
+  $\Pi_{\hat U, \hat V} G = \hat U (\hat U^{\top} G) \hat V^{\top}$,
+  \begin{equation}
+    \Psi^{n+1}
+    =
+    e^{\nu \Delta t\, \Delta}\, \Psi^n
+    + \Delta t \; \Pi_{\hat U, \hat V}\, N(\Psi_m).
+    \label{eq:step}
+  \end{equation}
+  Since $e^{\nu \Delta t \Delta} \Psi^n = \hat U_{\Delta t} S
+  \hat V_{\Delta t}^{\top}$ (Proposition~\ref{prop:viscous}) with
+  $\hat U_{\Delta t} = e^{\nu \Delta t D_x} U$,
+  $\hat V_{\Delta t} = e^{\nu \Delta t D_y} V$, step \eqref{eq:step} is
+  equivalently the coefficient update
+  \begin{equation}
+    S \leftarrow S + \Delta t\, \hat U_{\Delta t}^{\top}\,
+    N(\Psi_m)\, \hat V_{\Delta t},
+    \label{eq:s-update}
+  \end{equation}
+  on the viscously evolved factors (the Galerkin/projected integrator of
+  Haasdonk and Ohlberger~\cite{haasdonk2012}).
+  \item \textbf{Cleanup.} A thin SVD of $\Psi^{n+1}$ re-orthonormalizes the
+  factors (rank at most $2r$ before truncation); singular values below
+  tolerance are dropped (decay) and the residual indicator below may extend
+  the rank (growth; Section~\ref{sec:rank-adaptation}).
+\end{enumerate}
+
+The step is a \emph{projected exponential midpoint method}: the viscous part
+is integrated exactly (Proposition~\ref{prop:viscous}) and the nonlinear part
+is advanced by a midpoint rule on the projected dynamics, in the style of the
+robust low-rank integrators of Einkemmer et al.~\cite{einkemmer2023} and
+Ceruti et al.~\cite{ceruti2024}. For fixed factors the step is second order
+in $\Delta t$; the projection error is the rank deficiency of the current
+subspace, which the rank adaptation below is designed to control.
+% [PENDING-CODER: confirm the exact step order and the projection subspace
+% (midpoint-evolved factors as above, or frozen at t^n) in the
+% implementation, and the observed order of accuracy.]
+
+\subsection{Adaptive rank}
+\label{sec:rank-adaptation}
+
+\paragraph{Growth (incremental SVD).}
+Let $G := \Delta t\, N(\Psi_m)$ be the \emph{unprojected} nonlinear update and
+$\Pi = \Pi_{\hat U, \hat V}$. We measure the component of $G$ outside the
+current subspace by the residual indicator
+\begin{equation}
+  \eta := \frac{\norm{G - \Pi G}_F}{\norm{G}_F}.
+  \label{eq:indicator}
+\end{equation}
+If $\eta > \eta_{\mathrm{tol}}$, the dominant direction of $G - \Pi G$ is
+added to the subspace via an incremental singular value decomposition of the
+augmented factors (the rank-adaptation technique of
+Haasdonk and Ohlberger~\cite{haasdonk2012}), and the coefficients are
+re-solved. Growth is the only \emph{active} rank change in the scheme; under
+sustained forcing we expect $\eta$ to be triggered during the spin-up toward
+the statistical regime, with a quasi-stationary rank afterwards
+(Section~\ref{sec:results}).
+
+\paragraph{Decay.}
+At the cleanup SVD, singular values with $\sigma_i < \sigma_{\mathrm{tol}}$
+(absolute) or $\sigma_i/\sigma_1 < \sigma_{\mathrm{tol}}$ (relative) are
+dropped. This is a deterministic, cheap rule requiring no additional
+decompositions. In the unforced Taylor--Green test it drives a controlled
+rank decay $3 \to 2 \to 1$ as the vortex dissipates
+(Section~\ref{sec:results}).
+% [PENDING-CODER: confirm the exact rank rule and the tolerances
+% eta_tol, sigma_tol (absolute/relative), and the initial rank r_0 for each
+% experiment.]
+
+\subsection{Invariants}
+\label{sec:invariants}
+
+We validate the scheme against four invariants, per reviewer decision D3:
+
+\begin{itemize}
+  \item \textbf{I1 (exact divergence-freeness).} The velocity is always
+  recovered as $u = (\psi_y, -\psi_x)$ from the (low-rank) stream function, so
+  $\grad \cdot u = 0$ holds \emph{identically} at the discrete level:
+  $\max |\grad \cdot u| = O(\varepsilon_{\mathrm{mach}}) \approx 10^{-14}$ at
+  every step, for every rank and every Reynolds number. This is a property of
+  the formulation, not of the numerics.
+  \item \textbf{I2 (energy).} Unforced: $E(t)$ is monotone non-increasing
+  (verified numerically in the Taylor--Green test). Forced: $E$ obeys
+  \eqref{eq:energy} with $P_{\mathrm{in}} = -F\inner{\psi}{\cos y}$ and
+  $P_{\mathrm{diss}} = \nu \norm{\Delta \psi}_2^2$; the forcing-aware
+  invariant characterizing the statistical regime is given by the theory
+  work.
+  % [PENDING-THEORETICAL-RESEARCH: forcing-aware invariant and any
+  % monotone/conserved quantity for the forced dynamics,
+  % docs/theory/stability-error.md]
+  \item \textbf{I3 (rank economy).} The adaptive rank $r(t)$ against the
+  static POD count: the number of POD modes required to resolve 99.9\% of the
+  kinetic energy of the reference run. Static bases cannot follow rank growth,
+  so $r(t) \le r_{\mathrm{POD}}$ at late times is the expected (and measured)
+  outcome; the difference quantifies the cost of staticity.
+  \item \textbf{I4 (turbulent fidelity).} Kinetic-energy time series,
+  kinetic-energy spectrum, and dissipation statistics against the full-grid
+  spectral reference.
+\end{itemize}
+
+\subsection{Cost model}
+\label{sec:cost}
+
+Per step, with $n = N^2$ grid points and rank $r$:
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  Component & Cost & Remark \\
+  \midrule
+  Viscous half- and full-step (Prop.~\ref{prop:viscous}) & $O(r\, n \log n)$
+    & factor-wise 1D FFT exponentials \\
+  Nonlinear residual $N(\Psi_m)$ & $O(n \log n)$
+    & $\Delta$, $\Delta^{-1}$ by FFT; $J$ pointwise;
+    \emph{rank-independent} \\
+  Projection $\Pi_{\hat U, \hat V} N(\Psi_m)$ & $O(r n)$ & \\
+  Cleanup SVD (thin, $r \times r$) & $O(n r^2)$ & \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+The full-grid spectral reference has per-step cost $O(n \log n)$ with the same
+asymptotic form. We emphasize the honest consequence: because the nonlinear
+residual is evaluated on the full grid, its $O(n \log n)$ cost is
+\emph{independent of the rank}. At small $r$, the per-step cost of SP-DLRA is
+therefore comparable to, or larger than, the full-grid reference, and we make
+no a priori claim of per-step speedup. Any end-to-end benefit has to come
+from the memory footprint of the factors ($O(nr)$ versus $O(n)$) or from
+regimes in which the rank stays small over long time spans; both are measured,
+not assumed, and Section~\ref{sec:results} reports wall-clock time and memory
+explicitly, including the regimes in which SP-DLRA is slower
+(Figure~\ref{fig:cost}).
+% [PENDING-CODER: measured per-step and total wall-clock times and peak
+% memory for SP-DLRA, full-grid spectral, and static POD, per (Re, N).]

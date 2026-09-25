@@ -1,0 +1,190 @@
+% Results
+
+\section{Results}
+\label{sec:results}
+
+This section presents the validation of the SP-DLRA scheme along the ladder
+of Section~\ref{sec:setup}. All quantitative values below are pending the
+completed runs; the figure and table layout is fixed in advance so that each
+result can be dropped in without re-structuring the text.
+% [PENDING-CODER: every number in this section must be traceable to
+% state/coder/results/ with config + driver + commit (CHECKLIST item 1.1).]
+
+\subsection{Taylor--Green laminar decay (L1)}
+\label{sec:res-tg}
+
+Figure~\ref{fig:tg} shows the kinetic energy $E(t)$ and the adaptive rank
+$r(t)$ for the unforced Taylor--Green decay of
+Section~\ref{sec:taylor-green}. Two features are expected and must be
+verified: $E(t)$ is monotone non-increasing (I2, unforced), and the
+$\sigma_{\mathrm{tol}}$ rule drives the rank from its initial value
+$r_0 = 3$ down to $r = 1$ as the vortex dissipates.
+% [PENDING-CODER: kinetic-energy time series and rank-over-time trace for the
+% L1 run; the times at which the rank drops 3 -> 2 and 2 -> 1; max |div u|
+% over the run (expected ~1e-14).]
+
+\begin{figure}[t]
+  \centering
+  % [PENDING-CODER: generate from the L1 run record.]
+  \includegraphics[width=\linewidth]{figures/fig_tg_ke_rank}
+  \caption{Taylor--Green laminar decay (L1). Left: kinetic energy $E(t)$
+  (monotone non-increasing, I2). Right: adaptive rank $r(t)$ decaying
+  $3 \to 2 \to 1$ under the $\sigma_{\mathrm{tol}}$ rule.}
+  % [PENDING-CODER: confirm the rank-decay times shown in the figure.]
+  \label{fig:tg}
+\end{figure}
+
+\subsection{Rank and singular-value dynamics under forcing (L2)}
+\label{sec:res-rank}
+
+Figures~\ref{fig:rank} and~\ref{fig:svd} show, for each
+$\mathrm{Re} \in \{100, 1000, 5000\}$, the adaptive rank $r(t)$ and the
+singular-value spectrum $\sigma_i(t)$ over the retained (statistical) window.
+The qualitative picture we expect, and which the runs must confirm, is: a
+growth phase during spin-up (residual indicator \eqref{eq:indicator}
+triggered), followed by a quasi-stationary rank $r^*(\mathrm{Re})$ that
+increases with $\mathrm{Re}$; and a slow-decaying singular-value spectrum at
+high Re, i.e.\ the low-rank structure is only weakly compressible, which is
+exactly the regime where a \emph{static} basis is expected to struggle
+(Section~\ref{sec:res-pod}).
+% [PENDING-CODER: rank-over-time curves per Re; representative singular-value
+% spectra (e.g.\ at the start and end of the statistical window) per Re; the
+% quasi-stationary rank r*(Re); number of indicator-triggered growth events
+% per run.]
+
+\begin{figure}[t]
+  \centering
+  % [PENDING-CODER: generate from the L2 run records.]
+  \includegraphics[width=\linewidth]{figures/fig_rank_vs_time}
+  \caption{Adaptive rank $r(t)$ for forced Kolmogorov flow at
+  $\mathrm{Re} \in \{100, 1000, 5000\}$ (L2). Growth during spin-up, then a
+  quasi-stationary rank $r^*(\mathrm{Re})$.}
+  % [PENDING-CODER: confirm the spin-up duration and r*(Re) values.]
+  \label{fig:rank}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  % [PENDING-CODER: generate from the L2 run records.]
+  \includegraphics[width=\linewidth]{figures/fig_sv_decay}
+  \caption{Singular-value decay of $\psi(\cdot,\cdot,t)$ at
+  $\mathrm{Re} \in \{100, 1000, 5000\}$ (L2), at representative times in the
+  statistical window. Slower decay at higher Re.}
+  % [PENDING-CODER: confirm the times and values shown.]
+  \label{fig:svd}
+\end{figure}
+
+\subsection{Accuracy against the full-grid reference (L3)}
+\label{sec:res-error}
+
+Figure~\ref{fig:error} compares the SP-DLRA solution against the full-grid
+spectral reference of Section~\ref{sec:reference}: the relative $L^2$ error
+$\norm{\Psi - \psi_{\mathrm{ref}}}_2 / \norm{\psi_{\mathrm{ref}}}_2$ over the
+statistical window, per Reynolds number. The static POD baseline of
+Section~\ref{sec:pod} is plotted for the same quantity.
+% [PENDING-CODER: relative L2 error time series (SP-DLRA vs POD baseline) per
+% Re; max and mean error over the statistical window; any error growth or
+% drift observed; the Re at which (if any) the adaptive model degrades.]
+
+\begin{figure}[t]
+  \centering
+  % [PENDING-CODER: generate from the L2/L3 run records.]
+  \includegraphics[width=\linewidth]{figures/fig_error_vs_ref}
+  \caption{Relative $L^2$ error against the full-grid spectral reference over
+  the statistical window, per $\mathrm{Re}$ (L2 vs L3). SP-DLRA (adaptive)
+  versus the static POD baseline (Section~\ref{sec:pod}).}
+  % [PENDING-CODER: confirm the curves and the error magnitudes.]
+  \label{fig:error}
+\end{figure}
+
+\subsection{Divergence-free invariant (I1)}
+\label{sec:res-div}
+
+Table~\ref{tab:div} reports $\max |\grad \cdot u|$ over the full time span of
+each run. Since the velocity is recovered from the stream function via
+$u = (\psi_y, -\psi_x)$ (Section~\ref{sec:invariants}), all entries are
+expected at the level of roundoff, $\approx 10^{-14}$, independently of rank,
+Reynolds number, and time.
+% [PENDING-CODER: max |div u| per run (TG, Re 100/1000/5000, reference, POD).]
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{lc}
+    \toprule
+    Run & $\max_t \max_x |\grad \cdot u|$ \\
+    \midrule
+    L1 (Taylor--Green)        & [PENDING-CODER] \\
+    L2, $\mathrm{Re}=100$     & [PENDING-CODER] \\
+    L2, $\mathrm{Re}=1000$    & [PENDING-CODER] \\
+    L2, $\mathrm{Re}=5000$    & [PENDING-CODER] \\
+    L3 (full-grid reference)  & [PENDING-CODER] \\
+    L4 (static POD baseline)  & [PENDING-CODER] \\
+    \bottomrule
+  \end{tabular}
+  \caption{Divergence-free invariant I1: $\max |\grad \cdot u|$ per run. All
+  entries are expected at roundoff level ($\approx 10^{-14}$) by construction.}
+  \label{tab:div}
+\end{table}
+
+\subsection{Rank economy against static POD (L4)}
+\label{sec:res-pod}
+
+We compare the adaptive rank $r(t)$ of SP-DLRA with the static POD count
+$r_{\mathrm{POD}}$ (99.9\%-energy truncation of the reference snapshots,
+Section~\ref{sec:pod}). The expected outcome, to be verified:
+$r^*(\mathrm{Re}) \le r_{\mathrm{POD}}(\mathrm{Re})$ over the statistical
+window, with the gap widening at higher Re where the singular-value decay is
+slowest and the dynamics least compressible by a \emph{fixed} basis.
+% [PENDING-CODER: r*(Re) vs r_POD(Re) per Reynolds number; the error of the
+% POD baseline at fixed rank r_POD vs the error of SP-DLRA at its adaptive
+% rank (from Figure 3); any time intervals where the POD basis is
+% insufficient (error spikes) and SP-DLRA recovers by rank growth.]
+
+\subsection{Cost (the honest where-slower story)}
+\label{sec:res-cost}
+
+Figure~\ref{fig:cost} reports per-step and total wall-clock time, together
+with peak memory, for the three solvers (SP-DLRA, full-grid spectral
+reference, static POD baseline) per Reynolds number. Per the cost model of
+Section~\ref{sec:cost}, we do \emph{not} assume a per-step advantage for
+SP-DLRA: the nonlinear residual is evaluated on the full grid at
+rank-independent $O(n \log n)$ cost, so at small rank the per-step cost is
+comparable to, or larger than, the full-grid reference. The figure therefore
+includes, and the text reports explicitly, the regimes in which SP-DLRA is
+\emph{slower}.
+% [PENDING-CODER: per-step and total wall-clock time and peak memory for
+% SP-DLRA / full-grid / POD per Re; the (Re, N) regimes where SP-DLRA is
+% slower than the full-grid reference; total end-to-end cost ratios.]
+
+\begin{figure}[t]
+  \centering
+  % [PENDING-CODER: generate from the benchmark records.]
+  \includegraphics[width=\linewidth]{figures/fig_cost}
+  \caption{Cost comparison (L2 vs L3 vs L4): per-step and total wall-clock
+  time and peak memory for SP-DLRA, the full-grid spectral reference, and the
+  static POD baseline, per $\mathrm{Re}$. Includes the regimes in which
+  SP-DLRA is slower (see Section~\ref{sec:cost} for the cost model).}
+  % [PENDING-CODER: confirm all values shown.]
+  \label{fig:cost}
+\end{figure}
+
+\subsection{Turbulent fidelity (I4)}
+\label{sec:res-fidelity}
+
+Finally, we compare the kinetic-energy time series and kinetic-energy
+spectrum of the SP-DLRA runs against the full-grid reference
+(Figure~\ref{fig:kestats}).
+% [PENDING-CODER: KE time series and KE spectrum (vs wavenumber) per Re,
+% SP-DLRA vs reference; dissipation-rate statistics; any visible statistical
+% drift of the adaptive model over the retained window.]
+
+\begin{figure}[t]
+  \centering
+  % [PENDING-CODER: generate from the L2/L3 run records.]
+  \includegraphics[width=\linewidth]{figures/fig_ke_spectrum}
+  \caption{Kinetic-energy statistics (I4): left, $E(t)$ over the statistical
+  window; right, kinetic-energy spectrum versus wavenumber; per
+  $\mathrm{Re}$, SP-DLRA against the full-grid reference.}
+  % [PENDING-CODER: confirm the curves.]
+  \label{fig:kestats}
+\end{figure}

@@ -1,0 +1,129 @@
+% Experimental setup
+
+\section{Experimental setup}
+\label{sec:setup}
+
+The validation follows the reviewer's acceptance ladder
+(CHECKLIST, items L1--L4): a laminar smoke test, forced turbulent runs at
+three Reynolds numbers, a full-grid spectral reference, and a static POD
+baseline.
+
+\subsection{L1: Taylor--Green laminar decay}
+\label{sec:taylor-green}
+
+The unforced problem ($F = 0$) on $\T^2$, initialized with the Taylor--Green
+stream function
+\begin{equation}
+  \psi_{\mathrm{TG}}(x,y,0) = A \sin x \sin y
+  \qquad\Longleftrightarrow\qquad
+  u_{\mathrm{TG}} = (A \sin x \cos y,\; -A \cos x \sin y),
+  \label{eq:tg}
+\end{equation}
+with $A = 1$
+% [PENDING-CODER: confirm amplitude A, viscosity nu (Re), grid N, time span,
+% initial rank r_0, and rank tolerances for the L1 run.]
+and viscosity $\nu$ fixed by the chosen Reynolds number
+$\mathrm{Re} = 2\pi/\nu^2$
+% [PENDING-CODER: confirm Re value used for the laminar decay run.]
+, the flow decays monotonically: $E(t)$ is non-increasing by
+\eqref{eq:energy}, and the singular values of $\psi(\cdot,\cdot,t)$ decay
+rapidly. This test verifies (i) the discrete energy monotonicity (I2,
+unforced), (ii) the exact divergence-free property (I1), and (iii) the
+$\sigma_{\mathrm{tol}}$ decay rule of Section~\ref{sec:rank-adaptation},
+which should drive the rank $3 \to 2 \to 1$ as the vortex dissipates
+(Figure~\ref{fig:tg}).
+
+\subsection{L2: forced turbulent runs}
+\label{sec:forced}
+
+The main experiments are forced Kolmogorov-flow runs with
+$f = F\sin y\, e_x$ at
+\begin{equation}
+  \mathrm{Re} \in \{100,\; 1000,\; 5000\},
+  \qquad \mathrm{Re} = 2\pi F/\nu^2,
+  \label{eq:re-set}
+\end{equation}
+% [PENDING-CODER: confirm the (F, nu) pairing for each Re in
+% {100, 1000, 5000}.]
+on grid resolution $N = \text{[PENDING-CODER]}$
+% [PENDING-CODER: grid resolution N (and any resolution dependence check) for
+% each Re.]
+with time step $\Delta t = \text{[PENDING-CODER]}$
+% [PENDING-CODER: time step / time-stepping policy for each Re.]
+and initial condition
+$\text{[PENDING-CODER: initial condition, e.g.\ Kolmogorov equilibrium plus
+perturbation]}$.
+% [PENDING-CODER: confirm IC and total simulation time, including the length
+% of the spin-up (discarded) phase and the statistical (retained) window.]
+Each run records the invariants I1--I4 of
+Section~\ref{sec:invariants}: rank over time, singular-value decay,
+divergence-free residuals, kinetic energy and its spectrum, and per-step
+costs.
+
+\subsection{L3: full-grid spectral reference}
+\label{sec:reference}
+
+For accuracy and invariant comparison we integrate the same
+stream-function formulation \eqref{eq:stream-ns} on the full grid with a
+spectral method (Fourier collocation, exact $\Delta$ and $\Delta^{-1}$,
+same de-aliasing policy and time-stepping policy as the SP-DLRA runs)
+\cite{orszag1971}.
+% [PENDING-CODER: confirm the reference scheme's integrator, de-aliasing,
+% time step, and grid (possibly finer than the SP-DLRA grid), and how
+% reference fields are sampled for error/invariant comparison.]
+The reference solution $\psi_{\mathrm{ref}}$ is the ground truth for the
+relative error
+$\norm{\Psi - \psi_{\mathrm{ref}}}_2 / \norm{\psi_{\mathrm{ref}}}_2$ and for
+the kinetic-energy statistics of I4.
+
+\subsection{L4: static POD baseline}
+\label{sec:pod}
+
+As the static-basis baseline we build an offline proper orthogonal
+decomposition (POD) from snapshots of the reference run of each
+Reynolds number \cite{sirovich1987, lumley1967}: the snapshot matrix is
+eigen-decomposed and truncated at the smallest number of modes
+$r_{\mathrm{POD}}$ resolving 99.9\% of the (snapshot) energy. The baseline
+model is the Galerkin projection of the dynamics onto this \emph{fixed}
+basis (no online rank adaptation), advanced with the same nonlinear
+residual evaluation as SP-DLRA.
+% [PENDING-CODER: confirm the snapshot window used for the POD (statistical
+% window only), the exact energy threshold (99.9%), the Galerkin baseline
+% integrator, and how the POD basis handles the forcing term.]
+The POD baseline measures the cost of staticity: whether a fixed basis of
+size $r_{\mathrm{POD}}$ can track the dynamics at a cost and accuracy
+comparable to the adaptive rank-$r(t)$ SP-DLRA model.
+
+\subsection{Metrics}
+\label{sec:metrics}
+
+We report, per Reynolds number:
+\begin{itemize}
+  \item \emph{Rank dynamics}: $r(t)$ and the singular-value spectrum
+  $\sigma_i(t)$ (Figures~\ref{fig:rank} and~\ref{fig:svd});
+  \item \emph{Accuracy}: $\max$ relative $L^2$ error against the
+  full-grid reference over the statistical window, per Re
+  (Figure~\ref{fig:error});
+  \item \emph{Cost}: per-step and total wall-clock time and peak memory for
+  SP-DLRA, the full-grid reference, and the POD baseline, including the
+  regimes in which SP-DLRA is slower (Figure~\ref{fig:cost},
+  Section~\ref{sec:cost});
+  \item \emph{Invariants}: $\max|\grad\cdot u|$ per run (Table~\ref{tab:div}),
+  kinetic-energy monotonicity (I2), forcing-aware energy balance (I2), rank
+  versus $r_{\mathrm{POD}}$ (I3), and kinetic-energy spectrum / statistics
+  against the reference (I4).
+\end{itemize}
+
+\subsection{Hardware and reproducibility}
+\label{sec:repro}
+
+All experiments are single-node.
+% [PENDING-CODER: hardware (CPU/GPU), software stack and versions, and total
+% compute budget per (Re, N).]
+Per the project's reproducibility checklist (CHECKLIST, item 1.1), every
+number and figure in the paper is traceable to a run record in
+\texttt{state/coder/results/} with its configuration, driver script, and
+source commit; figures are generated from those records by scripts under
+\texttt{experiments/}.
+% [PENDING-CODER: confirm the results-directory layout and the figure
+% generation scripts so the provenance note above is accurate.]

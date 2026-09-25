@@ -1,0 +1,79 @@
+% Limitations
+
+\section{Limitations}
+\label{sec:limitations}
+
+We state the limitations of the present work explicitly, since several of
+them are deliberate scope choices rather than oversights.
+
+\begin{itemize}
+  \item \textbf{Two dimensions, periodic box, single forcing mode.}
+  All validation is for the 2D incompressible Navier--Stokes equations on
+  the periodic box $\T^2$ with the single-mode forcing of
+  eq.~\eqref{eq:forcing} (Section~\ref{sec:problem}). Free-slip walls,
+  boundary layers, and multi-mode or spatially heterogeneous forcing are
+  outside the scope of this work; the stream-function representation and the
+  exact viscous step both rely on the periodic setting and do not carry over
+  to bounded domains without additional treatment.
+
+  \item \textbf{Reynolds numbers up to 5000.} The turbulent-validation
+  ladder of Section~\ref{sec:setup} stops at $\mathrm{Re} = 5000$. Whether
+  the adaptive rank and the accuracy of Section~\ref{sec:res-error} hold
+  above that Re is untested; the cost model of Section~\ref{sec:cost}
+  suggests the per-step picture should be stable (the nonlinear residual
+  remains $O(n \log n)$ and rank-independent), but this is an expectation,
+  not a result.
+  % [PENDING-CODER: if the runs at Re = 5000 already show degradation,
+  % state it here and in Section~\ref{sec:res-error} instead of as a
+  % forward-looking limitation.]
+
+  \item \textbf{Rank decay is only fully exercised in the laminar run.}
+  The tolerance-based decay rule (Section~\ref{sec:rank-adaptation}) is
+  exercised in its full $3 \to 2 \to 1$ form in the Taylor--Green decay of
+  Section~\ref{sec:res-tg}. In the forced runs of Section~\ref{sec:results},
+  the rank is expected to be quasi-stationary over the statistical window,
+  so the interaction of decay with sustained forcing is not strongly
+  tested. In particular, we do not know yet whether the decay rule can
+  trigger spurious drops during the transient spin-up phase.
+  % [PENDING-CODER: report whether any decay events occur in the forced
+  % runs, and whether any are followed by immediate regrowth (a sign of
+  % indicator/decay-rule interaction).]
+
+  \item \textbf{No per-step speedup claim.} Because the nonlinear residual
+  is evaluated on the full grid at rank-independent $O(n \log n)$ cost
+  (Section~\ref{sec:cost}), SP-DLRA is not expected to beat the full-grid
+  spectral reference per step at small rank, and the cost section reports
+  the regimes where it is \emph{slower} (Figure~\ref{fig:cost}). The
+  contribution is the reduced-model capability with exact
+  divergence-freeness and online rank adaptation, validated in a
+  high-Reynolds-number turbulent regime; a wall-clock advantage is
+  neither claimed nor assumed.
+
+  \item \textbf{No stability analysis of the full coupled scheme.} The
+  viscous step is exact within the ansatz and the nonlinear step is a
+  standard projected midpoint update, but the scheme with online rank
+  changes has no stability or error analysis in this work. The residual
+  indicator \eqref{eq:indicator} is a heuristic error control, not a proven
+  a~priori bound; long-time behavior over the retained windows is supported
+  by the runs themselves (Sections~\ref{sec:res-error}
+  and~\ref{sec:res-fidelity}), not by a theorem.
+
+  \item \textbf{Forcing-aware invariant not yet formalized for the reduced
+  model.} The unforced energy monotonicity (I2) is replaced under forcing by
+  the forcing-aware balance of eq.~\eqref{eq:energy}; the precise
+  reduced-model statement that the runs are checked against is being
+  defined by the theoretical-research line of work (decision D3) and is not
+  yet finalized. We therefore report the energy balance of
+  Section~\ref{sec:res-fidelity} as an empirical check pending that
+  statement.
+  % [PENDING-THEORETICAL-RESEARCH: replace this paragraph with the final
+  % forcing-aware invariant statement once it lands.]
+
+  \item \textbf{No statistical-convergence study.} The retained statistical
+  windows of Section~\ref{sec:setup} are fixed in advance; we do not study
+  how the statistics (kinetic-energy spectrum, dissipation rate) converge as
+  the window length grows, nor do we run longer than the retained windows.
+  Whether the quasi-stationary rank and the statistical quantities of
+  Section~\ref{sec:res-fidelity} are stable under longer runs is part of the
+  open validation items (V2 in the project's validation ladder).
+\end{itemize}

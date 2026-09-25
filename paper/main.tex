@@ -1,0 +1,71 @@
+% ============================================================================
+% Structure-Preserving Dynamical Low-Rank Approximation of the
+% Incompressible Navier--Stokes Equations in High-Reynolds-Number Turbulence
+%
+% Venue-neutral scaffold. The venue is not yet decided (reviewer decision D5:
+% working direction is a scientific-computing / ML-adjacent venue). To target
+% a specific venue, replace \documentclass and adjust the preamble to the
+% venue's template; the section structure is intended to survive that swap.
+% ============================================================================
+% TODO(venue): swap documentclass for the venue template, e.g.
+%   \documentclass[review]{icml2027}   or   \documentclass{neurips_2027}
+%   or a journal class (SISC / JCP).
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+
+% Notation shortcuts used across sections
+\newcommand{\dd}{\,\mathrm{d}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\T}{\mathbb{T}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
+\newcommand{\grad}{\nabla}
+\newcommand{\ddt}{\partial_t}
+\newcommand{\dlra}{SP-DLRA}
+
+% Placeholder convention: [PENDING-<owner>: detail] marks every value or
+% statement that must be filled from verified project data before submission.
+% % [PENDING-CODER]      -> numbers / figures / scheme confirmations
+% % [PENDING-THEORETICAL-RESEARCH] -> forcing-aware invariant, rank theory
+% % [FLAG-<owner>]        -> open question for another agent (see README.md)
+
+\title{Structure-Preserving Dynamical Low-Rank Approximation of the
+Incompressible Navier--Stokes Equations in High-Reynolds-Number Turbulence}
+
+\author{
+  [Authors to be added]\\
+  [Affiliations to be added]
+}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\input{sections/00_abstract}
+
+\input{sections/01_introduction}
+\input{sections/02_contributions}
+\input{sections/03_related_work}
+\input{sections/04_methods}
+\input{sections/05_experimental_setup}
+\input{sections/06_results}
+\input{sections/07_discussion}
+\input{sections/08_limitations}
+\input{sections/09_conclusion}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
