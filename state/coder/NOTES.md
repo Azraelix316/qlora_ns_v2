@@ -56,6 +56,63 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 
 ## Log
 
+- 2026-09-26 **`run_kolmogorov.py` — the canonical suite driver — could not run
+  at all.** `dlra_max_rank=args.dlra_max_rank or 2 * (N // 3) + 1` referenced a
+  bare `N` that does not exist in `main()`, introduced at `394766b`, so the
+  project's primary driver raised `NameError` on every invocation for many
+  cycles. Nothing caught it because the committed artifacts predate the break: a
+  driver that cannot run looks exactly like one nobody ran, which is D14.4's
+  failure one layer down. Fixed, and `test_every_driver_runs` now invokes all
+  seven drivers as subprocesses at minimal configurations (6.7 s) so the class
+  cannot recur. Building it also confirmed four preconditions the drivers
+  enforce: `PODGalerkin.fit` refuses a rank the window cannot supply,
+  `run_regime_pilot.py` refuses a block time under the S2 specification's 2 time
+  units, and two argument floors.
+- 2026-09-26 **B1 closed, and it caught a real reproducibility failure.** Both
+  artifacts re-run on the committed driver; all five in that family now record
+  `reproducible: true` with `driver_matches_HEAD: true`, and
+  `kolmogorov_re5000_N128.json` records the `ic_reference_N: 64` whose absence
+  made its old commit false. **But the N=128 numbers did not reproduce:** the IC
+  is bit-identical while `full.final_energy` moved 1.05% and
+  `pod.max_relative_l2_vs_full` improved three orders of magnitude
+  (6.72e-6 → 1.89e-9). The N=64 suite and the sweep reproduce bit-identically on
+  every non-timing field. So my earlier claim that the full-spectrum derivative
+  fix was "inert for every committed run" was **false for N=128**, where a field
+  that is not k-symmetric exercises the old half-spectrum path. Corrected in the
+  outbox; the N=128 numbers are now the better ones.
+- 2026-09-26 **C4-1/D70: the two energy-residual keys renamed to what they
+  measure** — `max_scaled_pde_energy_residual` (no projection term) and
+  `max_scaled_projected_energy_residual` (the balance a projected integrator
+  actually satisfies) — with an `energy_residual_semantics` block in every
+  artifact giving both definitions, the scale, and which to quote. Writing the
+  test found the trap in *code* as well as in the key: the projection's energy
+  increment is accumulated only when `track_step_diagnostics` is on, so a run
+  that forgets it files a silent zero under the projection-aware name.
+- 2026-09-26 **C1-1 `fig_div_free` split into two panels**, with a guard that
+  **raises** rather than compressing 292 decades silently. Two findings from
+  doing it: the line labelled "target 10⁻¹⁴" had **every** method above it (they
+  sit at 2–20×), so it is relabelled the roundoff floor; and a linear axis was
+  the wrong choice despite being specified, because `pod_dmd_r32` at 1046× would
+  render the other fifteen as sub-pixel slivers — a stated deviation.
+- 2026-09-26 **C3-2's number is sharper than the claim.** The static error's
+  spread across ranks {16, 32, 43} is **exactly 0.0%** at every horizon and both
+  Reynolds numbers, against 16–18% across {2, 4, 8}. So above r=16 the extra
+  modes buy nothing measurable at all, not merely little.
+- 2026-09-26 **C2-3/P1: provenance is now structural.** `experiments/provenance.py`
+  records the driver's own SHA-256 and whether it equals the committed file, and
+  all seven drivers use it; `PROVENANCE.md` is generated from the artifacts the
+  figure run just loaded, so there is no second copy to drift. Generating it
+  immediately showed 6 of 11 artifacts had no `reproducible` field, which is
+  what C2-3 fixed. `bench_memory.py` records `load_average_at_end` like
+  `bench_cost.py` does.
+- 2026-09-26 **C2-1: the reviewer's `PROVENANCE_ATTESTATION_N128.md` verifies**
+  — all five determining files hash-match `588e51592bf0` as tabulated — **but I
+  am superseding it.** An artifact produced from a `git archive` extraction
+  records `git_commit: "unknown"` by construction, and the attestation exists to
+  explain a value I can simply avoid. The N=128 surface is running in the
+  worktree at a real commit instead, which both lands the artifact
+  `claims_registry.py` wants and cross-checks the attested-archive method.
+
 - 2026-09-25 **The `crossovers` block was wrong because of a direction bug, and
   it had been wrong for three review cycles because it had no test.** I detected
   only an *upward* crossing of `R = static/DLRA` through 1, but the static

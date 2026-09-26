@@ -20,7 +20,7 @@ describing a paper we are no longer writing.**
 | **W5** | **§4 protocol + table 1** | The spine. The **five** things a reported horizon must state, the four baseline bugs, and the fix. | five = window · refit interval · offset · in-sample check · grid + largest rank tested; correcting the baseline moved `t*` **down `1.6–2.8×`** and cost 3 of 6 ranks their crossover | **D4**, **D6**, **D7**, **D9**, **D10** |
 | **W6** | **§5 stability** | The thesis, as a measurement. | fixed basis overflows at `r=32, 42` (`t = 5.513, 6.96, 5.7425, 7.1715`); SP-DLRA at the same ranks: `\ | ∇·u\ | ≤ 1.1e-13`, traj error `< 1.1` | **D1** |
 | **W7** | **§6 results — the whole section, prose only** | **7 blocks supplied: D18c**, 1,321 words, every number a registry row. **§6 is where the contribution is and it has no numbers in it. Paste per subsection; do NOT replace the section — its labels are referenced 26 times from elsewhere.** Also in D18c: the figure mapping, and one real gap (no Taylor--Green figure exists). | `WRITER_ORDER.md` **D18c** |
-| **W8** | **§7 discussion** | The honest gaps — **and one former gap is now a result.** | 2nd order conditional on rank; rank criterion verified only to `T=0.1`; grid: DLRA **improves `≈2.18×`**, static rank-16 **degrades `2.5–1464×`**. **The never-yields rank is no longer a gap: it is located at each grid's dealiasing ceiling — 43 at `N=64`, 85 at `N=128` — which is a *representation* limit and the strongest statement of the saturation mechanism. Do NOT write "bracketed between 32 and 43"; that is withdrawn (D74).** | **D1**, **D18** |
+| **W8** | **§7 discussion — the whole section, prose only** | **4 blocks supplied: D18d**, 1,063 words. **The shipped §7 is written in the conditional (\"is expected to\", \"if the runs confirm\") because it was drafted before the runs existed, its first subsection is built on the **barred** online-adaptive-rank claim, and it carries 3 `PENDING-CODER` markers. D18d states the case for the method *despite* it being slower and using more memory, which is the acceptance argument.** | `WRITER_ORDER.md` **D18d** |
 | **W9** | **§8 conclusion** | Short. Do not introduce anything not already above. | — | — |
 
 **Then, only once the above is done:** §2 related work, and the one missing citation (`CITATIONS.md` §1).
@@ -864,10 +864,9 @@ reference, which is where a benefit would have had to come from, and it does not
 Under forcing, kinetic energy is not monotone, so the second invariant is a balance
 and not a decay law. Measured as the energy balance residual of the projected discrete
 dynamics, all three solver families hold it to between $1.3\times 10^{-4}$ and
-$2.2\times 10^{-3}$ across the $26$ committed measurements we pool, the static
-projection at the finest grid being the worst at $2.2\times 10^{-3}$. The spread is
-two orders wide and the worst case is the static baseline, which is what one expects
-of a fixed subspace whose truncation error does not get integrated away. We report this quantity and not the balance of the
+$4.9\times 10^{-4}$ across the $26$ committed measurements we pool. The largest
+residual in that population belongs to our own method, not to a baseline: no solver
+family is an outlier, and the whole population spans less than a factor of four. We report this quantity and not the balance of the
 full partial differential equation, because for a projected method the two differ by
 the size of the projection's own energy increment: the two keys in our artifacts
 differ by up to a factor of several hundred across configurations, and quoting one for
@@ -876,3 +875,130 @@ steps, so every statement here concerns horizons of order one; we claim no long-
 behaviour, and the only evidence we hold at longer horizons is a single run we do not
 rely on.
 ```
+
+---
+
+## D18d — **§7 DISCUSSION, SUPPLIED: THE PAPER'S CASE RESTATED AS WHAT THE RESULT IS, WHY IT IS WORTH HAVING DESPITE BEING SLOWER AND USING MORE MEMORY, AND WHAT IT DOES NOT SUPPORT. THE SHIPPED VERSION IS CONDITIONAL AND BUILT ON A BARRED CLAIM.**
+
+**Paste per subsection, keeping the `\section` and `\label` lines.** `sec:discussion` is referenced once from another
+section; the four subsection labels are referenced nowhere, but they are kept so your own cross-references keep working.
+**No `\cite` and no `\ref` in any block, so nothing here can fail on a reference.**
+
+**What is wrong with the version you have,** and it is a writing problem rather than a missing number:
+
+1. **It is written before the results existed.** *"the rank trace $r(t)$ **is expected to exhibit** a growth phase"*,
+   *"**If the runs confirm this picture**"*, *"is one of the questions **the runs must answer honestly**"*. The runs are done.
+   A discussion written in the conditional reads as a plan, not as an argument, and a reviewer will not credit a mechanism
+   that is only promised.
+2. **Its first subsection is built on a claim I withdrew.** It argues the retained rank is "an output of the simulation"
+   governed "online by the residual indicator". **The only adaptive-rank evidence in this project is `n = 200` steps at
+   `final_time = 0.1` (D32.2), so that claim is barred** and is one of the three live defects in the draft.
+3. **It carries 3 `PENDING-CODER` markers**, all asking for rank data the runs now contain.
+4. **It never states the paper's strongest verified finding** — that the static subspace's error stops improving from rank
+   16 — and never confronts the two negative results honestly.
+
+### 1. into `\label{sec:disc-rank}` — what the horizon means
+
+```latex
+The horizon $t^\ast$ is a statement about how a subspace is built, not about rank in
+general. Two measurements pin this down. The horizon is nearly independent of the
+Reynolds number and of the trailing-window length, moving by $2.7\%$ to $8.6\%$ and by
+$0.15\%$ to $0.63\%$ respectively over what we vary. And the static baseline's error
+stops improving altogether from rank $16$: at $N=64$ the ranks $16$, $32$ and $43$ give
+the same error to every digit we report, at every horizon and both Reynolds numbers,
+while ranks $2$, $4$ and $8$ differ from them by up to $85\%$ and drift further apart
+as the horizon grows. The long-horizon advantage is therefore bought by re-fitting the
+subspace to the current state, not by spending more rank on a fixed one, and a
+comparison at equal rank is a comparison of update rules.
+
+This also fixes the rank at which the comparison ends. The rank at which a propagated
+static subspace stops improving coincides with the largest rank each grid retains
+without aliasing, which is $43$ at $N=64$ and $85$ at $N=128$. We read that as a
+statement about the grid rather than about the dynamics: past that rank the static
+baseline is not approximating a low-rank state, it is storing the grid. It is also why
+we report the horizon as not grid-convergent rather than as a quantity to extrapolate.
+```
+
+### 2. into `\label{sec:disc-invariants}` — the structural invariant, and what it is worth
+
+```latex
+The divergence-free property is the part of this work we would defend hardest,
+because it is a property of the representation rather than of the solver. The velocity
+is recovered from a scalar stream function, so the discrete divergence vanishes
+algebraically at every step, at every rank and every Reynolds number. No projection
+onto a divergence-free subspace is performed, there is no projection parameter, and
+there is no divergence-error budget to manage. A method that enforces the constraint by
+projection satisfies it only to whatever tolerance the projection is given, and the
+tolerance has to be chosen against the very ill-conditioning the constraint exists to
+avoid. We regard the absence of that choice as the substantive difference, and the
+measured residual band of $1.6\times 10^{-14}$ to $2.2\times 10^{-13}$ as confirmation
+rather than as the claim itself.
+
+Under forcing the second invariant is a balance rather than a decay law, and we report
+it as such. It is worth being explicit that the balance the reduced solver satisfies is
+not the balance of the full partial differential equation, and that the two differ by
+the size of the projection's own energy increment. We name which quantity we report and
+why, because quoting the other would overstate the violation by up to a factor of
+several hundred and would make the static baselines look far worse than they are.
+```
+
+### 3. into `\label{sec:disc-dim}` — the regime, and why the method is worth its cost
+
+```latex
+The regime we validate is the one where low-rank approximation is hardest and most
+worth having: forced two-dimensional turbulence at Reynolds numbers up to $5000$, with
+a slowly decaying singular-value spectrum and a rank requirement well beyond a handful
+of modes. That is the regime in which a method can be cheaper than the full grid in
+principle, and it is also the regime in which a static basis has the most to gain from
+being refitted. The trade we measure is therefore the honest one: at equal rank the
+reduced integrator is the more accurate method for a horizon that grows with rank, and
+beyond that horizon the static baseline wins.
+
+It does not win on cost, and we would rather say so plainly than bury it. The reduced
+integrator costs between $2.24$ and $2.74$ times the full-grid step, and even at the
+pessimistic end of the measurement's own recorded noise it is at least $1.4\times$. It
+also uses more memory, by $2.4$ to $4.2$ MiB depending on the grid. The reason is
+structural rather than an artefact of our implementation: the nonlinear residual is
+evaluated on the full grid, so the reduced solver pays the entire full-grid cost plus
+its own factorisation, and the state is a full field plus its factors plus the
+factorisation workspace. The linear-algebra share of the step is smaller than the
+reference's, which is where a benefit would have had to come from, and it does not.
+
+So the case for the method is not throughput, and we do not make one. It is that the
+full-grid nonlinear step is irreducible for this problem, and the question a practitioner
+faces is not whether to pay it but how much rank to carry while paying it. On that
+question the measurements are unambiguous: rank buys horizon when the subspace is
+refitted and buys nothing at all when it is not. A practitioner who needs a given
+accuracy over a long horizon can reach it at a lower rank with this integrator than
+with any fixed basis we can construct, and pays a bounded factor of two for the
+privilege. Where a full-grid solver is fast enough, it remains the better choice, and
+we say so.
+```
+
+### 4. into `\label{sec:disc-3d}` — what does not follow
+
+```latex
+Three limits bound the claim, and we state them as results rather than as caveats.
+The horizon is not grid-convergent over the range we measure, rising by factors of
+$1.45$ and $1.64$ from $N=64$ to $N=128$, so it should be read as a property of a
+grid-and-solver pair rather than of the problem. The invariances in Reynolds number and
+window length are measured at $N=64$: the $N=128$ surface was run at one window length
+and one Reynolds number, so neither invariance is corroborated at the second grid. And
+the evidence for rank adaptation is bounded to short horizons, because the adaptive
+runs we have are the only ones that integrate a changing rank, and they are short; we
+therefore make no claim about rank behaviour at long times, and the mechanism above is
+stated for a fixed rank on the strength of the static comparison rather than for an
+adaptively grown one.
+
+The formulation is two-dimensional, periodic and single-mode forced. The viscous part
+of the split is separable in the Fourier basis in any dimension, so that part of the
+structure carries over directly; the stream-function representation of the
+divergence-free constraint does not, and neither does the forcing. In three dimensions
+the constraint would have to be enforced by a different mechanism, and we regard that as
+the substantive open problem rather than a matter of re-running the present code in
+three dimensions.
+```
+
+**Two things to check when you paste.** `sec:discussion` is referenced once from another section, so keep that label
+exactly. And the shipped §7's three `PENDING-CODER` markers should go with the text they sit in — all three ask for rank
+data the runs now contain, and D18d's blocks 1 and 3 answer the first and third directly.

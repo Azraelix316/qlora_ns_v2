@@ -736,3 +736,66 @@ overflowing four) — and the three `D60` sites in your draft still need D18c bl
 caption.
 
 **Priority unchanged: D13, D14, `99.9%` → `99%` in all three files, then the D60 sites, then D18c.**
+
+---
+
+## R136 — **one number in D18c changed again, and the new version is a stronger claim**
+
+**Re-read D18c block 7.** The energy balance's population is now:
+
+> *"…all three solver families hold it to between $1.3\times10^{-4}$ and $4.9\times10^{-4}$ across the $26$ committed
+> measurements we pool. **The largest residual in that population belongs to our own method, not to a baseline: no solver
+> family is an outlier, and the whole population spans less than a factor of four.**"*
+
+**What changed and why.** The coder found and fixed an error in the **static baseline at `N=128`** that was **3551× too large**
+— its trajectory error was `6.7e-6` and is now `1.9e-9`. That baseline used to set the worst case, so the ceiling fell from
+`2.2e-3` to `4.9e-4` **and the worst case is now SP-DLRA itself.** So the sentence you paste is now *more* favourable and
+*more* honest than the one I gave you an hour ago, and you should use this version.
+
+**One thing worth a sentence in the paper, because it inverts the reader's expectation:** across three re-runs at `N=64` the
+**static baseline's** error moved `−3.7%`, `+7.0%`, `−0.7%`, while **SP-DLRA's** moved `0.0%`. **The baseline is the noisy
+quantity and our method is the reproducible one.** That bounds how precisely anything about the baseline can be claimed, and a
+reviewer who spots it will ask.
+
+**Also good news: D85's central mechanism is now a test, not just a sentence.** The coder's
+`test_the_static_baseline_error_is_flat_in_rank_above_16` passes, and the measured spread of the static error across ranks is
+**exactly `0.0%` for ranks `{16, 32, 43}` at every horizon and both Reynolds numbers, against `16.4%` and `18.2%` for
+`{2, 4, 8}`.** If the mechanism ever stops holding, the suite goes red.
+
+**Unchanged and still yours: D13, D14, the `99.9%` → `99%` fix in all three files, and the three D60 sites including the
+`tab:div` caption.**
+
+---
+
+## R137 — **§7 is supplied. It is the section that decides acceptance, and yours is written in the conditional because it was drafted before the runs existed.**
+
+`WRITER_ORDER.md` **D18d**: 4 blocks, 1,063 words, **0 `\cite` and 0 `\ref`**, so nothing in it can fail on a reference.
+Verified: braces balanced, 32 math spans none malformed, and `claims_registry.py` PART 4 confirms **9 new traced literals and
+0 untraced** — every number in it has a source.
+
+**Four things are wrong with the version you have, and three of them are not about numbers:**
+
+1. **It is in the conditional voice** — *"is expected to exhibit"*, *"if the runs confirm this picture"*, *"is one of the
+   questions the runs must answer honestly"*. **The runs are done.** A discussion written that way reads as a plan, and a
+   reviewer will not credit a mechanism that is only promised.
+2. **Its first subsection is built on a claim I withdrew.** It argues the retained rank is "an output of the simulation"
+   governed "**online** by the residual indicator". **The only adaptive-rank evidence is 200 steps at `final_time = 0.1`
+   (D32.2), so that is barred** — and it is one of the three live defects in your draft.
+3. **Three `PENDING-CODER` markers**, all asking for `r*(Re)`, spin-up durations and the rank gap — data the runs now contain.
+4. **It never states the paper's strongest verified finding** and never confronts the two negative results.
+
+**The missing piece is the acceptance argument, and D18d's block 3 makes it explicitly.** You measure that the method is
+`2.24–2.74×` the full-grid step and uses more memory. A discussion that does not answer "why is this worth having?" leaves
+the reader holding only the negatives. The answer D18d gives is the honest one: **the nonlinear residual is evaluated on the
+full grid, so the reduced solver pays the entire full-grid cost plus its own factorisation — the cost is structural, not an
+artefact of the implementation** — and the linear-algebra share is *smaller* than the reference's, which is where a benefit
+would have had to come from, and it does not. **So the case is not throughput. The question a practitioner faces is not whether
+to pay the full-grid step but how much rank to carry while paying it — and on that question the measurement is unambiguous:
+rank buys horizon when the subspace is refitted and buys nothing when it is not. Where a full-grid solver is fast enough, it
+remains the better choice, and we say so.**
+
+**Two mechanical notes.** Keep `\label{sec:discussion}` exactly — **it is referenced once from another section.** The four
+subsection labels are referenced nowhere but I have kept them so your own cross-references keep working. And paste per
+subsection; do not replace the section wholesale, which is the mistake I made with §6.
+
+**Priority unchanged: D13, D14, the `99.9%` → `99%` fix in all three files, the three D60 sites, then D18c and D18d.**

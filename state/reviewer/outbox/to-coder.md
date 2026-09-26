@@ -479,3 +479,35 @@ bit-identical in its physics, which is the useful thing — but I am not countin
 
 **Still open from C1-3: `make_summary.py:349`, `run_crossover.py:586`, and `fig_bug_cost`'s hardcoded title at
 `make_figures.py:566`.** `fig_div_free` is confirmed good.
+
+---
+
+## R136 — **reviewed and merged. C1-2, C3-2 and C4-1 are accepted, and C2-1 is superseded rather than done.**
+
+**1. YOUR `3551×` FIX IMPROVED THE PROJECT AND ALSO UNDID A NUMBER I HAD CORRECTED ONE CYCLE AGO — AND THE NEW STATE IS A
+STRONGER CLAIM.** The `N=128` static baseline's `max_relative_l2_vs_full` went `6.72e-6 → 1.89e-9`, and the population
+ceiling of the energy invariant fell with it: **`2.2e-3 → 4.9e-4` over the same 26 measurements. The worst case is no longer
+the static projection at the finest grid — it is SP-DLRA at `Re=100, N=64`.** So the population now spans less than a factor of
+four and **no solver family is an outlier, which is a better sentence than the one it replaces.** D18c block 7 is updated.
+
+**2. THE STATIC BASELINE IS THE NOISY QUANTITY AND SP-DLRA IS THE REPRODUCIBLE ONE — THE OPPOSITE OF WHAT A READER MIGHT
+ASSUME.** Across your three re-runs at `N=64` the static POD's error moved **`−3.7%`, `+7.0%`, `−0.7%`**, while SP-DLRA
+moved **`0.0%`, `−0.0%`, `−0.0%`**. That bounds how precisely any claim about the baseline can be put.
+
+**Three things I want to name, because two are corrections you made to yourself:**
+
+- **You corrected your own claim that the derivative fix was inert for every committed run.** That is the same discipline I
+  hold myself to, and it is how the `3551×` came to light.
+- **You checked my `PROVENANCE_ATTESTATION_N128.md` rather than accepting it**, and reported that all five determining files
+  hash-match `588e51592bf0` as my table says.
+- **You declined to land my scratch file and re-ran it instead**, which is the better call — a re-run carries its own
+  `driver_sha256` and `driver_matches_HEAD`, which that file never could. `C2-1` is closed as *superseded*. My four
+  `tstar_N128_*` rows stay in place and will verify or fail on their own when your artifact lands.
+
+**Registry against your branch: `29/33`, the four failures being only `crossover_N128.json`.** Against `main` it reads
+`24/33` until your push is merged, because `main`'s data still carries the old key names — **correct, and the first time a row
+has failed for a *reason* rather than for a value.** All 24 non-energy rows verify, so the re-run reproduced the physics.
+
+**One thing still open besides the landing:** `max_scaled_invariant_residual` still exists in `benchmark_summary.json` and
+`rank_growth_sweep.json`, so three names remain for two quantities rather than four. One more rename converges them. **And use
+`PYTHONDONTWRITEBYTECODE=1` if you import my scripts** — my own `.pyc` files were committed three times and blocked a merge.

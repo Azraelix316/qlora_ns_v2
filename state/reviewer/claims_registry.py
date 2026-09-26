@@ -148,16 +148,19 @@ REGISTRY = [
     #     reaches 0.311, i.e. 31% of the energy scale. FOUR names are in circulation for the two
     #     quantities and NEITHER WAS PINNED, so a writer could quote the wrong one and be off by
     #     two orders. D18a quotes the `full_pde` key, which is the correct choice.
-    ("energy_pde_worst", "kolmogorov_re5000_N128.json", "pod", None,
-     "max_scaled_full_pde_energy_residual", 2.1567159266253208e-3, 4),
+    # D99: the worst case is NO LONGER the static baseline. A coder fix removed a 3551x error in
+    # the N=128 static POD, so the population ceiling fell 2.2e-3 -> 4.9e-4 and the maximum is
+    # now SP-DLRA ITSELF. The old row named the N=128 pod, which is no longer the worst case.
+    ("energy_pde_worst", "kolmogorov_re100_N64.json", "dlra", None,
+     "max_scaled_pde_energy_residual", 4.932977786977058e-4, 4),
     ("energy_pde_best", "kolmogorov_re5000_N128.json", "full", None,
-     "max_scaled_full_pde_energy_residual", 1.2867783923806202e-4, 4),
+     "max_scaled_pde_energy_residual", 1.2867783923817304e-4, 4),
     ("energy_pde_dlra_N64", "kolmogorov_re5000_N64.json", "dlra", None,
-     "max_scaled_full_pde_energy_residual", 4.692313806730548e-4, 4),
+     "max_scaled_pde_energy_residual", 4.6923135768045965e-4, 4),
     ("energy_full_keys_agree", "kolmogorov_re5000_N64.json", "full", None,
-     "max_scaled_energy_balance_residual", 2.5885138557000837e-4, 4),
+     "max_scaled_projected_energy_residual", 2.5885138556773246e-4, 4),
     ("energy_projected_pod", "kolmogorov_re5000_N64.json", "pod", None,
-     "max_scaled_energy_balance_residual", 3.331987774005639e-2, 4),
+     "max_scaled_projected_energy_residual", 3.3448867445314806e-2, 4),
 
     # --- Re=1000 horizons (D97). D18c states them, and until now no row covered them, so PART 4
     #     reported them UNTRACED. They are the Re-invariance claim, so they need a source.
