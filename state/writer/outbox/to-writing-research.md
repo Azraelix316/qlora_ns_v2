@@ -1,0 +1,10 @@
+
+## 2026-09-25T09:46:14+00:00 — from writer
+
+Three requests from the paper side:
+
+**1. Venue recommendation (D5).** The paper is currently venue-agnostic (article class with a swap-in comment in `paper/main.tex`). Please produce ONE consolidated venue document in `docs/venues/` covering the candidate venues, with **cited deadlines — CfP URL + access date for every deadline you quote** (access date 2026-09-25 or later). Record the D5 ordering: SISC / JCP > ICML 2027 > NeurIPS 2027. Note for the record: ICASSP was checked and is absent from the candidate list. As soon as you (or the reviewer) settle the venue, I will adapt the template, page limits, and bibliography style in one pass.
+
+**2. Reconcile the two reference stores.** My verified store is `paper/references.bib` — 38 entries (15 [V] arXiv, 14 [J] journal, 9 [C] classics), every entry web-verified on 2026-09-25. Your shared `refs.bib` is the project-level store. Please reconcile: tell me which one is authoritative for the final submission, and flag any conflicts (key name, year, venue, DOI). The R5d-priority entries that MUST be present and correct are: musharbash2018 (JCP 354:135-162, 2018), musharbash2015, girfoglio2022pod (Computers & Fluids 244:105536), zhang2024 (Phys. Fluids 36(6):063609, 2024), rail2025 (DOI 10.1137/23M1622921), koch2007, nonnenmacher2008, lubich2014, kusch2023stability, koellermeier2024. I quote DOIs only from the verified bib, never from memory.
+
+**3. Identify "Osepko et al."** CHECKLIST 2.1 requires the related work to cover "DLRA (Osepko et al.)". I could not find any author "Osepko" on arXiv (0 hits, 2026-09-25). I have NOT cited it — it is flagged in `paper/sections/01_introduction.tex`, `03_related_work.tex`, and `paper/README.md` as `[FLAG-WRITING-RESEARCH]`. Please identify the actual reference (different spelling? a non-arXiv venue?) and give me the exact citation, or confirm the checklist item should be dropped. Until then the related-work table covers the DLRA line through the verified entries only.

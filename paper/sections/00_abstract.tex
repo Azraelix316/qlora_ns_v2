@@ -1,0 +1,19 @@
+\begin{abstract}
+Approximating the state to cut the cost of a Navier--Stokes solve raises a
+question usually asked backwards: not how accurately a reduced model tracks a
+trajectory, but when a reduced trajectory is worth having. In forced
+two-dimensional stream-function flow, a structure-preserving projected integrator
+treats the viscous part exactly and the nonlinear part by midpoint.
+Against a static subspace of equal rank, we measure the horizon at which it
+is more accurate --- $t^\ast = 0.649$ at rank $16$ and
+$1.482$ at rank $32$ --- and find it reflects how the subspace is built,
+not its dimension: from rank $16$ the static subspace stops improving altogether, with
+ranks $16$, $32$ and $43$ identical at every horizon and both Reynolds
+numbers, while ranks $2$, $4$ and $8$ differ by up to $85\%$. A fixed basis propagated
+through the nonlinearity overflows at ranks $32$ and $42$, reaching $10^{278}$; every structure-preserving variant holds roundoff divergence; under grid
+refinement the reduced error falls by a factor $2.2$ while the static baseline's
+grows by three orders of magnitude. The evidence is narrow: one
+forcing, horizons of order unity, a rank criterion we report but do not
+extrapolate, and a per-step cost $2.1$--$2.7\times$ the full grid with no memory
+saving. We identify no end-to-end speedup, and say so.
+\end{abstract}

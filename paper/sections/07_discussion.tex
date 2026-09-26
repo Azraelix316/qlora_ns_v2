@@ -1,0 +1,129 @@
+% Discussion
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Interpreting rank: a physical diagnostic, not just a cost}
+\label{sec:disc-rank}
+
+A distinctive property of the adaptive scheme of
+Section~\ref{sec:rank-adaptation} is that the retained rank $r(t)$ is an
+\emph{output of the simulation} rather than a user-chosen parameter: it is
+governed online by the residual indicator \eqref{eq:indicator} and the
+tolerance-based decay rule, and is therefore a diagnostic of the dynamics
+itself. In the runs of Section~\ref{sec:results}, the rank trace $r(t)$ is
+expected to exhibit a growth phase during spin-up, when forcing pumps energy
+into the inertial range and the singular-value spectrum of
+$\psi(\cdot,\cdot,t)$ broadens, followed by a quasi-stationary rank
+$r^*(\mathrm{Re})$ that increases with Reynolds number
+(Figures~\ref{fig:rank} and~\ref{fig:svd}). If the runs confirm this picture,
+$r^*(\mathrm{Re})$ is a measurable, low-cost summary of how far the dynamics
+is from low-rank compressibility at each Re: slow singular-value decay at
+high Re (Figure~\ref{fig:svd}) is the direct signature of a broad, weakly
+decaying inertial range, and the rank is simply the number of modes needed to
+hold the approximation error below tolerance.
+% [PENDING-CODER: r*(Re) values and spin-up durations per Re; number of
+% indicator-triggered growth events per run; whether the quasi-stationary
+% rank is stable to the statistical window used.]
+
+This should be read against the static POD baseline of
+Section~\ref{sec:res-pod}. A fixed basis built from snapshots of one
+reference run must choose its count $r_{\mathrm{POD}}$ so that it covers the
+worst case of the window, and it cannot react when the dynamics at a later
+time demands modes the basis does not contain. The cost of staticity is
+therefore twofold: in rank, $r_{\mathrm{POD}}$ must dominate the transient
+peaks of $r(t)$, and in accuracy, intervals where the basis is insufficient
+appear as error spikes (Section~\ref{sec:res-pod}). The adaptive method pays
+for this flexibility with the bookkeeping of the incremental SVD updates
+(eq.~\ref{eq:s-update}), which are cheap relative to a full-grid nonlinear
+residual but nonzero. Whether the rank gap $r_{\mathrm{POD}}(\mathrm{Re})
+- r^*(\mathrm{Re})$ is large enough to change the cost balance
+(Section~\ref{sec:res-cost}) is one of the questions the runs must answer
+honestly; we do not assume it goes in either direction.
+% [PENDING-CODER: r_POD(Re) vs r*(Re) per Re, and the cost balance of the
+% rank gap at each Re (feeds Figure~\ref{fig:cost}).]
+
+\subsection{Structural invariants and long-time behavior}
+\label{sec:disc-invariants}
+
+Two invariants deserve emphasis, because they are structural rather than
+numerical. First, divergence-freeness (I1) is a property of the
+\emph{representation}, not of the solver: the velocity is recovered from a
+scalar stream function on the periodic box, $u = (\partial_y \psi,
+-\partial_x \psi)$, so the discrete velocity is exactly divergence-free at
+every step and every rank, to roundoff (Table~\ref{tab:div}). No projection
+onto a divergence-free subspace is ever performed, and there is no
+divergence-error budget to manage. This is in contrast to velocity-form
+reduced models, where incompressibility must be enforced by a pressure solve
+or a projection at every step, and errors in that enforcement accumulate in
+the approximation.
+
+Second, the energy identity (I2, eq.~\eqref{eq:energy}) is preserved in the
+form $dE/dt = P_{\mathrm{in}} - P_{\mathrm{diss}}$ with the forcing power
+$P_{\mathrm{in}}$ of eq.~\eqref{eq:pin} accounted for explicitly
+(Section~\ref{sec:energy}). Under forcing, the unforced invariant
+``$E(t)$ is monotone non-increasing'' is replaced by this
+forcing-aware balance; the runs must verify it in the statistical sense
+(Section~\ref{sec:res-fidelity}).
+% [PENDING-THEORETICAL-RESEARCH: the forcing-aware invariant statement (D3)
+% is owned by theoretical-research; the exact form used in the paper's
+% verification of I2/I4 should be taken from their write-up once it lands.]
+
+What the structure does \emph{not} buy is a rigorous long-time stability
+statement for the full coupled scheme. The viscous step is exact within the
+ansatz (Proposition~\ref{prop:viscous}), and the nonlinear step is a standard
+projected second-order midpoint update; but we have no stability analysis of
+the two steps coupled with online rank changes, and the residual indicator
+is a heuristic, not a proven a~priori error bound. Over the retained
+statistical windows of Section~\ref{sec:setup}, the runs must show that
+error and statistics do not drift (Sections~\ref{sec:res-error}
+and~\ref{sec:res-fidelity}); that is the evidence we can offer in place of a
+theorem, and its absence is stated as a limitation in
+Section~\ref{sec:limitations}.
+
+\subsection{Dimensional regimes of forced turbulence}
+\label{sec:disc-dim}
+
+The validation of Section~\ref{sec:results} targets the regime where the
+interesting behavior lives: $\mathrm{Re} \in \{100, 1000, 5000\}$, where the
+singular-value decay is slowest and static bases are expected to struggle
+most. The choice of Reynolds numbers is informed by the dimensional-regime
+classification of Kolmogorov flow of Vinograd, Cullen, and Clark Di
+Leoni~\cite{vinograd2026}, which identifies the Re ranges over which
+successively richer dynamics (from laminar-like decay to fully turbulent,
+multi-scale dynamics) become active in the periodically forced 2D problem.
+% [PENDING-THEORETICAL-RESEARCH: cite the specific regime boundaries from
+% their write-up if they produce them, and state explicitly which regime each
+% of Re = 100 / 1000 / 5000 falls in, per vinograd2026.]
+
+Within that context, the expected rank behavior of
+Section~\ref{sec:disc-rank} is the low-rank signature of the regime
+structure: each time the dynamics crosses into a richer regime, new scales
+are excited and the singular-value spectrum broadens, which is precisely what
+the indicator \eqref{eq:indicator} detects. We do not claim that the adaptive
+rank tracks regime boundaries in a sharp or quantifiable way; whether
+$r^*(\mathrm{Re})$ exhibits structure (jumps, plateaus) across the three Re
+tested is an open question for the runs.
+% [PENDING-CODER: if r*(Re) is non-monotone or exhibits plateaus between the
+% three Re tested, note it here with the run references.]
+
+\subsection{Extending to three dimensions}
+\label{sec:disc-3d}
+
+The viscous part of the scheme extends to three dimensions without
+modification: on the periodic box, $\Delta$ acts componentwise and remains
+separable in Fourier space, so the exact rank-preserving viscous flow of
+Proposition~\ref{prop:viscous} (eq.~\eqref{eq:viscous-exact}) carries over
+verbatim for a vector field $\psi$ in place of the scalar. The obstruction
+is elsewhere. In three dimensions there is no scalar stream function whose
+curl gives a divergence-free velocity with the same one-to-one
+correspondence; one must introduce a vector potential and a gauge, or
+equivalently solve for a Helmholtz potential, and the incompressibility
+constraint is then carried by a divergence-free condition on that potential
+rather than by representation. In addition, the vorticity dynamics acquires
+the vortex-stretching term, which has no two-dimensional counterpart and
+changes the structure of the nonlinearity \eqref{eq:nonlin} that the
+projected midpoint step is designed for. We make no claim for a
+three-dimensional formulation in this work; it is identified as the natural
+next extension in Section~\ref{sec:conclusion}, together with the open
+question of how the gauge choice interacts with the low-rank ansatz.

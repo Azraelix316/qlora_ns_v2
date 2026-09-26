@@ -1,0 +1,43 @@
+% Contributions
+
+\section{Contributions}
+\label{sec:contributions}
+
+Our contributions are:
+
+\begin{itemize}
+\item \textbf{A structure-preserving reduced integrator for two-dimensional
+incompressible Navier--Stokes in stream-function form.} The viscous part is
+integrated exactly along a separable exponential flow that preserves the low-rank
+ansatz, so divergence-freeness holds identically in exact arithmetic; the measured
+residual is no larger than $1.1\times 10^{-13}$, seven orders of magnitude below
+the reduced solver's own trajectory error, and grows by a factor $2.6$ from a
+$64^2$ to a $128^2$ grid. The nonlinear part is advanced by a second-order
+projected step, and the cleanup is a QR factorisation of the $n\times r$ factors
+rather than a re-factorisation of the full state.
+
+\item \textbf{A measurement protocol for reduced-dynamics comparisons, and the
+finding that the accuracy horizon is not a property of the method.} A reported
+horizon must state its window length, refit interval, schedule offset, in-sample
+check, and the grid and largest rank tested. Under that protocol, correcting four
+baseline defects \emph{shortened} our own advantage and cost three of six ranks
+their crossover; we report the corrected numbers.
+
+\item \textbf{The mechanism, measured: a static subspace saturates in rank.} From
+rank $16$ a propagated static subspace stops improving altogether: ranks $16$, $32$ and $43$
+agree exactly at every horizon and both Reynolds numbers, while ranks $2$, $4$ and $8$
+differ from them by up to $85\%$, because its own per-step truncation accumulates onto a
+saturation plateau. The advantage
+horizon therefore reflects how a subspace is \emph{built}, not how large it is.
+
+\item \textbf{The stability result: the subspace must evolve.} A fixed basis
+propagated through the nonlinearity, with the same integrator, splitting and
+orthonormal basis, is stable at rank $16$ and overflows at ranks $32$ and $42$,
+reaching $10^{278}$. Every structure-preserving variant at the same ranks holds
+roundoff divergence throughout.
+
+\item \textbf{An honest cost accounting.} The reduced integrator costs
+$2.1$--$2.7\times$ a pinned-thread full-grid spectral reference per step in every
+regime and grid we measured, and uses slightly \emph{more} memory. Rank buys the
+ability to run, not speed.
+\end{itemize}
