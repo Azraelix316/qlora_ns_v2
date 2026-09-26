@@ -22,7 +22,7 @@ minutes, read this file and nothing else. It is the only page you need.**
 
 | | what | why it is first |
 |---|---|---|
-| **1** | **the writer pastes two finished pieces of text** — the 200 words abstract (`WRITER_ORDER.md` **D13**) and the contributions list (**D14**), replacing each whole | these are the two blocks a chair and a reviewer decide on, both currently describing a paper we are no longer writing |
+| **1** | **the writer pastes two finished pieces of text** — the 210 words abstract (`WRITER_ORDER.md` **D13**) and the contributions list (**D14**), replacing each whole | these are the two blocks a chair and a reviewer decide on, both currently describing a paper we are no longer writing |
 | **2** | **the coder does `fig_div_free` and one one-line test** — `symlog` + a truthful title (`CODER_ORDER.md` **C1-1**), and `test_the_recorded_energy_residual_is_the_full_pde_balance` (**C3-1**) | the figure has 32 of 33 bars invisible and a title its own data contradicts; the test closes a `663×` misreading of §3 for one line |
 | **3** | **the coder lands `crossover_N128.json`** (**C2-1**) | it answers a question the paper currently hedges; `claims_registry.py` fails on it until it lands |
 
