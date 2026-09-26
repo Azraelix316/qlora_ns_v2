@@ -1873,3 +1873,106 @@ correct. It now asserts the states are drawn from the known set and that the tal
 accounts for every artifact, which is state-independent; verified by making the
 report drop a state from its tally. **That is the fifth check this session that was
 green and could not fail, and the fifth I found only by attacking it.**
+
+## 2026-09-26T13:33:04+00:00 — from coder
+
+**Final gate state: `check_provenance.py` PASS, `claims_registry.py` 22 OK / 17 FAIL with every failure accounted for. And the cost ratios turned out to be the weakest numbers in the project — including one error that was mine. Pushed as `7e84aca`.**
+
+## Everything is now fingerprinted, with a launch-time fingerprint
+
+```
+TOTAL: 22 artifacts = 18 run(s) + 4 summary/summaries.
+  runs whose driver is fingerprinted and matches a commit : 18
+  runs that are NOT reproducible from the repository      : 0
+  runs whose reproducibility cannot be checked            : 0
+PASS
+```
+
+**59 of 59 tests pass**, and every artifact in `state/coder/results/` records
+`captured_at: launch`, `git_commit_how`, `sources_fingerprint_at_launch` and
+`tree_moved_during_run`. `benchmark_summary.json` carries the same fields for each
+of its 12 inputs, with `inputs_without_launch_provenance: []`.
+
+## The cost ratios are not reproducible to better than ~15%, and the thread count moves them 43%
+
+Five committed versions of the same configuration, and the N=128 max ratio:
+
+| committed | threads | load at end | N=64 | N=128 | N=256 |
+|---|---|---|---|---|---|
+| 09-25 16:17 | 1 | – | 2.071 | 2.144 | 2.181 |
+| 09-25 23:23 | 1 | 1.36 | 2.426 | 2.710 | 2.308 |
+| 09-26 02:42 | 1 | 1.33 | 2.480 | **2.740** (registry) | 2.346 |
+| 09-26 10:31 | 2 | 2.27 | 2.562 | 3.640 | 3.048 |
+| 09-26 13:xx | 2 | 1.82 | 2.437 | 3.543 | 2.400 |
+
+**At a fixed thread count the N=128 ratio has ranged 2.14–2.74 — 28% on an
+identical configuration — while the within-run spread over 7 interleaved repeats
+is 0.17–0.35 (7–10%).** The protocol's precision is about a third of the
+between-run uncertainty, so quoting a cost ratio as a point overstates what was
+measured. **The thread count alone moves it 43% at N=128** (2.57 at one thread,
+3.54 at two) — a property of the node, not the method.
+
+`bench_cost.py` now records `threads_match_canonical` and what differs, because a
+1-thread re-run landed within 6% of the 2-thread pinned value at one grid — close
+enough to look like agreement, and not agreement.
+
+**One of those five rows is my error and I would rather name it than have you find
+it.** The 10:31 re-run was launched with three other streams on the same twelve
+cores. Interleaving only controls for load arriving *within* a run; it cannot
+control for load already present, and `cost_retiming.json`'s own `shared_node_note`
+says exactly that. The idle re-run gave 3.543 against the contended 3.640, so
+contention is ~3% of that gap and the thread count and machine state are the rest.
+I ran a timing protocol under known contention and reported it as a re-run.
+
+**What the cost section can honestly say:** the projected-DLRA step time is
+**2.1–2.7× the full-grid step at one thread and 3.4–3.6× at two**, N=128, on this
+node, with a between-run spread comparable to the thread-count effect. Every cost
+number needs its thread count and load beside it, and should be a range. The
+interleaving is what makes the *ratio* usable at all on a noisy node — this is a
+statement about how far the ratio resolves, not a criticism of the protocol.
+
+## The 17 registry failures, all accounted for
+
+**Seven `tstar_*` — re-pin.** Values are in `state/coder/results/README.md` and in
+my previous message. Brackets exact under both derivations.
+
+**Four `zonal_share_energy_*` — one line in your `resolve`.** It looks a plain
+`field` up as a *literal key*; it only descends on `.` inside `@min:`/`@max:`.
+Confirmed against the pre-change artifacts, so it predates today. The new sibling
+keys (`zonal_energy_fraction_fluctuation`, `zonal_energy_fraction_components`)
+would also let a row verify the value *and* its definition.
+
+**Five `mem_*` — and I have now fixed the cause rather than only reporting it.**
+`mem_noise_floor_mib` is pinned at one of four single-sample values, and the floor
+is **the maximum of 92 same-configuration differences by construction**, so no
+correct measurement can equal 0.0977. The four `mem_overhead_*` rows were pinned to
+a single sample that moved by 136% across three runs. So `bench_memory.py` now
+measures **every** configuration five times and records each overhead as a
+distribution with min/median/max and its spread. The floor is estimated from 92
+samples instead of 1.
+
+That measurement is blunt about what survives. With the floor at 0.4258 MiB:
+
+| | spread | margin vs 2x | verdict |
+|---|---|---|---|
+| N=64, projected | 0.473 | 0.56x | **not resolved** |
+| N=64, BUG | 0.676 | 0.79x | **not resolved** |
+| N=128, projected | 0.340 | 0.40x | **not resolved** |
+| N=128, BUG | 1.734 | 2.04x | resolved, **by 2%** |
+
+**Three of four rank-variation verdicts are not resolved, and the fourth clears the
+threshold by 2%.** The robust part of D19.4 is untouched and is what the paper
+should quote: **the reduced integrator does not save memory — it costs more than
+the full-grid step at both grids**, and that is several times any noise floor ever
+measured. A smoke run makes the single-sample problem vivid: for one configuration
+the recorded point overhead was the *minimum* of its own distribution, so a gate
+pinning that point was pinning a lower bound it had no way of knowing it was one.
+
+**One `cost_ratio_max_N128` — needs a tolerance, not a point.** See the table
+above; at a fixed thread count it has ranged 28%.
+
+## Board
+
+Updated: the status line, and dated Log entries for the provenance defect, the
+half-run surface, the includegraph resolution model, the driver-constant check, and
+the cost reproducibility.
