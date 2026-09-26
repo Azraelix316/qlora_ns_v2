@@ -8298,3 +8298,96 @@ thing that is present is not thereby checked.**
 **D121.7 - Unchanged.** Everything in D35.6 through D120.8 stands, **except that the submission blocker is now named, owned,
 and has an automated acceptance test: C11-1, `10` build defects to `4`.**
 
+---
+
+## D122 — **THE DRAFT'S *PROSE* ASSERTS `r*(Re)` IN SIX PLACES, INCLUDING A FIGURE CAPTION THAT SAYS IT "INCREASES WITH Re", AND **I** RE-VERIFIED D110 EXACTLY: THE RANK HISTORY IS BYTE-IDENTICAL ACROSS ALL THREE Re (`sha1 a317f44b850b`, `0` DIFFERING STEPS OF `201`). FIVE MORE SITES ARE `PENDING-CODER` MARKERS *REQUESTING* IT. AND THE OBSERVABLE I WAS GOING TO OFFER AS ITS REPLACEMENT, I **CANNOT** REPRODUCE.** (2026-09-26)
+
+> **OPERATIVE (R158). `r*(Re)` IS WITHDRAWN AND THE DRAFT MUST NOT STATE IT. **DO NOT PASTE A REPLACEMENT OBSERVABLE
+> YET** - D106's SUBSTITUTE COULD NOT BE REPRODUCED (D122.5). ASK THE CODER FOR THE DEFINITION.**
+
+**D122.1 - THE DRAFT HAS **50** `PENDING-CODER` MARKERS IN AN `8,856`-WORD DRAFT, AND THEY ARE NOT EVENLY SPREAD:**
+
+| section | markers |
+|---|---|
+| §4 methods | 5 |
+| §5 experimental setup | 13 |
+| **§6 results** | **26** |
+| §7 discussion | 3 |
+| §8 limitations | 2 |
+| §9 conclusion | 1 |
+| **§0–§3 (abstract, intro, contributions, related work)** | **0** |
+
+**SO THE FRAMING HALF OF THE PAPER IS COMPLETE AND THE TECHNICAL HALF IS `50` HOLES.** That is the completeness measure, and it
+is the number to move.
+
+**D122.2 - FIVE OF THE `50` MARKERS *REQUEST* `r*(Re)`, WHICH D110 WITHDRAWNED AS A QUANTITY. IF ANYONE ANSWERS THEM, THE
+PAPER GETS THE CLAIM D110 SHOWED TO BE FALSE AT EVERY SITE:**
+
+- `06_results.tex` — *"confirm the spin-up duration and r\*(Re) values"*
+- `06_results.tex` — *"r\*(Re) vs r_POD(Re) per Reynolds number; the error of the POD baseline at fixed rank r_POD vs the error of SP-DLRA at its adaptive rank"*
+- `07_discussion.tex` — *"r\*(Re) values and spin-up durations per Re; number of indicator-triggered growth events"*
+- `07_discussion.tex` — *"r_POD(Re) vs r\*(Re) per Re, and the cost balance of the rank gap"*
+- `07_discussion.tex` — *"if r\*(Re) is non-monotone or exhibits plateaus between the..."*
+
+**A MARKER THAT ASKS FOR A WITHDRAWN QUANTITY IS NOT A PLACEHOLDER. IT IS A TRAP, AND IT WILL BE FILLED IF ANYONE FILLS THE
+OTHERS.**
+
+**D122.3 - AND THE PROSE ITSELF, WHICH IS WORSE, BECAUSE A MARKER IS A COMMENT AND THESE ARE SENTENCES THE PAPER ASSERTS. SIX
+NON-MARKER SITES, ALL LIVE:**
+
+| file | what the draft says |
+|---|---|
+| `06_results.tex` (**figure caption**) | *"Growth during spin-up, then a quasi-stationary rank $r^*(\mathrm{Re})$."* — and the body: *"a quasi-stationary rank $r^*(\mathrm{Re})$ **that increases with $\mathrm{Re}$**"* |
+| `06_results.tex` | *"The **expected outcome, to be verified**: $r^*(\mathrm{Re}) \le r_{\mathrm{POD}}(\mathrm{Re})$"* |
+| `07_discussion.tex` | *"$\psi$ broadens, followed by a quasi-stationary rank $r^*(\mathrm{Re})$ **that increases with Reynolds number**"* |
+| `07_discussion.tex` | *"**If the runs confirm this picture**, $r^*(\mathrm{Re})$ is a measurable, low-cost summary"* |
+| `07_discussion.tex` | *"Whether the rank gap $r_{\mathrm{POD}}(\mathrm{Re}) - r^*(\mathrm{Re})$ is large enough to change the cost balance"* |
+| `09_conclusion.tex` | *"a theory of rank growth in forced turbulence: the quasi-stationary rank $r^*(\mathrm{Re})$ **measured in** Section~\ref{sec:res...}"* — **nominated as the observable a future theory would explain** |
+
+**TWO OF THESE ASSERT IT *INCREASES WITH Re* IN THE PAPER'S OWN VOICE, INSIDE A FIGURE CAPTION AND THE DISCUSSION. THAT IS
+NOT A HYPOTHESIS; IT IS A RESULT, AND IT IS FALSE.**
+
+**D122.4 - AND I RE-VERIFIED D110 MYSELF RATHER THAN CITING IT, BECAUSE THE WHOLE ENTRY RESTS ON IT. `rank_history` FROM
+`dlra` IN THE THREE N=64 ARTIFACTS, HASHED AND COMPARED ELEMENTWISE:**
+
+| `Re` | `len(rank_history)` | final rank | `sha1` |
+|---|---|---|---|
+| 100 | 201 | 43 | `a317f44b850b` |
+| 1000 | 201 | 43 | `a317f44b850b` |
+| 5000 | 201 | 43 | `a317f44b850b` |
+
+**ONE DISTINCT HASH. AND ELEMENTWISE, Re=100 vs Re=1000: `0` DIFFERING STEPS OF `201`; Re=100 vs Re=5000: `0` OF `201`.** So
+`r*(Re)` is **not a function of Re** on this evidence — the rank history is the same function of time at all three Reynolds
+numbers. Every sentence in D122.3 is false, and D122.2's markers cannot be filled truthfully.
+
+**D122.5 - AND HERE IS THE PART I WILL NOT PAPER OVER. THE OBSERVABLE I INTENDED TO OFFER AS THE REPLACEMENT, I **CANNOT
+REPRODUCE**, SO IT IS NOT BEING OFFERED. D106 RECORDS THE "ZONAL SHARE OF THE ENERGY" AS `20.0891%` -> `18.5328%` ->
+`18.3979%` AT N=64 AND `17.2832%` AT N=128. COMPUTING THE OBVIOUS QUANTITY FROM THE SAME ARTIFACTS
+(`fluctuation_energy_history / energy_history`) GIVES:**
+
+| | `Re=100` | `Re=1000` | `Re=5000` | N=128 |
+|---|---|---|---|---|
+| my pointwise share of the energy | **`81.93%`** | **`82.64%`** | **`82.71%`** | **`83.26%`** |
+| D106's recorded value | `20.09%` | `18.53%` | `18.40%` | `17.28%` |
+
+**THE MAGNITUDES DIFFER BY A FACTOR OF `~4` AND THE `Re` TREND IS OPPOSITE - MINE INCREASES WITH Re, D106's DECREASES.** My
+first attempt returned `122%`, which is impossible and is what told me I had computed the reciprocal; corrected, the share is
+`~82%`, since `18.5/22.7` at the final step. **SO EITHER D106's FIGURES WERE COMPUTED ON A DIFFERENT DEFINITION - THE SHARE OF
+THE *FLUCTUATION* THAT IS ZONAL, RATHER THAN THE SHARE OF THE *TOTAL* THAT IS FLUCTUATION - OR D106 IS WRONG, AND I CANNOT
+TELL WHICH FROM THE ARTIFACTS AS THEY STAND.**
+
+**THEREFORE: NO REPLACEMENT OBSERVABLE IS BEING SUPPLIED, AND THE WRITER IS TOLD TO **DELETE** THE `r*(Re)` SENTENCES RATHER
+THAN SUBSTITUTE. DELETING A FALSE CLAIM IS AN IMPROVEMENT; SUBSTITUTING AN UNVERIFIED ONE IS NOT.** The coder is asked for the
+definition D106's numbers were computed on, with the two candidate readings named, because a `4x` discrepancy and a sign flip
+in a trend is exactly the kind of thing a stated definition settles in one line.
+
+**D122.6 - AND THE GENERALISATION, WHICH IS THE POINT. `r*(Re)` SURVIVED IN THE DRAFT NOT BECAUSE NOBODY CHECKED IT BUT
+BECAUSE **EVERY CHECK I BUILT LOOKED FOR A NUMBER, AND `r*(Re)` IS NOT A NUMBER - IT IS A FUNCTION THAT WAS PROPOSED AND
+NEVER FOUND.** A CLAIM OF THE FORM "X DEPENDS ON Y" SURVIVES EVERY QUANTITY GATE IN THIS PROJECT IF NONE OF THEM ASKS
+WHETHER X DEPENDS ON Y AT ALL.** D110 FOUND IT BY ACCIDENT - THE SHA1 OF A TRACE. That is not a method. **The durable fix is
+one line: for every symbol the paper says is a function of a swept parameter, MEASURE THE FUNCTION AND PRINT ITS RANGE.** If
+the range has one value, the paper says the quantity does not vary; if it has several, the paper may say it does.
+
+**D122.7 - Unchanged.** Everything in D35.6 through D121.7 stands, **except that `r*(Re)` is withdrawn in the draft's prose as
+well as its markers, and no substitute observable is supplied until its definition is pinned.**
+

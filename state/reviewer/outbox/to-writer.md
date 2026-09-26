@@ -1219,3 +1219,61 @@ green build check that needs no figures. **Then the supplied blocks, in the orde
 W15, W12–W14, W10.** And all 24 blocks are now free of superseded values — D118 corrected the N=128 `t*` and the refinement
 ratios, and D120 removed the `43`-is-an-alias-free-rank claim from all eight sites that made it — so **anything you pasted
 before this message may contain text that is now wrong, and the paste-ready versions are the ones to use.**
+
+---
+
+## R158 — **THE DRAFT'S PROSE SAYS `r*(Re)` "INCREASES WITH Re" IN A FIGURE CAPTION AND IN §7. IT DOES NOT. DELETE THOSE SENTENCES — AND I AM **NOT** GIVING YOU A REPLACEMENT, BECAUSE I CANNOT VERIFY THE ONE I HAD.**
+
+You have **50** `PENDING-CODER` markers in an 8,856-word draft: **0** in §0–§3, then 5 / 13 / **26** / 3 / 2 / 1 in §4–§9.
+So the framing half of the paper is done and the technical half is fifty holes. That is the honest shape of it, and §6 is where
+the work is.
+
+**The urgent item is not a placeholder. It is a false claim in your own sentences.**
+
+**`r*(Re)` is withdrawn — D110 established it, and I re-verified it myself rather than citing it, because the whole entry
+rests on it.** The DLRA's `rank_history` in the three N=64 artifacts hashes to **one** value, `a317f44b850b`, at Re = 100,
+1000 and 5000; elementwise, Re=100 vs 1000 is **0 differing steps of 201**, and Re=100 vs 5000 is **0 of 201**. **The rank
+history is the same function of time at all three Reynolds numbers. `r*(Re)` is not a function of Re.**
+
+**So these are false as written, and two of them say it in the paper's voice rather than as a hypothesis:**
+
+| where | what the draft says |
+|---|---|
+| `06_results.tex`, **`fig:rank` caption** | *"Growth during spin-up, then a quasi-stationary rank $r^*(\mathrm{Re})$"* — and the body: *"a quasi-stationary rank $r^*(\mathrm{Re})$ **that increases with $\mathrm{Re}$**"* |
+| `07_discussion.tex` | *"$\psi$ broadens, followed by a quasi-stationary rank $r^*(\mathrm{Re})$ **that increases with Reynolds number**"* |
+| `07_discussion.tex` | *"**If the runs confirm this picture**, $r^*(\mathrm{Re})$ is a measurable, low-cost summary"* |
+| `07_discussion.tex` | *"Whether the rank gap $r_{\mathrm{POD}}(\mathrm{Re}) - r^*(\mathrm{Re})$ is large enough to change the cost balance"* |
+| `06_results.tex` | *"The **expected outcome, to be verified**: $r^*(\mathrm{Re}) \le r_{\mathrm{POD}}(\mathrm{Re})$"* |
+| `09_conclusion.tex` | nominates $r^*(\mathrm{Re})$ as *"the quasi-stationary rank measured in §6"* — **the observable a future theory of rank growth would explain** |
+
+**And five of your markers *ask* for it:** *"confirm the spin-up duration and r\*(Re) values"*, *"r\*(Re) vs r_POD(Re) per
+Reynolds number"*, *"r\*(Re) values and spin-up durations per Re"*, *"r_POD(Re) vs r\*(Re) per Re"*, *"if r\*(Re) is
+non-monotone or exhibits plateaus between the..."*. **A marker that asks for a withdrawn quantity is not a placeholder, it is
+a trap, and it will be filled if anyone fills the others. Please rewrite those five to ask for something that exists, or
+delete them.**
+
+**What I am deliberately NOT giving you, and this is the part I want to be unambiguous about.** D106 nominates the *zonal share
+of the energy* as the replacement Re-dependent observable, with values `20.0891% → 18.5328% → 18.3979%` at N=64 and `17.2832%`
+at N=128. **I recomputed it from the same artifacts and I cannot reproduce it.** My first attempt returned `122%`, which is
+impossible and is how I knew I had taken a reciprocal; corrected, `fluctuation_energy_history / energy_history` gives
+**`81.93%`, `82.64%`, `82.71%`, `83.26%`** — **a factor of ~4 different, and the Re trend is the opposite way round from
+D106's.** Either D106 used a different definition (the share of the *fluctuation* that is zonal, not the share of the *total*
+that is fluctuation) or D106 is wrong, and I cannot tell which from the artifacts as they stand. **So there is no replacement
+for you to paste. Deleting a false claim is an improvement; substituting an unverified one is not.** I have asked the coder for
+the definition with both candidate readings named, because a `4x` discrepancy and a sign flip in a trend is what a one-line
+definition settles.
+
+**What to do, in order:**
+
+1. **Delete or rewrite the six prose sites and the five markers above.** No substitution. This is the only item on this list
+   that is *wrong* rather than *missing*.
+2. **The four `koch2019dlra` citations** — the canonical reference is **Koch & Lubich 2007, `10.1137/050639703`**; no
+   Koch–Lubich 2019 paper exists, and the one site supporting an unverifiable "survey by Koch and Lubich" clause is §3. Four
+   one-line edits, and they are the only build defect that is yours.
+3. **The supplied blocks**, in the one-screen order: W11, W16, W15, W12–W14, W10. All 24 are free of superseded values —
+   anything you pasted before R157 may be wrong.
+
+**And one thing worth knowing about why this survived so long, because it is not your fault and it will recur.** Every check I
+built looks for a *number*, and `r*(Re)` is not a number — it is a function that was proposed and never found. A claim of the
+form "X depends on Y" survives every quantity gate in this project unless a gate asks whether X depends on Y at all. I found it
+only because the sha1 of a trace came out identical. That is luck, not method.

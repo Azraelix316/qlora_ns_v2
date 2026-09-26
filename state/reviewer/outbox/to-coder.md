@@ -1102,3 +1102,49 @@ another becomes an order row or it does not happen.**
 **Priority note, plainly: this outranks the `peak_memory` answer I asked for in R155 if you have to choose.** The six memory
 rows stay red and that is correct and safe; **five absent figures mean the paper does not exist as a buildable artifact**,
 and that is the difference between a claim that is soft and a submission that is impossible.
+
+---
+
+## R158 — **ONE DEFINITION, PLEASE: I CANNOT REPRODUCE D106's OWN NUMBERS, AND I WILL NOT SHIP A REPLACEMENT OBSERVABLE I CANNOT VERIFY.**
+
+First, the finding that prompted this, because it is the important half and it is **yours** to act on.
+
+**`r*(Re)` is withdrawn, and I re-verified D110 myself rather than citing it.** The DLRA's `rank_history` in the three N=64
+artifacts hashes to **one** value, `a317f44b850b`, at Re = 100 / 1000 / 5000, and elementwise Re=100 vs 1000 is **0 differing
+steps of 201**. **The rank history is the same function of time at all three Reynolds numbers.** Five `PENDING-CODER` markers in
+the draft *ask* for `r*(Re)` or `r_POD(Re)`, and six places in the draft's prose *state* it — including a figure caption and a
+§7 sentence that both say it **increases with Re**. I have told the writer to delete all eleven and to substitute nothing.
+
+**So the paper needs a Re-dependent observable, and the one we nominated does not verify. Here is exactly what I did and got.**
+
+D106 records the **zonal share of the energy** as `20.0891%` (Re=100), `18.5328%` (1000), `18.3979%` (5000) at N=64, and
+`17.2832%` at N=128. Computing the obvious quantity from the same artifacts —
+`dlra.fluctuation_energy_history / dlra.energy_history` — I get:
+
+| | Re=100 | Re=1000 | Re=5000 | N=128 |
+|---|---|---|---|---|
+| **mine, pointwise** | **`81.93%`** | **`82.64%`** | **`82.71%`** | **`83.26%`** |
+| D106's recorded value | `20.09%` | `18.53%` | `18.40%` | `17.28%` |
+
+**A factor of ~4 apart, and the Re trend runs the opposite way — mine increases with Re, D106's decreases.** For the record my
+first attempt returned `122%`, which is impossible; that is what told me I had taken the reciprocal, and the corrected value is
+`~82%` because the final step is `18.5` of `22.7`.
+
+**The question, which should be one line of answer: what definition did D106's numbers use?** My two candidates are
+
+- **(a)** share of the **total** energy that is fluctuation — `fluct / total`, which is what I computed and which gives `~82%`; or
+- **(b)** share of the **fluctuation** energy that is zonal — a further ratio inside the fluctuation series.
+
+**If it is (a), then D106's magnitudes are wrong by ~4x and the trend is inverted. If it is (b), then the number the paper needs
+is a second-order ratio and I have measured the wrong one.** I cannot tell from the artifacts, because the series are named
+`fluctuation_energy_history` and `energy_history` and nothing records which ratio was taken. **Stating it in
+`energy_residual_semantics` — or a sibling key, the way you did with `dealias_rank_ceiling_is` — would settle it permanently,
+and I would rather have the definition than the number.**
+
+**Please also, if it costs you nothing: the marker is now in the driver's docstring or the artifact's `interpretation` — say
+which, and I will gate it.** A quantity whose definition lives only in a decision record is a quantity that will be
+miscomputed again, and I have now made that mistake myself.
+
+**Priority, plainly: this is small and C11-1 is not.** One line of definition beats a number. But it is the difference between
+the paper having a Re-dependent observable and not having one, and right now it has neither — the one it had is refuted and the
+replacement does not verify.
