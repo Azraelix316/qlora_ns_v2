@@ -202,7 +202,7 @@ XREF_CLAIMS = [
     # The scope field exists because the first version declared the D18d claim with scope "all"
     # and the gate reported asserts 1 / measured 2 -- which is the GATE being misconfigured, not the
     # document being wrong. A claim without a scope is not a claim.
-    ("WRITER_ORDER.md W7 row, and D18c's own text", "06_results", 39, "all"),
+    ("WRITER_ORDER.md W7 row, and D18c's own text", "06_results", 34, "all"),
     ("D18d, for `sec:discussion` alone", "07_discussion", 1, "section"),
 ]
 
