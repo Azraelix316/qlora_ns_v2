@@ -440,6 +440,75 @@ def test_exact_divergence_freeness_holds_for_every_surviving_method():
     )
 
 
+def test_the_crossover_block_agrees_with_the_rows_it_sits_beside():
+    """The derived `crossovers` block, asserted against the rows (D22.5).
+
+    D23 records the block as unusable: its ``t_star`` had no reproducible
+    relationship to any error column, and the file says *read the rows*. This is
+    that instruction made executable -- the block is recomputed from the rows by
+    the same function the driver uses, and required to agree.
+
+    It fails on the currently committed surface, by 7-16%, on both error columns
+    and both interpolation conventions -- so the disagreement is neither a column
+    choice nor a convention. That is the defect this test exists to make
+    impossible to carry silently: a derived block that disagrees with its own
+    data looks exactly as authoritative as one that agrees.
+    """
+    from run_crossover import (
+        CROSSOVER_AGREEMENT_TOLERANCE,
+        DECLARED_CROSSOVER_COLUMN,
+        t_star_from_rows,
+    )
+
+    art = load("crossover_surface.json")
+    windows = art["parameters"]["moving_window_lengths"]
+    column = DECLARED_CROSSOVER_COLUMN
+    assert column in art["error_columns"], (
+        f"the declared crossover column {column!r} is not one the artifact "
+        f"documents: {sorted(art['error_columns'])}"
+    )
+
+    disagreements, checked = [], 0
+    for re, case in sorted(art["by_reynolds"].items()):
+        for entry in case["crossovers"]:
+            if entry.get("t_star") is None:
+                continue
+            rank, window = entry["rank"], entry["window"]
+            rows_dlra = case["dlra"][str(rank)]
+            rows_static = case["static_moving_window"][f"W{window:g}_r{rank}"]
+            derived = t_star_from_rows(rows_dlra, rows_static, column)
+            assert derived["t_star"] is not None, (
+                f"Re={re} r={rank} W={window}: the block reports a crossover at "
+                f"t*={entry['t_star']:.4f} but the rows on column {column!r} show "
+                f"none"
+            )
+            checked += 1
+            block, rows_value = entry["t_star"], derived["t_star"]
+            if abs(block - rows_value) > CROSSOVER_AGREEMENT_TOLERANCE * abs(rows_value):
+                disagreements.append(
+                    f"Re={re} r={rank} W={window}: block t*={block:.4f} vs rows "
+                    f"{rows_value:.4f} on {column!r} "
+                    f"({100*(block-rows_value)/rows_value:+.1f}%)"
+                )
+            # The bracket is the convention-free statement, so it must agree
+            # exactly even when the point estimate does not.
+            assert [round(x, 9) for x in entry["bracket"]] == [
+                round(x, 9) for x in derived["bracket"]
+            ], (
+                f"Re={re} r={rank} W={window}: bracket {entry['bracket']} (block) "
+                f"vs {derived['bracket']} (rows). The bracket does not depend on "
+                f"the interpolation convention, so a difference here is a "
+                f"different failure from a point-estimate difference."
+            )
+    assert checked, "no resolved crossovers to check"
+    assert not disagreements, (
+        f"{len(disagreements)} of {checked} resolved crossovers disagree with the "
+        f"rows by more than {100*CROSSOVER_AGREEMENT_TOLERANCE:.0f}%:\n  "
+        + "\n  ".join(disagreements)
+        + "\nD23: the block is not a usable source for t*; read the rows."
+    )
+
+
 def test_the_crossover_artifact_records_its_own_provenance():
     """The central figure's artifact must be traceable to committed code.
 
