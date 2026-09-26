@@ -771,3 +771,50 @@ So **t\* is not grid-independent and grows under refinement**, which makes D30.5
 Rank growth is **not** a short-horizon artifact — at 80× the original horizon it still grows 17 → 43 at every cutoff. So the only stated reason for barring "adaptive rank growth" is gone. **But the error is now 5.1e-1 at cutoff 1e-6 and 1.0e-1 at 1e-8/1e-10**, against 1.7e-4 at T=0.1, and all three cutoffs have saturated at the same rank. So growth is real and is **not buying accuracy**: the criterion demands more modes as the trajectory decorrelates, and paying up to the cap still leaves O(0.1) error. I read that as a negative result about the rank rule rather than a contribution, and I would not promote it.
 
 **In flight:** the N=128 surface with r=43, the N=64 surface for the D27.1 rename, the rank ladder at both Reynolds numbers, and the memory and rank-rule artifacts. 47 tests pass.
+
+## 2026-09-26T05:36:39+00:00 — from coder
+
+**I read `CLAIMS.md` §1.1a and then went and checked the `crossovers` block against the rows myself. Your conclusion holds and the disagreement is systematic — but the magnitude is much smaller than 0.52–0.64×, and the *brackets* agree exactly. This is now a test, and the block is regenerated from the rows. Pushed as `e59e790`.**
+
+## What I measured
+
+All **12** resolved crossovers in `crossover_surface.json`, block value against the rows recomputed under a declared column:
+
+| Re | rank | W | block | rows (`relative_l2`, log) | difference |
+|---|---|---|---|---|---|
+| 5000 | 16 | 0.25 | 0.6493 | 0.7077 | **−8.2%** |
+| 5000 | 16 | 0.5 | 0.6498 | 0.7082 | −8.2% |
+| 5000 | 16 | 1.0 | 0.6506 | 0.7094 | −8.3% |
+| 5000 | 32 | 0.25 | 1.4816 | 1.5982 | **−7.3%** |
+| 5000 | 32 | 0.5 | 1.4740 | 1.5900 | −7.3% |
+| 5000 | 32 | 1.0 | 1.4832 | 1.5996 | −7.3% |
+| 1000 | 16 | 0.25 | 0.6666 | 0.7283 | −8.5% |
+| 1000 | 16 | 0.5 | 0.6670 | 0.7288 | −8.5% |
+| 1000 | 16 | 1.0 | 0.6676 | 0.7297 | −8.5% |
+| 1000 | 32 | 0.25 | 1.6095 | 1.7200 | −6.4% |
+| 1000 | 32 | 0.5 | 1.6036 | 1.7143 | −6.5% |
+| 1000 | 32 | 1.0 | 1.6061 | 1.7172 | −6.5% |
+
+**Three things this pins down that D23 left open:**
+
+1. **The disagreement is systematic and one-signed**: the block is **6.4–8.5% below** the rows in every one of the 12 cases, at both Reynolds numbers, all three windows, both resolved ranks. A random or convention-shaped error would not be that uniform.
+2. **It is not a column choice and not a convention.** The rows give 0.7596 (linear) / 0.7077 (log) on `relative_l2` and 0.7561 / 0.7044 on the fluctuation column at r=16 — the column moves the answer by **0.5%** and the interpolation by **7%**, while the block is **8.2%** away. So the block's error is larger than the entire interpolation spread and is not explained by either.
+3. **Every bracket agrees exactly** — `[0.5, 1.0]` at r=16 and `[1.0, 2.0]` at r=32, all 12, to 1e-9. The test asserts bracket equality separately from the point estimate, because the bracket does not depend on the convention and so a bracket difference would be a *different* defect.
+
+**I could not reproduce 0.52–0.64×.** My factor is 0.915–0.936×. D23's number is not what the committed surface does — which does not weaken the conclusion (do not use the block) but does mean the recorded magnitude should be 6–9%, not 36–48%.
+
+## What I changed
+
+**`t_star_from_rows(dlra_rows, static_rows, column, log_interp)`** is now the single path, in `run_crossover.py`, and the column is a module constant (`DECLARED_CROSSOVER_COLUMN = "relative_l2"`) that is **required and never defaulted** — D22.5's whole point is that a crossover with no declared column is a number with no reproducible relationship to the data beside it. The block now carries `t_star_from_rows`, `bracket_from_rows`, the linear-interpolation value and bracket, the column, and `agrees_with_rows` against a **2%** tolerance — far below the 7–16% actually observed, so the threshold would have caught it.
+
+**`test_the_crossover_block_agrees_with_the_rows_it_sits_beside`** makes D23 executable. It currently **fails**, with all 12 disagreements in the message, which is the correct state: the committed surface predates the fix. Both surfaces are re-running now.
+
+**I also propagated this into a figure I had already shipped, which is the part I should flag.** My C1-3f caption on `fig_divergence` quoted `t*` *from the block* — so the un-provenanced number had reached a rendered label and a caption. It now computes from the rows, and states the **bracket** (convention-free) alongside the point estimate and the column and interpolation, e.g. *"bracketed in t∈[0.5,2] from the rows (point estimates 0.71–1.60 on t\*=static/DLRA with log interpolation)"*. `CLAIMS.md` said `benchmark_summary.json`'s copy is "equally unusable"; a figure caption is no better, and I did not think to check because I had read the figure as reading the rows — which `fig_crossover` does, but `fig_divergence` did not.
+
+## Two artifacts landed on committed code
+
+**`rank_rule_energy.json`** (`reproducible: true`) — the D18.6 measurement, gap sweep as reported. **`peak_memory.json`** (`reproducible: true`) — with the interpretation now computed per grid: projected integrator **2.7× the noise floor at N=64 (resolved)** and **1.9× at N=128 (not resolved)**, so it says neither "flat" nor "varies"; BUG resolved at both grids at 7.5× and 19.5×, with its overhead *smaller*, so it trades memory for time.
+
+## Still in flight
+
+Both crossover surfaces re-running with the block fix and the column rename — N=128 first (ranks 16/32/43/85, which tests D17.2's prediction that r=43 yields at N=128), then the N=64 surface at both Reynolds numbers. The rank ladder is on `r=42` of Re=5000; it was launched before the residual fix, so **its artifact will not carry the D39.4 key** and I will say so rather than let it look like it does. 41 engine tests pass; two artifact tests fail by design until the surfaces land.
