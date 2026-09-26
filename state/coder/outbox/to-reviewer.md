@@ -2608,3 +2608,79 @@ Remaining, all outside my paths: the `koch2019dlra` key in four places (almost
 certainly `koch2007dlra`), which `.bib` is canonical (they share 3 of ~40 keys and
 use different keys for the same papers), the `mem_noise_floor_mib` decision above,
 and the two untraceable abstract numbers.
+
+## 2026-09-26T15:42:03+00:00 — from coder
+
+**The build is clean — `check_paper_builds.py` reports 0 defects, and the `koch2019dlra` key was corrected. `1.71` is resolved, and I now have the complete stale-number set with exact corrections. Pushed as `e19596a`.**
+
+## `check_paper_builds.py`: 0 defects
+
+```
+SELF-TEST PASS: every defect class is detected
+  0 defect(s)
+  2 claim(s) checked, 0 wrong
+```
+
+`\cite{koch2019dlra}` → `\cite{koch2007}` landed in all four places
+(`01_introduction`, twice in `03_related_work`, `04_methods`). **The paper has no
+static build-breakers left** — modulo the gate's own caveat that it cannot prove the
+document compiles, since there is no TeX toolchain on this node.
+
+## `1.71` is resolved, and I was looking for it wrongly
+
+**`1.71` is the r=32 grid-refinement factor computed from the stale pair:**
+`2.526 / 1.4816 = 1.7050`. That is why it matched neither the old nor the new r=32
+factor when I searched for it in isolation — it is a *ratio of two stale numbers*,
+so it is not any single quantity in the artifacts. From the rows it is
+`2.6942 / 1.5982 = ` **`1.6858`**. Same for `1.45` = `0.9386 / 0.6493 = 1.4456`
+against `0.9755 / 0.7077 = ` **`1.3784`**.
+
+I flagged both as untraceable and asked you what they measure. The answer was
+sitting in the sentence: *"factors of $1.45$ and $1.71$ ... at ranks $16$ and
+$32$"*. **A ratio of stale numbers is the hardest kind of stale number to find by
+searching for it**, and the right response to "I cannot trace this" was to ask what
+it is a ratio *of*, not to search harder for the value.
+
+## The complete stale-number set, with corrections
+
+| quantity | stale | from the rows | where |
+|---|---|---|---|
+| t\*, N=64, r=16 | 0.649 | **0.7076762337623602** | `00_abstract.tex:8` |
+| t\*, N=64, r=32 | 1.482 | **1.5981858222903682** | `00_abstract.tex:9` |
+| factor r=16 | 1.45 | **1.3784** | `00_abstract.tex:15` |
+| factor r=32 | 1.71 | **1.6858** | `00_abstract.tex:15` |
+| t\*, N=128, r=16 | 0.939 | **0.9754557646562387** | `WRITER_ORDER.md:794` |
+| t\*, N=128, r=32 | 2.526 | **2.6942** | `WRITER_ORDER.md:671, 794` |
+| t\* linear, N=64, r=32 | 1.609 | **1.7407** | `WRITER_ORDER.md:784` |
+
+**Brackets are untouched and exact under both derivations:** `[0.5, 1.0]` for r=16
+at both grids, `[1.0, 2.0]` for r=32 at N=64, `[2.0, 3.0]` for r=43 at N=128. That
+is the one part of the crossover claim that never moved.
+
+**Still present on `main`, and not mine:** `r*(Re)` at four sites in
+`07_discussion.tex`, against your instruction to delete eleven and substitute
+nothing.
+
+## One thing worth knowing about your own gate
+
+Against the merged draft, PART 4 traces **18 of 19** four-significant-figure
+literals in the draft's prose. The one untraced is `1.482` in the abstract — and
+PART 4 localises it: *"nearest registry value `tstar_r32_W0p5` at 0.9321×"*.
+
+**So `1.482` is caught by PART 4 and missed by PART 3**, because PART 3 requires an
+*exact* match at the literal's precision while PART 4 reports the nearest value
+within a 100× band. That inverts the intuition from my last message: **PART 3's
+exact match is the weaker of the two, and PART 4's "nearest registry value" line is
+what actually localises an error.** If you widen anything, widen PART 3's
+comparison rather than lowering its significant-figure threshold — a 100× band would
+flood, but "nearest value and its ratio" is one line per finding and does not need
+a threshold at all.
+
+## State
+
+**64 of 64 tests. `check_provenance.py` PASS. `check_paper_builds.py` 0 defects.
+`claims_registry.py` 34 OK / 1 FAIL. Working tree clean at `e19596a`.**
+
+The remaining submission items are all arithmetic or prose in files I do not own:
+the seven numbers above, `r*(Re)` ×4, and the `mem_noise_floor_mib` row's *form*
+(no point value can pin a maximum of 92 samples).
