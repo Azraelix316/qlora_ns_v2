@@ -44,6 +44,90 @@ def load(name: str) -> dict:
     return json.loads(path.read_text())
 
 
+def test_the_driver_drift_classifier_separates_wiring_from_computation():
+    """`check_driver_drift.py` must not confuse a parser edit with a maths edit.
+
+    It was wrong once already. The first implementation compared *lines*, and
+    adding `action=ListOnce` to an `add_argument` call that already spanned two
+    lines pushes its `default=` onto a continuation line — so a pure wiring
+    change produced `+ default=[64, 128])` and thirteen of twenty artifacts were
+    labelled "substantive". The replacement compares parsed structure, with the
+    wiring removed, so a continuation line is not a node and cannot be mistaken
+    for a change.
+
+    Both directions are tested on synthetic sources, because a classifier that
+    only ever says "fine" is the failure mode this project keeps hitting.
+    """
+    import sys
+
+    from _paths import EXPERIMENTS
+    sys.path.insert(0, str(EXPERIMENTS))
+    import check_driver_drift as drift
+
+    base = (
+        "import json\n"
+        "from _cli import ListOnce\n"
+        "def main():\n"
+        "    p = argparse.ArgumentParser()\n"
+        "    p.add_argument('--ranks', type=int, nargs='+',\n"
+        "                  default=[2, 8, 16, 32, 43])\n"
+        "    return p.parse_args()\n"
+    )
+    stripped = base.replace("from _cli import ListOnce\n", "").replace(
+        "nargs='+',\n", "nargs='+', "
+    ).replace(", action", ", action")
+
+    # The old version, and the current one with the wiring added back. These must
+    # be the same computation even though the text differs by several lines.
+    old = (
+        "import json\n"
+        "def main():\n"
+        "    p = argparse.ArgumentParser()\n"
+        "    p.add_argument('--ranks', type=int, nargs='+',\n"
+        "                  default=[2, 8, 16, 32, 43])\n"
+        "    return p.parse_args()\n"
+    )
+    import ast
+    assert ast.dump(drift._strip_wiring(ast.parse(base))) == ast.dump(ast.parse(old)), (
+        "stripping the wiring did not recover the original program"
+    )
+
+    # A change to a default is NOT wiring, even though it sits in the same call.
+    changed_default = base.replace("default=[2, 8, 16, 32, 43]", "default=[2, 4, 8]")
+    assert ast.dump(drift._strip_wiring(ast.parse(changed_default))) != ast.dump(
+        ast.parse(old)
+    ), "a changed default was classified as wiring-only"
+
+    # A change to the arithmetic is NOT wiring.
+    changed_math = base.replace(
+        "return p.parse_args()", "return p.parse_args() * 2"
+    )
+    assert ast.dump(drift._strip_wiring(ast.parse(changed_math))) != ast.dump(
+        ast.parse(old)
+    ), "a changed computation was classified as wiring-only"
+
+    # And the report itself must run, and must be honest about which of the two
+    # situations it is in rather than defaulting to "fine".
+    import subprocess
+    import sys as _sys
+    from _paths import REPO_ROOT
+
+    result = subprocess.run(
+        [_sys.executable, str(EXPERIMENTS / "check_driver_drift.py")],
+        cwd=REPO_ROOT, capture_output=True, text=True, timeout=600,
+    )
+    assert result.returncode == 0, result.stderr[-600:]
+    for state in ("wiring-only", "substantive", "current"):
+        assert state in result.stdout, (
+            f"the drift report never mentions {state!r}, so it is not "
+            f"classifying:\n{result.stdout[-900:]}"
+        )
+    # The report must not claim a clean tree when nine artifacts are known to
+    # carry wiring-only drift; if this ever goes stale the assertion below is the
+    # thing that notices.
+    assert "artifacts with provenance:" in result.stdout
+
+
 def test_no_list_valued_flag_silently_drops_a_repeated_occurrence():
     """Every ``nargs`` flag refuses a second occurrence instead of keeping the last.
 
