@@ -408,6 +408,151 @@ def trace_literals(text, values, lo=2, unaccounted_lo=4):
             out["small"].append(s)
     return out
 
+
+def self_test():
+    """D112 ADDED THIS. THE REASON IS THE FINDING, AND IT IS THE SAME ONE AS D111.9.
+
+    `claims_registry.py` had NO self-test, and it is the most load-bearing gate in the
+    project: 35 rows covering every number the paper states. D111.9's lesson applies with
+    more force here than anywhere else -- **a gate that cannot fail cannot be caught**, and
+    this one had never been shown to fail on a wrong value.
+
+    FOUR PROPERTIES, each measured over the real REGISTRY rather than a fixture:
+
+      1. NO ROW IS VACUOUS. Perturbing every asserted value by +50% must make the
+         comparison reject it. This also VERIFIES D91.5's own stated justification for
+         pinning the cost ratio at sf=1 -- "a real regression still fails at sf=1, because
+         2.24 -> 1.1 crosses the leading digit" -- a claim that had been asserted in a
+         comment and never tested on any row.
+      2. THE TRIPWIRE POPULATION, MEASURED. A registry row that fails on a value which
+         merely MOVED is a tripwire, not a gate. So: perturb every value by +10% -- a
+         plausible re-run displacement, against D91.5's recorded 8.7-26.5% within-run and
+         11-173% between-run spreads -- and count the rows that reject it. **A row that
+         cannot tell a regression from a re-run is not reporting a diagnosis, and the
+         registry's FAIL message does not distinguish them.**
+      3. THE RESOLVER'S THREE GUARDS. A missing path, a selector matching nothing, and a
+         selector matching MORE THAN ONE must each raise. A resolver that silently picks
+         the first of several matches would verify a row against the wrong element, and
+         every such row would read OK.
+      4. round_sig's BOUNDARIES, including the trailing-zero trap D91.5's `sig_figs`
+         docstring calls out (`1000` is one significant figure, not four).
+
+    Usage:  claims_registry.py --self-test
+    """
+    from decimal import Decimal
+
+    def accepts(actual, expect, sf):
+        """Does the registry ACCEPT `actual` for a row asserting `expect` at `sf`?
+
+        The registry's own comparison, from main(): round_sig(actual, sf) ==
+        round_sig(expect, sf). A non-numeric claim (expect is None) is accepted on status
+        words instead, so it is excluded from the numeric properties by construction.
+
+        D112 NOTE: this helper was first written as `rejects` and RETURNED TRUE WHEN THE TWO
+        VALUES ARE EQUAL -- that is, it answered "does the row accept this?" under a name
+        that said the opposite, and every population it printed was inverted. It was caught
+        by reading the output against the arithmetic, not by the test. The name now matches
+        the return value, and the two conditions below were checked against it."""
+        return round_sig(actual, sf) == round_sig(expect, sf)
+
+    rows = REGISTRY
+    numeric = [r for r in rows if r[5] is not None and r[6]]
+    nonnum = [r for r in rows if r[5] is None]
+    print(f"POPULATION: {len(rows)} registry row(s) -- {len(numeric)} numeric, "
+          f"{len(nonnum)} non-numeric claim(s).")
+    print("  Read from the real REGISTRY, so this measures the rows the gate actually uses.")
+    sf_hist = {}
+    for r in numeric:
+        sf_hist[r[6]] = sf_hist.get(r[6], 0) + 1
+    print(f"  significant figures requested: {dict(sorted(sf_hist.items()))}")
+    print()
+    fails = 0
+
+    # --- 1. no row is vacuous
+    print("  PROPERTY 1 -- no row is vacuous: a +50% error must be rejected by every row")
+    vacuous = []
+    for cid, art, path, sel, field, expect, sf in numeric:
+        bumped = float(expect) * 1.5
+        if accepts(bumped, expect, sf):          # accepts a 50% error -> the row is vacuous
+            vacuous.append((cid, sf, expect, bumped))
+    if vacuous:
+        for cid, sf, e, b in vacuous:
+            print(f"    VACUOUS  {cid:<26} sf={sf}  {e} vs {b} -- the row ACCEPTS a 50% error")
+        fails += len(vacuous)
+    else:
+        print(f"    ok  all {len(numeric)} numeric rows reject a +50% error")
+        print("        (this is the property D91.5 asserted for sf=1 and never tested on any row)")
+    print()
+
+    # --- 2. the tripwire population, measured
+    print("  PROPERTY 2 -- the TRIPWIRE POPULATION: rows that reject a +10% displacement,")
+    print("  which is a plausible re-run movement (D91.5 recorded 8.7-26.5% within-run and")
+    print("  11-173% between-run on the cost quantity). These rows cannot distinguish a")
+    print("  regression from a re-run, and the FAIL message does not say which it is.")
+    for pct in (0.10, 0.01):
+        tripped, tolerant = [], []
+        for r in numeric:
+            (tolerant if accepts(float(r[5]) * (1 + pct), r[5], r[6]) else tripped).append(r[0])
+        print(f"    +{int(pct*100):>2}% displacement: {len(tripped):>2}/{len(numeric)} rows REJECT it"
+              f"  ({100*len(tripped)/len(numeric):.0f}%), {len(tolerant)} tolerate it")
+        if pct == 0.10:
+            sfs = {}
+            for r in numeric:
+                if r[0] in tripped:
+                    sfs[r[6]] = sfs.get(r[6], 0) + 1
+            print(f"        the {len(tripped)} that reject it, by requested sf: {dict(sorted(sfs.items()))}")
+            print(f"        the {len(tolerant)} that TOLERATE it: {tolerant}")
+    print()
+
+    # --- 3. the resolver's guards
+    print("  PROPERTY 3 -- resolve() must raise rather than silently pick one of several")
+    guard_cases = [
+        ("missing path", ({"a": 1}, "nope", None, "f")),
+        ("selector matches nothing", ({"rows": [{"N": 64}, {"N": 128}]}, "rows", {"N": 999}, "f")),
+        ("selector matches TWO", ({"rows": [{"N": 64}, {"N": 64}]}, "rows", {"N": 64}, "f")),
+    ]
+    for name, args in guard_cases:
+        try:
+            resolve(*args)
+            print(f"    FAIL  {name:<28} returned a value -- a resolver that picks the first of")
+            print("          several would verify rows against the WRONG element and read OK")
+            fails += 1
+        except Exception as exc:                      # noqa: BLE001 - the point is that it raises
+            print(f"    ok    {name:<28} raises {type(exc).__name__}: {str(exc)[:52]}")
+    print()
+
+    # --- 4. round_sig boundaries, including the trailing-zero trap
+    print("  PROPERTY 4 -- round_sig() boundaries, including the trailing-zero trap")
+    sig_cases = [
+        (2.237746367620425, 1, Decimal("2"), "D91.5's cost row at sf=1: one leading digit"),
+        (0.6493281145096707, 16, Decimal("0.6493281145096707"), "a 16-s.f. row keeps everything"),
+        (20.0891, 4, Decimal("20.09"), "4 s.f. of 20.0891"),
+        (0.000101084, 2, Decimal("0.00010"), "2 s.f. of a small value: trailing zeros ARE significant here"),
+    ]
+    for val, sf, want, why in sig_cases:
+        got = round_sig(val, sf)
+        ok = got == want
+        print(f"    {'ok  ' if ok else 'FAIL'}  round_sig({val!r}, {sf}) = {got!r}"
+              f"{'' if ok else f'  expected {want!r}'}   {why}")
+        if not ok:
+            fails += 1
+    bare = sig_figs("1000")
+    ok = bare == 1
+    print(f"    {'ok  ' if ok else 'FAIL'}  sig_figs('1000') = {bare}"
+          f"{'' if ok else '  expected 1'}   a bare integer's trailing zeros are not significant")
+    if not ok:
+        fails += 1
+    print()
+    if fails:
+        print(f"FAIL: {fails} case(s) wrong -- the registry cannot be trusted until they pass")
+        return 1
+    print("PASS: no row is vacuous; the tripwire population is measured and reported;")
+    print("      resolve() raises on all three ambiguity cases; round_sig's boundaries hold.")
+    print("      NOTE: a large tripwire population is REPORTED, not failed -- whether that is")
+    print("      acceptable is a judgement about what the registry is for, recorded in D112.3.")
+    return 0
+
+
 def main():
     root = sys.argv[1] if len(sys.argv) > 1 else \
         os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -577,4 +722,9 @@ def main():
 
 
 if __name__ == "__main__":
+    # D112: this gate had no positive control at all, and it is the most load-bearing gate
+    # in the project -- 35 rows covering every number the paper states. A gate that cannot
+    # fail cannot be caught (D111.9).
+    if "--self-test" in sys.argv:
+        sys.exit(self_test())
     sys.exit(main())

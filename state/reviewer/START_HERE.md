@@ -75,7 +75,9 @@ headings in `DECISIONS.md` were wrapped across two lines and one of them imperso
 **`check_start_here.py` is the one that keeps this file honest**: it runs the gates above, extracts their headline
 numbers, and fails if any is missing from this section. It found this section two generations stale.
 
-**Six of the eight self-test** (`--self-test`): each proves it can fire on a hand-built instance of the defect it looks for. **The two that do not are `claims_registry.py` and — until R148 — `check_order_withdrawn.py`**, and both are load-bearing; a gate that cannot fail cannot be caught, which is how D52.5's pattern returned zero hits on the draft for cycles while reading as "no defect" (D111).
+**Seven of the eight self-test** (`--self-test`): each proves it can fire on a hand-built instance of the defect it looks for. **The two that do not are `claims_registry.py` and — until R148 — `check_order_withdrawn.py`**, and both are load-bearing; a gate that cannot fail cannot be caught, which is how D52.5's pattern returned zero hits on the draft for cycles while reading as "no defect" (D111).
+
+**`claims_registry.py --self-test` reports that 30 of its 32 numeric rows REJECT a `+10%` displacement** — a routine re-run movement by D91.5's own recorded spreads — so a `FAIL` there is a tripwire, not a diagnosis. **The `sf` values are correct and must not be loosened; what is missing is the relative difference in the `FAIL` line** (D112.3–D112.4). **A `FAIL` that cannot be diagnosed is a `FAIL` that gets ignored.**
 
 **Every one of these eight prints the population it measured over. A result without a population above it is not a result
 (D87, and CHECKLIST §1.15). And a number in THIS file is a claim: `check_start_here.py` exists so that you never have to

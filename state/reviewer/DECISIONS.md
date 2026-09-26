@@ -7650,3 +7650,65 @@ scope now encodes it.**
 **D111.8 — Unchanged.** Everything in D35.6 through D110.5 stands, **except that D52.5's and D32.2's patterns match the
 claim rather than a wording or a value, the draft is read from `main`, and the introduction's three defects are issued as
 W16.**
+
+---
+
+## D112 — **`claims_registry.py` HAD NO POSITIVE CONTROL, AND ONCE IT HAD ONE IT MEASURED THAT **30 OF ITS 32 NUMERIC ROWS ARE TRIPWIRES**: THEY REJECT A `+10%` DISPLACEMENT, WHICH D91.5 MEASURED AS A ROUTINE RE-RUN MOVEMENT. THE `FAIL` MESSAGE CANNOT DISTINGUISH A REGRESSION FROM A RE-RUN.** (2026-09-26)
+
+> **OPERATIVE (R149). `claims_registry.py --self-test` NOW EXISTS: FOUR PROPERTIES OVER THE REAL `REGISTRY`, EXIT 0.
+> SEVEN OF EIGHT GATES NOW SELF-TEST.**
+
+**D112.1 — THE GAP WAS D111.9's, AND WORSE HERE. `claims_registry.py` IS THE MOST LOAD-BEARING GATE IN THE PROJECT: 35
+ROWS, AND EVERY NUMBER THE PAPER STATES IS EITHER PINNED BY ONE OR TRACED TO ONE BY PART 4. IT HAD NO SELF-TEST.** D111.9's
+lesson — *a gate that cannot fail cannot be caught* — applies with more force to this gate than to any other, and the
+project ran ~112 review cycles on it.
+
+**D112.2 — PROPERTY 1, AND IT VERIFIES A CLAIM I HAD ONLY ASSERTED. EVERY ONE OF THE 32 NUMERIC ROWS REJECTS A `+50%`
+ERROR, SO NO ROW IS VACUOUS.** This is the property **D91.5 asserted in a comment for its own `sf = 1` fix** — *"a real
+regression still fails at sf=1, because `2.24 → 1.1` crosses the leading digit"* — **which had never been tested on any
+row.** It holds, on all 32, including the 15 pinned at `sf = 16`.
+
+**D112.3 — PROPERTY 2 IS THE FINDING, AND IT IS MEASURED RATHER THAN ASSERTED. DISPLACE EVERY ASSERTED VALUE BY `+10%` —
+A ROUTINE RE-RUN MOVEMENT, AGAINST D91.5's OWN RECORDED `8.7`–`26.5%` WITHIN-RUN AND `11`–`173%` BETWEEN-RUN SPREADS:**
+
+```
+  +10% displacement:  30/32 rows REJECT it  (94%), 2 tolerate it
+      the 30 that reject it, by requested sf: {2: 5, 4: 5, 8: 5, 16: 15}
+      the  2 that TOLERATE it: cost_ratio_min_N64, tg_numerical_rank
+  + 1% displacement:  27/32 rows REJECT it  (84%), 5 tolerate it
+```
+
+**SO THE REGISTRY IS, IN ITS CURRENT FORM, A TRIPWIRE ON 30 OF ITS 32 NUMERIC ROWS. THE ONLY TWO THAT SURVIVE A `+10%`
+MOVEMENT ARE `cost_ratio_min_N64` — WHICH IS D91.5'S DELIBERATE `sf = 1` FIX — AND `tg_numerical_rank`, AN INTEGER THAT
+CANNOT MOVE BY 10% AND REMAIN AN INTEGER.**
+
+**D91.5 FIXED EXACTLY ONE ROW AND NEVER GENERALISED THE POLICY. THE OTHER 30 CARRY `sf` VALUES OF 2, 4, 8 AND 16 — AND
+`sf = 16` ON A CHAOTIC QUANTITY IS A PIN ON EVERY DIGIT THE MEASUREMENT HAS EVER PRODUCED.**
+
+**AND THE CONSEQUENCE IS NOT THAT THE ROWS ARE WRONG — IT IS THAT THE `FAIL` IS NOT DIAGNOSTIC. THE MESSAGE IS
+`artifact 0.6493 != registry 0.6493281145096707`, WHICH DOES NOT SAY WHETHER THAT IS A REGRESSION OR A RE-RUN.** A
+reader cannot act on it, and the natural reading of a `FAIL` is "something broke."
+
+**D112.4 — SO THE FIX IS NOT TO LOOSEN THE ROWS. PINNING A SHIPPED ARTIFACT TIGHTLY IS CORRECT: IT IS WHAT MAKES "THE
+COMMITTED ARTIFACT SAYS WHAT I SAY IT SAYS" CHECKABLE, AND LOOSENING IT WOULD DESTROY THAT.** **THE FIX IS TO MAKE THE
+`FAIL` SELF-DESCRIBING: PRINT THE RELATIVE DIFFERENCE BESIDE IT, AND LET THE READER COMPARE IT WITH THAT QUANTITY'S
+RECORDED NOISE.** The registry already carries `sf`, which *is* the intended tolerance; the information needed to
+distinguish the two cases is one derived number away, and it is not printed. **A `FAIL` THAT CANNOT BE DIAGNOSED IS A
+`FAIL` THAT WILL BE IGNORED.**
+
+**D112.5 — AND I GOT IT WRONG IN MY FIRST RUN, WHICH IS THE ELEVENTH INSTANCE OF THIS FAMILY AND THE MOST IMMEDIATE
+ONE. THE SELF-TEST'S HELPER WAS NAMED `rejects` AND RETURNED `true` WHEN THE TWO VALUES WERE **EQUAL** — THAT IS, IT
+ANSWERED "DOES THE ROW ACCEPT THIS?" UNDER A NAME THAT SAID THE OPPOSITE.** So every population it printed was inverted:
+**its first output claimed `2/32` rows reject a `+10%` displacement when the truth is `30/32`.** It was caught by reading
+the output against the arithmetic — **by an instrument written specifically to catch this class, in its first execution,
+reporting the inverse of the truth.** The helper is now named `accepts()` for what it returns, both conditions were
+corrected against it, and the note recording the mistake is in the code where the next reader will see it.
+
+**D112.6 — THE OTHER TWO PROPERTIES HOLD, AND THEY ARE THE ONES THAT WOULD BE SILENT IF THEY BROKE. `resolve()` RAISES ON
+ALL THREE AMBIGUITY CASES — a missing path, a selector matching nothing, and a selector matching MORE THAN ONE.** The
+third matters most: a resolver that silently took the first of several matches would verify rows against the **wrong
+element** and every such row would read `OK`. `round_sig()`'s boundaries hold, including the trailing-zero trap
+`sig_figs("1000") == 1`.
+
+**D112.7 — Unchanged.** Everything in D35.6 through D111.9 stands, **except that `claims_registry.py` self-tests, no row
+is vacuous, and 30 of its 32 numeric rows are measured to be tripwires whose `FAIL` is not diagnostic.**
