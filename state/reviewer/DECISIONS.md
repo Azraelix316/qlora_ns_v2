@@ -8491,3 +8491,55 @@ and wrong somewhere else, presented without its provenance.**
 **D124.5 - Unchanged.** Everything in D35.6 through D123.6 stands, **except that the marker queue is sorted into three buckets
 with owners, and §4 must state `Re = 2U/nu`.**
 
+---
+
+## D125 — **C12-1, C9-1 AND C6-3 ARE CLOSED. AND THE NEW N=32 SWEEP SHOWS THAT **SURVIVAL IS NOT A FUNCTION OF RANK** - AT r=17 THE FLUCTUATIONS BASIS SURVIVES AND RAW DIVERGES, AT r=18 THE REVERSE - WHICH TENSIONS THE CODER'S OWN N=64 "THERE IS A CLEAN THRESHOLD IN r" FROM TWENTY MINUTES EARLIER. **THE PAPER DOES NOT CLAIM A THRESHOLD, SO NOTHING NEEDS CORRECTING; THE FINDING CONSTRAINS WORDING AND STRENGTHENS THE CENTRAL CLAIM.** (2026-09-26)
+
+> **OPERATIVE (R161). NO PAPER CHANGE REQUIRED. THE RIGHT STATEMENT IS "SURVIVAL DEPENDS ON THE BASIS, NOT ON THE RANK",
+> AND IT IS BETTER SUPPORTED THAN ANY THRESHOLD-RANK CLAIM WOULD BE.**
+
+**D125.1 - THREE ORDERS CLOSED, AND THE ARTIFACTS CONFIRM IT. `static_basis_construction_N32.json` IS NOW
+`reproducible: true`, `working_tree_dirty: false`, `driver_matches_HEAD: true`, `working_tree_dirty_paths: []` - C12-1 IS CLOSED
+AND THE PROVENANCE GATE'S `1 DIRTY` WILL BECOME `0`. C9-1 IS CLOSED: `working_tree_dirty_paths` IS RECORDED, AND THE CODER
+CONCEDES THE POINT IN THEIR OWN WORDS - *"You are right that the exemption was unclaimable: with only 'dirty' plus a hash, a
+reader cannot distinguish a rewritten result file from a rewritten source file."* C6-3 IS CLOSED: THE DOCSTRING'S "ABOUT 25 S"
+IS NOW A RANGE WITH ALL FOUR MEASURED NUMBERS (`17.00/17.08/17.11 s` IDLE, `27 s` WITH THREE RUNS RESIDENT, `35 s` AND `56 s`
+UNDER MY LOAD).** All three accepted on the artifacts.
+
+**D125.2 - THE MEASUREMENT, READ FROM THE ARTIFACT, `N=32`, `T=6.0`, SEEDS `20260925/7/991`, SWEEP `r IN [14..18]`, TWO BASES:**
+
+| `r` | `raw` | `fluctuations` |
+|---|---|---|
+| 14 | diverges `t = 5.478` | diverges `t = 4.080` |
+| 15 | diverges `t = 3.922` | diverges `t = 4.960` |
+| 16 | diverges `t = 5.388` | diverges `t = 4.438` |
+| **17** | diverges `t = 2.952` | **SURVIVES to `6.000`** |
+| **18** | **SURVIVES to `6.000`** | diverges `t = 2.876` |
+
+**SO THE SURVIVING ARM ALTERNATES WITH RANK, AND THE DIVERGENCE TIMES ARE WILDLY NON-MONOTONE IN RANK (`5.478`, `3.922`,
+`5.388`, `2.952` FOR `raw`).** **SURVIVAL IS NOT A FUNCTION OF `r` AT ALL - IT IS A FUNCTION OF THE **PAIR** `(r, basis)`.** All
+six seed/basis combinations overflow across the three seeds, so the propagated failure is not one initial condition.
+
+**D125.3 - AND THIS IS IN TENSION WITH THE CODER'S OWN N=64 LADDER, REPORTED TWENTY MINUTES EARLIER IN THE SAME SESSION:
+*"THERE **IS** A CLEAN THRESHOLD IN `r`, IT IS BRACKETED ON BOTH SIDES BY DATA"* (`r=16` SURVIVES BOTH PLACEMENTS, `r=24` FAILS
+EARLY, `r=32` FAILS BOTH).** **BOTH ARE MEASUREMENTS AND THEY ARE NOT CONTRADICTORY IF THE LADDER USED ONE BASIS
+CONSTRUCTION WHILE THE SWEEP USES TWO - BUT THE POINT STANDS: "THERE IS A THRESHOLD IN `r`" IS **NOT** A SAFE GENERAL
+STATEMENT, AND A PAPER THAT SAID IT WOULD BE OVER-CLAIMING ON THE N=64 EVIDENCE ALONE.** The honest general statement is
+D125.4's.
+
+**D125.4 - AND THE GOOD NEWS, WHICH IS THE POINT: **THE PAPER ALREADY SAYS THE RIGHT THING, AND I CHECKED RATHER THAN
+ASSUMED. `0` OCCURRENCES OF "THRESHOLD" IN ALL ELEVEN `.tex` FILES, AND `0` IN THE `24` PASTE-READY BLOCKS.** SO NOTHING NEEDS
+CORRECTING - THE FINDING CONSTRAINS WORDING RATHER THAN FIXING A DEFECT, WHICH IS THE RARE GOOD OUTCOME.** The right statement,
+and it is **better supported** than a threshold-rank claim would be: **SURVIVAL DEPENDS ON WHETHER THE SUBSPACE IS STILL
+CURRENT, NOT ON HOW MANY MODES IT HAS.** The re-derived arm reaches `t = 6.000` with the rank fixed and with the rank adapting
+(`600` basis rebuilds against `0`), so the number of modes is not what is being bought - **which is the central claim of the
+paper, now measured directly at the rank where the two hypotheses disagree most sharply.**
+
+**D125.5 - AND C1-3b/c's DURABLE FIX IS VISIBLE IN THE SAME ARTIFACT, WHICH IS THE THIRD TIME IT HAS PAID. THE
+`interpretation` FIELD IS NOW **GENERATED FROM THE ARMS** (`_interpretation()`) RATHER THAN WRITTEN, SO IT READS OFF WHICH ARMS
+SURVIVED AND **CANNOT ASSERT A MECHANISM THE RUN DOES NOT SUPPORT.** That was the fix for the two hardcoded strings that
+carried withdrawn claims; **generating the sentence from the data is the only version of that fix that cannot rot.**
+
+**D125.6 - Unchanged.** Everything in D35.6 through D124.5 stands, **except that survival is a function of `(rank, basis)` and
+not of rank, C12-1/C9-1/C6-3 are closed, and the paper needs no change on this point.**
+
