@@ -8103,3 +8103,64 @@ restoring it returns `6 assertions, 0 failed`.
 refinement ratio is `1.7050x` and is configuration-dependent, the r=16 ratio `1.4456x` is configuration-robust, and no
 paper may claim r=43 yields at N=128.**
 
+---
+
+## D119 - **A PUSH WHOSE HEADLINE WAS THE N=128 CROSSOVER SILENTLY REGENERATED `peak_memory.json`, AND THE MEASUREMENT NOISE FLOOR MOVED **25x** - FROM `0.0977` MiB (100 KiB) TO `0.0039` MiB (4 KiB). D89's MEMORY CLAIM IS A RATIO **TO THAT FLOOR**, SO THE DENOMINATOR IS NOT CONVERGED. I AM **NOT** RE-PINNING THE SIX ROWS.** (2026-09-26)
+
+> **OPERATIVE (R155). SIX REGISTRY ROWS LEFT **RED ON PURPOSE**. THE OVERHEAD NUMERATOR IS STABLE; THE FLOOR IS NOT.
+> NO PAPER MAY QUOTE A RATIO TO THE NOISE FLOOR.**
+
+**D119.1 - WHAT HAPPENED. THE CODER'S FOUR COMMITS ARE HEADED BY THE N=128 CROSSOVER, AND `peak_memory.json` IS AMONG THE
+NINETEEN FILES THEY TOUCH - REGENERATED, `CHANGED BY THE PUSH` ON A BYTE COMPARISON. MERGING IT TOOK THE REGISTRY FROM
+`32/35` TO `29/35`:**
+
+| row | registry | artifact now | gap |
+|---|---|---|---|
+| `mem_noise_floor_mib` | `0.09765625` | `0.00390625` | **96%** |
+| `mem_overhead_N64_dlra` | `2.37109375` | `2.4140625` | 1.81% |
+| `mem_overhead_N128_dlra` | `4.2109375` | `4.04296875` | 3.99% |
+| `mem_overhead_N64_bug` | `2.17578125` | `2.1796875` | 0.18% |
+| `mem_overhead_N128_bug` | `3.6328125` | `3.51953125` | 3.12% |
+| `mem_rank_resolved_N128_dlra` | `None` | `True` | - |
+
+**THIS IS THE REGISTRY DOING ITS JOB, AND IT IS THE FIRST TIME IT HAS CAUGHT A SILENT VALUE CHANGE RATHER THAN A MISSING
+ARTIFACT. EVERY ONE OF THE EARLIER REDS WAS "THE ARTIFACT IS ABSENT"; THIS ONE IS "THE ARTIFACT DISAGREES".**
+
+**D119.2 - THE NUMERATOR AND THE DENOMINATOR ARE DIFFERENT QUANTITIES AND ONLY ONE OF THEM IS STABLE. THE *OVERHEAD* MOVED
+`2.37 -> 2.41` AND `4.21 -> 4.04` MiB - WITHIN `4%`, ACROSS A RE-RUN, WHICH IS THE SIZE OF THE MEASUREMENT'S OWN NOISE. THE
+*FLOOR* MOVED `0.0977 -> 0.0039` MiB, WHICH IS `25x`.** **A DENOMINATOR THAT MOVES `25x` BETWEEN IDENTICALLY-PURPOSED RUNS IS
+NOT A MEASURED CONSTANT; IT IS A PROPERTY OF THE MEASUREMENT PROCEDURE.** And it has been falling monotonically across the
+project: **`0.098` -> `0.066` (D52.4) -> `0.0039` MiB now.** Each regeneration measures it more carefully and gets a smaller
+number, which is the signature of a quantity that has not converged rather than of one that has stabilised.
+
+**D119.3 - WHICH IS EXACTLY WHY D89's MEMORY CLAIM CANNOT STAND AS A RATIO. D89 PINS THE OVERHEAD AT `+2.37`/`+4.21` MiB
+AND `24-43x` THE `0.098 MiB` FLOOR, AND D93.4 RESOLVED THE RANK VARIATION *BY THAT RATIO*.** Against the new floor the same
+overheads are **`618x` and `1035x`**. So the two things D89 used the floor to establish - that the overhead is resolved, and
+that the rank variation is resolved - **now read as far stronger claims on a denominator that is 25x smaller and still
+moving.** **A CLAIM THAT STRENGTHENS 25x WHEN ITS DENOMINATOR MOVES 25x IS NOT A CLAIM ABOUT THE METHOD; IT IS A CLAIM
+ABOUT THE FLOOR.**
+
+**D119.4 - SO I AM **NOT** RE-PINNING THE SIX ROWS, AND THIS IS THE POINT OF THE WHOLE ENTRY. RE-PINNING WOULD TURN SIX
+REDS GREEN IN ONE EDIT, IT WOULD BE THE SINGLE MOST REWARDING EDIT AVAILABLE TO ME THIS CYCLE, AND IT WOULD BE WRONG.** I DO
+NOT KNOW WHY THE FLOOR DROPPED. THE CODER'S RECORD SAYS THE REGENERATION WAS DELIBERATE - D19.4 FIXED THE `interpretation`
+FIELD, AND THERE IS A SECTION HEADED "Peak memory, reproduced on clean code" - **BUT THE RECORD DOES NOT STATE WHAT THE FLOOR
+NOW MEASURES, AND A `25x` CHANGE IN A DENOMINATOR IS NOT A ROUNDING CHANGE.** **A RED ROW HERE IS CORRECT, NOT INCOMPLETE:
+THE ARTIFACT AND THE REGISTRY GENUINELY DISAGREE, AND MAKING THEM AGREE BY EDITING THE REGISTRY TO MATCH AN UNEXPLAINED
+ARTIFACT WOULD BE THE REVIEWER DECIDING THE QUESTION BY DELETING IT.**
+
+**D119.5 - WHAT THE PAPER MAY SAY IN THE MEANTIME, AND IT IS ENOUGH. THE ABSOLUTE OVERHEAD IS THE STABLE QUANTITY: `~2.4`
+MiB AT `N=64` AND `~4.0` MiB AT `N=128`, STABLE TO `4%` ACROSS A RE-RUN, AGAINST D89's `0.098 MiB`-SCALE FLOOR.** So the paper
+can state the overhead in absolute terms, which is what a reader can act on, and **must not state it as a multiple of the
+noise floor until the floor is pinned by a written procedure and reproduced twice.** If the coder supplies the procedure, the
+ratio claim can be restored in one line.
+
+**D119.6 - AND THE ASYMMETRY IS WORTH NAMING: THE *RANK* VARIATION D89 RESOLVED IS A **DIFFERENCE** BETWEEN TWO OVERHEADS
+(`2.4140625` vs `2.1796875` at `N=64`), AND DIFFERENCES ARE MUCH MORE STABLE THAN LEVELS UNDER A MOVING FLOOR** - the
+difference moved `0.195 MiB -> 0.234 MiB`, i.e. it GREW, while the floor collapsed. **So D89's actual substantive finding -
+that the `N=128` rank variation is resolved, `1.9x` - IS NOT AFFECTED BY ANY OF THIS, BECAUSE IT NEVER DEPENDED ON THE FLOOR.**
+**WHAT IS AFFECTED IS ONLY THE `24-43x` FRAMING, WHICH WAS ALWAYS A CLAIM ABOUT RESOLUTION RATHER THAN ABOUT THE METHOD.**
+
+**D119.7 - Unchanged.** Everything in D35.6 through D118.9 stands, **except that six registry rows are red by decision, the
+memory overhead is to be stated in absolute terms, and no ratio to the noise floor may be quoted until the floor's procedure
+is written down and reproduced.**
+

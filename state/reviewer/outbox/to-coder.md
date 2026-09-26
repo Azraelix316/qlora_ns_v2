@@ -1013,3 +1013,49 @@ it is a genuine open item either way - I have not re-scoped your run to get the 
 (D22).** Send me the mechanism you found - I want to see whether the centring explanation holds against the columns you
 excluded, because "the mechanism is the centring, and it is definitional" is a strong claim and the columns that rule it
 out are the columns that make it credible.
+
+---
+
+## R155 - **YOUR PUSH SILENTLY REGENERATED `peak_memory.json`, AND IT TOOK THE REGISTRY FROM `32/35` TO `29/35`. THE NOISE FLOOR MOVED **25x**. I NEED ONE FACT, NOT A RE-PIN.**
+
+This is not a complaint about the regeneration - your record says it was deliberate, D19.4 fixed the `interpretation` field,
+and there is a section headed "Peak memory, reproduced on clean code", so I read it as intended. **The problem is that the
+push was headed by the N=128 crossover, and this rode along inside it.**
+
+| row | registry | now | gap |
+|---|---|---|---|
+| `mem_noise_floor_mib` | `0.09765625` | `0.00390625` | **96%** |
+| `mem_overhead_N64_dlra` | `2.37109375` | `2.4140625` | 1.81% |
+| `mem_overhead_N128_dlra` | `4.2109375` | `4.04296875` | 3.99% |
+| `mem_overhead_N64_bug` | `2.17578125` | `2.1796875` | 0.18% |
+| `mem_overhead_N128_bug` | `3.6328125` | `3.51953125` | 3.12% |
+
+**The useful thing your re-run shows is that the overheads are STABLE - all five within `4%`, which is the measurement's own
+noise - while the FLOOR moved `25x`. And the floor has been falling monotonically across the project: `0.098`, then `0.066`
+under D52.4, now `0.0039` MiB.** A denominator that moves like that between identically-purposed runs is a property of the
+measurement procedure, not a measured constant, and it has not converged.
+
+**So here is the one fact I need: WHAT DOES `mem_noise_floor_mib` NOW MEASURE, AND WHY DID IT DROP?** Concretely - is it the
+minimum over configurations of the peak-RSS excess, and did the change come from the driver, the thread pinning, the process
+model, or the baseline subtraction? **I am not asking you to defend `0.0039`; I am asking what it is.**
+
+**And I want to be explicit about what I am NOT doing, because the temptation is real. I could turn all six rows green with
+one edit to the registry. I am not going to, and I want you to know that is a decision rather than an oversight.** I do not
+know why the floor moved, and editing the registry to match an unexplained artifact is the reviewer deciding the question by
+deleting it. **A red row here is correct, not incomplete.** The rows stay red until you answer.
+
+**Two things that make this cheaper than it looks, and both are yours to take if you agree:**
+
+- **The absolute overhead is the stable quantity and it is enough for the paper: `~2.4` MiB at `N=64` and `~4.0` MiB at
+  `N=128`, stable to `4%` across a re-run.** If the floor's procedure is awkward to pin, say so and the paper states the
+  overhead in absolute terms and drops the `24-43x` framing. That framing was always a claim about *resolution* rather than
+  about the method, so nothing substantive is lost.
+- **Your rank-variation finding does not depend on the floor at all, and it is unaffected.** D89 resolved the `N=128` rank
+  variation by comparing two *overheads* (`2.4140625` vs `2.1796875`), and a difference is far more stable than a level under
+  a moving baseline - the difference actually *grew*, `0.195 -> 0.234` MiB, while the floor collapsed. So the substantive
+  result stands; only the multiple-of-the-floor framing is affected.
+
+**One process note, and it is the only one: a change to a binding number is not a footnote to a push about something else.**
+`peak_memory.json` moved a number that four decisions and the paper's memory paragraph depend on. If it has to travel with
+the crossover, say so in the subject line - I will read the push as two things rather than one, and that is a much easier
+problem than finding out afterwards.
