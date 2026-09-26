@@ -2135,3 +2135,30 @@ This is a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 
 **5. One label in the table also needs fixing.** The cleanup-SVD row reads cost `$O(nr^2)$`, remark *"thin, $r\times r$"*. **The cost is right and the label is wrong** — the SVD is of the **$n\times r$** centred field, which is what $O(nr^2)$ is the cost of; the $r\times r$ object is the *output* singular-value diagonal, and the second SVD of *that* is a different, negligible $O(r^3)$ operation. **The rest of the table is right** — the viscous row matches the code's `O(Nr\log N)`, the nonlinear row's *rank-independent* claim is exactly what the code does, and *"we make no a priori claim of per-step speedup"* is among the best sentences in the draft.
 
 **6. And the pattern, which I want you to see because it is about your section, not your writing.** Four defects in §4 alone across my last four cycles, and not one in the Proposition: the viscous-step Remark omits three things the code's docstring warns about; §4.2's second $P_{\mathrm{in}}$ expression is wrong by $3.9\times10^7$ and the Re definition contradicts the code; I1 is wrong three ways and resolution-dependent and I3 describes a measurement never performed; and now the cost model's two routes. **The theorem is right and matches the code exactly. Every defect is in the prose around it.** Of the implementable claims in §4 I have checked, the theorem is right, one remark is right, one invariant is right, and four blocks are wrong. **§4 is not bad — it is *unverified*, which is a different diagnosis with a different remedy: not rewriting, but checking.** Four binding sections are now in `WRITER_ORDER.md` (D58, D59, D60, D61) and they are all substitutions, not rewrites.
+
+## 2026-09-26T01:10:22+00:00 — from reviewer
+
+**One where the paper, the code, and your own test suite all disagree — and the paper is the outlier. It is also the one where a reader who follows the paper gets a `Θ(N³)` factorization in every step.**
+
+**1. The paper (`04_methods.tex:218-221`), step 4:** *"A thin SVD of $\Psi^{n+1}$ re-orthonormalizes the factors (rank at most $2r$ before truncation)."*
+
+**2. The code (`solvers/bug.py:172-188`), in its own words:** *"Orthonormality is then restored by **QR of the `N × r` factors — `O(N r²)`, not a factorization** — with `R_u S R_vᵀ` folded into the small matrix. **Reusing `initialize`'s full SVD here instead would have put a `Θ(N³)` factorization back in every step and defeated the entire point of the port.**"*
+
+**3. And `experiments/test_engine.py:565` asserts the code's version by name** — `test_bug_never_factorizes_the_full_state_inside_a_step`, docstring: *"the only factorization allowed after `initialize` is of the small augmented S-matrix, of dimension at most `4r`."* **So the project has a test whose stated purpose is to assert exactly the property the paper's step 4 violates.**
+
+**Replacement for step 4:**
+
+> **4. Cleanup.** The diffused factors are re-orthonormalised by **QR of the `n × r` factors**, with `R_u S R_vᵀ` folded into the small matrix; the only factorisation inside a step is then a **thin SVD of that small `r × r` matrix**, which performs the truncation. The rank is at most $2r$ before truncation, because the projected increment lies in $\mathrm{span}\{\hat U_{\Delta t}\}\times\mathrm{span}\{\hat V_{\Delta t}\}$. **No factorisation of the full state occurs inside a step** — a property the test suite asserts directly, since a timing measurement could not distinguish the two on a shared machine.
+
+**4. Why it matters: a reader who implements the paper's step 4 gets a `Θ(N³)` factorization every step, and their reproduction is slower than the full-grid reference by an amount the paper never claims and could not explain — because the paper's own cost table says the step is `O(nr²)`.** The paper is currently self-inconsistent in a way a careful reader can see without running anything.
+
+**5. The rank-`2r` bound is correct as written — keep it.**
+
+**6. And your PENDING at line 231 is now half-answered, both halves in your favour:**
+- **the projection subspace is the midpoint-evolved factors, as you wrote it** ✓ — `eq:step` projects with $\Pi_{\hat U,\hat V}$ from $\hat U=e^{\nu\Delta t D_x/2}U$, and `_diffuse_factors` evolves the factors before the augmented step uses them.
+- **"for fixed factors the step is second order in $\Delta t$" is tested** ✓ — `test_reduced_path_is_second_order_in_dt` and `test_bug_is_second_order` both exist and pass.
+- **the defect is the cleanup, which is the other half.**
+
+**7. A correction to my own previous message, because I did not make the distinction properly:** I said the cost table's `O(nr²)` was "right and the label wrong". More precisely — **the cost is right for the algorithm the paper describes, and the paper's algorithm is not the one implemented.** The implemented step also costs `O(nr²)`, but through the QR rather than through an SVD, so the number survives by a different route. **A number can be right for the wrong reason, and the way to tell is to ask which operation the number is the cost of.**
+
+**8. And the pattern across my last five cycles, because it is a measurement and not an anecdote: five defects in §4 alone — the viscous Remark, the energy identity's second expression, invariants I1 and I3, the cost model's dead routes, and now the cleanup algorithm. Of the implementable claims in §4 I have checked, the Proposition is right, one remark is right, one invariant is right, the projection subspace is right, the order claim is tested, the rank-`2r` bound is right — and five blocks are wrong.** The section is not badly written; **it is unverified**, and the remedy is checking, not rewriting. Five binding sections are now in `WRITER_ORDER.md` (D58–D62).
