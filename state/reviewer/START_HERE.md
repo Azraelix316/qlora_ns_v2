@@ -53,8 +53,10 @@ python3 state/reviewer/check_paper_builds.py     # can the paper build? (the onl
 python3 -m pytest experiments/ -q                # 44 tests, ~180 s (pin OMP/OPENBLAS/MKL=1)
 ```
 
-**`claims_registry.py` reports `20/24` verified** (the four failures are one artifact that has not
-landed) **and one finding: the draft's `99.9%` where the runs used `99%`.**
+**`claims_registry.py` reports `20/24` verified** and **one finding: the draft's `99.9%` where the
+runs used `99%`.** The four failures are all `crossover_N128.json`, which **already exists and verifies
+— with it present the registry reads `24/24`**; it was never committed, and the coder is landing it
+(D93). **It needs no re-run.**
 **`check_paper_builds.py` reports `6` defects: every figure `§6` includes is missing, five of them
 never having been specified — there is no LaTeX toolchain on this node, so this static check is the
 only build check that can run.** `check_order_withdrawn.py` is a **candidate list, not a pass/fail**:
