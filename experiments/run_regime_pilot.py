@@ -29,6 +29,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+
+from _cli import ListOnce
 import subprocess
 import sys
 import time
@@ -315,7 +317,7 @@ def main() -> None:
     parser.add_argument("--re", type=int, default=5000)
     parser.add_argument("--N", type=int, default=64)
     parser.add_argument("--dt", type=float, default=None)
-    parser.add_argument("--horizons", type=float, nargs="+",
+    parser.add_argument("--horizons", type=float, nargs="+", action=ListOnce,
                         default=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 40.0])
     parser.add_argument("--block-time", type=float, default=2.0,
                         help="minimum block length in time units (S2 requires >= 2)")
@@ -326,12 +328,12 @@ def main() -> None:
     parser.add_argument("--cutoff", type=int, default=8)
     parser.add_argument("--seed", type=int, default=20260925)
     parser.add_argument(
-        "--rank-horizons", type=float, nargs="*", default=None,
+        "--rank-horizons", type=float, nargs="*", action=ListOnce, default=None,
         help="window ends for the rank-vs-horizon table (default: a ladder "
              "through 8, where the growth happens)",
     )
     parser.add_argument(
-        "--spectra-at", type=float, nargs="*", default=None,
+        "--spectra-at", type=float, nargs="*", action=ListOnce, default=None,
         help="horizons at which to also accumulate windowed E(k)/Z(k) "
              "(default: the largest horizon)",
     )

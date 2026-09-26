@@ -26,6 +26,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+
+from _cli import ListOnce
 import os
 import platform
 import statistics
@@ -293,13 +295,15 @@ def measure(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--grids", type=int, nargs="+", default=[64, 128, 256])
-    parser.add_argument("--ranks", type=int, nargs="+", default=[2, 64])
+    parser.add_argument("--grids", type=int, nargs="+", action=ListOnce,
+                        default=[64, 128, 256])
+    parser.add_argument("--ranks", type=int, nargs="+", action=ListOnce,
+                        default=[2, 64])
     parser.add_argument("--steps", type=int, default=2000)
     parser.add_argument("--repeats", type=int, default=7)
     parser.add_argument("--warmup", type=int, default=200)
     parser.add_argument(
-        "--bug-ranks", type=int, nargs="*", default=None,
+        "--bug-ranks", type=int, nargs="*", action=ListOnce, default=None,
         help="ranks at which to also time the BUG port, on the same protocol; "
              "omit to time the projected integrator only",
     )

@@ -39,6 +39,8 @@ from __future__ import annotations
 
 import argparse
 import json
+
+from _cli import ListOnce
 import sys
 import time
 from pathlib import Path
@@ -224,8 +226,9 @@ def main() -> None:
     parser.add_argument("--train-window", type=float, default=0.5)
     parser.add_argument("--train-snapshots", type=int, default=20)
     parser.add_argument("--check-every", type=int, default=5)
-    parser.add_argument("--sweep-ranks", type=int, nargs="+", default=[14, 15, 16, 17, 18])
-    parser.add_argument("--seeds", type=int, nargs="+",
+    parser.add_argument("--sweep-ranks", type=int, nargs="+", action=ListOnce,
+                        default=[14, 15, 16, 17, 18])
+    parser.add_argument("--seeds", type=int, nargs="+", action=ListOnce,
                         default=[20260925, 7, 991])
     parser.add_argument("--force-amplitude", type=float, default=0.5)
     parser.add_argument("--base-speed", type=float, default=0.5)

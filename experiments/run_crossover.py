@@ -40,6 +40,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+
+from _cli import ListOnce
 import math
 import platform
 import subprocess
@@ -432,7 +434,7 @@ def crossover_horizon(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--re", type=float, nargs="+", default=[5000.0],
+        "--re", type=float, nargs="+", action=ListOnce, default=[5000.0],
         help="Reynolds number(s). More than one produces a Reynolds column, so "
              "the advantage horizon's Reynolds dependence is measured here "
              "rather than imported from another run -- an artifact must be "
@@ -441,11 +443,12 @@ def main() -> None:
     parser.add_argument("--N", type=int, default=64)
     parser.add_argument("--dt", type=float, default=None)
     parser.add_argument("--force-amplitude", type=float, default=0.2)
-    parser.add_argument("--horizons", type=float, nargs="+",
+    parser.add_argument("--horizons", type=float, nargs="+", action=ListOnce,
                         default=[0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 6.0, 8.0])
-    parser.add_argument("--ranks", type=int, nargs="+",
+    parser.add_argument("--ranks", type=int, nargs="+", action=ListOnce,
                         default=[2, 4, 8, 16, 32, 43])
-    parser.add_argument("--window", type=float, nargs="+", default=[1.0],
+    parser.add_argument("--window", type=float, nargs="+", action=ListOnce,
+                        default=[1.0],
                         help="trailing window length(s) for the moving-window "
                              "baseline. More than one produces the surface as a "
                              "function of the window as well as the rank, which "

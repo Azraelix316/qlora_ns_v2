@@ -44,6 +44,77 @@ def load(name: str) -> dict:
     return json.loads(path.read_text())
 
 
+def test_no_list_valued_flag_silently_drops_a_repeated_occurrence():
+    """Every ``nargs`` flag refuses a second occurrence instead of keeping the last.
+
+    On 2026-09-26 `--re 5000 --re 1000` was passed to `run_crossover.py`. `--re`
+    is declared `nargs="+"`, which takes a *list* after one flag; argparse kept
+    the last occurrence, the run covered Re=1000 only, and a partial artifact
+    overwrote a complete one — deleting the paper's central result from the
+    file with nothing in the output to say so. The same shape had already cost
+    an hour in a shell script that passed `--dt` twice.
+
+    Seventeen flags across eight drivers had the property. The check here is on
+    the *source*, not on a run, because the failure is a parser behaviour and a
+    run cannot detect what it was never asked to do: `test_every_driver_runs`
+    passes a well-formed command line, and it passed while the hazard was live.
+    """
+    import ast
+    from pathlib import Path
+
+    from _paths import EXPERIMENTS
+
+    offenders: list[str] = []
+    found = 0
+    for path in sorted(EXPERIMENTS.glob("*.py")):
+        tree = ast.parse(path.read_text())
+        for node in ast.walk(tree):
+            if not (isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "add_argument"):
+                continue
+            kwargs = {kw.arg: kw.value for kw in node.keywords if kw.arg}
+            if "nargs" not in kwargs:
+                continue
+            found += 1
+            flag = None
+            if node.args and isinstance(node.args[0], ast.Constant):
+                flag = node.args[0].value
+            if "action" not in kwargs:
+                offenders.append(f"{path.name}: {flag}")
+            elif not any(
+                isinstance(v, ast.Name) and v.id == "ListOnce"
+                for v in [kwargs["action"]]
+            ):
+                offenders.append(f"{path.name}: {flag} (action is not ListOnce)")
+
+    assert found >= 15, (
+        f"only found {found} nargs-valued flag(s); the scan is broken, so the "
+        "green below would mean nothing"
+    )
+    assert not offenders, (
+        "list-valued flags that silently drop a repeated occurrence "
+        "(use action=ListOnce from experiments/_cli.py):\n  "
+        + "\n  ".join(offenders)
+    )
+
+    # And the guard must actually fire, on the flag that cost the hour.  A scan
+    # of the source proves the attribute is there; only a parse proves it works.
+    import subprocess
+    import sys
+
+    result = subprocess.run(
+        [sys.executable, str(EXPERIMENTS / "run_crossover.py"),
+         "--re", "5000", "--re", "1000", "--N", "64"],
+        capture_output=True, text=True, timeout=600,
+    )
+    assert result.returncode != 0, "the repeated --re was accepted"
+    assert "was given more than once" in result.stderr, result.stderr[-600:]
+    # The message has to be actionable, not just a refusal: it must show the
+    # form that would have worked.
+    assert "--re A B" in result.stderr, result.stderr[-600:]
+
+
 def test_every_included_figure_resolves_against_the_main_document():
     """The figures live where LaTeX will look for them.
 

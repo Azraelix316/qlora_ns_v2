@@ -24,6 +24,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+
+from _cli import ListOnce
 import os
 import platform
 import subprocess
@@ -249,9 +251,12 @@ def run_one(args) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--N", type=int, nargs="+", default=[64, 128])
-    parser.add_argument("--ranks", type=int, nargs="+", default=[2, 8, 16, 32, 43])
-    parser.add_argument("--methods", nargs="+", default=["full", "dlra", "bug"])
+    parser.add_argument("--N", type=int, nargs="+", action=ListOnce,
+                        default=[64, 128])
+    parser.add_argument("--ranks", type=int, nargs="+", action=ListOnce,
+                        default=[2, 8, 16, 32, 43])
+    parser.add_argument("--methods", nargs="+", action=ListOnce,
+                        default=["full", "dlra", "bug"])
     parser.add_argument("--steps", type=int, default=400)
     parser.add_argument(
         "--noise-repeats", type=int, default=8,
