@@ -864,6 +864,81 @@ def test_crossover_horizon_detects_a_downward_crossing():
         )
 
 
+def test_the_recorded_energy_residual_is_the_full_pde_balance():
+    """The projection-aware residual and the PDE residual are different numbers.
+
+    D70: the artifact's residual key was named for the energy balance but held
+    the *projection-aware* balance, so a writer taking it for the PDE balance
+    understated a projected method's violation by the size of the projection's
+    energy increment -- a factor of hundreds in the committed suite.  The two
+    are only interchangeable when there is no projection, and this pins both
+    halves of that: they coincide for a full-grid run, and they separate when a
+    projection does work.
+    """
+    from run_kolmogorov import _energy_residual
+
+    grid = Grid2D(24)
+    nu = 1 / 1000
+    forcing = KolmogorovForcing(0.5, 1.0)
+    model = StreamFunctionNS(grid, nu, forcing=forcing, dealias=True)
+    initial = field(grid, "mixed")
+    initial = initial - initial.mean()
+    dt = 0.002
+
+    # 1. A full-grid step has no projection, so the two must be identical.
+    state = initial.copy()
+    pde = proj = 0.0
+    for _ in range(20):
+        old = state
+        state = model.step(old, dt, t=0.0)
+        pde = max(pde, _energy_residual(model, old, state, dt, 0.0, grid, 0.0))
+        proj = max(proj, _energy_residual(model, old, state, dt, 0.0, grid, 0.0))
+    assert pde == proj, (pde, proj)
+
+    # 2. A projection that does measurable work must separate them, and in the
+    #    only possible direction: the projection-aware residual is the smaller,
+    #    because the projection's energy increment is exactly the discrepancy
+    #    between the two.
+    from solvers.pod import PODGalerkin
+    # Diagnostics must be on: the projection's energy increment is only
+    # accumulated when ``track_step_diagnostics`` is set, so a run that forgets
+    # it gets a silent zero and reports the PDE residual under the
+    # projection-aware name -- the D70 trap in code rather than in a key.
+    tracked = StreamFunctionNS(grid, nu, forcing=forcing, dealias=True)
+    tracked.track_step_diagnostics = True
+    X, Y = np.meshgrid(grid.x, grid.y, indexing="ij")
+    snapshots = np.stack([
+        np.sin(X) * np.sin(Y),
+        np.cos(2 * X) * np.sin(Y),
+        np.sin(X) * np.cos(2 * Y),
+    ])
+    snapshots = snapshots - snapshots.mean(axis=(1, 2), keepdims=True)
+    pod = PODGalerkin(grid, rank=2).fit(snapshots)
+    state = pod.project(field(grid, "mixed"))
+    pde = proj = 0.0
+    increments = []
+    for _ in range(20):
+        old = state
+        state = tracked.step(old, dt, t=0.0, projector=pod.project)
+        increment = float(
+            tracked.last_step_info.get("projection_energy_increment", 0.0)
+        )
+        increments.append(increment)
+        pde = max(pde, _energy_residual(tracked, old, state, dt, 0.0, grid, 0.0))
+        proj = max(
+            proj, _energy_residual(tracked, old, state, dt, 0.0, grid, increment)
+        )
+    assert max(abs(i) for i in increments) > 0.0, (
+        "the projection did no measurable work, so this test cannot separate "
+        "the two residuals; check track_step_diagnostics is enabled"
+    )
+    assert proj < pde, (
+        f"projection-aware residual {proj:.3e} is not below the PDE residual "
+        f"{pde:.3e}; the difference between them is the projection's energy "
+        f"increment, so the ordering is not a matter of taste"
+    )
+
+
 def test_baseline_rollouts_run_to_completion():
     """The baseline rollouts must actually run, not just import.
 

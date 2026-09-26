@@ -4,41 +4,53 @@
       "N": 64,
       "dealias_rank_ceiling": 43,
       "dlra": {
-        "final_energy": 20.25599184850741,
+        "energy_residual_semantics": {
+          "max_scaled_pde_energy_residual": "the same balance with NO projection term: how far the numerical state departs from the full PDE's own energy balance. A projected method violates this by construction, and the violation is the price of the projection, not an integration error.",
+          "max_scaled_projected_energy_residual": "the kinetic-energy balance residual of the *projected* discrete dynamics: the projection's measured energy increment is subtracted first, so this is the balance the reduced integrator actually satisfies. For a full-grid run it coincides with the PDE residual, because there is no projection.",
+          "scale": "each is divided by max(1, |dissipation|, |forcing input|) evaluated at the step, so it is a relative residual and the scale varies during a run",
+          "which_to_quote": "quote max_scaled_projected_energy_residual for 'does the reduced solver conserve energy', and max_scaled_pde_energy_residual for how much the projection costs. Do not quote one for the other."
+        },
+        "final_energy": 20.25599184850761,
         "initial_projection_relative_l2": null,
-        "linear_algebra_calls": null,
-        "linear_algebra_seconds_per_step": null,
-        "max_abs_divergence": 2.883377641616201e-14,
+        "linear_algebra_calls": 841,
+        "linear_algebra_seconds_per_step": 0.0030248155747540297,
+        "max_abs_divergence": 2.4868995751603507e-14,
         "max_relative_energy": 1.0,
-        "max_scaled_energy_balance_residual": 0.0005487125766839404,
-        "max_scaled_full_pde_energy_residual": 0.0004932977827017061,
-        "max_trajectory_divergence": 9.80284293900103e-05,
+        "max_scaled_pde_energy_residual": 0.0004932977786977058,
+        "max_scaled_projected_energy_residual": 0.0005487125745451668,
+        "max_trajectory_divergence": 9.802842939006096e-05,
         "rank_final": 43,
         "rank_max": 43,
         "rank_min": 17,
         "stable": true,
-        "wall_seconds_per_step": 0.008409237085143104
+        "wall_seconds_per_step": 0.011694922109600157
       },
       "dt": 0.0005,
       "file": "kolmogorov_re100_N64.json",
       "final_time": 0.1,
       "full": {
-        "final_energy": 20.256000638624897,
+        "energy_residual_semantics": {
+          "max_scaled_pde_energy_residual": "the same balance with NO projection term: how far the numerical state departs from the full PDE's own energy balance. A projected method violates this by construction, and the violation is the price of the projection, not an integration error.",
+          "max_scaled_projected_energy_residual": "the kinetic-energy balance residual of the *projected* discrete dynamics: the projection's measured energy increment is subtracted first, so this is the balance the reduced integrator actually satisfies. For a full-grid run it coincides with the PDE residual, because there is no projection.",
+          "scale": "each is divided by max(1, |dissipation|, |forcing input|) evaluated at the step, so it is a relative residual and the scale varies during a run",
+          "which_to_quote": "quote max_scaled_projected_energy_residual for 'does the reduced solver conserve energy', and max_scaled_pde_energy_residual for how much the projection costs. Do not quote one for the other."
+        },
+        "final_energy": 20.256000638624936,
         "initial_projection_relative_l2": null,
         "linear_algebra_calls": null,
         "linear_algebra_seconds_per_step": null,
-        "max_abs_divergence": 2.3199077980092357e-14,
+        "max_abs_divergence": 2.5757174171303632e-14,
         "max_relative_energy": 1.0,
-        "max_scaled_energy_balance_residual": 0.00046403599175971554,
-        "max_scaled_full_pde_energy_residual": 0.00046403599175971554,
+        "max_scaled_pde_energy_residual": 0.00046403599144866737,
+        "max_scaled_projected_energy_residual": 0.00046403599144866737,
         "max_trajectory_divergence": null,
         "rank_final": null,
         "rank_max": null,
         "rank_min": null,
         "stable": true,
-        "wall_seconds_per_step": 0.0031820072105620055
+        "wall_seconds_per_step": 0.005188833669526502
       },
-      "git_commit": "78607f3aa9c34987536823afca2eeb02702d4edc",
+      "git_commit": "7825a3be2b5a2e85a00f02ed98cc6a96788fe666",
       "ic_reference_N": null,
       "initial_energy": 22.206703312933374,
       "initial_state": {
@@ -52,20 +64,26 @@
         ]
       },
       "pod": {
-        "final_energy": 20.25600201367263,
-        "initial_projection_relative_l2": 1.8474839285874007e-17,
+        "energy_residual_semantics": {
+          "max_scaled_pde_energy_residual": "the same balance with NO projection term: how far the numerical state departs from the full PDE's own energy balance. A projected method violates this by construction, and the violation is the price of the projection, not an integration error.",
+          "max_scaled_projected_energy_residual": "the kinetic-energy balance residual of the *projected* discrete dynamics: the projection's measured energy increment is subtracted first, so this is the balance the reduced integrator actually satisfies. For a full-grid run it coincides with the PDE residual, because there is no projection.",
+          "scale": "each is divided by max(1, |dissipation|, |forcing input|) evaluated at the step, so it is a relative residual and the scale varies during a run",
+          "which_to_quote": "quote max_scaled_projected_energy_residual for 'does the reduced solver conserve energy', and max_scaled_pde_energy_residual for how much the projection costs. Do not quote one for the other."
+        },
+        "final_energy": 20.25600167578459,
+        "initial_projection_relative_l2": 1.69984105929716e-17,
         "linear_algebra_calls": null,
         "linear_algebra_seconds_per_step": null,
-        "max_abs_divergence": 2.7562041084034295e-14,
+        "max_abs_divergence": 2.4868995751603507e-14,
         "max_relative_energy": 1.0,
-        "max_scaled_energy_balance_residual": 0.31104337212089517,
-        "max_scaled_full_pde_energy_residual": 0.0004692631299098813,
-        "max_trajectory_divergence": 1.0777918080182383e-06,
+        "max_scaled_pde_energy_residual": 0.0004694450679090399,
+        "max_scaled_projected_energy_residual": 0.3089046730817618,
+        "max_trajectory_divergence": 1.0381974333363968e-06,
         "rank_final": 16,
         "rank_max": 16,
         "rank_min": 16,
         "stable": true,
-        "wall_seconds_per_step": 0.004759804180357605
+        "wall_seconds_per_step": 0.0070126833696849645
       },
       "pod_requested_rank": 16,
       "rank_mismatch": {
@@ -80,41 +98,53 @@
       "N": 64,
       "dealias_rank_ceiling": 43,
       "dlra": {
-        "final_energy": 22.459561513502102,
+        "energy_residual_semantics": {
+          "max_scaled_pde_energy_residual": "the same balance with NO projection term: how far the numerical state departs from the full PDE's own energy balance. A projected method violates this by construction, and the violation is the price of the projection, not an integration error.",
+          "max_scaled_projected_energy_residual": "the kinetic-energy balance residual of the *projected* discrete dynamics: the projection's measured energy increment is subtracted first, so this is the balance the reduced integrator actually satisfies. For a full-grid run it coincides with the PDE residual, because there is no projection.",
+          "scale": "each is divided by max(1, |dissipation|, |forcing input|) evaluated at the step, so it is a relative residual and the scale varies during a run",
+          "which_to_quote": "quote max_scaled_projected_energy_residual for 'does the reduced solver conserve energy', and max_scaled_pde_energy_residual for how much the projection costs. Do not quote one for the other."
+        },
+        "final_energy": 22.45956151350207,
         "initial_projection_relative_l2": null,
-        "linear_algebra_calls": null,
-        "linear_algebra_seconds_per_step": null,
-        "max_abs_divergence": 2.5169746091575313e-14,
-        "max_relative_energy": 1.0113865708477965,
-        "max_scaled_energy_balance_residual": 0.0007903269568767397,
-        "max_scaled_full_pde_energy_residual": 0.0004896931506859951,
-        "max_trajectory_divergence": 9.996097701099444e-05,
+        "linear_algebra_calls": 841,
+        "linear_algebra_seconds_per_step": 0.0025122368114534766,
+        "max_abs_divergence": 2.5757174171303632e-14,
+        "max_relative_energy": 1.0113865708477952,
+        "max_scaled_pde_energy_residual": 0.0004896931406322086,
+        "max_scaled_projected_energy_residual": 0.0007903269525705709,
+        "max_trajectory_divergence": 9.996097701095017e-05,
         "rank_final": 43,
         "rank_max": 43,
         "rank_min": 17,
         "stable": true,
-        "wall_seconds_per_step": 0.008428035965189339
+        "wall_seconds_per_step": 0.010157084123929962
       },
       "dt": 0.0005,
       "file": "kolmogorov_re1000_N64.json",
       "final_time": 0.1,
       "full": {
-        "final_energy": 22.459561539119793,
+        "energy_residual_semantics": {
+          "max_scaled_pde_energy_residual": "the same balance with NO projection term: how far the numerical state departs from the full PDE's own energy balance. A projected method violates this by construction, and the violation is the price of the projection, not an integration error.",
+          "max_scaled_projected_energy_residual": "the kinetic-energy balance residual of the *projected* discrete dynamics: the projection's measured energy increment is subtracted first, so this is the balance the reduced integrator actually satisfies. For a full-grid run it coincides with the PDE residual, because there is no projection.",
+          "scale": "each is divided by max(1, |dissipation|, |forcing input|) evaluated at the step, so it is a relative residual and the scale varies during a run",
+          "which_to_quote": "quote max_scaled_projected_energy_residual for 'does the reduced solver conserve energy', and max_scaled_pde_energy_residual for how much the projection costs. Do not quote one for the other."
+        },
+        "final_energy": 22.4595615391198,
         "initial_projection_relative_l2": null,
         "linear_algebra_calls": null,
         "linear_algebra_seconds_per_step": null,
-        "max_abs_divergence": 2.6781528840916117e-14,
-        "max_relative_energy": 1.0113865720013988,
-        "max_scaled_energy_balance_residual": 0.00027950146694752853,
-        "max_scaled_full_pde_energy_residual": 0.00027950146694752853,
+        "max_abs_divergence": 2.6645352591003757e-14,
+        "max_relative_energy": 1.0113865720013993,
+        "max_scaled_pde_energy_residual": 0.00027950146694525257,
+        "max_scaled_projected_energy_residual": 0.00027950146694525257,
         "max_trajectory_divergence": null,
         "rank_final": null,
         "rank_max": null,
         "rank_min": null,
         "stable": true,
-        "wall_seconds_per_step": 0.00202747359406203
+        "wall_seconds_per_step": 0.003226852050283924
       },
-      "git_commit": "78607f3aa9c34987536823afca2eeb02702d4edc",
+      "git_commit": "7825a3be2b5a2e85a00f02ed98cc6a96788fe666",
       "ic_reference_N": null,
       "initial_energy": 22.206703312933374,
       "initial_state": {
@@ -128,20 +158,26 @@
         ]
       },
       "pod": {
-        "final_energy": 22.459561634540286,
-        "initial_projection_relative_l2": 1.683283514606757e-17,
+        "energy_residual_semantics": {
+          "max_scaled_pde_energy_residual": "the same balance with NO projection term: how far the numerical state departs from the full PDE's own energy balance. A projected method violates this by construction, and the violation is the price of the projection, not an integration error.",
+          "max_scaled_projected_energy_residual": "the kinetic-energy balance residual of the *projected* discrete dynamics: the projection's measured energy increment is subtracted first, so this is the balance the reduced integrator actually satisfies. For a full-grid run it coincides with the PDE residual, because there is no projection.",
+          "scale": "each is divided by max(1, |dissipation|, |forcing input|) evaluated at the step, so it is a relative residual and the scale varies during a run",
+          "which_to_quote": "quote max_scaled_projected_energy_residual for 'does the reduced solver conserve energy', and max_scaled_pde_energy_residual for how much the projection costs. Do not quote one for the other."
+        },
+        "final_energy": 22.459561625720433,
+        "initial_projection_relative_l2": 2.0295065155556797e-17,
         "linear_algebra_calls": null,
         "linear_algebra_seconds_per_step": null,
-        "max_abs_divergence": 2.810875049375177e-14,
-        "max_relative_energy": 1.0113865762983218,
-        "max_scaled_energy_balance_residual": 0.1662890859118083,
-        "max_scaled_full_pde_energy_residual": 0.00027957229666685174,
-        "max_trajectory_divergence": 1.1320778814316169e-08,
+        "max_abs_divergence": 2.6645352591003757e-14,
+        "max_relative_energy": 1.011386575901151,
+        "max_scaled_pde_energy_residual": 0.0002795374037463966,
+        "max_scaled_projected_energy_residual": 0.16582158132357053,
+        "max_trajectory_divergence": 1.2107920225370606e-08,
         "rank_final": 16,
         "rank_max": 16,
         "rank_min": 16,
         "stable": true,
-        "wall_seconds_per_step": 0.0031266436248552055
+        "wall_seconds_per_step": 0.004619770819554106
       },
       "pod_requested_rank": 16,
       "rank_mismatch": {
@@ -156,41 +192,53 @@
       "N": 64,
       "dealias_rank_ceiling": 43,
       "dlra": {
-        "final_energy": 22.6715534590698,
+        "energy_residual_semantics": {
+          "max_scaled_pde_energy_residual": "the same balance with NO projection term: how far the numerical state departs from the full PDE's own energy balance. A projected method violates this by construction, and the violation is the price of the projection, not an integration error.",
+          "max_scaled_projected_energy_residual": "the kinetic-energy balance residual of the *projected* discrete dynamics: the projection's measured energy increment is subtracted first, so this is the balance the reduced integrator actually satisfies. For a full-grid run it coincides with the PDE residual, because there is no projection.",
+          "scale": "each is divided by max(1, |dissipation|, |forcing input|) evaluated at the step, so it is a relative residual and the scale varies during a run",
+          "which_to_quote": "quote max_scaled_projected_energy_residual for 'does the reduced solver conserve energy', and max_scaled_pde_energy_residual for how much the projection costs. Do not quote one for the other."
+        },
+        "final_energy": 22.67155345907041,
         "initial_projection_relative_l2": null,
-        "linear_algebra_calls": null,
-        "linear_algebra_seconds_per_step": null,
-        "max_abs_divergence": 2.468868399113717e-14,
-        "max_relative_energy": 1.020932875068659,
-        "max_scaled_energy_balance_residual": 0.0007700257924652773,
-        "max_scaled_full_pde_energy_residual": 0.0004692313806730548,
-        "max_trajectory_divergence": 0.00010108416677905397,
+        "linear_algebra_calls": 841,
+        "linear_algebra_seconds_per_step": 0.002338467929512262,
+        "max_abs_divergence": 2.6645352591003757e-14,
+        "max_relative_energy": 1.0209328750686866,
+        "max_scaled_pde_energy_residual": 0.00046923135768045965,
+        "max_scaled_projected_energy_residual": 0.0007700258068321355,
+        "max_trajectory_divergence": 0.00010108416677874297,
         "rank_final": 43,
         "rank_max": 43,
         "rank_min": 17,
         "stable": true,
-        "wall_seconds_per_step": 0.007655465480638668
+        "wall_seconds_per_step": 0.009911806674208492
       },
       "dt": 0.0005,
       "file": "kolmogorov_re5000_N64.json",
       "final_time": 0.1,
       "full": {
-        "final_energy": 22.671553322545982,
+        "energy_residual_semantics": {
+          "max_scaled_pde_energy_residual": "the same balance with NO projection term: how far the numerical state departs from the full PDE's own energy balance. A projected method violates this by construction, and the violation is the price of the projection, not an integration error.",
+          "max_scaled_projected_energy_residual": "the kinetic-energy balance residual of the *projected* discrete dynamics: the projection's measured energy increment is subtracted first, so this is the balance the reduced integrator actually satisfies. For a full-grid run it coincides with the PDE residual, because there is no projection.",
+          "scale": "each is divided by max(1, |dissipation|, |forcing input|) evaluated at the step, so it is a relative residual and the scale varies during a run",
+          "which_to_quote": "quote max_scaled_projected_energy_residual for 'does the reduced solver conserve energy', and max_scaled_pde_energy_residual for how much the projection costs. Do not quote one for the other."
+        },
+        "final_energy": 22.671553322545964,
         "initial_projection_relative_l2": null,
         "linear_algebra_calls": null,
         "linear_algebra_seconds_per_step": null,
-        "max_abs_divergence": 2.680700189994799e-14,
-        "max_relative_energy": 1.0209328689207946,
-        "max_scaled_energy_balance_residual": 0.00025885138557000837,
-        "max_scaled_full_pde_energy_residual": 0.00025885138557000837,
+        "max_abs_divergence": 2.4868995751603507e-14,
+        "max_relative_energy": 1.0209328689207937,
+        "max_scaled_pde_energy_residual": 0.00025885138556773246,
+        "max_scaled_projected_energy_residual": 0.00025885138556773246,
         "max_trajectory_divergence": null,
         "rank_final": null,
         "rank_max": null,
         "rank_min": null,
         "stable": true,
-        "wall_seconds_per_step": 0.001957046689931303
+        "wall_seconds_per_step": 0.0031670412351377307
       },
-      "git_commit": "78607f3aa9c34987536823afca2eeb02702d4edc",
+      "git_commit": "7825a3be2b5a2e85a00f02ed98cc6a96788fe666",
       "ic_reference_N": null,
       "initial_energy": 22.206703312933374,
       "initial_state": {
@@ -204,20 +252,26 @@
         ]
       },
       "pod": {
-        "final_energy": 22.671553333799896,
-        "initial_projection_relative_l2": 1.843071988360275e-17,
+        "energy_residual_semantics": {
+          "max_scaled_pde_energy_residual": "the same balance with NO projection term: how far the numerical state departs from the full PDE's own energy balance. A projected method violates this by construction, and the violation is the price of the projection, not an integration error.",
+          "max_scaled_projected_energy_residual": "the kinetic-energy balance residual of the *projected* discrete dynamics: the projection's measured energy increment is subtracted first, so this is the balance the reduced integrator actually satisfies. For a full-grid run it coincides with the PDE residual, because there is no projection.",
+          "scale": "each is divided by max(1, |dissipation|, |forcing input|) evaluated at the step, so it is a relative residual and the scale varies during a run",
+          "which_to_quote": "quote max_scaled_projected_energy_residual for 'does the reduced solver conserve energy', and max_scaled_pde_energy_residual for how much the projection costs. Do not quote one for the other."
+        },
+        "final_energy": 22.671553356880874,
+        "initial_projection_relative_l2": 3.547996800191442e-17,
         "linear_algebra_calls": null,
         "linear_algebra_seconds_per_step": null,
-        "max_abs_divergence": 2.4593693982977937e-14,
-        "max_relative_energy": 1.0209328694275746,
-        "max_scaled_energy_balance_residual": 0.03331987774005639,
-        "max_scaled_full_pde_energy_residual": 0.00025882150758633544,
-        "max_trajectory_divergence": 1.000255478355073e-08,
+        "max_abs_divergence": 2.4868995751603507e-14,
+        "max_relative_energy": 1.0209328704669445,
+        "max_scaled_pde_energy_residual": 0.00025882197697179064,
+        "max_scaled_projected_energy_residual": 0.033448867445314806,
+        "max_trajectory_divergence": 9.927879871812374e-09,
         "rank_final": 16,
         "rank_max": 16,
         "rank_min": 16,
         "stable": true,
-        "wall_seconds_per_step": 0.00320937109994702
+        "wall_seconds_per_step": 0.0045417480543255805
       },
       "pod_requested_rank": 16,
       "rank_mismatch": {
@@ -232,41 +286,41 @@
   "cost_note": "Per-step cost is reported under two accountings and no per-step speedup is claimed: the reduced method pays the same full-grid nonlinear evaluation as the reference plus its own whole-field SVD, which is Theta(N^3) and rank-independent (D11.1). Threads are pinned and recorded, a warm-up is discarded, and the median of 7 repeats over 2000 steps is reported with its min/max spread. Two caveats on the numbers themselves: the node is shared, so the spread is the honest uncertainty and the minimum is the least-contended estimate; and the reference block and the reduced blocks are timed sequentially rather than interleaved, so a load drift between them would bias the ratio by no more than the reported spreads.",
   "cost_retiming": {
     "file": "cost_retiming.json",
-    "git_commit": "1eb04326fcf72f66475c5d331e9cc75c9f69219a",
+    "git_commit": "41642ba7d82aee3ff21b6b3a34b826170bc849eb",
     "grids": [
       {
         "N": 64,
-        "reference_relative_spread": 0.3587206163262225,
-        "reference_seconds_per_step": 0.0012389647535746917,
+        "reference_relative_spread": 0.3191139466051705,
+        "reference_seconds_per_step": 0.0012175731650786474,
         "repeats": 7,
         "rows": [
           {
-            "amplitude_1e_3_seconds_median": 5.316459698951803,
-            "amplitude_cost_ratio": 0.9694630559977441,
-            "full_step_ratio_vs_reference": 2.0800072205298386,
-            "full_step_relative_spread": 0.19959743898743387,
-            "full_step_seconds_max": 6.006375375203788,
-            "full_step_seconds_median": 5.154111266834661,
-            "full_step_seconds_min": 4.9776279660873115,
-            "full_step_seconds_per_step": 0.0025770556334173307,
-            "linear_algebra_ratio_vs_reference": 0.6945922878953469,
-            "linear_algebra_seconds_median": 1.7211507256142795,
-            "linear_algebra_seconds_per_step": 0.0008605753628071397,
+            "amplitude_1e_3_seconds_median": 5.080151480506174,
+            "amplitude_cost_ratio": 1.0726530253760749,
+            "full_step_ratio_vs_reference": 2.237746367620425,
+            "full_step_relative_spread": 0.08687985010796495,
+            "full_step_seconds_max": 5.515849001938477,
+            "full_step_seconds_median": 5.449239854933694,
+            "full_step_seconds_min": 5.042419860139489,
+            "full_step_seconds_per_step": 0.002724619927466847,
+            "linear_algebra_ratio_vs_reference": 0.7289693115219062,
+            "linear_algebra_seconds_median": 1.77514694374986,
+            "linear_algebra_seconds_per_step": 0.00088757347187493,
             "rank": 2,
             "svd_calls_per_step": 4.005
           },
           {
-            "amplitude_1e_3_seconds_median": 5.617661667522043,
-            "amplitude_cost_ratio": 1.0702174859974734,
-            "full_step_ratio_vs_reference": 2.426267466307455,
-            "full_step_relative_spread": 0.1583346223811133,
-            "full_step_seconds_max": 6.6854117040056735,
-            "full_step_seconds_median": 6.012119746999815,
-            "full_step_seconds_min": 5.7334849941544235,
-            "full_step_seconds_per_step": 0.0030060598734999075,
-            "linear_algebra_ratio_vs_reference": 0.9938827901302607,
-            "linear_algebra_seconds_median": 2.462771492311731,
-            "linear_algebra_seconds_per_step": 0.0012313857461558656,
+            "amplitude_1e_3_seconds_median": 5.957125849556178,
+            "amplitude_cost_ratio": 1.0137361440102475,
+            "full_step_ratio_vs_reference": 2.4799141280855888,
+            "full_step_relative_spread": 0.26448759964656327,
+            "full_step_seconds_max": 7.419656705809757,
+            "full_step_seconds_median": 6.038953788112849,
+            "full_step_seconds_min": 5.822428314015269,
+            "full_step_seconds_per_step": 0.0030194768940564245,
+            "linear_algebra_ratio_vs_reference": 1.0119830341018965,
+            "linear_algebra_seconds_median": 2.4643267716746777,
+            "linear_algebra_seconds_per_step": 0.001232163385837339,
             "rank": 64,
             "svd_calls_per_step": 4.005
           }
@@ -275,37 +329,37 @@
       },
       {
         "N": 128,
-        "reference_relative_spread": 0.28361014602979095,
-        "reference_seconds_per_step": 0.004535299628507346,
+        "reference_relative_spread": 0.3011629478427993,
+        "reference_seconds_per_step": 0.0045581317235482855,
         "repeats": 7,
         "rows": [
           {
-            "amplitude_1e_3_seconds_median": 23.063446336891502,
-            "amplitude_cost_ratio": 1.0077347414830709,
-            "full_step_ratio_vs_reference": 2.5623264211614356,
-            "full_step_relative_spread": 0.14446124285693984,
-            "full_step_seconds_max": 25.664369808975607,
-            "full_step_seconds_median": 23.241836132016033,
-            "full_step_seconds_min": 22.30682527506724,
-            "full_step_seconds_per_step": 0.011620918066008016,
-            "linear_algebra_ratio_vs_reference": 1.2136811028717287,
-            "linear_algebra_seconds_median": 11.008814909961075,
-            "linear_algebra_seconds_per_step": 0.005504407454980537,
+            "amplitude_1e_3_seconds_median": 22.715085554053076,
+            "amplitude_cost_ratio": 1.0279492337140852,
+            "full_step_ratio_vs_reference": 2.5613514708677543,
+            "full_step_relative_spread": 0.08020491940696439,
+            "full_step_seconds_max": 24.489591527031735,
+            "full_step_seconds_median": 23.349954789038748,
+            "full_step_seconds_min": 22.61681028502062,
+            "full_step_seconds_per_step": 0.011674977394519373,
+            "linear_algebra_ratio_vs_reference": 1.1998821695328257,
+            "linear_algebra_seconds_median": 10.93844196293503,
+            "linear_algebra_seconds_per_step": 0.005469220981467515,
             "rank": 2,
             "svd_calls_per_step": 4.005
           },
           {
-            "amplitude_1e_3_seconds_median": 24.71743654506281,
-            "amplitude_cost_ratio": 0.9943225272327573,
-            "full_step_ratio_vs_reference": 2.70953475903983,
-            "full_step_relative_spread": 0.06415999894019676,
-            "full_step_seconds_max": 25.769011043943465,
-            "full_step_seconds_median": 24.577103972202167,
-            "full_step_seconds_min": 24.192144079133868,
-            "full_step_seconds_per_step": 0.012288551986101083,
-            "linear_algebra_ratio_vs_reference": 1.3392991279118867,
-            "linear_algebra_seconds_median": 12.148245674557984,
-            "linear_algebra_seconds_per_step": 0.006074122837278992,
+            "amplitude_1e_3_seconds_median": 24.205055713071488,
+            "amplitude_cost_ratio": 1.0321323658214485,
+            "full_step_ratio_vs_reference": 2.7404672498718976,
+            "full_step_relative_spread": 0.1301565603678174,
+            "full_step_seconds_max": 25.55103010404855,
+            "full_step_seconds_median": 24.982821417972445,
+            "full_step_seconds_min": 22.299352000001818,
+            "full_step_seconds_per_step": 0.012491410708986224,
+            "linear_algebra_ratio_vs_reference": 1.3407318352700657,
+            "linear_algebra_seconds_median": 12.2224646222312,
+            "linear_algebra_seconds_per_step": 0.006111232311115601,
             "rank": 64,
             "svd_calls_per_step": 4.005
           }
@@ -314,37 +368,37 @@
       },
       {
         "N": 256,
-        "reference_relative_spread": 0.05983232771116042,
-        "reference_seconds_per_step": 0.023848031917470508,
+        "reference_relative_spread": 0.16347086355189228,
+        "reference_seconds_per_step": 0.023058864605496637,
         "repeats": 7,
         "rows": [
           {
-            "amplitude_1e_3_seconds_median": 108.18193090043496,
-            "amplitude_cost_ratio": 0.9877608721406962,
-            "full_step_ratio_vs_reference": 2.2403919699930586,
-            "full_step_relative_spread": 0.09889622481502433,
-            "full_step_seconds_max": 112.91972373309545,
-            "full_step_seconds_median": 106.85787841607817,
-            "full_step_seconds_min": 102.35188296600245,
-            "full_step_seconds_per_step": 0.05342893920803908,
-            "linear_algebra_ratio_vs_reference": 1.214648131579673,
-            "linear_algebra_seconds_median": 57.93393482081592,
-            "linear_algebra_seconds_per_step": 0.02896696741040796,
+            "amplitude_1e_3_seconds_median": 104.50131225155201,
+            "amplitude_cost_ratio": 1.0180002419677765,
+            "full_step_ratio_vs_reference": 2.3067562730879496,
+            "full_step_relative_spread": 0.1693380572408016,
+            "full_step_seconds_max": 110.42861822200939,
+            "full_step_seconds_median": 106.38236115803011,
+            "full_step_seconds_min": 92.41403585881926,
+            "full_step_seconds_per_step": 0.053191180579015056,
+            "linear_algebra_ratio_vs_reference": 1.236030419763361,
+            "linear_algebra_seconds_median": 57.00291619519703,
+            "linear_algebra_seconds_per_step": 0.028501458097598516,
             "rank": 2,
             "svd_calls_per_step": 4.005
           },
           {
-            "amplitude_1e_3_seconds_median": 109.9160808500601,
-            "amplitude_cost_ratio": 1.001661613994277,
-            "full_step_ratio_vs_reference": 2.308339726506758,
-            "full_step_relative_spread": 0.03821735468000016,
-            "full_step_seconds_max": 111.33744149794802,
-            "full_step_seconds_median": 110.09871894819662,
-            "full_step_seconds_min": 107.12975970609114,
-            "full_step_seconds_per_step": 0.05504935947409831,
-            "linear_algebra_ratio_vs_reference": 1.227335599942737,
-            "linear_algebra_seconds_median": 58.53907712176442,
-            "linear_algebra_seconds_per_step": 0.02926953856088221,
+            "amplitude_1e_3_seconds_median": 106.94813480158336,
+            "amplitude_cost_ratio": 1.011713781289799,
+            "full_step_ratio_vs_reference": 2.3461888456600057,
+            "full_step_relative_spread": 0.11863258114374867,
+            "full_step_seconds_max": 109.1614037710242,
+            "full_step_seconds_median": 108.20090186200105,
+            "full_step_seconds_min": 96.32525150105357,
+            "full_step_seconds_per_step": 0.05410045093100052,
+            "linear_algebra_ratio_vs_reference": 1.2587206148735586,
+            "linear_algebra_seconds_median": 58.04933646903373,
+            "linear_algebra_seconds_per_step": 0.029024668234516868,
             "rank": 64,
             "svd_calls_per_step": 4.005
           }
@@ -355,8 +409,8 @@
     "rank_independence": [
       {
         "N": 64,
-        "full_step_ratio_hi_over_lo": 1.1664706941206742,
-        "linear_algebra_ratio_hi_over_lo": 1.4308865898033227,
+        "full_step_ratio_hi_over_lo": 1.1082194854471736,
+        "linear_algebra_ratio_hi_over_lo": 1.3882381852112924,
         "ranks_compared": [
           2,
           64
@@ -365,8 +419,8 @@
       },
       {
         "N": 128,
-        "full_step_ratio_hi_over_lo": 1.0574510478690957,
-        "linear_algebra_ratio_hi_over_lo": 1.1035016733332415,
+        "full_step_ratio_hi_over_lo": 1.0699301837492303,
+        "linear_algebra_ratio_hi_over_lo": 1.1173862478447194,
         "ranks_compared": [
           2,
           64
@@ -375,8 +429,8 @@
       },
       {
         "N": 256,
-        "full_step_ratio_hi_over_lo": 1.0303285127887287,
-        "linear_algebra_ratio_hi_over_lo": 1.010445385814379,
+        "full_step_ratio_hi_over_lo": 1.0170943818521712,
+        "linear_algebra_ratio_hi_over_lo": 1.0183573112339273,
         "ranks_compared": [
           2,
           64
@@ -386,7 +440,7 @@
     ],
     "thread_settings": {
       "MKL_NUM_THREADS": "1",
-      "NUMEXPR_NUM_THREADS": null,
+      "NUMEXPR_NUM_THREADS": "1",
       "OMP_NUM_THREADS": "1",
       "OPENBLAS_NUM_THREADS": "1",
       "VECLIB_MAXIMUM_THREADS": null
@@ -7281,7 +7335,7 @@
     },
     "file": "crossover_surface.json",
     "force_amplitude": 0.2,
-    "git_commit": "5909af66059168c28e4216ac8aecec893bfa93c4",
+    "git_commit": "896b3bfb1ef49ff1a9ebea8f0c3802e9e0ad0182",
     "horizons": [
       0.1,
       0.25,
@@ -7324,64 +7378,82 @@
   },
   "forcing_name_caveat": "The driver calls this a Kolmogorov flow, but the forcing is a periodic unidirectional shear f = (A sin(k y), 0), not the Arnold-Korkin-Sinitsyn cellular pump. CHECKLIST 1.3 asks that the forcing match what the name claims; the naming decision belongs to the reviewer and writer, and no result is affected by it because the forcing is recorded in every artifact's parameters.",
   "generated_by": "experiments/make_summary.py",
-  "git_commit": "1eb04326fcf72f66475c5d331e9cc75c9f69219a",
+  "git_commit": "7825a3be2b5a2e85a00f02ed98cc6a96788fe666",
   "grid_check": {
     "N": 128,
     "dlra": {
-      "final_energy": 22.671552147079137,
+      "energy_residual_semantics": {
+        "max_scaled_pde_energy_residual": "the same balance with NO projection term: how far the numerical state departs from the full PDE's own energy balance. A projected method violates this by construction, and the violation is the price of the projection, not an integration error.",
+        "max_scaled_projected_energy_residual": "the kinetic-energy balance residual of the *projected* discrete dynamics: the projection's measured energy increment is subtracted first, so this is the balance the reduced integrator actually satisfies. For a full-grid run it coincides with the PDE residual, because there is no projection.",
+        "scale": "each is divided by max(1, |dissipation|, |forcing input|) evaluated at the step, so it is a relative residual and the scale varies during a run",
+        "which_to_quote": "quote max_scaled_projected_energy_residual for 'does the reduced solver conserve energy', and max_scaled_pde_energy_residual for how much the projection costs. Do not quote one for the other."
+      },
+      "final_energy": 22.432965179105423,
       "initial_projection_relative_l2": null,
-      "linear_algebra_calls": null,
-      "linear_algebra_seconds_per_step": null,
-      "max_abs_divergence": 6.550208405013278e-14,
-      "max_relative_energy": 1.0209328159878206,
-      "max_scaled_energy_balance_residual": 0.0003351993919922295,
-      "max_scaled_full_pde_energy_residual": 0.0002144769155700095,
-      "max_trajectory_divergence": 4.6874068640007326e-05,
-      "rank_final": 48,
-      "rank_max": 48,
+      "linear_algebra_calls": 841,
+      "linear_algebra_seconds_per_step": 0.011508312980877235,
+      "max_abs_divergence": 6.750155989720952e-14,
+      "max_relative_energy": 1.010188899404995,
+      "max_scaled_pde_energy_residual": 0.00021447695584713626,
+      "max_scaled_projected_energy_residual": 0.00033519943514608827,
+      "max_trajectory_divergence": 4.6067480921986504e-05,
+      "rank_final": 70,
+      "rank_max": 70,
       "rank_min": 17,
       "stable": true,
-      "wall_seconds_per_step": 0.025822340842569246
+      "wall_seconds_per_step": 0.03320947149535641
     },
     "dt": 0.00025,
     "file": "kolmogorov_re5000_N128.json",
-    "final_time": 0.1,
+    "final_time": 0.05,
     "full": {
-      "final_energy": 22.671552121405043,
+      "energy_residual_semantics": {
+        "max_scaled_pde_energy_residual": "the same balance with NO projection term: how far the numerical state departs from the full PDE's own energy balance. A projected method violates this by construction, and the violation is the price of the projection, not an integration error.",
+        "max_scaled_projected_energy_residual": "the kinetic-energy balance residual of the *projected* discrete dynamics: the projection's measured energy increment is subtracted first, so this is the balance the reduced integrator actually satisfies. For a full-grid run it coincides with the PDE residual, because there is no projection.",
+        "scale": "each is divided by max(1, |dissipation|, |forcing input|) evaluated at the step, so it is a relative residual and the scale varies during a run",
+        "which_to_quote": "quote max_scaled_projected_energy_residual for 'does the reduced solver conserve energy', and max_scaled_pde_energy_residual for how much the projection costs. Do not quote one for the other."
+      },
+      "final_energy": 22.432965106190704,
       "initial_projection_relative_l2": null,
       "linear_algebra_calls": null,
       "linear_algebra_seconds_per_step": null,
-      "max_abs_divergence": 6.912194166500768e-14,
-      "max_relative_energy": 1.0209328148316794,
-      "max_scaled_energy_balance_residual": 0.00012867783923806202,
-      "max_scaled_full_pde_energy_residual": 0.00012867783923806202,
+      "max_abs_divergence": 6.217248937900877e-14,
+      "max_relative_energy": 1.01018889612154,
+      "max_scaled_pde_energy_residual": 0.00012867783923817304,
+      "max_scaled_projected_energy_residual": 0.00012867783923817304,
       "max_trajectory_divergence": null,
       "rank_final": null,
       "rank_max": null,
       "rank_min": null,
       "stable": true,
-      "wall_seconds_per_step": 0.008807677652221173
+      "wall_seconds_per_step": 0.0120417256699875
     },
-    "git_commit": "78607f3aa9c34987536823afca2eeb02702d4edc",
+    "git_commit": "7825a3be2b5a2e85a00f02ed98cc6a96788fe666",
     "ic_reference_N": 64,
     "initial_energy": 22.206703312933367,
     "initial_state_rank": 17,
     "note": "P0 item 3: dt is scaled with dx and the final time, IC spectral content and method settings are held fixed, so only N changes. ic_reference_N makes the perturbation the identical field sampled on the finer grid rather than a redraw. At this N the DLRA reaches the configured max_rank, not the dealias ceiling.",
     "pod": {
-      "final_energy": 22.671656246022057,
-      "initial_projection_relative_l2": 2.9205030170487496e-17,
+      "energy_residual_semantics": {
+        "max_scaled_pde_energy_residual": "the same balance with NO projection term: how far the numerical state departs from the full PDE's own energy balance. A projected method violates this by construction, and the violation is the price of the projection, not an integration error.",
+        "max_scaled_projected_energy_residual": "the kinetic-energy balance residual of the *projected* discrete dynamics: the projection's measured energy increment is subtracted first, so this is the balance the reduced integrator actually satisfies. For a full-grid run it coincides with the PDE residual, because there is no projection.",
+        "scale": "each is divided by max(1, |dissipation|, |forcing input|) evaluated at the step, so it is a relative residual and the scale varies during a run",
+        "which_to_quote": "quote max_scaled_projected_energy_residual for 'does the reduced solver conserve energy', and max_scaled_pde_energy_residual for how much the projection costs. Do not quote one for the other."
+      },
+      "final_energy": 22.43296512479575,
+      "initial_projection_relative_l2": 1.426704217286858e-17,
       "linear_algebra_calls": null,
       "linear_algebra_seconds_per_step": null,
-      "max_abs_divergence": 6.371780523620799e-14,
-      "max_relative_energy": 1.0209375037139303,
-      "max_scaled_energy_balance_residual": 0.03532306037194124,
-      "max_scaled_full_pde_energy_residual": 0.0021567159266253208,
-      "max_trajectory_divergence": 6.7211093754236915e-06,
+      "max_abs_divergence": 6.661338147750939e-14,
+      "max_relative_energy": 1.0101888969593522,
+      "max_scaled_pde_energy_residual": 0.0001286818419769284,
+      "max_scaled_projected_energy_residual": 0.035303848355700745,
+      "max_trajectory_divergence": 1.892981178595653e-09,
       "rank_final": 16,
       "rank_max": 16,
       "rank_min": 16,
       "stable": true,
-      "wall_seconds_per_step": 0.011054087457596324
+      "wall_seconds_per_step": 0.01641339097986929
     }
   },
   "honesty_note": "The static-POD baseline is now correct (its fit had reshaped the snapshot stack in C order, interleaving snapshots); every number here is post-fix. At T=0.1 the corrected static baseline is more accurate than adaptive DLRA, because its offline window is a prefix of the evaluated trajectory and is effectively rank 3, so no accuracy advantage is claimed for the proposed method at this horizon. Per D11.2 the regime is not turbulence and no turbulence statistic is drawn from t <= 0.1.",
@@ -7405,10 +7477,10 @@
   "peak_memory": {
     "file": "peak_memory.json",
     "full_grid_peak_mib": {
-      "N=128": 39.265625,
-      "N=64": 36.875
+      "N=128": 39.2890625,
+      "N=64": 37.01953125
     },
-    "git_commit": "ddc72073cdf844a1f7139ad174216cf2cc0cd1ec",
+    "git_commit": "896b3bfb1ef49ff1a9ebea8f0c3802e9e0ad0182",
     "grids": [
       64,
       128
@@ -7419,15 +7491,15 @@
       "dlra",
       "bug"
     ],
-    "noise_floor_mib": 0.1328125,
+    "noise_floor_mib": 0.09765625,
     "rank_scaling": [
       {
         "N": 64,
         "method": "dlra",
-        "noise_floor_mib": 0.1328125,
-        "overhead_vs_full_grid_mib": 2.5234375,
-        "peak_mib_max": 39.3984375,
-        "peak_mib_min": 39.10546875,
+        "noise_floor_mib": 0.09765625,
+        "overhead_vs_full_grid_mib": 2.37109375,
+        "peak_mib_max": 39.390625,
+        "peak_mib_min": 39.125,
         "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
         "rank_independence_resolved": true,
         "ranks": [
@@ -7437,15 +7509,15 @@
           32,
           43
         ],
-        "spread_over_rank_mib": 0.29296875
+        "spread_over_rank_mib": 0.265625
       },
       {
         "N": 64,
         "method": "bug",
-        "noise_floor_mib": 0.1328125,
-        "overhead_vs_full_grid_mib": 2.31640625,
-        "peak_mib_max": 39.19140625,
-        "peak_mib_min": 38.61328125,
+        "noise_floor_mib": 0.09765625,
+        "overhead_vs_full_grid_mib": 2.17578125,
+        "peak_mib_max": 39.1953125,
+        "peak_mib_min": 38.4609375,
         "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
         "rank_independence_resolved": true,
         "ranks": [
@@ -7455,17 +7527,17 @@
           32,
           43
         ],
-        "spread_over_rank_mib": 0.578125
+        "spread_over_rank_mib": 0.734375
       },
       {
         "N": 128,
         "method": "dlra",
-        "noise_floor_mib": 0.1328125,
-        "overhead_vs_full_grid_mib": 3.78515625,
-        "peak_mib_max": 43.05078125,
-        "peak_mib_min": 42.76171875,
+        "noise_floor_mib": 0.09765625,
+        "overhead_vs_full_grid_mib": 4.2109375,
+        "peak_mib_max": 43.5,
+        "peak_mib_min": 43.3125,
         "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
-        "rank_independence_resolved": true,
+        "rank_independence_resolved": false,
         "ranks": [
           2,
           8,
@@ -7473,15 +7545,15 @@
           32,
           43
         ],
-        "spread_over_rank_mib": 0.2890625
+        "spread_over_rank_mib": 0.1875
       },
       {
         "N": 128,
         "method": "bug",
-        "noise_floor_mib": 0.1328125,
-        "overhead_vs_full_grid_mib": 3.375,
-        "peak_mib_max": 42.640625,
-        "peak_mib_min": 41.109375,
+        "noise_floor_mib": 0.09765625,
+        "overhead_vs_full_grid_mib": 3.6328125,
+        "peak_mib_max": 42.921875,
+        "peak_mib_min": 41.01953125,
         "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
         "rank_independence_resolved": true,
         "ranks": [
@@ -7491,7 +7563,7 @@
           32,
           43
         ],
-        "spread_over_rank_mib": 1.53125
+        "spread_over_rank_mib": 1.90234375
       }
     ],
     "ranks": [
@@ -7507,7 +7579,7 @@
   "rank_matched_comparison": "CHECKLIST 1.0: the static-POD baseline is fixed-rank and the DLRA is adaptive, so the suite is not a rank-matched comparison. A matched-rank POD is F5 and is downstream of the regime decision.",
   "rank_threshold_sweep": {
     "file": "rank_growth_sweep.json",
-    "git_commit": "78607f3aa9c34987536823afca2eeb02702d4edc",
+    "git_commit": "7825a3be2b5a2e85a00f02ed98cc6a96788fe666",
     "parameters": {
       "base_speed": 0.5,
       "compare_stride": 20,
@@ -7521,6 +7593,7 @@
       "dt": 0.0005,
       "final_time": 0.1,
       "force_amplitude": 0.5,
+      "ic_reference_N": null,
       "nsteps": 200,
       "perturbation_velocity_rms": 1.0,
       "pod_fit_includes_ic": true,
@@ -7538,33 +7611,33 @@
     },
     "rows": [
       {
-        "max_relative_l2_vs_full": 0.0001723771741037479,
-        "max_scaled_invariant_residual": 0.0007700258082712,
+        "max_relative_l2_vs_full": 0.00017237717410484247,
+        "max_scaled_invariant_residual": 0.000770025818327352,
         "rank_final": 36,
         "rank_max": 36,
         "rank_min": 17,
         "relative_amplitude_cutoff": 1e-06,
-        "seconds_per_step": 0.007888318215264008,
+        "seconds_per_step": 0.009635197080206126,
         "stable": true
       },
       {
-        "max_relative_l2_vs_full": 0.00010107120885342302,
-        "max_scaled_invariant_residual": 0.0007700257924652773,
+        "max_relative_l2_vs_full": 0.00010107120885297804,
+        "max_scaled_invariant_residual": 0.0007700258082690377,
         "rank_final": 43,
         "rank_max": 43,
         "rank_min": 17,
         "relative_amplitude_cutoff": 1e-08,
-        "seconds_per_step": 0.007571065285010264,
+        "seconds_per_step": 0.01044434682931751,
         "stable": true
       },
       {
-        "max_relative_l2_vs_full": 0.00010108416677905397,
-        "max_scaled_invariant_residual": 0.0007700257924652773,
+        "max_relative_l2_vs_full": 0.00010108416677874297,
+        "max_scaled_invariant_residual": 0.0007700258068321355,
         "rank_final": 43,
         "rank_max": 43,
         "rank_min": 17,
         "relative_amplitude_cutoff": 1e-10,
-        "seconds_per_step": 0.007664874924812466,
+        "seconds_per_step": 0.00987230300437659,
         "stable": true
       }
     ]
