@@ -32,6 +32,7 @@ from solvers import (
     PODGalerkin,
     StreamFunctionNS,
 )
+from solvers.spectral import fluctuations  # psi' = psi - x-average(psi)
 
 
 def make_initial_state(
@@ -327,6 +328,8 @@ def _run_full(
     times = [0]
     spectra = {0: normalized_spectrum(state, spectrum_count)}
     energy_history = [grid.ke(state)]
+    fluctuation_energy_history = [grid.ke(fluctuations(state))]
+    fluctuation_enstrophy_history = [grid.enstrophy(fluctuations(state))]
     enstrophy_history = [grid.enstrophy(state)]
     max_div = grid.max_div_velocity(state)
     u0, v0 = grid.velocity(state)
@@ -345,6 +348,14 @@ def _run_full(
             break
         energy_history.append(grid.ke(state))
         enstrophy_history.append(grid.enstrophy(state))
+        # The statistics the paper reports are on psi' = psi - x-average(psi)
+        # (D11/S1), so the artifact must carry that series and not only the
+        # total: under forcing total KE rises for every method, so a figure of
+        # it distinguishes none of them, and the curve that actually decays is
+        # the one that would be erased.
+        psi = fluctuations(state)
+        fluctuation_energy_history.append(grid.ke(psi))
+        fluctuation_enstrophy_history.append(grid.enstrophy(psi))
         u_now, v_now = grid.velocity(state)
         max_cfl = max(max_cfl, float(np.max(np.hypot(u_now, v_now)) * dt / grid.dx))
         max_div = max(max_div, grid.max_div_velocity(state))
@@ -372,6 +383,8 @@ def _run_full(
         "singular_value_steps": times,
         "singular_values": [spectra[step] for step in times],
         "energy_history": energy_history,
+        "fluctuation_energy_history": fluctuation_energy_history,
+        "fluctuation_enstrophy_history": fluctuation_enstrophy_history,
         "enstrophy_history": enstrophy_history,
         "initial_energy": energy_history[0],
         "final_energy": energy_history[-1],
@@ -414,6 +427,8 @@ def _run_projected(
     checkpoints = {0: state.copy()}
     spectra = {0: normalized_spectrum(state, spectrum_count)}
     energy_history = [grid.ke(state)]
+    fluctuation_energy_history = [grid.ke(fluctuations(state))]
+    fluctuation_enstrophy_history = [grid.enstrophy(fluctuations(state))]
     enstrophy_history = [grid.enstrophy(state)]
     projection_energy_history = []
     errors = []
@@ -449,6 +464,14 @@ def _run_projected(
             break
         energy_history.append(grid.ke(state))
         enstrophy_history.append(grid.enstrophy(state))
+        # The statistics the paper reports are on psi' = psi - x-average(psi)
+        # (D11/S1), so the artifact must carry that series and not only the
+        # total: under forcing total KE rises for every method, so a figure of
+        # it distinguishes none of them, and the curve that actually decays is
+        # the one that would be erased.
+        psi = fluctuations(state)
+        fluctuation_energy_history.append(grid.ke(psi))
+        fluctuation_enstrophy_history.append(grid.enstrophy(psi))
         u_now, v_now = grid.velocity(state)
         max_cfl = max(max_cfl, float(np.max(np.hypot(u_now, v_now)) * dt / grid.dx))
         max_div = max(max_div, grid.max_div_velocity(state))
@@ -497,6 +520,8 @@ def _run_projected(
         "singular_value_steps": sorted(spectra),
         "singular_values": [spectra[step] for step in sorted(spectra)],
         "energy_history": energy_history,
+        "fluctuation_energy_history": fluctuation_energy_history,
+        "fluctuation_enstrophy_history": fluctuation_enstrophy_history,
         "enstrophy_history": enstrophy_history,
         "projection_energy_history": projection_energy_history,
         "initial_energy": energy_history[0],
@@ -697,6 +722,10 @@ def run_case(
     ]
     dlra_spectra = {0: normalized_spectrum(dlra_state, spectrum_count)}
     dlra_energy_history = [grid.ke(dlra_state)]
+    dlra_fluctuation_energy_history = [grid.ke(fluctuations(dlra_state))]
+    dlra_fluctuation_enstrophy_history = [
+        grid.enstrophy(fluctuations(dlra_state))
+    ]
     dlra_enstrophy_history = [grid.enstrophy(dlra_state)]
     dlra_projection_energy_history = []
     for step in range(1, nsteps + 1):
@@ -716,6 +745,9 @@ def run_case(
             break
         dlra_energy_history.append(grid.ke(dlra_state))
         dlra_enstrophy_history.append(grid.enstrophy(dlra_state))
+        dlra_psi = fluctuations(dlra_state)
+        dlra_fluctuation_energy_history.append(grid.ke(dlra_psi))
+        dlra_fluctuation_enstrophy_history.append(grid.enstrophy(dlra_psi))
         u_now, v_now = grid.velocity(dlra_state)
         dlra_max_cfl = max(
             dlra_max_cfl, float(np.max(np.hypot(u_now, v_now)) * dt / grid.dx)
@@ -776,6 +808,8 @@ def run_case(
         "singular_value_steps": sorted(dlra_spectra),
         "singular_values": [dlra_spectra[step] for step in sorted(dlra_spectra)],
         "energy_history": dlra_energy_history,
+        "fluctuation_energy_history": dlra_fluctuation_energy_history,
+        "fluctuation_enstrophy_history": dlra_fluctuation_enstrophy_history,
         "enstrophy_history": dlra_enstrophy_history,
         "projection_energy_history": dlra_projection_energy_history,
         "initial_energy": dlra_energy_history[0],

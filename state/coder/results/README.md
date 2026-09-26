@@ -82,6 +82,39 @@ in each artifact states which one its own numbers are.
   of 1e-6 is an energy ratio of 1e-12. It is not an accuracy tolerance and
   must not be described as one.
 
+## The rank rule: an order finding, not a change (D12)
+
+**Recorded here rather than implemented, per D12.** The question was whether the
+rank rule should be re-engineered to *accumulate a visited subspace* — to
+retain modes the trajectory has passed through — instead of reporting the rank
+the current window needs. The answer from measurement is that accumulating makes
+it **worse**, and the reason is specific:
+
+- The instantaneous rule at cutoff `1e-10` keeps **1.5%** of the fluctuation
+  energy outside the retained subspace. A windowed criterion (Gram-based stacked
+  spectrum over the same snapshots) keeps **27.5%** — nearly twenty times worse —
+  at the same cutoff.
+- The obvious explanation, that a bad window *placement* is responsible, is
+  **refuted by an oracle-window control**: giving the windowed criterion the
+  best window available, chosen with hindsight, still leaves **1.3%** outside.
+  So the loss is not the window's fault; it is the criterion.
+
+The mechanism is that this problem's spectrum decays slowly and the energy sits
+in *low* modes, so a stacked window spectrum is dominated by the modes the
+trajectory already occupies and under-weights the tail that the instantaneous
+criterion resolves. The windowed rule would also have been self-reinforcing —
+a wider window raises the computed rank, which keeps more modes, which widens
+the apparent window — and the oracle control is what rules that out as the
+explanation rather than merely being consistent with it.
+
+**What is reported instead is the distinction**, which is a finding: the
+instantaneous per-step rank and the window rank are different quantities, they
+answer different questions, and conflating them is what made "adaptive rank"
+look like a grid artifact. The window rank grows `1 -> 16` over `[0, 8]` and is
+grid-independent; the per-step amplitude rule's request tracks the grid and
+returns the dealiasing ceiling at tight cutoffs. Both are recorded, and the
+`rank_quantities` block says which is which.
+
 The files are intentionally compact JSON rather than raw field snapshots.
 Large trajectories and figures should be regenerated from the recorded
 parameters; no result is treated as authoritative unless its provenance,

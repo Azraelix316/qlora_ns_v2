@@ -249,13 +249,44 @@ def main() -> None:
         ax.set_title("Trajectory divergence, not error")
         ax.legend(fontsize=6.5, ncol=2)
         ax = axes[1]
+        # Two series, and the second one was previously missing.  The paper's
+        # statistics are on psi' = psi - x-average(psi) (D11/S1); total KE is
+        # dominated by the zonal mean -- at t=0 the fluctuation is only 32% of it
+        # -- so plotting the total alone shows the part every method shares and
+        # erases the part that separates them.
+        plotted = False
         for re, result in suite.items():
-            t = np.arange(len(result["full"]["energy_history"])) * result["parameters"]["dt"]
-            ax.plot(t, result["full"]["energy_history"], color=colors["full"],
-                    alpha=0.9 if re == 5000 else 0.4, label=f"full Re={re}")
+            dt = result["parameters"]["dt"]
+            block = result["full"]
+            total = np.asarray(block["energy_history"], dtype=float)
+            fluct = np.asarray(
+                block.get("fluctuation_energy_history") or [], dtype=float
+            )
+            if fluct.size != total.size:
+                continue
+            t = np.arange(total.size) * dt
+            alpha = 0.9 if re == 5000 else 0.4
+            ax.plot(t, total - fluct, color=colors["full"], alpha=alpha,
+                    label=f"zonal mean Re={re}")
+            ax.plot(t, fluct, color=colors["dlra"], alpha=alpha,
+                    label=r"fluctuation $\psi'$ Re=" + str(re))
+            plotted = True
+        if not plotted:
+            for re, result in suite.items():
+                t = (np.arange(len(result["full"]["energy_history"]))
+                     * result["parameters"]["dt"])
+                ax.plot(t, result["full"]["energy_history"],
+                        color=colors["full"],
+                        alpha=0.9 if re == 5000 else 0.4,
+                        label=f"total KE Re={re} "
+                              r"($\psi'$ series not recorded)")
         ax.set_xlabel("time")
         ax.set_ylabel(r"$E$")
-        ax.set_title(r"Total KE: the zonal mean grows")
+        ax.set_title(
+            r"KE split as fluctuation $\psi'$ and zonal mean,"
+            "\nthe statistic the paper reports is the first",
+            fontsize=9,
+        )
         ax.legend(fontsize=6.5)
         fig.tight_layout()
         fig.savefig(args.output_dir / "fig_divergence.pdf", bbox_inches="tight")
@@ -546,13 +577,14 @@ def main() -> None:
         if groups:
             x = np.arange(len(groups), dtype=float)
             width = 0.36
+            ratios = [bv / pv for pv, bv in zip(proj_vals, bug_vals)]
             fig, ax = plt.subplots(figsize=(1.45 * len(groups) + 1.3, 3.0))
             ax.bar(x - width / 2, proj_vals, width, color=colors["full"],
                    label="projected (full-field SVD)")
             ax.bar(x + width / 2, bug_vals, width, color=colors["dlra"],
                    label="midpoint BUG (no full-field SVD)")
-            for xi, pv, bv in zip(x, proj_vals, bug_vals):
-                ax.annotate(f"{bv/pv:.1f}x", (xi + width / 2, bv),
+            for xi, pv, bv, ratio in zip(x, proj_vals, bug_vals, ratios):
+                ax.annotate(f"{ratio:.1f}x", (xi + width / 2, bv),
                             textcoords="offset points", xytext=(0, 2),
                             ha="center", fontsize=6.5, color=colors["dlra"])
             ax.axhline(1.0, color=colors["ref"], linestyle=":", linewidth=1.0)
@@ -562,8 +594,13 @@ def main() -> None:
             ax.set_xticks(x)
             ax.set_xticklabels(groups, fontsize=7)
             ax.set_ylabel("full-step time / full grid")
+            # The factor is computed from the bars above, not typed in.  A title
+            # carrying its own literal is a title that can silently contradict the
+            # artifact it sits on, and this one did once: a re-run moved the
+            # range while the string stayed where it was.
             ax.set_title(
-                "BUG removes every full-size factorization\nand is still 3-5x slower",
+                "BUG removes every full-size factorization\n"
+                f"and is still {min(ratios):.1f}-{max(ratios):.1f}x slower",
                 fontsize=9,
             )
             ax.legend(fontsize=7, loc="upper left")
@@ -597,7 +634,13 @@ def main() -> None:
         case = by_re[primary]
         ranks = sorted(int(r) for r in case["dlra"])
         windows = xover["parameters"].get("moving_window_lengths") or [1.0]
-        fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.9))
+        # constrained layout, and a taller box: the left title runs to three
+        # lines and the right y-label to two, and tight_layout alone let the
+        # title overwrite the neighbour's axis label -- an unreadable figure
+        # that rendered without complaint.  constrained_layout reserves the
+        # space instead of trying to fit it afterwards.
+        fig, axes = plt.subplots(1, 2, figsize=(6.9, 3.4),
+                                 layout="constrained")
         ax = axes[0]
         cmap = plt.get_cmap("viridis")
         all_errors = [
@@ -649,10 +692,36 @@ def main() -> None:
             ax.set_ylim(min(ys) / 2.0, max(ys) * 2.0)
         title = "Error against horizon, by rank"
         if exact:
+            # The margin is measured, not asserted.  For each off-axis rank, the
+            # decades between its worst error and the *lowest* static baseline
+            # anywhere on the panel; the range over those ranks is what the title
+            # reports.  A literal here would be a number no re-run could correct.
+            static_floor = min(
+                (row["relative_l2_oracle_mean"]
+                 for rank in plotted
+                 for row in case["static_moving_window"][f"W{windows[0]:g}_r{rank}"]
+                 if row["relative_l2_oracle_mean"] > 0.0),
+                default=None,
+            )
+            decades = sorted(
+                (np.log10(static_floor)
+                 - np.log10(max(row["relative_l2"] for row in case["dlra"][str(r)]
+                                if row["time"] > 0))
+                 for r in exact)
+                if static_floor else []
+            )
+            # "below *every* static baseline" is bounded by the *closest* one, so
+            # the reference is the minimum over the static curves, not the mean.
+            # With a single off-axis rank the span is one number, and printing it
+            # as "7-7" would read as a range that does not exist.
+            span = (f"{decades[0]:.0f}" if len(decades) == 1
+                    else f"{decades[0]:.0f}-{decades[-1]:.0f}" if decades
+                    else "several")
+            plural = "order" if span in ("1", "several") else "orders"
             title += (
-                f"\n$r={'$, $r='.join(str(r) for r in exact)}$ (the largest rank "
-                f"tested) stays 6-11 orders of magnitude below every static\n"
-                f"baseline, and is off this log axis"
+                f"\n$r={'$, $r='.join(str(r) for r in exact)}$ (the largest rank"
+                f" tested) stays {span} {plural}\nof magnitude below the closest"
+                f" static baseline,\nand is off this log axis"
             )
         ax.set_xlabel("time $t$")
         ax.set_ylabel("relative $L^2$ against the full grid")
@@ -692,7 +761,6 @@ def main() -> None:
             r"$r\geq16$ buys it nothing, at any horizon", fontsize=9
         )
         ax.legend(fontsize=6.5, loc="upper left")
-        fig.tight_layout()
         fig.savefig(args.output_dir / "fig_crossover.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_crossover.png", bbox_inches="tight")
         plt.close(fig)
