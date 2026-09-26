@@ -57,6 +57,7 @@ is lost; the `C` numbering is the order and the `T` numbering is history.**
 | **C2-3** P1b the code fingerprint | *NEW TIER 1 — P1b* |
 | **C3-1..3** the three tests | *T2-A* |
 | **C4-1** the two energy keys | `### T1-6` |
+| **C7-1..6** `fig_crossover`'s title contradicts its own axis; a comment is wrong by 2.6x | *C7* — **C1-3d and C1-3g are closed properly, and the new `fluctuation_*_history` diagnostic quantifies D101 (zonal mode = `18.4%` of energy, `3.8%` of enstrophy) and is the FIRST Re-DEPENDENT observable in the artifact set. But the title claims `r>=16` while the axis plots all six ranks, and it is unscoped in grid (D93.4), and one comment states the opposite of the truth.** |
 | **C6-1..5** the new "central claim" test | *C6* — **it is green and pinning the wrong thing; `check_every` gates basis refresh, not only rank** |
 | protocol work, after the above | `## 2. Tier 2` |
 | background | `## 0. Where the project is`, `## 1. Tier 1`, `## 4. Standing` |
@@ -581,3 +582,39 @@ reports only "the rank at which it fails" will mislead whoever reads it next.
 it is built on the fluctuations. So "the subspace must evolve" is **not** established at that configuration; what is
 established there is that a fixed subspace built on raw snapshots is fragile, and the reduced model's is not. Those are
 different claims and the paper must not slide between them.
+
+---
+
+## C7 — **THE NEW DIAGNOSTIC IS RIGHT AND TWO FIGURE FIXES ARE RIGHT. `fig_crossover`'S TITLE CONTRADICTS ITS OWN AXIS, AND A COMMENT IN `fig_divergence` IS WRONG BY `2.6×`.**
+
+**C7-1 — `fig_crossover`'s TITLE MUST DESCRIBE WHAT THE AXIS PLOTS. THIS IS THE HIGHEST-PRIORITY ITEM HERE.** The right
+panel plots `spread_over_min` over **all six ranks** `[2,4,8,16,32,43]` — the axis even says "all ranks, %" — and
+`make_summary.py` says *"Every rank is included"* on purpose. **The title claims `$r\geq16$ buys it nothing`, which is
+the `{16,32,43}` subset, whose spread is `0.0%` by D85 and which is now a test (C3-2).** Either plot the `r ≥ 16` subset
+so the figure shows the result the title claims, or keep all-ranks and retitle it to what all-ranks shows. **A figure
+whose title contradicts its own axis is worse than no figure**, because a referee will check the axis.
+
+**C7-2 — AND SCOPE THAT TITLE TO `N = 64`.** D93.4: the `r = 16` saturation contrast is `N = 64` only and **cannot exist
+at `N = 128`**. The figure reads `crossover_surface.json`, which is `N = 64`, so the data is right and the title is
+over-general.
+
+**C7-3 — PLEASE FIX THE COMMENT AT `fig_divergence`'S CONSTRUCTION. IT IS BACKWARDS.** It says *"total KE is dominated by
+the zonal mean -- at t=0 the fluctuation is only 32% of it"*. **The fluctuation is `83.8%` of the initial energy**
+(`18.6076 / 22.2067`); the zonal mean holds `16.2%` at `t = 0` and `18.4%` at `t = 0.1`. **So the fluctuations dominate by
+about `5:1`, and the comment's conclusion inverts with it. The figure is fine — the split is the right thing to plot and
+naming the reported statistic is what D66/D96 require — but the justification is wrong, and I will be citing these
+diagnostics in the paper's mechanism section, so I would rather the comment were right.**
+
+**C7-4 — RECORD THE SHARES AS SCALARS.** Add `zonal_energy_fraction` and `zonal_enstrophy_fraction` per method to
+`run_kolmogorov.py`'s output. **Right now the share exists only as the difference of two 201-element lists, so it cannot
+be cited or registry-verified without redoing the subtraction** — and `18.4%` is now load-bearing for the paper's
+mechanism section, so it should be a field rather than a derivation.
+
+**C7-5 — THE LONG RUN HAS NO `fluctuation_*` DIAGNOSTIC.** `kolmogorov_re5000_N64_long.json` (`final_time = 1.0`, 2000
+steps) has none of the new keys, so the zonal share is measured only on 200-step runs. Either extend it or record the
+limitation in the artifact — **I would rather have the limitation written down than have the horizon silently
+uncovered**, because the long run is the one place a longer-horizon statement could be checked.
+
+**C7-6 — C6-1..C6-5 ARE STILL OPEN.** `test_artifacts.py`'s `check_every = 10**9` still freezes the basis (0 rebuilds in
+3000 steps, instrumented) and the docstring still claims the test re-derives the central claim. **C6-1 asks for one of
+two fixes, either of which takes minutes; please do not leave the docstring describing a test that does not exist.**

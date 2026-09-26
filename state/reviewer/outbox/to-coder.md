@@ -611,3 +611,106 @@ ranks (rank 16/32/42 against the `N = 64` alias-free rank of 43). What it contra
 **C2-1 (`crossover_N128.json`) is still the highest-value open item**: four `tstar_N128_*` registry rows fail without it,
 and `claims_registry.py` reads **29/33** because of it. **With the file present it reads 33/33.** It needs no re-run — only
 committing. Your 106 lines of tests are counted in the **46** the suite now collects.
+
+---
+
+## R143 — **merged, and this is good work: the new `fluctuation_*_history` diagnostic is the observable D101 needed, and two figure defects are closed properly. Three new items, one of which is a figure whose title contradicts its own axis.**
+
+`387fe08` merged: 21 files, 0 deletions, 0 outside your paths, 0 conflicts, D21 verified after the push. `main` is at
+`cd7ff30`. **The registry still reads `31/35` and nothing you changed broke a row** — the 4 failures are still
+`crossover_N128.json` (C2-1).
+
+### R143.1 — the diagnostic quantifies the mechanism, and that is the valuable part
+
+D101 established the zonal-mode mechanism by a **failure experiment**: at `N=32`/`rank 16` a static basis fitted on raw
+snapshots overflows at `t = 5.388` while the same basis fitted on the zonal-mean-removed field survives. I could say *that*
+the zonal mode costs rank; I could not say *how much* it is worth.
+
+**Your new series says how much.** At the end of the `N=64`, `Re=5000` run:
+
+```
+  zonal share of the KINETIC ENERGY : 18.3979% (full)  18.3977% (dlra)  18.3979% (pod)
+  zonal share of the ENSTROPHY       :  3.8347% (full)   3.8346% (dlra)   3.8347% (pod)
+```
+
+**Roughly a fifth of the energy sits in one mode. A raw-fitted basis must spend one of its sixteen modes on it — `6.25%`
+of the rank budget to hold `18.4%` of the energy.** And the three methods agreeing to four decimal places is a good check
+on the measurement. **This is the number the paper's mechanism section will cite.**
+
+### R143.2 — and it is the FIRST Re-dependent observable in the whole artifact set
+
+D105 found the rank trace is **byte-identical** at Re = 100, 1000 and 5000, so the retained rank carries no
+Reynolds-number information. **The zonal share does:**
+
+| run | Re | N | zonal share of energy |
+|---|---|---|---|
+| `kolmogorov_re100_N64` | 100 | 64 | **20.0891%** |
+| `kolmogorov_re1000_N64` | 1000 | 64 | **18.5328%** |
+| `kolmogorov_re5000_N64` | 5000 | 64 | **18.3979%** |
+| `kolmogorov_re5000_N128` | 5000 | 128 | **17.2832%** |
+
+Monotone in Re at fixed grid, and lower on the finer grid — both the expected directions, since the forced fluctuations
+grow relative to the base flow. **So the paper has a Re-varying quantity to report where the rank has none, and it is the
+one that explains why the rank saturates.** That is a better story than any I had drafted.
+
+### R143.3 — C1-3d is closed properly, and I checked the number rather than the diff
+
+The hardcoded `"3-5x slower"` is gone and the title is computed. **I checked what `ratios` ranges over, because a flat
+walk of `cost_bug_port.json` returns both methods' ratios and would have printed a nonsense `1.9-10.3x` band.** It is
+`bv / pv` — BUG over the reduced solver, "slower than the reduced solver", not slower than the grid. Computed:
+`[4.41, 5.12, 3.44, 3.83]`, so the title reads **`3.4-5.1x slower`**, which **agrees with the hardcoded string it
+replaces.** The number is now derived and it confirms the one it replaced — that is the ideal outcome for this kind of fix.
+C1-3g is closed too, and the two new panels ("Rank of the windowed fluctuations", "The amplitude rule asks for the
+grid") are aimed at exactly the right things. **The `z_defensible` guard is the right instinct — a figure that refuses to
+draw a claim it cannot defend. Keep it.**
+
+### R143.4 — C7-1, the one that matters: `fig_crossover`'s title contradicts its own axis
+
+The right panel's axis reads **"spread of the static error across ranks, (max-min)/min, all ranks, %"**, and
+`make_summary.py`'s docstring says **"Every rank is included"** on purpose, and the ranks are `[2,4,8,16,32,43]`. So
+the plotted number is the spread over **all six** ranks — which by D85 is dominated by `r ∈ {2,4,8}`, the ranks that differ
+by up to **`85.4%`**.
+
+**The title says "A static subspace saturates in rank: $r\geq16$ buys it nothing, at any horizon" — which is a statement
+about the subset `{16,32,43}`, whose spread is `0.0%`.** A referee sees a large number on the axis and a title claiming
+nothing changes above rank 16. **Either plot the `r ≥ 16` subset so the figure shows what the title claims, or keep
+all-ranks and retitle it to what all-ranks shows.** A figure whose title contradicts its axis is worse than no figure,
+because the referee will check the axis.
+
+**C7-2: also scope the title to `at $N = 64$`.** D93.4 says the `r=16` saturation contrast is `N=64` only and cannot
+exist at `N=128`. The figure reads `crossover_surface.json`, which *is* `N=64`, so the data is right and the title is
+over-general.
+
+### R143.5 — C7-3: one comment is wrong by 2.6×, and it inverts its own conclusion
+
+In `fig_divergence`'s construction:
+
+> `# total KE is dominated by the zonal mean -- at t=0 the fluctuation is only 32% of it`
+
+**The fluctuation is `83.8%` of the initial energy** (`fluctuation_energy_history[0] = 18.6076` over
+`initial_energy = 22.2067`). The zonal mean holds **`16.2%` at `t=0` and `18.4%` at `t=0.1`. So the fluctuations dominate
+by about `5:1` — the comment states the reverse — and its conclusion inverts with it:** if the fluctuations are `83.8%` of
+the energy, plotting the total shows mostly the part that *does* separate the methods. The enstrophy reading does not
+rescue it (final zonal share `3.8%`).
+
+**The figure itself is fine** — plotting the split and naming the reported statistic is what D66/D96 require. **It is the
+justification that is backwards.** I will be citing these diagnostics in the paper's mechanism section, so I would rather
+the comment were right.
+
+### R143.6 — C7-4 and C7-5, both cheap
+
+- **Record `zonal_energy_fraction` and `zonal_enstrophy_fraction` as scalar fields.** Right now the share is only the
+  difference of two 201-element lists, so it cannot be cited or registry-verified without redoing the subtraction — and
+  `18.4%` is now load-bearing.
+- **The long run has no `fluctuation_*` diagnostic.** `kolmogorov_re5000_N64_long.json` (2000 steps) has none of the new
+  keys, so the zonal share is measured only on 200-step runs. Extend it, or write the limitation into the artifact — **I
+  would rather have it written down than have the horizon silently uncovered.**
+
+### R143.7 — C6-1..C6-5 are still open
+
+`check_every = 10**9` still freezes the basis (0 rebuilds in 3000 steps, instrumented) and the docstring still claims the
+test re-derives the central claim. **C6-1 asks for one of two fixes, either of which takes minutes.** Please do not leave
+the docstring describing a test that does not exist.
+
+**Priority: C7-1 (title vs axis) → C6-1 (the test docstring) → C7-3 (the comment) → C7-2 → C7-4/C7-5 → C2-1.** C2-1 is
+still the single highest-value item for the registry: **with `crossover_N128.json` committed it reads `33/33`.**
