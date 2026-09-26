@@ -1976,3 +1976,93 @@ above; at a fixed thread count it has ranged 28%.
 Updated: the status line, and dated Log entries for the provenance defect, the
 half-run surface, the includegraph resolution model, the driver-constant check, and
 the cost reproducibility.
+
+## 2026-09-26T13:40:21+00:00 — from coder
+
+**Two things in the writer's current draft are wrong, and one sentence in your paste-ready blocks is now false. Also: a hold can be lifted, and a mechanism found. Pushed as `5fdc9c8`. 60 of 60 tests pass.**
+
+## The abstract the writer will paste carries superseded numbers
+
+`WRITER_ORDER.md` W1 says *"replace it whole"* and supplies the replacement. That replacement block quotes **`t* = 0.649` at rank 16 and `1.482` at rank 32** — the un-provenanced crossover-block values, which are **9.0% and 7.8% below** the rows-derived ones. The writer's current `00_abstract.tex` (a640cd8) still carries both. So the paper's most visible sentence is wrong by 8–9%, and it is wrong in a way that looks authoritative because it came with a verification claim attached.
+
+**Full correction set**, all four crossings plus the two derived ratios, from the rows at `W=0.25`, Re=5000:
+
+| quantity | in the paste-ready blocks | from the rows | change |
+|---|---|---|---|
+| N=64, r=16 | 0.649 | **0.7076762337623602** | +9.0% |
+| N=64, r=32 | 1.482 | **1.5981858222903682** | +7.8% |
+| N=128, r=16 | 0.939 | **0.9754557646562387** | +3.9% |
+| N=128, r=32 | 2.433 | **2.6942** | +10.7% |
+| N=128/N=64 at r=16 | 1.45× | **1.378×** | −4.7% |
+| N=128/N=64 at r=32 | 1.64× | **1.686×** | +2.7% |
+
+Brackets are unaffected and exact under both derivations: [0.5, 1.0] for r=16 at
+both grids, [1.0, 2.0] for r=32 at N=64, [2.0, 3.0] for r=43 at N=128.
+
+**`WRITER_ORDER.md` line 42 says the old pair is "verified bit-for-bit." That is
+now false** — and it is the sentence that would stop anyone checking, which makes
+it worse than a stale number rather than better. `START_HERE.md` carries one of the
+old values too.
+
+## `r*(Re)` is still in the draft, in five places
+
+`07_discussion.tex` states it at lines 18, 20, 40 and 105, and two of the
+paste-ready blocks in `WRITER_ORDER.md` carry it. Your withdrawal said to delete
+eleven places and substitute nothing, so I assume this is queue lag rather than a
+decision to keep it — flagging it because the writer will otherwise paste it.
+The measurement stands where I reported it: the `rank_history` in the three N=64
+artifacts hashes to one value, and is elementwise identical between Re=100 and
+Re=1000.
+
+## A hold you placed can be lifted
+
+You wrote *"ranks 43 and 85 are still running — do not quote them until I confirm
+them."* Both are run, inspected and now carry launch-time provenance:
+
+- **N=64, r=43: `never`** — *"the DLRA is exact at every horizon here (relative
+  error at roundoff), so no static baseline can overtake it."*
+- **N=128, r=85: `never`** — the identical reason.
+- **N=128, r=43: resolved**, t\* = **2.9897**, bracket [2.0, 3.0].
+
+## And the reason 43 and 85 never yield is a mechanism, not a coincidence
+
+`cost_retiming.json` records `dealias_rank_ceiling` = **43, 85, 171** for
+N = 64, 128, 256. The never-yields ranks are **43 at N=64 and 85 at N=128** —
+*exactly the ceiling at each grid*. A rank that reproduces the whole resolved band
+has nothing left to adapt: its subspace is the band, its error is at roundoff, and
+no static baseline can overtake it. **So "the rank at which the DLRA never yields"
+is a statement about the grid, not about the method**, which is why it moves from 43
+to 85 under refinement and why D118 was right to retire the older framing.
+
+This bounds the crossover on both sides, which is a better result than "t\* grows
+with rank":
+
+| rank | N=64 | N=128 |
+|---|---|---|
+| 2, 4, 8 | **unresolved** — static baseline leads at every horizon | not measured |
+| 16 | t\* = 0.7077, [0.5, 1.0] | t\* = 0.9755, [0.5, 1.0] |
+| 32 | t\* = 1.5982, [1.0, 2.0] | — |
+| 43 | **never** (the N=64 ceiling) | t\* = 2.9897, [2.0, 3.0] |
+| 85 | not measured | **never** (the N=128 ceiling) |
+
+**The highest rank that yields at all is the largest rank below the ceiling** — 32
+at N=64, 43 at N=128. Pinned by a test that also asserts the *reason* is the
+exactness one, so if a rank ever reported `never` for a different cause the claim
+would need rewording rather than re-measuring. **Two grids is thin and the test says
+so** — it fails if a third grid appears without extending the check.
+
+## One stale reference that is now better supported than when it was written
+
+`WRITER_ORDER.md` line 615 justifies cross-grid comparability by *"code
+`588e5159`, which reproduces the N=64 values bit-for-bit."* That commit is no
+longer what produced the numbers. The argument is now **stronger**: both surfaces
+record the *identical* `driver_sha256` **and** the identical whole-tree
+`sources_fingerprint_at_launch`, at the same commit `ab03045`. Same code, not
+"re-ran and agreed".
+
+## Gate state unchanged and good
+
+`check_provenance.py` PASS (18/18 runs fingerprinted and clean, 0 unverifiable).
+`claims_registry.py` 22 OK / 17 FAIL, unchanged — 7 `tstar_*` to re-pin at the
+values above, 4 zonal rows needing the one-line `resolve` fix, 5 `mem_*` now
+distributions by construction, 1 `cost_ratio_max_N128` needing a tolerance.
