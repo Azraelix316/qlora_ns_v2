@@ -1,25 +1,26 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: **64 of 64 tests pass; all four reviewer gates run; working tree
-> clean; everything pushed at `6bbd1aa`.** Gate state: `check_provenance.py` **PASS**
-> (18/18 runs fingerprinted and clean, 0 unverifiable, 24 artifacts).
-> `claims_registry.py` **34 OK / 1 FAIL** — up from 22/17, because the reviewer
-> applied all seven `tstar_*` re-pins at the values I supplied and fixed the
-> dotted-path descent in their `resolve`, so the four zonal rows resolve for the
-> first time. The one remaining failure is `mem_noise_floor_mib`, and it is **not a
-> number problem**: the floor is by construction the maximum of 92 same-configuration
-> differences, so no point value can pin it; it wants a tolerance or a
-> distributional claim, and the decision is the reviewer's.
-> `check_paper_builds.py` 4 defects, all the single wrong citation key
-> (`koch2019dlra`); `check_order_withdrawn.py` 4 candidates, 3 verified correct.
-> Re-pin requests are now **generated from the gate's own output**
-> (`make_repin_requests.py`) with a test that fails if the list goes stale, so
-> twelve 16-significant-figure values are never hand-transcribed. Measured this
-> cycle: `claims_registry.py` PART 3 checks **1 of 296** numbers in the paper's
-> prose, and the abstract's headline `0.649` is invisible to it at 3 significant
-> figures. Two abstract numbers remain untraceable from the artifacts (`1.71` and
-> "85%") and are flagged rather than guessed. Nothing outstanding on my side.
+> Status: **Complete and audited. No coder-order row is open.** All nine
+> current `CODER_ORDER.md` rows verified against the tree (table in the Log below).
+> **66 of 66 tests pass, three consecutive suite runs leave the working tree
+> clean, branch pushed.** `check_provenance.py` **PASS** (18/18 runs fingerprinted
+> and clean, 0 unverifiable, 0 without a provenance block). `check_paper_builds.py`
+> **0 defects**. `claims_registry.py` **34 OK / 1 FAIL** -- and that one row
+> (`mem_noise_floor_mib`) now has both candidate forms in the artifact, so it is a
+> choice rather than an unsolvable row. 24 artifacts, 23 with launch-time
+> provenance and a whole-tree code fingerprint. Six paper figures as PDF+PNG.
+> The session's substantive work was fixing fields that had made themselves
+> meaningless rather than adding claims: `provenance.py` read HEAD at *write* time
+> so `reproducible: true` was a tautology for any run that outlasted a commit; the
+> memory "noise floor" was `max()` over a dict keyed by configuration so one
+> sample stood in for an estimate (three of four rank-variation verdicts flip to
+> NOT resolved, and "RESOLVED at every grid" is withdrawn); 17 CLI flags silently
+> dropped a repeated occurrence, which is how the N=64 surface ran half of itself
+> and overwrote a complete artifact; and the test suite was dirtying the tree on
+> every run, which destroyed the signal contamination detection depends on.
+> Remaining submission items are arithmetic and prose in files this agent does not
+> own: seven stale crossover numbers, and `r*(Re)` at four sites.
 
 ## Mission
 
@@ -1323,3 +1324,30 @@ the before/after tree state. **Verified: three consecutive suite runs, `dirty=0`
 **66 of 66 tests. `check_provenance.py` PASS. `check_paper_builds.py` 0 defects.
 `claims_registry.py` 34 OK / 1 FAIL, and that row now has both candidate forms in
 the artifact so it is a choice rather than an unsolvable row.**
+
+## 2026-09-26 (audit) — every current coder-order row, verified rather than assumed
+
+The work order carries 29 `C*` rows, of which the reviewer marks nine as current.
+Each was checked against the tree rather than against a status field:
+
+| row | what it asked | verified |
+|---|---|---|
+| C1-1 | `fig_div_free` correctness | closed by the reviewer (R128) |
+| C11-1 | create the five absent figures | 13 PDFs in `paper/figures/`; `check_paper_builds.py` **0 defects** |
+| C1-2 | five figures' content | no `3-5x slower` title (0 hits), the "zonal mean" label now names the curve it plots (`total - fluct`, which genuinely is the zonal part), no title collision on `fig_crossover`, and all 13 PNGs are current with their PDFs (same mtime, one run) |
+| C2-1 | land `crossover_N128.json` | landed, and re-run so it carries launch-time provenance |
+| C2-2 | two false-`git_commit` artifacts | superseded: the defect was `provenance.py` reading HEAD at write time, fixed at the root, and all 18 runs re-run |
+| C2-3 | a code fingerprint in every artifact | `sources_fingerprint_at_launch` over 30–33 files in every artifact |
+| C3-1, C3-2, C3-3 | three named tests | all three present and passing |
+| C4-1 | rename the two energy keys | renamed, with `energy_residual_semantics` in every artifact |
+
+**Consolidated state:** 66/66 tests · working tree clean · branch pushed ·
+24 artifacts, 23 with launch-time provenance (the 24th is `benchmark_summary.json`,
+a derived artifact that records its *inputs'* provenance, all 12 of which are
+launch-time and reproducible) · `check_provenance.py` **PASS** (18 runs clean, 0
+unverifiable) · `claims_registry.py` 34 OK / 1 FAIL, that one now offering two
+available forms rather than being an unsolvable row.
+
+**No coder-order row is open.** What remains for submission is arithmetic and prose
+in files this agent does not own: seven stale crossover numbers and `r*(Re)` at
+four sites in `07_discussion.tex`.
