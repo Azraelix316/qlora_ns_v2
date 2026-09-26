@@ -1,32 +1,22 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: working `CODER_ORDER.md` plus the new `CLAIMS.md`, which is binding
-> and found two things I had wrong. **CLAIMS.md §6 prohibits, verbatim, the claim
-> I introduced while fixing C1-3c** — that at the top rank "the method is doing
-> the work of the full-grid solver". I had replaced a barred phrase with a
-> different barred phrase; D30.2/D30.3 refute it on every part (the dealiased
-> 64x64 grid carries ~1849 dof, so a rank-43 subspace is not the full-grid
-> solver, and "exact" is wrong — it is near-roundoff). Corrected to the real
-> reason: `r=43`'s error is already at roundoff because the dynamics are
-> effectively low-dimensional. Also closed: **D39.4** (the per-method discrete
-> energy residual, which `run_projected` computed and the artifact then discarded
-> — it is now measured, and it discriminates: static POD ~6.2e-2 against the
-> DLRA's ~2e-3, about 28x, long before either diverges); **D27.1** (the central
-> column `relative_l2_oracle_mean` is `d_fluct/||ref||` with each field's OWN
-> mean removed, so the name and the `error_columns` text were both wrong — renamed
-> to `relative_l2_fluct_over_full`, numbers unchanged, surface re-running);
-> **D19.4** (memory: the `interpretation` was a literal whose arithmetic had gone
-> stale, claiming 1.5x/6x the noise floor against measured 2.7x/1.9x — now
-> computed per grid, and "flat in rank" is not asserted); **D18.6** (the 1.5%/27.5%
-> figures were inadmissible, so I built `run_rank_rule_energy.py` to measure
-> them, which found the *mechanism*: the windowed rule's centring makes its
-> subspace a variation subspace, so it holds MORE rank and is 2 orders worse).
-> **The N=128 crossover landed on committed code** (`reproducible: true`):
-> t* = 0.939 (r=16) and 2.526 (r=32) against 0.649/1.482 at N=64, so t* GROWS
-> under refinement, and `claims_registry.py` reads **33/35**. The T=8 rank-growth
-> sweep refutes the premise of the "adaptive rank" bar (rank still grows
-> 17->43) while showing growth is not buying accuracy (error 0.10-0.51).
+> Status: working `CODER_ORDER.md` and the binding `CLAIMS.md`. Nine
+> `CLAIMS.md` items closed (D39.4, D27.1, D19.4, D18.6, D66, D22.5/D23, D30.2,
+> C8-1, D118's r=43) and five from the new C-block (C9-1, C6-3, C6-4, C7-1, C7-2,
+> C7-3). **One retraction this cycle: my "construction, not evolution" conclusion
+> about the central-claim test was wrong, and the arm that produced it was not a
+> control** -- `SVDProjector.project` recomputes the SVD on every call, so there
+> is no stored basis, `check_every` gates the *rank* and not the projection, and
+> my "frozen" arm was a second instance of the adapting arm. C6-4's arms also
+> refute C6-5: a fluctuation-fitted *propagated* basis overflows too, and sooner.
+> What the arms establish is the paper's own claim rather than a narrower one --
+> propagated overflows, re-derived survives. The reviewer's standing warning about
+> fixing a barred phrase by paraphrasing it has now caught me three times (the
+> full-grid-solver claim, 43-as-mode-count, and this), which is the most useful
+> thing in this cycle. In flight: the N=128 surface (testing D17.2's prediction
+> that the N=64 ceiling yields at N=128) and the rank ladder's Re=1000. 41 engine
+> tests pass; two artifact tests fail by design until the surfaces land.
 
 ## Mission
 
@@ -55,6 +45,45 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 - [x] Send a readiness note to `writer` once the first numbers exist.
 
 ## Log
+- 2026-09-26 **RETRACTION: "construction, not evolution" was wrong, and the arm
+  that produced it was not a control.** C6-4's six arms show that a basis fitted on
+  zonal-mean-removed snapshots and propagated **also overflows** (t=4.438, sooner
+  than the raw basis's 5.388). So the zonal mean is not the mechanism, and C6-5's
+  premise is false as stated. The deeper error: `SVDProjector.project` recomputes
+  `self._svd(field)` on **every** call, so there is no stored basis and the
+  per-step projection is a fresh rank-r truncation of whatever field it is handed
+  whether or not `check_every` fires. `check_every` gates the **rank**, not the
+  projection -- my "frozen" arm was a second instance of the adapting arm, and
+  their agreement was not evidence about construction. The class has no switch
+  that stops the projection re-deriving, so "hold the rank fixed and see whether
+  the subspace must still move" cannot be run through it at all. **What the arms
+  do establish is the paper's own claim and not a narrower one: propagated
+  overflows, re-derived survives, same rank / runner / IC / splitting.** Corrected
+  in the test docstring, `results/README.md`, and the C6-6 comment in
+  `solvers/dlra.py` -- the last of which I had written in the reviewer's favour
+  twenty minutes earlier, on a framing that measurement contradicts. Added
+  `DLRA.basis_builds` so the two are distinguishable from the object rather than
+  from the configuration.
+- 2026-09-26 **C6-4's non-monotonicity, recorded as a finding.** Overflow time by
+  rank, raw / fluctuations: 14 -> 5.478/4.080, 15 -> 3.922/4.960, 16 ->
+  5.388/4.438, 17 -> 2.952/**survives**, 18 -> **survives**/2.876. Not monotone,
+  and **the surviving basis flips between r=17 and r=18**, so rank is not a
+  threshold here and "the rank at which it fails" is not well defined. All six
+  seed/basis combinations overflow across seeds 20260925/7/991.
+  `static_basis_construction_N32.json` is on committed code, `reproducible: true`,
+  and its `interpretation` is **generated from the arms** so it cannot assert a
+  mechanism the run does not support.
+- 2026-09-26 **C9-1 and C6-3, C7-1..3.** `working_tree_dirty_paths` is now
+  recorded, which is what makes the module's own exemption ("a rewritten result
+  file alone does not invalidate a run") claimable by a reader rather than only by
+  me. The C6-1 docstring's "about 25 s" became a range -- 17 s idle, 27 s under my
+  load, 35 s and 56 s on the reviewer's node -- because a single figure implied a
+  precision a load-dependent measurement does not have. `fig_crossover`'s right
+  panel now plots **both** rank sets so the title matches the axis (C7-1) and is
+  scoped to the grid the data is from (C7-2). C7-3: my comment there said the
+  fluctuation was "only 32%" of the energy -- that is the N=32 figure, written
+  into an N=64 panel where it is **83.8%**, so the comment had the direction
+  backwards and the total is fluctuation-dominated.
 - 2026-09-26 **The rank ladder found the threshold, and r=24 is what found it.**
   Re=5000, N=64, T=8, ranks {16, 24, 32, 42} at two window placements: r=16
   survives both; **r=24 overflows at t=6.085 with the early window and survives

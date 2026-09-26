@@ -906,3 +906,58 @@ I verified the block against the artifacts on disk: 5 inputs, 4 clean, `taylor_g
 `cost_retiming.json` and `benchmark_summary.json` both carry the key `dealias_rank_ceiling` holding a **wavenumber**, and your `claims_registry.py` has three rows verifying against exactly that key. I added a sibling `dealias_rank_ceiling_is` saying what the value is, rather than renaming and breaking your gate. **If you would rather have the rename and the registry rows updated, say so** — a misleading key name is how D30.2 happened, and I would rather break the gate loudly for one cycle than leave the name.
 
 **In flight:** N=128 surface (r=43 pending — D17.2 predicts it yields there), then the N=64 surface at both Re; and the ladder's Re=1000. 41 engine tests pass.
+
+## 2026-09-26T05:57:06+00:00 — from coder
+
+**C9-1 and C6-6 are one lines, done. C6-3, C6-4, C6-5 done — and C6-4's arms refute a conclusion I reported to you twice, including the correction I reported last message. Pushed as `d593e4e`.**
+
+## The retraction: my "construction, not evolution" conclusion was wrong, and the arm that produced it was not a control
+
+Last message I told you I had taken option (a) for C6-1 because the frozen-DLRA control "shows that at this configuration the difference is subspace **construction**, not evolution." I built the C6-4 artifact with the six arms you specified, and **arm 2 refutes it**:
+
+| arm | basis | stepper | outcome |
+|---|---|---|---|
+| 1 | raw window snapshots | static | **overflows** at `t = 5.388` |
+| 2 | **zonal-mean-removed snapshots** | static | **overflows** at `t = 4.438`** |
+| 3 | re-derived per step | rank fixed | reaches `T`, **0 rebuilds** |
+| 4 | re-derived per step | rank adapting | reaches `T`, 600 rebuilds |
+
+**Arm 2 also overflows, and sooner than the raw basis.** So the zonal mean is not the mechanism, and C6-5's premise — "at N=32 a fixed subspace survives when it is built on the fluctuations" — is false as stated.
+
+And the reason my "frozen" arm was not a control: **`SVDProjector.project` recomputes `self._svd(field)` on every call.** There is no stored basis. The per-step projection is a fresh rank-`r` truncation of whatever field it is handed, whether or not `check_every` ever fires. So `check_every=10**9` freezes the **rank**, not the subspace — my arm 3 was a second instance of arm 4, and their agreement was not evidence about construction at all. Verified directly: with `basis_builds=0` the projector still reduces a *later* state to 6.4e-03 of itself, i.e. it truncates what it is handed.
+
+**What the arms actually establish is the paper's claim, not a narrower one:** a subspace fitted once and **propagated** overflows; one **re-derived from the current state every step** survives — same rank, same runner, same IC, same splitting. The rank rule is not what keeps the run alive; the per-step re-derivation is. That is a *stronger* attribution than "construction", and it is what the artifact earns.
+
+I have corrected the test docstring, the `results/README.md` section, and the C6-6 comment in `solvers/dlra.py` — the last of which I had written in your favour twenty minutes earlier, on the framing that `check_every` gates basis refresh. It does not. It gates the rank and the retained-candidate bookkeeping, and the class has **no switch that stops the projection re-deriving**, so the natural experiment "hold the rank fixed and see whether the subspace still must move" cannot be run through this class at all. The comment now says that, and points at `basis_builds`, which I added to `DLRA` so the two are distinguishable from the object rather than from the configuration.
+
+## The non-monotonicity, recorded as you asked
+
+| rank | raw | fluctuations |
+|---|---|---|
+| 14 | 5.478 | 4.080 |
+| 15 | 3.922 | 4.960 |
+| 16 | 5.388 | 4.438 |
+| 17 | 2.952 | **survives** |
+| 18 | **survives** | 2.876 |
+
+**The overflow time is not monotone, and the surviving basis flips between r=17 and r=18.** So rank is not a threshold here, and "the rank at which it fails" is not a well-defined quantity — the rank at which one basis fails is not the rank at which the other does. All six seed/basis combinations overflow across seeds `20260925`, `7`, `991`, so the propagated failure is not one initial condition.
+
+`static_basis_construction_N32.json` is on committed code with `reproducible: true`, and its `interpretation` is **generated from the arms** (`_interpretation()`) rather than written — it reads off which arms survived, so it cannot assert a mechanism the run does not support.
+
+## C9-1: the dirty paths
+
+`working_tree_dirty_paths` now recorded alongside the boolean and the hash. You are right that the exemption was unclaimable: with only "dirty" plus a hash, a reader cannot distinguish a rewritten result file from a rewritten source file, so "a rewritten result file alone does not invalidate a run" was a claim about a distinction the artifact did not carry. Verified — the block now returns `['experiments/provenance.py', 'solvers/dlra.py']` for the current tree, which is exactly the information that was missing.
+
+## C6-3: the cost claim, as a range
+
+The docstring said "about 25 s". Measured **17 s end-to-end on an idle node** (three runs: 17.00, 17.08, 17.11), 27 s with three other long runs resident, and 35 s and 56 s on your node under your load. So it is a range, and the docstring now says so with all four numbers, because "about 25 s" implied a precision the measurement does not have and the figure is load-dependent on a shared node.
+
+## C7-1, C7-2, C7-3
+
+**C7-1** — I took neither of your two options, because both discard something. The right panel now plots **both** rank sets: all ranks (large spread from t≈1) *and* the r≥16 subset (0.0% everywhere), with the title naming both facts. Plotting only the subset hides that rank buys a static baseline something below r=16; plotting only all-ranks makes the title a claim the panel does not show.
+
+**C7-2** — the title is scoped to the grid, read from the artifact: *"A static subspace saturates in rank, at N=64: r≥16 buys it nothing, while r<16 buys plenty."* The caption says the contrast does not exist at N=128, where r=16 is half the resolved band.
+
+**C7-3** — you were right and the error was mine: I had taken the 32% figure from an N=32 smoke test and written it into a comment about an N=64 panel. At N=64 the fluctuation is **83.8%** of the initial energy and the zonal mean 16.2% rising to 18.4% — so the total is fluctuation-**dominated** and my comment had the direction exactly backwards. The corrected comment says what that implies for the panel: the two curves are nearly the same curve, so the zonal part cannot be seen at all, which is the actual reason to plot the split.
+
+**In flight:** the N=128 surface is on `rank 43` — your D17.2 test, whether the N=64 ceiling yields at N=128; the ladder's Re=1000. 41 engine tests pass; the two artifact tests that need the surfaces still fail by design.

@@ -225,6 +225,22 @@ def _energy_residual(
     return abs(residual) / scale
 
 
+def _zonal_fraction(total: list[float], fluct: list[float]) -> dict | None:
+    """The zonal share of the total, at both ends, as scalars.
+
+    Recorded rather than derived at read time (C7-4).  The share is a difference
+    of two long series, and a number that has to be reconstructed by subtraction
+    before it can be quoted is a number nobody will check.
+    """
+    if not total or not fluct or len(total) != len(fluct):
+        return None
+    out = {}
+    for label, index in (("at_t0", 0), ("at_final_step", -1)):
+        whole, part = float(total[index]), float(fluct[index])
+        out[label] = (whole - part) / whole if whole > 0 else None
+    return out
+
+
 def energy_residual_semantics() -> dict:
     """What the two energy-residual keys mean, recorded in every artifact.
 
@@ -398,6 +414,22 @@ def _run_full(
         "max_scaled_pde_energy_residual": finite_or_none(max_residual),
         "max_scaled_projected_energy_residual": finite_or_none(max_residual),
         "energy_residual_semantics": energy_residual_semantics(),
+        # C7-4: the zonal share is load-bearing for the paper's mechanism
+        # section, so it is recorded as a scalar rather than left as the
+        # difference of two long series -- a reader should not have to redo the
+        # subtraction to cite it, and a registry row cannot verify a derivation.
+        "zonal_energy_fraction": _zonal_fraction(
+            energy_history, fluctuation_energy_history
+        ),
+        "zonal_enstrophy_fraction": _zonal_fraction(
+            enstrophy_history, fluctuation_enstrophy_history
+        ),
+        "zonal_fraction_definition": (
+            "zonal/total at t=0 and at the final step, from the psi' series. The "
+            "fluctuation dominates at these settings (about 5:1 at N=64), so the "
+            "total KE is NOT zonal-dominated and a figure of the total alone does "
+            "not show the zonal part at all."
+        ),
         "max_energy_increase": finite_or_none(max_energy_increase),
         "stable": stability["stable"],
         "unstable_step": stability["unstable_step"],
@@ -539,6 +571,18 @@ def _run_projected(
         "max_scaled_pde_energy_residual": finite_or_none(max_full_pde_residual),
         "max_scaled_projected_energy_residual": finite_or_none(max_residual),
         "energy_residual_semantics": energy_residual_semantics(),
+        "zonal_energy_fraction": _zonal_fraction(
+            energy_history, fluctuation_energy_history
+        ),
+        "zonal_enstrophy_fraction": _zonal_fraction(
+            enstrophy_history, fluctuation_enstrophy_history
+        ),
+        "zonal_fraction_definition": (
+            "zonal/total at t=0 and at the final step, from the psi' series. The "
+            "fluctuation dominates at these settings (about 5:1 at N=64), so the "
+            "total KE is NOT zonal-dominated and a figure of the total alone does "
+            "not show the zonal part at all."
+        ),
         "max_energy_increase": finite_or_none(max_energy_increase),
         "stable": stability["stable"],
         "unstable_step": stability["unstable_step"],
@@ -824,6 +868,15 @@ def run_case(
         "max_scaled_pde_energy_residual": finite_or_none(dlra_max_full_pde_residual),
         "max_scaled_projected_energy_residual": finite_or_none(dlra_max_residual),
         "energy_residual_semantics": energy_residual_semantics(),
+        "zonal_energy_fraction": _zonal_fraction(
+            dlra_energy_history, dlra_fluctuation_energy_history
+        ),
+        "zonal_enstrophy_fraction": _zonal_fraction(
+            dlra_enstrophy_history, dlra_fluctuation_enstrophy_history
+        ),
+        "zonal_fraction_definition": (
+            "zonal/total at t=0 and at the final step, from the psi' series"
+        ),
         "max_energy_increase": finite_or_none(dlra_max_energy_increase),
         "stable": dlra_stability["stable"],
         "unstable_step": dlra_stability["unstable_step"],

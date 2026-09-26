@@ -131,42 +131,47 @@ answer different questions, and conflating them is what made "adaptive rank"
 look like a grid artifact. The window rank grows `1 -> 16` over `[0, 8]` and is
 grid-independent; the per-step amplitude rule's request tracks the grid. Both are
 recorded, and the `rank_quantities` block says which is which.
+## What separates a propagated static basis from the re-derived one (C6)
 
-## What separates a propagating static basis from the DLRA is construction, not refresh (C6-1)
+`state/coder/results/static_basis_construction_N32.json`, at `N=32`, rank 16,
+`dt=0.002`, `T=6.0`:
 
-Measured at `N=32`, rank 16, `dt=0.002`, `T=6.0`, three arms on the same runner
-and the same rank:
+| arm | basis | stepper | outcome |
+|---|---|---|---|
+| 1 | raw window snapshots | static | **overflows** at `t = 5.388` |
+| 2 | zonal-mean-removed snapshots | static | **overflows** at `t = 4.438` |
+| 3 | re-derived from the current field each step | rank fixed | reaches `T`, 0 rebuilds |
+| 4 | re-derived from the current field each step | rank adapting | reaches `T`, 600 rebuilds |
 
-| arm | outcome | max \|∇·u\| |
-|---|---|---|
-| raw-snapshot static basis, propagated | **overflows** at `t = 5.388` | 2.14e+191 |
-| DLRA, `check_every=5` (subspace refreshes) | reaches `T` | 2.287e-14 |
-| DLRA, `check_every=1e9` (subspace frozen) — control | reaches `T` | 2.287e-14 |
+**The contrast is propagated versus re-derived**, and that is the claim the paper
+makes. Two things this rules out, both of which had been written down as
+conclusions before the arms were run:
 
-**The frozen control survives, identically.** So at this configuration the
-difference from a raw-snapshot static basis is in how the subspace is
-*constructed* — fluctuation basis, energy criterion, proper initialisation — and
-not in whether it is refreshed. `check_every` gates the basis refresh, not only
-the rank, so a test that sets it to "never" and calls the result "adaptive" is
-measuring construction while reporting evolution.
+- **The zonal mean is not the mechanism.** Arm 2 removes it and *still* overflows,
+  sooner than the raw basis. Removing the mean does not rescue a propagated basis.
+- **The rank rule is not what keeps the runs alive.** Arms 3 and 4 agree exactly,
+  and the reason is structural rather than coincidental: `SVDProjector.project`
+  recomputes `self._svd(field)` on **every** call, so the per-step projection is a
+  fresh rank-`r` truncation of whatever field it is handed. `check_every` gates
+  the **rank**, not the projection. A large `check_every` freezes the rank while
+  the subspace keeps tracking the state, because tracking it is what the
+  projection does.
 
-This is consistent with the configuration rather than surprising: rank 16 on an
-N=32 grid is 16 of the 21 alias-free modes, so there is little room for a
-refresh to matter. **The open question is whether the refresh matters at higher
-rank**, where the T=8 artifact shows the static basis overflowing at `r ≥ 32`;
-that is where construction and evolution could come apart.
+**The overflow time is not monotone in rank, and which basis survives flips.** Raw
+survives at `r=18`; fluctuations survive at `r=17` -- the two swap. Overflow times
+run 5.478, 3.922, 5.388, 2.952 for the raw basis at ranks 14-17. So rank is *not*
+a threshold here, and an artifact reporting only "the rank at which it fails"
+would mislead: the rank at which one basis fails is not the rank at which the
+other does. All six seed/basis combinations of the propagated baselines overflow
+across seeds `20260925`, `7`, `991`, so the failure is not one initial condition.
 
-Two claims, pinned in two different places, and neither asked to do the other's
-job:
-
-- **construction** — `test_a_propagated_fixed_basis_overflows_and_the_evolving_one_does_not`
-  (live, ~27 s), whose assertions record which way the control fell so the test
-  fails if the two arms ever become distinguishable;
-- **evolution** — `test_the_subspace_must_evolve_contrast_is_present_in_the_artifact`,
-  from the shipped T=8 artifact, where fixed-basis POD overflows at `r ≥ 32` and
-  the DLRA at the same rank does not.
+**A correction worth recording.** An earlier version of this section, and of the
+test that backs it, concluded the difference was the basis **construction**
+(fluctuation basis, energy criterion, proper initialisation) rather than
+evolution. That was inferred from a "frozen DLRA" control arm which turned out
+not to control what it looked like: with `check_every=10**9` the rank is fixed
+but the projection still re-derives per step, so the control was a second
+instance of the same arm. The narrower claim the artifact actually earns is the
+one above.
 
 The files are intentionally compact JSON rather than raw field snapshots.
-Large trajectories and figures should be regenerated from the recorded
-parameters; no result is treated as authoritative unless its provenance,
-finite-value checks, and scale-aware stability flags are present.

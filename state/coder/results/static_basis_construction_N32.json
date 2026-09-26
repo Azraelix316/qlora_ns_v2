@@ -12,7 +12,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "static (projected every step, basis never refitted)",
-      "wall_seconds": 3.891282140975818
+      "wall_seconds": 6.123733963118866
     },
     {
       "arm": "2_fluctuation_snapshots_static_stepper",
@@ -26,7 +26,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "static (projected every step, basis never refitted)",
-      "wall_seconds": 3.233711580047384
+      "wall_seconds": 4.103347253985703
     },
     {
       "arm": "3_dlra_basis_frozen",
@@ -40,7 +40,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "DLRA, check_every=10**9 (frozen; expect rebuilds=0)",
-      "wall_seconds": 6.0044229491613805
+      "wall_seconds": 6.669172136113048
     },
     {
       "arm": "4_dlra_basis_refreshing",
@@ -54,12 +54,12 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "DLRA, check_every=5 (refreshes)",
-      "wall_seconds": 6.2659001720603555
+      "wall_seconds": 8.620682580862194
     }
   ],
   "case": "static_basis_construction",
   "case_family": "stability",
-  "interpretation": "At this configuration the difference between a static basis that overflows and one that survives is its CONSTRUCTION, not whether it refreshes: the raw-snapshot basis overflows, and the fluctuation-based basis survives whether the stepper refits it or not. That is a narrower claim than 'the subspace must evolve', and it is the claim this artifact earns. The overflow time is NOT monotone in rank (see `rank_sweep`), which is recorded as a finding rather than as noise: an artifact reporting only the rank at which it fails would mislead the next reader. Both observations are specific to N=32 and to the horizons and ranks listed under `parameters`.",
+  "interpretation": "At this configuration a subspace fitted once and PROPAGATED overflows, and a subspace RE-DERIVED from the current state every step survives -- raw propagated overflows at t=5.388, fluctuation propagated overflows at t=4.438, re-derived with the rank fixed reaches t=6.000, re-derived with the rank adapting reaches t=6.000 (600 basis rebuilds against 0). Both propagated bases fail, so the zonal mean is NOT the mechanism: removing it does not rescue a propagated basis, and in fact fails sooner here. The two re-derived arms agree, and the reason is structural rather than a coincidence: SVDProjector recomputes the SVD of whatever field it is handed on every call, so `check_every` gates the RANK and not the projection. The rank rule is therefore not what keeps these runs alive; the per-step re-derivation is. The overflow time is NOT monotone in rank, and which basis survives flips between ranks (raw survives at [18], fluctuations at [17]; the two swap). This is recorded as a finding, not as noise: an artifact reporting only the rank at which a basis fails would mislead the next reader, because the rank is not a threshold here. All 6 seed/basis combinations of the propagated baselines overflow, so the propagated failure is not a property of one initial condition. Every statement here is specific to the N, horizon and ranks under `parameters`.",
   "parameters": {
     "N": 32,
     "base_speed": 0.5,
@@ -89,19 +89,13 @@
   "provenance": {
     "driver": "experiments/run_static_basis_construction.py",
     "driver_dirty": false,
-    "driver_matches_HEAD": false,
-    "driver_sha256": "bba77c18fc87515221728cf5414654054cc4c385da0f9844abc5bcbe5b38252d",
-    "git_commit": "f0f4158e79ceeb0b9a35ede1c2b9db2d8c31faf3",
+    "driver_matches_HEAD": true,
+    "driver_sha256": "ab2961f9c14aebcb5eada09aa9a6eff11d46df0a832f6fb5fdbbc8a0fddaf379",
+    "git_commit": "acbb0ad9c940efea580c1b469d24bc72b28c9d78",
     "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
-    "reproducible": false,
-    "working_tree_diff_sha256": "ff32fdbf7d8fe5f3ecca4c5413fffddef758ab55249a3d6837121365bf894608",
-    "working_tree_dirty": true,
-    "working_tree_dirty_paths": [
-      "experiments/make_figures.py",
-      "experiments/provenance.py",
-      "experiments/test_artifacts.py",
-      "solvers/dlra.py"
-    ]
+    "reproducible": true,
+    "working_tree_dirty": false,
+    "working_tree_dirty_paths": []
   },
   "rank_sweep": [
     {
@@ -113,7 +107,7 @@
       "final_time_reached": 5.478,
       "max_abs_divergence": 1.6414204589195224e+132,
       "rank": 14,
-      "wall_seconds": 3.9161469228565693
+      "wall_seconds": 6.780263631138951
     },
     {
       "basis": "fluctuations",
@@ -124,7 +118,7 @@
       "final_time_reached": 4.08,
       "max_abs_divergence": 6.477610257926561e+224,
       "rank": 14,
-      "wall_seconds": 2.944325861055404
+      "wall_seconds": 5.826417803065851
     },
     {
       "basis": "raw",
@@ -135,7 +129,7 @@
       "final_time_reached": 3.922,
       "max_abs_divergence": 2.8392137667797144e+133,
       "rank": 15,
-      "wall_seconds": 2.816160357091576
+      "wall_seconds": 5.613968692952767
     },
     {
       "basis": "fluctuations",
@@ -146,7 +140,7 @@
       "final_time_reached": 4.96,
       "max_abs_divergence": 2.864581841720371e+89,
       "rank": 15,
-      "wall_seconds": 3.5833087239880115
+      "wall_seconds": 7.282449014950544
     },
     {
       "basis": "raw",
@@ -157,7 +151,7 @@
       "final_time_reached": 5.388,
       "max_abs_divergence": 2.138644039510404e+191,
       "rank": 16,
-      "wall_seconds": 3.8668735940009356
+      "wall_seconds": 7.9747730570379645
     },
     {
       "basis": "fluctuations",
@@ -168,7 +162,7 @@
       "final_time_reached": 4.438,
       "max_abs_divergence": 3.8194424556271614e+89,
       "rank": 16,
-      "wall_seconds": 3.1884377151727676
+      "wall_seconds": 6.557428947882727
     },
     {
       "basis": "raw",
@@ -179,7 +173,7 @@
       "final_time_reached": 2.952,
       "max_abs_divergence": 1.4196068833898572e+132,
       "rank": 17,
-      "wall_seconds": 2.2470342360902578
+      "wall_seconds": 3.2538919469807297
     },
     {
       "basis": "fluctuations",
@@ -190,7 +184,7 @@
       "final_time_reached": 6.0,
       "max_abs_divergence": 7.105427357601002e-14,
       "rank": 17,
-      "wall_seconds": 4.354434384033084
+      "wall_seconds": 8.520269950851798
     },
     {
       "basis": "raw",
@@ -201,7 +195,7 @@
       "final_time_reached": 6.0,
       "max_abs_divergence": 6.394884621840902e-14,
       "rank": 18,
-      "wall_seconds": 4.338866809150204
+      "wall_seconds": 8.676165394019336
     },
     {
       "basis": "fluctuations",
@@ -212,7 +206,7 @@
       "final_time_reached": 2.876,
       "max_abs_divergence": 2.0859248397665138e+93,
       "rank": 18,
-      "wall_seconds": 2.06483897799626
+      "wall_seconds": 4.152616209117696
     }
   ],
   "seed_replication": [
@@ -226,7 +220,7 @@
       "initial_energy": 22.28992861738245,
       "max_abs_divergence": 2.138644039510404e+191,
       "seed": 20260925,
-      "wall_seconds": 3.8644288890063763
+      "wall_seconds": 5.7078353320248425
     },
     {
       "basis": "fluctuations",
@@ -238,7 +232,7 @@
       "initial_energy": 22.28992861738245,
       "max_abs_divergence": 3.8194424556271614e+89,
       "seed": 20260925,
-      "wall_seconds": 3.169478969881311
+      "wall_seconds": 5.021903202170506
     },
     {
       "basis": "raw",
@@ -250,7 +244,7 @@
       "initial_energy": 22.215153823348857,
       "max_abs_divergence": 5.558020283391177e+78,
       "seed": 7,
-      "wall_seconds": 3.2651555510237813
+      "wall_seconds": 5.102371867047623
     },
     {
       "basis": "fluctuations",
@@ -262,7 +256,7 @@
       "initial_energy": 22.215153823348857,
       "max_abs_divergence": 2.4550429559221064e+150,
       "seed": 7,
-      "wall_seconds": 2.819326138822362
+      "wall_seconds": 3.499162877909839
     },
     {
       "basis": "raw",
@@ -274,7 +268,7 @@
       "initial_energy": 22.286048551199556,
       "max_abs_divergence": 4.1010951089681474e+99,
       "seed": 991,
-      "wall_seconds": 4.101253130938858
+      "wall_seconds": 5.286515793064609
     },
     {
       "basis": "fluctuations",
@@ -286,7 +280,7 @@
       "initial_energy": 22.286048551199556,
       "max_abs_divergence": 2.154551665274214e+214,
       "seed": 991,
-      "wall_seconds": 2.944321487797424
+      "wall_seconds": 4.509381401119754
     }
   ]
 }

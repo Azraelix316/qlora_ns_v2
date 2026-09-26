@@ -115,6 +115,62 @@
           "window": 0.25
         },
         {
+          "all_crossings": [
+            {
+              "bracket": [
+                2.0,
+                3.0
+              ],
+              "direction": "static_overtakes",
+              "ratio_at_bracket": [
+                1.7962783436588157,
+                0.9395724755734859
+              ],
+              "t_linear": 2.929465261441987,
+              "t_loglog": 2.8852569045257255
+            }
+          ],
+          "bracket": [
+            2.0,
+            3.0
+          ],
+          "crossings": 1,
+          "note": "ratio = static error / DLRA error, so >1 means the DLRA leads. bracket is the measured pair containing the crossing; the two t values are the log-log and linear interpolations of it and differ, so quote the bracket if a convention is not stated.",
+          "rank": 43,
+          "ratio_by_horizon": [
+            {
+              "ratio": 3377.6658752860567,
+              "time": 0.1
+            },
+            {
+              "ratio": 253.98554199118172,
+              "time": 0.25
+            },
+            {
+              "ratio": 41.8110081439234,
+              "time": 0.5
+            },
+            {
+              "ratio": 7.545438354937165,
+              "time": 1.0
+            },
+            {
+              "ratio": 1.7962783436588157,
+              "time": 2.0
+            },
+            {
+              "ratio": 0.9395724755734859,
+              "time": 3.0
+            }
+          ],
+          "reason": "the static baseline takes the lead between t=2 and t=3 and holds from there on",
+          "status": "resolved",
+          "t_star": 2.8852569045257255,
+          "t_star_linear": 2.929465261441987,
+          "t_star_loglog": 2.8852569045257255,
+          "window": 0.25
+        },
+        {
           "all_crossings": [],
           "crossings": 0,
           "note": "ratio = static error / DLRA error, so >1 means the DLRA leads. bracket is the measured pair containing the crossing; the two t values are the log-log and linear interpolations of it and differ, so quote the bracket if a convention is not stated.",
@@ -157,8 +213,8 @@
             "rank": 16,
             "relative_l2": 0.0,
             "relative_l2_fluct_normalized": 0.0,
+            "relative_l2_fluct_over_full": 0.0,
             "relative_l2_mean_only": 0.0,
-            "relative_l2_oracle_mean": 0.0,
             "time": 0.0
           },
           {
@@ -166,8 +222,8 @@
             "rank": 16,
             "relative_l2": 0.014318547186256664,
             "relative_l2_fluct_normalized": 0.03945366740759356,
+            "relative_l2_fluct_over_full": 0.014278186947401628,
             "relative_l2_mean_only": 0.0010743235174324598,
-            "relative_l2_oracle_mean": 0.014278186947401628,
             "time": 0.1
           },
           {
@@ -175,8 +231,8 @@
             "rank": 16,
             "relative_l2": 0.0289076475117782,
             "relative_l2_fluct_normalized": 0.07909880206302479,
+            "relative_l2_fluct_over_full": 0.0286892194095531,
             "relative_l2_mean_only": 0.0035469387273729257,
-            "relative_l2_oracle_mean": 0.0286892194095531,
             "time": 0.25
           },
           {
@@ -184,8 +240,8 @@
             "rank": 16,
             "relative_l2": 0.065736176018574,
             "relative_l2_fluct_normalized": 0.1670565614364642,
+            "relative_l2_fluct_over_full": 0.06356209813387152,
             "relative_l2_mean_only": 0.01676617184586363,
-            "relative_l2_oracle_mean": 0.06356209813387152,
             "time": 0.5
           },
           {
@@ -193,8 +249,8 @@
             "rank": 16,
             "relative_l2": 0.1593397562457096,
             "relative_l2_fluct_normalized": 0.3781862409786965,
+            "relative_l2_fluct_over_full": 0.1557792158041677,
             "relative_l2_mean_only": 0.033496176556148866,
-            "relative_l2_oracle_mean": 0.1557792158041677,
             "time": 1.0
           },
           {
@@ -202,8 +258,8 @@
             "rank": 16,
             "relative_l2": 0.35665234649323024,
             "relative_l2_fluct_normalized": 0.8473245783817406,
+            "relative_l2_fluct_over_full": 0.3518913469691173,
             "relative_l2_mean_only": 0.058080772957903135,
-            "relative_l2_oracle_mean": 0.3518913469691173,
             "time": 2.0
           },
           {
@@ -211,8 +267,8 @@
             "rank": 16,
             "relative_l2": 0.4309765186512759,
             "relative_l2_fluct_normalized": 1.0162923268089008,
+            "relative_l2_fluct_over_full": 0.41522462189767706,
             "relative_l2_mean_only": 0.11545247073451768,
-            "relative_l2_oracle_mean": 0.41522462189767706,
             "time": 3.0
           }
         ],
@@ -221,8 +277,8 @@
             "rank": 32,
             "relative_l2": 0.0,
             "relative_l2_fluct_normalized": 0.0,
+            "relative_l2_fluct_over_full": 0.0,
             "relative_l2_mean_only": 0.0,
-            "relative_l2_oracle_mean": 0.0,
             "time": 0.0
           },
           {
@@ -230,8 +286,8 @@
             "rank": 32,
             "relative_l2": 0.00020804030406170596,
             "relative_l2_fluct_normalized": 0.0005747127773835573,
+            "relative_l2_fluct_over_full": 0.0002079871661047024,
             "relative_l2_mean_only": 4.7017921925288654e-06,
-            "relative_l2_oracle_mean": 0.0002079871661047024,
             "time": 0.1
           },
           {
@@ -239,8 +295,8 @@
             "rank": 32,
             "relative_l2": 0.0015441859981623963,
             "relative_l2_fluct_normalized": 0.004247067653292666,
+            "relative_l2_fluct_over_full": 0.0015404159427780551,
             "relative_l2_mean_only": 0.00010783839833745809,
-            "relative_l2_oracle_mean": 0.0015404159427780551,
             "time": 0.25
           },
           {
@@ -248,8 +304,8 @@
             "rank": 32,
             "relative_l2": 0.007422837675588801,
             "relative_l2_fluct_normalized": 0.01939636353307767,
+            "relative_l2_fluct_over_full": 0.007379976887640073,
             "relative_l2_mean_only": 0.0007965301601565088,
-            "relative_l2_oracle_mean": 0.007379976887640073,
             "time": 0.5
           },
           {
@@ -257,8 +313,8 @@
             "rank": 32,
             "relative_l2": 0.03547977784493795,
             "relative_l2_fluct_normalized": 0.08448039160777604,
+            "relative_l2_fluct_over_full": 0.034798434552857437,
             "relative_l2_mean_only": 0.006919796860938035,
-            "relative_l2_oracle_mean": 0.034798434552857437,
             "time": 1.0
           },
           {
@@ -266,8 +322,8 @@
             "rank": 32,
             "relative_l2": 0.12419549437390469,
             "relative_l2_fluct_normalized": 0.29334633259770554,
+            "relative_l2_fluct_over_full": 0.12182584896026868,
             "relative_l2_mean_only": 0.024145048102838705,
-            "relative_l2_oracle_mean": 0.12182584896026868,
             "time": 2.0
           },
           {
@@ -275,8 +331,72 @@
             "rank": 32,
             "relative_l2": 0.21392969981378404,
             "relative_l2_fluct_normalized": 0.5013053038624516,
+            "relative_l2_fluct_over_full": 0.20481735398433942,
             "relative_l2_mean_only": 0.061771902749304726,
-            "relative_l2_oracle_mean": 0.20481735398433942,
+            "time": 3.0
+          }
+        ],
+        "43": [
+          {
+            "rank": 43,
+            "relative_l2": 0.0,
+            "relative_l2_fluct_normalized": 0.0,
+            "relative_l2_fluct_over_full": 0.0,
+            "relative_l2_mean_only": 0.0,
+            "time": 0.0
+          },
+          {
+            "mean_energy_share_of_reference": 0.8690301380959112,
+            "rank": 43,
+            "relative_l2": 2.9020615666803698e-05,
+            "relative_l2_fluct_normalized": 8.018747024323633e-05,
+            "relative_l2_fluct_over_full": 2.901965181446658e-05,
+            "relative_l2_mean_only": 2.36521135258927e-07,
+            "time": 0.1
+          },
+          {
+            "mean_energy_share_of_reference": 0.8684479405561389,
+            "rank": 43,
+            "relative_l2": 0.0004874767007766264,
+            "relative_l2_fluct_normalized": 0.0013427797532383754,
+            "relative_l2_fluct_over_full": 0.00048702764080632354,
+            "relative_l2_mean_only": 2.0919151289863227e-05,
+            "time": 0.25
+          },
+          {
+            "mean_energy_share_of_reference": 0.8552330672068597,
+            "rank": 43,
+            "relative_l2": 0.003195750797645081,
+            "relative_l2_fluct_normalized": 0.008353997876814699,
+            "relative_l2_fluct_over_full": 0.00317854999702123,
+            "relative_l2_mean_only": 0.00033112396030109267,
+            "time": 0.5
+          },
+          {
+            "mean_energy_share_of_reference": 0.8303290163648313,
+            "rank": 43,
+            "relative_l2": 0.019663846856977408,
+            "relative_l2_fluct_normalized": 0.046748864060706705,
+            "relative_l2_fluct_over_full": 0.019256389032732572,
+            "relative_l2_mean_only": 0.0039822549685721055,
+            "time": 1.0
+          },
+          {
+            "mean_energy_share_of_reference": 0.8275284100830584,
+            "rank": 43,
+            "relative_l2": 0.09207837470621197,
+            "relative_l2_fluct_normalized": 0.20635125113897676,
+            "relative_l2_fluct_over_full": 0.08569705348419987,
+            "relative_l2_mean_only": 0.03368148026236024,
+            "time": 2.0
+          },
+          {
+            "mean_energy_share_of_reference": 0.83307211016392,
+            "rank": 43,
+            "relative_l2": 0.18438987284106514,
+            "relative_l2_fluct_normalized": 0.4367623850706341,
+            "relative_l2_fluct_over_full": 0.17844717648269992,
+            "relative_l2_mean_only": 0.046435228132273826,
             "time": 3.0
           }
         ],
@@ -285,8 +405,8 @@
             "rank": 85,
             "relative_l2": 0.0,
             "relative_l2_fluct_normalized": 0.0,
+            "relative_l2_fluct_over_full": 0.0,
             "relative_l2_mean_only": 0.0,
-            "relative_l2_oracle_mean": 0.0,
             "time": 0.0
           },
           {
@@ -294,8 +414,8 @@
             "rank": 85,
             "relative_l2": 3.2037007232465623e-12,
             "relative_l2_fluct_normalized": 2.972682030292795e-12,
+            "relative_l2_fluct_over_full": 1.0758064472235287e-12,
             "relative_l2_mean_only": 3.0176568864056293e-12,
-            "relative_l2_oracle_mean": 1.0758064472235287e-12,
             "time": 0.1
           },
           {
@@ -303,8 +423,8 @@
             "rank": 85,
             "relative_l2": 6.441405743811362e-12,
             "relative_l2_fluct_normalized": 8.126896051718463e-12,
+            "relative_l2_fluct_over_full": 2.9476338182796727e-12,
             "relative_l2_mean_only": 5.727474597096096e-12,
-            "relative_l2_oracle_mean": 2.9476338182796727e-12,
             "time": 0.25
           },
           {
@@ -312,8 +432,8 @@
             "rank": 85,
             "relative_l2": 1.621029057491209e-11,
             "relative_l2_fluct_normalized": 2.518029465746944e-11,
+            "relative_l2_fluct_over_full": 9.580661461576822e-12,
             "relative_l2_mean_only": 1.307607345840193e-11,
-            "relative_l2_oracle_mean": 9.580661461576822e-12,
             "time": 0.5
           },
           {
@@ -321,8 +441,8 @@
             "rank": 85,
             "relative_l2": 3.697827846686352e-11,
             "relative_l2_fluct_normalized": 8.154535117990305e-11,
+            "relative_l2_fluct_over_full": 3.358945800462458e-11,
             "relative_l2_mean_only": 1.5464164194695947e-11,
-            "relative_l2_oracle_mean": 3.358945800462458e-11,
             "time": 1.0
           },
           {
@@ -330,8 +450,8 @@
             "rank": 85,
             "relative_l2": 1.3109836472453614e-10,
             "relative_l2_fluct_normalized": 2.8003355737632796e-10,
+            "relative_l2_fluct_over_full": 1.162970934820615e-10,
             "relative_l2_mean_only": 6.05125242091599e-11,
-            "relative_l2_oracle_mean": 1.162970934820615e-10,
             "time": 2.0
           },
           {
@@ -339,8 +459,8 @@
             "rank": 85,
             "relative_l2": 2.885059554115909e-10,
             "relative_l2_fluct_normalized": 6.547742546508715e-10,
+            "relative_l2_fluct_over_full": 2.6751987114713724e-10,
             "relative_l2_mean_only": 1.0802220571507339e-10,
-            "relative_l2_oracle_mean": 2.6751987114713724e-10,
             "time": 3.0
           }
         ]
@@ -350,28 +470,35 @@
       "reference": {
         "max_abs_divergence": 1.1501910535116622e-13,
         "nsteps": 12000,
-        "wall_seconds": 149.53858495992608
+        "wall_seconds": 146.96858842414804
       },
       "run_diagnostics": {
         "16": {
           "dlra": {
             "max_abs_divergence": 1.056932319443149e-13,
             "rank_actual": 16,
-            "wall_seconds": 288.8870658050291
+            "wall_seconds": 291.1447837871965
           }
         },
         "32": {
           "dlra": {
             "max_abs_divergence": 1.0946799022804043e-13,
             "rank_actual": 32,
-            "wall_seconds": 268.96094264206477
+            "wall_seconds": 250.7575222030282
+          }
+        },
+        "43": {
+          "dlra": {
+            "max_abs_divergence": 1.1102230246251565e-13,
+            "rank_actual": 43,
+            "wall_seconds": 223.52620680304244
           }
         },
         "85": {
           "dlra": {
             "max_abs_divergence": 1.1013412404281553e-13,
             "rank_actual": 85,
-            "wall_seconds": 284.0666756890714
+            "wall_seconds": 237.16114492178895
           }
         },
         "W0.25_r16": {
@@ -379,21 +506,28 @@
           "max_abs_divergence": 1.4210854715202004e-13,
           "refits": 12,
           "refits_with_fewer_snapshots_than_rank": 12,
-          "wall_seconds": 138.40160597395152
+          "wall_seconds": 187.94301863899454
         },
         "W0.25_r32": {
           "diverged": false,
           "max_abs_divergence": 1.4210854715202004e-13,
           "refits": 12,
           "refits_with_fewer_snapshots_than_rank": 12,
-          "wall_seconds": 134.5930989391636
+          "wall_seconds": 151.08556180610321
+        },
+        "W0.25_r43": {
+          "diverged": false,
+          "max_abs_divergence": 1.4210854715202004e-13,
+          "refits": 12,
+          "refits_with_fewer_snapshots_than_rank": 12,
+          "wall_seconds": 129.41486807609908
         },
         "W0.25_r85": {
           "diverged": false,
           "max_abs_divergence": 1.4210854715202004e-13,
           "refits": 12,
           "refits_with_fewer_snapshots_than_rank": 12,
-          "wall_seconds": 136.4607658260502
+          "wall_seconds": 183.03422814793885
         }
       },
       "static_moving_window": {
@@ -403,8 +537,8 @@
             "rank": 16,
             "relative_l2": 0.10940847446957205,
             "relative_l2_fluct_normalized": 0.27085547770161467,
+            "relative_l2_fluct_over_full": 0.09802194321755477,
             "relative_l2_mean_only": 0.04859951577550411,
-            "relative_l2_oracle_mean": 0.09802194321755477,
             "time": 0.1
           },
           {
@@ -412,8 +546,8 @@
             "rank": 16,
             "relative_l2": 0.13252540216335595,
             "relative_l2_fluct_normalized": 0.34136110275143966,
+            "relative_l2_fluct_over_full": 0.12381203405482456,
             "relative_l2_mean_only": 0.04726058020979217,
-            "relative_l2_oracle_mean": 0.12381203405482456,
             "time": 0.25
           },
           {
@@ -421,8 +555,8 @@
             "rank": 16,
             "relative_l2": 0.13859078083857068,
             "relative_l2_fluct_normalized": 0.35117925957787316,
+            "relative_l2_fluct_over_full": 0.13361756262628818,
             "relative_l2_mean_only": 0.036793362054244244,
-            "relative_l2_oracle_mean": 0.13361756262628818,
             "time": 0.5
           },
           {
@@ -430,8 +564,8 @@
             "rank": 16,
             "relative_l2": 0.15332114829407742,
             "relative_l2_fluct_normalized": 0.3602045295893879,
+            "relative_l2_fluct_over_full": 0.14837234428024795,
             "relative_l2_mean_only": 0.038639642428444636,
-            "relative_l2_oracle_mean": 0.14837234428024795,
             "time": 1.0
           },
           {
@@ -439,8 +573,8 @@
             "rank": 16,
             "relative_l2": 0.1767272554019789,
             "relative_l2_fluct_normalized": 0.39826532428615485,
+            "relative_l2_fluct_over_full": 0.16539839040407023,
             "relative_l2_mean_only": 0.06225668842509253,
-            "relative_l2_oracle_mean": 0.16539839040407023,
             "time": 2.0
           },
           {
@@ -448,8 +582,8 @@
             "rank": 16,
             "relative_l2": 0.1831404886341971,
             "relative_l2_fluct_normalized": 0.42403616580461856,
+            "relative_l2_fluct_over_full": 0.17324764929595984,
             "relative_l2_mean_only": 0.05937752597234559,
-            "relative_l2_oracle_mean": 0.17324764929595984,
             "time": 3.0
           }
         ],
@@ -459,8 +593,8 @@
             "rank": 32,
             "relative_l2": 0.10940847446957205,
             "relative_l2_fluct_normalized": 0.27085547770161467,
+            "relative_l2_fluct_over_full": 0.09802194321755477,
             "relative_l2_mean_only": 0.04859951577550411,
-            "relative_l2_oracle_mean": 0.09802194321755477,
             "time": 0.1
           },
           {
@@ -468,8 +602,8 @@
             "rank": 32,
             "relative_l2": 0.13252540216335595,
             "relative_l2_fluct_normalized": 0.34136110275143966,
+            "relative_l2_fluct_over_full": 0.12381203405482456,
             "relative_l2_mean_only": 0.04726058020979217,
-            "relative_l2_oracle_mean": 0.12381203405482456,
             "time": 0.25
           },
           {
@@ -477,8 +611,8 @@
             "rank": 32,
             "relative_l2": 0.13859078083857068,
             "relative_l2_fluct_normalized": 0.35117925957787316,
+            "relative_l2_fluct_over_full": 0.13361756262628818,
             "relative_l2_mean_only": 0.036793362054244244,
-            "relative_l2_oracle_mean": 0.13361756262628818,
             "time": 0.5
           },
           {
@@ -486,8 +620,8 @@
             "rank": 32,
             "relative_l2": 0.15332114829407742,
             "relative_l2_fluct_normalized": 0.3602045295893879,
+            "relative_l2_fluct_over_full": 0.14837234428024795,
             "relative_l2_mean_only": 0.038639642428444636,
-            "relative_l2_oracle_mean": 0.14837234428024795,
             "time": 1.0
           },
           {
@@ -495,8 +629,8 @@
             "rank": 32,
             "relative_l2": 0.1767272554019789,
             "relative_l2_fluct_normalized": 0.39826532428615485,
+            "relative_l2_fluct_over_full": 0.16539839040407023,
             "relative_l2_mean_only": 0.06225668842509253,
-            "relative_l2_oracle_mean": 0.16539839040407023,
             "time": 2.0
           },
           {
@@ -504,8 +638,64 @@
             "rank": 32,
             "relative_l2": 0.1831404886341971,
             "relative_l2_fluct_normalized": 0.42403616580461856,
+            "relative_l2_fluct_over_full": 0.17324764929595984,
             "relative_l2_mean_only": 0.05937752597234559,
-            "relative_l2_oracle_mean": 0.17324764929595984,
+            "time": 3.0
+          }
+        ],
+        "W0.25_r43": [
+          {
+            "mean_energy_share_of_reference": 0.8690301380959112,
+            "rank": 43,
+            "relative_l2": 0.10940847446957205,
+            "relative_l2_fluct_normalized": 0.27085547770161467,
+            "relative_l2_fluct_over_full": 0.09802194321755477,
+            "relative_l2_mean_only": 0.04859951577550411,
+            "time": 0.1
+          },
+          {
+            "mean_energy_share_of_reference": 0.8684479405561389,
+            "rank": 43,
+            "relative_l2": 0.13252540216335595,
+            "relative_l2_fluct_normalized": 0.34136110275143966,
+            "relative_l2_fluct_over_full": 0.12381203405482456,
+            "relative_l2_mean_only": 0.04726058020979217,
+            "time": 0.25
+          },
+          {
+            "mean_energy_share_of_reference": 0.8552330672068597,
+            "rank": 43,
+            "relative_l2": 0.13859078083857068,
+            "relative_l2_fluct_normalized": 0.35117925957787316,
+            "relative_l2_fluct_over_full": 0.13361756262628818,
+            "relative_l2_mean_only": 0.036793362054244244,
+            "time": 0.5
+          },
+          {
+            "mean_energy_share_of_reference": 0.8303290163648313,
+            "rank": 43,
+            "relative_l2": 0.15332114829407742,
+            "relative_l2_fluct_normalized": 0.3602045295893879,
+            "relative_l2_fluct_over_full": 0.14837234428024795,
+            "relative_l2_mean_only": 0.038639642428444636,
+            "time": 1.0
+          },
+          {
+            "mean_energy_share_of_reference": 0.8275284100830584,
+            "rank": 43,
+            "relative_l2": 0.1767272554019789,
+            "relative_l2_fluct_normalized": 0.39826532428615485,
+            "relative_l2_fluct_over_full": 0.16539839040407023,
+            "relative_l2_mean_only": 0.06225668842509253,
+            "time": 2.0
+          },
+          {
+            "mean_energy_share_of_reference": 0.83307211016392,
+            "rank": 43,
+            "relative_l2": 0.1831404886341971,
+            "relative_l2_fluct_normalized": 0.42403616580461856,
+            "relative_l2_fluct_over_full": 0.17324764929595984,
+            "relative_l2_mean_only": 0.05937752597234559,
             "time": 3.0
           }
         ],
@@ -515,8 +705,8 @@
             "rank": 85,
             "relative_l2": 0.10940847446957205,
             "relative_l2_fluct_normalized": 0.27085547770161467,
+            "relative_l2_fluct_over_full": 0.09802194321755477,
             "relative_l2_mean_only": 0.04859951577550411,
-            "relative_l2_oracle_mean": 0.09802194321755477,
             "time": 0.1
           },
           {
@@ -524,8 +714,8 @@
             "rank": 85,
             "relative_l2": 0.13252540216335595,
             "relative_l2_fluct_normalized": 0.34136110275143966,
+            "relative_l2_fluct_over_full": 0.12381203405482456,
             "relative_l2_mean_only": 0.04726058020979217,
-            "relative_l2_oracle_mean": 0.12381203405482456,
             "time": 0.25
           },
           {
@@ -533,8 +723,8 @@
             "rank": 85,
             "relative_l2": 0.13859078083857068,
             "relative_l2_fluct_normalized": 0.35117925957787316,
+            "relative_l2_fluct_over_full": 0.13361756262628818,
             "relative_l2_mean_only": 0.036793362054244244,
-            "relative_l2_oracle_mean": 0.13361756262628818,
             "time": 0.5
           },
           {
@@ -542,8 +732,8 @@
             "rank": 85,
             "relative_l2": 0.15332114829407742,
             "relative_l2_fluct_normalized": 0.3602045295893879,
+            "relative_l2_fluct_over_full": 0.14837234428024795,
             "relative_l2_mean_only": 0.038639642428444636,
-            "relative_l2_oracle_mean": 0.14837234428024795,
             "time": 1.0
           },
           {
@@ -551,8 +741,8 @@
             "rank": 85,
             "relative_l2": 0.1767272554019789,
             "relative_l2_fluct_normalized": 0.39826532428615485,
+            "relative_l2_fluct_over_full": 0.16539839040407023,
             "relative_l2_mean_only": 0.06225668842509253,
-            "relative_l2_oracle_mean": 0.16539839040407023,
             "time": 2.0
           },
           {
@@ -560,8 +750,8 @@
             "rank": 85,
             "relative_l2": 0.1831404886341971,
             "relative_l2_fluct_normalized": 0.42403616580461856,
+            "relative_l2_fluct_over_full": 0.17324764929595984,
             "relative_l2_mean_only": 0.05937752597234559,
-            "relative_l2_oracle_mean": 0.17324764929595984,
             "time": 3.0
           }
         ]
@@ -575,16 +765,16 @@
   },
   "error_columns": {
     "relative_l2": "the method's own mean handling, full field; the comparable number",
-    "relative_l2_fluct_normalized": "fluctuation error over the fluctuation norm",
-    "relative_l2_mean_only": "the zonal mean's contribution alone, over the full-field norm",
-    "relative_l2_oracle_mean": "error with the zonal mean replaced by the reference's, i.e. what the baseline would make with a perfect mean"
+    "relative_l2_fluct_normalized": "fluctuation error over the fluctuation norm, not the full norm",
+    "relative_l2_fluct_over_full": "the FLUCTUATION error, each field's own zonal mean removed, over the FULL-field norm of the reference. D27.1: this column used to be called relative_l2_oracle_mean and documented as 'the zonal mean replaced by the reference's', which is a different quantity -- no mean is borrowed and it is not an oracle-mean error. Renamed to what it computes; the numbers are unchanged (D28.5/D29.2).",
+    "relative_l2_mean_only": "the zonal mean's contribution alone, over the full-field norm"
   },
   "initial_state": {
     "energy": 22.188588576546824,
     "note": "the same initial condition is used at every Reynolds number, so the Reynolds column varies the flow and nothing else",
     "numerical_rank": 17
   },
-  "interpretation": "An accuracy surface, not a cost surface. The rank is fixed per run, so the advantage comes from re-fitting the subspace to the current state each step and says nothing about adaptive rank. The static baseline is the oracle form: refitted on a trailing window of the reference trajectory, with the refit schedule offset from the evaluation grid so that no basis ever contains the time it is scored at. Its accuracy is a function of the window length, the refit interval and the offset, all recorded above -- three successive corrections to this baseline moved the advantage horizon by factors of two to four, so a t* quoted without them is not reproducible. Per-step cost is Theta(N^3) and rank-independent (D11.1, measured in cost_retiming.json). The highest rank tested is the only one that never loses, and it is the largest rank this grid resolves without aliasing, 2*floor(N/3)+1 -- which is not a single grid-independent quantity but a function of N, and at that rank the method is doing the work of the full-grid solver at over twice its cost.",
+  "interpretation": "An accuracy surface, not a cost surface. The rank is fixed per run, so the advantage comes from re-fitting the subspace to the current state each step and says nothing about adaptive rank. The static baseline is the oracle form: refitted on a trailing window of the reference trajectory, with the refit schedule offset from the evaluation grid so that no basis ever contains the time it is scored at. Its accuracy is a function of the window length, the refit interval and the offset, all recorded above -- three successive corrections to this baseline moved the advantage horizon by factors of two to four, so a t* quoted without them is not reproducible. Per-step cost is Theta(N^3) and rank-independent (D11.1, measured in cost_retiming.json). The highest rank tested is the only one that never yields, and the reason is that its error is already at roundoff -- the dynamics are effectively low-dimensional at these settings, not that the rank has reached the grid. That rank is the largest one tested and it happens to coincide with the wavenumber 2*floor(N/3)+1; the wavenumber is not a rank, it is 43 at N=64 and 85 at N=128, and the dealiased grid carries far more degrees of freedom than either. So a rank-43 subspace is not the full-grid solver, and it is not exact either -- it is near-roundoff.",
   "key_schema": {
     "by_reynolds": "top level key is the Reynolds number, formatted with %g",
     "crossovers": "one entry per (rank, window) pair, each carrying its own rank and window",
@@ -617,6 +807,7 @@
     "ranks": [
       16,
       32,
+      43,
       85
     ],
     "reynolds_numbers": [
@@ -629,10 +820,11 @@
     "driver": "experiments/run_crossover.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "49306ba027705bb3a250e7fc2b5b2f5630f6a8b01d691c874c6844f5f9e1f8bc",
-    "git_commit": "382bcdde9e2106a794307511f0742f2e5e7375d2",
+    "driver_sha256": "60fdd1ade90c9f8a43f6a19a893266f2ef53d7ee0982c9862db7e4d0318d15e1",
+    "git_commit": "acbb0ad9c940efea580c1b469d24bc72b28c9d78",
     "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_dirty": false
+    "working_tree_diff_sha256": "0828d64bf783c7e126ddcc417c7604ecd5c1412bc17cc5974d7478eae9dad7fb",
+    "working_tree_dirty": true
   }
 }
