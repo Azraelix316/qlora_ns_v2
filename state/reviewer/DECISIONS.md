@@ -7464,3 +7464,68 @@ not exist. **C8-1..C8-3 BELOW ARE NEW AND SMALLER.**
 
 **D108.10 — Unchanged.** Everything in D35.6 through D107.8 stands, **except that provenance is now a gate, `DIRTY` is 0,
 and 6 of 13 runs are named as unverifiable.**
+
+---
+
+## D109 — **THE PROVENANCE BLOCK RECORDS *THAT* THE WORKING TREE WAS DIRTY AND A HASH OF THE DIFF, BUT NOT *WHICH PATHS*. SO ITS OWN STATED RULE — "A REWRITTEN RESULT FILE ALONE DOES NOT INVALIDATE A RUN" — CANNOT BE APPLIED BY A READER. AND THIS IS TRUE OF BOTH COST ARTIFACTS, WHICH ARE WHERE THE PAPER'S COST BAND AND ITS PESSIMISTIC FLOOR COME FROM.** (2026-09-26)
+
+> **OPERATIVE (R146). C9-1, ONE LINE OF CODE. ALSO RECORDS TWO HYPOTHESES OF MINE THAT CHECKING REFUTED.**
+
+**D109.1 — THE FIELD IS A BOOLEAN WHERE THE DECISION NEEDS A LIST. `experiments/provenance.py` RECORDS:**
+
+```
+  driver                    experiments/bench_cost.py
+  driver_sha256             8d6c0f35...      the driver file's hash on disk
+  driver_dirty              false            is the DRIVER's diff non-empty
+  driver_matches_HEAD       true             does the on-disk driver equal the one at git_commit
+  working_tree_dirty        true             is THE TREE's diff non-empty
+  working_tree_diff_sha256  9bb7971b...      a hash of the diff
+  reproducible              true             driver_matches_HEAD is True
+```
+
+**AND THE BLOCK'S OWN NOTE SAYS: *"`working_tree_dirty` IS RECORDED TOO, BUT A REWRITTEN RESULT FILE ALONE DOES NOT
+INVALIDATE A RUN."* THE NOTE IS CORRECT AS A POLICY AND UNUSABLE AS A CHECK, BECAUSE THE BLOCK RECORDS NO PATH LIST.**
+
+**THE DISTINCTION THE NOTE TURNS ON IS *RESULT FILE* VERSUS *SOURCE FILE*. A READER HOLDING A BOOLEAN AND A HASH CANNOT
+TELL WHICH CASE THEY ARE IN.** On `cost_retiming.json` and `cost_bug_port.json` — the two artifacts the paper's
+**`2.24`–`2.7×`** band and its **`≥ 1.4×`** pessimistic floor are computed from — `working_tree_dirty` is **`true`** and
+`working_tree_diff_sha256` is non-empty, so the note's own exemption **cannot be claimed by anyone reading the artifact.**
+
+**D109.2 — AND THIS IS A BOOLEAN-WHERE-A-LIST FAILS THE OTHER WAY TOO. THE DRIVER *IS* FINGERPRINTED CORRECTLY, SO THE
+PHYSICS IS SAFE; WHAT IS UNCHECKABLE IS THE WORKING-TREE RULE.** `driver_dirty: false` and `driver_matches_HEAD: true` mean
+the *code that produced the numbers* is byte-identical to the code at the recorded commit, and that is the check the note
+correctly calls *"the check that decides reproducibility."* **SO NO RESULT IS INVALIDATED BY D109.1 — BUT A RESULT THAT NEEDS
+THE WORKING-TREE EXEMPTION IS, AND THE ARTIFACT CANNOT SHOW THAT IT NEEDS IT.**
+
+**D109.3 — TWO HYPOTHESES OF MINE THAT CHECKING REFUTED, RECORDED BECAUSE BEING WRONG IS THE POINT AND BOTH WERE THE
+PLEASANT FINDING.**
+
+**FIRST, I HYPOTHESED THAT THE COST NUMBERS WERE CONTAMINATED BY CONCURRENCY.** The coder's session note reports *"three
+multi-threaded BLAS jobs on twelve cores"*, D91.5 records the cost noise as reproducible only to **`11`–`173%`** between two
+runs of the same protocol, and `11`–`173%` is exactly what a shared machine produces. **I WAS WRONG, AND THE ARTIFACTS
+SAY SO THEMSELVES:**
+
+```
+  thread_settings        {'MKL_NUM_THREADS': '1', 'NUMEXPR_NUM_THREADS': '1',
+                          'OMP_NUM_THREADS': '1', 'OPENBLAS_NUM_THREADS': '1'}
+  load_average_at_end    [1.326, 1.379, 1.333]   (cost_retiming)   [1.189, 1.235, 2.404] (cost_bug_port)
+  shared_node_note       "this node also serves a language model, so its load moves with someone else's work; the ..."
+```
+
+**THREADS PINNED TO 1, LOAD AVERAGE ~`1.2`–`1.4`, AND THE SHARED-NODE HAZARD NAMED IN THE ARTIFACT.** The coder's BLAS remark
+concerned the *figure regeneration* runs, not the cost timing. **D91.5's `11`–`173%` IS NOT MACHINE CONTENTION, AND I AM
+RECORDING THAT SO THE NEXT READER DOESN'T RE-DERIVE IT.**
+
+**SECOND, I HYPOTHESED THAT `fig_spectra_ek`'S GENERATED CAPTION WINDOW `t ∈ [13.33, 20]` LAY OUTSIDE THE DATA** (D108.8).
+**I WAS WRONG: `regime_pilot_re5000_A0p5.json` IS A GENUINE `t = 20` RUN.** Both refutations came from reading the artifact
+rather than the diff, which is the only reason they were cheap.
+
+**D109.4 — AND ONE POSITIVE FINDING WORTH KEEPING. THE COST ARTIFACTS ARE THE BEST-EVIDENCED THINGS IN THE REPOSITORY.**
+They record the interpreter, the platform, the processor, the numpy version, **the full thread configuration, the load average
+at the end of the run, AND a note naming the shared-node hazard.** The physics artifacts record only the driver fingerprint.
+**That allocation is correct rather than backwards: the physics claims are robust — the `N=128` re-run reproduced every series
+byte-identically (D108.3) — while the cost claims are the fragile ones (`11`–`173%`, D91.5). THE EVIDENCE IS STRONGEST WHERE
+THE MEASUREMENT IS WEAKEST, WHICH IS HOW IT SHOULD BE.**
+
+**D109.5 — Unchanged.** Everything in D35.6 through D108.10 stands, **except that the working-tree exemption is recorded as
+a boolean plus a hash and is therefore unactionable, and D91.5's cost noise is not machine contention.**

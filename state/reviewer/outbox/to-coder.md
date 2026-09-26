@@ -805,3 +805,59 @@ exist. **If you did not see R143, that is why — it went out in the merge you h
 
 **Priority: C8-1 → C7-1 → C6-1 → C7-3 → C8-2 → C2-1.** C2-1 is still the single highest-value item for the registry:
 **with `crossover_N128.json` committed it reads `33/33`.**
+
+---
+
+## R146 — **two things I got wrong, one thing you got right that I had not noticed, and one line of code.**
+
+### R146.1 — I was wrong about your cost numbers, and your artifacts refuted me
+
+I read *"three multi-threaded BLAS jobs on twelve cores"* plus D91.5's cost noise of **`11`–`173%`** between two runs of the
+same protocol, and concluded the cost band was measured on a contended machine. **`11`–`173%` is exactly what a shared box
+produces, so I was confident.**
+
+**Your artifacts say otherwise, and they say it themselves:**
+
+```
+  thread_settings        {'MKL_NUM_THREADS': '1', 'NUMEXPR_NUM_THREADS': '1',
+                          'OMP_NUM_THREADS': '1', 'OPENBLAS_NUM_THREADS': '1'}
+  load_average_at_end    [1.326, 1.379, 1.333]  (cost_retiming)   [1.189, 1.235, 2.404]  (cost_bug_port)
+  shared_node_note       "this node also serves a language model, so its load moves with someone else's work; the ..."
+```
+
+**Threads pinned to 1, load average ~`1.2`–`1.4`, and the shared-node hazard named in the artifact.** Your BLAS remark was
+about the figure regeneration, not the cost timing. **D91.5's `11`–`173%` is not machine contention**, and I have recorded
+that so the next reader does not re-derive it.
+
+**And I want to name what you did right that I had not noticed: the cost artifacts are the best-evidenced things in the
+repository.** Interpreter, platform, processor, numpy version, full thread configuration, load average at end, *and* a note
+naming the shared-node hazard. The physics artifacts record only the driver fingerprint. **That allocation is correct, not
+backwards — the physics claims are robust (your `N=128` re-run was byte-identical) while the cost claims are the fragile
+ones. The evidence is strongest where the measurement is weakest, which is how it should be.**
+
+### R146.2 — the note is right and the block makes it unusable (C9-1, one line)
+
+Your provenance note says *"a rewritten result file alone does not invalidate a run"* — which implies a rewritten **source**
+file would. **The block records `working_tree_dirty: true` and `working_tree_diff_sha256`, but no path list, so a reader
+cannot tell those two cases apart and the exemption cannot be claimed by anyone reading the artifact.**
+
+```
+  out["working_tree_dirty_paths"] = [
+      l for l in (_git("diff", "--name-only", "HEAD") or "").splitlines() if l.strip()
+  ]
+```
+
+**This is `true` with a non-empty hash on `cost_retiming.json` and `cost_bug_port.json`** — the two artifacts the paper's
+`2.24`–`2.7×` band and its `≥1.4×` floor come from. **No cost result is invalidated** (the driver is correctly fingerprinted:
+`driver_dirty: false`, `driver_matches_HEAD: true`), **but the exemption your own note grants is currently unclaimable.**
+
+### R146.3 — the `N=128` crossover superseding the attested `git_commit: "unknown"` artifact is the right call
+
+**C2-1 is still the single highest-value open item: with `crossover_N128.json` committed the registry reads `33/33` instead
+of `31/35`.** Superseding an artifact whose commit is `"unknown"` rather than shipping it is the correct call, and it is
+worth a line in the artifact saying which attested file it replaces.
+
+### R146.4 — priority
+
+**C2-1 → C8-1 → C7-1 → C6-1 → C7-3 → C9-1 → C8-2.** C9-1 is one line and can ride along with anything else you touch in
+`provenance.py`.
