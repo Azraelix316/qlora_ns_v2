@@ -44,6 +44,47 @@ def load(name: str) -> dict:
     return json.loads(path.read_text())
 
 
+def test_every_driver_can_print_its_own_help():
+    """`--help` is how a person discovers the flags, so it must not crash.
+
+    A bare `%` in an argparse `help=` string is interpolated by argparse, and
+    raises `ValueError: unsupported format character` — which means the driver
+    cannot print its own help at all. That happened on 2026-09-26: a help string
+    mentioning "+136%" made `bench_memory.py --help` exit 1 with a traceback, and
+    the *only* symptom was that `check_driver_flags.py` reported it "cannot
+    validate", which read like a problem with the checker.
+
+    That is worth a test of its own. A driver whose help crashes is a driver
+    nobody can inspect, and the failure mode is a traceback rather than anything
+    that looks like a broken flag.
+    """
+    import glob
+    import subprocess
+    import sys
+
+    from _paths import EXPERIMENTS, REPO_ROOT
+
+    broken: list[str] = []
+    drivers = sorted(glob.glob(str(EXPERIMENTS / "*.py")))
+    assert len(drivers) > 10, f"only found {len(drivers)} driver(s) to check"
+    for path in drivers:
+        if path.endswith("_cli.py") or path.endswith("_paths.py"):
+            continue
+        result = subprocess.run(
+            [sys.executable, path, "--help"],
+            cwd=REPO_ROOT, capture_output=True, text=True, timeout=300,
+        )
+        if result.returncode != 0:
+            broken.append(
+                f"{Path(path).name}: exit {result.returncode}; "
+                + (result.stderr.strip().splitlines() or ["(no stderr)"])[-1]
+            )
+    assert not broken, (
+        "these drivers cannot print their own help, so their flags cannot be "
+        "discovered or checked:\n  " + "\n  ".join(broken)
+    )
+
+
 def test_the_scheme_card_cites_code_that_says_what_the_card_claims():
     """Every `file:line` in the scheme card resolves, and the card is regenerated.
 

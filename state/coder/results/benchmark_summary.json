@@ -14,7 +14,7 @@
         "final_energy": 20.25599184850761,
         "initial_projection_relative_l2": null,
         "linear_algebra_calls": 841,
-        "linear_algebra_seconds_per_step": 0.0014991919184103608,
+        "linear_algebra_seconds_per_step": 0.0013247981178574264,
         "max_abs_divergence": 2.4868995751603507e-14,
         "max_relative_energy": 1.0,
         "max_scaled_pde_energy_residual": 0.0004932977786977058,
@@ -24,7 +24,7 @@
         "rank_max": 43,
         "rank_min": 17,
         "stable": true,
-        "wall_seconds_per_step": 0.0067862356698606165
+        "wall_seconds_per_step": 0.005920321780722588
       },
       "dt": 0.0005,
       "file": "kolmogorov_re100_N64.json",
@@ -49,9 +49,9 @@
         "rank_max": null,
         "rank_min": null,
         "stable": true,
-        "wall_seconds_per_step": 0.005284089614870027
+        "wall_seconds_per_step": 0.003065651369979605
       },
-      "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
+      "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
       "ic_reference_N": null,
       "initial_energy": 22.206703312933374,
       "initial_state": {
@@ -84,7 +84,7 @@
         "rank_max": 16,
         "rank_min": 16,
         "stable": true,
-        "wall_seconds_per_step": 0.0051753645006101575
+        "wall_seconds_per_step": 0.00437896691961214
       },
       "pod_requested_rank": 16,
       "rank_mismatch": {
@@ -109,7 +109,7 @@
         "final_energy": 22.45956151350207,
         "initial_projection_relative_l2": null,
         "linear_algebra_calls": 841,
-        "linear_algebra_seconds_per_step": 0.0015007872378919275,
+        "linear_algebra_seconds_per_step": 0.001732909579295665,
         "max_abs_divergence": 2.5757174171303632e-14,
         "max_relative_energy": 1.0113865708477952,
         "max_scaled_pde_energy_residual": 0.0004896931406322086,
@@ -119,7 +119,7 @@
         "rank_max": 43,
         "rank_min": 17,
         "stable": true,
-        "wall_seconds_per_step": 0.006754053614567965
+        "wall_seconds_per_step": 0.007892721735406666
       },
       "dt": 0.0005,
       "file": "kolmogorov_re1000_N64.json",
@@ -144,9 +144,9 @@
         "rank_max": null,
         "rank_min": null,
         "stable": true,
-        "wall_seconds_per_step": 0.004657721269177273
+        "wall_seconds_per_step": 0.005222129139583558
       },
-      "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
+      "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
       "ic_reference_N": null,
       "initial_energy": 22.206703312933374,
       "initial_state": {
@@ -179,7 +179,7 @@
         "rank_max": 16,
         "rank_min": 16,
         "stable": true,
-        "wall_seconds_per_step": 0.0050191760307643565
+        "wall_seconds_per_step": 0.007008305644849316
       },
       "pod_requested_rank": 16,
       "rank_mismatch": {
@@ -204,7 +204,7 @@
         "final_energy": 22.67155345907041,
         "initial_projection_relative_l2": null,
         "linear_algebra_calls": 841,
-        "linear_algebra_seconds_per_step": 0.0014850573113653809,
+        "linear_algebra_seconds_per_step": 0.0020597443403676152,
         "max_abs_divergence": 2.6645352591003757e-14,
         "max_relative_energy": 1.0209328750686866,
         "max_scaled_pde_energy_residual": 0.00046923135768045965,
@@ -214,7 +214,7 @@
         "rank_max": 43,
         "rank_min": 17,
         "stable": true,
-        "wall_seconds_per_step": 0.006755446965107694
+        "wall_seconds_per_step": 0.009499610349303111
       },
       "dt": 0.0005,
       "file": "kolmogorov_re5000_N64.json",
@@ -239,9 +239,9 @@
         "rank_max": null,
         "rank_min": null,
         "stable": true,
-        "wall_seconds_per_step": 0.004516866594785824
+        "wall_seconds_per_step": 0.005265268159564585
       },
-      "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
+      "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
       "ic_reference_N": null,
       "initial_energy": 22.206703312933374,
       "initial_state": {
@@ -274,7 +274,7 @@
         "rank_max": 16,
         "rank_min": 16,
         "stable": true,
-        "wall_seconds_per_step": 0.005095474340487271
+        "wall_seconds_per_step": 0.007064125074539334
       },
       "pod_requested_rank": 16,
       "rank_mismatch": {
@@ -7765,7 +7765,7 @@
   },
   "forcing_name_caveat": "The driver calls this a Kolmogorov flow, but the forcing is a periodic unidirectional shear f = (A sin(k y), 0), not the Arnold-Korkin-Sinitsyn cellular pump. CHECKLIST 1.3 asks that the forcing match what the name claims; the naming decision belongs to the reviewer and writer, and no result is affected by it because the forcing is recorded in every artifact's parameters.",
   "generated_by": "experiments/make_summary.py",
-  "git_commit": "f527aedea0b4ac504cb3e264016cae3e53b7e651",
+  "git_commit": "916256ea34b80e0bea8417dca20d49eb942e9a84",
   "grid_check": {
     "N": 128,
     "dlra": {
@@ -7778,7 +7778,7 @@
       "final_energy": 22.432965179105423,
       "initial_projection_relative_l2": null,
       "linear_algebra_calls": 841,
-      "linear_algebra_seconds_per_step": 0.006588788607623428,
+      "linear_algebra_seconds_per_step": 0.006763347096275538,
       "max_abs_divergence": 6.750155989720952e-14,
       "max_relative_energy": 1.010188899404995,
       "max_scaled_pde_energy_residual": 0.00021447695584713626,
@@ -7788,7 +7788,7 @@
       "rank_max": 70,
       "rank_min": 17,
       "stable": true,
-      "wall_seconds_per_step": 0.021958390545332804
+      "wall_seconds_per_step": 0.022991493655135854
     },
     "dt": 0.00025,
     "file": "kolmogorov_re5000_N128.json",
@@ -7813,9 +7813,9 @@
       "rank_max": null,
       "rank_min": null,
       "stable": true,
-      "wall_seconds_per_step": 0.01262520655989647
+      "wall_seconds_per_step": 0.014681880593998357
     },
-    "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
+    "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
     "ic_reference_N": 64,
     "initial_energy": 22.206703312933367,
     "initial_state_rank": 17,
@@ -7840,7 +7840,7 @@
       "rank_max": 16,
       "rank_min": 16,
       "stable": true,
-      "wall_seconds_per_step": 0.015524537434102967
+      "wall_seconds_per_step": 0.014407349264947697
     }
   },
   "honesty_note": "The static-POD baseline is now correct (its fit had reshaped the snapshot stack in C order, interleaving snapshots); every number here is post-fix. At T=0.1 the corrected static baseline is more accurate than adaptive DLRA, because its offline window is a prefix of the evaluated trajectory and is effectively rank 3, so no accuracy advantage is claimed for the proposed method at this horizon. Per D11.2 the regime is not turbulence and no turbulence statistic is drawn from t <= 0.1.",
@@ -7854,7 +7854,7 @@
     "final_time": 1.0,
     "full_final_energy": 28.722340374791127,
     "full_max_abs_divergence": 3.3306690738754696e-14,
-    "git_commit": "f403ab6b1986e9743839b649bccd235fb7213822",
+    "git_commit": "c74432641a4b3fd6a44ab0b9a8cafc6d4c041279",
     "max_trajectory_divergence": 0.0003346509368601237,
     "note": "full-grid and DLRA only; T=1 is a sustained check, not a statistical window (S5/D11.2: no turbulence statistic at t <= 0.1, and this horizon is not claimed stationary)",
     "re": 5000,
@@ -7864,29 +7864,29 @@
   "peak_memory": {
     "file": "peak_memory.json",
     "full_grid_peak_mib": {
-      "N=128": 39.46484375,
-      "N=64": 37.296875
+      "N=128": 39.703125,
+      "N=64": 37.28515625
     },
-    "git_commit": "4923f79f6596f92c4862540a4fe4640566abafb5",
+    "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
     "grids": [
       64,
       128
     ],
-    "interpretation": "Report the overhead over the full-grid step, not raw RSS: the interpreter and BLAS baseline is tens of MiB and no method choice affects it. THE ANSWER TO THE QUESTION THAT MATTERS IS NEGATIVE AND ROBUST: the reduced integrator does not save memory. It costs MORE than the full-grid step at both grids and every rank, because its state is a full N x N field plus its factors plus the factorization workspace, and that overhead is many times the run-to-run noise floor measured here from repeating one configuration, so it is real. For the midpoint BUG integrator, peak RSS N=64: varies by 0.68 MiB, which is 1.6x the noise floor (threshold 2x, so the margin is 0.8x either side) -- NOT resolved, so no variation is established; N=128: varies by 1.73 MiB, which is 4.1x the noise floor (threshold 2x, so the margin is 2.0x either side) -- RESOLVED, so the variation with rank is real. Neither 'flat in rank' nor 'varies with rank' is supported here, because the two grids disagree about whether a variation exists at all. For the projected integrator, peak RSS N=64: varies by 0.47 MiB, which is 1.1x the noise floor (threshold 2x, so the margin is 0.6x either side) -- NOT resolved, so no variation is established; N=128: varies by 0.34 MiB, which is 0.8x the noise floor (threshold 2x, so the margin is 0.4x either side) -- NOT resolved, so no variation is established. No variation with rank is resolved at any grid, so the spread is consistent with zero but does not demonstrate it. THE NOISE FLOOR IS A DISTRIBUTION, not a point: it is the largest of 92 re-measurements of one configuration (0.0000 to 0.4258 MiB, a factor of nan between them). With a single repeat this number has been observed at 0.1328, 0.0664, 0.0977 and 0.0039 MiB -- a factor of 34 -- and the verdicts above flip between 'resolved' and 'not established' across that range for the projected integrator. **Any claim of the form 'the variation with rank is N times the noise floor' therefore carries the floor's own spread, and the verdicts here are taken against its maximum so that the error can only fall on the side of not claiming a rank dependence.** The BUG integrator trades memory for time: its overhead is SMALLER than the projected integrator's at both grids, while its cost per step is 3.4-5.1x the projected one. Its spread over rank is also larger, in the direction its construction predicts, since it holds augmented factors of size up to 4r rather than a whole-field factorization.",
+    "interpretation": "Report the overhead over the full-grid step, not raw RSS: the interpreter and BLAS baseline is tens of MiB and no method choice affects it. THE ANSWER TO THE QUESTION THAT MATTERS IS NEGATIVE AND ROBUST: the reduced integrator does not save memory. It costs MORE than the full-grid step at both grids and every rank, because its state is a full N x N field plus its factors plus the factorization workspace, and that overhead is many times the run-to-run noise floor measured here from repeating one configuration, so it is real. For the midpoint BUG integrator, peak RSS N=64: varies by 0.42 MiB, which is 1.3x the noise floor (threshold 2x, so the margin is 0.6x either side) -- NOT resolved, so no variation is established; N=128: varies by 1.76 MiB, which is 5.4x the noise floor (threshold 2x, so the margin is 2.7x either side) -- RESOLVED, so the variation with rank is real. Neither 'flat in rank' nor 'varies with rank' is supported here, because the two grids disagree about whether a variation exists at all. For the projected integrator, peak RSS N=64: varies by 0.21 MiB, which is 0.7x the noise floor (threshold 2x, so the margin is 0.3x either side) -- NOT resolved, so no variation is established; N=128: varies by 0.33 MiB, which is 1.0x the noise floor (threshold 2x, so the margin is 0.5x either side) -- NOT resolved, so no variation is established. No variation with rank is resolved at any grid, so the spread is consistent with zero but does not demonstrate it. THE NOISE FLOOR IS A DISTRIBUTION, not a point: it is the largest of 92 re-measurements of one configuration (0.0000 to 0.3281 MiB, a factor of nan between them). With a single repeat this number has been observed at 0.1328, 0.0664, 0.0977 and 0.0039 MiB -- a factor of 34 -- and the verdicts above flip between 'resolved' and 'not established' across that range for the projected integrator. **Any claim of the form 'the variation with rank is N times the noise floor' therefore carries the floor's own spread, and the verdicts here are taken against its maximum so that the error can only fall on the side of not claiming a rank dependence.** The BUG integrator trades memory for time: its overhead is SMALLER than the projected integrator's at both grids, while its cost per step is 3.4-5.1x the projected one. Its spread over rank is also larger, in the direction its construction predicts, since it holds augmented factors of size up to 4r rather than a whole-field factorization.",
     "methods": [
       "full",
       "dlra",
       "bug"
     ],
-    "noise_floor_mib": 0.42578125,
+    "noise_floor_mib": 0.328125,
     "rank_scaling": [
       {
         "N": 64,
         "method": "dlra",
-        "noise_floor_mib": 0.42578125,
-        "overhead_vs_full_grid_mib": 2.53125,
-        "peak_mib_max": 39.828125,
-        "peak_mib_min": 39.35546875,
+        "noise_floor_mib": 0.328125,
+        "overhead_vs_full_grid_mib": 2.52734375,
+        "peak_mib_max": 39.8125,
+        "peak_mib_min": 39.59765625,
         "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
         "rank_independence_resolved": false,
         "ranks": [
@@ -7896,15 +7896,15 @@
           32,
           43
         ],
-        "spread_over_rank_mib": 0.47265625
+        "spread_over_rank_mib": 0.21484375
       },
       {
         "N": 64,
         "method": "bug",
-        "noise_floor_mib": 0.42578125,
-        "overhead_vs_full_grid_mib": 2.32421875,
-        "peak_mib_max": 39.62109375,
-        "peak_mib_min": 38.9453125,
+        "noise_floor_mib": 0.328125,
+        "overhead_vs_full_grid_mib": 2.19140625,
+        "peak_mib_max": 39.4765625,
+        "peak_mib_min": 39.0546875,
         "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
         "rank_independence_resolved": false,
         "ranks": [
@@ -7914,15 +7914,15 @@
           32,
           43
         ],
-        "spread_over_rank_mib": 0.67578125
+        "spread_over_rank_mib": 0.421875
       },
       {
         "N": 128,
         "method": "dlra",
-        "noise_floor_mib": 0.42578125,
-        "overhead_vs_full_grid_mib": 4.32421875,
-        "peak_mib_max": 43.7890625,
-        "peak_mib_min": 43.44921875,
+        "noise_floor_mib": 0.328125,
+        "overhead_vs_full_grid_mib": 3.98828125,
+        "peak_mib_max": 43.69140625,
+        "peak_mib_min": 43.359375,
         "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
         "rank_independence_resolved": false,
         "ranks": [
@@ -7932,15 +7932,15 @@
           32,
           43
         ],
-        "spread_over_rank_mib": 0.33984375
+        "spread_over_rank_mib": 0.33203125
       },
       {
         "N": 128,
         "method": "bug",
-        "noise_floor_mib": 0.42578125,
-        "overhead_vs_full_grid_mib": 3.92578125,
-        "peak_mib_max": 43.390625,
-        "peak_mib_min": 41.65625,
+        "noise_floor_mib": 0.328125,
+        "overhead_vs_full_grid_mib": 3.59375,
+        "peak_mib_max": 43.296875,
+        "peak_mib_min": 41.5390625,
         "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
         "rank_independence_resolved": true,
         "ranks": [
@@ -7950,7 +7950,7 @@
           32,
           43
         ],
-        "spread_over_rank_mib": 1.734375
+        "spread_over_rank_mib": 1.7578125
       }
     ],
     "ranks": [
@@ -7967,7 +7967,7 @@
     "all_inputs_reproducible": true,
     "generated_by": "experiments/make_summary.py",
     "generator_dirty": true,
-    "generator_git_commit": "f527aedea0b4ac504cb3e264016cae3e53b7e651",
+    "generator_git_commit": "916256ea34b80e0bea8417dca20d49eb942e9a84",
     "how_to_read_this": "every number in this file comes from one of the artifacts listed under `inputs`, at the commit listed beside it. An artifact whose `reproducible` is not true was produced by a driver that did not match its own recorded commit, so a number taken from it is not covered by that commit. An artifact listed under `inputs_absent` contributed nothing.",
     "inputs": [
       {
@@ -7975,11 +7975,11 @@
         "captured_at": "launch",
         "driver": "experiments/run_kolmogorov.py",
         "driver_matches_HEAD": true,
-        "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
-        "git_commit_how": "git log -1 --before=1790411857",
+        "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+        "git_commit_how": "git log -1 --before=1790430654",
         "present": true,
         "reproducible": true,
-        "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+        "sources_fingerprint_at_launch": "e6ddf4bede78ffc0b2637ecb18b818cfaee82cbd887dc1bc45140b0839a6b787",
         "tree_moved_during_run": false,
         "working_tree_dirty": true
       },
@@ -7988,11 +7988,11 @@
         "captured_at": "launch",
         "driver": "experiments/run_kolmogorov.py",
         "driver_matches_HEAD": true,
-        "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
-        "git_commit_how": "git log -1 --before=1790411853",
+        "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+        "git_commit_how": "git log -1 --before=1790430650",
         "present": true,
         "reproducible": true,
-        "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+        "sources_fingerprint_at_launch": "e6ddf4bede78ffc0b2637ecb18b818cfaee82cbd887dc1bc45140b0839a6b787",
         "tree_moved_during_run": false,
         "working_tree_dirty": true
       },
@@ -8001,11 +8001,11 @@
         "captured_at": "launch",
         "driver": "experiments/run_kolmogorov.py",
         "driver_matches_HEAD": true,
-        "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
-        "git_commit_how": "git log -1 --before=1790411850",
+        "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+        "git_commit_how": "git log -1 --before=1790430645",
         "present": true,
         "reproducible": true,
-        "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+        "sources_fingerprint_at_launch": "e6ddf4bede78ffc0b2637ecb18b818cfaee82cbd887dc1bc45140b0839a6b787",
         "tree_moved_during_run": false,
         "working_tree_dirty": false
       },
@@ -8014,11 +8014,11 @@
         "captured_at": "launch",
         "driver": "experiments/run_kolmogorov.py",
         "driver_matches_HEAD": true,
-        "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
-        "git_commit_how": "git log -1 --before=1790411860",
+        "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+        "git_commit_how": "git log -1 --before=1790430657",
         "present": true,
         "reproducible": true,
-        "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+        "sources_fingerprint_at_launch": "e6ddf4bede78ffc0b2637ecb18b818cfaee82cbd887dc1bc45140b0839a6b787",
         "tree_moved_during_run": false,
         "working_tree_dirty": true
       },
@@ -8027,11 +8027,11 @@
         "captured_at": "launch",
         "driver": "experiments/run_long_time.py",
         "driver_matches_HEAD": true,
-        "git_commit": "f403ab6b1986e9743839b649bccd235fb7213822",
-        "git_commit_how": "git log -1 --before=1790413476",
+        "git_commit": "c74432641a4b3fd6a44ab0b9a8cafc6d4c041279",
+        "git_commit_how": "git log -1 --before=1790432407",
         "present": true,
         "reproducible": true,
-        "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+        "sources_fingerprint_at_launch": "1ae129ff26e49e278062e1e406ca7b80f58e325dea05683c1d58144b1ecfb533",
         "tree_moved_during_run": false,
         "working_tree_dirty": true
       },
@@ -8040,11 +8040,11 @@
         "captured_at": "launch",
         "driver": "experiments/run_rank_growth_sweep.py",
         "driver_matches_HEAD": true,
-        "git_commit": "f403ab6b1986e9743839b649bccd235fb7213822",
-        "git_commit_how": "git log -1 --before=1790413498",
+        "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+        "git_commit_how": "git log -1 --before=1790431638",
         "present": true,
         "reproducible": true,
-        "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+        "sources_fingerprint_at_launch": "1ae129ff26e49e278062e1e406ca7b80f58e325dea05683c1d58144b1ecfb533",
         "tree_moved_during_run": false,
         "working_tree_dirty": true
       },
@@ -8071,24 +8071,24 @@
         "captured_at": "launch",
         "driver": "experiments/run_regime_pilot.py",
         "driver_matches_HEAD": true,
-        "git_commit": "f403ab6b1986e9743839b649bccd235fb7213822",
-        "git_commit_how": "git log -1 --before=1790412170",
+        "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+        "git_commit_how": "git log -1 --before=1790432224",
         "present": true,
         "reproducible": true,
-        "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
-        "tree_moved_during_run": false,
-        "working_tree_dirty": true
+        "sources_fingerprint_at_launch": "1ae129ff26e49e278062e1e406ca7b80f58e325dea05683c1d58144b1ecfb533",
+        "tree_moved_during_run": true,
+        "working_tree_dirty": false
       },
       {
         "artifact": "regime_pilot_re5000_A0p5.json",
         "captured_at": "launch",
         "driver": "experiments/run_regime_pilot.py",
         "driver_matches_HEAD": true,
-        "git_commit": "66dbb2b3a8954db2409c2e5ab1a4eeccf00c14b3",
-        "git_commit_how": "git log -1 --before=1790413919",
+        "git_commit": "ca8f9ccd4a1f8ae6b37f615f202b5e68b22136a8",
+        "git_commit_how": "git log -1 --before=1790433043",
         "present": true,
         "reproducible": true,
-        "sources_fingerprint_at_launch": "66d0e0121e43b379f625d48c8000d47014dfe311eb913509a2e99d3a7989797f",
+        "sources_fingerprint_at_launch": "1ae129ff26e49e278062e1e406ca7b80f58e325dea05683c1d58144b1ecfb533",
         "tree_moved_during_run": false,
         "working_tree_dirty": true
       },
@@ -8110,13 +8110,13 @@
         "captured_at": "launch",
         "driver": "experiments/bench_memory.py",
         "driver_matches_HEAD": true,
-        "git_commit": "4923f79f6596f92c4862540a4fe4640566abafb5",
-        "git_commit_how": "git log -1 --before=1790418700",
+        "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+        "git_commit_how": "git log -1 --before=1790430668",
         "present": true,
         "reproducible": true,
-        "sources_fingerprint_at_launch": "7aeba4b7a2eb283f1277715b541aaeed746532eb80a770674831af1791f3c71c",
+        "sources_fingerprint_at_launch": "e6ddf4bede78ffc0b2637ecb18b818cfaee82cbd887dc1bc45140b0839a6b787",
         "tree_moved_during_run": false,
-        "working_tree_dirty": false
+        "working_tree_dirty": true
       }
     ],
     "inputs_absent": [
@@ -8128,7 +8128,7 @@
   "rank_matched_comparison": "CHECKLIST 1.0: the static-POD baseline is fixed-rank and the DLRA is adaptive, so the suite is not a rank-matched comparison. A matched-rank POD is F5 and is downstream of the regime decision.",
   "rank_threshold_sweep": {
     "file": "rank_growth_sweep.json",
-    "git_commit": "f403ab6b1986e9743839b649bccd235fb7213822",
+    "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
     "parameters": {
       "base_speed": 0.5,
       "compare_stride": 20,
@@ -8166,7 +8166,7 @@
         "rank_max": 36,
         "rank_min": 17,
         "relative_amplitude_cutoff": 1e-06,
-        "seconds_per_step": 0.00712457888526842,
+        "seconds_per_step": 0.006280849820468575,
         "stable": true
       },
       {
@@ -8176,7 +8176,7 @@
         "rank_max": 43,
         "rank_min": 17,
         "relative_amplitude_cutoff": 1e-08,
-        "seconds_per_step": 0.006955508920364082,
+        "seconds_per_step": 0.006335149535443634,
         "stable": true
       },
       {
@@ -8186,7 +8186,7 @@
         "rank_max": 43,
         "rank_min": 17,
         "relative_amplitude_cutoff": 1e-10,
-        "seconds_per_step": 0.006916859043994919,
+        "seconds_per_step": 0.006213043854804709,
         "stable": true
       }
     ]
@@ -8195,7 +8195,7 @@
   "regime_pilot": {
     "file": "regime_pilot_re5000_A0p5.json",
     "force_amplitude": 0.5,
-    "git_commit": "66dbb2b3a8954db2409c2e5ab1a4eeccf00c14b3",
+    "git_commit": "ca8f9ccd4a1f8ae6b37f615f202b5e68b22136a8",
     "qualifying_horizons": [],
     "rank_finding": "window_rank_table gives the modes needed to represent the fluctuations over [0, W]: r99 grows 1 -> 14 over the first 8 time units, and that is a property of the dynamics, while the amplitude rule's request reaches 230 modes by W = 2 at N=64 -- larger than the largest rank this project has ever run, and a number that grows with the grid, so it measures the discretisation rather than the dynamics and no fixed relative cutoff repairs it, (the two are different quantities; see rank_quantities in the artifact. 2*floor(N/3)+1 is a wavenumber and is deliberately not quoted here as a mode count or a rank, D30.2).",
     "re": 5000,

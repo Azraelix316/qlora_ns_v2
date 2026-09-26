@@ -48,18 +48,31 @@
     "driver_matches_HEAD_at_write": true,
     "driver_sha256": "bc47cb1efc512af0cd20e9b18193ecb7b569de1e77070479949a3b83beaca66d",
     "driver_sha256_at_write": "bc47cb1efc512af0cd20e9b18193ecb7b569de1e77070479949a3b83beaca66d",
-    "git_commit": "f403ab6b1986e9743839b649bccd235fb7213822",
-    "git_commit_at_write": "66dbb2b3a8954db2409c2e5ab1a4eeccf00c14b3",
-    "git_commit_how": "git log -1 --before=1790413507",
+    "environment": {
+      "numpy": "2.5.3",
+      "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
+      "processor": "x86_64",
+      "python": "3.12.3",
+      "thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": null,
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+    "git_commit_at_write": "c74432641a4b3fd6a44ab0b9a8cafc6d4c041279",
+    "git_commit_how": "git log -1 --before=1790431647",
     "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "sources_files_at_launch": 30,
-    "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+    "sources_files_at_launch": 32,
+    "sources_fingerprint_at_launch": "1ae129ff26e49e278062e1e406ca7b80f58e325dea05683c1d58144b1ecfb533",
     "tree_moved_during_run": true,
-    "working_tree_diff_sha256": "096158b6ae04f00dbd4a563273c1c92a3ddae012fa8834a165200e23311fca53",
+    "working_tree_diff_sha256": "a3a1f4e476b63e26bea793701770cf796ccfab325dfba4fae293515903696d63",
     "working_tree_dirty": true,
     "working_tree_dirty_paths": [
-      "state/coder/results/baselines_re5000_N64_T8.json"
+      "state/coder/results/regime_pilot_re5000_A0p2.json"
     ]
   },
   "rows": [
@@ -70,7 +83,7 @@
       "rank_max": 43,
       "rank_min": 17,
       "relative_amplitude_cutoff": 1e-06,
-      "seconds_per_step": 0.0070299405726254914,
+      "seconds_per_step": 0.006820211294500041,
       "stable": true
     },
     {
@@ -80,7 +93,7 @@
       "rank_max": 43,
       "rank_min": 17,
       "relative_amplitude_cutoff": 1e-08,
-      "seconds_per_step": 0.007068472188679152,
+      "seconds_per_step": 0.00710918030817993,
       "stable": true
     },
     {
@@ -90,7 +103,7 @@
       "rank_max": 43,
       "rank_min": 17,
       "relative_amplitude_cutoff": 1e-10,
-      "seconds_per_step": 0.007085519444866804,
+      "seconds_per_step": 0.0070503584143007175,
       "stable": true
     }
   ]

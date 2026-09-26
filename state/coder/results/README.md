@@ -532,3 +532,27 @@ Full correction set, all four crossings plus the two derived ratios:
 is now false — and it is the sentence that discourages anyone from checking. The
 brackets are unaffected and exact under both derivations: [0.5, 1.0] for r=16 at
 both grids, [1.0, 2.0] for r=32 at N=64, [2.0, 3.0] for r=43 at N=128.
+
+## I overwrote a file I do not own, by writing through a symlink
+
+To run the reviewer's gates I built a scratch tree at `/tmp/opencode/regroot/`
+with **symlinks** into this worktree, so the gates would see the real artifacts. To
+refresh a reviewer's markdown from `origin/agent/reviewer` I ran
+
+    git show origin/agent/reviewer:state/reviewer/DECISIONS.md > /tmp/opencode/regroot/state/reviewer/DECISIONS.md
+
+and `>` opens a symlink's **target**. So that wrote 8328 lines into
+`state/reviewer/DECISIONS.md` in my worktree — a file that is not mine, whose
+entire purpose in this repository is that exactly one agent edits it.
+
+Caught by `git status` in the same minute, restored with
+`git checkout HEAD -- state/reviewer/DECISIONS.md`, and verified clean. **No
+damage reached the branch**, but the failure is worth recording because it was
+invisible by construction: a symlink farm looks like a copy, and every write
+through it is a write to somewhere else.
+
+The symlinks under `state/reviewer/` are now **real copies**. The only symlinks
+left in that tree are this agent's own result files, which are read and never
+written. The general rule this establishes for the gates: a scratch tree may
+symlink *inputs it only reads*, and must copy anything a command might redirect
+into.

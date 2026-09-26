@@ -12,7 +12,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "static (projected every step, basis never refitted)",
-      "wall_seconds": 4.478483332088217
+      "wall_seconds": 3.636059371056035
     },
     {
       "arm": "2_fluctuation_snapshots_static_stepper",
@@ -26,7 +26,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "static (projected every step, basis never refitted)",
-      "wall_seconds": 3.1496827281080186
+      "wall_seconds": 3.050142825115472
     },
     {
       "arm": "3_dlra_basis_frozen",
@@ -40,7 +40,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "DLRA, check_every=10**9 (frozen; expect rebuilds=0)",
-      "wall_seconds": 5.8984181608539075
+      "wall_seconds": 5.545905690873042
     },
     {
       "arm": "4_dlra_basis_refreshing",
@@ -54,7 +54,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "DLRA, check_every=5 (refreshes)",
-      "wall_seconds": 6.159851306118071
+      "wall_seconds": 6.260753236943856
     }
   ],
   "case": "static_basis_construction",
@@ -94,18 +94,40 @@
     "driver_matches_HEAD_at_write": true,
     "driver_sha256": "dcaaa897957c15c3a306054cd46c206f8d645b5fa15b0e4f2ed1d77ce7e24026",
     "driver_sha256_at_write": "dcaaa897957c15c3a306054cd46c206f8d645b5fa15b0e4f2ed1d77ce7e24026",
-    "git_commit": "f403ab6b1986e9743839b649bccd235fb7213822",
-    "git_commit_at_write": "f403ab6b1986e9743839b649bccd235fb7213822",
-    "git_commit_how": "git log -1 --before=1790412053",
+    "environment": {
+      "numpy": "2.5.3",
+      "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
+      "processor": "x86_64",
+      "python": "3.12.3",
+      "thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": null,
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+    "git_commit_at_write": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+    "git_commit_how": "git log -1 --before=1790431518",
     "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "sources_files_at_launch": 30,
-    "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+    "sources_files_at_launch": 32,
+    "sources_fingerprint_at_launch": "1ae129ff26e49e278062e1e406ca7b80f58e325dea05683c1d58144b1ecfb533",
     "tree_moved_during_run": false,
-    "working_tree_diff_sha256": "eb19b0990e2f51e8d9deb7adf4cf7cedd63c4a956d125acc917f56a4ea02aba9",
+    "working_tree_diff_sha256": "54310425eb4116fe25b635920c59630e5bcb1017cde96fecd5b558022de256d7",
     "working_tree_dirty": true,
     "working_tree_dirty_paths": [
-      "state/coder/results/peak_memory.json"
+      "experiments/bench_memory.py",
+      "experiments/check_driver_flags.py",
+      "experiments/test_artifacts.py",
+      "state/coder/results/kolmogorov_re1000_N64.json",
+      "state/coder/results/kolmogorov_re100_N64.json",
+      "state/coder/results/kolmogorov_re5000_N128.json",
+      "state/coder/results/kolmogorov_re5000_N64.json",
+      "state/coder/results/peak_memory.json",
+      "state/coder/results/scheme_card.json",
+      "state/coder/results/taylor_green.json"
     ]
   },
   "rank_sweep": [
@@ -118,7 +140,7 @@
       "final_time_reached": 5.478,
       "max_abs_divergence": 1.6414204589195224e+132,
       "rank": 14,
-      "wall_seconds": 3.8873618468642235
+      "wall_seconds": 4.742742642061785
     },
     {
       "basis": "fluctuations",
@@ -129,7 +151,7 @@
       "final_time_reached": 4.08,
       "max_abs_divergence": 6.477610257926561e+224,
       "rank": 14,
-      "wall_seconds": 2.8975342358462512
+      "wall_seconds": 3.59848167700693
     },
     {
       "basis": "raw",
@@ -140,7 +162,7 @@
       "final_time_reached": 3.922,
       "max_abs_divergence": 2.8392137667797144e+133,
       "rank": 15,
-      "wall_seconds": 2.793237438192591
+      "wall_seconds": 3.6446391560602933
     },
     {
       "basis": "fluctuations",
@@ -151,7 +173,7 @@
       "final_time_reached": 4.96,
       "max_abs_divergence": 2.864581841720371e+89,
       "rank": 15,
-      "wall_seconds": 3.518186707980931
+      "wall_seconds": 3.467995725106448
     },
     {
       "basis": "raw",
@@ -162,7 +184,7 @@
       "final_time_reached": 5.388,
       "max_abs_divergence": 2.138644039510404e+191,
       "rank": 16,
-      "wall_seconds": 3.8191482808906585
+      "wall_seconds": 3.7102733289357275
     },
     {
       "basis": "fluctuations",
@@ -173,7 +195,7 @@
       "final_time_reached": 4.438,
       "max_abs_divergence": 3.8194424556271614e+89,
       "rank": 16,
-      "wall_seconds": 3.1330193190369755
+      "wall_seconds": 3.0289818779565394
     },
     {
       "basis": "raw",
@@ -184,7 +206,7 @@
       "final_time_reached": 2.952,
       "max_abs_divergence": 1.4196068833898572e+132,
       "rank": 17,
-      "wall_seconds": 2.115489653078839
+      "wall_seconds": 2.773167422041297
     },
     {
       "basis": "fluctuations",
@@ -195,7 +217,7 @@
       "final_time_reached": 6.0,
       "max_abs_divergence": 7.105427357601002e-14,
       "rank": 17,
-      "wall_seconds": 4.272218049038202
+      "wall_seconds": 3.967478649923578
     },
     {
       "basis": "raw",
@@ -206,7 +228,7 @@
       "final_time_reached": 6.0,
       "max_abs_divergence": 6.394884621840902e-14,
       "rank": 18,
-      "wall_seconds": 4.2719342990312725
+      "wall_seconds": 4.103913621976972
     },
     {
       "basis": "fluctuations",
@@ -217,7 +239,7 @@
       "final_time_reached": 2.876,
       "max_abs_divergence": 2.0859248397665138e+93,
       "rank": 18,
-      "wall_seconds": 2.061947900103405
+      "wall_seconds": 1.8979276570025831
     }
   ],
   "seed_replication": [
@@ -231,7 +253,7 @@
       "initial_energy": 22.28992861738245,
       "max_abs_divergence": 2.138644039510404e+191,
       "seed": 20260925,
-      "wall_seconds": 3.8265863191336393
+      "wall_seconds": 3.8650418559554964
     },
     {
       "basis": "fluctuations",
@@ -243,7 +265,7 @@
       "initial_energy": 22.28992861738245,
       "max_abs_divergence": 3.8194424556271614e+89,
       "seed": 20260925,
-      "wall_seconds": 3.173670988995582
+      "wall_seconds": 3.4477003200445324
     },
     {
       "basis": "raw",
@@ -255,7 +277,7 @@
       "initial_energy": 22.215153823348857,
       "max_abs_divergence": 5.558020283391177e+78,
       "seed": 7,
-      "wall_seconds": 3.1987658268772066
+      "wall_seconds": 3.7143758109305054
     },
     {
       "basis": "fluctuations",
@@ -267,7 +289,7 @@
       "initial_energy": 22.215153823348857,
       "max_abs_divergence": 2.4550429559221064e+150,
       "seed": 7,
-      "wall_seconds": 2.7803753870539367
+      "wall_seconds": 2.755583364982158
     },
     {
       "basis": "raw",
@@ -279,7 +301,7 @@
       "initial_energy": 22.286048551199556,
       "max_abs_divergence": 4.1010951089681474e+99,
       "seed": 991,
-      "wall_seconds": 4.062167312018573
+      "wall_seconds": 4.246265816967934
     },
     {
       "basis": "fluctuations",
@@ -291,7 +313,7 @@
       "initial_energy": 22.286048551199556,
       "max_abs_divergence": 2.154551665274214e+214,
       "seed": 991,
-      "wall_seconds": 2.830278577050194
+      "wall_seconds": 3.041068848920986
     }
   ]
 }
