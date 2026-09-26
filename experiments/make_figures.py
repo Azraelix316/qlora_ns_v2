@@ -211,10 +211,19 @@ def make_paper_figures(results, out, paper_dir, used, skipped, colors) -> None:
         ax.set_xlabel("time $t$")
         ax.set_ylabel(r"adaptive rank $r(t)$")
         ax.set_title(
-            r"Adaptive rank $r(t)$, growth then quasi-stationary"
-            + ("\nfinal: " + ", ".join(
-                f"Re={k}: {v}" for k, v in sorted(final_ranks.items()))
-               if final_ranks else ""), fontsize=8.5,
+            # The measured behaviour, not the draft's caption.  There is no
+            # spin-up growth phase -- the rank reaches its final value at the
+            # FIRST check and stays there -- and r* is the same number at every
+            # Reynolds number, so there is no r*(Re) to quote.  The value it
+            # takes is the top of the band the grid resolves, which makes it a
+            # property of the discretisation rather than of the dynamics.
+            r"$r(t)$: one jump at the first check, then flat"
+            + (f"\n$r^*$ = {sorted(set(final_ranks.values()))[0]} at every Re "
+               f"(the top of the band $N$ resolves)"
+               if final_ranks and len(set(final_ranks.values())) == 1
+               else "\nfinal: " + ", ".join(
+                   f"Re={k}: {v}" for k, v in sorted(final_ranks.items()))),
+            fontsize=8.5,
         )
         ax.legend(fontsize=7)
         fig.savefig(out / "fig_rank_vs_time.pdf", bbox_inches="tight")
@@ -222,11 +231,19 @@ def make_paper_figures(results, out, paper_dir, used, skipped, colors) -> None:
         plt.close(fig)
         emit(fig, "fig_rank_vs_time",
              r"Adaptive rank $r(t)$ for the forced flow at each Reynolds number, "
-             r"from the suite runs. The rank grows from the initial condition's "
-             r"numerical rank and then settles. **Read this with the horizon: "
-             r"these runs reach $t=0.1$, and at $T=8$ the same rule reaches the "
-             r"top of the band at every cutoff, so the quasi-stationary value is "
-             r"a property of the horizon as much as of $\mathrm{Re}$.**")
+             r"from the suite runs. **Two things the draft's caption asserts that "
+             r"this figure does not show.** There is no spin-up growth phase: the "
+             r"rank reaches its final value at the *first* check and is flat "
+             r"thereafter. And $r^*(\mathrm{Re})$ does not depend on "
+             r"$\mathrm{Re}$ -- it is the same number at all three -- so there is "
+             r"no $r^*(\mathrm{Re})$ to quote. The value it takes is the top of "
+             r"the band the grid resolves without aliasing, which makes it a "
+             r"property of the discretisation rather than of the dynamics; the "
+             r"**window** rank, which does measure the dynamics, is a different "
+             r"quantity and is 16 at both grids. Read it with the horizon too: "
+             r"these runs reach $t=0.1$, and the same rule at $T=8$ still sits at "
+             r"the top of the band at every cutoff while the error grows to "
+             r"$0.1$--$0.5$.")
 
     # --- fig_sv_decay (fig:svd) ---------------------------------------------
     if suite:

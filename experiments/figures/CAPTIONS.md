@@ -24,7 +24,7 @@ Kinetic-energy statistics. Left: $E(t)$ for the full grid at each Reynolds numbe
 
 ## `fig_rank_vs_time`
 
-Adaptive rank $r(t)$ for the forced flow at each Reynolds number, from the suite runs. The rank grows from the initial condition's numerical rank and then settles. **Read this with the horizon: these runs reach $t=0.1$, and at $T=8$ the same rule reaches the top of the band at every cutoff, so the quasi-stationary value is a property of the horizon as much as of $\mathrm{Re}$.**
+Adaptive rank $r(t)$ for the forced flow at each Reynolds number, from the suite runs. **Two things the draft's caption asserts that this figure does not show.** There is no spin-up growth phase: the rank reaches its final value at the *first* check and is flat thereafter. And $r^*(\mathrm{Re})$ does not depend on $\mathrm{Re}$ -- it is the same number at all three -- so there is no $r^*(\mathrm{Re})$ to quote. The value it takes is the top of the band the grid resolves without aliasing, which makes it a property of the discretisation rather than of the dynamics; the **window** rank, which does measure the dynamics, is a different quantity and is 16 at both grids. Read it with the horizon too: these runs reach $t=0.1$, and the same rule at $T=8$ still sits at the top of the band at every cutoff while the error grows to $0.1$--$0.5$.
 
 ## `fig_spectra_ek`
 
