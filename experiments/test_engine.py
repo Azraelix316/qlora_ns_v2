@@ -31,6 +31,29 @@ from solvers import (
 )
 
 
+def divergence_tolerance(grid: Grid2D) -> float:
+    """The resolution-scaled bound on ``max |div u|``, and why it is scaled.
+
+    The suite used to assert a flat ``< 1e-12`` in seven places.  That bound is
+    adequate at every resolution this project currently runs and **is not
+    resolution-safe**: the measured divergence grows about as ``N**1`` while the
+    floating-point floor ``eps * N**2`` grows as ``N**2``, so the ratio *falls*
+    by an order of magnitude across N = 32..256 -- but the absolute value rises,
+    and at N=256 the measured ``1.8e-13`` leaves only about 5x margin under a flat
+    ``1e-12``.  One grid finer and the assertion would fail on a perfectly correct
+    solver.
+
+    A bound of the form ``0.5 * eps * N**2`` holds with a 12-50x margin at all
+    four resolutions measured, and it says what the number *is*: a property of the
+    representation, not of the integrator.  No change to the scheme improves it,
+    so nothing should be claimed to.
+
+    Written as a function of the grid rather than a constant so a new test cannot
+    reintroduce the flat form by writing the number out.
+    """
+    return 0.5 * float(np.finfo(float).eps) * float(grid.N) ** 2
+
+
 def field(grid: Grid2D, name: str = "tg", rng=None) -> np.ndarray:
     X, Y = np.meshgrid(grid.x, grid.y, indexing="ij")
     if name == "tg":
@@ -59,7 +82,7 @@ def test_spectral_conventions_and_norms():
     u, v = grid.velocity(psi)
     assert np.max(np.abs(omega - 2.0 * psi)) < 1e-11
     assert np.isclose(grid.ky[-1], grid.N / 2.0)
-    assert grid.max_div_velocity(psi) < 1e-12
+    assert grid.max_div_velocity(psi) < divergence_tolerance(grid)
     assert np.isclose(grid.ke(psi), 0.5 * (grid.l2_sq(u) + grid.l2_sq(v)))
     assert np.isclose(grid.enstrophy(psi), 0.5 * grid.l2_sq(omega))
     random = np.random.default_rng(3).normal(size=(grid.N, grid.N))
@@ -213,7 +236,7 @@ def test_svd_projection_adapts_and_preserves_divergence():
         check_every=1,
     )
     projected = lowrank.initialize(state)
-    assert grid.max_div_velocity(projected) < 1e-12
+    assert grid.max_div_velocity(projected) < divergence_tolerance(grid)
     evolved = lowrank.step(projected, 0.002)
     # Diffusion is a diagonal Fourier semigroup, so it preserves the
     # low-rank stream-function subspace before the nonlinear projection.
@@ -223,7 +246,7 @@ def test_svd_projection_adapts_and_preserves_divergence():
     assert np.count_nonzero(diffuse_rank > 1e-10 * diffuse_rank[0]) <= 2
     assert lowrank.rank > 2
     assert lowrank.rank <= 12
-    assert grid.max_div_velocity(evolved) < 1e-12
+    assert grid.max_div_velocity(evolved) < divergence_tolerance(grid)
     assert lowrank.projector.last_stats is not None
     assert lowrank.projector.last_stats.target_rank <= 12
 
@@ -249,7 +272,7 @@ def test_adaptive_rank_decays_for_laminar_multimode_decay():
     assert max(lowrank.rank_history) > 1
     assert lowrank.rank == 1
     assert grid.ke(final) < grid.ke(initial)
-    assert grid.max_div_velocity(final) < 1e-12
+    assert grid.max_div_velocity(final) < divergence_tolerance(grid)
 
 
 def test_rank_stagnation_and_restart_from_checkpoint():
@@ -298,7 +321,7 @@ def test_static_pod_projection_is_a_galerkin_baseline():
     assert np.max(np.abs(pod.project(tg) - tg)) < 1e-13
     assert np.isfinite(pod.relative_error(mixed))
     # Projection stays in the divergence-free class by representation.
-    assert grid.max_div_velocity(pod.project(mixed)) < 1e-12
+    assert grid.max_div_velocity(pod.project(mixed)) < divergence_tolerance(grid)
 
     # Rank truncation is a genuine L2-orthogonal, idempotent projection.
     three = np.stack([tg, 0.8 * mixed, 0.5 * tg + 0.9 * mixed])
@@ -437,7 +460,7 @@ def test_nyquist_row_keeps_velocity_exactly_divergence_free():
     psi = psi - psi.mean()
     assert np.max(np.abs(grid.fft(psi)[grid.N // 2, :])) > 1.0  # Nyquist row is real
     u, v = grid.velocity(psi)
-    assert grid.max_div_velocity(psi) < 1e-12
+    assert grid.max_div_velocity(psi) < divergence_tolerance(grid)
     # The multiplier arrays are deliberately untouched: only k=0 is zero.
     for arr in (grid.kx, grid.ky):
         assert np.count_nonzero(arr == 0.0) == 1
@@ -1093,7 +1116,7 @@ def test_divergence_diagnostic_detects_an_injected_violation():
     psi = field(grid, "mixed")
     u, v = grid.velocity(psi)
     assert grid.max_divergence(u, v) < 1e-12        # the structural case
-    assert grid.max_div_velocity(psi) < 1e-12       # the reported invariant
+    assert grid.max_div_velocity(psi) < divergence_tolerance(grid)       # the reported invariant
 
     # phi = sin(x): div(grad phi) = Lap phi = -sin(x), so the diagnostic must
     # report ~1, not ~0.
