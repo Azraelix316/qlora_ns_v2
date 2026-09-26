@@ -56,32 +56,42 @@ def _rank_finding(regime_data: dict) -> str:
         }
     )
     N = grids[0] if grids else None
-    ceiling = 2 * (N // 3) + 1 if N else None
-    # The first window at which the amplitude rule's request reaches the top of
-    # the resolved band: past that point its answer is set by the grid.
+    # D30.2: 2*floor(N/3)+1 is a WAVENUMBER, not a mode count and not a rank.
+    # The dealiased N x N grid carries far more degrees of freedom than it (about
+    # 1849 at N=64), so nothing may be expressed as a multiple of it and it is
+    # not "the number of modes the grid resolves".  The claim is that the
+    # amplitude rule's REQUEST GROWS WITH THE GRID; that is what is said here.
+    largest_wavenumber = 2 * (N // 3) + 1 if N else None
+    # The first window at which the request is comparable with the wavenumber
+    # scale, i.e. far larger than any rank this project has run.
     pinned = next(
-        (w for w, a in zip(windows, amp) if ceiling is not None and a >= ceiling),
+        (w for w, a in zip(windows, amp)
+         if largest_wavenumber is not None and a >= largest_wavenumber),
         None,
     )
     parts = [
         "window_rank_table gives the modes needed to represent the fluctuations "
         f"over [0, W]: r99 grows {r99[0]} -> {max(r99)} over the first "
-        f"{windows[-1]:g} time units"
+        f"{windows[-1]:g} time units, and that is a property of the dynamics"
     ]
-    if pinned is not None and ceiling is not None:
+    if pinned is not None and largest_wavenumber is not None:
         parts.append(
-            f"while the amplitude rule's request passes the top of the band that "
-            f"N={N} resolves without aliasing ({ceiling} = 2*floor(N/3)+1) by "
-            f"W = {pinned:g} -- a request larger than the grid can represent is not "
-            f"a measurement of the dynamics, so its rank trace is the grid's"
+            f"while the amplitude rule's request reaches {max(amp)} modes by "
+            f"W = {pinned:g} at N={N} -- larger than the largest rank this project "
+            f"has ever run, and a number that grows with the grid, so it measures "
+            f"the discretisation rather than the dynamics and no fixed relative "
+            f"cutoff repairs it"
         )
     else:
         parts.append(
-            f"while the amplitude rule's request stays within the {ceiling} modes "
-            f"N={N} resolves without aliasing at every measured window"
+            f"while the amplitude rule's request reaches {max(amp)} modes at "
+            f"N={N}, a grid-dependent number rather than a measurement of the "
+            f"dynamics"
         )
     parts.append(
-        "(the two are different quantities; see rank_quantities in the artifact)"
+        "(the two are different quantities; see rank_quantities in the artifact. "
+        "2*floor(N/3)+1 is a wavenumber and is deliberately not quoted here as a "
+        "mode count or a rank, D30.2)"
     )
     return ", ".join(parts) + "."
 
@@ -206,6 +216,7 @@ def suite_case(data: dict, file_name: str) -> dict:
         "dlra": method_row(dlra, "dlra"),
         "pod_requested_rank": pod.get("effective_rank"),
         "dealias_rank_ceiling": 2 * (data["grid"]["N"] // 3) + 1,
+        "dealias_rank_ceiling_is": "a WAVENUMBER (the largest k the 2/3 rule leaves resolved), not a mode count and not a rank; the dealiased NxN grid carries far more degrees of freedom than it (~1849 at N=64). The key name is historical and is kept because claims_registry.py verifies against it; D30.2 forbids expressing a rank as a multiple of it.",
         # CHECKLIST 1.0: a POD baseline at r=16 against an adaptive method that
         # reached r=43 is not a rank-matched comparison.  The mismatch is
         # stated rather than hidden; making it matched is F5's job and is

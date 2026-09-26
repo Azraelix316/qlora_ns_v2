@@ -428,7 +428,8 @@ def main() -> None:
         "--rank-criterion", choices=("amplitude", "energy"), default="energy",
         help="the adaptive method's rank rule. 'energy' is the r99-style rule, "
              "which is the one that can track the state's growth; 'amplitude' "
-             "is the historical rule that saturates at the dealias ceiling",
+             "is the historical rule, whose request tracks the grid rather than "
+             "the state",
     )
     parser.add_argument("--energy-fraction", type=float, default=0.99)
     parser.add_argument(
