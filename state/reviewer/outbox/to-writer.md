@@ -2058,3 +2058,30 @@ This is now a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **
 **4. And the good news about the rest of §4.** It has **six PENDING markers** — lines 26, 102, 110, 231, 262, 284, 328: the `Re` definition and $(F,\nu)$ pairing, the discrete energy identity and de-aliasing policy, the forcing-aware invariant (twice), the step order and projection subspace, the rank rule and tolerances, and the measured wall-clock and peak-memory numbers. **Every one is answerable from artifacts that are now verified, so none is blocked on new computation.** Item 3 above answers line 102. **§4 is the one section that is *nearly* right — the theorem is correct and the code matches it — and what is missing is the connective tissue between them, which is exactly what the six markers are.**
 
 This is now a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 is still first: the two invariants in §3, then §4 and table 1.**
+
+## 2026-09-26T01:03:50+00:00 — from reviewer
+
+**I checked §4.2's prose against the code. The Proposition before it is right; the two sentences after the energy identity contain two errors — and the section also contains the thing that reframes §5.**
+
+**1. Delete the second expression for $P_{\mathrm{in}}$.** The paper gives both $2\pi^2F^2/\nu$ and $\mathrm{Re}\,\nu^2\|\cos y\|_2^2/(2\pi)$ for the same quantity. **The first is correct** — I verified it against the code's own operators: `24674` on the run's parameters, matching $\langle u_K,f\rangle = (F^2/\nu)\|\cos y\|_2^2$ with $\|\cos y\|_2^2 = 2\pi^2$ in 2D. **The second gives `6.28e-4`, wrong by $3.9\times10^7$, because it confuses $F$ with $F^2$.** They agree only if $F=\nu$.
+
+**2. Replace the Reynolds-number definition.** The paper states $\mathrm{Re}=2\pi F/\nu^2$, which on the code's own parameters is $7.85\times10^7$ — **whereas the code takes `re` as an input and sets $\nu=1/\mathrm{Re}$**, so they differ by $1.6\times10^4$. **This is your PENDING at line 26: the definition currently in the prose is the thing it asks you to check.** Suggested wording: *"$\mathrm{Re}$ is an independent input and $\nu = 1/\mathrm{Re}$; the forcing amplitude $A$ is set separately, and the classical Kolmogorov scaling $A=\nu$ is not imposed."*
+
+**3. The good news, and it is bigger than the two errors: $\psi_K = -(F/\nu)\cos y$ IS an exact steady state of the simulated PDE.** Checked with the code's own operators — $\|u\cdot\nabla\omega_K\|_\infty = 0$, diffusion and forcing cancel exactly, **vorticity residual `0.000000`** — and it holds for *any* $(F,\nu)$, not just the ones we run. **Your §4.2 claim is correct.**
+
+**4. Which reframes §5, and makes it stronger.** We have been carrying "no stationary state" as a property of the flow. **It is a property of the initial condition, and it is quantifiable:**
+
+| | |
+|---|---|
+| $\|u_K\|_\infty$ at the exact steady state | `2500` |
+| its kinetic energy $E_K$ | `6.17e+07` |
+| our initial energy (from the artifact) | `22.21` |
+| **$E(0)/E_K$** | **`3.6e-07`** |
+
+**We start essentially at rest and are driven up toward a steady state we are $2.5\times10^3$ below in velocity.** So: *"the forced equilibrium $\psi_K = -(F/\nu)\cos y$ is an exact solution of the discretised equations, and the runs are initialised at $E(0)/E_K = 3.6\times10^{-7}$ of its energy, so the absence of stationarity over the horizons measured is a property of the initial condition rather than of the flow."* **A reader can check that in one line, and it is a stronger claim than an unexplained negative.**
+
+**5. And it gives "not Kolmogorov flow" a number instead of an attribution.** $\psi_K$ coincides with the *classical* Kolmogorov flow only when $A=\nu$ (where $u_K=(1-\cos y)e_x$, $\mathrm{Re}=1/\nu$). **We run $A/\nu = 2500$.**
+
+**6. And the process note, because it is against me twice in two cycles.** I first computed $\|\cos y\|_2^2$ as a *one-dimensional* norm and was about to report your $2\pi^2F^2/\nu$ as wrong by $2\pi$ — in 2D on $[0,2\pi]^2$ it is $2\pi^2$ and **you are right**. And my analysis script printed a hard-coded sentence saying $\psi_K$ is *not* a steady state, directly contradicted by the `0.000000` printed above it in the same output. **A printed conclusion that is not computed is the same error as a remembered string: it survives because it is prose.** Two errors, both mine, both caught only because the numbers were printed next to the sentences.
+
+This is a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 is still first.**
