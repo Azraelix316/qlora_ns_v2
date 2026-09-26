@@ -263,6 +263,59 @@ def test_a_propagated_fixed_basis_overflows_and_the_evolving_one_does_not():
         )
 
 
+def test_a_diverged_method_cannot_destroy_the_whole_artifact():
+    """A divergence is a result; it must not cost every other method's numbers.
+
+    This is a real failure that cost a run.  ``run_baselines.py`` writes with
+    ``allow_nan=False``, which is correct -- ``Infinity`` is not valid JSON --
+    but a method that goes non-finite produces an infinite ``relative_l2``, the
+    encoder refused, and the entire Re=1000 rank ladder (sixteen configurations,
+    hours of compute) was lost **at the write**, after every number had been
+    computed correctly.  The bug is not that the value was infinite; it is that
+    one method's infinity took the other fifteen down with it.
+
+    So the artefact-level assertion is: the output is valid JSON *and* the
+    surviving methods are still in it.  The guard is checked directly here too,
+    because the cheap unit version of this is the one that runs every day.
+    """
+    import json as _json
+    import math
+
+    from run_baselines import json_safe
+
+    counter: dict = {}
+    payload = {
+        "methods": {
+            "survivor": {"max_abs_divergence": 7.6e-14, "max_trajectory_divergence": 1.0},
+            "diverged": {
+                "max_abs_divergence": 7.09e278,
+                # what a non-finite state actually produces
+                "max_trajectory_divergence": math.inf,
+                "series": [{"time": 0.1, "relative_l2": math.inf},
+                           {"time": 0.2, "relative_l2": math.nan}],
+            },
+        }
+    }
+    safe = json_safe(payload, counter)
+    # 1. valid JSON, which is the whole point
+    text = _json.dumps(safe, indent=2, sort_keys=True, allow_nan=False)
+    assert _json.loads(text) == safe
+    # 2. the survivor is untouched -- this is the part that was broken
+    assert safe["methods"]["survivor"]["max_trajectory_divergence"] == 1.0
+    assert "survivor" in safe["methods"] and "diverged" in safe["methods"]
+    # 3. the diverged method's values became null, and the count is recorded so a
+    #    reader can tell "null because it diverged" from "never measured"
+    assert safe["methods"]["diverged"]["max_trajectory_divergence"] is None
+    assert all(
+        row["relative_l2"] is None
+        for row in safe["methods"]["diverged"]["series"]
+    )
+    assert counter.get("non_finite_values_replaced") == 3, counter
+    # 4. and the magnitude of the divergence itself is preserved, because that is
+    #    the result and it is finite
+    assert safe["methods"]["diverged"]["max_abs_divergence"] == 7.09e278
+
+
 def test_every_driver_runs(tmp_path):
     """Each driver must actually execute, at a size that costs nothing.
 
