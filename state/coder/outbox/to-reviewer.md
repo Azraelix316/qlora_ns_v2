@@ -1496,3 +1496,73 @@ I verified this against the **pre-change** artifacts, so it predates anything I 
 ## Test suite: 54 of 54 pass
 
 Both crossover-surface tests are green now that a surface exists with the new schema. The two remaining gates still await your decisions: the `check_paper_builds.py` figure-resolution fix, and the `dealias_rank_ceiling` rename versus the three registry rows.
+
+## 2026-09-26T07:43:35+00:00 — from coder
+
+**I resolved the `check_paper_builds.py` blocker with a measurement instead of an argument. Recommendation unchanged, now with a gate attached. Pushed as `58967b1`.**
+
+## Both resolution models, run over the real draft
+
+`experiments/check_includegraph_paths.py` reads the draft from `origin/agent/writer`,
+implements **both** models, and reports what each one finds:
+
+```
+  main document    : paper/main.tex  (graphics resolve against its directory)
+  \includegraphics : 6 across 11 .tex file(s)
+  \graphicspath    : NOT SET — the search list is the document directory alone
+  standalone docs  : none — every section is \input into the main document
+
+  resolved against the INCLUDING file   (paper/sections/...):   0/6
+  resolved against the MAIN DOCUMENT    (paper/...):           6/6
+```
+
+**0/6 versus 6/6.** The checker's model is the one that finds nothing. LaTeX
+resolves graphics against the main document's directory plus `\graphicspath`;
+`\input` does not move that directory. The draft sets no `\graphicspath` and no
+section is a standalone document (none has a `\documentclass`), so there is no
+reading of this tree under which `paper/sections/figures/` is where the build
+looks.
+
+**So: option (1), fix the checker to resolve against the document root, is the
+only one of the three that is correct on this draft.** Option (2),
+`\graphicspath{{figures/}}`, would be harmless but redundant — `figures/` is
+already the main document's subdirectory. Option (3), mirroring into
+`paper/sections/figures/`, would make the checker green by making the tree
+contain a directory the build never reads, which is how a gate stops meaning
+anything.
+
+`test_every_included_figure_resolves_against_the_main_document` runs both models
+and requires the main-document one to resolve **every** target, so the figures
+cannot drift out of `paper/figures/` without going red. It also asserts
+`\graphicspath` is still unset — if the writer adds one, the search list widens
+and the question has to be re-asked with it included, which is the case this test
+exists to notice.
+
+## The check I wrote could not fail, and the control caught it
+
+First version: `assert "/6)" in resolved`. That also matches `5/6`. **It passed
+with `fig_cost.pdf` deleted.** Then it passed again with the PDF deleted *and* the
+PNG present, because the resolver accepts either extension — so my first control
+was also incomplete. Removing both made it go red correctly
+(`only 5 of 6 ... resolve`), and the second control caught it.
+
+**That is the third check this session that was written too loosely to fail** —
+after the caption checker's possessive-label miss and the `min-not-max` control I
+had to add. All three were found by *trying to break* the check, not by reading
+it. The pattern is consistent enough to be worth stating plainly: a green gate
+in this project has to be attacked before it is believed, and a control that is
+itself sloppy hides the problem it was built to find.
+
+## Also in this commit
+
+- `mem_noise_floor_mib` and the three `tstar` re-pins are described in my previous
+  message; nothing further needed from me on those.
+- 55 of 55 tests pass.
+
+## In flight
+
+The N=64 surface is re-running with both Reynolds numbers (`--re 5000 1000`),
+currently Re=5000 rank 2. That is the last thing between the project and a
+regenerated `make_summary` / `make_figures` / `benchmark_summary.json` with
+correct provenance, so I will report the corrected Re=5000 `t*` values and the
+§1/§3 implication as soon as it lands.
