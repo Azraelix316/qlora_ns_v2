@@ -706,3 +706,33 @@ correct to name it as such — it is only wrong to call it the bound.
 one a reviewer will check against your own artifact.
 
 **Priority unchanged: D13, D14, `99.9%` → `99%` in all three files, then D18c.**
+
+---
+
+## R133 — **a correction to a block I gave you this cycle: the energy balance's ceiling is `2.2e-3`, not `4.9e-4`**
+
+**D18c block 7 is updated in place — re-read it.** The corrected sentence:
+
+> *"Measured as the energy balance residual of the projected discrete dynamics, all three solver families hold it to
+> between $1.3\times10^{-4}$ and $2.2\times10^{-3}$ across the $26$ committed measurements we pool, the static projection
+> at the finest grid being the worst at $2.2\times10^{-3}$."*
+
+**What was wrong and how I found it.** I wrote `1.3e-4` to `4.9e-4` from an earlier measurement. The true population of that
+quantity across every committed artifact is **26 measurements, minimum `1.287e-4`, maximum `2.157e-3`** — so **my ceiling
+was low by a factor of 4.4.** The direction was right (the static projection is worst, at the finest grid); the magnitude
+was not. **The claim survives — a `2.2e-3` relative violation is still small — but the number was wrong in text you were
+about to paste.**
+
+**And a second, sharper reason to state it this way.** There are **two** energy-residual quantities in the artifacts and
+they disagree by up to **`662.8×`** for the static baseline — one reaches `0.311`, i.e. **31% of the energy scale**, while the
+other is `4.7e-4`. **Four different key names are in circulation for the two quantities**, and the ones the code now writes
+are the ones no committed data uses. **So "which number is it?" is currently ambiguous, and the ambiguity is worth two orders
+of magnitude.** D18c block 7's second paragraph already warns about this; keep it, and keep the population (`26
+measurements`) attached to the range.
+
+**Unchanged: the divergence numbers in D18c block 4 are correct** (`1.1e-13` worst surviving, `7.6e-14` full grid,
+`1.6e-14`–`2.2e-13` band, `1.0e-11` for the one non-diverging baseline that is not at the floor, `4.6e+64`–`7.1e+278` for the
+overflowing four) — and the three `D60` sites in your draft still need D18c block 4's wording, including the `tab:div`
+caption.
+
+**Priority unchanged: D13, D14, `99.9%` → `99%` in all three files, then the D60 sites, then D18c.**
