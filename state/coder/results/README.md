@@ -85,35 +85,52 @@ in each artifact states which one its own numbers are.
 ## The rank rule: an order finding, not a change (D12)
 
 **Recorded here rather than implemented, per D12.** The question was whether the
-rank rule should be re-engineered to *accumulate a visited subspace* — to
-retain modes the trajectory has passed through — instead of reporting the rank
-the current window needs. The answer from measurement is that accumulating makes
-it **worse**, and the reason is specific:
+rank rule should be re-engineered to *accumulate a visited subspace* — to retain
+modes the trajectory has passed through — instead of reporting the rank the
+current window needs. The answer from measurement is that accumulating makes it
+**much worse**, and `state/coder/results/rank_rule_energy.json` now carries the
+measurement (D18.6 made the earlier, message-only numbers inadmissible).
 
-- The instantaneous rule at cutoff `1e-10` keeps **1.5%** of the fluctuation
-  energy outside the retained subspace. A windowed criterion (Gram-based stacked
-  spectrum over the same snapshots) keeps **27.5%** — nearly twenty times worse —
-  at the same cutoff.
-- The obvious explanation, that a bad window *placement* is responsible, is
-  **refuted by an oracle-window control**: giving the windowed criterion the
-  best window available, chosen with hindsight, still leaves **1.3%** outside.
-  So the loss is not the window's fault; it is the criterion.
+The driver scores each rule on the same target field, using columns that
+**exclude** that target, at four gaps between the rule's columns and the target.
+Both details are load-bearing and both were found by getting them wrong first:
+scoring the instantaneous rule on the target is tautological — it retains the
+field it is shown — and a gap of one check is uninformative, because consecutive
+candidates `0.0025` apart are nearly parallel, so rank 1 spans the next one and
+the rule looks perfect because the flow is slow rather than because the rule is
+good.
 
-The mechanism is that this problem's spectrum decays slowly and the energy sits
-in *low* modes, so a stacked window spectrum is dominated by the modes the
-trajectory already occupies and under-weights the tail that the instantaneous
-criterion resolves. The windowed rule would also have been self-reinforcing —
-a wider window raises the computed rank, which keeps more modes, which widens
-the apparent window — and the oracle control is what rules that out as the
-explanation rather than merely being consistent with it.
+Fraction of the target's fluctuation energy left outside the retained subspace,
+at the amplitude cutoff `1e-10` the DLRA actually applies:
+
+| gap (time units) | instantaneous | windowed | windowed, best window by hindsight |
+|---|---|---|---|
+| 0.0025 | r=1, **0.00%** | r=12, 97.24% | r=11, 75.38% |
+| 0.05 | r=1, 0.23% | r=13, 97.99% | r=11, 75.38% |
+| 0.25 | r=1, 2.93% | r=11, 99.68% | r=11, 75.38% |
+| 1.00 | r=1, 14.50% | r=13, 95.92% | r=11, 75.38% |
+
+**The mechanism is the centring, and it is definitional rather than a tuning
+failure.** The project's windowed spectrum (`run_regime_pilot.window_rank_table`)
+removes the across-window mean before the SVD, so the windowed rule retains a
+*variation* subspace — the directions along which the window's fields differ —
+and a variation subspace cannot represent the fields themselves. That is why the
+windowed rule holds **more** rank (11–13 against 1) and is nonetheless two orders
+of magnitude worse: the extra modes are extra *variations*, not extra field. The
+instantaneous rule has no window to centre, so its subspace contains the field.
+
+**The window placement is refuted as the explanation** — which D18.3 recorded as
+refuted, and which this artifact now supports. Handed the best window available,
+chosen with hindsight, the windowed rule still leaves **75.38%** outside, and that
+number does not move with the gap at all, because it is limited by what a
+variation subspace can span rather than by where the window sits.
 
 **What is reported instead is the distinction**, which is a finding: the
 instantaneous per-step rank and the window rank are different quantities, they
 answer different questions, and conflating them is what made "adaptive rank"
 look like a grid artifact. The window rank grows `1 -> 16` over `[0, 8]` and is
-grid-independent; the per-step amplitude rule's request tracks the grid and
-returns the dealiasing ceiling at tight cutoffs. Both are recorded, and the
-`rank_quantities` block says which is which.
+grid-independent; the per-step amplitude rule's request tracks the grid. Both are
+recorded, and the `rank_quantities` block says which is which.
 
 ## What separates a propagating static basis from the DLRA is construction, not refresh (C6-1)
 
