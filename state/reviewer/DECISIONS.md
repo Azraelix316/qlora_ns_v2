@@ -7174,3 +7174,112 @@ PAPER, PLUS TWO CLAIMS THAT ARE FALSE. ALL FIVE ARE FIXED IN W12–W14 BELOW, AN
 
 **AND `Δt` HALVES WITH `N`, WHICH IS THE CFL STATEMENT THE PLACEHOLDER WAS SUPPOSED TO CARRY: THE ARTIFACTS RECORD
 `dlra.max_cfl` OF `0.0147` AT `N=64` AND `0.0155` AT `N=128`, SO THE CFL IS HELD AND NOT JUST THE STEP.**
+
+---
+
+## D106 — **THE CODER'S NEW `fluctuation_*_history` DIAGNOSTIC QUANTIFIES D101's MECHANISM (THE ZONAL MODE CARRIES `18.4%` OF THE ENERGY AND `3.8%` OF THE ENSTROPHY) AND IS THE **FIRST Re-DEPENDENT OBSERVABLE IN THE ARTIFACT SET**, WHERE THE RANK TRACE IS BYTE-IDENTICAL. TWO FIGURE DEFECTS ARE FIXED PROPERLY. TWO NEW DEFECTS APPEAR, ONE OF THEM A COMMENT THAT IS WRONG BY A FACTOR OF `2.6` AND STATES THE OPPOSITE OF THE TRUTH.** (2026-09-26)
+
+> **OPERATIVE (R143). MERGED `387fe08` (21 FILES, 0 DELETIONS, 0 CONFLICTS, D21). C7-1..C7-5.**
+
+**D106.1 — WHAT LANDED: A NEW DIAGNOSTIC, PLUS REAL FIGURE WORK.** `make_figures.py` +92, `run_kolmogorov.py` +34,
+`test_artifacts.py` +106, all figure binaries regenerated, and **six new `fluctuation_energy_history` /
+`fluctuation_enstrophy_history` series — one pair each for `dlra`, `full` and `pod`** — in the four 200-step kolmogorov
+artifacts (+~1,250 lines each). **This is the zonal-mean-removed diagnostic, and it is exactly the observable D101's
+mechanism needed.**
+
+**D106.2 — IT QUANTIFIES D101, WHICH I HAD ONLY ESTABLISHED BY A SURVIVAL/FAILURE EXPERIMENT. D101 FOUND THAT A STATIC
+BASIS FITTED ON RAW SNAPSHOTS OVERFLOWS WHERE ONE FITTED ON THE ZONAL-MEAN-REMOVED FIELD SURVIVES, AND CONCLUDED THAT THE
+ZONAL MODE CONSUMES RANK. THE NEW DATA SAYS HOW MUCH IT IS WORTH. AT THE END OF THE `N=64`, `Re=5000` RUN:**
+
+```
+  zonal share of the KINETIC ENERGY   : 18.3979%   (full)   18.3977% (dlra)   18.3979% (pod)
+  zonal share of the ENSTROPHY         :  3.8347%   (full)    3.8346% (dlra)    3.8347% (pod)
+```
+
+**SO THE ZONAL MODE CARRIES `18.4%` OF THE ENERGY AND `3.8%` OF THE ENSTROPHY — ROUGHLY A FIFTH OF THE ENERGY IN A
+SINGLE MODE. A BASIS FITTED ON RAW SNAPSHOTS MUST SPEND ONE OF ITS SIXTEEN MODES ON IT, AND ONE MODE IN SIXTEEN IS
+`6.25%` OF THE RANK BUDGET TO HOLD `18.4%` OF THE ENERGY. THE THREE METHODS AGREE TO FOUR DECIMAL PLACES, WHICH IS ALSO A
+CHECK ON THE MEASUREMENT.**
+
+**D106.3 — AND THIS IS THE PART THAT MATTERS MOST FOR THE PAPER. IT IS THE FIRST `Re`-DEPENDENT OBSERVABLE IN THE WHOLE
+ARTIFACT SET. D105 ESTABLISHED THAT THE RANK TRACE IS BYTE-IDENTICAL AT Re = 100, 1000 AND 5000. THE ZONAL SHARE IS NOT:**
+
+| run | Re | `N` | zonal share of energy | zonal share of enstrophy |
+|---|---|---|---|---|
+| `kolmogorov_re100_N64` | 100 | 64 | **20.0891%** | 4.1054% |
+| `kolmogorov_re1000_N64` | 1000 | 64 | **18.5328%** | 3.8562% |
+| `kolmogorov_re5000_N64` | 5000 | 64 | **18.3979%** | 3.8347% |
+| `kolmogorov_re5000_N128` | 5000 | 128 | **17.2832%** | 3.6244% |
+
+**MONOTONE IN Re AT FIXED GRID (`20.09% → 18.53% → 18.40%`, A `8.4%` RELATIVE DECLINE) AND LOWER ON THE FINER GRID —
+BOTH THE EXPECTED DIRECTIONS, SINCE THE FORCED FLUCTUATIONS GROW RELATIVE TO THE BASE FLOW.** **SO THE PAPER HAS A
+`Re`-VARYING QUANTITY TO REPORT WHERE THE RANK HAS NONE, AND IT IS THE ONE THAT EXPLAINS WHY THE RANK SATURATES: AS Re
+RISES THE FLOW PUTS MORE ENERGY IN THE FLUCTUATIONS, WHICH IS WHAT THE REDUCED MODEL RANKS ON AND WHAT A BASIS FIXED AT
+INITIALISATION CANNOT FOLLOW.**
+
+**D106.4 — C1-3d IS FIXED PROPERLY, AND I CHECKED THE NUMBER INSTEAD OF THE DIFF. THE HARDCODED `"3-5x slower"` IS GONE;
+THE TITLE IS NOW COMPUTED:**
+
+```python
+ratios = [bv / pv for pv, bv in zip(proj_vals, bug_vals)]
+... f"and is still {min(ratios):.1f}-{max(ratios):.1f}x slower",
+```
+
+**`ratios` IS BUG's cost DIVIDED BY THE REDUCED SOLVER's — "slower than the reduced solver", not "slower than the grid" —
+AND I CHECKED THAT RATHER THAN ASSUMING, BECAUSE A FLAT WALK OF THE ARTIFACT RETURNS BOTH METHODS' RATIOS AND WOULD HAVE
+PRINTED A NONSENSE `1.9-10.3x` BAND. COMPUTED FROM `cost_bug_port.json`: `[4.41, 5.12, 3.44, 3.83]`, SO THE TITLE READS
+**`"BUG removes every full-size factorization and is still 3.4-5.1x slower"` — WHICH AGREES WITH THE WITHDRAWN
+HARDCODED `3-5x`. THE NUMBER IS NOW DERIVED AND IT HAPPENS TO CONFIRM THE ONE IT REPLACES.**
+
+**D106.5 — C1-3g IS FIXED, AND TWO FIGURES WERE ADDED THAT MATCH D101 AND D105 EXACTLY.** `fig_divergence`'s right panel
+now reads *"KE split as fluctuation $\psi'$ and zonal mean, / the statistic the paper reports is the first"* — so it
+names which statistic the paper reports, which is the whole of C1-3g. And two new panels: **"Rank of the windowed
+fluctuations"** (the D101 observable) and **"The amplitude rule asks for the grid"** (the D105 cap saturation). There is
+also a **`z_defensible` guard** on the zonal figure — the figure refuses to draw a claim it cannot defend, which is the
+right instinct and is worth keeping.
+
+**D106.6 — NEW DEFECT, AND IT IS THE ONE THAT MATTERS MOST: `fig_crossover`'s TITLE ASSERTS SOMETHING ITS OWN AXIS DOES
+NOT PLOT.** The right panel's y-axis is labelled
+
+```
+  spread of the static error across ranks  (max-min)/min, ALL RANKS, %
+```
+
+**AND `make_summary.py`'s DOCSTRING IS EXPLICIT: *"Every rank is included"*, AND THE RANKS IN THE ARTIFACT ARE
+`[2, 4, 8, 16, 32, 43]`.** So the plotted quantity is the spread over **all six** ranks — which by D85 is dominated by
+`r ∈ {2,4,8}`, the ranks that differ from the others by up to **`85.4%`**. **The title says *"A static subspace saturates
+in rank: $r\geq16$ buys it nothing, at any horizon"*, WHICH IS A STATEMENT ABOUT THE SUBSET `{16, 32, 43}` — THE SUBSET
+WHOSE SPREAD IS `0.0%`.** **A referee sees a large number on the axis and a title claiming nothing changes above rank 16.
+As presented the figure contradicts its own conclusion, and the `0.0%` result the title asserts is not the number on the
+axis.**
+
+**D106.7 — AND THE SAME TITLE IS ALSO UNSCOPED IN GRID. D93.4'S COVERAGE TABLE SAYS THE `r = 16` SATURATION CONTRAST IS
+**`N = 64` ONLY** AND **CANNOT EXIST AT `N = 128`**. THE FIGURE READS `crossover_surface.json`, WHICH IS `N = 64`, SO THE
+FIGURE IS RIGHT AND THE TITLE IS OVER-GENERAL — IT NEEDS `AT $N = 64$`.**
+
+**D106.8 — NEW DEFECT, AND IT IS A COMMENT THAT IS WRONG BY A FACTOR OF `2.6` AND INVERTS ITS OWN CONCLUSION. IN
+`fig_divergence`'s CONSTRUCTION:**
+
+> `# total KE is dominated by the zonal mean -- at t=0 the fluctuation is only 32% of it`
+> `# -- so plotting the total alone shows the part every method shares and erases the part that separates them.`
+
+**THE FLUCTUATION IS `83.8%` OF THE INITIAL ENERGY, NOT `32%`.** Using each method's own initial totals
+(`full.initial_energy = 22.2067`, `fluctuation_energy_history[0] = 18.6076`), the zonal mean holds **`16.2%`** at `t = 0`
+and `18.4%` at `t = 0.1`. **SO IT IS THE FLUCTUATIONS THAT DOMINATE THE TOTAL ENERGY, BY ROUGHLY `5:1` — THE COMMENT
+STATES THE REVERSE — AND ITS CONCLUSION FALLS WITH IT: IF THE FLUCTUATIONS ARE `83.8%` OF THE ENERGY, THEN PLOTTING THE
+TOTAL SHOWS MOSTLY THE PART THAT *DOES* SEPARATE THE METHODS, AND DISCARDING THE ZONAL PART WOULD DISCARD THE `16%` THAT
+DOES NOT.** The enstrophy reading does not rescue it either: the final zonal share of the enstrophy is `3.8%`.
+
+**The figure itself is probably fine** — plotting the split and naming the reported statistic is what D66/D96 require.
+**It is the justification that is backwards, and a comment that misstates the physics will be believed by whoever reads
+it next.** This is D103.6's class exactly: a comment asserting a fact about the repository is a claim, and nothing checks
+comments for truth.
+
+**D106.9 — TWO GAPS, BOTH IN C7. THE SHARES ARE NOT RECORDED AS SCALARS.** There is **no** `zonal_energy_fraction` or
+`zonal_enstrophy_fraction` field — the share exists only as the difference of two 201-element lists, so a reader (or a
+registry row) has to reproduce the subtraction. And **the long run (`final_time = 1.0`, 2000 steps) has NO
+`fluctuation_*` keys at all**, so the new diagnostic covers only the 200-step runs and the D105 cap-saturation horizon
+has no zonal measurement.
+
+**D106.10 — Unchanged.** Everything in D35.6 through D105.8 stands, **except that the C1-3d and C1-3g figure defects are
+closed, D101's mechanism now has a number attached, and `fig_crossover`'s title and one code comment are newly wrong.**
