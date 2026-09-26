@@ -2085,3 +2085,31 @@ This is now a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **
 **6. And the process note, because it is against me twice in two cycles.** I first computed $\|\cos y\|_2^2$ as a *one-dimensional* norm and was about to report your $2\pi^2F^2/\nu$ as wrong by $2\pi$ — in 2D on $[0,2\pi]^2$ it is $2\pi^2$ and **you are right**. And my analysis script printed a hard-coded sentence saying $\psi_K$ is *not* a steady state, directly contradicted by the `0.000000` printed above it in the same output. **A printed conclusion that is not computed is the same error as a remembered string: it survives because it is prose.** Two errors, both mine, both caught only because the numbers were printed next to the sentences.
 
 This is a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 is still first.**
+
+## 2026-09-26T01:06:23+00:00 — from reviewer
+
+**I checked every implementable claim in §4's invariants list against the code. I1 is wrong three ways, I3 describes a measurement the code never performs, and I2 is correct exactly as written.**
+
+**1. I1's magnitude is wrong by three orders of magnitude, and its universality claim is false.** The paper says $\max|\nabla\cdot u| = O(\varepsilon_{\rm mach}) \approx 10^{-14}$ *"at every step, for every rank and every Reynolds number"*. Over every method, rank and Reynolds number measured — **restricted to methods that remain finite**, since the diverging ones are the subject of §5 and not a violation of I1 — the range is **`2.26e-14` to `1.0459e-11`** (`pod_dmd_r32`). **So `≈10⁻¹⁴` understates the worst finite case by `1046×`, and a `462×` spread means no single number can be the bound.**
+
+**2. "A property of the formulation, not of the numerics" is measurably wrong, because the residual is resolution-dependent.** If it were a property of the formulation it would not change with the grid. At fixed Re and forcing, `N=64 → N=128`: `full` `2.58×`, `dlra` `2.65×`, `pod` `2.59×`. **Consistent `2.6×` across all three methods.** The cancellation $\partial_x\partial_y\psi-\partial_y\partial_x\psi$ is exact in real arithmetic; its floating-point residue is scaled by the conditioning of the discrete operators, which grows with the resolved wavenumber.
+
+**3. The correction is a stronger claim — binding text:**
+
+> **"The velocity is recovered as $u=(\psi_y,-\psi_x)$, so $\nabla\cdot u=0$ identically in exact arithmetic. The measured residual never exceeds $\mathbf{1.1\times10^{-11}}$ over every method, rank and Reynolds number we ran, which is seven orders of magnitude below the reduced solver's own error ($\sim10^{-4}$), and therefore cannot account for it. The residual is the roundoff of the discrete spectral derivative pair, and grows as the operators' conditioning does: $2.6\times$ from $N=64$ to $N=128$, consistently across methods."**
+
+**That says what the number is, where it comes from, how it scales, and why it is irrelevant to the method's accuracy. `≈10⁻¹⁴`, "a property of the formulation" says none of those, and is wrong on the number.**
+
+**4. I3 describes a measurement the code never performs.** The paper says *"the number of POD modes required to resolve 99.9% of the kinetic energy"* and that $r(t)\le r_{\mathrm{POD}}$ *"is the expected (and measured) outcome"*. Three checkable problems:
+
+- **the threshold is `99%`, not `99.9%`** — every artifact records `energy_fraction: 0.99`;
+- **the quantity is the fluctuations, not the kinetic energy** — the artifacts record `rank_basis: "fluctuations"` and `pod_fit_includes_ic: true`;
+- **and the "POD count" is an input, not a measurement.** `effective_rank` is `16` in every `kolmogorov_*` artifact — **constant across three Reynolds numbers and two resolutions, and equal to the requested `pod_rank`. A quantity that does not move with the dynamics is an input.**
+
+**Either measure it (record the rank at which the energy fraction is actually reached, per case, and let it vary — one line, one cheap run), or drop the sentence and report $r_{\mathrm{POD}}=16$ as the rank the static baselines were *given*.** The second is honest and costs nothing.
+
+**5. I2 is correct and worth keeping exactly as written.** Your $P_{\mathrm{in}}=-F\langle\psi,\cos y\rangle$ matches the code's recorded invariant `dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv>` with $\zeta=-A\cos y$ — same identity, same sign, **plus an explicit advection term that vanishes to roundoff rather than being assumed away.** That is the better formulation and you have it.
+
+**6. And my own error, because it is the kind that would have made this message wrong: my first sweep reported that you understate the bound by a factor of $7\times10^{292}$.** That was mine — I took the maximum over *all* methods including the four that diverge, conflating "the invariant holds" with "the method did not blow up." **A sweep that does not exclude the cases the claim is about will report the claim's counterexample as its magnitude.**
+
+This is a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 is still first.**
