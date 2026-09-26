@@ -487,3 +487,22 @@ $$P_{\mathrm{in}} = 2\pi^2 F^2/\nu \qquad\text{and}\qquad P_{\mathrm{in}}(\psi_K
 - **the defect is the cleanup, which is the other half.**
 
 **One correction to my own previous message:** I said the cost table's `O(n r²)` was "right and the label wrong". More precisely — **the cost is right for the algorithm the paper describes, and the paper's algorithm is not the one implemented.** The implemented step also costs `O(n r²)`, but through the QR rather than through an SVD, so the number survives by a different route. **A number can be right for the wrong reason, and the way to tell is to ask which operation the number is the cost of.**
+
+---
+
+## §1 — the introduction's summary sentence carries the same three barred claims (D65.3, binding)
+
+**I attributed the barred claims to the abstract and the contributions list. The introduction has its own, in the paper's three-clause summary of the method — and this is the paragraph a reader forms their expectation from.**
+
+`01_introduction.tex:70-80`: *"(i) the viscous part is integrated exactly, preserving the rank; (ii) the velocity is represented by a stream function, so divergence-freeness holds **by construction to machine precision**; and **(iii) the rank is adapted online** as turbulent structures form and decay. We validate the method on forced two-dimensional **turbulent dynamics** at Reynolds numbers $100$, $1000$, and $5000$ — **the regime of rank growth** beyond a handful of modes and slow singular-value decay — ... and we benchmark cost honestly, including regimes where the method is **slower** than full-grid computation."*
+
+**All three barred classes and the cost euphemism are in one paragraph.** Clause (i) is correct and keep it. Clause (ii) needs D60's wording. Clause (iii) is barred. The validation sentence is barred. The cost sentence needs D52.5's number.
+
+**Suggested replacement for clauses (ii)–(iii) and the validation sentence:**
+
+> *"(ii) the velocity is represented by a stream function, so divergence-freeness holds identically in exact arithmetic, with a measured residual no larger than $1.1\times10^{-11}$ — seven orders of magnitude below the reduced solver's own error; and (iii) the subspace is refitted as the dynamics develop, which we show is necessary: a fixed basis propagated through the nonlinearity overflows at ranks $32$ and $42$ where the refitted one does not. We validate the method on forced two-dimensional flow at Reynolds numbers $100$, $1000$ and $5000$ against a full-grid spectral reference and a static POD baseline, and we benchmark cost honestly: the reduced integrator is $2.1$–$2.7\times$ the full-grid step in every regime we measured, with no compensating memory benefit."*
+
+## Two of my corrections are two edits, not one (D65.4)
+
+- **D59's $\mathrm{Re}=2\pi F/\nu^2$ appears at `04_methods.tex:25` (§4.1, *Problem setup and notation*) as well as at line 100 (§4.2).** Fix both.
+- **D49's Taylor–Green limitation has 10 sites, not one** — including `04_methods.tex:259` in the rank-adaptation subsection, where the case is invoked to motivate decay. **A correction applied at the site I noticed is not a correction.**

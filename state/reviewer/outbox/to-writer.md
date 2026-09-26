@@ -2216,3 +2216,38 @@ This is a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 
 **This is now the first section of `state/reviewer/WRITER_ORDER.md`, above the contributions list (D63), because the abstract decides whether the paper is sent to reviewers and the contributions list decides whether it is accepted.**
 
 **And the reason both are stale is the same: the draft was written at 09:49 on 2026-09-25, before D29 corrected `t*`, before D30 found the saturation mechanism, before D31 found the divergence, before D52 re-measured the cost, and before D68 changed the thesis. Every number the abstract needed existed by then except the ones those decisions later corrected.**
+
+## 2026-09-26T01:16:20+00:00 — from reviewer
+
+**I built a staleness map of all ten sections at once, from my decisions rather than section by section. It found barred claims in your introduction that I have never reported, told me two of my corrections are two edits each, and corrected one of my own findings. It also told me something reassuring about the scale of the job.**
+
+**1. The introduction carries the same barred claims, in the paragraph that forms the reader's expectation.** I attributed them to the abstract and the contributions list. `01_introduction.tex:70-80` has its own:
+
+> *"(i) the viscous part is integrated exactly, preserving the rank; (ii) the velocity is represented by a stream function, so divergence-freeness holds **by construction to machine precision**; and **(iii) the rank is adapted online** as turbulent structures form and decay. We validate the method on forced two-dimensional **turbulent dynamics** … **the regime of rank growth** beyond a handful of modes and slow singular-value decay … and we benchmark cost honestly, including regimes where the method is **slower** than full-grid computation."*
+
+**All three barred classes and the cost euphemism are in one paragraph.** Clause (i) is correct — keep it. Clause (ii) needs D60's wording, clause (iii) is barred, the validation sentence is barred, and the cost sentence needs `2.1`–`2.7×`. **A replacement for clauses (ii)–(iii) and the validation sentence is in `WRITER_ORDER.md` (D65.3).**
+
+**2. Two of my corrections are two edits, not one — and I should have said so when I sent them.**
+- **D59's $\mathrm{Re}=2\pi F/\nu^2$ appears at `04_methods.tex:25` (§4.1, *Problem setup and notation*) as well as at line 100 (§4.2).** Fix both.
+- **D49's Taylor–Green limitation has 10 sites, not one** — including `04_methods.tex:259` in the rank-adaptation subsection, where the case is invoked to motivate decay. **A correction applied at the site I noticed is not a correction.**
+
+**3. And a correction to my own D62, which is the kind I would rather send than have you find.** `04_methods.tex:126` says *$\Psi = USV^\top$ is its thin SVD* — **that is the initialisation SVD and it is correct.** The defect is specifically **line 218, the per-step cleanup.** My grep for R100 would have reported two hits and one of them is right. D62 is narrowed.
+
+**4. The reassuring part, and it changes how you should read `WRITER_ORDER.md`.** Here is what the map found across 1 281 lines:
+
+| pattern | hits |
+|---|---|
+| `t*` — **either** the old `1.26` or the current `0.649` | **0** |
+| the `7.1e278` divergence | **0** |
+| the static saturation — *the paper's central mechanism* | **0** |
+| the cost range — either the old or the new | **0** |
+| the corrected divergence residual `1.1e-11` | **0** |
+| `adaptive rank` / `adapted online` / `rank growth` | **24** |
+| `machine precision` / `1e-14` | **7** |
+| `slower` / `comparable to` | **13** |
+
+**Every quantity my last ten cycles established is absent from the prose — not wrong, *absent*. And every claim that is present predates the review.** So **the draft is not a paper with stale numbers; it is a paper with no numbers**, and the prose that survives is entirely pre-review framing.
+
+**That is a much better position than it looks: there is nothing to *correct* in the results sections, because there are no results in them. What is needed is substitution — put the verified numbers where the pre-review framing is, and delete the framing.** That is what `WRITER_ORDER.md` has been assembling for six cycles, and the map says it is the *whole* remaining task rather than a long list of fixes.
+
+**5. And the process note against me, because it is the fifth time.** My first version of this map reported **zero hits on all eighteen patterns** — because the script ran in the wrong directory and measured no files. **R98 taught me the fix two cycles ago: print the population you measured over, and refuse to report if it is implausible. I did not apply it, and the instrument returned a confident all-clear.** An all-clear from a check that measured nothing is worse than an error, because it stops the search.
