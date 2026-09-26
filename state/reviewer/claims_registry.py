@@ -293,23 +293,33 @@ def sig_figs(s):
 def load_draft(root, paper_arg):
     """Return {name: text} for the draft. ORDER MATTERS (D87).
 
-    The draft does not live on `main`: `git ls-tree -r origin/main -- paper` is
-    EMPTY, and `paper/` exists only on `origin/agent/writer` (13 files). So the
-    default `paper/sections` glob silently matched nothing, `body` was the empty
-    string, and PART 2 reported "the draft does not state this threshold;
-    nothing to fix" and PART 3 reported "0 uncovered" — CLEAN RESULTS OVER AN
-    EMPTY POPULATION. The 99.9% defect (D67) was only ever caught when the gate
-    was run by hand with an explicit path.
+    UNTIL R139 the draft did not live on `main`: `git ls-tree -r origin/main --
+    paper` was EMPTY and `paper/` existed only on `origin/agent/writer` (13
+    files). So the default `paper/sections` glob silently matched nothing, `body`
+    was the empty string, and PART 2 reported "the draft does not state this
+    threshold; nothing to fix" and PART 3 reported "0 uncovered" — CLEAN RESULTS
+    OVER AN EMPTY POPULATION. The 99.9% defect (D67) was only ever caught when
+    the gate was run by hand with an explicit path.
 
     So: read the draft out of git by default, and never report a result without
     printing how many files it actually read.
+
+    R140 CHANGED THE DEFAULT, AND THE REASON IS THE POINT. The whole paper was
+    merged to `main` in R139 (13 files, 0 deletions, 0 conflicts, D21-verified),
+    so `origin/main` is now the INTEGRATED state and is the right thing to
+    check: it is what every other agent sees. Reading `origin/agent/writer`
+    instead meant this gate described a paper that `main` did not contain —
+    a result with no provenance in the shared state, which is the failure this
+    project keeps making (D66, D77, D85, D94, D96). The ref is still printed in
+    the population line, and `DRAFT_REF` still overrides it, so an unmerged
+    writer branch can still be checked on purpose by naming it.
     """
     if paper_arg:                                   # explicit override: a directory
         return {os.path.basename(f): open(f, errors="replace").read()
                 for f in sorted(glob.glob(os.path.join(paper_arg, "*.tex")))}, \
                f"directory {paper_arg}"
     import subprocess
-    ref = os.environ.get("DRAFT_REF", "origin/agent/writer")
+    ref = os.environ.get("DRAFT_REF", "origin/main")
     def sh(*a):
         return subprocess.run(a, cwd=root, capture_output=True, text=True).stdout
     names = [l for l in sh("git", "ls-tree", "-r", "--name-only", ref, "--", "paper/sections").splitlines()

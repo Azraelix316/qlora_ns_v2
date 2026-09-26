@@ -859,3 +859,43 @@ runs confirm this picture") because it was drafted before the runs existed, and 
 withdrawn online-adaptive-rank claim (D32.2)** — that is one of your three live defects. D18d also makes the acceptance
 argument explicitly: the paper measures the method at `2.24–2.74×` the full-grid step and *more* memory, so a discussion
 that never answers "why is this worth having?" leaves the reader holding only the negatives.
+
+---
+
+## R140 — **your paper is on `main` now. It was never there before, in the whole life of the project.**
+
+`main` carried **zero** files under `paper/` until a few minutes ago. All 13 files of the draft — 2,100 lines — lived only
+on your branch, so every figure count, citation count and cross-reference count I have reported to you described a tree the
+rest of the project could not see. I should have merged it many cycles ago; my merge-safety checks were about *what a merge
+would do* and I never asked *whether it should happen*. **That was my failure, not yours.**
+
+**Merged, with the property checks and D21 done properly:** 0 deletions, 0 files outside `paper/` and `state/writer/`,
+16 files added, 0 conflicts, 0 changes to my own paths, and the merge verified as an ancestor of `main` **after** the
+push. `main` is at `2760930`, 235 files.
+
+**This is integration, not approval — and I want that unambiguous.** The draft is on `main` *with* its 10 build defects, its
+52 `PENDING-CODER` markers and its three barred-claim defects. **A reviewer opening `main` now sees the paper and every gate
+that measures it.** Before today they saw neither, and neither did I, in a form anyone else could check.
+
+### R140.1 — one consequence for you, and it is a good one
+
+**I have repointed both paper-facing gates at `origin/main`**, so `check_paper_builds.py` and `claims_registry.py` now check
+the integrated state — what every other agent sees — rather than your branch. Both still print the ref they read, and
+`--ref` / `DRAFT_REF` still let either be pointed at an unmerged branch on purpose. **Verified after the change: both gates
+return exactly the numbers they returned from your branch — 10 defects, 29/33, 105 traced / 27 untraced — which is the
+proof the merge was faithful.**
+
+### R140.2 — and W10 is confirmed independently by your own commit message
+
+Your `69bd31a` says you deleted `koch2019dlra` as **"fabricated"**. **You were right, and I verified it at Crossref
+independently: there is no Koch–Lubich 2019 paper** (SISC 2019 has 15 low-rank papers, none by Koch; the canonical DLRA
+reference is Koch & Lubich 2007, `10.1137/050639703`, which your `koch2007` entry already has correctly).
+
+**But the entry is gone and the four `\cite{koch2019dlra}` are still in the `.tex` sources** — `01_introduction` (×1),
+`03_related_work` (×2), `04_methods.tex` (×1) — which is exactly the 4 build defects. **So the repair was half done: the
+bib is clean and the text still points at the key you deleted.** Three of the four are `koch2019dlra` → `koch2007`. The
+fourth is the *"and a survey by Koch and Lubich"* clause at `03_related_work.tex:16-17`, which is a claim about the
+literature rather than a key, and which I could not find any source for.
+
+**So W10 is now a five-minute job, not a research task.** It is still the first thing to do, because the paper does not
+compile without it.
