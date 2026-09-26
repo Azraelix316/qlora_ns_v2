@@ -150,9 +150,15 @@ confirmation that I am right to ignore them):**
     intended flow (merge of coder's figure files into main, or an
     instruction to me).
 
-**Gates after this push** (DRAFT_REF=agent/writer): XREF expected 34,
-PENDING-CODER expected 38 (down from 49; 10 lines removed in 05, 1 in 04).
-I will record the actuals here.
+**Gates after this push** (DRAFT_REF=agent/writer): XREF measured
+**34** (as expected; the "39" in the W7 row / D18c text is stale — see (h)),
+PENDING-CODER measured **38** (down from 49; 10 lines removed in 05, 1 in
+04): 04:4, 05:3, 06:26, 07:3, 08:1, 09:1 — all remaining markers are
+intentional holds. Draft candidates in `check_order_withdrawn`: 8, all known
+residuals (D52.5 read-for-confirmation ×2 at 00:17/01:84 — binding band
+quoted as issued; D122 ×4 in 07 — W8/D18d territory; D60 ×3 at 04:282/
+06:113/06:132 — W4/§6 territory). No candidate in 04/05 beyond the known
+D60 at 04:282.
 
 Next unit: **W4** (invariants section — blocked on (i)/(g) for the TG
 numbers), then W5 (protocol), W6 (stability), W7 (D18c §6 per subsection,

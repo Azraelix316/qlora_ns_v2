@@ -1,7 +1,13 @@
 # NOTES.md — writer
 
 > Branch: `agent/writer` · Worktree: `worktrees/writer`
-> Status: reissued binding WRITER_ORDER (1364 lines, atop main@24d7700): batch 1 pushed (e3a0fa2); batch 2 (unit C) APPLIED + byte-verified in the working tree, pushed this session — W13 (§5 lead paragraph), W14 (TG setup, literal two-sentence replacement → preceding clause now verbless; 3 options flagged (m)), W12 (binding block + per-run lead naming the four record stems + tab:forced-params, 14 rows, every source key verified against the four kolmogorov records) + D124 (eq:re-set → Re = 2U/ν, k = π/L = 1/2) + D128 §4 cost sentence (04 viscous-cost remark) + L3/L4 rewrites + hardware/provenance closure; flags (a)–(r) in outbox; gates recorded post-push; next W4–W9 (W7 = D18c §6 per subsection, 7 blocks + D128 §6 sentence + R165 re-derivation sentence; W8 = D18d §7; W9 = banned-item-9 purge at 09:9 + 08:19–20).
+> Status: reissued binding WRITER_ORDER (1364 lines, atop main@24d7700): batch 1 pushed (e3a0fa2); batch 2 (unit C) APPLIED + byte-verified in the working tree, pushed this session — W13 (§5 lead paragraph), W14 (TG setup, literal two-sentence replacement → preceding clause now verbless; 3 options flagged (m)), W12 (binding block + per-run lead naming the four record stems + tab:forced-params, 14 rows, every source key verified against the four kolmogorov records) + D124 (eq:re-set → Re = 2U/ν, k = π/L = 1/2) + D128 §4 cost sentence (04 viscous-cost remark) + L3/L4 rewrites + hardware/provenance closure; flags (a)–(r) in outbox ((r) covers the coder's f527aed 1-thread
+non-canonical re-timing; 05 hardware sentence corrected one→two threads per
+the canonical artifact); gates recorded post-push (XREF 34, PENDING-CODER
+38, draft candidates 8 = known residuals); next W4–W9 (W4 blocked on TG
+numbers (i)/(g); W5 cost wording pending (s); W7 = D18c §6 per subsection,
+7 blocks + D128 §6 sentence + R165 re-derivation sentence; W8 = D18d §7;
+W9 = banned-item-9 purge at 09:9 + 08:19–20).
 
 ## Mission
 
@@ -24,7 +30,10 @@ Write the paper. Draft in `paper/`, integrating: theory from
 | `02_contributions.tex` | **W2 re-paste 2026-09-26 from the current D14 block** (`2.2` band in item 5); **D130 applied 2026-09-26**: item 3 label → "a static subspace's advantage stops at a rank budget, not at a rank the dynamics chooses"; invented "saturation plateau" clause → stopping-rank sentence ($2\lfloor N/3\rfloor+1$ = the rank budget we set from the grid); last sentence kept exactly |
 | `03_related_work.tex` | drafted; D4 full form (R5d binding wording, FLAG-D4); `tab:related` High-Re cell = `target`; Osepko flagged; **W10 applied 2026-09-26**: Koch–Lubich "survey" sentence deleted (no such paper, R139/R140) + `koch2019dlra` removed from the cite list |
 | `04_methods.tex` | drafted; governing section: I1–I4 numbering, eq:pin/energy, prop:viscous, eq:step, eq:indicator; **D15 fix 2026-09-26** (`99\%` at :288); **W10 applied 2026-09-26**: `koch2019dlra` → `koch2007`; **batch 2 2026-09-26**: E8 Re clause ($Re = 2U/\nu$, $k = \pi/L = 1/2$ at the fundamental, pointer to Table~\ref{tab:forced-params}) + E9 D128 §4 cost-mechanism sentence verbatim inside the viscous-cost remark; :100 stale $Re = 2\pi F/\nu^2$ left untouched (D18a territory, flagged (n)) |
-| `05_experimental_setup.tex` | **batch 2 applied 2026-09-26** (all binding pastes byte-verified): W13 §5 lead paragraph (block_16); W14 TG setup — literal two-sentence replacement (block_17, leading comma → period; preceding clause now a verbless fragment, flagged (m) with 3 options); W12 L2 binding block (block_15) + per-run lead naming the four `kolmogorov_*.json` stems + tab:forced-params (booktabs, `lccccl`, 14 rows, bold 128/2.5e-4/0.05/three ν/85/6.22e-14; every source key verified against the records; same-steps "(200)" sentence); D124 eq:re-set → $Re = 2U/\nu$; L3 rewrite (marker drop, \cite{orszag1971} kept); L4 fixed-rank-16 rewrite (marker drop); hardware closure + CHECKLIST-clause removal. Remaining PENDING-CODER: TG×2 (:28/:32) + results-layout (:175) — all intentional holds |
+| `05_experimental_setup.tex` | **batch 2 applied 2026-09-26** (all binding pastes byte-verified): W13 §5 lead paragraph (block_16); W14 TG setup — literal two-sentence replacement (block_17, leading comma → period; preceding clause now a verbless fragment, flagged (m) with 3 options); W12 L2 binding block (block_15) + per-run lead naming the four `kolmogorov_*.json` stems + tab:forced-params (booktabs, `lccccl`, 14 rows, bold 128/2.5e-4/0.05/three ν/85/6.22e-14; every source key verified against the records; same-steps "(200)" sentence); D124 eq:re-set → $Re = 2U/\nu$; L3 rewrite (marker drop, \cite{orszag1971} kept); L4 fixed-rank-16 rewrite (marker drop); hardware closure + CHECKLIST-clause removal (post-fetch: thread count
+corrected one→two per the canonical 2-thread artifact — flag (r)).
+Remaining PENDING-CODER: TG×2 (:28/:32) + results-layout (:175) — all
+intentional holds |
 | `06_results.tex` | drafted; all numbers/figures [PENDING-CODER]; `tab:div` placeholders; step-0 per R5m (0.319, not 0.0); **D15 fix 2026-09-26** (`99\%` at :133); **W15 applied 2026-09-26**: L2 expected-outcome sentence → W15.1 saturation block (byte-verified) + standalone slow-decay sentence; `fig:rank` caption → W15.2 ("Retained rank"; budget within fifteen steps; three curves coincide); r*(Re) dropped from the four L2/L4 markers; L4 expected-outcome sentence deleted ("retained rank" in marker); L1 subsection (`fig:tg`, `3 \to 2 \to 1`) and L4 subsection untouched — both to be replaced by D18c in W7 |
 | `07_discussion.tex` | drafted 2026-09-25 (rank as diagnostic, invariants/long-time, dimensional regimes, 3D) |
 | `08_limitations.tex` | drafted 2026-09-25 (2D/periodic/Re≤5000, TG-only decay, no per-step speedup, no stability analysis, D3 open, no V2 study); **W15 applied 2026-09-26**: L1 bullet body → W15.3 (TG state a single Fourier mode from the outset, numerical rank one; forced rank rises to the budget; decay-events marker deleted — 2000-step run has none); "online rank adaptation" → measured rank-criterion phrasing (W15.4); V2 sentence → "rank already at its ceiling for $99\%$ of the longer run" (W15.6); lines 19–20 "turbulent-validation ladder" still to purge in W9 (banned item 9) |
@@ -90,8 +99,13 @@ Write the paper. Draft in `paper/`, integrating: theory from
   `CANONICAL_THREADS = 2` check (full-step ratios 2.19/2.44, 2.39/2.57,
   2.26/2.26 vs the canonical 2.24/2.56, 3.47/3.64, 3.01/3.05); binding
   band kept as issued, and 05's hardware sentence corrected one→two
-  threads (canonical artifact), flagged in (r). Pushed after re-fetch;
-  gates re-run with DRAFT_REF=agent/writer. Next: W4–W9.
+  threads (canonical artifact), flagged in (r). Pushed after re-fetch
+  (16fa0b4); gates re-run with DRAFT_REF=agent/writer: XREF measured 34
+  (as expected; the order's "39" is stale — flag (h)), PENDING-CODER
+  measured 38 (04:4, 05:3, 06:26, 07:3, 08:1, 09:1 — all intentional
+  holds); draft candidates 8, all known residuals (D52.5×2, D122×4 in
+  07, D60×3). Next: W4–W9 (W4 blocked on TG numbers (i)/(g); W5 cost
+  wording pending (s)).
 - 2026-09-26 (later) Reissued order: batch 1 (units A + W15 + D130) pushed
   Merged `origin/main`@24d7700 and `origin/agent/reviewer`@b46f291 into
   `agent/writer` (de3738e) — brings D128 into the order, R162–R168, the
