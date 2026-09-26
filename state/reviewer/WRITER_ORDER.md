@@ -19,7 +19,7 @@ describing a paper we are no longer writing.**
 | **W4** | **§3 method + invariants** | The credibility. Both invariants as equations, then the verification. **For the energy invariant use the FULL-PDE key, not the one named `forcing_aware_invariant`** — they differ by up to `663×` and the wrong one reports a 31% violation that does not exist. | `\ | ∇·u\ | ≤ 1.1e-13`; balance `dE/dt + nu‖ω‖² − ⟨ψ,ζ⟩ = 0`, advection input vanishing to roundoff, *not assumed away*; Taylor–Green `2.8e-14` / `2.3e-14` over 200 steps; balance residual `3.2e-4` | **D2**, **D8** |
 | **W5** | **§4 protocol + table 1** | The spine. The **five** things a reported horizon must state, the four baseline bugs, and the fix. | five = window · refit interval · offset · in-sample check · grid + largest rank tested; correcting the baseline moved `t*` **down `1.6–2.8×`** and cost 3 of 6 ranks their crossover | **D4**, **D6**, **D7**, **D9**, **D10** |
 | **W6** | **§5 stability** | The thesis, as a measurement. | fixed basis overflows at `r=32, 42` (`t = 5.513, 6.96, 5.7425, 7.1715`); SP-DLRA at the same ranks: `\ | ∇·u\ | ≤ 1.1e-13`, traj error `< 1.1` | **D1** |
-| **W7** | **§6 results** | The horizon, the mechanism, the costs. **This section has no numbers in it yet — everything below is new text.** | `t*` = `0.649` (`r=16`), `1.482` (`r=32`); window `0.15–0.63%`; Re `2.8%` / `8.6%`; **the static baseline saturates**; cost `2.08–2.71×` slower; memory `+2.24` (N=64) / `+4.27` MiB (N=128) **more**. **GRID (`N=128`, new): `t*` = `0.939` (`r=16`), `2.433` (`r=32`) — `1.4456×` / `1.6424×`, so `t*` is NOT grid-convergent. The never-yields rank is the DEALIASING CEILING: 43 at `N=64`, 85 at `N=128`.** | **D5**, **D3**, **D18** |
+| **W7** | **§6 results** | The horizon, the mechanism, the costs. **This section has no numbers in it yet — everything below is new text.** | `t*` = `0.649` (`r=16`), `1.482` (`r=32`); window `0.15–0.63%`; Re `2.8%` / `8.6%`; **the static baseline saturates**; cost `2.08–2.71×` slower; memory `+2.24` (N=64) / `+4.27` MiB (N=128) **more**. **GRID (`N=128`, new): `t*` = `0.939` (`r=16`), `2.433` (`r=32`) — `1.4456×` / `1.6424×`, so `t*` is NOT grid-convergent. The never-yields rank coincides with the grid's largest alias-free rank: 43 at `N=64`, 85 at `N=128`.** | **D5**, **D3**, **D18** |
 | **W8** | **§7 discussion** | The honest gaps — **and one former gap is now a result.** | 2nd order conditional on rank; rank criterion verified only to `T=0.1`; grid: DLRA **improves `≈2.18×`**, static rank-16 **degrades `2.5–1464×`**. **The never-yields rank is no longer a gap: it is located at each grid's dealiasing ceiling — 43 at `N=64`, 85 at `N=128` — which is a *representation* limit and the strongest statement of the saturation mechanism. Do NOT write "bracketed between 32 and 43"; that is withdrawn (D74).** | **D1**, **D18** |
 | **W9** | **§8 conclusion** | Short. Do not introduce anything not already above. | — | — |
 
@@ -612,7 +612,7 @@ self-serving direction as the `99.9%`.**
 
 ---
 
-## D18b — **the grid question is answered, and the "bracketed between 32 and 43, not located" hedge is retired. The never-yields rank is the dealiasing ceiling, and it moves with the grid.** (binding)
+## D18b — **the grid question is answered, and the "bracketed between 32 and 43, not located" hedge is retired. The never-yields rank coincides with the largest alias-free rank, and it moves with the grid.** (binding)
 
 **Replace the sentence that says the never-yields rank is "bracketed between 32 and 43, not located." It is located.**
 
@@ -629,7 +629,7 @@ self-serving direction as the `99.9%`.**
 grid-convergent over `64 -> 128`**, and the direction is the expected one: the reduced integrator's error falls while the
 static baseline's rises, so the gap widens. **Write it as a result, not as the open question you had to hedge.**
 
-**2. The never-yields rank is the dealiasing ceiling, and it moves with the grid: 43 at `N=64`, 85 at `N=128`.**
+**2. The never-yields rank coincides with the largest alias-free rank, and it moves with the grid: 43 at `N=64`, 85 at `N=128`.**
 At `N=64` rank 43 never yields; on the finer grid rank 43 *does* yield (`t* = 2.683`) and the never-yields rank is 85.
 **Those are exactly the two `dealias_rank_ceiling` values.**
 

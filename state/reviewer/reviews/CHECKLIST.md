@@ -588,6 +588,17 @@ enumerable:
 **Five seconds each, and their absence is why a withdrawn instruction sat in the writer's first screen for nine
 cycles.**
 
+**But §1.14 is a LIST OF CANDIDATES FOR ME TO READ, NOT AN AUTOMATED PASS/FAIL (D77.3).** Running it over both
+order documents gave **11 raw hits and 0 real defects**: three classes of false positive — a *prohibition*
+(`1.1e-13` (not `1e-14`)), a *quoted defect* (the `3-5x slower` title described as wrong), and a *finding stated
+correctly*. **A pure grep cannot distinguish "write this claim" from "this claim is wrong" from "this claim
+turned out to be true", and these documents are mostly made of descriptions of defects.** The automation's value
+is that it finds the candidates; its limitation is that it cannot rank them. **Print the population, and the
+verdict is mine.**
+
+**It has twice found a real defect in my own documents, both times in prose rather than code** — the pre-send
+instruction that had silently no-op'd (D76.3), and D74's own "is the dealiasing ceiling" phrasing (D77.2).
+
 **Two more properties of an order document, both violated in R114 and both now checked:**
 
 - **Its header must state the true range of its own detail IDs.** It said `D1`–`D14` while running to `D18b`.

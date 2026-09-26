@@ -435,7 +435,7 @@ reported the static baseline violating the energy balance by 31% when its actual
 
 **2. `test_the_static_baseline_error_is_flat_in_rank_above_16` — cheap, closes the paper's central mechanism.**
 Three ranks, one horizon, comparing the static error. **This asserts D30.1's saturation, which D74 has just made
-the paper's central claim** (the never-yields rank is the dealiasing ceiling: 43 at `N=64`, 85 at `N=128`). **It needs
+the paper's central claim** (the never-yields rank coincides with the largest alias-free rank: 43 at `N=64`, 85 at `N=128`). **It needs
 no long rollout — saturation is visible at `t = 0.1`, exactly where your suite already operates.** I should have
 noticed sooner that the suite's own horizon is sufficient for it.
 
