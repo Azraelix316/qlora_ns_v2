@@ -922,7 +922,8 @@ def main() -> None:
         "--dlra-max-rank",
         type=int,
         default=0,
-        help="largest retained rank; 0 selects the grid's dealiasing ceiling "
+        help="largest retained rank; 0 selects the largest alias-free rank "
+             "for this grid, 2*floor(N/3)+1 "
              "2*floor(N/3)+1, so the cap cannot bind before the physics does",
     )
     parser.add_argument(

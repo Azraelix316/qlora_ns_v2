@@ -16,7 +16,7 @@ Maximum $|\nabla\!\cdot u|$ over each run. Every method that survives stays with
 
 ## `fig_divergence`
 
-Left: relative $L^2$ against the full grid. Once two trajectories decorrelate this measures phase, not accuracy. Right: kinetic energy split as the fluctuation $\psi'=\psi-\overline{\psi}_x$ and the zonal mean; the fluctuation is the series the paper's statistics are computed on, and it is the one that carries the method-to-method difference.
+**Left: relative $L^2$ against the full grid, over the suite window $t\leq0.1$ only.** Once two trajectories decorrelate this measures phase, not accuracy. **This window does not show the paper's conclusion and must not be read as if it did**: inside $t\leq0.1$ the static baseline's offline fitting window is a *prefix* of the evaluated trajectory, so it is the more accurate method here, and the ordering reverses at the crossover, $t^*\in[0.65,1.61]$ (Fig. \ref{fig:crossover}). Right: kinetic energy split as the fluctuation $\psi'=\psi-\overline{\psi}_x$ and the zonal mean; the fluctuation is the series the paper's statistics are computed on, and it is the one that carries the method-to-method difference.
 
 ## `fig_spectra_ek`
 
@@ -28,7 +28,7 @@ Singular-value spectrum of the **full-grid** state, at $t=0$ and at the end of t
 
 ## `fig_window_rank`
 
-Two different rank quantities against window length. Left: the modes needed to represent a whole window of the trajectory, which grows and is grid-independent. Right: what the per-step amplitude rule requests, which tracks the grid and saturates at the dealiasing ceiling $2\lfloor N/3\rfloor+1$. Conflating these is what made adaptive rank look like a grid artifact.
+Two different rank quantities against window length. Left: the modes needed to represent a whole window of the trajectory, which grows and is grid-independent. Right: what the per-step amplitude rule requests, which tracks the grid and saturates at the top of the band the grid resolves without aliasing, $2\lfloor N/3\rfloor+1$ modes. Conflating these is what made adaptive rank look like a grid artifact.
 
 ## Panels deliberately omitted
 

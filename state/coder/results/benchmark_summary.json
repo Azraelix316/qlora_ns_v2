@@ -13,7 +13,7 @@
         "final_energy": 20.25599184850761,
         "initial_projection_relative_l2": null,
         "linear_algebra_calls": 841,
-        "linear_algebra_seconds_per_step": 0.0030248155747540297,
+        "linear_algebra_seconds_per_step": 0.11021151099237614,
         "max_abs_divergence": 2.4868995751603507e-14,
         "max_relative_energy": 1.0,
         "max_scaled_pde_energy_residual": 0.0004932977786977058,
@@ -23,7 +23,7 @@
         "rank_max": 43,
         "rank_min": 17,
         "stable": true,
-        "wall_seconds_per_step": 0.011694922109600157
+        "wall_seconds_per_step": 0.12318543695495464
       },
       "dt": 0.0005,
       "file": "kolmogorov_re100_N64.json",
@@ -48,9 +48,9 @@
         "rank_max": null,
         "rank_min": null,
         "stable": true,
-        "wall_seconds_per_step": 0.005188833669526502
+        "wall_seconds_per_step": 0.015139855949673802
       },
-      "git_commit": "7825a3be2b5a2e85a00f02ed98cc6a96788fe666",
+      "git_commit": "ff19721ab31edcc374069726f5d0b5b7b24f39d4",
       "ic_reference_N": null,
       "initial_energy": 22.206703312933374,
       "initial_state": {
@@ -83,7 +83,7 @@
         "rank_max": 16,
         "rank_min": 16,
         "stable": true,
-        "wall_seconds_per_step": 0.0070126833696849645
+        "wall_seconds_per_step": 0.013786316105397418
       },
       "pod_requested_rank": 16,
       "rank_mismatch": {
@@ -107,7 +107,7 @@
         "final_energy": 22.45956151350207,
         "initial_projection_relative_l2": null,
         "linear_algebra_calls": 841,
-        "linear_algebra_seconds_per_step": 0.0025122368114534766,
+        "linear_algebra_seconds_per_step": 0.0142794240207877,
         "max_abs_divergence": 2.5757174171303632e-14,
         "max_relative_energy": 1.0113865708477952,
         "max_scaled_pde_energy_residual": 0.0004896931406322086,
@@ -117,7 +117,7 @@
         "rank_max": 43,
         "rank_min": 17,
         "stable": true,
-        "wall_seconds_per_step": 0.010157084123929962
+        "wall_seconds_per_step": 0.03443904275423847
       },
       "dt": 0.0005,
       "file": "kolmogorov_re1000_N64.json",
@@ -142,9 +142,9 @@
         "rank_max": null,
         "rank_min": null,
         "stable": true,
-        "wall_seconds_per_step": 0.003226852050283924
+        "wall_seconds_per_step": 0.00948954486520961
       },
-      "git_commit": "7825a3be2b5a2e85a00f02ed98cc6a96788fe666",
+      "git_commit": "ff19721ab31edcc374069726f5d0b5b7b24f39d4",
       "ic_reference_N": null,
       "initial_energy": 22.206703312933374,
       "initial_state": {
@@ -177,7 +177,7 @@
         "rank_max": 16,
         "rank_min": 16,
         "stable": true,
-        "wall_seconds_per_step": 0.004619770819554106
+        "wall_seconds_per_step": 0.014655497769126669
       },
       "pod_requested_rank": 16,
       "rank_mismatch": {
@@ -201,7 +201,7 @@
         "final_energy": 22.67155345907041,
         "initial_projection_relative_l2": null,
         "linear_algebra_calls": 841,
-        "linear_algebra_seconds_per_step": 0.002338467929512262,
+        "linear_algebra_seconds_per_step": 0.25335743061383253,
         "max_abs_divergence": 2.6645352591003757e-14,
         "max_relative_energy": 1.0209328750686866,
         "max_scaled_pde_energy_residual": 0.00046923135768045965,
@@ -211,7 +211,7 @@
         "rank_max": 43,
         "rank_min": 17,
         "stable": true,
-        "wall_seconds_per_step": 0.009911806674208492
+        "wall_seconds_per_step": 0.2664355474757031
       },
       "dt": 0.0005,
       "file": "kolmogorov_re5000_N64.json",
@@ -236,9 +236,9 @@
         "rank_max": null,
         "rank_min": null,
         "stable": true,
-        "wall_seconds_per_step": 0.0031670412351377307
+        "wall_seconds_per_step": 0.011122730739880354
       },
-      "git_commit": "7825a3be2b5a2e85a00f02ed98cc6a96788fe666",
+      "git_commit": "ff19721ab31edcc374069726f5d0b5b7b24f39d4",
       "ic_reference_N": null,
       "initial_energy": 22.206703312933374,
       "initial_state": {
@@ -271,7 +271,7 @@
         "rank_max": 16,
         "rank_min": 16,
         "stable": true,
-        "wall_seconds_per_step": 0.0045417480543255805
+        "wall_seconds_per_step": 0.012078942024381832
       },
       "pod_requested_rank": 16,
       "rank_mismatch": {
@@ -7378,7 +7378,7 @@
   },
   "forcing_name_caveat": "The driver calls this a Kolmogorov flow, but the forcing is a periodic unidirectional shear f = (A sin(k y), 0), not the Arnold-Korkin-Sinitsyn cellular pump. CHECKLIST 1.3 asks that the forcing match what the name claims; the naming decision belongs to the reviewer and writer, and no result is affected by it because the forcing is recorded in every artifact's parameters.",
   "generated_by": "experiments/make_summary.py",
-  "git_commit": "7825a3be2b5a2e85a00f02ed98cc6a96788fe666",
+  "git_commit": "5d099b26565f83ad4f4fc1838d9204b75a4c8891",
   "grid_check": {
     "N": 128,
     "dlra": {
@@ -7391,17 +7391,17 @@
       "final_energy": 22.432965179105423,
       "initial_projection_relative_l2": null,
       "linear_algebra_calls": 841,
-      "linear_algebra_seconds_per_step": 0.011508312980877235,
+      "linear_algebra_seconds_per_step": 0.21176119805895724,
       "max_abs_divergence": 6.750155989720952e-14,
       "max_relative_energy": 1.010188899404995,
       "max_scaled_pde_energy_residual": 0.00021447695584713626,
       "max_scaled_projected_energy_residual": 0.00033519943514608827,
-      "max_trajectory_divergence": 4.6067480921986504e-05,
+      "max_trajectory_divergence": 4.60674809219865e-05,
       "rank_final": 70,
       "rank_max": 70,
       "rank_min": 17,
       "stable": true,
-      "wall_seconds_per_step": 0.03320947149535641
+      "wall_seconds_per_step": 0.25658686441020107
     },
     "dt": 0.00025,
     "file": "kolmogorov_re5000_N128.json",
@@ -7426,9 +7426,9 @@
       "rank_max": null,
       "rank_min": null,
       "stable": true,
-      "wall_seconds_per_step": 0.0120417256699875
+      "wall_seconds_per_step": 0.04494145690463483
     },
-    "git_commit": "7825a3be2b5a2e85a00f02ed98cc6a96788fe666",
+    "git_commit": "ff19721ab31edcc374069726f5d0b5b7b24f39d4",
     "ic_reference_N": 64,
     "initial_energy": 22.206703312933367,
     "initial_state_rank": 17,
@@ -7448,12 +7448,12 @@
       "max_relative_energy": 1.0101888969593522,
       "max_scaled_pde_energy_residual": 0.0001286818419769284,
       "max_scaled_projected_energy_residual": 0.035303848355700745,
-      "max_trajectory_divergence": 1.892981178595653e-09,
+      "max_trajectory_divergence": 1.892981178595652e-09,
       "rank_final": 16,
       "rank_max": 16,
       "rank_min": 16,
       "stable": true,
-      "wall_seconds_per_step": 0.01641339097986929
+      "wall_seconds_per_step": 0.0717838442453649
     }
   },
   "honesty_note": "The static-POD baseline is now correct (its fit had reshaped the snapshot stack in C order, interleaving snapshots); every number here is post-fix. At T=0.1 the corrected static baseline is more accurate than adaptive DLRA, because its offline window is a prefix of the evaluated trajectory and is effectively rank 3, so no accuracy advantage is claimed for the proposed method at this horizon. Per D11.2 the regime is not turbulence and no turbulence statistic is drawn from t <= 0.1.",
@@ -7648,7 +7648,7 @@
     "force_amplitude": 0.5,
     "git_commit": "1968c46224861c1f8b1f70df8457b8dfb6e516d6",
     "qualifying_horizons": [],
-    "rank_finding": "window_rank_table gives the modes needed to represent the fluctuations over [0, W]: r99 grows 1 -> 16 over the first eight time units, while the amplitude rule requests more modes than the dealiasing ceiling holds from t=2 onward, so its rank trace is the grid's and not the dynamics'",
+    "rank_finding": "window_rank_table gives the modes needed to represent the fluctuations over [0, W]: r99 grows 1 -> 14 over the first 8 time units, while the amplitude rule's request passes the top of the band that N=64 resolves without aliasing (43 = 2*floor(N/3)+1) by W = 2 -- a request larger than the grid can represent is not a measurement of the dynamics, so its rank trace is the grid's, (the two are different quantities; see rank_quantities in the artifact).",
     "re": 5000,
     "rows": [
       {

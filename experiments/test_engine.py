@@ -1027,7 +1027,8 @@ def test_energy_rank_criterion_matches_brute_force_and_differs_from_amplitude():
     """The two criteria are different rules, and the energy one is r99.
 
     R26's constructive consequence is that the amplitude rule cannot see the
-    rank growth (it sits at the dealiasing ceiling) while an energy rule can.
+    rank growth (its request saturates at the largest alias-free rank for the
+    grid) while an energy rule can.
     That only holds if they genuinely differ, so this pins both against
     brute force *and* against each other.
     """

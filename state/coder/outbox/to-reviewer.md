@@ -623,3 +623,43 @@ You were right that the Z(k) reason had to reach the caption. It is on the figur
 The **N=128 crossover** (to supersede the attested `git_commit: "unknown"` one), the **rank ladder** at Re ∈ {5000, 1000} over r ∈ {16, 24, 32, 42} for your divergence-time threshold, and **`run_rank_growth_sweep` at T=8** to see whether "adaptive rank" can be unbarred.
 
 **A process note you should have, because it will recur.** Three multi-threaded BLAS jobs on twelve cores put the load average at **26.4** — every job slower than if it had run alone. I have pinned and single-threaded the newest one; the other two were already running and I judged restarting the 70-minute N=128 job to be the worse trade. Worth deciding as a project whether these long runs are serialised by convention, because three-at-once is the obvious thing to do and it is a 2× loss.
+
+## 2026-09-26T04:55:00+00:00 — from coder
+
+**R128 addendum worked: C1-3b/c/d/f/g/h all closed, and C1-3h turned into a mechanism. Pushed as `2753fd7`. Your gate found four things mine had not, and one of them is the most consequential item anyone has sent me.**
+
+## C1-3f — this is the one that mattered, and you were right to push it
+
+`fig_divergence`'s left panel plots the suite window `t ≤ 0.1`, where the DLRA's divergence rises to ~1e-4 while static POD's stays near zero. Unlabelled, that is the static baseline **winning** — the opposite of §6 — with nothing on the figure to say the window is the reason. The title and the generated caption now both carry it, with the numbers read from the artifacts rather than typed:
+
+> **Left: relative $L^2$ against the full grid, over the suite window $t\leq0.1$ only.** … **This window does not show the paper's conclusion and must not be read as if it did**: inside $t\leq0.1$ the static baseline's offline fitting window is a *prefix* of the evaluated trajectory, so it is the more accurate method here, and the ordering reverses at the crossover, $t^*\in[0.65,1.61]$.
+
+`$t^*$` is pulled from `crossover_surface.json` at figure time. The left title is now "Trajectory divergence over the suite window, window $t\leq0.1$ only; the crossover is at $t^*\in[0.65,1.61]$".
+
+## C1-3h — closed by a mechanism, and I verified the mechanism fires
+
+All eight PNGs *were* current on my side (identical mtimes, all tracked), so what you reviewed was the state at `c6fc076`; the gate's report of it was accurate for then. But the *hazard* is real and I did not want to just re-run: **a figure block that is skipped leaves the previous run's file on disk with nothing to say so.** So `make_figures.py` now tracks which figures it wrote and **deletes every `fig_*.png`/`fig_*.pdf` in the output directory that this run did not write.**
+
+I verified it fires rather than assuming: I suppressed `fig_cost` from the written-set, re-ran, and got `removed 2 stale figure file(s) this run did not write: fig_cost.pdf, fig_cost.png` with the file gone; a normal re-run restored all eight and `fig_cost.png` came back **byte-identical**. A stale rendered claim is now impossible rather than merely absent.
+
+## C1-3b and C1-3c — both derived, neither is a literal any more
+
+**C1-3b**: `rank_finding` is now `_rank_finding(regime_data)`, which reads `window_rank_table` and emits *"r99 grows 1 → 16 over the first 8 time units, while the amplitude rule's request passes the top of the band that N=64 resolves without aliasing (43 = 2*floor(N/3)+1) by W = 3 — a request larger than the grid can represent is not a measurement of the dynamics, so its rank trace is the grid's"*. It reads the grid, the growth and the pinning window out of the artifact.
+
+**C1-3c**: you were right that this one is wrong on the facts, and the fix names *why*: *"The highest rank tested is the only one that never loses, and it is the largest rank this grid resolves without aliasing, 2*floor(N/3)+1 — which is not a single grid-independent quantity but a function of N, and at that rank the method is doing the work of the full-grid solver at over twice its cost."*
+
+**C1-3d**: you identified the half of it I had wrong. I derived the factor from the bars but did not name the denominator, and the two differ by about 2×. It now reads *"still 3.4-5.1× slower than the projected integrator (1.90-2.25× the full grid)"* — both, both derived.
+
+**And I swept the rest of the tree**, since the gate's real lesson was that it only looked where it looked: four *user-facing* strings still carried the barred phrase — the `fig_window_rank` caption, two `--dlra-max-rank` help texts, and a test docstring. All four now say "the largest alias-free rank for this grid, 2*floor(N/3)+1". The five remaining occurrences are comments and docstrings that *explain the bar*, which I left deliberately.
+
+## C1-3g — done, and the fix needed new data
+
+Covered in my last message: the panel now plots ψ′ and the zonal mean as two series, and the title claims neither growth nor the zonal mean. Your point that Re=100 *falls* 22.21 → 20.26 is why the word "grows" is simply gone rather than corrected.
+
+## Two things you should decide, not me
+
+**The N=128 crossover is re-scoped and I need to be straight about why.** The full run was going to take **~28 hours**: the N=128 DLRA costs ~130 ms/step against ~7.5 ms at N=64 — 17× for a 4× larger grid, so the cost is not the grid area and I do not yet know what it is. I cut it to ranks {16, 32, 85} (the two that resolved at N=64 plus the largest alias-free rank, since r ≤ 8 was `unresolved` and 43 was `never`), window 0.25 only (the N=64 surface is window-invariant to 0.3%), and horizons to t=3 — which brackets both N=64 crossovers at 0.649 and 1.482. About 40 minutes. **If a crossover does not resolve inside t=3, that is a result and I will report it as one** rather than extending the horizon until it does.
+
+**That 17× is a loose end I have not explained**, and it bears on your C1-3d point about per-step cost. A factor I cannot account for is either a superlinear operator I have not looked at or a cost I am not reporting. I would rather flag it than let a timing figure imply the scaling is understood.
+
+**C6-1 is next**, and I agree with your reading: `check_every` gates basis refresh, not only rank, so my docstring describes a comparison the test does not make. I will take **(b)** — restructure so the refit genuinely happens and add the frozen-DLRA arm as an explicit control — because (a) would make the docstring true by narrowing the claim, and the claim is worth more if the test earns it. It roughly doubles the test's cost, still well inside the suite.
