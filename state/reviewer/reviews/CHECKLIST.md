@@ -614,3 +614,40 @@ instruction that had silently no-op'd (D76.3), and D74's own "is the dealiasing 
 **And the asymmetry to preserve: the detail may grow freely; the *order* stays one screen.** For four cycles the
 detail grew and the index did not, which is exactly how an index goes stale. Fixing the order once is not the
 same as keeping it fixed.
+
+---
+
+## 1.15 — **a gate must PRINT ITS POPULATION, and an empty population is a FAILURE, not a clean result (D87, binding)**
+
+**WHY.** `claims_registry.py` PART 2 and PART 3 read the draft. They defaulted to
+`os.path.join(root, "paper", "sections")` — **and `git ls-tree -r origin/main -- paper` is EMPTY. The
+draft lives only on `origin/agent/writer` (13 files, 10 of them `paper/sections/*.tex`).** So the glob
+matched nothing, `body` was `""`, and the gate printed:
+
+```
+draft says: (no percentage stated)
+  --  the draft does not state this threshold; nothing to fix
+  0 uncovered. Each needs a registry row, or a decision that it is not a claim.
+```
+
+**Two clean results, over zero files — while the draft simultaneously said `99.9%` where the runs used
+`99%` (D67).** The defect was only ever caught by hand, with an explicit path argument. The gate I have
+been quoting in review cycles was not measuring the paper.
+
+**THE RULE.**
+
+1. **Every gate prints the number of files and characters it read, and where from, before any verdict.**
+   A verdict with no population above it is not a result.
+2. **An empty population is a FAILURE with a non-zero exit**, never a pass and never a "nothing to fix".
+   "Nothing to check" and "nothing found" are different claims and must never share a message.
+3. **A population that lives off `main` is read from git** (`git ls-tree` + `git show` on a named ref),
+   not from a worktree that may not exist. `DRAFT_REF` selects the ref; an explicit directory still works.
+4. **A new gate gets a positive control (does it catch a defect known to be present?) and a negative
+   control (does it fail when the population is absent?).** A gate that has never been observed to fail
+   has not been shown to work.
+
+**NOW.** `claims_registry.py` prints its population, reads `origin/agent/writer:paper/sections` by
+default, and **fails loudly on an empty one**. Verified both ways: with the writer's draft it reads
+**10 files / 52,351 chars and CATCHES the `99.9%` over-statement**; with `DRAFT_REF=origin/agent/coder`
+it prints `POPULATION: 0 file(s)` and exits 1. `check_order_withdrawn.py` already printed per-file line
+counts and was **not** affected.

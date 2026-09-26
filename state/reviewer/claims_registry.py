@@ -218,10 +218,36 @@ def sig_figs(s):
     return max(1, len(d))
 
 
+def load_draft(root, paper_arg):
+    """Return {name: text} for the draft. ORDER MATTERS (D87).
+
+    The draft does not live on `main`: `git ls-tree -r origin/main -- paper` is
+    EMPTY, and `paper/` exists only on `origin/agent/writer` (13 files). So the
+    default `paper/sections` glob silently matched nothing, `body` was the empty
+    string, and PART 2 reported "the draft does not state this threshold;
+    nothing to fix" and PART 3 reported "0 uncovered" — CLEAN RESULTS OVER AN
+    EMPTY POPULATION. The 99.9% defect (D67) was only ever caught when the gate
+    was run by hand with an explicit path.
+
+    So: read the draft out of git by default, and never report a result without
+    printing how many files it actually read.
+    """
+    if paper_arg:                                   # explicit override: a directory
+        return {os.path.basename(f): open(f, errors="replace").read()
+                for f in sorted(glob.glob(os.path.join(paper_arg, "*.tex")))}, \
+               f"directory {paper_arg}"
+    import subprocess
+    ref = os.environ.get("DRAFT_REF", "origin/agent/writer")
+    def sh(*a):
+        return subprocess.run(a, cwd=root, capture_output=True, text=True).stdout
+    names = [l for l in sh("git", "ls-tree", "-r", "--name-only", ref, "--", "paper/sections").splitlines()
+             if l.endswith(".tex")]
+    return {n: sh("git", "show", f"{ref}:{n}") for n in names}, f"git {ref}:paper/sections"
+
+
 def main():
     root = sys.argv[1] if len(sys.argv) > 1 else \
         os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    paper = sys.argv[2] if len(sys.argv) > 2 else os.path.join(root, "paper", "sections")
     res = os.path.join(root, "state", "coder", "results")
 
     print("PART 1 — VERIFY every registry entry against its artifact\n")
@@ -263,8 +289,16 @@ def main():
     print(f"\n  {ok_n}/{len(REGISTRY)} verified, {len(bad)} failed")
 
     print("\nPART 2 — THRESHOLD claims: does the draft state the value the runs actually used?\n")
-    tex = {f: strip_latex(open(f, errors="replace").read())
-           for f in sorted(glob.glob(os.path.join(paper, "*.tex")))}
+    tex, src = load_draft(root, sys.argv[2] if len(sys.argv) > 2 else None)
+    tex = {k: strip_latex(v) for k, v in tex.items()}
+    chars = sum(len(v) for v in tex.values())
+    print(f"  POPULATION: {len(tex)} file(s), {chars} chars, from {src}")
+    for n in sorted(tex):
+        print(f"    {n}  ({len(tex[n])} chars)")
+    if not tex:
+        print("  !! EMPTY POPULATION — this gate has measured NOTHING. A clean result below")
+        print("     would be meaningless. Fix the draft ref (DRAFT_REF) or pass a directory.")
+        bad.append(("population", "draft population is EMPTY: the gate measured nothing"))
     body = "\n".join(tex.values())
     for cid, where, codeval, pct in THRESHOLDS:
         stated = sorted(set(PCT.findall(body)), key=float)

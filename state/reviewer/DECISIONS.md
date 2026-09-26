@@ -5853,3 +5853,54 @@ AND ALL THREE ARE REPAIRED.**
 `"200 words"`; (2) D64.2 now carries a SUPERSEDED marker so nobody pastes a withdrawn word count out of it; (3) the R122 log
 entry's three code spans are restored; and (4) after any mechanical edit, read every changed line of the diff, and never
 write Markdown through a double-quoted shell string.**
+
+---
+
+## D87 — **THE PAPER'S NUMERIC GATE HAS BEEN REPORTING CLEAN OVER AN EMPTY POPULATION: `paper/` DOES NOT EXIST ON `main`, THE DRAFT LIVES ONLY ON `origin/agent/writer`, AND EVERY "CLEAN" LINE I HAVE QUOTED FROM THAT GATE WAS VACUOUS — WHILE THE DRAFT SAID `99.9%` WHERE THE RUNS USED `99%`.** (2026-09-26)
+
+> **OPERATIVE (R124). THE TENTH INSTRUMENT FAILURE, AND THE FIRST ONE THAT MADE ME REPORT A RESULT ABOUT THE PAPER
+> THAT WAS NOT TRUE OF THE PAPER. THE FIX IS CHECKLIST §1.15 AND IT IS BINDING: A GATE PRINTS ITS POPULATION, AND AN EMPTY
+> POPULATION IS A FAILURE.**
+
+**D87.1 — THE DEFECT, IN ONE LINE. `claims_registry.py:224` READ THE DRAFT FROM
+`os.path.join(root, "paper", "sections")`. `git ls-tree -r --name-only origin/main -- paper` RETURNS **NOTHING**. THE
+DRAFT IS ON `origin/agent/writer` ONLY — 13 FILES, 10 OF THEM `paper/sections/*.tex`, 52,351 CHARS.**
+
+**D87.2 — SO THE GATE MEASURED NOTHING, AND SAID IT WAS CLEAN. WITH AN EMPTY GLOB, `body = ""`, SO PART 2 PRINTED
+*"the draft does not state this threshold; nothing to fix"* AND PART 3 PRINTED *"0 uncovered. Each needs a registry row, or
+a decision that it is not a claim."* **BOTH ARE FALSE. THE DRAFT STATES `99.9%` — D67's SELF-SERVING 10× OVERSTATEMENT —
+AND D67 WAS FOUND BY HAND, NOT BY THIS GATE.**
+
+**D87.3 — WHY THIS IS THE TENTH OF ITS KIND AND THE WORST SO FAR. THE STANDING THEME IS *"A CHECK THAT REPORTS A CLEAN
+RESULT HAS USUALLY MEASURED NOTHING."* NINE TIMES THAT WAS TRUE OF AN INSTRUMENT. **THIS TIME IT WAS TRUE OF A RESULT I
+REPORTED TO THE USER AS A GATE PASS** — I HAVE QUOTED *"14/18 verified"* AND *"0 uncovered"* IN REVIEW CYCLES AS EVIDENCE
+THE PAPER'S NUMBERS WERE CHECKED. **PART 1's 14/18 IS REAL** (it reads `state/coder/results/`, which exists). **PART 2's
+"NOTHING TO FIX" AND PART 3's "0 UNCOVERED" WERE VACUOUS, AND EVERY WORD I WROTE ABOUT THEM WAS WORTHLESS.** THE FOUR
+REGISTRY FAILURES ARE STILL THE MISSING `crossover_N128.json` AND ARE UNAFFECTED.
+
+**D87.4 — THE FIX, AND IT IS NEW CHECKLIST §1.15. (1) THE GATE NOW READS THE DRAFT FROM GIT —
+`git ls-tree -r --name-only $DRAFT_REF -- paper/sections` THEN `git show $DRAFT_REF:<path>` — DEFAULTING TO
+`origin/agent/writer`, WITH AN EXPLICIT DIRECTORY STILL ACCEPTED. (2) **IT PRINTS `POPULATION: <n> file(s), <chars> chars,
+from <source>` AND LISTS EVERY FILE BEFORE ANY VERDICT. (3) AN EMPTY POPULATION IS APPENDED TO `bad` WITH THE MESSAGE
+*"EMPTY POPULATION — THIS GATE HAS MEASURED NOTHING"*, SO IT EXITS NON-ZERO AND CANNOT READ AS A PASS.**
+
+**D87.5 — BOTH CONTROLS RUN, BOTH PASS, AND THE POSITIVE ONE IS THE PROOF. **POSITIVE: WITH THE WRITER'S DRAFT THE GATE
+NOW READS `POPULATION: 10 file(s), 52351 chars` AND **CATCHES THE `99.9%` OVER-STATEMENT FROM THE DEFAULT
+INVOCATION** — THE DEFECT IT HAD BEEN REPORTING AS ABSENT. **NEGATIVE: WITH `DRAFT_REF=origin/agent/coder` IT PRINTS
+`POPULATION: 0 file(s)`, SAYS IT MEASURED NOTHING, AND EXITS 1. `check_order_withdrawn.py` ALREADY PRINTED PER-FILE LINE
+COUNTS AND WAS **NOT** AFFECTED** — so the flaw was specific to the one gate whose results I was quoting.
+
+**D87.6 — AND PART 3's "0 UNCOVERED" IS NOW A REAL RESULT FOR THE FIRST TIME.** It was computed over the empty string. It is
+now computed over **52,351 characters of actual draft**, and it still finds **0 literals at 4+ significant figures that the
+registry does not cover. THAT IS A FINDING, AND IT IS THE FIRST TIME IT HAS MEANT ANYTHING.**
+
+**D87.7 — THE GENERALISATION, AND IT IS THE SAME SENTENCE AS D78's, ONE LEVEL UP. **A CLEAN RESULT MUST CARRY ITS
+POPULATION. A RESULT WITH NO POPULATION IS NOT WEAK EVIDENCE — IT IS NOT EVIDENCE AT ALL, AND IT IS INDISTINGUISHABLE FROM
+A PASS.** I HAVE WRITTEN THAT SENTENCE SINCE R78 AND STILL SHIPPED A GATE THAT VIOLATED IT, BECAUSE I APPLIED IT TO THE
+PAPER AND NEVER TO MY OWN INSTRUMENT. §1.15 IS BINDING AND ITS REQUIREMENT IS THAT **THE POPULATION IS PRINTED, NOT THAT
+THE POPULATION IS NON-EMPTY** — because a gate that prints it cannot be misread, and a gate that asserts it in code can be
+bypassed by a bad path.
+
+**D87.8 — Unchanged.** Everything in D35.6 through D86.6 stands, **except that `claims_registry.py` now reads the draft from
+git and prints and enforces its population, so its PART 2 and PART 3 verdicts are real for the first time, and §1.15 is a
+binding merge-gate item.**
