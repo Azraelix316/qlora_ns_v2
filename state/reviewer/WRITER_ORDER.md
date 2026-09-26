@@ -306,3 +306,30 @@ THOSE IS ANSWERABLE FROM ARTIFACTS THAT ARE NOW VERIFIED, so none of them is blo
 §4 is the one section that is *nearly* right: the theorem is correct and the code matches it. What is
 missing is the connective tissue between them — which is exactly what the six markers are. **Item 3 above
 answers marker 102; the others are in `WRITER_ORDER.md` §1 and `FIRST_RUN.md`.**
+
+## §4.2 and §5 — two wrong numbers, and the steady state that reframes §5 (D59, binding)
+
+**I checked §4.2's prose against the code. The Proposition before it was right (D58); the two sentences after the energy identity contain two errors.**
+
+**1. Delete the second expression for $P_{\mathrm{in}}$.** The paper writes both
+
+$$P_{\mathrm{in}} = 2\pi^2 F^2/\nu \qquad\text{and}\qquad P_{\mathrm{in}}(\psi_K) = \mathrm{Re}\cdot\nu^2\|\cos y\|_2^2/(2\pi).$$
+
+**The first is correct** (verified against the code's own operators: `24674` on the run's parameters, matching $\langle u_K,f\rangle = (F^2/\nu)\|\cos y\|_2^2$ with $\|\cos y\|_2^2 = 2\pi^2$ in 2D). **The second gives `6.28e-4` — wrong by a factor $3.9\times10^7$, because it confuses $F$ with $F^2$.** They agree only if $F=\nu$. Keep the first, drop the second.
+
+**2. Replace the Reynolds-number definition.** The paper states $\mathrm{Re} = 2\pi F/\nu^2$. On the code's own parameters that is $7.85\times10^7$, **whereas the code takes `re` as an input and sets $\nu = 1/\mathrm{Re}$** — so every Re in the paper is an *input*, not a quantity derived from $F$ and $\nu$. They differ by $1.6\times10^4$. **This is your PENDING at line 26, and the definition currently in the prose is the thing it asks you to check.** Say it as: *"$\mathrm{Re}$ is an independent input and $\nu = 1/\mathrm{Re}$; the forcing amplitude $A$ is set separately, and the classical Kolmogorov scaling $A=\nu$ is not imposed."*
+
+**3. The good news, and it is bigger than the two errors: $\psi_K = -(F/\nu)\cos y$ IS an exact steady state of the simulated PDE.** I checked with the code's own operators: $\|u\cdot\nabla\omega_K\|_\infty = 0$, the diffusion and forcing terms cancel exactly, **vorticity residual `0.000000`** — and it holds for *any* $(F,\nu)$, not just the ones we run. **Your §4.2 claim is correct.**
+
+**4. Which reframes §5, and makes it stronger.** We have been carrying "no stationary state" as a property of the flow. **It is a property of the initial condition, and it is quantifiable:**
+
+| | |
+|---|---|
+| $\|u_K\|_\infty$ at the exact steady state | `2500` |
+| its kinetic energy $E_K$ | `6.17e+07` |
+| our initial energy (from the artifact) | `22.21` |
+| **$E(0)/E_K$** | **`3.6e-07`** |
+
+**We start essentially at rest and are driven up toward a steady state we are $2.5\times10^3$ below in velocity.** So replace "no stationary state is observed" with a quantified statement — *"the forced equilibrium $\psi_K = -(F/\nu)\cos y$ is an exact solution of the discretised equations, and the runs are initialised at $E(0)/E_K = 3.6\times10^{-7}$ of its energy, so the absence of stationarity over the horizons measured is a property of the initial condition rather than of the flow."* **A reader can check that in one line, and it is a stronger claim than an unexplained negative.**
+
+**5. And it gives the "not Kolmogorov flow" statement a number instead of an attribution.** $\psi_K$ coincides with the *classical* Kolmogorov flow only when $A=\nu$ (where $u_K=(1-\cos y)e_x$, $\mathrm{Re}=1/\nu$). **We run $A/\nu = 2500$.** Same family, not the same flow — and now that is a quantity rather than a citation.

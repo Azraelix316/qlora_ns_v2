@@ -820,6 +820,61 @@
   FOR EACH IMPLEMENTABLE SENTENCE IN §4, DOES THE CODE DO THAT, AND DOES THE CODE'S OWN DOCUMENTATION WARN
   AGAINST THE OBVIOUS ALTERNATIVES? THREE DID NOT, AND THE WARNINGS WERE ALREADY WRITTEN DOWN.**
 
+- 2026-09-26 **R97 — §4.2's SECOND EXPRESSION FOR `P_in` IS WRONG BY `3.9e+07`, ITS Re DEFINITION DOES NOT
+  DESCRIBE THE CODE, AND "NO STATIONARY STATE" IS A STATEMENT ABOUT THE INITIAL CONDITION — the exact
+  steady state exists in closed form and the runs start `3.6e-07` of its energy below it. D59.** No new
+  pushes.
+  **THE FIRST VALUE IS CORRECT AND THE SECOND IS WRONG BY A FACTOR `3.9e+07`.** `04_methods.tex:98-101`
+  claims `P_in = 2 pi^2 F^2/nu` AND "for the definition `Re = 2 pi F/nu^2` this reads `P_in(psi_K) = Re .
+  nu^2 ||cos y||_2^2/(2 pi)`". Checked by hand with the 2D norm AND with the code's own operators:
+  `2 pi^2 F^2/nu = 24674` **CORRECT**; `Re . nu^2 ||cos y||_2^2/(2 pi) = 6.28e-4`, **WRONG, OFF BY
+  `3.93e+07`, AND IT IS WHAT YOU GET CONFUSING `F` WITH `F^2`.** The two agree only if `F = nu`.
+  **AND THE Re DEFINITION DOES NOT DESCRIBE THE CODE: the paper states `Re = 2 pi F/nu^2`, which on the
+  code's own parameters is `7.85e+07`, WHEREAS THE CODE RUNS `re = 5000` AND SETS `nu = 1/Re` —
+  REYNOLDS NUMBER IS AN *INPUT*, NOT DERIVED FROM `F` AND `nu`. THEY DIFFER BY `1.6e+04`. THIS IS EXACTLY THE
+  PENDING AT LINE 26 — THE WRITER FLAGGED IT AND THEN WROTE A DEFINITION IN THE PROSE THAT THE CODE
+  CONTRADICTS.**
+  **AND THE PAPER IS RIGHT ABOUT `psi_K` BEING A STEADY STATE, WHICH IS THE INTERESTING PART. WITH THE
+  CODE'S OWN OPERATORS, `psi_K = -(F/nu)cos y` HAS `||u.grad omega_K||_inf = 0` (advuction vanishes:
+  `omega_K` depends only on `y`, `u_K` only on `x`), `nu||Lap omega_K||_inf = ||zeta||_inf = 0.5`
+  **CANCELLING** (`zeta = -A cos y` per D20.1), AND **VORTICITY RESIDUAL EXACTLY `0.000000`. SO `psi_K` IS
+  AN EXACT STEADY STATE OF THE SIMULATED PDE, FOR *ANY* `(F, nu)`.** The paper's §4.2 claim is CORRECT.
+  **AND THAT REFRAMES D20/D24's "NO STATIONARY STATE", WHICH THE PROJECT HAS CARRIED SINCE R20:**
+
+  | | |
+  |---|---|
+  | exact steady state's velocity `||u_K||_inf` | `2500` |
+  | exact steady state's energy `E_K` | `6.17e+07` |
+  | the runs' initial energy (from the artifact) | `22.21` |
+  | **`E(0)/E_K`** | **`3.6e-07`** |
+  | `perturbation_velocity_rms` | `1.0` |
+
+  **THE RUNS ARE INITIALISED ESSENTIALLY AT REST AND THEN DRIVEN UP TOWARD A STEADY STATE THEY ARE `2.5e+03`
+  BELOW IN VELOCITY. SO "NO STATIONARY STATE IS OBSERVED" IS NOT A PROPERTY OF THE FLOW — IT IS A STATEMENT
+  ABOUT THE INITIAL CONDITION, AND IT IS QUANTIFIED. THAT IS A FAR BETTER POSITION THAN AN UNEXPLAINED
+  NEGATIVE: the reader can see exactly how far from equilibrium the computation starts, and the equilibrium
+  is something they can verify in one line.**
+  **AND IT GIVES D20's BAR A MECHANISM RATHER THAN A CITATION: `psi_K` COINCIDES WITH THE *CLASSICAL*
+  KOLMOGOROV FLOW ONLY WHEN `F = nu` (WHERE `u_K = (1 - cos y)e_x` AND `Re = 1/nu`), AND THE CODE RUNS
+  `A/nu = 2500`.** Same family, not the same flow — and now that is a number rather than an attribution.
+  **WHAT I GOT WRONG IN THIS CYCLE, SINCE IT IS THE THIRD TIME IN THREE: I computed `||cos y||_2^2 = pi` —
+  A *ONE-DIMENSIONAL* NORM — and was about to report the paper's `2 pi^2 F^2/nu` as wrong by `2 pi`. IN 2D
+  ON `[0,2pi]^2` IT IS `2 pi^2`, AND THE PAPER IS RIGHT. AND MY ANALYSIS SCRIPT PRINTED A HARD-CODED
+  NARRATIVE LINE — "they ADD in the vorticity equation instead of cancelling, so `psi_K` IS NOT A STEADY
+  STATE" — DIRECTLY CONTRADICTED BY THE `0.000000` PRINTED ABOVE IT. A PRINTED CONCLUSION THAT IS NOT
+  COMPUTED IS THE SAME ERROR AS A REMEMBERED STRING: IT SURVIVES BECAUSE IT IS PROSE. THE NUMBERS WERE
+  RIGHT AND THE SENTENCE WAS WRONG, IN THE SAME OUTPUT, AND ONLY BECAUSE BOTH WERE PRINTED COULD I SEE IT.**
+  Three cycles, three near-misses of one kind: R84 (a citation contradicted by a second file), R93 (a
+  "multipliers" label standing in for a derivation), R97 (a 1-D norm and a hard-coded conclusion). **The
+  discipline that catches all three is the same: compute it, print it next to the claim, and let the number
+  decide.**
+  **THE LESSON: A PAPER'S PROSE IS WHERE ITS MATHEMATICS IS LEAST CHECKED, BECAUSE THE CODE IS CHECKED AND
+  THE SENTENCES AROUND THE CODE ARE NOT. R96 VERIFIED THE PROPOSITION AGAINST `solvers/`; THIS CYCLE
+  VERIFIED THE TWO SENTENCES *AFTER* THE ENERGY IDENTITY AND FOUND ONE WRONG BY SEVEN ORDERS OF MAGNITUDE AND
+  ONE THAT CONTRADICTS THE CODE'S OWN PARAMETERISATION. THE PROPOSITION WAS RIGHT; THE PARAGRAPH AFTER IT WAS
+  NOT. THAT IS NOT A COMMENT ON THE WRITER — IT IS A COMMENT ON WHERE REVIEW ATTENTION GOES, AND IT WENT TO
+  THE THEOREM BECAUSE THEOREMS ARE CHECKABLE AND SENTENCES ARE NOT.**
+
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
 **Everything below this line, up to `## Mission`, is superseded history.** The `> Status:` line
