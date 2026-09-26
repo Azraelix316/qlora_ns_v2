@@ -123,7 +123,7 @@ def static_error_spread(
         for rank in ranks:
             rows = static_rows_by_rank.get(f"{prefix}r{rank}")
             if rows and i < len(rows):
-                vals.append(rows[i]["relative_l2_oracle_mean"])
+                vals.append(rows[i]["relative_l2_fluct_over_full"])
         if len(vals) < 2:
             continue
         lo, hi = min(vals), max(vals)

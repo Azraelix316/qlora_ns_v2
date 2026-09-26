@@ -1,0 +1,86 @@
+{
+  "case": "rank_growth_sweep",
+  "initial_state": {
+    "dtype": "float64",
+    "initial_energy": 22.206703312933374,
+    "numerical_rank": 17,
+    "sha256": "ebcef128e52e73f728024f67e95e0a4263addff56aa82c7a8e82e7f5e8b1af41",
+    "shape": [
+      64,
+      64
+    ]
+  },
+  "interpretation": "The unprojected candidate is inspected at each check; tighter thresholds retain more slowly decaying singular directions and therefore grow rank.",
+  "parameters": {
+    "base_speed": 0.5,
+    "compare_stride": 20,
+    "cutoff": 8,
+    "dlra_adapt_initial": true,
+    "dlra_check_every": 5,
+    "dlra_initial_rank": 2,
+    "dlra_max_rank": 48,
+    "dlra_min_rank": 2,
+    "dlra_relative_amplitude_cutoff": 1e-10,
+    "dt": 0.0005,
+    "final_time": 8.0,
+    "force_amplitude": 0.5,
+    "ic_reference_N": null,
+    "nsteps": 16000,
+    "perturbation_velocity_rms": 1.0,
+    "pod_fit_includes_ic": true,
+    "pod_rank": 16,
+    "relative_amplitude_cutoffs": [
+      1e-06,
+      1e-08,
+      1e-10
+    ],
+    "seed": 20260925,
+    "snapshot_stride": 5,
+    "spectrum_count": null,
+    "steps": 16000,
+    "train_steps": 8000
+  },
+  "provenance": {
+    "driver": "experiments/run_rank_growth_sweep.py",
+    "driver_dirty": false,
+    "driver_matches_HEAD": true,
+    "driver_sha256": "bc47cb1efc512af0cd20e9b18193ecb7b569de1e77070479949a3b83beaca66d",
+    "git_commit": "4bafb41b8835d261f9b3331855d503c33e1b7251",
+    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "reproducible": true,
+    "working_tree_diff_sha256": "36688f9972295b5a6a19de2f3d20302c27d567b07ba5069a2873778c5c274e08",
+    "working_tree_dirty": true
+  },
+  "rows": [
+    {
+      "max_relative_l2_vs_full": 0.5134927805445354,
+      "max_scaled_invariant_residual": 0.000770025818327352,
+      "rank_final": 43,
+      "rank_max": 43,
+      "rank_min": 17,
+      "relative_amplitude_cutoff": 1e-06,
+      "seconds_per_step": 0.01336144753343251,
+      "stable": true
+    },
+    {
+      "max_relative_l2_vs_full": 0.10168307848315154,
+      "max_scaled_invariant_residual": 0.0007700258082690377,
+      "rank_final": 43,
+      "rank_max": 43,
+      "rank_min": 17,
+      "relative_amplitude_cutoff": 1e-08,
+      "seconds_per_step": 0.009785067889126368,
+      "stable": true
+    },
+    {
+      "max_relative_l2_vs_full": 0.10222425561590834,
+      "max_scaled_invariant_residual": 0.0007700258068321355,
+      "rank_final": 43,
+      "rank_max": 43,
+      "rank_min": 17,
+      "relative_amplitude_cutoff": 1e-10,
+      "seconds_per_step": 0.009537473892749403,
+      "stable": true
+    }
+  ]
+}

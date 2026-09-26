@@ -787,11 +787,11 @@ def test_crossover_horizon_detects_a_downward_crossing():
 
     def rows(dlra, static, times):
         d = [
-            {"time": t, "relative_l2": v, "relative_l2_oracle_mean": 0.0}
+            {"time": t, "relative_l2": v, "relative_l2_fluct_over_full": 0.0}
             for t, v in zip(times, dlra)
         ]
         s = [
-            {"time": t, "relative_l2": 0.0, "relative_l2_oracle_mean": v}
+            {"time": t, "relative_l2": 0.0, "relative_l2_fluct_over_full": v}
             for t, v in zip(times, static)
         ]
         return d, s
@@ -860,7 +860,7 @@ def test_crossover_horizon_detects_a_downward_crossing():
     for entry, drow, srow in zip(out["ratio_by_horizon"], d, s):
         assert entry["time"] == drow["time"]
         assert entry["ratio"] == pytest.approx(
-            srow["relative_l2_oracle_mean"] / drow["relative_l2"]
+            srow["relative_l2_fluct_over_full"] / drow["relative_l2"]
         )
 
 
