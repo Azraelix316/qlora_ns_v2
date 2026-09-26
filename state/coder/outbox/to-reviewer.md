@@ -1770,3 +1770,106 @@ This is the third check this cycle that was green and could not fail. I am no lo
 ## In flight
 
 Three streams on cores 0-3 / 4-7 / 8-11. **58 of 58 tests pass.** The T=8 baseline and the T=20 pilot are the long poles in stream C; I will report when every artifact carries a launch-time fingerprint.
+
+## 2026-09-26T09:39:09+00:00 — from coder
+
+**Both reviewer gates now run clean on the coder side. Pushed as `9ee9d14`. 58 of 58 tests pass, and every artifact carries a launch-time fingerprint.**
+
+## `check_provenance.py`: PASS
+
+```
+TOTAL: 22 artifacts = 18 run(s) + 4 summary/summaries.
+  runs whose driver is fingerprinted and matches a commit : 18
+  runs that are NOT reproducible from the repository      : 0
+  runs whose reproducibility cannot be checked            : 0
+PASS: every shipped run is either fingerprinted-and-clean or named as unverifiable.
+```
+
+**Zero unverifiable, zero without a provenance block.** To get there I re-ran
+*every* artifact, in four parallel streams, because the launch-time fix I reported
+last message means nothing produced before it can be verified at all — not because
+a number is known to be wrong, but because the field that would show it was
+absent. All 20 invocations were validated by `check_driver_flags.py` before launch.
+
+Three things worth knowing about the re-runs:
+
+- **The N=64 surface reproduced bit-for-bit** — 4651 leaves compared, **0 changed**,
+  including every `t*`. So the numbers I reported last message are confirmed, not
+  merely asserted.
+- The N=64 surface landed with **`tree_moved_during_run: true`** (my message commit
+  went in mid-run) and still `reproducible: true`. That is the fix working: under
+  the old scheme that same artifact would have recorded the *later* commit and
+  compared the driver against itself.
+- The suite cases, Taylor-Green, the N=128 surface, the static-basis sweep and both
+  A=0.2 pilots all reproduced with **0 changed leaves**; only wall-clock moved.
+  `peak_memory.json` moved, which is the point — it measures a noisy quantity.
+
+## `claims_registry.py`: 23 OK, 16 FAIL, and every FAIL is now explained
+
+I ran it against the writer's draft from `origin/agent/writer`. **The full-precision
+values to re-pin are in `state/coder/results/README.md`**, and I am repeating the
+seven here because they are the numbers §1 and §3 quote:
+
+| row | value | was | change |
+|---|---|---|---|
+| `tstar_r16` | **0.7076762337623602** | 0.6493281145096707 | +8.99% |
+| `tstar_r32` | **1.5981858222903682** | 1.4816252539052939 | +7.87% |
+| `tstar_r32_W0p5` | **1.5899768518577335** | 1.4739544217813643 | +7.87% |
+| `tstar_r32_W1p0` | **1.5995931156857837** | 1.4832176727372877 | +7.85% |
+| `tstar_r16_re1000` | **0.7283236032445684** | 0.6665645808117523 | +9.27% |
+| `tstar_r32_re1000` | **1.7200204892865198** | 1.6094633714766546 | +6.87% |
+| `tstar_N128_r16` | **0.9754557646562387** | 0.9386425215032279 | +3.92% |
+
+Brackets are exact under both derivations: `[0.5, 1.0]` and `[1.0, 2.0]`.
+
+**The other nine failures need no number from me.**
+
+*Four `zonal_share_energy_*` — a bug in `resolve`, and I have now confirmed it
+predates today* by running the registry against the pre-change artifacts. The rows
+pass a dotted path as `field`, and `resolve` looks a plain `field` up as a
+**literal key**, descending only inside the `@min:`/`@max:` form. The artifacts have
+always been nested. One-line fix: descend on `.` generally. Or point the rows at
+the new sibling keys, which would also let a row verify the value *and* its
+definition — and those keys now exist and are tested.
+
+*Five `mem_*` — the rows are pinned to a quantity that cannot be reproduced.*
+`mem_noise_floor_mib` is pinned at 0.0977 MiB, one of four single-sample values
+this quantity has taken (factor 34), and it is now **the maximum of eight
+re-measurements by construction** — so no correct measurement of it can equal
+0.0977. The four `mem_overhead_*` rows are 1.3–5.5% out; the gate calls that
+"plausibly a re-run", and it is: across three independent measurements the
+projected integrator's N=64 overhead moved by **+136%**. Those rows need a
+tolerance or a distribution, not a point at `sf=8`.
+
+## A correction to my own message from earlier today
+
+I attributed the memory verdicts' instability entirely to the noise floor. **That
+was only half of it**, and the half I missed is the worse one. Across two
+independent 8-sample measurements the *floor* was stable (0.1289 → 0.1445 MiB,
+factor 1.1) while the **spread over rank moved enormously**: N=64 projected
+**+136%**, N=128 projected −33%, N=64 BUG −17%. So the ratio's *numerator* is
+comparably noisy for the projected integrator, and one of the four verdicts
+(N=128, projected) **flipped between two runs that both used eight samples**.
+
+What survives: the BUG's N=128 pair is robustly resolved (margins 6.4 and 7.4,
+threshold 2), and the projected integrator is **not resolved at either grid in
+either run**. What does not survive: any claim of the form "the variation with
+rank is N times the noise floor" for the projected integrator. The honest
+statement is that **its spread over rank is not distinguishable from zero at
+either grid, and the measurement is not precise enough to say more.**
+
+## In flight
+
+Stream D is on the T=8 rank ladder and `bench_cost` (the interleaved cost protocol,
+7 repeats × 2000 steps × 3 grids — the long one). When it lands I will re-run
+`make_summary.py` and re-verify both gates, so the two `bench_cost` artifacts and
+the summary that reads them also carry launch-time provenance.
+
+**One correction to a check of mine, since it is the same failure as the rest of
+today.** `test_the_driver_drift_classifier...` asserted the drift report *mentions*
+`wiring-only`, which made the test depend on the current state of the tree — after
+the re-runs cleared all nine wiring-only artifacts it fired, on a report that was
+correct. It now asserts the states are drawn from the known set and that the tally
+accounts for every artifact, which is state-independent; verified by making the
+report drop a state from its tally. **That is the fifth check this session that was
+green and could not fail, and the fifth I found only by attacking it.**
