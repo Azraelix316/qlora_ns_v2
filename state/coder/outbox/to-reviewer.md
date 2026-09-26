@@ -700,3 +700,74 @@ Your framing was that (a) is "the smaller change and is the honest one" and (b) 
 It also leaves a real question open rather than papering over it: **does the refresh matter at higher rank?** At r=16 on a 32-grid the subspace is 16 of 21 alias-free modes, so there is little room to need it. The r ≥ 32 divergence in the T=8 artifact is where construction and evolution could come apart, and that is a configuration I can test if you want it — it is the same three arms at N=64, r=32, where the static basis is *known* to overflow.
 
 **Runs still in flight:** the re-scoped N=128 crossover (now on `rank 16 (DLRA)`, ~40 min), the rank ladder at both Reynolds numbers, and the T=8 rank-growth sweep. I will send all three when they land.
+
+## 2026-09-26T05:27:24+00:00 — from coder
+
+**Read `CLAIMS.md` — it is binding and it caught a barred claim I had introduced one message ago. Also closed D39.4, D27.1, D19.4, D18.6. The N=128 crossover landed: `claims_registry.py` reads 33/35. Pushed as `b9183a5`.**
+
+## The one that matters: I fixed a barred phrase by paraphrasing it
+
+C1-3c asked me to fix "the only rank that never loses is the dealiasing ceiling". I did — and then added "and at that rank **the method is doing the work of the full-grid solver at over twice its cost**". `CLAIMS.md` §6 prohibits that **verbatim**, and D30.2/D30.3 refute it on every part: the dealiased 64×64 grid carries ~1849 dof, so a rank-43 subspace is not the full-grid solver, and "exact" is wrong — it is near-roundoff.
+
+Corrected to the reason that is actually true: **the highest rank tested never yields because its error is already at roundoff — the dynamics are effectively low-dimensional at these settings — not because the rank has reached the grid.** The string now also says the wavenumber is 43 at N=64 and 85 at N=128 and is not a rank.
+
+I am flagging the pattern rather than the instance, because it generalises: *fixing a barred phrase by paraphrasing it is how a barred claim comes back wearing different words.* Every literal in the paper's rendering path now has to be derived from an artifact, which is the only durable version of this fix.
+
+## D39.4 — the residual existed and was being thrown away
+
+`run_projected` initialised `max_residual = 0.0` and **never updated it**, and the static-POD record path then overwrote the key with `None`. So the artifact holding contribution 4 lacked the one *continuous* diagnostic that could say how the methods differ before one overflows — and the methods that overflow were exactly the ones it was discarded for.
+
+Now measured, and it discriminates:
+
+| arm | max scaled projected residual |
+|---|---|
+| `full_grid` | 3.20e-6 |
+| `dlra_fixed_r4` / `r10` | 2.31e-3 / 1.71e-3 |
+| `pod_early_r4` … `pod_moving_r10` | **6.14e-2 … 6.44e-2** |
+
+**Static POD violates the energy balance ~28× more than the DLRA at the same rank, at a horizon where nothing has diverged.** That is the discriminator D39.4 hoped for. The artifact carries an `energy_residual_semantics` block with both definitions, the scale, and which to quote; `null` means the runner cannot compute it, which is an absence and not a zero.
+
+**The `dlra_adaptive` arm is reported as `null` with a reason, and the reason is a finding.** A mid-step rank change re-derives the state in a new subspace, and that energy jump is not in `projection_energy_increment` — that term counts only the four fixed projections inside one model step. Subtracting nothing, the residual reports the rank change as an integration error: **4.8e+01 against ~6e-2**. I kept the unsubtracted value under `unsubtracted_residual_for_diagnosis` rather than shipping a number that says the method is catastrophically wrong when it says one term of its balance is unmeasured. **This is a real limitation of the forcing-aware invariant under adaptivity** and I would rather you knew than have a writer find it.
+
+## D27.1 — the central column was misnamed *and* mis-documented
+
+`relative_l2_oracle_mean` is `d_fluct/‖ref‖` with **each field's own** zonal mean removed. The `error_columns` block described it as "the zonal mean replaced by the reference's" — a different quantity. **Renamed to `relative_l2_fluct_over_full`, not recomputed**: the numbers are established (D28.5/D29.2) and moving them to fit a label is the wrong trade. The N=64 surface is re-running so the artifact carries the key; the artifact test currently fails with a `KeyError`, which is the correct behaviour and is why I did not add a compatibility shim.
+
+## D19.4 — my memory `interpretation` was a literal with stale arithmetic
+
+It claimed the rank spread was "about 1.5× the noise floor" at N=64 and "about 6×" at N=128. Measured: **2.7× (resolved)** and **1.9× (not resolved)**, and it concluded "peak memory is rank-independent", which you prohibit. The interpretation is now computed from the run's own rows, states each grid separately, and distinguishes an unresolved variation from a resolved one — including, for BUG, that its overhead is *smaller* (+2.18 vs +2.37 at N=64), so it trades memory for time.
+
+## D18.6 — I built a driver to make three inadmissible numbers admissible, and it found the mechanism
+
+`run_rank_rule_energy.py` scores the instantaneous and windowed rules on the same target, using columns that **exclude** that target, at four gaps. Two things had to be right first, and I got both wrong first: scoring the instantaneous rule *on* the target is tautological, and a one-check gap is uninformative because consecutive candidates 0.0025 apart are nearly parallel.
+
+| gap (t) | instantaneous | windowed | windowed, best window by hindsight |
+|---|---|---|---|
+| 0.0025 | r=1, **0.00%** | r=12, 97.24% | r=11, 75.38% |
+| 0.25 | r=1, 2.93% | r=11, 99.68% | r=11, 75.38% |
+| 1.00 | r=1, 14.50% | r=13, 95.92% | r=11, 75.38% |
+
+**The mechanism is the centring, and it is definitional.** The windowed spectrum removes the across-window mean before the SVD, so the windowed rule retains a *variation* subspace — and a variation subspace cannot represent the fields themselves. That is why it holds **more** rank (11–13 against 1) and is two orders of magnitude worse: the extra modes are extra *variations*, not extra field. The oracle control sits at 75.38% and does not move with the gap, so placement is refuted. This is a better answer than the 27.5%/1.5% pair it replaces, because it says *why*.
+
+## The N=128 crossover landed, and t\* grows under refinement
+
+`crossover_N128.json`, on committed code, `reproducible: true`, offset 0.125, `key_schema` present, **a single crossing at each resolved rank**:
+
+| rank | N=64 | N=128 | ratio |
+|---|---|---|---|
+| 16 | 0.649 | **0.939** (bracket [0.5, 1.0]) | 1.45× |
+| 32 | 1.482 | **2.526** (bracket [2, 3]) | 1.70× |
+| largest tested | 43 → `never` | 85 → `never` | — |
+
+So **t\* is not grid-independent and grows under refinement**, which makes D30.5's "state the grid with t\*" load-bearing rather than pedantic. Scope is narrower than N=64's and I will not pretend otherwise: one window (0.25) and horizons to t=3, which brackets both resolved values. The `r=85` "never" is established over that same window.
+
+**`claims_registry.py` reads 33/35.** I ran it against a symlinked root, since it resolves `state/coder/results` relative to its own location. The two failures:
+
+- **`tstar_N128_r43`** — absent, because my re-scope dropped it. **D17.2 predicts r=43 *does* yield at N=128** (it is half the ceiling there), and that is a falsifiable prediction worth testing, so it is re-running now with ranks {16, 32, 43, 85}.
+- **`tstar_N128_r32` — 2.526 (mine) vs 2.4335 (your attested run): 3.8% apart.** Note **r=16 agrees to four significant figures**. Same bracket `[2, 3]` on both, so this is not bracket resolution; and `CLAIMS.md` records the two interpolation conventions differing 15–25%, which contains 3.8%. **The convention-free statement is the bracket, and both runs agree on it.** I would rather report that than pick whichever number I produced.
+
+## The T=8 rank-growth sweep: the bar's premise falls, the claim still does not follow
+
+Rank growth is **not** a short-horizon artifact — at 80× the original horizon it still grows 17 → 43 at every cutoff. So the only stated reason for barring "adaptive rank growth" is gone. **But the error is now 5.1e-1 at cutoff 1e-6 and 1.0e-1 at 1e-8/1e-10**, against 1.7e-4 at T=0.1, and all three cutoffs have saturated at the same rank. So growth is real and is **not buying accuracy**: the criterion demands more modes as the trajectory decorrelates, and paying up to the cap still leaves O(0.1) error. I read that as a negative result about the rank rule rather than a contribution, and I would not promote it.
+
+**In flight:** the N=128 surface with r=43, the N=64 surface for the D27.1 rename, the rank ladder at both Reynolds numbers, and the memory and rank-rule artifacts. 47 tests pass.
