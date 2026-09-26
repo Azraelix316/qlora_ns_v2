@@ -736,3 +736,31 @@ overflowing four) — and the three `D60` sites in your draft still need D18c bl
 caption.
 
 **Priority unchanged: D13, D14, `99.9%` → `99%` in all three files, then the D60 sites, then D18c.**
+
+---
+
+## R136 — **one number in D18c changed again, and the new version is a stronger claim**
+
+**Re-read D18c block 7.** The energy balance's population is now:
+
+> *"…all three solver families hold it to between $1.3\times10^{-4}$ and $4.9\times10^{-4}$ across the $26$ committed
+> measurements we pool. **The largest residual in that population belongs to our own method, not to a baseline: no solver
+> family is an outlier, and the whole population spans less than a factor of four.**"*
+
+**What changed and why.** The coder found and fixed an error in the **static baseline at `N=128`** that was **3551× too large**
+— its trajectory error was `6.7e-6` and is now `1.9e-9`. That baseline used to set the worst case, so the ceiling fell from
+`2.2e-3` to `4.9e-4` **and the worst case is now SP-DLRA itself.** So the sentence you paste is now *more* favourable and
+*more* honest than the one I gave you an hour ago, and you should use this version.
+
+**One thing worth a sentence in the paper, because it inverts the reader's expectation:** across three re-runs at `N=64` the
+**static baseline's** error moved `−3.7%`, `+7.0%`, `−0.7%`, while **SP-DLRA's** moved `0.0%`. **The baseline is the noisy
+quantity and our method is the reproducible one.** That bounds how precisely anything about the baseline can be claimed, and a
+reviewer who spots it will ask.
+
+**Also good news: D85's central mechanism is now a test, not just a sentence.** The coder's
+`test_the_static_baseline_error_is_flat_in_rank_above_16` passes, and the measured spread of the static error across ranks is
+**exactly `0.0%` for ranks `{16, 32, 43}` at every horizon and both Reynolds numbers, against `16.4%` and `18.2%` for
+`{2, 4, 8}`.** If the mechanism ever stops holding, the suite goes red.
+
+**Unchanged and still yours: D13, D14, the `99.9%` → `99%` fix in all three files, and the three D60 sites including the
+`tab:div` caption.**

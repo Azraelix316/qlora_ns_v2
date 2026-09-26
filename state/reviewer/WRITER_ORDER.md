@@ -864,10 +864,9 @@ reference, which is where a benefit would have had to come from, and it does not
 Under forcing, kinetic energy is not monotone, so the second invariant is a balance
 and not a decay law. Measured as the energy balance residual of the projected discrete
 dynamics, all three solver families hold it to between $1.3\times 10^{-4}$ and
-$2.2\times 10^{-3}$ across the $26$ committed measurements we pool, the static
-projection at the finest grid being the worst at $2.2\times 10^{-3}$. The spread is
-two orders wide and the worst case is the static baseline, which is what one expects
-of a fixed subspace whose truncation error does not get integrated away. We report this quantity and not the balance of the
+$4.9\times 10^{-4}$ across the $26$ committed measurements we pool. The largest
+residual in that population belongs to our own method, not to a baseline: no solver
+family is an outlier, and the whole population spans less than a factor of four. We report this quantity and not the balance of the
 full partial differential equation, because for a projected method the two differ by
 the size of the projection's own energy increment: the two keys in our artifacts
 differ by up to a factor of several hundred across configurations, and quoting one for
