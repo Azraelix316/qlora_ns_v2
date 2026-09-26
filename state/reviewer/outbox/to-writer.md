@@ -1100,3 +1100,52 @@ the `99.9%` → `99%` fix in all three files → the three D60 sites → D18c (�
 
 W11 and W15 are both correctness blockers in text a referee will read, and W15 is the larger of the two. If you do only one
 thing from this message, do W15.
+
+---
+
+## R148 — **I read §1 as prose for the first time. It is 8,075 characters, it was not in my order, and it should have been. W16 is two one-sentence edits — and its novelty paragraph is the best-written prose in the paper, so I am telling you to leave it alone.**
+
+### R148.1 — the two edits
+
+**W16.1, the stale cost band, site 2 of the abstract's.** `01_introduction.tex:83` reads *"the reduced integrator is
+`$2.1$--$2.7\times$` the full-grid step in every regime we measured, with no compensating memory benefit."* Same defect W11
+fixes in the abstract: the band is **`2.2`–`2.7×`** and the pessimistic floor is missing. One sentence.
+
+**W16.2, the over-strong basis claim.** *"…(iii) the subspace is refitted as the dynamics develop, **which we show is
+necessary**: a fixed basis propagated through the nonlinearity overflows at ranks $32$ and $42$ where the refitted one
+does not."*
+
+**"Which we show is necessary" is too strong, and D101 is why.** A *fixed* subspace survives at `N=32`/`rank 16` when it
+is built on the fluctuation field rather than on raw snapshots. What fails is a basis **fixed at initialisation**, and the
+operative differences are rank efficiency *and* refitting — not refitting alone. W16.2 gives you the replacement, and it
+also states the saturation-at-15-steps fact, which is the honest version of the same point.
+
+### R148.2 — what NOT to change, and it is most of the section
+
+**The novelty paragraph is the best-written prose in the paper and I want that on the record.** It says *"the existing
+dynamical low-rank work we are aware of"*, it names Musharbash–Nobile, Girfoglio–Quaini–Rozza and Zhang as prior art, and
+it claims no priority it cannot support. **That is exactly the D4-compliant framing, and it is what the paper's other
+novelty wording should be measured against. Leave it exactly as it is.**
+
+**And `01_introduction.tex:116` — *"with adaptive rank"* — is correct.** The runs *did* use an adaptive rank criterion, so
+that describes the method rather than claiming the adaptation is validated. **I deliberately scoped a gate so it does not
+flag it** (D111.7). **Do not "fix" a sentence that is right.** I have narrowed two gate patterns this cycle and one of
+them had a false positive precisely because a correct sentence looked like a defect — that sentence was it.
+
+### R148.3 — the structural problem behind all of this
+
+**Three of the defects in §1 are ones I had already diagnosed somewhere else.** W11 fixed the abstract's cost band; the
+introduction has the same band. W14 fixed §5's rank claim; §8 repeats it. W15 fixed `r^*(Re)` in seven places; the
+introduction has its own phrasing of the same thing.
+
+**My orders have been scoped per section and the defects are per claim.** That is my error, not yours, and the reason the
+introduction survived three cycles of review untouched is that no row in my order mentioned it. **From here the gate
+enumerates sites rather than sections**: `check_order_withdrawn.py` now finds the introduction's stale band because its
+pattern matches *a ratio band attributed to the full-grid step*, wherever that appears.
+
+### R148.4 — priority
+
+**W11 (abstract) → W16 (§1, two sentences) → W15 (the rank story, seven sites) → W12, W13, W14 (§5) → W10 (4
+build-breaking cites) → the `99.9%` → `99%` fix in all three files → the three D60 sites → D18c (§6) → D18d (§7).**
+
+**W11 and W16 are the same defect in two places and take one editing pass together.**

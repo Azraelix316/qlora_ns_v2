@@ -7581,3 +7581,72 @@ sharper question, it is answerable, and the zonal-share measurement is the first
 
 **D110.5 — Unchanged.** Everything in D35.6 through D109.5 stands, **except that the rank-outcome claim is withdrawn at
 seven sites, and `r^*(Re)` is withdrawn as a quantity.**
+
+---
+
+## D111 — **A GATE PATTERN KEYED TO SUPERSEDED *NUMBERS* CANNOT CATCH THE CLAIM IT EXISTS TO POLICE, AND IT REPORTED CLEAN. MEASURED OVER THE DRAFT'S 1,284 RENDERED LINES, D52.5's PATTERN RETURNS **ZERO** HITS — SO "0 CANDIDATES" READ AS "NO DEFECT" WHEN IT MEANT "THIS GATE CANNOT SEE THE DRAFT'S COST CLAIMS AT ALL". MEANWHILE D32.2's PATTERN HAD BOTH A FALSE POSITIVE AND A FALSE NEGATIVE.** (2026-09-26)
+
+> **OPERATIVE (R148). BOTH PATTERNS NARROWED TO THE CLAIM. D52.5: `0 → 2` HITS, BOTH REAL. D32.2: `2 → 1` HITS, THE
+> FALSE POSITIVE GONE. W16 SUPPLIES THE INTRODUCTION'S THREE FIXES.**
+
+**D111.1 — D52.5'S PATTERN WAS `1\.78|2\.18`. THAT IS TWO SUPERSEDED NUMBERS, WHICH IS THE INVERSE OF WHAT IT MUST
+DO.** Measured over the **1,284 rendered lines** of the eleven `.tex` files on `origin/main`, with comments stripped:
+
+| pattern | hits in the draft |
+|---|---|
+| `1\.78\|2\.18` (**as it stood**) | **0** |
+| a ratio band attributed to the full-grid step (**as it now stands**) | **2** — `00_abstract.tex`, `01_introduction.tex` |
+
+**THE DRAFT STATES THE BAND AS `$2.1$--$2.7\times$`, AND `2.1` IS IN NO PATTERN.** So for however many cycles this gate
+has been reporting on the draft, `0 candidates` in this population meant **not "no defect" but "this gate cannot see the
+draft's cost claims at all."**
+
+**THE MECHANISM IS SPECIFIC AND IT IS THE POINT: A PATTERN KEYED TO *VALUES* CANNOT CATCH A CLAIM STATED WITH
+*DIFFERENT* VALUES — AND DIFFERENT VALUES IS EXACTLY WHAT HAPPENED. D52.5 RE-DERIVED THE MINIMUM OF THE BAND FROM `2.08`
+TO `2.237746367620425`. THE NUMBER `2.08` WAS NEVER IN THE PATTERN, AND THE DRAFT'S RESPONSE TO THE RE-DERIVATION WAS
+NOT TO CHANGE THE NUMBER. THE BAND SAT AT `2.1` AND THE GATE WENT BLIND.**
+
+**D111.2 — D32.2'S PATTERN MATCHED FOUR FIXED WORDINGS, AND THEREFORE HAD BOTH A FALSE POSITIVE AND A FALSE NEGATIVE.**
+
+| pattern | hits | of which false |
+|---|---|---|
+| four fixed wordings (**as it stood**) | 2 | **1** — `05_experimental_setup.tex:88` reads *"(no online rank adaptation)"*, which is **TRUE** and describes a baseline |
+| the claim form + a negation guard (**as it now stands**) | 1 | **0** — the survivor is `08_limitations.tex:48`, the real one |
+
+**A FALSE POSITIVE TRAINS A READER TO SKIP THE ROW (D95), AND A GATE THAT IS TRAINED TO BE SKIPPED CANNOT FIND THE REAL
+SITE.** The two failure modes were in the same pattern at the same time.
+
+**D111.3 — THE GUARD IS NOT A REGEX, AND THAT IS WHY IT TOOK CODE. *"(NO ONLINE RANK ADAPTATION)"* AND *"ONLINE RANK
+ADAPTATION"* ARE THE SAME PHRASE WITH OPPOSITE CLAIM-FORCE: THE FIRST DESCRIBES A BASELINE, THE SECOND CLAIMS A
+CONTRIBUTION. PYTHON'S LOOKBEHIND IS FIXED-WIDTH AND THE NEGATOR LIST IS NOT, SO THE SEPARATION IS A WINDOWED TEST IN
+CODE — A NEGATOR WITHIN THE 34 CHARACTERS BEFORE A MATCH DROPS IT.** The window is 34 characters because that is the
+measured distance in the one false positive the guard removes; a wider window would start dropping real claims.
+
+**D111.4 — AND I INTRODUCED A BUG WHILE FIXING IT, WHICH THE STRUCTURE REVEALED. THERE ARE **FOUR** COPIES OF THE SAME
+SCAN LOOP IN THIS GATE, AND MY GUARD LANDED IN ONE OF THEM — SO THE DRAFT STILL SHOWED THE FALSE POSITIVE WHILE THE
+ORDER DOCUMENTS DID NOT.** Four copies of one loop is the defect; the guard landing in one is the symptom. **Both match
+sites now carry the guard.** A check whose logic is duplicated cannot be fixed in one place, and this is the second time
+in two cycles that a fix I made landed in only one copy (D103.6's was a comment; this is a loop).
+
+**D111.5 — AND A STALE COMMENT, D103.6'S CLASS, WHICH ALSO MEANT THE GATE READ THE WRONG TREE. `draft_lines()` ASSERTED
+*"`paper/` DOES NOT EXIST ON `main` — THE DRAFT LIVES ONLY ON `origin/agent/writer`"*, WHICH WAS TRUE WHEN WRITTEN AND
+BECAME FALSE IN R139 WHEN THE WHOLE DRAFT WAS MERGED TO `main`.** The default ref was still the writer's branch, so the
+gate was reading the writer's branch rather than the integrated state. **Both corrected, and the comment now says what is
+true and why.**
+
+**D111.6 — WHAT THE FIXED GATE FINDS IN THE DRAFT, AND IT IS THE INTRODUCTION'S THREE DEFECTS, ALL ALREADY DIAGNOSED
+ELSEWHERE. THE STALE BAND IS AT `00_abstract.tex:17` **AND `01_introduction.tex:83`** — W11 FIXED THE ABSTRACT, AND THE
+INTRODUCTION IS SITE 2 OF THE SAME DEFECT.** D32.2's one surviving site is `08_limitations.tex:48`, already in W15.4.
+
+**D111.7 — THE INTRODUCTION IS OTHERWISE EXEMPLARY, AND I WANT THAT ON THE RECORD. ITS NOVELTY PARAGRAPH USES "WE ARE
+NOT AWARE OF" AND "THAT WE ARE AWARE OF" THROUGHOUT, NAMES MUSHARBASH–NIBILE, GI RFOGLIO–QUAINI–ROZZA AND ZHANG AS PRIOR
+ART, AND CLAIMS NO PRIORITY IT CANNOT SUPPORT. THAT IS EXACTLY THE D4-COMPLIANT FRAMING, AND IT IS WHAT THE REST OF THE
+PAPER'S NOVELTY WORDING SHOULD BE MEASURED AGAINST.** The defects are two stale numbers and one over-strong *"which we
+show is necessary"* — **not the framing.** Note also that `01_introduction.tex:116` (*"with adaptive rank"*) is
+**deliberately not** treated as a D32.2 claim: the runs *did* use an adaptive rank criterion, so that describes the
+method rather than claiming the adaptation is validated. **That is the same 3-keep / 7-fix split as D110, and the gate's
+scope now encodes it.**
+
+**D111.8 — Unchanged.** Everything in D35.6 through D110.5 stands, **except that D52.5's and D32.2's patterns match the
+claim rather than a wording or a value, the draft is read from `main`, and the introduction's three defects are issued as
+W16.**

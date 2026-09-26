@@ -22,6 +22,7 @@ describing a paper we are no longer writing.**
 | **W7** | **§6 results — the whole section, prose only** | **7 blocks supplied: D18c**, 1,321 words, every number a registry row. **§6 is where the contribution is and it has no numbers in it. Paste per subsection; do NOT replace the section — its labels are referenced 26 times from elsewhere.** Also in D18c: the figure mapping, and one real gap (no Taylor--Green figure exists). | `WRITER_ORDER.md` **D18c** |
 | **W8** | **§7 discussion — the whole section, prose only** | **4 blocks supplied: D18d**, 1,063 words. **The shipped §7 is written in the conditional (\"is expected to\", \"if the runs confirm\") because it was drafted before the runs existed, its first subsection is built on the **barred** online-adaptive-rank claim, and it carries 3 `PENDING-CODER` markers. D18d states the case for the method *despite* it being slower and using more memory, which is the acceptance argument.** | `WRITER_ORDER.md` **D18d** |
 | **W9** | **§8 conclusion** | Short. Do not introduce anything not already above. | — | — |
+| **W16** | **§1 repeats the abstract's stale cost band** | **Two one-sentence edits. `01_introduction.tex:83` carries the same `$2.1$--$2.7\times$` W11 fixes in the abstract, and the "which we show is necessary" clause overstates the basis claim (D101). **Its novelty paragraph is the best-written prose in the paper - leave it alone.** | *W16* (D111) |
 | **W15** | **the rank story: `r*(Re)` is asserted at 7 sites and is measured false at all 7** | **SECOND-CONTRIBUTION BLOCKER. The results, a FIGURE CAPTION, the limitations and the conclusion all claim a quasi-stationary rank that increases with Re — and the conclusion NOMINATES IT as the observable for a future theory. D105 measured the trace BYTE-IDENTICAL at Re=100/1000/5000. W15.5 replaces the research question with a sharper one the data can answer.** | *W15* (D110) |
 | **W12** | **§5's three `[PENDING-CODER]` placeholders** | **Grid `N`, time step `Δt` and the initial condition are the most basic reproducibility facts in the paper and all three are unfilled. Supplied, with the artifact field each value comes from, plus the CFL statement the placeholder was meant to carry.** | *W12* (D105.8) |
 | **W13** | **§5 cites my internal `CHECKLIST` by name** | *"the reviewer's acceptance ladder (CHECKLIST, items L1--L4)"* — a referee cannot resolve it. Replacement keeps the four-stage structure and adds that the invariants are reported for EVERY method.** | *W13* |
@@ -1203,3 +1204,44 @@ the statistical quantities, not the rank"*.
 on a reference.** Every number is traceable: `92\%`/`99\%` and `15` steps are D105.1–D105.2; `20.1/18.5/18.4/17.3%` are
 D106.3; `18.4%` of the energy and `3.8\%` of the enstrophy and the `6.25\%` rank share are D106.2. **Do not paste W15.5
 without W15.1** — the conclusion's question is the results section's measurement, and a referee will look for it.
+
+---
+
+## W16 — **THE INTRODUCTION REPEATS THE ABSTRACT'S STALE COST BAND, AND OVERSTATES THE BASIS CLAIM. ITS NOVELTY PARAGRAPH IS THE BEST-WRITTEN PROSE IN THE PAPER AND SHOULD BE LEFT ALONE.** (two edits, both one sentence)
+
+I read `01_introduction.tex` as prose for the first time this cycle. It is 8,075 characters and it was not in my order, and
+it should have been. **Three defects, all already diagnosed elsewhere — which is the real problem: my fixes have been
+scoped per section, and the defects are per claim.**
+
+**W16.1 — the stale cost band, site 2 of the abstract's. `01_introduction.tex:83` reads *"the reduced integrator is
+`$2.1$--$2.7\times$` the full-grid step in every regime we measured, with no compensating memory benefit."*** The band is
+**`2.2`–`2.7×`** (D52.5 re-derived the minimum from `2.08` to `2.24`), and the pessimistic floor is missing. **Replace the
+sentence with:**
+
+```latex
+the reduced integrator is $2.2$--$2.7\times$ the full-grid step in every regime
+we measured --- at least $1.4\times$ even at the pessimistic end of the
+measurement's own recorded noise --- with no compensating memory benefit.
+```
+
+**W16.2 — the over-strong basis claim. The paragraph reads *"(iii) the subspace is refitted as the dynamics develop,
+which we show is necessary: a fixed basis propagated through the nonlinearity overflows at ranks $32$ and $42$ where the
+refitted one does not."*** **"WHICH WE SHOW IS NECESSARY" IS TOO STRONG, AND D101 IS WHY.** A *fixed* subspace survives at
+`N=32`/`rank 16` when it is built on the fluctuation field rather than on raw snapshots; what fails is a basis **fixed at
+initialisation**, and the operative differences are rank efficiency *and* refitting. **Replace those two sentences with:**
+
+```latex
+and (iii) the subspace is rebuilt as the dynamics develop, which is what
+separates it from a basis fixed at initialisation: such a basis overflows at
+ranks $32$ and $42$ where the rebuilt one does not, and its error stops
+improving once its rank reaches $16$. The rebuilt subspace reaches the grid's
+largest alias-free rank within fifteen steps and stays there, which is the
+sense in which it is reporting the resolved band rather than the flow.
+```
+
+**W16.3 — what NOT to change, and it is most of the section.** The novelty paragraph is the best-written prose in the
+paper: it says *"the existing dynamical low-rank work we are aware of"*, names Musharbash–Nobile, Girfoglio–Quaini–Rozza
+and Zhang, and claims no priority it cannot support. **Leave it exactly as it is.** Likewise `01_introduction.tex:116`
+(*"with adaptive rank"*) **is correct** — the runs did use an adaptive rank criterion — and `check_order_withdrawn.py` is
+deliberately scoped not to flag it. **Do not "fix" a sentence that is right; I have changed two gate patterns this cycle
+and one of them had a false positive precisely because a correct sentence looked like a defect.**

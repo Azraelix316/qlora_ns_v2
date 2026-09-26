@@ -42,10 +42,27 @@ from pathlib import Path
 #   "$\max|\grad\cdot u| = O(\varepsilon_{\mathrm{mach}}) \approx 10^{-14}$ at"
 #   "every step, for every rank and every Reynolds number"
 # so the number and the universal quantifier that makes it a defect are not on the same line.
+# D111: a negator in the 34 characters before a match means the phrase DESCRIBES something else
+# (a baseline that has "no online rank adaptation") rather than CLAIMING it. Separate from
+# PROHIBITION, which suppresses matches inside text already marked withdrawn. A regex cannot do
+# this: Python needs a fixed-width lookbehind and the negator list is variable-width.
+NEGATOR = re.compile(r"\b(?:no|not|never|without|neither|nor|non)\b", re.I)
+
 WITHDRAWN = [
     ("D29",   r"\b1\.26\b|\b2\.44\b|\b1\.46\b|\b2\.45\b|\b1\.24\b|\b2\.53\b|\b1\.33\b",
      "the pre-D29 t* values"),
-    ("D52.5", r"1\.78|2\.18", "the superseded cost range"),
+    # D111: this was `1\.78|2\.18` -- keyed to two SUPERSEDED NUMBERS, which is the inverse of
+    # what it must do. Measured over the draft's 1,284 rendered lines it returned ZERO hits, so
+    # for cycles "0 candidates" in this population read as "no defect" when it meant "this gate
+    # cannot see the draft's cost claims at all". The draft states the band as $2.1$--$2.7\times$
+    # and `2.1` is in no pattern. A pattern keyed to VALUES cannot catch a claim stated with
+    # DIFFERENT values -- which is exactly what happened when D52.5 re-derived the minimum from
+    # 2.08 to 2.2377 and the draft kept saying 2.1.
+    # The claim-keyed form -- a ratio band attributed to the full-grid step -- returns exactly the
+    # two real sites (00_abstract.tex, 01_introduction.tex) and nothing else.
+    ("D52.5", r"\$\d\.\d\$?\\?--\\?\$?\d\.\d\\times\$?\s*(?:the\s+)?full[-\s]grid",
+     "a per-step cost band attributed to the full-grid step (D52.5: 2.2-2.7, floor 1.4)"),
+
     ("D56",   r"1\.46\s*(?:→|->)\s*1\.99|2\.45\s*(?:→|->)\s*6\.04", "the STRUCK N=128 multipliers"),
     # D60.1: the DEFECT is a UNIVERSAL QUANTIFIER over a roundoff number, not the number.
     # "at the level of the 10^-14 roundoff floor" is CORRECT and says so; "~1e-14 at every
@@ -69,9 +86,21 @@ WITHDRAWN = [
     ("D30",   r"dealiasing ceiling", "a wavenumber count used as a rank claim"),
     # Added R124, with the draft itself now scanned (D88).
     ("D67",   r"99\.9\s*\\?%", "the baseline energy threshold: draft says 99.9%, runs used 99%"),
-    ("D32.2", r"rank is adapted online|adapted online by|online rank adaptation|"
-              r"rank is adapted online as",
-     "the barred online-adaptive-rank claim (only evidence is nsteps: 200)"),
+    # D111: the pattern matched four FIXED WORDINGS, so it both missed the claim and flagged a
+    # correct statement. `05_experimental_setup.tex` says a baseline has "(no online rank
+    # adaptation)" -- that is TRUE, it describes the baseline, and the old pattern flagged it. A
+    # false positive trains a reader to skip the row (D95). The claim form is broader, and the 5th
+    # tuple element is a NEGATION GUARD: drop a match whose preceding 34 characters contain a
+    # negator. A regex cannot do this -- Python needs a fixed-width lookbehind and the negator
+    # list is variable-width -- so the guard is applied in code. Measured on the draft: 2 hits
+    # with 1 false positive -> 1 hit, 0 false positives, and the survivor is the real one.
+    # `01_introduction.tex:116` ("with adaptive rank") is deliberately NOT matched: the runs did
+    # use an adaptive rank criterion, so that describes the method rather than claiming the
+    # adaptation is a validated contribution -- the same 3-keep / 7-fix split as D110.
+    ("D32.2", r"(?:online|adaptive|in-situ|on-the-fly)\s+rank\s+adap\w*|adapted\s+online|"
+              r"rank\s+is\s+adapted",
+     "the barred online-adaptive-rank claim (the rank sits at the cap for 92.5-99.2% of a run)",
+     1, True),
     ("D85",   r"above rank[^.]{0,24}(?:\\approx\s*)?8\b",
      "the withdrawn saturation threshold (it is r=16, not above r~8)"),
 ]
@@ -136,27 +165,41 @@ def scan(path):
     for row in WITHDRAWN:
         decision, pattern, what = row[0], row[1], row[2]
         window = row[3] if len(row) > 3 else 1
-        # re.S ONLY for a multi-line window: `.` must cross the newline for a lookahead to see
-        # the number on one line and the quantifier on the next. Without it the pattern silently
-        # failed on the very instance it exists to catch (D95).
+        # D111: optional 5th element, a negation guard. A phrase like "no online rank adaptation"
+        # DESCRIBES A BASELINE and is correct; the same phrase as an unqualified claim is the
+        # defect. A regex cannot separate them (Python requires a fixed-width lookbehind; the
+        # negator list is variable-width), so it is a windowed test in code. Applied in the order
+        # the D60 comment demands: the claim must be present AND not negated.
+        neg_guard = row[4] if len(row) > 4 else False
         rx = re.compile(pattern, re.I | (re.S if window > 1 else 0))
         for i, line in enumerate(lines):
             if i >= cut and i not in in_latex:
                 continue                      # order region, or paste-ready text
             probe = "\n".join(lines[i:i + window])
-            if rx.search(probe) and not PROHIBITION.search(probe):
-                kind = "PASTE-READY TEXT" if i in in_latex else "order"
-                found.append((decision, what, i + 1, kind, line.strip()[:100]))
+            m = rx.search(probe)
+            if not m or PROHIBITION.search(probe):
+                continue
+            if neg_guard and NEGATOR.search(probe[max(0, m.start() - 34):m.start()]):
+                continue
+            kind = "PASTE-READY TEXT" if i in in_latex else "order"
+            found.append((decision, what, i + 1, kind, line.strip()[:100]))
     return len(lines), cut, len(latex), found
 
 
 def draft_lines(root):
-    """The DRAFT, read from git (D88). `paper/` does not exist on `main` — the draft lives only
-    on origin/agent/writer — so a filesystem glob here would silently scan nothing, which is
-    exactly how claims_registry.py came to report clean results over an empty population (D87).
+    """The DRAFT, read from git (D88). WHY FROM GIT: a filesystem glob silently scans nothing
+    when the path is absent, which is exactly how claims_registry.py came to report clean
+    results over an empty population (D87).
+
+    D111 CORRECTS A COMMENT THAT HAD BECOME FALSE. This used to assert *"`paper/` does not exist
+    on `main` -- the draft lives only on origin/agent/writer"*, which was true when written and
+    became false in R139, when the whole draft was merged to `main`. The default ref is now
+    `origin/main`, so the gate reads the INTEGRATED state; `DRAFT_REF` points it at a branch on
+    purpose. A comment asserting a fact about the repository is a claim, and nothing checks
+    comments for truth (D103.6).
     Returns (rendered, commented, source)."""
     import subprocess
-    ref = os.environ.get("DRAFT_REF", "origin/agent/writer")
+    ref = os.environ.get("DRAFT_REF", "origin/main")
     # `git ls-tree` restricts to the CURRENT SUBDIRECTORY, and --full-name does not lift that
     # restriction (verified: 0 hits from state/reviewer, 10 from the repo root). So run git from
     # the toplevel, not from this file's directory.
@@ -300,10 +343,14 @@ def main():
     for row in WITHDRAWN:
         decision, pat, what = row[0], row[1], row[2]
         window = row[3] if len(row) > 3 else 1
+        neg_guard = row[4] if len(row) > 4 else False
         p = re.compile(pat, re.I | (re.S if window > 1 else 0))
         for loc, line in rendered:
             probe = "\n".join(l for _, l in rendered[idx[loc]:idx[loc] + window])
-            if p.search(probe) and not PROHIBITION.search(probe):
+            m = p.search(probe)
+            if (m and not PROHIBITION.search(probe)
+                    and not (neg_guard
+                             and NEGATOR.search(probe[max(0, m.start() - 34):m.start()]))):
                 hits += 1
                 print(f"  CANDIDATE [{decision}] {what}  {loc} (RENDERED TEXT): "
                       f"{line.strip()[:100]}")
