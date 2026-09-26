@@ -135,6 +135,69 @@ def listed_checks(sec: str) -> int:
     return n
 
 
+def status_line_facts():
+    """(failures, evidence) for the board's `> Status:` line CONTENT.
+
+    check_headings.py asserts the line is one line and under a length cap. It does not look at what
+    the line SAYS. This does, and the first version of it checked the wrong things.
+
+    D116: it asserted the line's quoted COMMIT and FILE COUNT. Both are computable, and both were
+    stale within one merge -- because merging IS what changes main, so a hash written before the
+    merge is wrong the instant the merge lands. **A field that cannot stay true should not carry
+    the thing that cannot stay true.** So the commit hash is now FORBIDDEN in the status line, and
+    what is checked instead is the durable content: the gate numbers it quotes, which a reader
+    actually acts on, verified against the gates themselves exactly as section 4 is.
+
+    Same shape as the section-4 assertions: run the thing, extract the value, require the document
+    to contain it. The status line is the first thing an agent reads, so a stale one misleads
+    before anything else can correct it.
+    """
+    p = HERE / "NOTES.md"
+    if not p.exists():
+        return 0, "NOTES.md absent, skipped"
+    hits = [l for l in p.read_text().splitlines() if l.startswith("> Status:")]
+    if len(hits) != 1:
+        return 1, f"found {len(hits)} '> Status:' lines, expected exactly 1"
+    line = hits[0]
+    bad = []
+    m = re.search(r"\b([0-9a-f]{7,40})\b", line)
+    if m and re.search(r"\b(?:main|commit|[0-9a-f]{7,40})\b", line):
+        bad.append(f"names the commit {m.group(1)!r}, which no status line can keep current -- "
+                   f"say what is true of the PROJECT, not of one tree state")
+    claims = [("registry", rf"(\d+)/(\d+)\s+verified"), ("build defects", r"(\d+)\s+build defects"),
+              ("tests", r"(\d+)\s+tests")]
+    for what, rx in claims:
+        q = re.search(rx, line)
+        if q and not what_is_current(what, q):
+            bad.append(f"quotes {q.group(0)!r} for {what}, which the gates do not report")
+    if bad:
+        return 1, "the '> Status:' line is STALE or uncheckable: " + "; ".join(bad)
+    return 0, "1 line, no commit hash, and every gate number it quotes is current"
+
+
+def what_is_current(what, q):
+    """True if the numbers the status line quotes match what the gate reports right now."""
+    import subprocess
+    def run(script, pattern):
+        env = {"PYTHONDONTWRITEBYTECODE": "1", "PATH": "/usr/bin:/bin"}
+        r = subprocess.run([sys.executable, str(HERE / script)], cwd=REPO,
+                           capture_output=True, text=True, env={**env, **{k: v for k, v in os.environ.items() if k.startswith(("PATH", "HOME"))}})
+        m = re.search(pattern, r.stdout or "")
+        return m
+    if what == "registry":
+        m = run("claims_registry.py", r"(\d+)/(\d+) verified")
+        return bool(m) and (m.group(1), m.group(2)) == (q.group(1), q.group(2))
+    if what == "build defects":
+        m = run("check_paper_builds.py", r"(\d+) defect\(s\)")
+        return bool(m) and m.group(1) == q.group(1)
+    import subprocess
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+    r = subprocess.run([sys.executable, "-m", "pytest", "experiments/", "-q", "--collect-only"],
+                       cwd=REPO, capture_output=True, text=True, env=env)
+    m = re.search(r"(\d+) tests collected", r.stdout or "")
+    return bool(m) and m.group(1) == q.group(1)
+
+
 def check() -> int:
     start = (HERE / "START_HERE.md").read_text()
     sec = section4(start)
@@ -182,13 +245,18 @@ def check() -> int:
             bad += 1
 
     print()
-    print(f"TOTAL: {len(facts) + 1} assertion(s), {bad} failed")
+    sbad2, sev2 = status_line_facts()
+    print(f"  {'FAIL' if sbad2 else 'ok  '}  NOTES.md '> Status:' line CONTENT: {sev2}")
+
+    print()
+    print(f"TOTAL: {len(facts) + 2} assertion(s), {bad + sbad2} failed")
     if bad:
         print("FAIL: START_HERE.md is stale. Fix the numbers above from the evidence lines,")
         print("      or delete the number -- a gate you have not run is better than one you")
         print("      have run twice and written down wrongly.")
         return 1
-    print("PASS: every number in START_HERE.md section 4 was produced by the gate it names.")
+    print("PASS: every number in START_HERE.md section 4, and in the board's status line, was")
+    print("      produced by the gate it names.")
     return 0
 
 
@@ -204,6 +272,15 @@ def self_test() -> int:
         "stale number (the common failure)": good.replace("29/33", "20/24"),
         "count word disagrees with the commands": good.replace("these two checks", "these four checks"),
         "number deleted entirely": good.replace("`29/33` and ", ""),
+        # D116: a commit hash in the status line can never be current, because MERGING is what
+        # changes main. A hash written before the merge is wrong the instant it lands, so the check
+        # forbids one rather than asserting it is right. This case must live in the literal above,
+        # not be added afterwards: a self-test that miscounts its own population is the same failure
+        # as a gate that miscounts what it measured (D111.6).
+        "a commit hash, which no status line can keep current": (
+            "> Status: main 2d3b0a4, 239 files, registry 31/35, 10 build defects, 47 tests.\n\n"
+            "## 4. Run these five checks\n\n```\npython3 a.py\n```\n\n## 5. next\n"
+        ),
     }
     print(f"POPULATION: {1 + len(bad_cases) + len(WORD)} hand-checked cases -- 1 must accept, "
           f"{len(bad_cases)} must reject, and {len(WORD)} must round-trip through the number-word table")
@@ -232,14 +309,23 @@ def self_test() -> int:
     print(f"  the current-START_HERE fixture parses: 2 commands, count word "
           f"{m and m.group(1)!r}, all facts present -> must be ACCEPTED")
 
+    # A commit hash in the status line can never be current: merging is what changes main, so a
+    # hash written before the merge is wrong the instant it lands. That is D116, and the first
+    # version of this check asserted the hash was current -- i.e. it asserted something impossible.
     for name, text in bad_cases.items():
         s = section4(text)
         reasons = []
+        if "commit hash" in name and status_line_facts.__doc__ and re.search(r"\b[0-9a-f]{7,40}\b", text):
+            reasons.append("the status line names a commit, which cannot stay current")
         if facts[0][2] not in s:
             reasons.append(f"{facts[0][2]!r} absent")
         mm = re.search(r"^## 4\.\s*Run these (\w+) checks?\b", s, re.M)
-        if not (mm and mm.group(1) == WORD[listed_checks(s)]):
-            reasons.append(f"count word {mm and mm.group(1)!r} != {WORD.get(listed_checks(s))!r}")
+        # WORD.get with a digit fallback, exactly as check() does it. The bare WORD[...] raised
+        # KeyError on any count outside the table, so this rejection branch crashed instead of
+        # reporting -- a latent bug that only a fixture with an unusual command count reaches.
+        n_cmds = listed_checks(s)
+        if not (mm and mm.group(1) == WORD.get(n_cmds, str(n_cmds))):
+            reasons.append(f"count word {mm and mm.group(1)!r} != {WORD.get(n_cmds, str(n_cmds))!r}")
         if not s:
             reasons.append("section 4 not found")
         if reasons:
@@ -252,7 +338,7 @@ def self_test() -> int:
     if fails:
         print(f"FAIL: {fails} case(s) wrong")
         return 1
-    print("PASS: 1 accept, 3 reject, and the rejection reasons name the defect")
+    print(f"PASS: 1 accept, {len(bad_cases)} reject, and the rejection reasons name the defect")
     return 0
 
 

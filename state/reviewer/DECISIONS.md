@@ -7892,3 +7892,38 @@ W7's title no longer contradicts its own body, and quoted cross-reference counts
 
 ## C10-3 — **NONE. THIS ONE IS MINE AND IT IS DONE.** (recorded so the numbering stays contiguous with C10-1 and C10-2)
 
+---
+
+## D116 — **THE `> Status:` LINE NAMED A COMMIT AND A FILE COUNT, AND NEITHER GATE CHECKED ITS CONTENT. ADDING THE CHECK EXPOSED A DESIGN FLAW IN THE LINE ITSELF: A COMMIT HASH THERE CAN NEVER BE CURRENT, BECAUSE MERGING IS WHAT CHANGES `main`. SO THE HASH IS NOW FORBIDDEN AND THE DURABLE NUMBERS ARE CHECKED INSTEAD.** (2026-09-26)
+
+> **OPERATIVE (R152). `check_start_here.py` NOW ASSERTS SIX THINGS, NOT FIVE. SELF-TEST: 16 CASES, 1 MUST ACCEPT,
+> 4 MUST REJECT, 11 TABLE ROUND-TRIPS.**
+
+**D116.1 — THE GAP. `check_start_here.py` CHECKED §4's FOUR NUMBERS AND `check_headings.py` CHECKED THE STATUS LINE'S
+*LENGTH*. NEITHER LOOKED AT WHAT THE LINE SAYS.** So mine read `main 0175b69, 238 files` while `main` was at `2d3b0a4`
+with 239 files, and **no gate noticed, because a field can be the right length and still be wrong.** The line is the first
+thing an agent reads, so a stale one misleads before anything else can correct it.
+
+**D116.2 — AND THE FIRST VERSION OF THE CHECK ASSERTED SOMETHING IMPOSSIBLE, WHICH IS THE PART WORTH RECORDING. I HAD IT
+VERIFY THE LINE'S COMMIT HASH AGAINST `origin/main`. THAT IS A CHECK THAT CANNOT PASS: MERGING IS WHAT CHANGES `main`, SO A
+HASH WRITTEN BEFORE THE MERGE IS WRONG THE INSTANT IT LANDS. THE CHECK FAILED IMMEDIATELY AND WAS RIGHT TO.** **SO THE HASH
+IS NOW FORBIDDEN IN THE STATUS LINE RATHER THAN REQUIRED TO BE CORRECT, AND WHAT IS CHECKED INSTEAD IS THE DURABLE CONTENT —
+THE GATE NUMBERS THE LINE QUOTES, WHICH A READER ACTUALLY ACTS ON.** **A FIELD THAT CANNOT STAY TRUE SHOULD NOT CARRY THE
+THING THAT CANNOT STAY TRUE.** The line now reads `8 gates green (registry 31/35, 10 build defects, 47 tests; …)` and
+contains no hash and no file count, and is 291 characters.
+
+**D116.3 — TWO LATENT BUGS IN THE SELF-TEST, BOTH EXPOSED BY THE NEW CASE RATHER THAN BY READING. THE REJECTION BRANCH USED
+`WORD[listed_checks(s)]` WITH NO FALLBACK, SO ANY COMMAND COUNT OUTSIDE THE TABLE RAISED `KeyError` AND THE BRANCH CRASHED
+INSTEAD OF REPORTING** — `check()` has used `WORD.get(n, str(n))` all along, and only a fixture with an unusual count ever
+reached the other one. **AND THE NEW CASE WAS INITIALLY ADDED *AFTER* THE POPULATION LINE, SO THE HEADER SAID "3 must reject"
+WHILE THE DICT HELD FOUR** — a self-test miscounting its own population, which is the same failure as a gate miscounting what
+it measured (D111.6). **The case now lives inside the dict literal, and the count and the final line are both computed from
+`len(bad_cases)`.**
+
+**D116.4 — Unchanged.** Everything in D35.6 through D115.7 stands, **except that the status line carries no commit hash, its
+content is asserted, and the self-test's own population is computed rather than written.**
+
+---
+
+## C10-4 — **NONE. MINE, AND DONE.** (numbering kept contiguous with C10-1..C10-3)
+
