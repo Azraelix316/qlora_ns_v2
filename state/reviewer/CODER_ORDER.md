@@ -310,3 +310,22 @@ report a violation that does not exist — in the paper's credibility clause, in
    from the artifact alone.
 
 None of this changes a number the paper reports. **It changes whether the number can be found.**
+
+### T1-7. Four more figure defects in the six figures nobody had opened (D71) — **new**
+
+D69 found one unreadable figure and one false title. **The other six had never been opened.** In those six:
+
+| figure | line | the defect | the fix |
+|---|---|---|---|
+| **`fig_bug_cost`** | `:433` | title says **"3-5x slower"**; `cost_bug_port.json` gives `full_step_ratio_vs_reference` = `2.1421`, `2.1702`, `2.5545`, `2.5842` — **0 of 12 ratio values fall in [3,5]** | say **`2.1-2.6x`**. It is also inconsistent with the cost figure's own `2.08-2.71x`, and a reader cannot reconcile the two. **Keep the "removes every full-size factorization" half — `linear_algebra_ratio_vs_reference` is `0.71-0.79` at `N=64` — but note it is `1.21-1.22` at `N=128`, so do not imply it is free at every grid.** |
+| **`fig_divergence`** | `:213` | title **"Total KE: the zonal mean grows"** — **no zonal mean is plotted or computed anywhere in `make_figures.py`**, and **one of the three curves decays**: `Re=100` goes `22.2067 → 20.2560` (`−1.9507`) while `Re=1000` and `Re=5000` grow | retitle **"Total KE: it grows at Re ≥ 1000 and decays at Re = 100"**, or plot the zonal mean and earn the old title. **The decaying curve is the one that carries the physics** — D59's `3.6e-07`-below-equilibrium start is why `Re=100` cannot hold the state — so the current title erases exactly what §5 rests on. |
+| **`fig_window_rank`** | `:146` | `annotate(f"dealias ceiling {ceiling}")` — **D30's barred phrase, fourth instance** — and `ceiling` is **recomputed in figure code** as `2*(N//3)+1` instead of read from the artifact | **read `dealias_rank_ceiling` from the artifact** (`43/85/171`); label it **"the largest rank the grid resolves"**. Re-deriving it means the figure will silently disagree the day the two formulas diverge. |
+| **`fig_spectrum`** | `:176` | `annotate("IC is exactly rank 17")` — **"exactly" is a tolerance claim**, and the state is rank 17 **of the state filtered at `cutoff=8`**; D60.3 also established the rank *rule* counts `rank_basis: "fluctuations"`, a different basis | say **"rank 17 at the stated spectral cutoff"** and drop "exactly". The companion title *"Full-grid state spectrum (all resolved modes)"* has the same problem — it is the spectrum of the *filtered* state. |
+
+**A suspicion I checked and dropped, so you do not chase it:** the artifact set has two `Re=5000` runs with
+different final energies (`22.6716` at `N=64`, `28.7223` at `N=128`), which would mean two identically-labelled
+curves in one panel. **`suite` is keyed by Re and loads only the `N64` files (`:162`); the `N=128` artifact is
+used only by `fig_div_free` (`:226`). No such defect.**
+
+**The method, which is worth applying to anything else that plots: for each panel, compare the title and the axis
+label against the range and the direction of the data actually plotted.** Nothing here needed a new tool.
