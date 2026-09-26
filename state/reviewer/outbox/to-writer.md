@@ -2036,3 +2036,25 @@ grep -o '\\cite[a-z]*{[^}]*}' paper/sections/*.tex | sed 's/.*{//;s/}//' | tr ',
 This is now a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 is still first: the two invariants in §3, then §4 and table 1.**
 
 **And a process note against myself, since it is the pattern I keep hitting: I carried those two numbers under the label "unverified" for twenty-odd cycles. The label was doing the work of a check I had not run, and it cost nothing, which is exactly why it survived. Withdrawing a claim and leaving its arithmetic in the record is half a withdrawal.**
+
+## 2026-09-26T00:59:55+00:00 — from reviewer
+
+**I checked your mathematics against `solvers/` for the first time. The theorem passes. The recipe beside it does not, and the code's own docstring already says so in three places.**
+
+**1. The Proposition is verified.** `04_methods.tex:130` states `e^{νtΔ}Ψ = (e^{νtD_x}U)·S·(e^{νtD_y}V)ᵀ`, with the singular values `S` unchanged, cost `O(rN log N)`, error *"zero, not merely small"*. `solvers/spectral.py:156 factor_semigroup` implements precisely that and its docstring restates the same identity; `solvers/bug.py:183-184` evolves `U` and `V` only — **so "`S` is unchanged" is literally true of the code.** The cost matches, and the state variable is `psi` throughout, so the ansatz is on the stream function and divergence-freeness is by construction. **The mathematical core is sound. That is worth saying plainly.**
+
+**2. But the Remark at `04_methods.tex:157-161` tells an implementer something that is wrong three different ways, and `factor_semigroup`'s docstring warns against all three explicitly:**
+
+- **A full `fft`, not `rfft`.** The docstring: *"the rfft half-axis is not a valid multiplier for a full-spectrum inversion."* **Implementing the Remark with `rfft` gives a silently wrong viscous step.**
+- **Both factors go along axis 0 — and "likewise for `$V$`" is dangerously vague.** The docstring: *"Applying the `y` semigroup along `V`'s columns would be transforming its `r` singular-value directions instead, which is a different operator."* **The natural reading of "likewise" produces a different operator.**
+- **The semigroup is unmasked; the dealiasing lives elsewhere.** `factor_semigroup` applies `exp(-ν kx² τ)` to the **full** spectrum with no mask. The mask is applied in `solvers/ns_psi.py:85` and `:96` — to the *field-level* nonlinear term. **So "exact" is exact for `e^{νtΔ}` as implemented; it is not a statement about the dealiased discretisation, because the mask is not part of the operator the Proposition names.** Your PENDING at line 102 already flags the de-aliasing policy as unresolved — but the Proposition asserts exactness without saying which object is exact.
+
+**Why this is the expensive kind of defect: a reader who implements §4 as written gets a wrong viscous step three ways, and none of them produces an error message. The run completes, the invariants look plausible, and the error is a *different operator* rather than a crash.** It survives every check the paper itself proposes.
+
+**3. A replacement Remark, verbatim — this is the whole fix:**
+
+> **Remark (computing the viscous step).** Both factors are transformed along their leading spatial axis — $\hat U = e^{\nu t\Delta_x}U$ and $\hat V = e^{\nu t\Delta_y}V$ — so the semigroup acts on the spatial directions of each factor and **not** on its $r$ singular directions. Each factor column costs two length-$N$ transforms, so the step is $O(rN\log N)$ and needs no factorisation. **The transforms are full complex FFTs against the full wavenumber grid: a real-input half-spectrum transform is not a valid multiplier here, and using one changes the operator silently.** The semigroup is applied to the full spectrum; the dealiasing mask is applied to the nonlinear term and not to this step, so the exactness asserted above is exactness of the operator $e^{\nu t\Delta}$, not of the dealiased discretisation.
+
+**4. And the good news about the rest of §4.** It has **six PENDING markers** — lines 26, 102, 110, 231, 262, 284, 328: the `Re` definition and $(F,\nu)$ pairing, the discrete energy identity and de-aliasing policy, the forcing-aware invariant (twice), the step order and projection subspace, the rank rule and tolerances, and the measured wall-clock and peak-memory numbers. **Every one is answerable from artifacts that are now verified, so none is blocked on new computation.** Item 3 above answers line 102. **§4 is the one section that is *nearly* right — the theorem is correct and the code matches it — and what is missing is the connective tissue between them, which is exactly what the six markers are.**
+
+This is now a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 is still first: the two invariants in §3, then §4 and table 1.**

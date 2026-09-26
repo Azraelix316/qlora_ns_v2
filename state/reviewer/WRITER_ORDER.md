@@ -256,3 +256,53 @@ separates the two families is worth more than the two multipliers it replaces.**
 study** — a proper order study needs three grids — **and because the baseline's ratio is unstable, the
 *size* of its degradation is not a stable quantity to quote; only the sign and the order of magnitude
 are.**
+
+## §4 — the Proposition is VERIFIED against the code; the Remark beside it is not (D58, binding)
+
+**I checked the paper's mathematics against `solvers/` for the first time. The theorem passes.**
+
+`04_methods.tex:130` states `e^{nu t Delta} Psi = (e^{nu t D_x} U) S (e^{nu t D_y} V)^T`, with the singular
+values `S` unchanged, at cost `O(rN log N)`, error *"zero, not merely small"*. `solvers/spectral.py:156
+factor_semigroup` implements precisely this, and `solvers/bug.py:183-184` evolves `U` and `V` only —
+**so "`S` is unchanged" is literally true of the code.** The cost matches, and the state variable is `psi`
+throughout, so the ansatz is on the stream function and divergence-freeness is by construction.
+
+**But the Remark that tells an implementer how to compute it omits three things, and
+`factor_semigroup`'s own docstring states all three explicitly. Each produces a silently wrong answer —
+the run completes, the invariants look plausible, and the error is a *different operator* rather than a
+crash.**
+
+1. **A full `fft`, not `rfft`.** The docstring: *"the rfft half-axis is not a valid multiplier for a
+   full-spectrum inversion."* **Implementing the Remark with `rfft` gives a wrong viscous step with no
+   error message.**
+2. **Both factors go along axis 0 — and "likewise for `$V$`" is dangerously vague.** The docstring:
+   *"Applying the `y` semigroup along `V`'s columns would be transforming its `r` singular-value
+   directions instead, which is a different operator."* **The natural reading of "likewise" produces a
+   different operator.**
+3. **The semigroup is unmasked; the dealiasing lives elsewhere.** `factor_semigroup` applies
+   `exp(-nu kx^2 tau)` to the **full** spectrum with no mask. The mask is applied in
+   `solvers/ns_psi.py:85` and `:96`, to the *field-level* nonlinear term. **So "exact" is exact for
+   `e^{nu t Delta}` as implemented — it is not a statement about the dealiased discretisation, because
+   the mask is not part of the operator the Proposition names.** Your PENDING at line 102 already flags
+   the de-aliasing policy as unresolved; the Proposition asserts exactness without saying which object is
+   exact.
+
+**Replacement Remark, verbatim — this is the whole fix:**
+
+> **Remark (computing the viscous step).** Both factors are transformed along their leading spatial axis —
+> $\hat U = e^{\nu t\Delta_x}U$ and $\hat V = e^{\nu t\Delta_y}V$ — so the semigroup acts on the spatial
+> directions of each factor and **not** on its $r$ singular directions. Each factor column costs two
+> length-$N$ transforms, so the step is $O(rN\log N)$ and needs no factorisation. **The transforms are
+> full complex FFTs against the full wavenumber grid: a real-input half-spectrum transform is not a valid
+> multiplier here, and using one changes the operator silently.** The semigroup is applied to the full
+> spectrum; the dealiasing mask is applied to the nonlinear term and not to this step, so the exactness
+> asserted above is exactness of the operator $e^{\nu t\Delta}$, not of the dealiased discretisation.
+
+**And the section's real state, which is good news: `04_methods.tex` has SIX PENDING markers, at lines
+26, 102, 110, 231, 262, 284 and 328 — the `Re` definition and $(F,\nu)$ pairing, the discrete energy
+identity and de-aliasing policy, the forcing-aware invariant (twice), the step order and projection
+subspace, the rank rule and tolerances, and the measured wall-clock and peak-memory numbers. EVERY ONE OF
+THOSE IS ANSWERABLE FROM ARTIFACTS THAT ARE NOW VERIFIED, so none of them is blocked on new computation.**
+§4 is the one section that is *nearly* right: the theorem is correct and the code matches it. What is
+missing is the connective tissue between them — which is exactly what the six markers are. **Item 3 above
+answers marker 102; the others are in `WRITER_ORDER.md` §1 and `FIRST_RUN.md`.**
