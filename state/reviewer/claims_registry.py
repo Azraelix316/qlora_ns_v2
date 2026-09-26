@@ -62,6 +62,28 @@ REGISTRY = [
     ("dealias_ceiling_N128", "cost_retiming.json", "grids", {"N": 128}, "dealias_rank_ceiling", 85, 2),
     ("dealias_ceiling_N256", "cost_retiming.json", "grids", {"N": 256}, "dealias_rank_ceiling", 171, 2),
 
+    # --- MEMORY (added R126/D89). These were load-bearing in FOUR documents and the registry
+    #     asserted NONE of them, which is exactly how D19.4a's numbers went stale through two
+    #     regenerations before I found them by reading the coder's message. Now a re-run that
+    #     moves them fails here instead.
+    #     D89: the SIGN is the claim (no memory saving); these rows pin the digits AND the
+    #     resolution flag, because the flag is what changed qualitatively.
+    ("mem_noise_floor_mib", "peak_memory.json", ".", None,
+     "noise_floor_mib", 0.09765625, 8),
+    ("mem_overhead_N64_dlra", "peak_memory.json", "rank_scaling", {"N": 64, "method": "dlra"},
+     "overhead_vs_full_grid_mib", 2.37109375, 8),
+    ("mem_overhead_N128_dlra", "peak_memory.json", "rank_scaling", {"N": 128, "method": "dlra"},
+     "overhead_vs_full_grid_mib", 4.2109375, 8),
+    ("mem_overhead_N64_bug", "peak_memory.json", "rank_scaling", {"N": 64, "method": "bug"},
+     "overhead_vs_full_grid_mib", 2.17578125, 8),
+    ("mem_overhead_N128_bug", "peak_memory.json", "rank_scaling", {"N": 128, "method": "bug"},
+     "overhead_vs_full_grid_mib", 3.6328125, 8),
+    # A non-numeric claim, asserted because D89's whole point is that it is FALSE: the N=128
+    # projected rank-variation is NOT resolved, so neither "flat in rank" nor "grows with rank"
+    # is supported there. If a future run resolves it, this row fails and the guidance changes.
+    ("mem_rank_resolved_N128_dlra", "peak_memory.json", "rank_scaling", {"N": 128, "method": "dlra"},
+     "rank_independence_resolved", None, None),
+
     # --- divergence (D66: a POPULATION, never a single universal bound)
     ("div_worst_our_method", "baselines_re5000_N64_T8.json", "methods.dlra_fixed_r1", None,
      "max_abs_divergence", 1.1093903573566877e-13, 16),
@@ -280,7 +302,15 @@ def main():
             continue
         if expect is None:                     # a non-numeric claim, e.g. status == "never"
             want_lit = True
-        if expect is None:
+        if expect is None and isinstance(actual, bool):
+            # A BOOLEAN CLAIM (D89). The claim asserted is that the flag is FALSE --
+            # e.g. peak_memory rank_independence_resolved at N=128 for the projected
+            # integrator. Accepted only when it really is False; a future run that
+            # resolves it fails this row, and the guidance that depends on it changes.
+            ok = (actual is False)
+            note = (f"{field}={actual!r} (asserted False; a run that RESOLVES it must fail "
+                    f"this row and the rank-independence guidance must be revisited)")
+        elif expect is None:
             ok = str(actual) in ("never", "unresolved", "resolved")
             note = f"status={actual!r} (a non-numeric claim; accepted if it is a status word)"
         else:
