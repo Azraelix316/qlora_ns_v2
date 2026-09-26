@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
 
 from experiments.run_kolmogorov import initial_state_fingerprint
 from solvers import DLRA, Grid2D, StreamFunctionNS, ZeroForcing
+from solvers.spectral import fluctuations
 
 
 def relative_l2(a: np.ndarray, b: np.ndarray) -> float:
@@ -68,6 +69,15 @@ def run_case(
     max_energy_increase = -np.inf
     max_balance_residual = 0.0
     exact = initial.copy()
+    # C11-1: the paper's `fig_tg_ke_rank` plots E(t) and the adaptive r(t), and
+    # neither was recorded -- the artifact carried only scalars, so a caption
+    # asking for a monotone E(t) and a rank decaying 3 -> 2 -> 1 had nothing to
+    # be drawn from.  The zonal share rides along because it is the same
+    # diagnostic the forced runs now carry.
+    energy_history = [grid.ke(full)]
+    dlra_energy_history = [grid.ke(reduced)]
+    rank_history = [int(lowrank.rank)]
+    zonal_energy_history = [grid.ke(fluctuations(full))]
 
     for n in range(nsteps):
         t = n * dt
@@ -86,6 +96,10 @@ def run_case(
         residual = terms.residual_from_derivative(derivative)
         scale = max(1.0, abs(terms.dissipation), abs(terms.forcing_input))
         max_balance_residual = max(max_balance_residual, abs(residual) / scale)
+        energy_history.append(grid.ke(full))
+        dlra_energy_history.append(grid.ke(reduced))
+        rank_history.append(int(lowrank.rank))
+        zonal_energy_history.append(grid.ke(fluctuations(full)))
     # Time each method in a separate loop so the reported costs include only
     # the method named by the corresponding field.
     timing_full = initial.copy()
@@ -117,6 +131,18 @@ def run_case(
         },
         "grid": {"N": N, "L": grid.L},
         "parameters": {"nu": nu, "dt": dt, "nsteps": nsteps, "rank": rank},
+        "energy_history": energy_history,
+        "dlra_energy_history": dlra_energy_history,
+        "rank_history": rank_history,
+        "fluctuation_energy_history": zonal_energy_history,
+        "series_note": (
+            "E(t) for the full grid and for the reduced state, the adaptive rank "
+            "at every step, and the fluctuation energy. Recorded so the paper's "
+            "fig_tg_ke_rank can be drawn from the artifact rather than "
+            "reconstructed. This case is UNFORCED, so E(t) is the laminar decay "
+            "and the fluctuation series is the same quantity on a field with no "
+            "zonal forcing."
+        ),
         "initial_state": initial_state_fingerprint(grid, initial),
         "initial_energy": grid.ke(initial),
         "final_energy": grid.ke(full),

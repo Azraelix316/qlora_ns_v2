@@ -8054,8 +8054,14 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "zonal_energy_fraction": null,
-    "zonal_enstrophy_fraction": null
+    "zonal_energy_fraction": {
+      "at_final_step": 0.3216520469292423,
+      "at_t0": 0.16207103178372204
+    },
+    "zonal_enstrophy_fraction": {
+      "at_final_step": 0.035406467454776026,
+      "at_t0": 0.03501861052034957
+    }
   },
   "full": {
     "energy_history": [
@@ -14105,8 +14111,14 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "zonal_energy_fraction": null,
-    "zonal_enstrophy_fraction": null,
+    "zonal_energy_fraction": {
+      "at_final_step": 0.32163117679826064,
+      "at_t0": 0.16207103178372245
+    },
+    "zonal_enstrophy_fraction": {
+      "at_final_step": 0.03537490151750782,
+      "at_t0": 0.03501861052034979
+    },
     "zonal_fraction_definition": "zonal/total at t=0 and at the final step, from the psi' series. The fluctuation dominates at these settings, so the total is NOT zonal-dominated; this run measures the share over the whole horizon rather than at one instant."
   },
   "grid": {
@@ -14125,7 +14137,7 @@
     ]
   },
   "linear_algebra_calls": 8401,
-  "linear_algebra_seconds": 12.81496108113788,
+  "linear_algebra_seconds": 3.333027030341327,
   "max_relative_l2_dlra_vs_full": 0.0003346509368601237,
   "method_note": "Long-time run compares full-grid and DLRA only; see the short Re suite for static POD.",
   "parameters": {
@@ -14153,8 +14165,8 @@
     "driver": "experiments/run_long_time.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "66a41ae6fbd545121086ce3c7e9a7ac0052897aff082a759f6ff459eaf440c35",
-    "git_commit": "ad0f8b10a4b6dfe27105c548202380d81307cad4",
+    "driver_sha256": "b608f781cfe62c095608ba1f1d35380161f78c50ac2b0761ad3c2c88c1e6bcc5",
+    "git_commit": "0959a89820e19e341b26ad06698a62aface9e4c7",
     "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
     "working_tree_dirty": false,
@@ -14268,5 +14280,5 @@
       "time": 1.0
     }
   ],
-  "wall_seconds": 38.43569939606823
+  "wall_seconds": 19.924841874977574
 }

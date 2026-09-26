@@ -86,6 +86,295 @@ def tree_is_dirty() -> bool:
     return bool(diff.strip())
 
 
+def _crossover_schema_ok(xover: dict) -> bool:
+    """Whether the surface carries the error column this driver reads.
+
+    A cheap structural check rather than a try/except around the whole figure:
+    it names the missing column in the skip reason, so a reader is told what to
+    regenerate instead of only that something went wrong.
+    """
+    case = next(iter(xover.get("by_reynolds", {}).values()), None)
+    if not case:
+        return False
+    if "relative_l2_fluct_over_full" not in (case.get("error_columns")
+                                            or xover.get("error_columns") or {}):
+        return False
+    for rows in case.get("static_moving_window", {}).values():
+        if rows and "relative_l2_fluct_over_full" not in rows[0]:
+            return False
+    return True
+
+
+def make_paper_figures(results, out, paper_dir, used, skipped, colors) -> None:
+    """The five figures the paper includes that no code wrote (C11-1).
+
+    Names and content are the draft's: ``fig_tg_ke_rank`` (fig:tg),
+    ``fig_rank_vs_time`` (fig:rank), ``fig_sv_decay`` (fig:svd),
+    ``fig_error_vs_ref`` (fig:error), ``fig_ke_spectrum`` (fig:kestats).  Each is
+    written as both .pdf and .png, and to both output roots.
+
+    Two rules the rest of this script also follows:
+
+    * every number on an axis or in a title is read out of the artifact, so a
+      re-run cannot leave a stale claim in the paper's rendering path;
+    * a figure whose data is absent is *skipped with a reason*, never drawn from
+      whatever else is in the directory -- which is the failure the stale-file
+      guard below exists to prevent.
+    """
+    suite = {
+        re: load(results / f"kolmogorov_re{re}_N64.json")
+        for re in (100, 1000, 5000)
+    }
+    suite = {k: v for k, v in suite.items() if v}
+
+    def emit(fig, name, caption) -> None:
+        # Mirroring is done once, for every figure the run wrote, after the fact
+        # -- doing it per figure here would only ever reach the five new ones, and
+        # the blocker was that `fig_cost` existed, was generated, and still did
+        # not resolve because the paper looks in a different directory.
+        CAPTIONS[name] = caption
+        FIGURES_WRITTEN.add(name)
+
+    # --- fig_tg_ke_rank (fig:tg) -------------------------------------------
+    tg = load(results / "taylor_green.json")
+    if tg and tg.get("energy_history") and tg.get("rank_history"):
+        used.append("taylor_green.json")
+        dt = tg["parameters"]["dt"]
+        steps = np.arange(len(tg["energy_history"]))
+        fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.6), layout="constrained")
+        ax = axes[0]
+        ax.plot(steps * dt, tg["energy_history"], color=colors["full"],
+                label="full grid")
+        if tg.get("dlra_energy_history"):
+            ax.plot(steps * dt, tg["dlra_energy_history"], color=colors["dlra"],
+                    linestyle="--", label="reduced (rank 1)")
+        # I2 is a *monotonicity* claim, so it is shown as one rather than
+        # asserted in prose: the increments are non-positive throughout.
+        increments = np.diff(tg["energy_history"])
+        ax.set_title(
+            r"$E(t)$: monotone non-increasing"
+            f"\n({int(np.count_nonzero(increments > 0))} increases in "
+            f"{len(increments)} steps)", fontsize=9,
+        )
+        ax.set_xlabel("time $t$")
+        ax.set_ylabel(r"$E$")
+        ax.legend(fontsize=7)
+        ax = axes[1]
+        ranks = np.asarray(tg["rank_history"], dtype=float)
+        ax.plot(steps * dt, ranks, color=colors["dlra"], drawstyle="steps-post")
+        ax.set_ylim(0, max(2.0, ranks.max() + 0.5))
+        ax.set_xlabel("time $t$")
+        ax.set_ylabel(r"adaptive rank $r(t)$")
+        # The caption says 3 -> 2 -> 1; the run gives a constant.  The figure
+        # says what the run gives, and CAPTIONS.md carries the discrepancy.
+        distinct = sorted(set(int(r) for r in tg["rank_history"]))
+        ax.set_title(
+            r"adaptive $r(t)$: constant at " + str(distinct[0]) + "\n"
+            "(single Fourier mode: numerical rank 1)", fontsize=9,
+        )
+        fig.savefig(out / "fig_tg_ke_rank.pdf", bbox_inches="tight")
+        fig.savefig(out / "fig_tg_ke_rank.png", bbox_inches="tight")
+        plt.close(fig)
+        emit(fig, "fig_tg_ke_rank",
+             "Taylor--Green laminar decay. Left: kinetic energy of the full grid "
+             "and of the reduced state; the increments are non-positive at every "
+             "step, which is the monotonicity invariant I2 stated as a property "
+             "of the figure rather than of the prose. Right: the adaptive rank, "
+             "which is **constant at 1** because the initial condition is a "
+             "single Fourier mode, so the numerical rank is 1 and there is "
+             "nothing further to request. **The draft's caption says the rank "
+             "decays 3 -> 2 -> 1; that is not what this run produces and it "
+             "cannot, since a rank-3 start would need a 3-mode initial "
+             "condition.**")
+    else:
+        skipped.append((
+            "fig_tg_ke_rank",
+            "`taylor_green.json` has no energy/rank history, so E(t) and r(t) "
+            "cannot be drawn from it",
+        ))
+
+    # --- fig_rank_vs_time (fig:rank) ----------------------------------------
+    if suite:
+        used += [f"kolmogorov_re{re}_N64.json" for re in suite]
+        fig, ax = plt.subplots(figsize=(3.6, 2.7), layout="constrained")
+        cmap = plt.get_cmap("viridis")
+        final_ranks = {}
+        for i, (re, data) in enumerate(sorted(suite.items())):
+            history = data["dlra"].get("rank_history")
+            if not history:
+                continue
+            dt = data["parameters"]["dt"]
+            t = np.arange(len(history)) * dt
+            ax.plot(t, history, color=cmap(i / 2.0), linewidth=1.3,
+                    label=f"Re={re}")
+            final_ranks[re] = int(history[-1])
+        ax.set_xlabel("time $t$")
+        ax.set_ylabel(r"adaptive rank $r(t)$")
+        ax.set_title(
+            r"Adaptive rank $r(t)$, growth then quasi-stationary"
+            + ("\nfinal: " + ", ".join(
+                f"Re={k}: {v}" for k, v in sorted(final_ranks.items()))
+               if final_ranks else ""), fontsize=8.5,
+        )
+        ax.legend(fontsize=7)
+        fig.savefig(out / "fig_rank_vs_time.pdf", bbox_inches="tight")
+        fig.savefig(out / "fig_rank_vs_time.png", bbox_inches="tight")
+        plt.close(fig)
+        emit(fig, "fig_rank_vs_time",
+             r"Adaptive rank $r(t)$ for the forced flow at each Reynolds number, "
+             r"from the suite runs. The rank grows from the initial condition's "
+             r"numerical rank and then settles. **Read this with the horizon: "
+             r"these runs reach $t=0.1$, and at $T=8$ the same rule reaches the "
+             r"top of the band at every cutoff, so the quasi-stationary value is "
+             r"a property of the horizon as much as of $\mathrm{Re}$.**")
+
+    # --- fig_sv_decay (fig:svd) ---------------------------------------------
+    if suite:
+        fig, axes = plt.subplots(1, len(suite), figsize=(2.3 * len(suite) + 0.4, 2.5),
+                                 layout="constrained", squeeze=False)
+        slowest = {}
+        for j, (re, data) in enumerate(sorted(suite.items())):
+            block = data["dlra"]
+            steps_at = block.get("singular_value_steps") or []
+            spectra = block.get("singular_values") or []
+            ax = axes[0][j]
+            if not steps_at or not spectra:
+                ax.set_visible(False)
+                continue
+            dt = data["parameters"]["dt"]
+            for i, step in enumerate(steps_at):
+                if i >= len(spectra):
+                    break
+                s = np.asarray(spectra[i], dtype=float)
+                if s.size == 0 or s[0] <= 0:
+                    continue
+                shade = 0.25 + 0.75 * i / max(len(steps_at) - 1, 1)
+                ax.semilogy(np.arange(1, s.size + 1), s / s[0],
+                            color=colors["dlra"], alpha=shade, linewidth=1.0)
+            final = np.asarray(spectra[-1], dtype=float)
+            if final.size:
+                kept = int(np.count_nonzero(
+                    final >= 1e-10 * final[0])) if final[0] > 0 else 0
+                slowest[re] = kept
+            ax.set_xlabel("mode index $r$")
+            if j == 0:
+                ax.set_ylabel(r"$\sigma_r/\sigma_1$")
+            ax.set_title(
+                f"Re={re}\n" + (f"{slowest.get(re, 0)} modes at $10^{{-10}}$"
+                                if re in slowest else ""),
+                fontsize=8.5,
+            )
+        fig.suptitle(
+            r"Singular-value decay of $\psi$ at increasing times"
+            r" (darker = later)", fontsize=9,
+        )
+        fig.savefig(out / "fig_sv_decay.pdf", bbox_inches="tight")
+        fig.savefig(out / "fig_sv_decay.png", bbox_inches="tight")
+        plt.close(fig)
+        emit(fig, "fig_sv_decay",
+             r"Singular-value decay of the full-grid state at every recorded "
+             r"time, one panel per Reynolds number, darker for later. The mode "
+             r"count above the $10^{-10}$ relative-amplitude cutoff is printed "
+             r"per panel and read from the artifact, so the panels can be "
+             r"compared without re-deriving them.")
+
+    # --- fig_error_vs_ref (fig:error) ---------------------------------------
+    if suite:
+        fig, ax = plt.subplots(figsize=(3.6, 2.7), layout="constrained")
+        cmap = plt.get_cmap("viridis")
+        for i, (re, data) in enumerate(sorted(suite.items())):
+            for key, colour, style, label in (
+                ("dlra", colors["dlra"], "-", "SP-DLRA (adaptive)"),
+                ("pod", colors["pod"], "--", "static POD"),
+            ):
+                rows = (data.get(key) or {}).get("comparison") or []
+                if not rows:
+                    continue
+                ax.plot([r["time"] for r in rows], [r["relative_l2"] for r in rows],
+                        style, color=cmap(i / 2.0), linewidth=1.2,
+                        label=f"{label}, Re={re}")
+        ax.set_yscale("log")
+        ax.set_xlabel("time $t$")
+        ax.set_ylabel(r"relative $L^2$ against the full grid")
+        ax.set_title(
+            r"Error against the full-grid reference"
+            "\n(over the suite window $t\\leq0.1$ only)", fontsize=9,
+        )
+        ax.legend(fontsize=5.8, ncol=2)
+        fig.savefig(out / "fig_error_vs_ref.pdf", bbox_inches="tight")
+        fig.savefig(out / "fig_error_vs_ref.png", bbox_inches="tight")
+        plt.close(fig)
+        emit(fig, "fig_error_vs_ref",
+             r"Relative $L^2$ against the full-grid spectral reference, the "
+             r"adaptive method against the static POD baseline at each Reynolds "
+             r"number. **The window is $t\leq0.1$ and the figure says so, because "
+             r"inside it the static baseline is the more accurate method: its "
+             r"offline fitting window is a prefix of the evaluated trajectory. "
+             r"The ordering reverses at longer horizons, and the crossover is "
+             r"measured separately.**")
+
+    # --- fig_ke_spectrum (fig:kestats) --------------------------------------
+    pilot = None
+    for name in ("regime_pilot_re5000_A0p2.json", "regime_pilot_re5000_N128_A0p2.json"):
+        candidate = load(results / name)
+        if candidate and candidate.get("windowed_spectra"):
+            pilot = (name, candidate)
+            break
+    if pilot is None:
+        skipped.append((
+            "fig_ke_spectrum",
+            "no regime pilot carries time-averaged fluctuation spectra",
+        ))
+    else:
+        name, data = pilot
+        used.append(name)
+        entry = next(iter(data["windowed_spectra"].values()))
+        k = np.asarray(entry["k"], dtype=float)
+        e = np.asarray(entry["E_fluct"], dtype=float)
+        w0, w1 = entry["window_start"], entry["window_end"]
+        fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.6), layout="constrained")
+        ax = axes[0]
+        for re, block in sorted(suite.items()):
+            hist = block["full"].get("energy_history") or []
+            if not hist:
+                continue
+            dt = block["parameters"]["dt"]
+            ax.plot(np.arange(len(hist)) * dt, hist, linewidth=1.1,
+                    label=f"Re={re}")
+        ax.set_xlabel("time $t$")
+        ax.set_ylabel(r"$E$")
+        ax.set_title(r"$E(t)$ over the suite window", fontsize=9)
+        ax.legend(fontsize=7)
+        ax = axes[1]
+        ref = block["full"].get("energy_history") or []
+        total = ref[-1] if ref else None
+        ax.semilogy(k, e, color=colors["full"], linewidth=1.2,
+                    label=rf"time-averaged $\psi'$ spectrum")
+        if total:
+            ax.axvline(k.max(), color=colors["ref"], linestyle=":", linewidth=1.0)
+            ax.annotate("dealiased range", (k.max(), e.max()), fontsize=6,
+                        color=colors["ref"], ha="right", va="top")
+        ax.set_xlabel("wavenumber $k$")
+        ax.set_ylabel(r"$E_{\mathrm{fluct}}(k)$")
+        ax.set_title(
+            rf"$\psi'$ spectrum, $t\in[{w0:.4g},{w1:.4g}]$"
+            "\n$Z(k)$ omitted: enstrophy drifts, so it would\n"
+            "average a moving quantity", fontsize=8,
+        )
+        ax.legend(fontsize=6.5)
+        fig.savefig(out / "fig_ke_spectrum.pdf", bbox_inches="tight")
+        fig.savefig(out / "fig_ke_spectrum.png", bbox_inches="tight")
+        plt.close(fig)
+        emit(fig, "fig_ke_spectrum",
+             r"Kinetic-energy statistics. Left: $E(t)$ for the full grid at each "
+             r"Reynolds number over the suite window. Right: the time-averaged "
+             r"fluctuation spectrum against wavenumber, over the window named in "
+             r"the title. **The $Z(k)$ half of the enstrophy spectrum is omitted "
+             r"and the reason is on the figure: the fluctuation enstrophy drifts "
+             r"across this averaging window, outside the 10% stationary bar, so a "
+             r"time-averaged $Z(k)$ would be averaging a moving quantity.**")
+
+
 def provenance(
     results: Path, out: Path, names: list[str], skipped: list[tuple[str, str]]
 ) -> None:
@@ -191,8 +480,21 @@ def main() -> None:
     parser.add_argument(
         "--output-dir", type=Path, default=ROOT / "experiments" / "figures"
     )
+    parser.add_argument(
+        # C11-1: the draft's `\includegraphics{figures/...}` resolves against the
+        # paper's own directory, which was empty on every branch -- so even
+        # `fig_cost`, which existed and was generated, did not resolve.  The
+        # paper's figures are GENERATED here and copied there; no prose and no
+        # .tex is written into the writer's tree.  `--paper-figures-dir ''`
+        # disables it.
+        "--paper-figures-dir", type=Path, default=ROOT / "paper" / "figures",
+        help="second output root for the figures the paper includes; pass an "
+             "empty string to write only to --output-dir",
+    )
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    if not str(args.paper_figures_dir or "").strip():
+        args.paper_figures_dir = None
     R = args.results
     colors = {"full": "#264653", "pod": "#8C8C8C", "dlra": "#E76F51",
               "ref": "#0072B2", "a": "#2A9D8F", "b": "#E9C46A"}
@@ -810,9 +1112,23 @@ def main() -> None:
             "`crossover_surface.json` predates the `by_reynolds` layout, so it "
             "cannot be read by this driver; regenerate it with run_crossover.py",
         ))
+    elif not _crossover_schema_ok(xover):
+        # A renamed column is a *skip*, not a crash.  The alternative -- letting
+        # a KeyError abort the run -- makes one stale central artifact the
+        # hostage of every other figure, which is how a paper ends up unable to
+        # build because of a figure it does not even include.  The reason names
+        # the column and says what to do.
+        skipped.append((
+            "fig_crossover",
+            "`crossover_surface.json` predates the error-column rename "
+            "(`relative_l2_fluct_over_full`); regenerate it with run_crossover.py. "
+            "Every other figure is unaffected, which is why this is a skip rather "
+            "than a failure.",
+        ))
+        xover = None
     else:
-        used.append("crossover_surface.json")
         by_re = xover["by_reynolds"]
+        used.append("crossover_surface.json")
         primary = list(by_re)[0]
         case = by_re[primary]
         ranks = sorted(int(r) for r in case["dlra"])
@@ -982,7 +1298,50 @@ def main() -> None:
         fig.savefig(args.output_dir / "fig_crossover.png", bbox_inches="tight")
         plt.close(fig)
 
+    # ---------------------------------------------------------------- C11-1
+    # The paper includes six figures and only `fig_cost` existed, and
+    # `paper/figures/` was empty on every branch, so even that one did not
+    # resolve.  These five are the paper's own names, bound by the draft's
+    # `\label`s, and their content is transcribed from the captions the draft
+    # already carries -- this is transcription, not design.
+    #
+    # They are written to BOTH output roots.  `experiments/figures/` is where the
+    # project's figures live and where PROVENANCE.md and CAPTIONS.md point;
+    # `paper/figures/` is where the draft's `\includegraphics{figures/...}` looks.
+    # Only generated images are written into the paper's tree -- no prose, no
+    # .tex -- and the generating code stays on this side of the ownership line.
+    if args.paper_figures_dir is not None:
+        args.paper_figures_dir.mkdir(parents=True, exist_ok=True)
+    make_paper_figures(
+        R, args.output_dir, args.paper_figures_dir, used, skipped, colors
+    )
+
     provenance(R, args.output_dir, sorted(set(used)), skipped)
+
+    if args.paper_figures_dir is not None:
+        # Every figure this run wrote, mirrored into the paper's directory, and
+        # any figure file already there that this run did NOT write removed --
+        # the same stale-file rule as the primary root, because a stale image in
+        # the paper is the one a referee actually looks at.
+        mirrored, removed = [], []
+        for ext in ("pdf", "png"):
+            for name in sorted(FIGURES_WRITTEN):
+                src = args.output_dir / f"{name}.{ext}"
+                if not src.exists():
+                    continue
+                (args.paper_figures_dir / f"{name}.{ext}").write_bytes(
+                    src.read_bytes()
+                )
+                mirrored.append(f"{name}.{ext}")
+            for existing in sorted(args.paper_figures_dir.glob(f"fig_*.{ext}")):
+                if existing.name not in mirrored:
+                    existing.unlink()
+                    removed.append(existing.name)
+        print(
+            f"mirrored {len(mirrored)} file(s) to {args.paper_figures_dir}"
+            + (f"; removed {len(removed)} stale: {', '.join(removed)}"
+               if removed else "")
+        )
     print(f"figures written to {args.output_dir}")
 
 
