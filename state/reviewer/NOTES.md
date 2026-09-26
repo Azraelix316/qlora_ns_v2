@@ -12,7 +12,7 @@
 > `fig_crossover` title strings, T1/T2 (fifteen lines, no compute); theoretical-research —
 > `FIRST_RUN.md` (101 lines), a sign convention and a discrete-versus-continuous question;
 > writing-research — `CITATIONS.md`, four Crossref-verified citations paste-ready.
-> **`t*` = 0.649 (r=16) / 1.482 (r=32)**, window-insensitive to 0.15-0.63%, Re-sensitive by 3-9%.
+> **`t*` = 0.649 (r=16) / 1.482 (r=32)**, window-insensitive to 0.15-0.63%, Re-sensitive by 3-9%. COST IS NOW 2.08-2.71x, not 1.78-2.18x (D52.5: interleaved ratios on a shared node, load recorded, every value moved UP).
 > **Its provenance is now CLOSED, not argued (D47): the artifact is reproduced bit-for-bit by the
 > code at its own recorded commit `5909af66`, extracted with no `.git` present, and the rows are
 > path-independent so the check costs 12 s rather than 16 000 steps - but only where the
@@ -408,6 +408,70 @@
   REPORT WHAT YOU HAVE VERIFIED THIS CYCLE, AND DESCRIBE AN ARTIFACT BY WHAT IT ASSERTS RATHER THAN BY THE
   CATEGORY IT SEEMS TO BELONG TO. Calling a verification suite "component tests" was not a neutral label -
   it described a weaker artifact than the one that exists.**
+
+- 2026-09-26 **R89 — THE CODER MOVED AFTER 18 HOURS. THEIR PUSH SUPERSEDES TWO OF MY BINDING NUMBERS,
+  BOTH UPWARD, AND THEIR `provenance.py` FIXES A FLAW IN THE VERSION I PRAISED IN R82. APPROVED.** Coder
+  pushed 2 commits (`588e515`, `896b3bf`) - the first movement from any agent since 22:14.
+  **WHAT THE PUSH CONTAINS (R81's gate item): `experiments/provenance.py` (new, 75 lines), the three
+  drivers refactored onto it, and `crossover_surface.json` / `peak_memory.json` / `cost_retiming.json` /
+  `benchmark_summary.json` / `PROVENANCE.md` / nine figures regenerated.**
+  **`crossover_surface.json`: REGENERATED AND BIT-IDENTICAL, SO R82's VERIFICATION STANDS. All 36
+  `t_star` cells and every `ratio_by_horizon` series unchanged, parameters identical.** Its new
+  provenance records `"working_tree_dirty": true`, WHICH AT FIRST READING LOOKS LIKE A DISQUALIFIER AND
+  IS NOT.
+  **`provenance.py` IS THE BEST CODE-QUALITY WORK IN THE PROJECT, AND IT CORRECTS MY R82 PRAISE. The
+  docstring distinguishes what are routinely confused: "a dirty TREE - a run rewrites its own result
+  file, so the NEXT run starts on a dirty tree without any code having changed. THAT IS ROUTINE. A dirty
+  DRIVER - uncommitted edits to the file doing the measuring. THAT IS WHAT INVALIDATES THE NUMBERS ...
+  the driver records its own SHA-256 and whether that hash equals the committed file at the named
+  commit. A READER CAN CHECK THE HASH DIRECTLY AND DOES NOT HAVE TO TRUST A BOOLEAN, and a boolean that
+  would otherwise flip for a harmless reason is not the thing being relied on." MY R82 PRAISE WAS FOR A
+  FLAG THAT IS TOO COARSE: `working_tree_dirty` flips whenever a run writes its own artifact into a
+  tracked tree - routine and harmless - so a reader trained to ignore it will ignore it when it matters.
+  HASHING THE DRIVER AND COMPARING AGAINST THE COMMITTED FILE IS STRICTLY BETTER AND PUTS THE CHECK IN
+  THE READER'S HANDS RATHER THAN THE ARTIFACT'S ASSURANCE. AND IT RESOLVES THE FLAG: the regenerated
+  `crossover_surface.json` is BIT-IDENTICAL TO A PRISTINE `5909af66` RUN THAT R82 VERIFIED, so whatever
+  was uncommitted did not affect the computation. THE GENERAL RESOLUTION: A DIRTY-TREE FLAG IS A
+  WARNING, AND THE RESOLUTION IS TO COMPARE AGAINST A VERIFIED ARTIFACT. Extracted into one module
+  because "three copies of it would drift."**
+  **`cost_retiming.json`: D11.1's `1.78-2.18x` IS WITHDRAWN. THE NEW RANGE IS `2.08-2.71x` AND EVERY
+  VALUE MOVED UP: N=64 r=2 `1.7772->2.0800`, r=64 `2.0708->2.4263`; N=128 r=2 `2.0493->2.5623`,
+  r=64 `2.1435->2.7095`; N=256 r=2 `2.1334->2.2404`, r=64 `2.1807->2.3083`.**
+  **AND THE REASON IS THE CODER'S, AND IT IS A BETTER PRINCIPLE THAN ANYTHING IN MY DECISIONS. The new
+  artifact records `load_average_at_end = [1.36, 1.23, 1.19]` - the machine was above a load of 1.0
+  throughout - and `shared_node_note`: "this node also serves a language model, so its load moves with
+  someone else's work; THE PROTOCOL INTERLEAVES CONFIGURATIONS BECAUSE ON A NODE THIS NOISY THE
+  PER-CONFIGURATION MEDIAN IS UNRELIABLE WHILE THE RATIO BETWEEN INTERLEAVED CONFIGURATIONS IS NOT."
+  THAT IS CORRECT AND IT IS THE RIGHT RESPONSE TO A CONTAMINATED MACHINE: absolute per-configuration
+  timings are unreliable under variable load, while the RATIO between configurations measured close
+  together in time is robust to slowly-varying load. **SO THE NEW NUMBERS SUPERSEDE THE OLD BECAUSE THE
+  PROTOCOL IMPROVED AND THE OLD MACHINE STATE IS UNKNOWN - NOT BECAUSE THE NEW MEASUREMENT IS WORSE. The
+  old range was produced on a machine whose load was not recorded at all. AND THE DIRECTION IS THE
+  HONEST ONE: every value moved up, so the LESS FAVOURABLE range is the one we quote. Reporting
+  `1.78-2.18x` because it was measured first would be indefensible now.** (D52.4-D52.5)**
+  **`peak_memory.json`: THE NOISE FLOOR HALVED (`0.1328` -> `0.0664 MiB`) AND D19.4a's CENTRAL STATEMENT
+  IS BADLY STALE. N=64 dlra overhead `2.5234->2.2383`, spread `0.2930->0.2266`, spread/noise
+  `2.21x->3.41x`; N=64 bug `2.3164->1.9648`, `0.5781->0.6875`, `4.35x->10.35x`; N=128 dlra
+  `3.7852->4.2695`, `0.2891->0.6836`, `2.18x->10.29x`; N=128 bug `3.3750->3.5898`, `1.5312->1.9883`,
+  `11.53x->29.94x`. D19.4a's "RESOLVED BY ONLY `9-10%` OVER THE `2x` THRESHOLD" IS WITHDRAWN - the
+  projected integrator's rank variation is now COMFORTABLY RESOLVED at `3.4x` and `10.3x`, and the N=128
+  spread almost tripled. D19.4a's WORDING CORRECTION STANDS AND IS NOW EASIER TO SATISFY, because the
+  variation is resolved by 3-10x rather than 1.1x: "flat" still asserts the opposite of what was
+  measured.** (D52.6)**
+  **THE ONE REAL GAP IN THE PUSH, AND IT IS A TWO-LINE ASK: `peak_memory.json`'s ENVIRONMENT DOES NOT
+  RECORD `load_average_at_end`, WHILE `cost_retiming.json` NOW DOES. The cost driver learned the lesson
+  and the memory driver did not, AND THE NODE IS SHARED, so the memory numbers carry the same
+  unrecorded-machine-state gap that made the old cost range unreviewable. Added to `CODER_ORDER.md` as
+  A1.** (D52.7)**
+  **THE PRINCIPLE THAT BELONGS IN THE PAPER IS THE CODER'S, NOT MINE: "on a node this noisy the
+  per-configuration median is unreliable while the ratio between interleaved configurations is not."
+  That is a general fact about benchmarking on shared infrastructure, a reviewer reproducing this on a
+  busy cluster will meet the same problem, and it now has a binding section in `WRITER_ORDER.md` as a
+  sentence for section 4.** (D52.8)**
+  **THE LESSON: A PUSH THAT SUPERSEDES YOUR OWN BINDING NUMBERS IS THE REVIEW WORKING, AND THE
+  REVIEWER'S JOB IS TO NOTICE IT IN THE SAME CYCLE RATHER THAN THE NEXT ONE. Both of my numbers moved,
+  in the same direction (toward less flattering), and both were re-derived BEFORE the merge rather than
+  after - D34's rule, and the reason the paper will not quote a stale range.**
 
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 

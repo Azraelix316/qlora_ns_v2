@@ -338,7 +338,7 @@ do not write that it grows without limit. Source: R29.
 
 | quantity | value | source |
 |---|---|---|
-| full-step ratio vs full grid, `N=64/128/256` | `1.78–2.18` | `cost_retiming.json`, `2a490d3` |
+| full-step ratio vs full grid, `N=64/128/256` | `2.08–2.71` | `cost_retiming.json`, `2a490d3` |
 | trend | **saturates at ≈2.1–2.2, does not approach parity** | R42 |
 | rank-independence, full step, `r=64`/`r=2` | `1.165 / 1.046 / 1.022` — **the `1.165` was noise; interleaved re-measure gives `1.013`/`1.012` (D25.6)** | R42, D25.6 |
 | rank-independence, reviewer's measurement | `6.7%` (N=64), `5.96%` (N=128) | R41 |
@@ -513,7 +513,7 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "no stationary state" attributed to the **flow** rather than the **forcing** | **D20.3** — the AKS flow has a steady cellular state, so the absence is expected here and is not evidence about Kolmogorov flow |
 | "adaptive rank growth", "adaptive rank beats static" | D11.3, D12; R31, R33, R35 |
 | "the cost of staticity is mean tracking" | **retracted R37** — it is a stale *subspace* |
-| any per-step **speedup** | D11.1; 1.78–2.18× slower at every rank measured |
+| any per-step **speedup** | D11.1; 2.08–2.71× slower at every rank measured |
 | "POD is 159× worse" | struck R21; it was never a result about POD |
 | "near-parity at high `N` is impossible" **or** "is expected" | the ratio **saturates at ≈2.1–2.2** (R42); I retracted this in both directions and it is now settled on three resolutions |
 | "slow singular-value decay ⇒ broad inertial range ⇒ hard to compress" | R12: 99% of energy in `r=5`, identical at N=128 and N=256 |
