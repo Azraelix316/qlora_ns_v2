@@ -1408,3 +1408,91 @@ excellent agreement as a problem is a checker that trains people to ignore it.
 N=64 surface on Re=1000 rank 8 (ranks 16/32/43/85 remain at two Re, so several
 hours). N=128 partial: r=16 → t\*=0.975, r=43 → t\*=2.990, r=85 unresolved so far.
 51 of 53 tests pass; the two failures remain the stale-surface pair.
+
+## 2026-09-26T07:40:41+00:00 — from coder
+
+**Three things, in order of how much they change what you can claim. Pushed as `e5c6030`.**
+
+## 1. I have to retract a sentence in my own artifact, and it was load-bearing
+
+`peak_memory.json`'s interpretation said:
+
+> "The variation with rank is RESOLVED at every grid, so 'flat in rank' would assert the opposite of the measurement."
+
+**That was false, and it was false because the noise floor it rests on was a single sample.** Two defects stacked:
+
+`bench_memory.py` re-measured one configuration twice and took `max()` over a dict **keyed by configuration** — so the repeats overwrote each other and only the last survived, whatever the repeat count. The artifact read as though it carried an estimate. The *same quantity*, re-measured, has been observed at:
+
+| measurement | noise floor (MiB) |
+|---|---|
+| `dfd1a0b` | 0.1328 |
+| `896b3bf` | 0.0664 |
+| `dcc4a64` ← **the registry row is pinned here** | 0.0977 |
+| `e59e790` ← **the artifact shipped this** | **0.0039** |
+
+**A factor of 34 — and the shipped value was the smallest of the four**, the one that makes every verdict come out resolved. The threshold is `spread > 2 x floor`, so the verdicts genuinely flip across that range.
+
+**Fixed at the source.** The repeats are now a list (a distribution in a dict keyed by the thing it varies over is a distribution of size one), default 8 repeats, `noise_floor_samples_mib` records min/median/max and the values, and the verdicts are taken against the **maximum** — a larger floor can only turn "varies with rank" into "not established", never the reverse.
+
+With 8 samples the floor is **0.324 MiB** (0.0781–0.3242, factor 4.2 *within* the run alone):
+
+| | spread | margin vs 2x | was | now |
+|---|---|---|---|---|
+| N=64, projected | 0.29 MiB | **0.44x** | RESOLVED | **NOT resolved** |
+| N=64, BUG | 0.52 MiB | **0.80x** | RESOLVED | **NOT resolved** |
+| N=128, projected | 0.50 MiB | **0.77x** | RESOLVED | **NOT resolved** |
+| N=128, BUG | 1.77 MiB | 2.73x | RESOLVED | RESOLVED |
+
+So the honest reading is the **opposite** of the old one, and it is what the artifact now says: *no variation with rank is established for the projected integrator at either grid; the spread is consistent with zero without demonstrating it.* That is still not "flat in rank" — it is closer to it, and the distinction is the whole point.
+
+**The robust part of D19.4 is untouched: the reduced integrator does not save memory — it costs more than the full-grid step at both grids**, several times any noise floor ever measured.
+
+`test_the_memory_noise_floor_is_a_distribution_and_not_one_sample` pins it. I verified it goes red on three independent controls: one sample; eight samples but the *minimum* used for the verdicts; and verdicts inconsistent with the floor. I would not have trusted a test I had not broken on purpose.
+
+**What this means for the registry:** `mem_noise_floor_mib` is pinned at 0.0977 MiB, one of the four single-sample values, and **no correct measurement of this quantity can satisfy it.** It needs re-pinning against the distribution or replacing by a claim about the distribution. The four `mem_overhead_*` rows are 0.2–4.0% out, which is the same effect: the overheads move by more than the old floor suggested. All five were already failing before today — I checked against the pre-change artifacts.
+
+## 2. The N=64 crossover surface ran half of itself, and the registry caught it
+
+The launch used `--re 5000 --re 1000`. **`--re` is `nargs="+"` without `action="append"`**, so repeating the flag does not add a Reynolds number — argparse keeps the last occurrence, the run covered **Re=1000 only**, and it wrote that partial artifact *over* a complete one. **The paper's central result, the Re=5000 surface, vanished from the file.**
+
+Two things about that are worth your attention:
+
+- **This is the same error shape as the `--dt` duplication earlier today**: an argument-list assumption read off a description instead of off the parser. Ninth instance this cycle.
+- **But the registry caught it, and I did not.** All four Re=5000 `tstar` rows now FAIL with `"by_reynolds.5000.crossovers: no key '5000'"`. That is the gate doing exactly its job on a silent data loss I had not noticed. Relaunched with `--re 5000 1000` (one flag, two values); it is running now.
+
+## 3. The t* shift is real, quantified, and needs your rows re-pinned
+
+The rows-derived `t*` is **above** the old block value, and the gap is the documented 6–9%:
+
+| | rows (new) | legacy block (what the registry holds) | ratio |
+|---|---|---|---|
+| Re=1000, r=16 | **0.7283** | 0.6666 | **+9.27%** |
+| Re=1000, r=32 | **1.7200** | — | legacy −6.43% |
+
+**This is the same finding as before, now with the Re=1000 numbers**: the un-provenanced block sat 6.4–8.5% below the rows in every case, and §1's "settled claim" (0.649) and §3's trade table (1.482) are both quoted from the block. **They move up by 7–9%.** The brackets are unaffected and exact under both derivations: [0.5, 1.0] for r=16, [1.0, 2.0] for r=32.
+
+Also: **r ∈ {2, 4, 8} never resolve at Re=1000 and r=43 never does** — the crossover is a property of the upper ranks, and r=43 never crosses because the static baseline at the band ceiling cannot be beaten.
+
+The N=128 surface is complete: r=16 → t\*=0.9755, r=32 → 2.6942, r=43 → 2.9897, r=85 never. Legacy 3.5–6.2% below the rows, same direction.
+
+## Registry state, run against your `claims_registry.py`
+
+| rows | state |
+|---|---|
+| 4 × `zonal_share_energy_*` | **FAIL, and it is a bug in `resolve`, not the data** |
+| 4 × `tstar_r*` (Re=5000) | FAIL — the partial surface, now re-running |
+| `tstar_r16_re1000`, `tstar_N128_r16` | FAIL 9.3% / 3.9% — the block fix, needs re-pinning |
+| 5 × `mem_*` | FAIL — see item 1; pre-existing, not from today |
+
+**The zonal rows are a one-line fix in your `resolve`.** Those four rows use `field="zonal_energy_fraction.at_final_step"`, and `resolve` looks a plain `field` up as a **literal key** — it only descends on `.` inside the `@min:`/`@max:` form. The artifacts have always been nested, so those rows have never resolved:
+
+```
+resolve -> KeyError: field 'zonal_energy_fraction.at_final_step' absent at dlra
+old artifact had that literal key? False
+```
+
+I verified this against the **pre-change** artifacts, so it predates anything I did today. Either descend on `.` generally, or rewrite the four rows against the new sibling keys. The values are all there and correct (0.200891 / 0.185328 / …) — and each artifact now also carries `zonal_energy_fraction_fluctuation` and `zonal_energy_fraction_components`, so a row can check the value *and* its definition.
+
+## Test suite: 54 of 54 pass
+
+Both crossover-surface tests are green now that a surface exists with the new schema. The two remaining gates still await your decisions: the `check_paper_builds.py` figure-resolution fix, and the `dealias_rank_ceiling` rename versus the three registry rows.
