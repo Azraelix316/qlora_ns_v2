@@ -67,6 +67,30 @@ def thread_settings() -> dict:
     return {key: os.environ.get(key) for key in keys}
 
 
+#: The thread settings this project pins for timing runs.  Recorded rather than
+#: assumed, because of what happened on 2026-09-26: a re-run under **1** thread
+#: produced ratios within 10% of the registry's pinned values -- close enough to
+#: look like agreement, and not agreement, because the pinned run used 2.  A
+#: timing artifact whose thread settings differ from the canonical ones is not
+#: comparable with the previous one, and nothing in the artifact said so.
+CANONICAL_THREADS = {
+    "OPENBLAS_NUM_THREADS": "2",
+    "OMP_NUM_THREADS": "2",
+    "MKL_NUM_THREADS": "2",
+}
+
+
+def threads_match_canonical() -> tuple[bool, dict]:
+    """Whether the thread settings are the pinned ones, and what differs."""
+    settings = thread_settings()
+    differing = {
+        key: {"canonical": want, "actual": settings.get(key)}
+        for key, want in CANONICAL_THREADS.items()
+        if settings.get(key) != want
+    }
+    return not differing, differing
+
+
 def load_average() -> list[float] | None:
     """The node's load average, recorded because the node is shared.
 
@@ -385,6 +409,18 @@ def main() -> None:
             "platform": platform.platform(),
             "processor": platform.processor() or "unknown",
             "thread_settings": thread_settings(),
+            "threads_match_canonical": threads_match_canonical()[0],
+            "threads_differing_from_canonical": threads_match_canonical()[1],
+            "thread_settings_note": (
+                "the canonical timing configuration is "
+                + ", ".join(f"{k}={v}" for k, v in CANONICAL_THREADS.items())
+                + ". If threads_match_canonical is false this artifact is NOT "
+                "comparable with one produced under the canonical settings, and a "
+                "ratio that happens to land within 10% of such an artifact is a "
+                "coincidence rather than agreement -- which is the state this "
+                "project was in on 2026-09-26, when a 1-thread re-run came "
+                "within 6% of a 2-thread pinned value."
+            ),
             "load_average_at_end": load_average(),
             "shared_node_note": (
                 "this node also serves a language model, so its load moves with "
