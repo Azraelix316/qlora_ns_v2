@@ -54,7 +54,7 @@ python3 state/reviewer/check_headings.py         # my own documents: no heading 
 python3 state/reviewer/check_start_here.py       # is THIS file still true? (it computes the numbers below)
 python3 state/reviewer/check_directional_claims.py  # two-sided magnitude claims a referee will check
 python3 state/reviewer/check_provenance.py      # can every shipped run say whether it is reproducible?
-python3 -m pytest experiments/ -q                # 47 tests, ~240 s (pin OMP/OPENBLAS/MKL=1)
+python3 -m pytest experiments/ -q                # 48 tests, ~240 s (pin OMP/OPENBLAS/MKL=1)
 ```
 
 **`claims_registry.py` reports `29/35` verified.** The **4** failures are the `crossover_N128.json` rows, and that file **Six of those are red BY DECISION (D119): the coder's push silently regenerated `peak_memory.json` and the noise floor moved `25x`, so the overheads and the floor genuinely disagree. Do not re-pin them to make the gate green - the coder has been asked what the floor now measures.**
