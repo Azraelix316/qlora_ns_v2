@@ -173,6 +173,33 @@ def run_reference(
     }
 
 
+def _energy_residual(
+    model: StreamFunctionNS,
+    old: np.ndarray,
+    new: np.ndarray,
+    dt: float,
+    t: float,
+    grid: Grid2D,
+    projection_energy_increment: float = 0.0,
+) -> float:
+    """The scaled kinetic-energy balance residual of one step.
+
+    Identical to ``run_kolmogorov._energy_residual``, and deliberately so: the
+    two drivers report the same diagnostic under the same two names, and a
+    residual that meant different things in different artifacts would be worse
+    than none.  With ``projection_energy_increment`` at zero this is the balance
+    of the projected *discrete* dynamics; the projection's own energy change is
+    subtracted first when it is supplied, because a projector changes the state
+    by a measured amount and that amount is not an integration error.
+    """
+    terms = model.energy_terms(old, t)
+    derivative = (grid.ke(new) - grid.ke(old)) / dt
+    residual = terms.residual_from_derivative(derivative)
+    residual -= projection_energy_increment / dt
+    scale = max(1.0, abs(terms.dissipation), abs(terms.forcing_input))
+    return abs(residual) / scale
+
+
 def run_projected(
     grid: Grid2D, model: StreamFunctionNS, initial: np.ndarray, dt: float,
     final_time: float, sample_every: int, projector, reference_checkpoints: dict,
@@ -204,6 +231,21 @@ def run_projected(
             break
         projection_energy += grid.ke(state) - before
         max_div = max(max_div, grid.max_div_velocity(state))
+        # D39.4.  This was initialised and returned but never updated, so the
+        # artifact would have carried a silent 0.0 for every method -- the same
+        # failure as the projection-increment trap in D70, one function over.
+        # It is the one *continuous* diagnostic that can say how the methods
+        # differ before one of them overflows, so a zero would have been an
+        # absence of evidence presented as evidence of perfection.
+        increment = float(
+            model.last_step_info.get("projection_energy_increment", 0.0)
+        )
+        max_residual = max(
+            max_residual,
+            _energy_residual(
+                model, old, state, dt, (step - 1) * dt, grid, increment
+            ),
+        )
         if step % sample_every == 0 or step == nsteps:
             times.append(step * dt)
             states.append(state.copy())
@@ -306,6 +348,7 @@ def run_projected_moving(
     states = [state.copy()]
     max_div = grid.max_div_velocity(state)
     projection_energy = 0.0
+    max_residual = 0.0
     diverged_at_step = None
     nsteps = int(round(final_time / dt))
     start = time.perf_counter()
@@ -321,6 +364,15 @@ def run_projected_moving(
             break
         projection_energy += grid.ke(state) - before
         max_div = max(max_div, grid.max_div_velocity(state))
+        increment = float(
+            model.last_step_info.get("projection_energy_increment", 0.0)
+        )
+        max_residual = max(
+            max_residual,
+            _energy_residual(
+                model, old, state, dt, (step - 1) * dt, grid, increment
+            ),
+        )
         if step % sample_every == 0 or step == nsteps:
             times.append(step * dt)
             states.append(state.copy())
@@ -328,7 +380,7 @@ def run_projected_moving(
         "times": times,
         "states": states,
         "max_abs_divergence": max_div,
-        "max_scaled_projected_energy_residual": None,
+        "max_scaled_projected_energy_residual": max_residual,
         "projection_energy_total": projection_energy,
         "wall_seconds": time.perf_counter() - start,
         "diverged_at_step": diverged_at_step,
@@ -475,6 +527,16 @@ def main() -> None:
         entry = {
             "metrics": metrics,
             "max_abs_divergence": run["max_abs_divergence"],
+            # D39.4: the per-method discrete energy-balance residual.  run_projected
+            # has always computed it and the artifact never carried it, so the one
+            # *continuous* diagnostic that could say how the methods differ before
+            # one of them overflows was absent from the artifact holding
+            # contribution 4.  Recorded per method now, under the name that says
+            # which balance it is (see energy_residual_semantics in
+            # run_kolmogorov.py for the two definitions and the scale).
+            "max_scaled_projected_energy_residual": run.get(
+                "max_scaled_projected_energy_residual"
+            ),
             "trajectory_divergence_series": div,
             "max_trajectory_divergence": max(finite) if finite else None,
             "final_trajectory_divergence": finite[-1] if finite else None,
@@ -522,22 +584,52 @@ def main() -> None:
     dlra_start = time.perf_counter()
     nsteps = int(round(args.T / dt))
     dlra_diverged = None
+    adaptive_model = adaptive.model
+    dlra_residual = 0.0
     for step in range(1, nsteps + 1):
+        dlra_old = dlra_state
         dlra_state = adaptive.step(dlra_state, dt, t=(step - 1) * dt)
         if not np.isfinite(dlra_state).all():
             dlra_diverged = step
             break
         dlra_div = max(dlra_div, grid.max_div_velocity(dlra_state))
+        dlra_residual = max(
+            dlra_residual,
+            _energy_residual(
+                adaptive_model, dlra_old, dlra_state, dt, (step - 1) * dt, grid,
+                float(adaptive_model.last_step_info.get(
+                    "projection_energy_increment", 0.0)),
+            ),
+        )
         if step % sample_every == 0 or step == nsteps:
             dlra_times.append(step * dt)
             dlra_states.append(dlra_state.copy())
     adaptive_rank = int(adaptive.rank)
+    # The adaptive arm's residual is *not* reported, and the reason is a finding
+    # rather than a gap in the harness.  A rank change mid-step re-derives the
+    # state in a new subspace, which moves the energy by an amount that is not
+    # part of `projection_energy_increment` (that term counts only the four fixed
+    # projections inside one model step).  Subtracting nothing, the residual picks
+    # that jump up and reports ~4.8e+01 against ~6e-2 for the static baselines --
+    # a number that would say the method is catastrophically wrong when what it
+    # says is that one term of its discrete balance is unmeasured.  The fixed-rank
+    # DLRA arms below isolate the same integrator with no rank change, and their
+    # residuals are the comparable ones.
     record(
         "dlra_adaptive",
         {
             "times": dlra_times,
             "states": dlra_states,
             "max_abs_divergence": dlra_div,
+            "max_scaled_projected_energy_residual": None,
+            "energy_residual_omitted_because": (
+                "a mid-step rank change re-derives the state in a new subspace, and "
+                "that energy jump is not included in projection_energy_increment, so "
+                "the residual would report the rank change as an integration error. "
+                "Compare the dlra_fixed_r* arms, which run the same integrator with "
+                "no rank change."
+            ),
+            "unsubtracted_residual_for_diagnosis": dlra_residual,
             "wall_seconds": time.perf_counter() - dlra_start,
             "diverged_at_step": dlra_diverged,
             "final_time_reached": dlra_times[-1],
@@ -580,7 +672,11 @@ def main() -> None:
                 grid, new_model(grid, args.re, args.force_amplitude), initial, dt,
                 args.T, sample_every, pod.project, ref["checkpoints"],
             )
-            run["max_scaled_projected_energy_residual"] = None
+            # The residual run_projected just computed is kept.  It used to be
+            # overwritten with None here, which is why D39.4 said the baselines
+            # artifact lacked the one continuous diagnostic that could say how
+            # these methods differ *before* one of them overflows -- the methods
+            # that overflow are exactly the ones it was discarded for.
             record(
                 f"pod_{label}_r{rank}",
                 run,
@@ -715,12 +811,28 @@ def main() -> None:
         div = grid.max_div_velocity(state)
         start = time.perf_counter()
         fixed_diverged = None
+        # The DLRA's own residual, against its own model's energy terms.  It owns
+        # the integrator, so it cannot be recovered from the reference model's
+        # last_step_info; leaving it None for the method the paper is about would
+        # be the wrong gap to leave open.
+        fixed_model = fixed.model
+        fixed_residual = 0.0
         for step in range(1, nsteps + 1):
+            old = state
             state = fixed.step(state, dt, t=(step - 1) * dt)
             if not np.isfinite(state).all():
                 fixed_diverged = step
                 break
             div = max(div, grid.max_div_velocity(state))
+            increment = float(
+                fixed_model.last_step_info.get("projection_energy_increment", 0.0)
+            )
+            fixed_residual = max(
+                fixed_residual,
+                _energy_residual(
+                    fixed_model, old, state, dt, (step - 1) * dt, grid, increment
+                ),
+            )
             if step % sample_every == 0 or step == nsteps:
                 times.append(step * dt)
                 states.append(state.copy())
@@ -730,6 +842,7 @@ def main() -> None:
                 "times": times,
                 "states": states,
                 "max_abs_divergence": div,
+                "max_scaled_projected_energy_residual": fixed_residual,
                 "wall_seconds": time.perf_counter() - start,
                 "diverged_at_step": fixed_diverged,
                 "final_time_reached": times[-1],
@@ -811,6 +924,27 @@ def main() -> None:
             ),
             "windowed_rank": (
                 "not measured here; see regime_pilot_*.json -> window_rank_table"
+            ),
+        },
+        "energy_residual_semantics": {
+            "max_scaled_projected_energy_residual": (
+                "per method, the kinetic-energy balance residual of the "
+                "*projected* discrete dynamics: the projection's measured energy "
+                "increment is subtracted first, so this is the balance the reduced "
+                "integrator actually satisfies. For full_grid it coincides with the "
+                "PDE balance, because there is no projection. null where the runner "
+                "cannot compute it (the DMD baseline), which is an absence and not "
+                "a zero."
+            ),
+            "scale": (
+                "divided by max(1, |dissipation|, |forcing input|) evaluated at the "
+                "step, so it is a relative residual and the scale varies during a run"
+            ),
+            "why_it_is_here": (
+                "D39.4: this is the one *continuous* diagnostic that can say how "
+                "the methods differ before one of them overflows, and the artifact "
+                "did not carry it. It is a discriminator only once measured; it is "
+                "recorded here, not claimed."
             ),
         },
         "reference": ref_metrics,

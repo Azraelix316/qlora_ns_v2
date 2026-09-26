@@ -583,11 +583,14 @@ def main() -> None:
             "the advantage horizon by factors of two to four, so a t* quoted without "
             "them is not reproducible. Per-step cost is Theta(N^3) and "
             "rank-independent (D11.1, measured in cost_retiming.json). The highest "
-            "rank tested is the only one that never loses, and it is the largest "
-            "rank this grid resolves without aliasing, 2*floor(N/3)+1 -- which is "
-            "not a single grid-independent quantity but a function of N, and at "
-            "that rank the method is doing the work of the full-grid solver at "
-            "over twice its cost."
+            "rank tested is the only one that never yields, and the reason is that "
+            "its error is already at roundoff -- the dynamics are effectively "
+            "low-dimensional at these settings, not that the rank has reached the "
+            "grid. That rank is the largest one tested and it happens to coincide "
+            "with the wavenumber 2*floor(N/3)+1; the wavenumber is not a rank, it "
+            "is 43 at N=64 and 85 at N=128, and the dealiased grid carries far more "
+            "degrees of freedom than either. So a rank-43 subspace is not the "
+            "full-grid solver, and it is not exact either -- it is near-roundoff."
         ),
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
