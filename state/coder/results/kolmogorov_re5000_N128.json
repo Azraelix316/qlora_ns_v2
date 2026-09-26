@@ -885,10 +885,10 @@
       "status": "projected_discrete_balance_with_projection_work"
     },
     "initial_energy": 22.206703312933374,
-    "initialization_seconds": 0.011785564944148064,
+    "initialization_seconds": 0.013184038922190666,
     "linear_algebra_calls": 841,
-    "linear_algebra_seconds": 19.52473436598666,
-    "linear_algebra_seconds_per_step": 0.0976236718299333,
+    "linear_algebra_seconds": 47.34165567252785,
+    "linear_algebra_seconds_per_step": 0.23670827836263925,
     "max_abs_divergence": 6.750155989720952e-14,
     "max_cfl": 0.015461843721421717,
     "max_energy_increase": 0.0011622587958655117,
@@ -897,7 +897,7 @@
     "max_relative_l2_vs_full": 4.60674809219865e-05,
     "max_scaled_pde_energy_residual": 0.00021447695584713626,
     "max_scaled_projected_energy_residual": 0.00033519943514608827,
-    "offline_plus_online_seconds": 30.250795549945906,
+    "offline_plus_online_seconds": 59.16458167578094,
     "projection_energy_history": [
       -1.0300469810431423e-07,
       -1.104395686013504e-07,
@@ -2760,8 +2760,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 30.239009985001758,
-    "wall_seconds_per_step": 0.1511950499250088
+    "wall_seconds": 59.151397636858746,
+    "wall_seconds_per_step": 0.29575698818429375
   },
   "full": {
     "checkpoint_steps": [
@@ -5064,8 +5064,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 12.030250939074904,
-    "wall_seconds_per_step": 0.060151254695374516
+    "wall_seconds": 10.844444331945851,
+    "wall_seconds_per_step": 0.05422222165972926
   },
   "grid": {
     "L": 6.283185307179586,
@@ -5580,7 +5580,7 @@
     "final_energy": 22.43296512479575,
     "final_enstrophy": 1335.7076185247581,
     "final_relative_l2_vs_full": 1.892981178595652e-09,
-    "fit_seconds": 0.1287789000198245,
+    "fit_seconds": 0.2721108680125326,
     "fluctuation_energy_history": [
       18.607639994491254,
       18.607406298768577,
@@ -6002,7 +6002,7 @@
     "max_relative_l2_vs_full": 1.892981178595652e-09,
     "max_scaled_pde_energy_residual": 0.0001286818419769284,
     "max_scaled_projected_energy_residual": 0.035303848355700745,
-    "offline_plus_online_seconds": 10.615147342905402,
+    "offline_plus_online_seconds": 14.374747300054878,
     "projection_energy_history": [
       -4.339644371142981e-05,
       -4.339433019140415e-05,
@@ -7865,18 +7865,18 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 10.486368442885578,
-    "wall_seconds_per_step": 0.05243184221442789
+    "wall_seconds": 14.102636432042345,
+    "wall_seconds_per_step": 0.07051318216021173
   },
   "provenance": {
     "driver": "experiments/run_kolmogorov.py",
-    "driver_dirty": true,
-    "driver_matches_HEAD": false,
+    "driver_dirty": false,
+    "driver_matches_HEAD": true,
     "driver_sha256": "61266d45002cad6a781a62a7ac770bb7ecc0e735fefc106cca438b05934e08df",
-    "git_commit": "727fb8da95e304af983cda62c7b571b90759df64",
+    "git_commit": "387fe0855fa88fc534c62e50841f28bb7cafd1a9",
     "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
-    "reproducible": false,
-    "working_tree_diff_sha256": "7eaa7c044b0f9ef9fdf9971196608bf9597985a4c996827e1ddb5e00491fe35d",
+    "reproducible": true,
+    "working_tree_diff_sha256": "5506b203a5a718c2488a3027efec0d1bbc29d1a4ab196eb250062f9e21262474",
     "working_tree_dirty": true
   },
   "reynolds": 5000,
