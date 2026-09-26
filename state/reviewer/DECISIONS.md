@@ -918,8 +918,7 @@ its cost argument does not. Every D4 barred claim stands.
 
 ---
 
-## D16 — D15 confirmed at a second Reynolds number; **D15.4 is qualified**; memory has no
-## advantage either (2026-09-25)
+## D16 — D15 confirmed at a second Reynolds number; **D15.4 is qualified**; memory has no advantage either (2026-09-25)
 
 > **OPERATIVE (R52).** D15's `t* ≈ 1.3` (`r=16`) and `≈2.4` (`r=32`) **stand, now verified at
 > two Reynolds numbers and three window lengths each.** **D15.4 is corrected**: the static
@@ -990,8 +989,7 @@ barred claim stands.
 
 ---
 
-## D17 — The fifth axis: **`t*` is grid-dependent; the mechanism is not. D16's robustness
-## claim is qualified** (2026-09-25)
+## D17 — The fifth axis: **`t*` is grid-dependent; the mechanism is not. D16's robustness claim is qualified** (2026-09-25)
 
 > **OPERATIVE (R53b).** A reported `t*` must state **five** things: the baseline's window
 > length, its refit interval, its offset, the in-sample check, **and the grid together with its
@@ -1045,8 +1043,7 @@ refit offset. Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred c
 
 ---
 
-## D18 — The windowed rank rule was built, measured, and **does not work**. That converts
-## D12's preference into evidence, and yields a no-go statement (2026-09-25)
+## D18 — The windowed rank rule was built, measured, and **does not work**. That converts D12's preference into evidence, and yields a no-go statement (2026-09-25)
 
 > **OPERATIVE (R54).** Report the **instantaneous/local versus cumulative** distinction as the
 > finding, **with the constraint that makes it a finding**: *a causal per-step or fixed-window
@@ -1123,8 +1120,7 @@ claim stands.
 
 ---
 
-## D19 — Peak memory: no advantage, and the BUG port's rank-dependent cost is now confirmed
-## on an independent axis (2026-09-25)
+## D19 — Peak memory: no advantage, and the BUG port's rank-dependent cost is now confirmed on an independent axis (2026-09-25)
 
 > **OPERATIVE (R55).** The reduced integrator uses **`+2.5 MiB` (`N=64`) to `+3.8 MiB`
 > (`N=128`) MORE than the full-grid step**, flat in rank to within `0.3 MiB`. **The BUG port's
@@ -1390,8 +1386,7 @@ Exact divergence-freeness `2.3e-14`–`2.2e-13`. Every D4 barred claim stands.
 
 ---
 
-## D23 — The `crossovers` block is **un-provenanced**, and the rows are now the only
-## quotable source (2026-09-25)
+## D23 — The `crossovers` block is **un-provenanced**, and the rows are now the only quotable source (2026-09-25)
 
 > **OPERATIVE (R58).** `crossover_surface.json`'s `crossovers` block **is not reproducible from
 > any row, column, rank, or index shift in the artifact, and does not name the error column it
@@ -6770,3 +6765,98 @@ WRITER'S OWN CROSS-REFERENCES KEEP WORKING.** D18c LEARNED THIS THE HARD WAY BY 
 **D100.5 — Unchanged.** Everything in D35.6 through D99.8 stands, **except that §7 is supplied as D18d, the writer's W8 row
 points at it, and the acceptance argument for a method that is slower and larger than the full grid is now made explicitly
 rather than left to the reader.**
+
+---
+
+## D101 — **THE PROJECT'S NEW CENTRAL TEST DOES NOT TEST WHAT IT CLAIMS. `check_every` GATES *BASIS REFRESH*, NOT ONLY RANK, SO `check_every = 10**9` FREEZES THE SUBSPACE — AND THE CONTRAST THE TEST MEASURES IS CAUSED BY THE ZONAL MODE, NOT BY RE-FITTING.** (2026-09-26)
+
+> **OPERATIVE (R138). C6-1..C6-5. THE TEST IS STILL GREEN AND STILL PINNING THE WRONG THING.**
+
+**D101.1 — WHAT THE CODER PUSHED.** One file, `experiments/test_artifacts.py`, +106 lines:
+`test_a_propagated_fixed_basis_overflows_and_the_evolving_one_does_not`. Its docstring says it is *"the project's central
+claim, re-derived from scratch — the one live test"*, and that it would notice *"a sign error in the projection, a rank
+criterion that stopped evolving, a change in the splitting"*. It passes, in **34.97 s**.
+
+**D101.2 — IT DOES NOT RE-DERIVE THE CLAIM, AND THE REASON IS A FACT ABOUT THE SOLVER THAT THE TEST'S OWN COMMENT
+GETS BACKWARDS. `DLRA.step` RE-FACTORISES ONLY INSIDE THE ADAPTATION CHECKPOINT:**
+
+```
+        self.steps += 1
+        if self.steps % self.check_every == 0:
+            candidate = self.projector.candidate("after_nonlinear")
+            ...
+            centered, u, s, vh = self._svd(field)      # the only per-step factorisation
+```
+
+The test sets **`check_every = 10**9`** with the comment *"never adapt: this isolates the basis, not rank"*. **The author
+believed the basis refreshes independently of the rank check. It does not — the rank check *is* the basis refresh.** With
+`self.steps` incremented before the test, `1 % 10**9 != 0`, so the checkpoint branch never executes.
+
+**INSTRUMENTED, NOT INFERRED: COUNTING `projector.candidate` CALLS OVER THE TEST'S OWN 3000-STEP ROLLOUT GIVES *ZERO*
+BASIS REBUILDS.** So the "evolving" side does not evolve, once, ever. **BOTH SIDES PROPAGATE A FIXED SUBSPACE.**
+
+**D101.3 — SO THE DOCSTRING'S CENTRAL SENTENCE IS FALSE AS WRITTEN.** It claims *"a basis propagated without refitting
+overflows and an evolving basis does not"*. In the test, *neither* basis is refitted, and the static one overflows at
+`t = 5.388` while the other survives to `T = 6.0`. The contrast is real; **the explanation attached to it is not.**
+
+**D101.4 — AND THE PROJECTION COUNT, THE OBVIOUS ALTERNATIVE EXPLANATION, IS RULED OUT BY MEASUREMENT. BOTH SIDES CALL
+`project` EXACTLY 801 TIMES OVER 200 STEPS** — four per step plus the initial one, identical on both sides. So the
+difference is not "the reduced model projects less often".
+
+**D101.5 — THE DECISIVE DECOMPOSITION. FOUR ARMS, `N = 32`, `rank = 16`, `Re = 5000`, `dt = 0.002`, `T = 6.0`
+(3000 steps), `seed = 20260925`:**
+
+| arm | basis | stepper | outcome |
+|---|---|---|---|
+| A | `PODGalerkin` on 20 window snapshots, raw | static | **overflows at step 2694, `t = 5.388`** |
+| B | the DLRA's own init basis (`rank_basis="fluctuations"`) | static | **SURVIVES to `T = 6.0`** |
+| C | the DLRA's own init basis, basis **frozen** | `DLRA.step` | **SURVIVES**, rebuilds = 0 |
+| D | the DLRA's own init basis, **refit every 5 steps** | `DLRA.step` | **SURVIVES**, rebuilds = 600 |
+
+**B IS THE ONE THAT MATTERS: THE SAME BASIS, PROPAGATED BY THE SAME STATIC STEPPER, SURVIVES — WHILE A DIFFERENT FIXED
+BASIS ON THE SAME STEPPER OVERFLOWS. THE BASIS IS THE ONLY VARIABLE. RE-FITTING IS NOT.**
+
+**D101.6 — AND THE MECHANISM IS SPECIFIC AND MEASURABLE: IT IS THE ZONAL MODE. `rank_basis="fluctuations"` RANKS ON THE
+ZONAL-MEAN-REMOVED FIELD (`solvers/spectral.py: fluctuations = psi - zonal_mean(psi)`), SO THE REDUCED MODEL SPENDS NO RANK
+ON THE BASE FLOW; THE STATIC BASIS IS FITTED ON RAW SNAPSHOTS AND SPENDS ONE OF ITS SIXTEEN MODES ON THE ZONAL MODE.
+REMOVING THE ZONAL MODE FROM THE FITTING DATA, AND CHANGING NOTHING ELSE:**
+
+| rank | raw (zonal mode kept) | zonal-mean-removed |
+|---|---|---|
+| 14 | dies `t = 5.478` | SURVIVES |
+| 15 | dies `t = 3.922` | SURVIVES |
+| 16 | dies `t = 5.388` | SURVIVES |
+| 17 | dies `t = 2.952` | SURVIVES |
+| 18 | **SURVIVES** | SURVIVES |
+
+**POPULATION: ONE GRID (`N = 32`), FIVE RANKS, ONE REPLICATE EACH, ONE SEED, `T = 6.0`.** And note the
+**NON-MONOTONICITY — `5.478, 3.922, 5.388, 2.952, ∞`: the overflow time is not a monotone function of rank.** Any account
+that says "the fixed basis fails above some rank" cannot be reading this table.
+
+**D101.7 — AND IT IS NOT A ONE-MODE BUDGET EFFECT, WHICH IS WHY I REPLICATED IT OVER INITIAL CONDITIONS. THREE SEEDS
+(`20260925`, `7`, `991`) AT `rank = 16`, OTHERWISE IDENTICAL — POPULATION 3 RUNS PER ARM:**
+
+| seed | raw | zonal-mean-removed |
+|---|---|---|
+| 20260925 | dies `t = 5.388` | SURVIVES |
+| 7 | dies `t = 4.516` | SURVIVES |
+| 991 | dies `t = 5.720` | dies `t = 5.880` |
+
+**`raw` OVERFLOWS 3/3, ALL AT `t <= 5.720`. `zonal-mean-removed` OVERFLOWS 1/3, AND THAT ONE DIES *LATER* (`5.880`) THAN
+ANY `raw` CASE.** So removing the zonal mode **delays or avoids** the overflow; it does not abolish it. **The honest
+statement is a rank-budget effect in which the zonal flow consumes a mode — not a clean on/off switch, and not yet
+established at three replicates.**
+
+**D101.8 — WHAT THIS DOES *NOT* TOUCH, STATED SO IT IS NOT OVERREAD. THE PAPER'S D14 STABILITY BULLET IS A *DIFFERENT*
+EXPERIMENT** — *"a fixed basis ... is stable at rank $16$ and overflows at ranks $32$ and $42$"* against the `N = 64`
+alias-free rank of `43`. **That is at a different grid and different ranks, and nothing here contradicts it.** What is
+contradicted is the *new test's* claim to re-derive it. And the new test **will keep passing for the wrong reason**, so it
+will not catch the regression it advertises.
+
+**D101.9 — A DISCARDED MEASUREMENT, RECORDED BECAUSE IT LOOKED USEFUL. MY FIRST CUT PRINTED "ENERGY CAPTURED BY r=16:
+100.00%" FOR EVERY ARM. `PODGalerkin.fit(rank=16)` TRUNCATES `singular_values` TO THE RETAINED VALUES, SO THE FRACTION IS
+IDENTICALLY 100% AND MEASURES NOTHING.** It is not evidence and appears nowhere above.
+
+**D101.10 — Unchanged.** Everything in D35.6 through D100.5 stands, **except that the new artifact test is reclassified
+from "the central claim, re-derived from scratch" to "a contrast whose cause is the basis construction, not the refit"**,
+and C6-1..C6-5 are open.

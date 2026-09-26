@@ -57,6 +57,7 @@ is lost; the `C` numbering is the order and the `T` numbering is history.**
 | **C2-3** P1b the code fingerprint | *NEW TIER 1 — P1b* |
 | **C3-1..3** the three tests | *T2-A* |
 | **C4-1** the two energy keys | `### T1-6` |
+| **C6-1..5** the new "central claim" test | *C6* — **it is green and pinning the wrong thing; `check_every` gates basis refresh, not only rank** |
 | protocol work, after the above | `## 2. Tier 2` |
 | background | `## 0. Where the project is`, `## 1. Tier 1`, `## 4. Standing` |
 
@@ -540,3 +541,43 @@ withdrawn-claim gate now scans `experiments/*.py` as well as the draft and my or
 
 **Run `python state/reviewer/check_order_withdrawn.py` after touching any title or interpretation string. It now prints
 `FIGURE CODE: 14 file(s), 5990 non-comment line(s)` and lists every hit, so you can see your own change land.**
+
+---
+
+## C6 — **THE NEW ARTIFACT TEST: IT IS GREEN, AND IT IS PINNING THE WRONG THING. `check_every` GATES BASIS REFRESH, NOT ONLY RANK.**
+
+**C6-1 — THE FIX, AND IT IS YOUR CALL WHICH OF THE TWO.** Either
+**(a) redocument the test to describe what it actually measures** — *a fixed subspace built on raw snapshots overflows at
+`N=32`/`rank=16` where the reduced model's fixed subspace does not*, with the zonal mode named as the cause — **or
+(b) restructure it so the refit genuinely happens** (`check_every = 5`, say), and **add the frozen-DLRA arm as an explicit
+control**, so the test pins basis evolution rather than basis construction. **(a) is the smaller change and is the honest
+one; (b) is the one that makes the docstring true.** What is not acceptable is leaving the current text, which describes
+neither.
+
+**C6-2 — DOCUMENT IN `solvers/dlra.py` THAT `check_every` GATES *BASIS REFRESH*, NOT ONLY THE RANK.** The trap is
+structural: the parameter is named for rank, it also controls the only per-step factorisation, and `check_every = 10**9`
+therefore silently produces a *static* subspace that still reports itself as a `DLRA`. One line at the `check_every`
+assignment, pointing at `step`. This is the same class as D60 and D95 — a name that does not describe the quantity.
+
+**C6-3 — THE DOCSTRING'S COST CLAIM IS OFF BY ~4×. IT SAYS "ABOUT 9 s"; MEASURED END-TO-END IT IS `34.97 s`.** That is
+the difference between a test that belongs in the default suite and one that does not, so please state the real number.
+
+**C6-4 — LAND D101's MEASUREMENT AS A SHIPPED ARTIFACT, so it can be cited and registry-verified.** I ran it in a scratch
+tree; **scratch is not evidence** (D22). Reproduce it as `state/coder/results/static_basis_construction_N32.json` with,
+per arm: the basis construction, the stepper, the seed, the rank, `diverged_at_step`, `t`, and the **counted** basis
+rebuilds. The arms, at `N=32`, `Re=5000`, `dt=0.002`, `T=6.0`:
+
+1. `PODGalerkin` on 20 window snapshots, **raw**, static stepper — expect overflow at step 2694
+2. the DLRA init basis (`rank_basis="fluctuations"`), **static stepper** — expect survival
+3. the DLRA init basis, frozen (`check_every=10**9`) — expect survival, **rebuilds = 0**
+4. the DLRA init basis, `check_every=5` — expect survival, rebuilds = 600
+5. the rank sweep of §D101.6, ranks 14..18, raw and zonal-mean-removed
+6. the three-seed replication of §D101.7, seeds `20260925`, `7`, `991`, rank 16
+
+**Record the non-monotonicity as a finding, not as noise:** the overflow time is not monotone in rank, so an artifact that
+reports only "the rank at which it fails" will mislead whoever reads it next.
+
+**C6-5 — AND THE HONEST SCOPE NOTE FOR THE PAPER, WHICH IS C6-4'S PAYOFF.** At `N = 32` a *fixed* subspace survives when
+it is built on the fluctuations. So "the subspace must evolve" is **not** established at that configuration; what is
+established there is that a fixed subspace built on raw snapshots is fragile, and the reduced model's is not. Those are
+different claims and the paper must not slide between them.
