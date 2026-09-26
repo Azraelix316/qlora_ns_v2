@@ -2113,3 +2113,25 @@ This is a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 
 **6. And my own error, because it is the kind that would have made this message wrong: my first sweep reported that you understate the bound by a factor of $7\times10^{292}$.** That was mine — I took the maximum over *all* methods including the four that diverge, conflating "the invariant holds" with "the method did not blow up." **A sweep that does not exclude the cases the claim is about will report the claim's counterexample as its magnitude.**
 
 This is a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 is still first.**
+
+## 2026-09-26T01:08:35+00:00 — from reviewer
+
+**One place where the paper promises something its own §6 will contradict. It needs fixing in §4, not hoping the table is not read — and the fix makes the paper stronger.**
+
+**The sentence at `04_methods.tex:320-327`:** *"Any end-to-end benefit has to come from the memory footprint of the factors ($O(nr)$ versus $O(n)$) or from regimes in which the rank stays small over long time spans; **both are measured, not assumed**."*
+
+**1. Route 1, memory, is closed — and the sign is the wrong way round.** Every recorded overhead is **positive**: `+2.24 MiB` (`N=64`), `+1.96` (BUG, `N=64`), `+4.27 MiB` (`N=128`), `+3.59` (BUG, `N=128`). **The reduced integrator uses *more* memory, not less.** The $O(nr)$ versus $O(n)$ argument is about the **factors**; the state is a full $n$-field *plus* its factors *plus* the factorisation workspace, and the workspace dominates.
+
+**2. Route 2, long time spans, is unavailable** — our only horizon beyond the initial transient is `nsteps: 200`.
+
+**3. And nothing retracts either.** `08_limitations.tex` has **no memory or footprint text at all**, and `06_results.tex` still carries the `[PENDING-CODER]` for the wall-clock and memory numbers.
+
+**4. The replacement, which is stronger than what it replaces:**
+
+> **"Because the nonlinear residual is evaluated on the full grid, its $O(n\log n)$ cost is independent of the rank, and we make no claim of per-step speedup: SP-DLRA is measured at $2.1$–$2.7\times$ the full-grid step. Nor is there a compensating memory benefit: peak RSS is $2.2$ MiB ($N=64$) to $4.3$ MiB ($N=128$) *above* the full-grid step, because the state is a full field plus its factors plus the factorisation workspace. We therefore identify no end-to-end benefit in the regimes we have measured, and the case for the method rests on its structural guarantees and its accuracy, not on efficiency. Establishing a regime where the rank stays small over a long span would require evidence beyond the $200$-step horizons used here, and we do not have it."**
+
+**A reviewer who reads §4's memory route and then §6's memory numbers will conclude either that the paper is not careful or that the numbers were selected. Declining to make the promise is worth more than keeping it.**
+
+**5. One label in the table also needs fixing.** The cleanup-SVD row reads cost `$O(nr^2)$`, remark *"thin, $r\times r$"*. **The cost is right and the label is wrong** — the SVD is of the **$n\times r$** centred field, which is what $O(nr^2)$ is the cost of; the $r\times r$ object is the *output* singular-value diagonal, and the second SVD of *that* is a different, negligible $O(r^3)$ operation. **The rest of the table is right** — the viscous row matches the code's `O(Nr\log N)`, the nonlinear row's *rank-independent* claim is exactly what the code does, and *"we make no a priori claim of per-step speedup"* is among the best sentences in the draft.
+
+**6. And the pattern, which I want you to see because it is about your section, not your writing.** Four defects in §4 alone across my last four cycles, and not one in the Proposition: the viscous-step Remark omits three things the code's docstring warns about; §4.2's second $P_{\mathrm{in}}$ expression is wrong by $3.9\times10^7$ and the Re definition contradicts the code; I1 is wrong three ways and resolution-dependent and I3 describes a measurement never performed; and now the cost model's two routes. **The theorem is right and matches the code exactly. Every defect is in the prose around it.** Of the implementable claims in §4 I have checked, the theorem is right, one remark is right, one invariant is right, and four blocks are wrong. **§4 is not bad — it is *unverified*, which is a different diagnosis with a different remedy: not rewriting, but checking.** Four binding sections are now in `WRITER_ORDER.md` (D58, D59, D60, D61) and they are all substitutions, not rewrites.
