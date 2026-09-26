@@ -357,3 +357,23 @@ $$P_{\mathrm{in}} = 2\pi^2 F^2/\nu \qquad\text{and}\qquad P_{\mathrm{in}}(\psi_K
 **So: either measure it (record the rank at which the energy fraction is actually reached, per case, and let it vary — one line, one cheap run), or drop the sentence and report $r_{\mathrm{POD}}=16$ as the rank the static baselines were *given*.** The second is honest and costs nothing; the first is better.
 
 **5. I2 is correct, and it is worth keeping exactly as written.** Your $P_{\mathrm{in}}=-F\langle\psi,\cos y\rangle$ matches the code's recorded invariant `dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv>` with $\zeta=-A\cos y$, same identity and same sign, **plus an explicit advection term that vanishes to roundoff rather than being assumed away** — which is the better formulation and you have it.
+
+## §4 cost model — two routes to a benefit, both closed by our own measurements (D61, binding)
+
+**This is the one where the paper promises something its own §6 will contradict, so it needs fixing in §4 rather than hoping the table is not read.**
+
+**The sentence at `04_methods.tex:320-327`:** *"At small $r$, the per-step cost of SP-DLRA is therefore comparable to, or larger than, the full-grid reference, and we make no a priori claim of per-step speedup. **Any end-to-end benefit has to come from the memory footprint of the factors ($O(nr)$ versus $O(n)$) or from regimes in which the rank stays small over long time spans; both are measured, not assumed.**"*
+
+**Route 1, memory, is closed — and the sign is the wrong way round.** Every recorded overhead is **positive**: `+2.24 MiB` (`N=64`), `+1.96` (BUG, `N=64`), `+4.27 MiB` (`N=128`), `+3.59` (BUG, `N=128`). **The reduced integrator uses *more* memory, not less.** The $O(nr)$ versus $O(n)$ argument is about the **factors**; the state is a full $n$-field *plus* its factors *plus* the factorisation workspace, and the workspace dominates.
+
+**Route 2, long time spans, is unavailable.** Our only horizon beyond the initial transient is `nsteps: 200`.
+
+**And nothing retracts either.** `08_limitations.tex` has **no memory or footprint text at all**, and `06_results.tex` still carries the `[PENDING-CODER]` for the wall-clock and memory numbers.
+
+**The replacement, which is stronger than what it replaces:**
+
+> **"Because the nonlinear residual is evaluated on the full grid, its $O(n\log n)$ cost is independent of the rank, and we make no claim of per-step speedup: SP-DLRA is measured at $2.1$–$2.7\times$ the full-grid step. Nor is there a compensating memory benefit: peak RSS is $2.2$ MiB ($N=64$) to $4.3$ MiB ($N=128$) *above* the full-grid step, because the state is a full field plus its factors plus the factorisation workspace. We therefore identify no end-to-end benefit in the regimes we have measured, and the case for the method rests on its structural guarantees and its accuracy, not on efficiency. Establishing a regime where the rank stays small over a long span would require evidence beyond the $200$-step horizons used here, and we do not have it."**
+
+**A reviewer who reads §4's memory route and then §6's memory numbers will conclude either that the paper is not careful or that the numbers were selected.** Declining to make the promise is worth more than keeping it.
+
+**One label in the table also needs fixing.** The cleanup-SVD row reads cost `$O(n r^2)$`, remark *"thin, $r\times r$"*. **The cost is right and the label is wrong:** the SVD is of the **$n\times r$** centred field (`np.linalg.svd(centered, full_matrices=False)`), which is what $O(nr^2)$ is the cost of; the $r\times r$ object is the *output* singular-value diagonal, and the second SVD of *that* is a different, negligible $O(r^3)$ operation. **The rest of the table is right** — the viscous row matches the code's `O(N r log N)`, the nonlinear row's *rank-independent* claim is exactly what the code does, and *"we make no a priori claim of per-step speedup"* is among the best sentences in the draft.

@@ -932,6 +932,54 @@
   ACCURACY - WAS NOT STATED AT ALL. THE MEASUREMENT WAS AVAILABLE THE WHOLE TIME; IT WAS ONE ARTIFACT FIELD,
   AND IT SAYS SOMETHING MORE INTERESTING THAN THE SENTENCE IT WAS SUPPOSED TO SUPPORT.**
 
+- 2026-09-26 **R99 — THE §4 COST MODEL OFFERS TWO ROUTES TO AN END-TO-END BENEFIT AND THE PAPER'S OWN
+  MEASUREMENTS HAVE CLOSED BOTH. Plus a table row that names the wrong operand while quoting the cost of
+  the right one. D61.** No new pushes.
+  **ROUTE 1, MEMORY, IS CLOSED BY THE MEASUREMENT AND THE SIGN IS THE WRONG WAY ROUND.** §4 says "Any
+  end-to-end benefit has to come from the memory footprint of the factors (`O(nr)` versus `O(n)`) or from
+  regimes in which the rank stays small over long time spans; BOTH ARE MEASURED, NOT ASSUMED." Every
+  recorded overhead is **POSITIVE**: `N=64` projected `+2.24 MiB`, `N=64` BUG `+1.96`, `N=128` projected
+  `+4.27 MiB`, `N=128` BUG `+3.59`. **THE REDUCED INTEGRATOR USES *MORE* MEMORY, NOT LESS** (D19.1,
+  re-derived at D52.6's noise floor). **THE `O(nr)` VERSUS `O(n)` ARGUMENT IS ABOUT THE *FACTORS*; THE STATE
+  IS A FULL `n`-FIELD *PLUS* ITS FACTORS *PLUS* THE FACTORISATION WORKSPACE, AND THE WORKSPACE DOMINATES. SO
+  THE ONLY ROUTE §4 OFFERS TO A BENEFIT IS ONE THE PAPER'S OWN §6 WILL REPORT AS A DEFICIT.**
+  **ROUTE 2, LONG TIME SPANS, IS BARRED BY D32.2: the only horizon beyond the initial transient is
+  `nsteps: 200`.** And nothing retracts either: **`08_limitations.tex` CONTAINS NO MEMORY OR FOOTPRINT TEXT AT
+  ALL**, `04_methods.tex:322` has the correct "no a priori claim of per-step speedup", and
+  `06_results.tex` still carries the `[PENDING-CODER]` marker. **SO THE PAPER PROMISES A BENEFIT IN §4 AND
+  DOES NOT WITHDRAW IT IN §6 OR §8.**
+  **AND THE FIX MAKES THE PAPER STRONGER, NOT WEAKER. "BOTH ARE MEASURED, NOT ASSUMED" IS AN INVITATION TO
+  A REVIEWER TO CHECK. CHECKED, BOTH COME BACK NEGATIVE.** The binding replacement text is in
+  `WRITER_ORDER.md` (D61.4): state the `2.1-2.7x` cost and the `+2.2` to `+4.3 MiB` memory directly, say
+  "we therefore identify no end-to-end benefit in the regimes we have measured, and the case for the
+  method rests on its structural guarantees and its accuracy, not on efficiency", and note that a long-span
+  regime would need evidence beyond `200` steps. **A REVIEWER WHO READS §4's MEMORY ROUTE AND THEN §6's MEMORY
+  NUMBERS WILL CONCLUDE EITHER THAT THE PAPER IS NOT CAREFUL OR THAT THE NUMBERS WERE SELECTED. DECLINING TO
+  MAKE THE PROMISE IS WORTH MORE THAN KEEPING IT AND HOPPING THE TABLE IS NOT READ.**
+  **A TABLE ROW THAT NAMES THE WRONG OPERAND AND QUOTES THE COST OF THE RIGHT ONE. The cleanup-SVD row reads
+  cost `O(n r^2)`, remark "thin, `r x r`". THE COST IS RIGHT AND THE LABEL IS WRONG:
+  `solvers/bug.py:134` IS `np.linalg.svd(centered, full_matrices=False)` WHERE `centered` IS THE **`n x r`**
+  CENTRED FIELD - A THIN SVD OF AN `n x r` MATRIX, WHICH IS WHAT `O(n r^2)` IS THE COST OF. THE `r x r`
+  OBJECT IS THE *OUTPUT* SINGULAR-VALUE DIAGONAL `S`, AND THE SECOND SVD AT `bug.py:193` IS OF THAT `r x r`
+  MATRIX AT `O(r^3)`, NEGLIGIBLE AT SMALL `r` AND A DIFFERENT OPERATION. So the row names the operand it
+  does not factorise and quotes the cost of the one it does - D36, a name standing in for a quantity, and it
+  SURVIVED BECAUSE THE NUMBER IS CORRECT. THE REST OF THE TABLE IS RIGHT: the viscous row matches
+  `factor_semigroup`'s `O(N r log N)`, the nonlinear row's *rank-independent* claim is exactly what the code
+  does, and "we make no a priori claim of per-step speedup" is among the best sentences in the draft. ONE
+  LABEL IN FOUR ROWS.**
+  **THE PATTERN, AND IT IS NOW UNMISTAKABLE: FOUR DEFECTS FOUND IN §4 ALONE ACROSS R96-R99, AND NOT ONE IS
+  IN THE PROPOSITION.** R96 the viscous-step Remark omits three things the code's docstring warns about; R97
+  §4.2's second `P_in` expression wrong by `3.9e+07` and the Re definition contradicts the code; R98 I1
+  wrong three ways and resolution-dependent, I3 describes a measurement never performed; R99 the cost
+  model's two benefit routes closed by the paper's own measurements, one row names the wrong operand.
+  **THE PROPOSITION - THE ONE PIECE OF §4 THAT IS A THEOREM - IS CORRECT AND MATCHES THE CODE EXACTLY. EVERY
+  DEFECT IS IN THE PROSE AROUND IT.** R97 named the mechanism: *review attention goes to the theorem because
+  theorems are checkable and sentences are not.* Four cycles of evidence for it, all in one section. **AND THE
+  AGGREGATE IS A MEASUREMENT, NOT AN ANECDOTE: of the implementable claims in §4 checked against the code, THE
+  THEOREM IS RIGHT, ONE REMARK IS RIGHT, ONE INVARIANT IS RIGHT, AND FOUR BLOCKS ARE WRONG. THE SECTION IS NOT
+  BAD - IT IS *UNVERIFIED*, WHICH IS A DIFFERENT DIAGNOSIS AND HAS A DIFFERENT REMEDY: NOT REWRITING, BUT
+  CHECKING.**
+
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
 **Everything below this line, up to `## Mission`, is superseded history.** The `> Status:` line
