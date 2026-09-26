@@ -42,6 +42,17 @@ def provenance(driver: Path) -> dict:
     out["working_tree_dirty"] = bool(diff and diff.strip())
     if diff and diff.strip():
         out["working_tree_diff_sha256"] = hashlib.sha256(diff.encode()).hexdigest()
+    # WHICH paths were dirty, not only that something was.  The module's own note
+    # exempts "a rewritten result file alone", which implies a rewritten *source*
+    # file would not be exempt -- and with only a boolean and a hash a reader
+    # cannot tell those two cases apart, so the exemption is unclaimable by
+    # anyone reading the artifact.  The path list is also what lets a later
+    # reader tell a benign re-run of a results file from real contamination
+    # without re-deriving anything.
+    out["working_tree_dirty_paths"] = [
+        line for line in ((_git("diff", "--name-only", "HEAD") or "").splitlines())
+        if line.strip()
+    ]
 
     try:
         rel = str(Path(driver).resolve().relative_to(ROOT))

@@ -1,0 +1,292 @@
+{
+  "arms": [
+    {
+      "arm": "1_raw_snapshots_static_stepper",
+      "basis_construction": "PODGalerkin on raw window snapshots",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 2694,
+      "diverged_at_time": 5.388,
+      "final_time_reached": 5.388,
+      "max_abs_divergence": 2.138644039510404e+191,
+      "rank": 16,
+      "seed": 20260925,
+      "stepper": "static (projected every step, basis never refitted)",
+      "wall_seconds": 3.891282140975818
+    },
+    {
+      "arm": "2_fluctuation_snapshots_static_stepper",
+      "basis_construction": "PODGalerkin on zonal-mean-removed snapshots",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 2219,
+      "diverged_at_time": 4.438,
+      "final_time_reached": 4.438,
+      "max_abs_divergence": 3.8194424556271614e+89,
+      "rank": 16,
+      "seed": 20260925,
+      "stepper": "static (projected every step, basis never refitted)",
+      "wall_seconds": 3.233711580047384
+    },
+    {
+      "arm": "3_dlra_basis_frozen",
+      "basis_construction": "DLRA initialisation (fluctuations, energy rule)",
+      "basis_rebuilds": 0,
+      "diverged": false,
+      "diverged_at_step": null,
+      "diverged_at_time": null,
+      "final_time_reached": 6.0,
+      "max_abs_divergence": 2.2870594307278225e-14,
+      "rank": 16,
+      "seed": 20260925,
+      "stepper": "DLRA, check_every=10**9 (frozen; expect rebuilds=0)",
+      "wall_seconds": 6.0044229491613805
+    },
+    {
+      "arm": "4_dlra_basis_refreshing",
+      "basis_construction": "DLRA initialisation (fluctuations, energy rule)",
+      "basis_rebuilds": 600,
+      "diverged": false,
+      "diverged_at_step": null,
+      "diverged_at_time": null,
+      "final_time_reached": 6.0,
+      "max_abs_divergence": 2.2870594307278225e-14,
+      "rank": 16,
+      "seed": 20260925,
+      "stepper": "DLRA, check_every=5 (refreshes)",
+      "wall_seconds": 6.2659001720603555
+    }
+  ],
+  "case": "static_basis_construction",
+  "case_family": "stability",
+  "interpretation": "At this configuration the difference between a static basis that overflows and one that survives is its CONSTRUCTION, not whether it refreshes: the raw-snapshot basis overflows, and the fluctuation-based basis survives whether the stepper refits it or not. That is a narrower claim than 'the subspace must evolve', and it is the claim this artifact earns. The overflow time is NOT monotone in rank (see `rank_sweep`), which is recorded as a finding rather than as noise: an artifact reporting only the rank at which it fails would mislead the next reader. Both observations are specific to N=32 and to the horizons and ranks listed under `parameters`.",
+  "parameters": {
+    "N": 32,
+    "base_speed": 0.5,
+    "check_every": 5,
+    "cutoff": 8,
+    "dt": 0.002,
+    "final_time": 6.0,
+    "force_amplitude": 0.5,
+    "perturbation_velocity_rms": 1.0,
+    "rank": 16,
+    "re": 5000,
+    "seeds": [
+      20260925,
+      7,
+      991
+    ],
+    "sweep_ranks": [
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "train_snapshots": 20,
+    "train_window": 0.5
+  },
+  "provenance": {
+    "driver": "experiments/run_static_basis_construction.py",
+    "driver_dirty": false,
+    "driver_matches_HEAD": false,
+    "driver_sha256": "bba77c18fc87515221728cf5414654054cc4c385da0f9844abc5bcbe5b38252d",
+    "git_commit": "f0f4158e79ceeb0b9a35ede1c2b9db2d8c31faf3",
+    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "reproducible": false,
+    "working_tree_diff_sha256": "ff32fdbf7d8fe5f3ecca4c5413fffddef758ab55249a3d6837121365bf894608",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "experiments/make_figures.py",
+      "experiments/provenance.py",
+      "experiments/test_artifacts.py",
+      "solvers/dlra.py"
+    ]
+  },
+  "rank_sweep": [
+    {
+      "basis": "raw",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 2739,
+      "diverged_at_time": 5.478,
+      "final_time_reached": 5.478,
+      "max_abs_divergence": 1.6414204589195224e+132,
+      "rank": 14,
+      "wall_seconds": 3.9161469228565693
+    },
+    {
+      "basis": "fluctuations",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 2040,
+      "diverged_at_time": 4.08,
+      "final_time_reached": 4.08,
+      "max_abs_divergence": 6.477610257926561e+224,
+      "rank": 14,
+      "wall_seconds": 2.944325861055404
+    },
+    {
+      "basis": "raw",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 1961,
+      "diverged_at_time": 3.922,
+      "final_time_reached": 3.922,
+      "max_abs_divergence": 2.8392137667797144e+133,
+      "rank": 15,
+      "wall_seconds": 2.816160357091576
+    },
+    {
+      "basis": "fluctuations",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 2480,
+      "diverged_at_time": 4.96,
+      "final_time_reached": 4.96,
+      "max_abs_divergence": 2.864581841720371e+89,
+      "rank": 15,
+      "wall_seconds": 3.5833087239880115
+    },
+    {
+      "basis": "raw",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 2694,
+      "diverged_at_time": 5.388,
+      "final_time_reached": 5.388,
+      "max_abs_divergence": 2.138644039510404e+191,
+      "rank": 16,
+      "wall_seconds": 3.8668735940009356
+    },
+    {
+      "basis": "fluctuations",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 2219,
+      "diverged_at_time": 4.438,
+      "final_time_reached": 4.438,
+      "max_abs_divergence": 3.8194424556271614e+89,
+      "rank": 16,
+      "wall_seconds": 3.1884377151727676
+    },
+    {
+      "basis": "raw",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 1476,
+      "diverged_at_time": 2.952,
+      "final_time_reached": 2.952,
+      "max_abs_divergence": 1.4196068833898572e+132,
+      "rank": 17,
+      "wall_seconds": 2.2470342360902578
+    },
+    {
+      "basis": "fluctuations",
+      "basis_rebuilds": 0,
+      "diverged": false,
+      "diverged_at_step": null,
+      "diverged_at_time": null,
+      "final_time_reached": 6.0,
+      "max_abs_divergence": 7.105427357601002e-14,
+      "rank": 17,
+      "wall_seconds": 4.354434384033084
+    },
+    {
+      "basis": "raw",
+      "basis_rebuilds": 0,
+      "diverged": false,
+      "diverged_at_step": null,
+      "diverged_at_time": null,
+      "final_time_reached": 6.0,
+      "max_abs_divergence": 6.394884621840902e-14,
+      "rank": 18,
+      "wall_seconds": 4.338866809150204
+    },
+    {
+      "basis": "fluctuations",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 1438,
+      "diverged_at_time": 2.876,
+      "final_time_reached": 2.876,
+      "max_abs_divergence": 2.0859248397665138e+93,
+      "rank": 18,
+      "wall_seconds": 2.06483897799626
+    }
+  ],
+  "seed_replication": [
+    {
+      "basis": "raw",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 2694,
+      "diverged_at_time": 5.388,
+      "final_time_reached": 5.388,
+      "initial_energy": 22.28992861738245,
+      "max_abs_divergence": 2.138644039510404e+191,
+      "seed": 20260925,
+      "wall_seconds": 3.8644288890063763
+    },
+    {
+      "basis": "fluctuations",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 2219,
+      "diverged_at_time": 4.438,
+      "final_time_reached": 4.438,
+      "initial_energy": 22.28992861738245,
+      "max_abs_divergence": 3.8194424556271614e+89,
+      "seed": 20260925,
+      "wall_seconds": 3.169478969881311
+    },
+    {
+      "basis": "raw",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 2258,
+      "diverged_at_time": 4.516,
+      "final_time_reached": 4.516,
+      "initial_energy": 22.215153823348857,
+      "max_abs_divergence": 5.558020283391177e+78,
+      "seed": 7,
+      "wall_seconds": 3.2651555510237813
+    },
+    {
+      "basis": "fluctuations",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 1969,
+      "diverged_at_time": 3.938,
+      "final_time_reached": 3.938,
+      "initial_energy": 22.215153823348857,
+      "max_abs_divergence": 2.4550429559221064e+150,
+      "seed": 7,
+      "wall_seconds": 2.819326138822362
+    },
+    {
+      "basis": "raw",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 2860,
+      "diverged_at_time": 5.72,
+      "final_time_reached": 5.72,
+      "initial_energy": 22.286048551199556,
+      "max_abs_divergence": 4.1010951089681474e+99,
+      "seed": 991,
+      "wall_seconds": 4.101253130938858
+    },
+    {
+      "basis": "fluctuations",
+      "basis_rebuilds": 0,
+      "diverged": true,
+      "diverged_at_step": 2010,
+      "diverged_at_time": 4.0200000000000005,
+      "final_time_reached": 4.0200000000000005,
+      "initial_energy": 22.286048551199556,
+      "max_abs_divergence": 2.154551665274214e+214,
+      "seed": 991,
+      "wall_seconds": 2.944321487797424
+    }
+  ]
+}

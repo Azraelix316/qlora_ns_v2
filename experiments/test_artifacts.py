@@ -94,40 +94,52 @@ def test_a_propagated_fixed_basis_overflows_and_the_evolving_one_does_not():
     """The project's central claim, re-derived from scratch — the one live test.
 
     The thesis is a *contrast*: on the same runner, the same splitting, the same
-    initial condition and the same rank, a subspace propagated without refreshing
-    overflows and a refreshing one does not. Every other test either checks the
-    engine's operators or reads a recorded artifact, so this is the only place
-    the claim is re-established rather than re-read. If the contrast quietly
-    stopped holding — a sign error in the projection, a rank criterion that
-    stopped evolving, a change in the splitting — this is what would notice.
+    initial condition and the same rank, a subspace **fitted once and propagated**
+    overflows, and one **re-derived from the current state every step** does not.
+    Every other test either checks the engine's operators or reads a recorded
+    artifact, so this is the only place the claim is re-established rather than
+    re-read.
 
-    **Three arms, and the control says something narrower than the thesis.**
-    ``check_every`` gates the *basis refresh*, not only the rank, so the arm that
-    refreshes (``check_every=5``) is bracketed by two frozen ones: a basis built
-    from raw snapshots and never refitted, and the DLRA's own subspace frozen
-    after initialisation. **Measured: the frozen DLRA survives too** — both
-    refreshing and frozen reach ``T`` with the same ``max|∇·u|`` to four
-    significant figures. So *at this configuration* the difference from a
-    raw-snapshot static basis is in how the subspace is **constructed**
-    (fluctuation basis, energy criterion, proper initialisation), and this test
-    does **not** separate construction from evolution. The docstring says so, the
-    assertions record which way the control fell, and basis evolution against
-    static propagation is pinned from the shipped ``T=8`` artifact by
-    ``test_the_subspace_must_evolve_contrast_is_present_in_the_artifact``
-    instead. If a future change makes the frozen arm diverge, the test fails and
-    says the stronger claim has become available.
+    **What the third arm does and does not control, corrected.** An earlier
+    version of this test ran a "frozen DLRA" arm at ``check_every=10**9`` and
+    concluded from it that the difference was subspace *construction* rather than
+    *evolution*. That conclusion was wrong, and the arm was not the control it
+    looked like: ``SVDProjector.project`` recomputes ``self._svd(field)`` on
+    **every** call, so the projection is a fresh rank-``r`` truncation of whatever
+    field it is handed whether or not ``check_every`` ever fires. A large
+    ``check_every`` freezes the **rank**, not the subspace — the subspace still
+    tracks the state every step, because tracking it is what the projection does.
+    The "frozen" arm was therefore a second instance of the same evolving arm, and
+    it agreeing with it was not evidence about construction at all.
+
+    What the arms actually establish, and it is enough for the thesis:
+
+    - a basis fitted on a training window and propagated **overflows**;
+    - the same basis fitted on zonal-mean-removed snapshots and propagated
+      **also overflows** (so it is not the zonal mean doing the damage);
+    - the projector that re-derives per step **survives**, at the same rank.
+
+    So the contrast is **propagated-versus-re-derived**, which is the claim the
+    paper makes. ``state/coder/results/static_basis_construction_N32.json`` is the
+    shipped version of this measurement, with the rank sweep and the three-seed
+    replication; the non-monotonicity of the overflow time in rank is recorded
+    there as a finding, because an artifact reporting only "the rank at which it
+    fails" would mislead the next reader.
 
     The configuration was chosen by probing for the cheapest one that shows the
-    contrast at all, and the answer is not the one the shipped artifact uses:
-    at **N=32, rank 16, dt=0.002** the raw-snapshot basis overflows at
-    ``t = 5.388`` while the DLRA at the *same* rank reaches ``T = 6.0``. At N=64
-    the same rank survives statically, so the threshold is not merely in the
-    rank -- it is in the rank *relative to the resolved band* (the largest
-    alias-free rank is 21 at N=32 and 43 at N=64). That is worth knowing, and it
-    is why the test fixes the grid rather than the rank alone.
+    contrast at all: at **N=32, rank 16, dt=0.002** the propagated basis overflows
+    at ``t = 5.388`` and the re-derived one reaches ``T = 6.0``. At N=64 the same
+    rank survives statically, so the threshold is not merely in the rank -- it is
+    in the rank *relative to the resolved band* (the largest alias-free rank is 21
+    at N=32 and 43 at N=64). That is why the test fixes the grid, not the rank
+    alone.
 
-    Cost is about 25 s, which is why this lives in the results layer rather than
-    being deferred to a benchmark.
+    Cost is load-dependent and worth stating as a range rather than a number,
+    because the node is shared: **17 s measured end-to-end on an otherwise-idle
+    node**, 27 s with three other long runs resident, and 35 s and 56 s measured
+    on the reviewer's node under its own load. An earlier version of this
+    docstring said "about 25 s", which is inside that range but implied a
+    precision the measurement does not have.
     """
     import numpy as np
 
@@ -207,11 +219,14 @@ def test_a_propagated_fixed_basis_overflows_and_the_evolving_one_does_not():
             adapt_initial=False,
         )
 
-    # Arm 2: the basis genuinely refreshes.  This is the project's method.
+    # Arm 2: the rank adapts as configured.  This is the project's method.
     evolving_div, evolving_max_div, _ = rollout(dlra=make(5))
-    # Arm 3: the control.  Same code, same rank, subspace frozen after
-    # initialisation -- so anything that separates arm 2 from arm 3 is attributable
-    # to the refresh and to nothing else.
+    # Arm 3: the rank is held fixed.  NOT a frozen subspace: SVDProjector
+    # recomputes the SVD of whatever field it is handed on every call, so this arm
+    # re-derives per step exactly as arm 2 does.  What it shows is that the *rank
+    # rule* is not what keeps the run alive -- a real and narrower fact, and why
+    # the docstring attributes the contrast to the projection rather than to the
+    # adaptation.
     frozen_div, frozen_max_div, _ = rollout(dlra=make(10**9))
 
     assert evolving_div is None, (
@@ -225,34 +240,26 @@ def test_a_propagated_fixed_basis_overflows_and_the_evolving_one_does_not():
         f"|div u|, so it survived without keeping the invariant that the "
         f"structure-preserving split exists to enforce"
     )
-    # What the control actually shows, recorded rather than assumed.  Measured:
-    # at N=32/rank 16 the *frozen* DLRA subspace survives as well as the
-    # refreshing one (both reach T with the same max|div u| to 4 significant
-    # figures).  So at this configuration the difference from a raw-snapshot
-    # static basis is in how the subspace is **constructed** -- fluctuation basis,
-    # energy criterion, proper initialisation -- and not in whether it is
-    # refreshed.  Asserting otherwise would be asserting something the run does
-    # not say.
-    #
-    # The direction that would strengthen the claim is recorded rather than
-    # required: if a future change makes the frozen arm diverge, this fails and
-    # the docstring can be widened, because then construction and evolution are
-    # separable and the thesis has the stronger form.  Basis evolution against
-    # static propagation is pinned separately, from the shipped T=8 artifact, by
-    # `test_the_subspace_must_evolve_contrast_is_present_in_the_artifact`.
+    # Arms 2 and 3 must agree, and the reason they do is now recorded rather than
+    # assumed: they agree because the per-step projection re-derives the subspace
+    # from the current field in BOTH, so the rank rule cannot be what separates
+    # them.  Asserted, because if they ever diverge then something *has* begun to
+    # gate the projection itself and this test's attribution would be wrong.
+    assert (frozen_div is None) == (evolving_div is None), (
+        f"the fixed-rank arm diverged={frozen_div is not None} but the adapting "
+        f"arm diverged={evolving_div is not None}. These arms differ only in the "
+        f"rank rule, and both re-derive the subspace per step, so they should "
+        f"agree; if they no longer do, the projection has started depending on "
+        f"check_every and this test's attribution needs revisiting."
+    )
     if frozen_div is None:
-        assert frozen_max_div == evolving_max_div, (
-            f"the frozen control survived with max|div u| = {frozen_max_div:.3e} "
-            f"while the refreshing arm gave {evolving_max_div:.3e}. The two arms "
-            f"are now distinguishable, so this test may be claiming more than it "
-            f"measures -- update the docstring and the claim with them."
-        )
-    else:
-        assert evolving_div is None and frozen_div is not None, (
-            f"the frozen DLRA basis diverged at step {frozen_div} while the "
-            f"refreshing one survived: at this configuration construction and "
-            f"evolution ARE separable, so the docstring should say so and the "
-            f"stronger form of the claim is available."
+        assert abs(frozen_max_div - evolving_max_div) <= 1e-15 + 1e-9 * max(
+            abs(evolving_max_div), 1e-30
+        ), (
+            f"the fixed-rank arm survived with max|div u| = {frozen_max_div:.3e} "
+            f"against the adapting arm's {evolving_max_div:.3e}. The two take "
+            f"different code paths so a difference is possible, but it should be "
+            f"roundoff: both re-derive the same per-step projection."
         )
 
 

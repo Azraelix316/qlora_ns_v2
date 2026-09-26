@@ -420,6 +420,22 @@ class DLRA:
     ):
         if int(check_every) != check_every or check_every < 1:
             raise ValueError("check_every must be a positive integer")
+        # `check_every` gates the RANK ADAPTATION and the retained-candidate
+        # bookkeeping -- NOT the projection.  `SVDProjector.project` recomputes
+        # `self._svd(field)` on every call and truncates whatever field it is
+        # handed, so the per-step projection is a fresh rank-r truncation of the
+        # *current* state whether or not `check_every` ever fires.  A large
+        # `check_every` therefore freezes the RANK, not the subspace: the
+        # subspace still tracks the state at every step, because tracking it is
+        # what the projection does.
+        #
+        # Stated here because the parameter is named for the rank and a reader
+        # will take the name literally: the natural experiment "hold the rank
+        # fixed and see whether the subspace still has to move" cannot be run
+        # through this class at all, because it has no switch that stops the
+        # projection from re-deriving.  `basis_builds` counts the adaptations
+        # that did happen, so a reader can tell the two apart from the object
+        # rather than from the configuration.
         self.model = model
         self.projector = SVDProjector(
             model.grid,
@@ -436,6 +452,11 @@ class DLRA:
         self.adapt_initial = bool(adapt_initial)
         self.steps = 0
         self.rank_history: list[int] = [self.projector.rank]
+        # How many times the subspace has actually been rebuilt.  Distinct from
+        # `steps`, and from `rank_history`: the rank can be checked without a
+        # rebuild, and a frozen basis reports a perfectly healthy rank history
+        # while its subspace never moves.
+        self.basis_builds: int = 0
         self.spectrum_history: list[np.ndarray] = []
         self.last_step_info: dict = {}
 
@@ -454,6 +475,7 @@ class DLRA:
         trajectory that is not the one the configuration describes.
         """
         self.projector.reset()
+        self.basis_builds = 0
         self.steps = 0
         self.rank_history = []
         self.spectrum_history = []
@@ -484,6 +506,12 @@ class DLRA:
         if self.steps % self.check_every == 0:
             candidate = self.projector.candidate("after_nonlinear")
             if candidate is not None:
+                # Counted, not inferred.  `check_every` gates the basis refresh
+                # as well as the rank, so "did the subspace actually move?" is a
+                # question about this object's state and not about its
+                # configuration -- and reading it off the configuration is how
+                # `check_every=10**9` came to look like a rank-only experiment.
+                self.basis_builds += 1
                 centered, u, s, vh = candidate
                 candidate_field = (u * s) @ vh
                 before_adapt = self.model.grid.ke(candidate_field)
