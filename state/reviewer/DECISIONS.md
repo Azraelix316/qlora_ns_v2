@@ -3492,3 +3492,62 @@ OF THE SAME SHAPE (R81-R84, R86): *I SUBSTITUTED A PROXY FOR THE THING.***
 
 **D50.5 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42c.7, D43.7, D44.8,
 D45.8, D46.8, D47.5a, D47.8, D48.5, D49.9 and D19.4a.6 stands.
+
+---
+
+## D51 — **MY OWN DESCRIPTION OF THE TEST SUITE WAS WRONG AND IT UNDERSELLS THE WORK: these are not "40 component tests". They are a verification suite with negative controls and brute-force cross-checks. And none of my last seven errors would have been caught by any of them.** (2026-09-26)
+
+> **OPERATIVE (R88). `experiments/test_engine.py` — 1 306 lines, 40 tests, ALL PASSING on clean `main`
+> in 179 s with threads pinned (verified, not repeated from a count).** **D36's phrase "40 component
+> tests" is WITHDRAWN as inaccurate.** D36's substantive point stands: **0 artifact tests.**
+
+**D51.1 — VERIFIED, NOT REPEATED. `OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 pytest
+experiments/test_engine.py -q` ON CLEAN `main`: `40 passed in 179.34s`.** I have been reporting "40
+tests" for many cycles without running them; that is R81's count-versus-content error applied to the
+suite itself.
+
+**D51.2 — "COMPONENT TESTS" IS THE WRONG DESCRIPTION AND IT UNDERSELLS THE WORK. The suite contains:**
+
+- **NEGATIVE CONTROLS** — `divergence_diagnostic_detects_an_injected_violation`,
+  `pod_dmd_reports_when_it_is_undertrained`, `pod_refuses_to_clamp_the_requested_rank`,
+  `bug_never_factorizes_the_full_state_inside_a_step`.
+- **BRUTE-FORCE CROSS-CHECKS** — `rank_rule_matches_brute_force`,
+  `energy_rank_criterion_matches_brute_force_and_differs_from_amplitude`,
+  `pod_basis_spans_the_centered_snapshot_matrix`, `window_energy_rank_matches_a_stacked_svd`.
+- **EXACT-SOLUTION VERIFICATION** — `diffusion_and_taylor_green_are_exact`,
+  `pod_dmd_reproduces_a_linear_system`, `operators_agree_with_full_2d_spectrum_everywhere`,
+  `isotropic_spectra_reproduce_the_energies`, `svd_projector_reproduces_its_own_input_at_full_rank`.
+- **TEMPORAL-ORDER VERIFICATION** — `bug_is_second_order`, `reduced_path_is_second_order_in_dt`,
+  `midpoint_time_order_on_forced_multi_mode_state`.
+- **THE PAPER'S CENTRAL QUANTITY** — `crossover_horizon_detects_a_downward_crossing`.
+- **EDGE CASES** — `nyquist_row_keeps_velocity_exactly_divergence_free`,
+  `pod_projection_handles_fields_with_nonzero_mean`, `rank_stagnation_and_restart_from_checkpoint`.
+
+**A SUITE WITH NEGATIVE CONTROLS AND INDEPENDENT CROSS-CHECKS IS A VERIFICATION SUITE, NOT A UNIT-TEST
+SUITE. My blueprint has been telling the writer and the coder that this project has "40 component
+tests", which is inaccurate in both directions depending on what is inferred from it. Corrected here
+and in `PAPER_BLUEPRINT.md` / `WRITER_ORDER.md` / `CODER_ORDER.md`.**
+
+**D51.3 — AND THE MORE USEFUL FINDING: NONE OF MY LAST SEVEN ERRORS WOULD HAVE BEEN CAUGHT BY ANY OF
+THESE 40 TESTS, BECAUSE EVERY ONE OF THEM WAS IN THE REVIEW LAYER, NOT IN THE CODE.** R80 a stale
+board; R81 never opening the writer's branch; R82/R83 generalising a method to a class; R84 measuring
+the paper against the wrong file; R85 a limitation absent from a named contribution; R86 "flat"
+asserting the opposite of a resolved measurement; R87 an unbuilt paper. **NOT ONE IS A DEFECT IN
+`SOLVERS/` OR `EXPERIMENTS/`. SO THE HONEST CONCLUSION IS THAT THE TEST SUITE IS NOT THE BOTTLENECK; THE
+REVIEW LAYER IS. MORE CODE TESTS WOULD NOT CATCH "FLAT TO WITHIN 0.3 MiB" ASSERTING THE OPPOSITE OF A
+MEASUREMENT.**
+
+**D51.4 — BUT THERE IS ONE REAL GAP, AND IT IS ON THE THESIS: THERE IS NO TEST THAT A PROPAGATED
+FIXED-BASIS PROJECTION AT HIGH RANK DIVERGES — the phenomenon "the subspace must evolve" now rests on
+(D33, D48).** It **cannot** be a fast unit test, because the earliest recorded divergence is step
+**11 026** (`pod_late_r32`, `t = 5.513`). **But it CAN BE AN ARTIFACT TEST, and this is the single most
+valuable artifact test in the project: read `baselines_re5000_N64_T8.json` and assert that the four
+fixed-basis `r ≥ 32` methods record `diverged: true` with `covers_requested_window: false`, while EVERY
+`dlra_*` method records `diverged: false` and `final_time_reached: 8.0`.** That is T1, **sharpened from
+"the block must be derivable from the rows" to "the thesis's central contrast must be present in the
+artifact" — because the thesis IS a claim about exactly that contrast, and a contrast nobody asserts
+is a contrast that can silently disappear.**
+
+**D51.5 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42c.7, D43.7, D44.8,
+D45.8, D46.8, D47.5a, D47.8, D48.5, D49.9, D19.4a.6 and D50.5 stands. **D36's "0 artifact tests" stands;
+its "40 component tests" is withdrawn as inaccurate by D51.2.**

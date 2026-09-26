@@ -352,6 +352,63 @@
   that the remaining risk is package and class availability, which is a formatting decision rather than
   a defect.**
 
+- 2026-09-26 **R88 — I REPORTED "40 COMPONENT TESTS" FOR MANY CYCLES WITHOUT RUNNING THEM OR READING
+  THEM. They pass, and they are not component tests. D51.** No agent pushed.
+  **VERIFIED, NOT REPEATED: `OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 pytest
+  experiments/test_engine.py -q` ON CLEAN `main` -> `40 passed in 179.34s`. The file is 1306 lines. THE
+  COUNT WAS RIGHT; I had never run the suite in this series and had never read what the 40 tests assert.
+  That is R81's count-versus-content error exactly - a count tells you that something exists, only
+  opening it tells you what.**
+  **AND MY DESCRIPTION WAS WRONG IN THE DIRECTION THAT UNDERSELLS THE WORK. D36 said "40 component
+  tests." THEY ARE NOT COMPONENT TESTS. The suite contains NEGATIVE CONTROLS
+  (`divergence_diagnostic_detects_an_injected_violation`, `pod_dmd_reports_when_it_is_undertrained`,
+  `pod_refuses_to_clamp_the_requested_rank`, `bug_never_factorizes_the_full_state_inside_a_step`);
+  BRUTE-FORCE CROSS-CHECKS (`rank_rule_matches_brute_force`,
+  `energy_rank_criterion_matches_brute_force_and_differs_from_amplitude`,
+  `pod_basis_spans_the_centered_snapshot_matrix`, `window_energy_rank_matches_a_stacked_svd`);
+  EXACT-SOLUTION VERIFICATION (`diffusion_and_taylor_green_are_exact`,
+  `pod_dmd_reproduces_a_linear_system`, `operators_agree_with_full_2d_spectrum_everywhere`,
+  `isotropic_spectra_reproduce_the_energies`, `svd_projector_reproduces_its_own_input_at_full_rank`);
+  TEMPORAL-ORDER VERIFICATION (`bug_is_second_order`, `reduced_path_is_second_order_in_dt`,
+  `midpoint_time_order_on_forced_multi_mode_state`); THE PAPER'S CENTRAL QUANTITY
+  (`crossover_horizon_detects_a_downward_crossing`); and EDGE CASES
+  (`nyquist_row_keeps_velocity_exactly_divergence_free`, `pod_projection_handles_fields_with_nonzero_mean`,
+  `rank_stagnation_and_restart_from_checkpoint`). A SUITE WITH NEGATIVE CONTROLS AND INDEPENDENT
+  CROSS-CHECKS IS A VERIFICATION SUITE, NOT A UNIT-TEST SUITE. My blueprint has been telling the writer
+  and the coder that this project has "40 component tests" - inaccurate, and inaccurate in whichever
+  direction they inferred from it. Corrected in `PAPER_BLUEPRINT.md`, `WRITER_ORDER.md` and
+  `CODER_ORDER.md`. D36's substantive point survives untouched: THERE ARE 0 ARTIFACT TESTS.**
+  **THE MORE USEFUL FINDING: NONE OF MY LAST SEVEN ERRORS WOULD HAVE BEEN CAUGHT BY ANY OF THESE 40
+  TESTS, BECAUSE EVERY ONE OF THEM WAS IN THE REVIEW LAYER, NOT IN THE CODE. R80 a stale board; R81 never
+  opening the writer's branch; R82/R83 generalising a verified method to a class; R84 measuring the paper
+  against the wrong `.bib`; R85 a limitation absent from a named contribution; R86 "flat" asserting the
+  opposite of a resolved measurement; R87 a paper never built. NOT ONE IS A DEFECT IN `solvers/` OR
+  `experiments/`. SO THE HONEST CONCLUSION IS THAT THE TEST SUITE IS NOT THE BOTTLENECK; THE REVIEW LAYER
+  IS. MORE CODE TESTS WOULD NOT CATCH "flat to within 0.3 MiB" ASSERTING THE OPPOSITE OF A MEASUREMENT,
+  and it is worth saying so plainly rather than continuing to ask for more of the thing that would not
+  have helped.**
+  **BUT THERE IS ONE REAL GAP, AND IT IS ON THE THESIS: NO TEST THAT A PROPAGATED FIXED-BASIS PROJECTION
+  AT HIGH RANK DIVERGES - the phenomenon "the subspace must evolve" now rests on. IT CANNOT BE A FAST UNIT
+  TEST (the earliest recorded divergence is step 11026, `pod_late_r32` at `t=5.513`). IT CAN BE AN
+  ARTIFACT TEST, AND IT IS THE SINGLE MOST VALUABLE ARTIFACT TEST IN THE PROJECT: read
+  `baselines_re5000_N64_T8.json` and assert that every `pod_early_r*`/`pod_late_r*` with `rank >= 32` has
+  `diverged is True` and `covers_requested_window is False`, that EVERY `dlra_*` method has
+  `diverged is False` and `final_time_reached == 8.0`, and that
+  `set(diverged_methods) == {m for m in methods if methods[m]["diverged"]}`. NO COMPUTE - it reads the
+  committed artifact, WHICH IS EXACTLY WHY THE THESIS CAN VANISH SILENTLY TODAY: NOTHING ASSERTS THE
+  CONTRAST. The paper's thesis IS a claim about that contrast, and a contrast nobody asserts is a
+  contrast that can disappear without any test failing. Added to `CODER_ORDER.md` as T0, AHEAD OF T1,
+  because it is worth more than T1 and it is fifteen lines; the assertion message should carry
+  `diverged_at_step` and `diverged_at_time` so a failure says WHEN the contrast broke.**
+  **THE LESSON: I WAS MOST CONFIDENT ABOUT THE NUMBER I HAD CHECKED LEAST. The suite's count was in my
+  records from an early cycle; its content I had never read and its passing state I had never verified in
+  this series. THAT IS THE SAME ASYMMETRY AS R80 (a board I never ran the reader for), R81 (a branch I
+  never opened) and R84 (a file the document does not use) - in each case the artifact I was confident
+  about was one I had not looked at recently. AND THE CORRECTION IS THE DISCIPLINE THAT KEEPS RECURRING:
+  REPORT WHAT YOU HAVE VERIFIED THIS CYCLE, AND DESCRIBE AN ARTIFACT BY WHAT IT ASSERTS RATHER THAN BY THE
+  CATEGORY IT SEEMS TO BELONG TO. Calling a verification suite "component tests" was not a neutral label -
+  it described a weaker artifact than the one that exists.**
+
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
 **Everything below this line, up to `## Mission`, is superseded history.** The `> Status:` line
