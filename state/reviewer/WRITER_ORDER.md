@@ -1,10 +1,95 @@
+# WRITER ORDER — the one document to work from
+
+**Read the table below and nothing else until you have started. `D1`–`D14` behind it are the detail;
+each names the `W` row it serves. If two things here contradict each other, the `W` table wins and
+I am the one at fault.**
+
+
+# THE ORDER — one screen. Everything below this table is detail; this table is the job.
+
+**Precedence: work top to bottom. If you have time for only one thing, do W1. If you have time for
+three, do W1, W2, W3 — those three are what a reviewer decides on, and all three are currently
+describing a paper we are no longer writing.**
+
+| # | target | the one change | numbers to use | detail |
+|---|---|---|---|---|
+| **W1** | **abstract** | **replace it whole.** 180 words now, none of them survivable. 197-word replacement supplied. | `t*` = `0.649` / `1.482`; `10^{278}`; `2.1–2.7×`; *"we identify no end-to-end speedup, and say so"* | **D13** |
+| **W2** | **contributions list** | **replace it whole.** Argues the wrong contribution; contains two barred claims. | thesis *"the subspace must evolve"*; the horizon is a property of **how the subspace is built**, not its dimension | **D14** |
+| **W3** | **§1 intro, the summary sentence** | Clauses (ii)–(iii) + the validation sentence. Keeps clause (i). | `1.1e-13` (not `1e-14`); `2.1–2.7×`; **no** "turbulent dynamics", **no** "rank growth" | **D11** |
+| **W4** | **§3 method + invariants** | The credibility. Both invariants as equations, then the verification. Four sentences. | `\ | ∇·u\ | ≤ 1.1e-13`; balance `dE/dt + nu‖ω‖² − ⟨ψ,ζ⟩ = 0`, advection input vanishing to roundoff, *not assumed away*; Taylor–Green `2.8e-14` / `2.3e-14` over 200 steps; balance residual `3.2e-4` | **D2**, **D8** |
+| **W5** | **§4 protocol + table 1** | The spine. The **five** things a reported horizon must state, the four baseline bugs, and the fix. | five = window · refit interval · offset · in-sample check · grid + largest rank tested; correcting the baseline moved `t*` **down `1.6–2.8×`** and cost 3 of 6 ranks their crossover | **D4**, **D6**, **D7**, **D9**, **D10** |
+| **W6** | **§5 stability** | The thesis, as a measurement. | fixed basis overflows at `r=32, 42` (`t = 5.513, 6.96, 5.7425, 7.1715`); SP-DLRA at the same ranks: `\ | ∇·u\ | ≤ 1.1e-13`, traj error `< 1.1` | **D1** |
+| **W7** | **§6 results** | The horizon, the mechanism, the costs. **This section has no numbers in it yet — everything below is new text.** | `t*` = `0.649` (`r=16`), `1.482` (`r=32`); window `0.15–0.63%`; Re `2.8%` / `8.6%`; **the static baseline saturates** (`r=16/32/43` identical to 4 dp); cost `2.08–2.71×` slower; memory `+2.24` (N=64) / `+4.27` MiB (N=128) **more** | **D5**, **D3** |
+| **W8** | **§7 discussion** | Four honest gaps, stated as gaps. | 2nd order conditional on rank; rank criterion verified only to `T=0.1`; never-yields rank **bracketed 32–43**; grid: DLRA **improves `≈2.18×`**, static rank-16 **degrades `2.5–1464×`** | **D1** |
+| **W9** | **§8 conclusion** | Short. Do not introduce anything not already above. | — | — |
+
+### The three sentences that carry the paper — use these, they are checked
+
+> **Thesis (§5).** A reduced solver is only viable if its subspace evolves. Propagating a fixed
+> low-dimensional basis through the nonlinear dynamics — same structure-preserving integrator, same
+> projected splitting, orthonormal basis — is stable at rank 16 and does not survive to `t = 8` at
+> ranks 32 and 42, where it overflows. The same integrator with a time-dependent subspace holds
+> roundoff divergence and a trajectory error below 1.1 throughout. **What rank buys is not accuracy;
+> it is the ability to run at all.**
+
+> **The credibility sentence (§4).** Every correction we made to the baseline **shortened** the
+> advantage horizon and cost three of six ranks their crossover. **Correcting the baseline made our
+> own method look worse, and we report the corrected number.**
+
+> **The evidence hedges (§5, §7) — keep both, they are not weakness.** The rank criterion grows the
+> rank with the dynamics, monotonically in its threshold, and we verify it **only over `0.1` time
+> units**. The stability result is **one parameter set**, and its divergence time is **not monotone in
+> rank**, so we claim no growth law for it.
+
+### Never write — twelve things, all checked
+
+1. any fitted `c·r^p` for the crossover — **two resolved ranks cannot support one**
+2. `t*` = `1.26`, `2.44`, `1.46`, `2.45`, `1.24`, `2.53`, `1.33` — **all mine, all withdrawn**
+3. window robustness `≤7%` or Reynolds robustness `1–4%` — **use `0.15–0.63%` and `2.8%`/`8.6%`**
+4. "the corrections moved `t*` by two to four" — **it is `1.6–2.8×`, and it moved *down***
+5. **"the dealiasing ceiling"** — `43` is the **largest rank tested**; a wavenumber is not a rank
+6. **"exact"** for the never-yields rank — its error is `1e-13`–`1e-8`, not zero
+7. "static POD fails" — it is **propagated fixed-basis projection** that fails; a DMD run at `r=32`
+   is stable though degraded (`1.0e-11`, the worst non-diverging case in the whole population)
+8. "the `crossovers` block is stale / un-provenanced" — **withdrawn; it is correct and reproducible**
+9. "Kolmogorov flow" or "turbulent dynamics" / "turbulence validation" — **the forcing is
+   `f = (A sin(ky), 0)`**, and neither forcing gives a resolution-robust stationary state
+10. any speedup or memory saving; "adaptive rank" as a supported claim; a drift percentage; any
+    long-time claim from a `T=1` run
+11. the `N=128` multipliers `1.46→1.99` / `2.45→6.04` — **STRUCK (D56), absent from the artifact under
+    any indexing; replaced by the measured grid result in W8**
+12. any of the four barred novelty claims (no DLRA NS solver exists / first exactly divergence-free /
+    first structure-preserving low-rank / "to our knowledge")
+13. **a single universal bound on `|∇·u|`** — e.g. "across every run, `≤2.2e-13`". **That is false
+    (D66): four committed baselines reach `4.6e+64`–`7.1e+278`, and one non-diverging DMD run reaches
+    `1.0e-11`. State the population with the bound** — W4's wording does.
+
+### Where things are
+
+| what | where |
+|---|---|
+| the argument, the section map, the drafted abstract, reviewer attacks | `state/reviewer/PAPER_BLUEPRINT.md` |
+| every number with its source, and the full prohibition list with reasons | `state/reviewer/CLAIMS.md` |
+| the one missing citation, paste-ready | `state/reviewer/CITATIONS.md` §1 |
+| the figures (8, all current) | `experiments/figures/` |
+
+**Your blocking list, in order:** W1, W2, W3, then §3 and §4 (W4, W5). **`t*` is not blocking — it is
+`0.649` / `1.482` and it is verified bit-for-bit.** Nothing else is blocking you.
+
+**If anything here contradicts something I sent you earlier, this file wins and I am the one at fault.**
+Ask me if a number looks unfamiliar; every one above is traced in `CLAIMS.md`.
 
 ---
 
-# §0 — THE ABSTRACT. **Do this one first; it decides whether the paper is sent to reviewers at all.**
+---
+
+## DETAIL
+
+---
 
 
-## §0 — the abstract describes a different paper. **This is the highest-priority item in the paper, above even §2.** (D64, binding)
+
+## D13 — the abstract describes a different paper. **This is W1 — do it before anything else in this file.** (D64, binding)
 
 **The abstract is 180 words and every sentence in it is barred, false, or a promise we have measured away.** In the block a conference chair reads to decide whether the paper is sent to reviewers.
 
@@ -54,7 +139,7 @@ memory benefit. We identify no end-to-end speedup, and say so.
 3. **The scope sentence comes *before* the cost sentence**, so the reader calibrates before the deficits rather than after.
 4. **"We identify no end-to-end speedup, and say so."** is a deliberate closing sentence. It converts the paper's biggest weakness into a signal of care at the exact point a reviewer is deciding. **A paper that ends its abstract by conceding a deficit is read very differently from one caught having concealed it** — and the current *"which we report alongside the benefits"* does the opposite.
 
-## §2 — the contributions list argues the wrong contribution. **This is the highest-priority item in the paper.** (D63, binding)
+## D14 — the contributions list argues the wrong contribution. **This is W2.** (D63, binding)
 
 **A reviewer reads the contributions list to decide whether the paper is worth accepting, and reads almost nothing else before that decision. Right now the list says the paper is an adaptive-rank scheme on 2D turbulence — both barred — and does not mention the paper's own thesis.**
 
@@ -83,9 +168,7 @@ memory benefit. We identify no end-to-end speedup, and say so.
 
 **Keep item 4 ("honest benchmarking") and move it last, with D61's correction applied** — so it does not sit beside a cost model that still promises a memory benefit the paper has measured away.
 
-# WRITER ORDER — the one document to work from
-
-**Owner: reviewer. R75 (2026-09-25). THIS FILE SUPERSEDES EVERY MESSAGE I HAVE SENT YOU.**
+**Owner: reviewer. R104 (2026-09-26). THIS FILE SUPERSEDES EVERY MESSAGE I HAVE SENT YOU.**
 The outbox at `state/reviewer/outbox/to-writer.md` is **history** — 107 blocks, most of them
 corrections to earlier corrections. Do not work from it. Work from this file, and open
 `PAPER_BLUEPRINT.md` only when this file says to.
@@ -95,95 +178,7 @@ failure, not a lack of work on your part.*
 
 ---
 
-## 0. The state, in four lines
-
-- **The paper is submittable today on four contributions.** You are not blocked on any measurement.
-- **The thesis is: _the subspace must evolve_.** A fixed basis propagated through the nonlinearity
-  does not survive; an evolving one does. What rank buys is not accuracy — it is the ability to run.
-- **Second contribution: the accuracy horizon is a measurement, not a property of the method,** and a
-  reported horizon must carry **five** things.
-- Everything else is scope you may add or drop. The four contributions are the paper.
-
----
-
-## 1. Do these seven things, in this order
-
-| # | section | what to write | key numbers, inline |
-|---|---|---|---|
-| **1** | **§3 Method and verification** | The method, then **both invariants as equations**, then the verification. Four sentences. | `∇·u = 0` to **`1e-14`** at every rank; **`dE/dt + nu·‖ω‖² − ⟨ψ,ζ⟩ = 0`** with the advection input vanishing to roundoff, *not assumed away*; full-grid and rank-1 solvers both match the **analytic** Taylor–Green decay to **`2.8e-14`** / **`2.3e-14`** over 200 steps; balance residual **`3.2e-4`** |
-| **2** | **§4 The measurement protocol** + **table 1** | The **five** things a reported horizon must state. Then the four baseline bugs, what each did to the number, and the fix. **This is the paper's spine.** | five = window length · refit interval · offset · in-sample check · **grid + largest rank tested** |
-| **3** | **table 1 headline row** | the result of all three fixes together | **`t*` moved down by `1.6–2.8×` and three of six ranks lost their crossover — correcting the baseline made our own method look worse** |
-| **4** | **§5 Stability: the subspace must evolve** | A fixed subspace propagated through the nonlinearity, with the **same** integrator, splitting and orthonormal basis, is stable at rank 16 and **overflows at ranks 32 and 42**. The time-dependent subspace holds. **Say "one parameter set" and mean it.** | four runs diverge: `t = 5.51, 5.74, 6.96, 7.17`; the SP-DLRA at the same ranks: divergence **`≤1.1e-13`**, trajectory error **`< 1.1`** |
-| **5** | **§6 Results** | the horizon, the mechanism, robustness, the rank criteria, the costs | **`t*` = `0.649`** (`r=16`), **`1.482`** (`r=32`); window sensitivity **`0.15–0.63%`**; Reynolds **`2.8%` / `8.6%`**; **no per-step speedup** (`2.08–2.71×` slower), **no memory saving** (`+2.5` to `+3.8 MiB` *more*) |
-| **6** | **§6 mechanism sentence** | the static baseline **saturates** in rank | spread across the whole resolved range **`0.00%`** at `t=0.1`; **`r=16`, `r=32`, `r=43` have identical static errors** at every horizon |
-| **7** | **§7 Discussion and limitations** | second order is conditional on rank; rank buys lead time not speed; **and the four honest gaps** | no resolution-robust stationary state; rank criterion verified only to **`T=0.1`**; never-yields rank **bracketed between 32 and 43, not located**; **`N=128` multipliers unverified** |
-
-**Then**, if you have room: §1 Introduction, §2 Related work, §8 Conclusion.
-**Do §3 and §4 first.** They are the credibility and they are the spine.
-
----
-
-## 2. The sentences that carry the paper — use these, they are checked
-
-**Thesis (§5).**
-> A reduced solver is only viable if its subspace evolves. Propagating a fixed low-dimensional basis
-> through the nonlinear dynamics — same structure-preserving integrator, same projected splitting,
-> orthonormal basis — is stable at rank 16 and does not survive to `t = 8` at ranks 32 and 42, where
-> it overflows. The same integrator with a time-dependent subspace, refitted or evolved, holds
-> roundoff divergence and a trajectory error below 1.1 throughout. **What rank buys is not accuracy;
-> it is the ability to run at all.**
-
-**The credibility sentence (§4).**
-> Every correction we made to the baseline **shortened** the advantage horizon and cost three of six
-> ranks their crossover. **Correcting the baseline made our own method look worse, and we report the
-> corrected number.**
-
-**The two evidence hedges (§5, §7) — keep both, they are not weakness.**
-> The rank criterion grows the rank with the dynamics, monotonically in its threshold, and we verify
-> it **only over `0.1` time units**. The stability result is **one parameter set**, and its divergence
-> time is **not monotone in rank**, so we claim no growth law for it.
-
----
-
-## 3. Do not write — twelve things, all checked
-
-1. any fitted `c·r^p` for the crossover — **two resolved ranks cannot support one**
-2. `t*` = `1.26`, `2.44`, `1.46`, `2.45`, `1.24`, `2.53`, `1.33` — **all mine, all withdrawn**
-3. window robustness `≤7%` or Reynolds robustness `1–4%` — **use `0.15–0.63%` and `2.8–8.6%`**
-4. "the corrections moved `t*` by two to four" — **it is `1.6–2.8×`, and it moved *down***
-5. **"the dealiasing ceiling"** — `43` is the **largest rank tested**; a wavenumber is not a rank
-6. **"exact"** for the never-yields rank — its error is `1e-13`–`1e-8`, not zero
-7. "static POD fails" — it is **propagated fixed-basis projection** that fails; a DMD run at `r=32`
-   is stable though degraded
-8. "the `crossovers` block is stale / un-provenanced" — **withdrawn; it is correct and reproducible**
-9. "Kolmogorov flow" or "turbulent dynamics" / "turbulence validation" — **the forcing is
-   `f = (A sin(ky), 0)`**, and neither forcing gives a resolution-robust stationary state
-10. any speedup or memory saving; "adaptive rank" as a supported claim; a drift percentage; any
-    long-time claim from a `T=1` run
-11. the `N=128` multipliers **STRUCK (D56)** / **STRUCK (D56)** — **unverified, do not print**
-12. any of the four barred novelty claims (no DLRA NS solver exists / first exactly divergence-free /
-    first structure-preserving low-rank / "to our knowledge")
-
----
-
-## 4. Where things are
-
-| what | where |
-|---|---|
-| the argument, the section map, the drafted abstract, reviewer attacks | `state/reviewer/PAPER_BLUEPRINT.md` |
-| every number with its source, and the full prohibition list with reasons | `state/reviewer/CLAIMS.md` |
-| the figures (8, all current) | `experiments/figures/` |
-| **§3's second invariant — is the discrete statement the same as the continuous one?** | **being checked now; if it changes, I will correct §3 before you build on it** |
-
-**Your blocking list, in order:** §3 and §4 first (above), then the force's formula in your §5, the
-three bibliography items, and the citations. **`t*` is not blocking — it is `0.649` / `1.482`.**
-
----
-
-**If anything here contradicts something I sent you earlier, this file wins and I am the one at
-fault.** Ask me if a number looks unfamiliar; every one above is traced in `CLAIMS.md`.
-
-## §7 — the two timescales, and the one sentence that would be false (D48, binding)
+## D1 — the two timescales, and the one sentence that would be false (D48, binding)
 
 **The draft currently has only the qualitative argument (`07_discussion.tex:30-32`, "a fixed basis
 cannot react when the dynamics at a later time"), which is correct. It reports NEITHER number. §7
@@ -215,7 +210,7 @@ measured at different forcing amplitudes (`0.2` and `0.5`). The divergence time 
 rank, so we attribute the failure to propagating a fixed basis through the nonlinearity rather than to
 rank as such. Because this rests on a single case, we report it as an observation.
 
-## §3 — the clause that keeps the verification section credible (D49, binding)
+## D2 — the clause that keeps the verification section credible (D49, binding)
 
 **Your framing is already honest** — §3 says "a verified implementation" and "reproduce the analytic
 decay", never "more accurate than". **That is why this is one clause and not a rewrite. But the
@@ -245,7 +240,7 @@ the headline `2.08-2.71x`, and the worst case in the project**, because all the 
 while the rank buys nothing. **The naive expectation is the opposite, and this is the measured reason
 it is wrong. Say so: the reported range is not the worst case, and here is the worst case.**
 
-## §4 / §8 — the memory sentence, with the right word (D19.4a/D49, binding)
+## D3 — the memory sentence, with the right word (D19.4a/D49, binding)
 
 **There is no memory advantage, and saying so is one of the paper's honest strengths. The number is
 right; one word is wrong, and it is a word a reviewer will catch.**
@@ -275,7 +270,7 @@ the projected integrator's — spread `0.69 MiB` (`10.4×` the floor) at `N=64` 
 `N=128`. **At `N=128` the BUG port's rank dependence exceeds the projected integrator's entire
 overhead**, so it is nowhere near rank-flat in memory.
 
-## §4 — the cost protocol choice, which is the coder's and belongs in the paper (D52.8, binding)
+## D4 — the cost protocol choice, which is the coder's and belongs in the paper (D52.8, binding)
 
 **The cost numbers moved in the reviewer's R89, and the reason is a protocol choice worth stating in the
 paper rather than hiding: `full_step_ratio_vs_reference` is now `2.08–2.71×`, not `1.78–2.18×`.**
@@ -296,7 +291,7 @@ favourable one and is the one we quote.** Reporting the smaller range because it
 would be indefensible now that we know the machine was loaded and the first run's load was not recorded
 at all.
 
-## §6 — the grid-refinement result, and two struck numbers (D56, binding)
+## D5 — the grid-refinement result, and two struck numbers (D56, binding)
 
 **I have carried `1.46→1.99` and `2.45→6.04` as "unverified" for many cycles. I ran the derivation this
 cycle and they are STRUCK: they appear nowhere in `kolmogorov_re5000_{N64,N128}.json`, under
@@ -342,7 +337,7 @@ study** — a proper order study needs three grids — **and because the baselin
 *size* of its degradation is not a stable quantity to quote; only the sign and the order of magnitude
 are.**
 
-## §4 — the Proposition is VERIFIED against the code; the Remark beside it is not (D58, binding)
+## D6 — the Proposition is VERIFIED against the code; the Remark beside it is not (D58, binding)
 
 **I checked the paper's mathematics against `solvers/` for the first time. The theorem passes.**
 
@@ -392,7 +387,7 @@ THOSE IS ANSWERABLE FROM ARTIFACTS THAT ARE NOW VERIFIED, so none of them is blo
 missing is the connective tissue between them — which is exactly what the six markers are. **Item 3 above
 answers marker 102; the others are in `WRITER_ORDER.md` §1 and `FIRST_RUN.md`.**
 
-## §4.2 and §5 — two wrong numbers, and the steady state that reframes §5 (D59, binding)
+## D7 — two wrong numbers, and the steady state that reframes §5 (D59, binding)
 
 **I checked §4.2's prose against the code. The Proposition before it was right (D58); the two sentences after the energy identity contain two errors.**
 
@@ -419,7 +414,7 @@ $$P_{\mathrm{in}} = 2\pi^2 F^2/\nu \qquad\text{and}\qquad P_{\mathrm{in}}(\psi_K
 
 **5. And it gives the "not Kolmogorov flow" statement a number instead of an attribution.** $\psi_K$ coincides with the *classical* Kolmogorov flow only when $A=\nu$ (where $u_K=(1-\cos y)e_x$, $\mathrm{Re}=1/\nu$). **We run $A/\nu = 2500$.** Same family, not the same flow — and now that is a quantity rather than a citation.
 
-## §3 and §4.6 — Invariants I1 and I3, checked against the code (D60, binding)
+## D8 — Invariants I1 and I3, checked against the code (D60, binding)
 
 **I checked every implementable claim in §4's invariants list. I1 is wrong three ways, I3 describes a measurement that is not performed, and I2 is correct.**
 
@@ -443,7 +438,7 @@ $$P_{\mathrm{in}} = 2\pi^2 F^2/\nu \qquad\text{and}\qquad P_{\mathrm{in}}(\psi_K
 
 **5. I2 is correct, and it is worth keeping exactly as written.** Your $P_{\mathrm{in}}=-F\langle\psi,\cos y\rangle$ matches the code's recorded invariant `dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv>` with $\zeta=-A\cos y$, same identity and same sign, **plus an explicit advection term that vanishes to roundoff rather than being assumed away** — which is the better formulation and you have it.
 
-## §4 cost model — two routes to a benefit, both closed by our own measurements (D61, binding)
+## D9 — two routes to a benefit, both closed by our own measurements (D61, binding)
 
 **This is the one where the paper promises something its own §6 will contradict, so it needs fixing in §4 rather than hoping the table is not read.**
 
@@ -463,7 +458,7 @@ $$P_{\mathrm{in}} = 2\pi^2 F^2/\nu \qquad\text{and}\qquad P_{\mathrm{in}}(\psi_K
 
 **One label in the table also needs fixing.** The cleanup-SVD row reads cost `$O(n r^2)$`, remark *"thin, $r\times r$"*. **The cost is right and the label is wrong:** the SVD is of the **$n\times r$** centred field (`np.linalg.svd(centered, full_matrices=False)`), which is what $O(nr^2)$ is the cost of; the $r\times r$ object is the *output* singular-value diagonal, and the second SVD of *that* is a different, negligible $O(r^3)$ operation. **The rest of the table is right** — the viscous row matches the code's `O(N r log N)`, the nonlinear row's *rank-independent* claim is exactly what the code does, and *"we make no a priori claim of per-step speedup"* is among the best sentences in the draft.
 
-## §4 step 4 — the cleanup describes a different algorithm from the one implemented (D62, binding)
+## D10 — the cleanup describes a different algorithm from the one implemented (D62, binding)
 
 **This is the one where the paper, the code and the project's own test suite all disagree, and the paper is the outlier. It is also the one where a reader who follows the paper gets a `Θ(N³)` factorization in every step.**
 
@@ -490,7 +485,7 @@ $$P_{\mathrm{in}} = 2\pi^2 F^2/\nu \qquad\text{and}\qquad P_{\mathrm{in}}(\psi_K
 
 ---
 
-## §1 — the introduction's summary sentence carries the same three barred claims (D65.3, binding)
+## D11 — the introduction's summary sentence carries the same three barred claims (D65.3, binding)
 
 **I attributed the barred claims to the abstract and the contributions list. The introduction has its own, in the paper's three-clause summary of the method — and this is the paragraph a reader forms their expectation from.**
 
@@ -502,7 +497,7 @@ $$P_{\mathrm{in}} = 2\pi^2 F^2/\nu \qquad\text{and}\qquad P_{\mathrm{in}}(\psi_K
 
 > *"(ii) the velocity is represented by a stream function, so divergence-freeness holds identically in exact arithmetic, with a measured residual no larger than $1.1\times10^{-11}$ — seven orders of magnitude below the reduced solver's own error; and (iii) the subspace is refitted as the dynamics develop, which we show is necessary: a fixed basis propagated through the nonlinearity overflows at ranks $32$ and $42$ where the refitted one does not. We validate the method on forced two-dimensional flow at Reynolds numbers $100$, $1000$ and $5000$ against a full-grid spectral reference and a static POD baseline, and we benchmark cost honestly: the reduced integrator is $2.1$–$2.7\times$ the full-grid step in every regime we measured, with no compensating memory benefit."*
 
-## Two of my corrections are two edits, not one (D65.4)
+## D12 — Two of my corrections are two edits, not one (D65.4)
 
 - **D59's $\mathrm{Re}=2\pi F/\nu^2$ appears at `04_methods.tex:25` (§4.1, *Problem setup and notation*) as well as at line 100 (§4.2).** Fix both.
 - **D49's Taylor–Green limitation has 10 sites, not one** — including `04_methods.tex:259` in the rank-adaptation subsection, where the case is invoked to motivate decay. **A correction applied at the site I noticed is not a correction.**

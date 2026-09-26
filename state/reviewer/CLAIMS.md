@@ -443,8 +443,21 @@ the negative.**
 
 | claim | value | source |
 |---|---|---|
-| across every **committed** run | `2.32e-14` … `2.24e-13` | audited over all 13 result artifacts, R44 |
+| **our method + full grid, all committed runs** | `7.3e-15` … `1.8e-13` | R44 scaling law below, D66 |
+| **the roundoff band, all committed runs** | `2.265e-14` … `2.242e-13` | D66, pooled over 12 artifacts / 119 measurements |
+| the **worst non-diverging** case in the whole population | `1.046e-11` — `pod_dmd_r32`, **not** our method | D66 |
+| the **four diverged fixed-basis baselines** | `4.61e+64` … `7.09e+278` | D66, D31 |
 | BUG stationary state | `< 1e-12` over 25 steps, both factors orthonormal to `1e-12` | R42 |
+
+> **⚠ SUPERSEDED BY D66 (R104). The R44 row "across every committed run: `2.32e-14` … `2.24e-13`" is
+> WITHDRAWN — not because the endpoints are far off, but because its *form* is false.** Its maximum
+> `2.24e-13` is right and its minimum `2.32e-14` is beaten by two committed artifacts (`2.265e-14` in
+> `baselines_re5000_N64_T8.json`, a **forced** case; `1.628e-14` in `taylor_green.json`, unforced) — a
+> 2.4% endpoint error, which is not the problem. **The problem is the phrase "across every committed run":
+> the committed population contains `1.046e-11` and four runs at `4.6e+64`–`7.1e+278`, so a bare bound
+> stated across it is false by 265 orders of magnitude for four of them.** A bound is a claim about a
+> *population*, and this one named a population it does not hold over (D55c.6: print the population with
+> the number). **Write the population-resolved form above, never a single universal bound.**
 
 **The claim to write is the scaling law, not a bare bound** — measured R44 at `Re=5000`,
 `A=0.2`, 200 steps, DLRA `r=16` and full grid agreeing:
