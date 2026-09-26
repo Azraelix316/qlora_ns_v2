@@ -230,6 +230,72 @@ def test_the_repin_request_list_is_current_and_explains_every_row():
     assert after["generated_from"]["draft_ref"], after["generated_from"]
 
 
+def test_running_the_suite_does_not_dirty_the_working_tree():
+    """A test suite that rewrites its own artifacts destroys the signal.
+
+    `provenance.py` distinguishes a dirty *tree* from a dirty *driver*, and the
+    tree's dirtiness is how this project detects contamination at all. Two tests
+    were regenerating the artifacts they check — `make_scheme_card.py` and
+    `make_repin_requests.py` — so every suite run left `git status` dirty and
+    "the tree is clean" stopped meaning anything.
+
+    The generators now have a `--check` mode that verifies without writing, and
+    the tests use it. The residue was subtler: `make_scheme_card.py` read
+    `"--check" in sys.argv` and ignored every other flag, so
+    `test_every_driver_can_print_its_own_help` — which runs `--help` on every
+    driver — **regenerated the card on every suite run**, and no `--check` in the
+    tests could stop it. Third instance of that pattern today.
+
+    So this test asserts the property directly: run the suite's own generators in
+    their verifying modes, and require the working tree to be untouched. It is the
+    only test that can catch a generator which writes when asked not to, because
+    it is the one that looks at the tree rather than at a return code.
+    """
+    import subprocess
+    import sys
+
+    from _paths import EXPERIMENTS, REPO_ROOT
+
+    def tree_state() -> str:
+        result = subprocess.run(
+            ["git", "status", "--porcelain"], cwd=REPO_ROOT,
+            capture_output=True, text=True, timeout=300,
+        )
+        return result.stdout
+
+    before = tree_state()
+    for script in ("make_scheme_card.py", "make_repin_requests.py"):
+        result = subprocess.run(
+            [sys.executable, str(EXPERIMENTS / script), "--check"],
+            cwd=REPO_ROOT, capture_output=True, text=True, timeout=3600,
+        )
+        assert result.returncode == 0, (
+            f"{script} --check failed, so the committed artifact is stale:\n"
+            f"{result.stdout[-800:]}\n{result.stderr[-400:]}"
+        )
+    after = tree_state()
+
+    assert after == before, (
+        "running the generators in --check mode modified the working tree, so a "
+        "green suite no longer implies a clean tree:\n"
+        f"  before: {before.strip()!r}\n  after:  {after.strip()!r}"
+    )
+
+    # And --help must not do the work either. This is the specific failure the
+    # third instance of that pattern produced: a script with a --check flag but
+    # no argument parsing, so --help ran the generator.
+    result = subprocess.run(
+        [sys.executable, str(EXPERIMENTS / "make_scheme_card.py"), "--help"],
+        cwd=REPO_ROOT, capture_output=True, text=True, timeout=300,
+    )
+    assert result.returncode == 0, result.stderr[-400:]
+    assert "usage:" in result.stdout.lower(), (
+        "make_scheme_card.py --help did not print usage, so it ran the generator "
+        "instead — which rewrites the artifact on every suite run"
+    )
+    assert tree_state() == before, "--help wrote to the working tree"
+
+
 def test_every_driver_can_print_its_own_help():
     """`--help` is how a person discovers the flags, so it must not crash.
 

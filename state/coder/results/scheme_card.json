@@ -4,8 +4,8 @@
   "provenance": {
     "captured_at": "launch",
     "driver": "experiments/make_scheme_card.py",
-    "driver_dirty": true,
-    "driver_matches_HEAD": false,
+    "driver_dirty": false,
+    "driver_matches_HEAD": true,
     "driver_matches_HEAD_at_write": true,
     "driver_sha256": "a464e71ca85586b3793eabce7f0317e32900f9f3da92d9b9dd0ff3ba1844d48c",
     "driver_sha256_at_write": "a464e71ca85586b3793eabce7f0317e32900f9f3da92d9b9dd0ff3ba1844d48c",
@@ -22,18 +22,18 @@
         "VECLIB_MAXIMUM_THREADS": null
       }
     },
-    "git_commit": "aac134b6f50862104bbc84acf3fefae9ef61acd0",
-    "git_commit_at_write": "aac134b6f50862104bbc84acf3fefae9ef61acd0",
-    "git_commit_how": "git log -1 --before=1790439186",
+    "git_commit": "36fc3e15bb55b7bab77a7991a7a0e5b75ff23606",
+    "git_commit_at_write": "36fc3e15bb55b7bab77a7991a7a0e5b75ff23606",
+    "git_commit_how": "git log -1 --before=1790439476",
     "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
-    "reproducible": false,
+    "reproducible": true,
     "sources_files_at_launch": 33,
-    "sources_fingerprint_at_launch": "a4bc5bd2b4978423010f519dbec820144792c19f671268493728d33664a1256f",
+    "sources_fingerprint_at_launch": "8eb522e8490efa01e4573183e75e40f71cc815aa1bf3bdf32dc63884863b9fef",
     "tree_moved_during_run": false,
-    "working_tree_diff_sha256": "f5f0f669093443168445dfe73c4c41d501653bf43b9e8d3c0ef86309e10da6e0",
+    "working_tree_diff_sha256": "5cf91cad460f7e01f6961072319721e63c65dca82eae16c6f59244321c944255",
     "working_tree_dirty": true,
     "working_tree_dirty_paths": [
-      "experiments/make_scheme_card.py",
+      "experiments/test_artifacts.py",
       "state/coder/results/scheme_card.json"
     ]
   },
