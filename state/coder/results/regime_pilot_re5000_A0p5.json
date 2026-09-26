@@ -9064,20 +9064,26 @@
     ]
   },
   "provenance": {
+    "captured_at": "launch",
     "driver": "experiments/run_regime_pilot.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "ed620285fb26ea4fcad8328696f0a9d8f52907fe4021a7e70d97638baeb9f39b",
-    "git_commit": "79c98be28e3759ab4ebdfbab68c6e4c38c3adf1e",
-    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "driver_matches_HEAD_at_write": true,
+    "driver_sha256": "f2e920fed9cf3d82a770c0dde7a1568671a272fe8f537b6bbd91353b4700c384",
+    "driver_sha256_at_write": "f2e920fed9cf3d82a770c0dde7a1568671a272fe8f537b6bbd91353b4700c384",
+    "git_commit": "66dbb2b3a8954db2409c2e5ab1a4eeccf00c14b3",
+    "git_commit_at_write": "66dbb2b3a8954db2409c2e5ab1a4eeccf00c14b3",
+    "git_commit_how": "git log -1 --before=1790413919",
+    "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_diff_sha256": "f0a551f051e23cc74bd8c42e85c1506afbc4c95cb7f31f60130c0c8df281f943",
+    "sources_files_at_launch": 31,
+    "sources_fingerprint_at_launch": "66d0e0121e43b379f625d48c8000d47014dfe311eb913509a2e99d3a7989797f",
+    "tree_moved_during_run": false,
+    "working_tree_diff_sha256": "f96d806e77bd4da1d110db21a78efd37819777ab4e6cd95a220f48179253fafb",
     "working_tree_dirty": true,
     "working_tree_dirty_paths": [
-      "state/coder/results/kolmogorov_re1000_N64.json",
-      "state/coder/results/kolmogorov_re100_N64.json",
-      "state/coder/results/kolmogorov_re5000_N128.json",
-      "state/coder/results/kolmogorov_re5000_N64.json"
+      "state/coder/results/baselines_re5000_N64_T8.json",
+      "state/coder/results/rank_growth_sweep_T8.json"
     ]
   },
   "qualifying_horizons": [],
@@ -9122,7 +9128,7 @@
         }
       },
       "samples": 6,
-      "wall_seconds": 0.4300454871263355,
+      "wall_seconds": 0.6782070780172944,
       "zonal_share_of_total_energy_at_end": 0.18397942647862783
     },
     {
@@ -9160,7 +9166,7 @@
         }
       },
       "samples": 14,
-      "wall_seconds": 1.0766066280193627,
+      "wall_seconds": 1.2509448509663343,
       "zonal_share_of_total_energy_at_end": 0.21463112917237984
     },
     {
@@ -9198,7 +9204,7 @@
         }
       },
       "samples": 26,
-      "wall_seconds": 2.1727101581636816,
+      "wall_seconds": 2.2813484519720078,
       "zonal_share_of_total_energy_at_end": 0.24378416515662507
     },
     {
@@ -9236,7 +9242,7 @@
         }
       },
       "samples": 51,
-      "wall_seconds": 4.272634872002527,
+      "wall_seconds": 4.609141792869195,
       "zonal_share_of_total_energy_at_end": 0.32163117679826075
     },
     {
@@ -9274,7 +9280,7 @@
         }
       },
       "samples": 101,
-      "wall_seconds": 8.5846998100169,
+      "wall_seconds": 9.254238762892783,
       "zonal_share_of_total_energy_at_end": 0.49688615984890105
     },
     {
@@ -9318,7 +9324,7 @@
         }
       },
       "samples": 151,
-      "wall_seconds": 12.714197854977101,
+      "wall_seconds": 13.667701845988631,
       "zonal_share_of_total_energy_at_end": 0.48603747944525777
     },
     {
@@ -9362,7 +9368,7 @@
         }
       },
       "samples": 201,
-      "wall_seconds": 17.055916377110407,
+      "wall_seconds": 17.744075607974082,
       "zonal_share_of_total_energy_at_end": 0.5534467976724189
     },
     {
@@ -9408,7 +9414,7 @@
         }
       },
       "samples": 301,
-      "wall_seconds": 26.213451934978366,
+      "wall_seconds": 26.886854026000947,
       "zonal_share_of_total_energy_at_end": 0.6108846415672203
     },
     {
@@ -9454,7 +9460,7 @@
         }
       },
       "samples": 401,
-      "wall_seconds": 35.26842295890674,
+      "wall_seconds": 35.17136371508241,
       "zonal_share_of_total_energy_at_end": 0.7371225718971963
     },
     {
@@ -9504,7 +9510,7 @@
         }
       },
       "samples": 601,
-      "wall_seconds": 52.86701085511595,
+      "wall_seconds": 51.520439505111426,
       "zonal_share_of_total_energy_at_end": 0.8427156748023765
     },
     {
@@ -9556,7 +9562,7 @@
         }
       },
       "samples": 801,
-      "wall_seconds": 71.5748158749193,
+      "wall_seconds": 68.7540523740463,
       "zonal_share_of_total_energy_at_end": 0.931213298329932
     },
     {
@@ -9610,7 +9616,7 @@
         }
       },
       "samples": 1001,
-      "wall_seconds": 84.67767602414824,
+      "wall_seconds": 88.00832161097787,
       "zonal_share_of_total_energy_at_end": 0.9379530346632285
     }
   ],

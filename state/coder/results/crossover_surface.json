@@ -1732,49 +1732,49 @@
       "reference": {
         "max_abs_divergence": 4.773959005888173e-14,
         "nsteps": 16000,
-        "wall_seconds": 32.180037763901055
+        "wall_seconds": 32.34727268991992
       },
       "run_diagnostics": {
         "16": {
           "dlra": {
             "max_abs_divergence": 5.0182080713057076e-14,
             "rank_actual": 16,
-            "wall_seconds": 63.090612481115386
+            "wall_seconds": 64.46496575092897
           }
         },
         "2": {
           "dlra": {
             "max_abs_divergence": 5.845324224651449e-14,
             "rank_actual": 2,
-            "wall_seconds": 64.96442652889527
+            "wall_seconds": 62.054819573881105
           }
         },
         "32": {
           "dlra": {
             "max_abs_divergence": 4.796163466380676e-14,
             "rank_actual": 32,
-            "wall_seconds": 66.0359360310249
+            "wall_seconds": 67.33302903198637
           }
         },
         "4": {
           "dlra": {
             "max_abs_divergence": 4.851674617611934e-14,
             "rank_actual": 4,
-            "wall_seconds": 63.19651301810518
+            "wall_seconds": 63.797848891001195
           }
         },
         "43": {
           "dlra": {
             "max_abs_divergence": 4.951594689828198e-14,
             "rank_actual": 43,
-            "wall_seconds": 68.061222020071
+            "wall_seconds": 68.09639210207388
           }
         },
         "8": {
           "dlra": {
             "max_abs_divergence": 4.707345624410664e-14,
             "rank_actual": 8,
-            "wall_seconds": 64.5622920889873
+            "wall_seconds": 63.86456268001348
           }
         },
         "W0.25_r16": {
@@ -1782,126 +1782,126 @@
           "max_abs_divergence": 4.973799150320701e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 52.030458573950455
+          "wall_seconds": 55.143365495838225
         },
         "W0.25_r2": {
           "diverged": false,
           "max_abs_divergence": 4.468647674116255e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 47.065255937865004
+          "wall_seconds": 46.58952704118565
         },
         "W0.25_r32": {
           "diverged": false,
           "max_abs_divergence": 4.973799150320701e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 52.07341400813311
+          "wall_seconds": 54.90024618990719
         },
         "W0.25_r4": {
           "diverged": false,
           "max_abs_divergence": 4.6074255521943996e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 50.37183321593329
+          "wall_seconds": 50.637749853078276
         },
         "W0.25_r43": {
           "diverged": false,
           "max_abs_divergence": 4.973799150320701e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 52.1347190560773
+          "wall_seconds": 52.01885609398596
         },
         "W0.25_r8": {
           "diverged": false,
           "max_abs_divergence": 4.796163466380676e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 49.789320962969214
+          "wall_seconds": 50.259420881047845
         },
         "W0.5_r16": {
           "diverged": false,
           "max_abs_divergence": 4.929390229335695e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 53.14638240891509
+          "wall_seconds": 54.23676615394652
         },
         "W0.5_r2": {
           "diverged": false,
           "max_abs_divergence": 4.674038933671909e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 46.60372524219565
+          "wall_seconds": 45.97899053408764
         },
         "W0.5_r32": {
           "diverged": false,
           "max_abs_divergence": 4.6407322429331543e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 54.15097728301771
+          "wall_seconds": 56.16798309306614
         },
         "W0.5_r4": {
           "diverged": false,
           "max_abs_divergence": 4.707345624410664e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 50.61259180121124
+          "wall_seconds": 51.09067756612785
         },
         "W0.5_r43": {
           "diverged": false,
           "max_abs_divergence": 4.6407322429331543e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 53.58703736704774
+          "wall_seconds": 52.288350843125954
         },
         "W0.5_r8": {
           "diverged": false,
           "max_abs_divergence": 4.574118861455645e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 47.57731921900995
+          "wall_seconds": 50.58332912391052
         },
         "W1_r16": {
           "diverged": false,
           "max_abs_divergence": 4.884981308350689e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 52.05637068510987
+          "wall_seconds": 53.88411098602228
         },
         "W1_r2": {
           "diverged": false,
           "max_abs_divergence": 4.907185768843192e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 44.68788633705117
+          "wall_seconds": 45.96229670289904
         },
         "W1_r32": {
           "diverged": false,
           "max_abs_divergence": 4.574118861455645e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 2,
-          "wall_seconds": 52.85391440195963
+          "wall_seconds": 58.21912962407805
         },
         "W1_r4": {
           "diverged": false,
           "max_abs_divergence": 4.418687638008123e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 49.77323175291531
+          "wall_seconds": 52.852953801862895
         },
         "W1_r43": {
           "diverged": false,
           "max_abs_divergence": 4.8627768478581856e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 3,
-          "wall_seconds": 54.64611616288312
+          "wall_seconds": 54.87021289486438
         },
         "W1_r8": {
           "diverged": false,
           "max_abs_divergence": 4.3520742565306136e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 48.12948025413789
+          "wall_seconds": 51.47583126393147
         }
       },
       "static_moving_window": {
@@ -5133,49 +5133,49 @@
       "reference": {
         "max_abs_divergence": 5.129230373768223e-14,
         "nsteps": 16000,
-        "wall_seconds": 36.69531538197771
+        "wall_seconds": 36.952226035064086
       },
       "run_diagnostics": {
         "16": {
           "dlra": {
             "max_abs_divergence": 5.10702591327572e-14,
             "rank_actual": 16,
-            "wall_seconds": 62.485232095001265
+            "wall_seconds": 64.29086583782919
           }
         },
         "2": {
           "dlra": {
             "max_abs_divergence": 4.723998969780041e-14,
             "rank_actual": 2,
-            "wall_seconds": 67.36946425889619
+            "wall_seconds": 68.42426376510412
           }
         },
         "32": {
           "dlra": {
             "max_abs_divergence": 4.907185768843192e-14,
             "rank_actual": 32,
-            "wall_seconds": 66.79008634388447
+            "wall_seconds": 67.1369384098798
           }
         },
         "4": {
           "dlra": {
             "max_abs_divergence": 4.96269692007445e-14,
             "rank_actual": 4,
-            "wall_seconds": 60.840856549097225
+            "wall_seconds": 63.536384240025654
           }
         },
         "43": {
           "dlra": {
             "max_abs_divergence": 5.040412531798211e-14,
             "rank_actual": 43,
-            "wall_seconds": 69.97343954490498
+            "wall_seconds": 68.17532975389622
           }
         },
         "8": {
           "dlra": {
             "max_abs_divergence": 4.374278717023117e-14,
             "rank_actual": 8,
-            "wall_seconds": 61.928804052993655
+            "wall_seconds": 63.91133732092567
           }
         },
         "W0.25_r16": {
@@ -5183,126 +5183,126 @@
           "max_abs_divergence": 5.062616992290714e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 52.90186519478448
+          "wall_seconds": 53.58317688596435
         },
         "W0.25_r2": {
           "diverged": false,
           "max_abs_divergence": 4.951594689828198e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 44.49592002504505
+          "wall_seconds": 49.15272624185309
         },
         "W0.25_r32": {
           "diverged": false,
           "max_abs_divergence": 5.062616992290714e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 53.51724844612181
+          "wall_seconds": 55.30671021505259
         },
         "W0.25_r4": {
           "diverged": false,
           "max_abs_divergence": 4.707345624410664e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 45.47181763406843
+          "wall_seconds": 51.46982996305451
         },
         "W0.25_r43": {
           "diverged": false,
           "max_abs_divergence": 5.062616992290714e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 52.87960801203735
+          "wall_seconds": 55.26950864912942
         },
         "W0.25_r8": {
           "diverged": false,
           "max_abs_divergence": 4.796163466380676e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 50.09581130091101
+          "wall_seconds": 52.11846513580531
         },
         "W0.5_r16": {
           "diverged": false,
           "max_abs_divergence": 4.75175454539567e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 54.20271381596103
+          "wall_seconds": 55.74701838195324
         },
         "W0.5_r2": {
           "diverged": false,
           "max_abs_divergence": 4.8627768478581856e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 46.151879912940785
+          "wall_seconds": 49.833571917843074
         },
         "W0.5_r32": {
           "diverged": false,
           "max_abs_divergence": 4.618527782440651e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 54.86986225191504
+          "wall_seconds": 55.275580865796655
         },
         "W0.5_r4": {
           "diverged": false,
           "max_abs_divergence": 4.8183679268731794e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 50.76158857997507
+          "wall_seconds": 51.394371181027964
         },
         "W0.5_r43": {
           "diverged": false,
           "max_abs_divergence": 4.618527782440651e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 55.231445538811386
+          "wall_seconds": 56.61730314185843
         },
         "W0.5_r8": {
           "diverged": false,
           "max_abs_divergence": 4.596323321948148e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 49.4435526242014
+          "wall_seconds": 52.43115446716547
         },
         "W1_r16": {
           "diverged": false,
           "max_abs_divergence": 4.6851411639181606e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 52.819442845880985
+          "wall_seconds": 54.692928650882095
         },
         "W1_r2": {
           "diverged": false,
           "max_abs_divergence": 5.728750807065808e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 45.261765715200454
+          "wall_seconds": 49.354516708059236
         },
         "W1_r32": {
           "diverged": false,
           "max_abs_divergence": 5.5067062021407764e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 2,
-          "wall_seconds": 55.999271598877385
+          "wall_seconds": 55.885428635869175
         },
         "W1_r4": {
           "diverged": false,
           "max_abs_divergence": 4.707345624410664e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 49.47252260008827
+          "wall_seconds": 51.18337606708519
         },
         "W1_r43": {
           "diverged": false,
           "max_abs_divergence": 4.9960036108132044e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 3,
-          "wall_seconds": 55.346339501906186
+          "wall_seconds": 60.267075047129765
         },
         "W1_r8": {
           "diverged": false,
           "max_abs_divergence": 4.529709940470639e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 48.4875814311672
+          "wall_seconds": 52.75761723704636
         }
       },
       "static_moving_window": {
@@ -6870,19 +6870,27 @@
     "snapshot_stride": 0.02
   },
   "provenance": {
+    "captured_at": "launch",
     "driver": "experiments/run_crossover.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
+    "driver_matches_HEAD_at_write": true,
     "driver_sha256": "98b3d61b2496d31384df9a150ac129c10e61b825c3847da4711826a6c231d7ba",
-    "git_commit": "2dd252c79b085ad5256a800f51d98d531ac33a36",
-    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "driver_sha256_at_write": "98b3d61b2496d31384df9a150ac129c10e61b825c3847da4711826a6c231d7ba",
+    "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
+    "git_commit_at_write": "66dbb2b3a8954db2409c2e5ab1a4eeccf00c14b3",
+    "git_commit_how": "git log -1 --before=1790411850",
+    "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_diff_sha256": "76f8dd32e294a570cc7880ef7571fa9a2b19d38328cd81b02486a3baaffa0667",
+    "sources_files_at_launch": 30,
+    "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+    "tree_moved_during_run": true,
+    "working_tree_diff_sha256": "16fcac245f5d86b4f55f199696874a117058924171f01fbe5dfcf3b8223e44b5",
     "working_tree_dirty": true,
     "working_tree_dirty_paths": [
-      "state/coder/results/rank_rule_energy.json",
-      "state/coder/results/regime_pilot_re5000_N128_A0p2.json",
-      "state/coder/results/static_basis_construction_N32.json"
+      "state/coder/results/baselines_re5000_N64_T8.json",
+      "state/coder/results/rank_growth_sweep_T8.json",
+      "state/coder/results/regime_pilot_re5000_A0p5.json"
     ]
   }
 }

@@ -215,15 +215,38 @@ def test_the_driver_drift_classifier_separates_wiring_from_computation():
         cwd=REPO_ROOT, capture_output=True, text=True, timeout=600,
     )
     assert result.returncode == 0, result.stderr[-600:]
-    for state in ("wiring-only", "substantive", "current"):
-        assert state in result.stdout, (
-            f"the drift report never mentions {state!r}, so it is not "
-            f"classifying:\n{result.stdout[-900:]}"
-        )
-    # The report must not claim a clean tree when nine artifacts are known to
-    # carry wiring-only drift; if this ever goes stale the assertion below is the
-    # thing that notices.
-    assert "artifacts with provenance:" in result.stdout
+    # Assert the report's states are drawn from the known set -- NOT that all of
+    # them appear. The first version asserted `wiring-only` was mentioned, which
+    # made the test depend on the *current state of the tree*: after the
+    # relaunch cleared all nine wiring-only artifacts the assertion fired, on a
+    # report that was correct. The classifier's behaviour is established by the
+    # synthetic sources above; this half only checks the report runs and
+    # classifies rather than crashing.
+    assert "artifacts with provenance:" in result.stdout, result.stdout[-600:]
+    for line in result.stdout.splitlines():
+        token = line.strip().split()[0] if line.strip() else ""
+        if token in {"current", "wiring-only", "substantive", "unverifiable",
+                     "driver-missing"}:
+            continue
+    known = {"current", "wiring-only", "substantive", "unverifiable",
+             "driver-missing"}
+    reported = {
+        ln.strip().split()[0]
+        for ln in result.stdout.splitlines()
+        if ln.strip() and ln.strip().split()[0] in known
+    }
+    assert reported, f"the report classified nothing:\n{result.stdout[-900:]}"
+    # Every artifact with provenance must be accounted for by exactly one state.
+    total = int(re.search(r"artifacts with provenance:\s*(\d+)",
+                          result.stdout).group(1))
+    counted = sum(int(m.group(1)) for m in
+                  re.finditer(r"^\s+(\d+)\s+(current|wiring-only|substantive|"
+                              r"unverifiable|driver-missing)\s*$",
+                              result.stdout, re.M))
+    assert counted == total, (
+        f"the report classifies {counted} of {total} artifact(s); a state is "
+        "being dropped rather than counted"
+    )
 
 
 def test_no_list_valued_flag_silently_drops_a_repeated_occurrence():
