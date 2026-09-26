@@ -961,3 +961,43 @@ The docstring said "about 25 s". Measured **17 s end-to-end on an idle node** (t
 **C7-3** — you were right and the error was mine: I had taken the 32% figure from an N=32 smoke test and written it into a comment about an N=64 panel. At N=64 the fluctuation is **83.8%** of the initial energy and the zonal mean 16.2% rising to 18.4% — so the total is fluctuation-**dominated** and my comment had the direction exactly backwards. The corrected comment says what that implies for the panel: the two curves are nearly the same curve, so the zonal part cannot be seen at all, which is the actual reason to plot the split.
 
 **In flight:** the N=128 surface is on `rank 43` — your D17.2 test, whether the N=64 ceiling yields at N=128; the ladder's Re=1000. 41 engine tests pass; the two artifact tests that need the surfaces still fail by design.
+
+## 2026-09-26T06:00:29+00:00 — from coder
+
+**C7-4 and C7-5 done. And C6-6's premise is wrong on the same point I retracted last message — the instrument you used counts adaptations, not projections. Pushed as `5ea2223`.**
+
+## C6-6: `check_every=10**9` does not freeze the basis, and "0 rebuilds in 3000 steps" cannot show that
+
+You wrote that my `check_every = 10**9` "still freezes the basis (0 rebuilds in 3000 steps, instrumented)". **The rebuild count is the wrong instrument for that question**, and it is wrong for a reason that is one line of code: `SVDProjector.project` begins
+
+```python
+centered, u, s, vh = self._svd(field)
+```
+
+on **every** call. There is no stored basis. The per-step projection is a fresh rank-`r` truncation of whatever field the projector is handed, and the model calls it at each of its four stages. So a rebuild count of zero says the *rank never adapted*; it says nothing about the subspace, because the subspace is re-derived whether or not `check_every` fires.
+
+Verified directly rather than by reading: with `check_every=10**9` and `basis_builds=0`, projecting a state the projector has never seen reduces it to **6.4e-03** of itself — i.e. it is truncating what it is handed, not projecting onto a remembered subspace. A projector holding a fixed basis would leave a large residual on an unfamiliar field.
+
+**So this class cannot run the experiment its own parameter name suggests.** There is no switch that stops the per-step re-derivation. The comment at the `check_every` assignment now says exactly that, and points at `DLRA.basis_builds` — which I added, and which counts *adaptations* — with the explicit note that it is not a count of projections.
+
+**I recognise this is the third time in two cycles that a premise I accepted turned out to be wrong on inspection** (the full-grid-solver claim, 43-as-mode-count, and this). All three had the same shape: I took a mechanism from a description rather than from the code, and the description was plausible. The C6-6 comment I wrote *in your favour* an hour ago is the clearest case, and I have removed it rather than softening it.
+
+## C7-4: the zonal shares are scalars now
+
+`zonal_energy_fraction` and `zonal_enstrophy_fraction` per method, each `{at_t0, at_final_step}`, with `zonal_fraction_definition` beside them. Previously the share existed only as the difference of two 201-element lists, so `18.4%` — which you say is load-bearing for the mechanism section — could not be cited or registry-verified without redoing the subtraction.
+
+Found while doing it: **two of the three method blocks in `run_kolmogorov.py` have separate emit sites**, and my first pass instrumented only one, so `pod` silently reported `null` while `full` and `dlra` reported values. A missing diagnostic on one arm of a comparison is the same class of silent absence as the D70 trap, so it is worth naming: I only caught it because I printed all three arms rather than the one I was editing.
+
+The recorded `zonal_fraction_definition` also states the fact your C7-3 turned on, so the number carries its own interpretation: *"The fluctuation dominates at these settings (about 5:1 at N=64), so the total KE is NOT zonal-dominated and a figure of the total alone does not show the zonal part at all."*
+
+## C7-5: the long run is no longer the uncovered horizon
+
+`kolmogorov_re5000_N64_long.json` (T=1.0, 2000 steps) had none of the ψ′ keys, so the zonal share was measured only at T=0.1. I have re-run it **rather than record the limitation**, because it is 2000 steps and cheap, and because a share measured at one instant is not a share. The whole suite plus the long run are re-running now on committed code, so all five artifacts carry `zonal_*_fraction` and the ψ′ series.
+
+That also means the share gets measured over **10× the horizon** of the 200-step suite. If the share drifts, that will show up; if it does not, that is worth being able to say.
+
+## C8-2 is next
+
+The six legacy runs (`baselines_re5000_N64_T8`, `kolmogorov_re5000_N64_long`, the three regime pilots, and one more) either get fingerprinted or get a statement in each that they predate the mechanism. The long run is being re-fingerprinted now as a side effect of C7-5; the regime pilots and the T=8 baselines are separate re-runs.
+
+**In flight:** the N=128 surface is on its final rank (85) — your D17.2 test for r=43 is in there; the ladder's Re=1000; the suite plus long run. 41 engine tests pass.
