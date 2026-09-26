@@ -20,7 +20,9 @@
 > crossover (`5909af66`), Taylor–Green (`78607f3a`), and the `7.1e+278` divergence (`1c9d032a`)
 > reproduced 15/15 methods bit-for-bit at full scope in 45 min (D53) — so the earlier "no cheap
 > reproduction" note applies only to TRUNCATED runs, not to the full run at reduced scope.**
-> **Open, named:** the figure axis that renders every finite bar at 1.5e-290 of its width; two
+> **Open, named:** **FIVE ARTIFACTS RECORD A `git_commit` THAT DID NOT PRODUCE THEM** (four
+> `kolmogorov_*` + `rank_growth_sweep`, D55) - numbers may be fine, the record is false, and the fix is
+> a cheap clean-tree re-run; the figure axis that renders every finite bar at 1.5e-290 of its width; two
 > withdrawn claims printed in `fig_crossover`'s title; three required citations absent from
 > `refs.bib` — **CORRECTED, R84: that is D42's false claim. All 30 keys the draft cites resolve in
 > the writer's `paper/references.bib`, and the five D4-critical DOIs verify against Crossref. Only
@@ -537,6 +539,66 @@
   CONVERTED A VAGUE HOLD INTO A FACT PLUS AN EXIT. AND THE COROLLARY: A BRANCH CAN BE UNMERGEABLE AND THE
   WORK STILL BE NEARLY DONE - the two things I needed were never in the 39 commits' blast radius; they
   were two paragraphs and a citation list, and one of the two was already finished by someone else.**
+
+- 2026-09-26 **R91 — FIVE COMMITTED ARTIFACTS RECORD A `git_commit` THAT DEMONSTRABLY DID NOT PRODUCE
+  THEM. Found by a check that needs no compute, and it is the coder's own docstring case, verbatim.
+  D55.** No new pushes.
+  **HOW IT STARTED: verifying `rank_growth_sweep.json` (17.5 s, `T=0.1`) returned the NUMBERS EXACT -
+  rank `17->36` at cutoff `1e-6`, `17->43` at `1e-8` and `1e-10`, all stable, `rank_final` identical -
+  AND `parameters identical: False`.** The reproduction, run from the artifact's OWN RECORDED COMMIT
+  `78607f3a`, wrote a **10-KEY** parameter dict; the committed artifact has **22 KEYS** with different
+  names. **BY HAND: `run_rank_growth_sweep.py @ 78607f3a` writes A HARD-CODED 10-KEY DICT; `@ main` writes
+  `**result["parameters"]` (the case's own record, ~24 keys). THE SAME CODE CANNOT WRITE BOTH SCHEMAS. SO
+  `rank_growth_sweep.json` WAS PRODUCED BY A STRICTLY LATER VERSION OF THE DRIVER THAN THE ONE IT NAMES.
+  ITS `provenance.git_commit` IS FALSE - AND ITS NUMBERS STILL REPRODUCE BIT-FOR-BIT.**
+  **THE GENERALISATION, AND IT COSTS NOTHING: IF AN ARTIFACT'S RECORDED COMMIT'S DRIVER DOES NOT WRITE
+  THE KEYS THE ARTIFACT CONTAINS, THE COMMIT DID NOT PRODUCE THE ARTIFACT. No compute, no run, no
+  comparison of numbers. APPLIED TO ALL SIXTEEN: FIVE FALSE, TEN MATCH.**
+  **FALSE COMMIT (`78607f3a`): `kolmogorov_re100_N64.json`, `kolmogorov_re1000_N64.json`,
+  `kolmogorov_re5000_N64.json` - keys `pod_fit_includes_ic`, `spectrum_count`;
+  `kolmogorov_re5000_N128.json` - the same two plus `ic_reference_N`; `rank_growth_sweep.json` - 18
+  KEYS. MATCH: `baselines_re5000_N64_T8.json` (24 keys), `crossover_surface.json` (17),
+  `peak_memory.json` (6), `taylor_green.json` (4), `kolmogorov_re5000_N64_long.json` (15),
+  `regime_pilot_*` (13 each). SO ALL THREE ARTIFACTS VERIFIED NUMERICALLY IN R82/R90 ARE IN THE MATCH
+  COLUMN, AS IS `taylor_green.json`, WHICH STRENGTHENS R85 RATHER THAN UNDERMINING IT.**
+  **WHY IT HAPPENED, AND IT IS THE D47 GAP OCCURRING RATHER THAN BEING HYPOTHETICAL: `git log -S` shows
+  `554bad3` (13:13) added `spectrum_count`/`pod_fit_includes_ic` to `run_kolmogorov.py` and `78607f3a`
+  is NOT AN ANCESTOR of it; `a26cccb` (13:29) added the splat to `run_rank_growth_sweep.py` and
+  `78607f3a` IS an ancestor of it. SO THE SEQUENCE WAS: HEAD was `78607f3a`; the working tree carried
+  the new fields UNCOMMITTED; the runs recorded `78607f3a`; the code was then committed as `554bad3` and
+  `a26cccb`. THAT IS THE CODER'S OWN DOCSTRING CASE, VERBATIM: "a dirty DRIVER - uncommitted edits to the
+  file doing the measuring. THAT IS WHAT INVALIDATES THE NUMBERS." I HYPOTHESISED THIS GAP IN D47, BUILT A
+  METHOD TO TEST IT, AND THE METHOD HAS NOW CAUGHT IT HAPPENING IN FIVE COMMITTED ARTIFACTS.**
+  **WHAT IS AND IS NOT FALSIFIED, AND THE DISTINCTION IS THE POINT: the NUMBERS in
+  `rank_growth_sweep.json` are VERIFIED (reproduce bit-for-bit); the `provenance.git_commit` in all five
+  is FALSIFIED; the numbers in the four `kolmogorov_*` are UNVERIFIED EITHER WAY; and D32.2's bar on
+  "adaptive rank" is UNCHANGED, because it was never about this artifact being wrong but about the
+  horizon being `T=0.1`. A NUMERICAL REPRODUCTION CANNOT FALSIFY A PROVENANCE CLAIM, BECAUSE A LATER
+  VERSION OF A DRIVER CAN EMIT IDENTICAL NUMBERS WITH A RICHER PARAMETER RECORD. THE NUMBERS ARE
+  VERIFIED; THE PROVENANCE IS FALSE. THOSE ARE TWO DIFFERENT VERIFICATIONS, AND ONLY ONE OF THEM IS ABOUT
+  THE NUMBERS.**
+  **THE REMEDY IS CHEAP AND THE MECHANISM IS ALREADY IN THE TREE: all five are `T=0.1` or `T=1.0` -
+  seconds to a couple of minutes each - and re-running them on a clean tree under the new
+  `experiments/provenance.py` makes the record true, because that module hashes the driver and compares
+  it against the committed file. THE FIX IS NOT "RE-RUN BECAUSE I DOUBT THE NUMBERS"; IT IS "RE-RUN
+  BECAUSE THE RECORD IS FALSE, AND THE NUMBERS MAY WELL BE FINE."**
+  **AND A FALSE POSITIVE FROM MY OWN INSTRUMENT, WHICH IS WHY THIS IS RECORDED AS A DISCIPLINE RATHER THAN
+  ONLY A FINDING: the first extractor used a non-greedy regex that stopped at the first `}`, and it
+  reported `baselines_re5000_N64_T8.json` as a MISMATCH on keys `N` and `T` - KEYS THE CODE AT `1c9d032a`
+  PLAINLY WRITES. REPORTING THAT WOULD HAVE BEEN A FALSE DEFECT AGAINST THE VERY ARTIFACT I VERIFIED IN
+  R90. THE FIX WAS BRACE-MATCHING PLUS A SELF-TEST AGAINST A CASE I HAD ALREADY CHECKED BY HAND. A FINDING
+  FROM A BROKEN INSTRUMENT IS THE SAME ERROR AS A CLAIM FROM A REMEMBERED STRING.**
+  **THE LESSON: D47 said a dirty working tree makes "is the recorded commit still the code?" unanswerable
+  FROM THE ARTIFACT, and prescribed running the recorded code. That works when the code is deterministic.
+  IT FAILS IN EXACTLY ONE CASE - A LATER DRIVER THAT COMPUTES THE SAME NUMBERS AND RECORDS MORE - AND IN
+  THAT CASE THE STRONGEST POSSIBLE EVIDENCE STILL SAYS NOTHING, BECAUSE THE NUMBERS ARE RIGHT. SO D47
+  NEEDS A SECOND, INDEPENDENT CHECK, AND IT IS FREE: read the artifact's own parameter keys and confirm
+  the named commit's driver writes them. NUMBERS VERIFY THE COMPUTATION; THE SCHEMA VERIFIES THE
+  ATTRIBUTION. A PROJECT CAN HAVE A FULLY REPRODUCIBLE ARTIFACT WHOSE PROVENANCE RECORD IS FALSE, AND ONLY
+  THE SECOND CHECK SEES IT. AND THE META-POINT IS THE FOURTH TIME THIS SHAPE HAS APPEARED: MY EXTRACTOR
+  PRODUCED A FALSE DEFECT ON THE FIRST RUN, AND WHAT CAUGHT IT WAS SELF-TESTING THE INSTRUMENT AGAINST A
+  CASE ALREADY ESTABLISHED BY HAND. VERIFY THE VERIFIER, AND VERIFY IT AGAINST SOMETHING ALREADY KNOWN,
+  BEFORE BELIEVING WHAT IT SAYS ABOUT ANYTHING NEW.**
 
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
