@@ -74,7 +74,8 @@ def peak_rss_mib() -> float:
     return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / KIB
 
 
-def _memory_interpretation(rank_rows: list[dict], noise_floor: float) -> str:
+def _memory_interpretation(rank_rows: list[dict], noise_floor: float,
+                           noise_stats: dict | None = None) -> str:
     """State the rank variation as measured, per grid, and claim nothing more.
 
     D19.4/D89: the overhead over the full grid is positive at every rank and
@@ -112,9 +113,17 @@ def _memory_interpretation(rank_rows: list[dict], noise_floor: float) -> str:
             ratio = spread / noise_floor if noise_floor else float("nan")
             resolved = row.get("rank_independence_resolved")
             verdicts.append(bool(resolved))
+            # How much headroom the verdict has, and how much of it the floor's
+            # own uncertainty could eat.  A verdict stated without its margin is
+            # the thing that flipped: with the smallest of four measured floors
+            # this read 49x, with the largest it reads 1.4x and crosses the
+            # threshold of 2.  Both numbers are reported so a reader can see
+            # which side of the line the answer is on.
+            headroom = ratio / 2.0 if noise_floor else float("nan")
             detail.append(
                 f"N={row.get('N')}: varies by {spread:.2f} MiB, which is "
-                f"{ratio:.1f}x the noise floor -- "
+                f"{ratio:.1f}x the noise floor (threshold 2x, so the margin is "
+                f"{headroom:.1f}x either side) -- "
                 + ("RESOLVED, so the variation with rank is real"
                    if resolved else "NOT resolved, so no variation is established")
             )
@@ -133,6 +142,21 @@ def _memory_interpretation(rank_rows: list[dict], noise_floor: float) -> str:
             parts.append(
                 f"For the {label}, peak RSS " + "; ".join(detail) + f". {tail}"
             )
+    if noise_stats and noise_stats.get("samples", 0) > 1:
+        parts.append(
+            f"THE NOISE FLOOR IS A DISTRIBUTION, not a point: it is the largest of "
+            f"{noise_stats['samples']} re-measurements of one configuration "
+            f"({noise_stats['min_mib']:.4f} to {noise_stats['max_mib']:.4f} MiB, "
+            f"a factor of {(noise_stats['max_over_min'] or float('nan')):.0f} "
+            f"between them). With a single repeat this number has been observed at "
+            f"0.1328, 0.0664, 0.0977 and 0.0039 MiB -- a factor of 34 -- and the "
+            f"verdicts above flip between 'resolved' and 'not established' across "
+            f"that range for the projected integrator. **Any claim of the form "
+            f"'the variation with rank is N times the noise floor' therefore "
+            f"carries the floor's own spread, and the verdicts here are taken "
+            f"against its maximum so that the error can only fall on the side of "
+            f"not claiming a rank dependence.**"
+        )
     parts.append(
         "The BUG integrator trades memory for time: its overhead is SMALLER "
         "than the projected integrator's at both grids, while its cost per step "
@@ -229,6 +253,16 @@ def main() -> None:
     parser.add_argument("--ranks", type=int, nargs="+", default=[2, 8, 16, 32, 43])
     parser.add_argument("--methods", nargs="+", default=["full", "dlra", "bug"])
     parser.add_argument("--steps", type=int, default=400)
+    parser.add_argument(
+        "--noise-repeats", type=int, default=8,
+        help=(
+            "how many times to re-measure ONE configuration to estimate the "
+            "noise floor. One repeat gives a single sample, and a single "
+            "sample of this quantity has been observed to move by a factor "
+            "of 34, which is enough to flip a verdict. 8 costs 7 extra "
+            "worker subprocesses and no integration time."
+        ),
+    )
     parser.add_argument("--dt", type=float, default=None)
     parser.add_argument("--output", type=Path,
                         default=Path("state/coder/results/peak_memory.json"))
@@ -239,12 +273,25 @@ def main() -> None:
         for method in args.methods:
             ranks = [0] if method == "full" else list(args.ranks)
             for rank in ranks:
-                # An identical configuration is measured twice, so the artifact
-                # carries the measurement's own noise floor.  Without it, a
-                # "rank-independent" verdict is a boolean that flips when
+                # An identical configuration is measured repeatedly, so the
+                # artifact carries the measurement's own noise floor.  Without
+                # it, a "rank-independent" verdict is a boolean that flips when
                 # allocator behaviour moves the peak by a few tenths of a MiB --
                 # which is exactly the size of the effect being asked about.
-                repeats = 2 if (N == args.N[0] and method == args.methods[0]) else 1
+                #
+                # The repeat count is NOT 2.  With a single repeat the "floor"
+                # is one sample of |RSS(a) - RSS(b)|, and it was measured four
+                # times on this problem at 0.1328, 0.0664, 0.0977 and 0.0039 MiB
+                # -- a factor of 34 for the same quantity.  Under the threshold
+                # below (spread > 2 x floor) that is the difference between
+                # "the variation with rank is real" and "no variation is
+                # established" for the DLRA at both grids.  A floor estimated
+                # from one sample cannot carry a verdict that swings on it, so
+                # the floor is now a distribution and the verdict is taken
+                # against its MAXIMUM, which is the conservative side.
+                is_reference = (N == args.N[0] and method == args.methods[0]
+                                and rank == 0)
+                repeats = args.noise_repeats + 1 if is_reference else 1
                 for rep in range(repeats):
                     cmd = [
                         sys.executable, str(Path(__file__).resolve()),
@@ -273,8 +320,15 @@ def main() -> None:
                     rows.append(row)
 
     by_key = {(r["method"], r["N"], r["rank"]): r for r in rows if r["repeat"] == 0}
-    # The noise floor: the same configuration measured twice, so the reader can
-    # see whether a spread over rank is larger than the spread over nothing.
+    # The noise floor: the same configuration measured repeatedly, so the reader
+    # can see whether a spread over rank is larger than the spread over nothing.
+    # It is reported as a DISTRIBUTION, not a point, because one sample of this
+    # quantity has been observed to move by a factor of 34 (see the repeat-count
+    # comment above) and a verdict must not rest on the luck of which sample is
+    # taken.  ``noise_floor`` -- the value the verdicts use -- is the MAXIMUM,
+    # because the failure mode being guarded against is claiming a rank
+    # dependence that is allocator noise, and the conservative side of that
+    # error is the larger floor.
     repeats = [r for r in rows if r["repeat"] > 0]
     noise = {}
     for r in repeats:
@@ -284,6 +338,28 @@ def main() -> None:
                 r["peak_rss_mib"] - base["peak_rss_mib"]
             )
     noise_floor = max(noise.values()) if noise else None
+    noise_stats = None
+    if noise:
+        ordered = sorted(noise.values())
+        median = (ordered[len(ordered) // 2] if len(ordered) % 2
+                  else 0.5 * (ordered[len(ordered) // 2 - 1]
+                              + ordered[len(ordered) // 2]))
+        noise_stats = {
+            "samples": len(ordered),
+            "min_mib": ordered[0],
+            "median_mib": median,
+            "max_mib": ordered[-1],
+            "max_over_min": (ordered[-1] / ordered[0]) if ordered[0] > 0 else None,
+            "values_mib": ordered,
+            "used_for_verdicts": "max_mib",
+            "why_max": (
+                "the verdicts ask whether a spread over rank exceeds twice this "
+                "quantity. Taking the maximum is the conservative side: it can "
+                "only turn a 'varies with rank' verdict into 'not established', "
+                "never the reverse, and a false claim of rank-independence is "
+                "the error this project has been correcting all cycle."
+            ),
+        }
     for N in args.N:
         base = by_key.get(("full", N, 0))
         if base is None:
@@ -385,6 +461,7 @@ def main() -> None:
         },
         "measurements": rows,
         "noise_floor_mib": noise_floor,
+        "noise_floor_samples_mib": noise_stats,
         "run_to_run_noise_mib": noise,
         "rank_scaling": rank_scaling,
         # D19.4: "peak memory is rank-independent" is NOT supported.  The
@@ -400,7 +477,8 @@ def main() -> None:
     # written as a literal.  It has to be assigned after the dict is built,
     # because it reads the dict.
     artifact["interpretation"] = _memory_interpretation(
-        artifact.get("rank_scaling", []), artifact["noise_floor_mib"]
+        artifact.get("rank_scaling", []), artifact["noise_floor_mib"],
+        artifact.get("noise_floor_samples_mib"),
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n")
