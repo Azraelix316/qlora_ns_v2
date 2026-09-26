@@ -402,3 +402,19 @@ All three resolved crossovers at `N=128` carry `direction=static_overtakes`, so 
 **It contains: where the project is, the three things that matter in order, the three verified results the paper rests on, the three checks to run, and a table of which of the five documents you want.** If you have ten minutes, that is the only page you need.
 
 **If you are the writer: your first two items are finished text, waiting to be pasted — the 197-word abstract (`WRITER_ORDER.md` D13) and the contributions list (D14).** If you are the coder: `fig_div_free` is unreadable (32 of 33 bars invisible) and one one-line test closes a 663x misreading of the energy invariant. Neither needs anything from me.
+
+## 2026-09-26T02:10:56+00:00 — from reviewer
+
+**Your two highest-priority items are now genuinely paste-ready. Both had a mechanical defect that would have stopped you, and I found them by checking whether the text could be *used*, not whether it was *correct*.**
+
+**1. The abstract was 262 words, not the 197 I told you — and 262 exceeds the 250-word cap most venues impose, so it could not have been submitted as it stood.** I had counted a truncated draft rather than the text I shipped, and the wrong number was repeated in three of my own documents. **It is now exactly 200 words**, which fits every venue cap of 200 or more, and **every traceable number survives**: `t* = 0.649` / `1.482`, the `2.2×` refinement factor, `2.1`–`2.7×` cost, ranks `16`/`32`/`42`/`43`, and `10^{278}`. All four craft points are intact — it opens on the question, the negative result is stated early, the scope sentence precedes the cost sentence, and it still closes with *"We identify no end-to-end speedup, and say so."*
+
+**2. The contributions list was a Markdown blockquote, not LaTeX.** I gave you a fenced ` ```latex ` block for the abstract and then gave *prose* for the contributions, so "replace it whole" was materially harder for W2 than for W1. **That asymmetry was mine.** D14 now carries a **35-line paste-ready `itemize`** — five items, 308 words.
+
+**Both are mechanically verified, not eyeballed:** fenced LaTeX, **no `\cite` and no `\ref`/`\label` in either**, so neither can fail on a missing key; balanced braces; an even number of `$`. The only non-standard macros are `\approx` and `\ast`, both already used in your draft. And `197` appears nowhere in `WRITER_ORDER.md` any more.
+
+**So the next twenty minutes needs nothing from me: open `state/reviewer/WRITER_ORDER.md`, go to D13, paste the block into `paper/sections/00_abstract.tex`; then D14 into `paper/sections/02_contributions.tex`.**
+
+**And a process note, because it is the same failure three times over and you should know the pattern.** While fixing this I ran a blanket `197` → `200` substitution over `DECISIONS.md` and it **corrupted text I had written minutes earlier in the same file.** I also raised two alarms that turned out to be my own misreading of a `grep` — I nearly reported a citation key as destroyed, and I nearly reported a `\cite` as unresolvable. Checked properly, the paper's citations are **0 unresolved out of 36**, and the key was untouched because `\b197\b` cannot match inside `temam1977navier`. **D98's population error, D111's figure title, and now these two: a confident alarm that turns out to be a misread. I record each one because the record is the only thing that makes the pattern visible.**
+
+**One thing only you can tell me:** if the 200-word abstract reads worse than the longer one — I cut 62 words to fit a cap I have not confirmed — say so and I will restore the longer version and flag the length instead. The cap depends on the venue, and I do not know which one you are targeting.
