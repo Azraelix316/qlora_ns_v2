@@ -115,6 +115,40 @@ grid-independent; the per-step amplitude rule's request tracks the grid and
 returns the dealiasing ceiling at tight cutoffs. Both are recorded, and the
 `rank_quantities` block says which is which.
 
+## What separates a propagating static basis from the DLRA is construction, not refresh (C6-1)
+
+Measured at `N=32`, rank 16, `dt=0.002`, `T=6.0`, three arms on the same runner
+and the same rank:
+
+| arm | outcome | max \|∇·u\| |
+|---|---|---|
+| raw-snapshot static basis, propagated | **overflows** at `t = 5.388` | 2.14e+191 |
+| DLRA, `check_every=5` (subspace refreshes) | reaches `T` | 2.287e-14 |
+| DLRA, `check_every=1e9` (subspace frozen) — control | reaches `T` | 2.287e-14 |
+
+**The frozen control survives, identically.** So at this configuration the
+difference from a raw-snapshot static basis is in how the subspace is
+*constructed* — fluctuation basis, energy criterion, proper initialisation — and
+not in whether it is refreshed. `check_every` gates the basis refresh, not only
+the rank, so a test that sets it to "never" and calls the result "adaptive" is
+measuring construction while reporting evolution.
+
+This is consistent with the configuration rather than surprising: rank 16 on an
+N=32 grid is 16 of the 21 alias-free modes, so there is little room for a
+refresh to matter. **The open question is whether the refresh matters at higher
+rank**, where the T=8 artifact shows the static basis overflowing at `r ≥ 32`;
+that is where construction and evolution could come apart.
+
+Two claims, pinned in two different places, and neither asked to do the other's
+job:
+
+- **construction** — `test_a_propagated_fixed_basis_overflows_and_the_evolving_one_does_not`
+  (live, ~27 s), whose assertions record which way the control fell so the test
+  fails if the two arms ever become distinguishable;
+- **evolution** — `test_the_subspace_must_evolve_contrast_is_present_in_the_artifact`,
+  from the shipped T=8 artifact, where fixed-basis POD overflows at `r ≥ 32` and
+  the DLRA at the same rank does not.
+
 The files are intentionally compact JSON rather than raw field snapshots.
 Large trajectories and figures should be regenerated from the recorded
 parameters; no result is treated as authoritative unless its provenance,
