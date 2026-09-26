@@ -423,3 +423,47 @@ out, which the gate itself calls "plausibly a re-run" — and it is: across thre
 independent measurements the overhead of the projected integrator at N=64 moved by
 **+136%**. These rows need a stated tolerance or a distribution, not a point
 pinned to `sf=8`.
+
+## The cost ratios are not reproducible to better than ~15% on this node
+
+Five committed versions of `cost_retiming.json`, all the same configuration
+(N=64/128/256, ranks {2, 64}, 7 interleaved repeats of 2000 steps), with the
+maximum per-configuration `full_step_ratio_vs_reference`:
+
+| committed | OMP threads | load at end | N=64 | N=128 | N=256 |
+|---|---|---|---|---|---|
+| 09-25 16:17 | 1 | – | 2.071 | 2.144 | 2.181 |
+| 09-25 23:23 | 1 | 1.36 | 2.426 | 2.710 | 2.308 |
+| 09-26 02:42 | 1 | 1.33 | 2.480 | **2.740** | 2.346 |
+| 09-26 10:31 | 2 | 2.27 | 2.562 | 3.640 | 3.048 |
+| 09-26 13:xx | 2 | 1.82 | 2.437 | 3.543 | 2.400 |
+
+**At a fixed thread count the N=128 ratio has ranged 2.14 – 2.74, a 28% spread
+on an identical configuration**, and the within-run spread over 7 interleaved
+repeats is only 0.17 – 0.35 (7–10%). So the protocol's precision is roughly a
+third of the between-run uncertainty, and quoting a cost ratio as a point
+overstates what was measured.
+
+**The thread count moves it by 43% at N=128** (2.57 at one thread, 3.54 at two),
+which is larger than every other effect here and is a property of the node rather
+than of the method. `bench_cost.py` now records `threads_match_canonical` and
+`threads_differing_from_canonical`, because a 1-thread re-run landed within 6% of
+the 2-thread pinned value at one grid — close enough to look like agreement, and
+not agreement.
+
+**One measurement failure was mine and is worth recording.** The 10:31 re-run was
+launched while three other streams were using the same twelve cores. Its N=128
+ratio of 3.640 is the highest in the table, and interleaving only controls for load
+that arrives *within* a run — it cannot control for load that was already there.
+`cost_retiming.json`'s `shared_node_note` says as much, and I ran it anyway. The
+re-run at 13:xx was done with nothing else on the machine and gave 3.543, so
+contention accounts for about 3% of that particular gap and the rest is the
+thread-count and machine-state effects above.
+
+**What the paper can honestly say.** The ratio of projected-DLRA step time to
+full-grid step time is **2.1–2.7 at one thread** and **3.4–3.6 at two threads**,
+N=128, on this node, with a between-run spread comparable to the thread-count
+effect. Any cost claim needs its thread count and load stated next to it, and
+should be a range rather than a value. That is not a weakness in the
+interleaving — the interleaving is what makes the *ratio* usable at all on a noisy
+node — it is a statement about what the ratio can be resolved to.
