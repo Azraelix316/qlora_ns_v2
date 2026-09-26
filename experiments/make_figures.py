@@ -250,6 +250,7 @@ def make_paper_figures(results, out, paper_dir, used, skipped, colors) -> None:
         fig, axes = plt.subplots(1, len(suite), figsize=(2.3 * len(suite) + 0.4, 2.5),
                                  layout="constrained", squeeze=False)
         slowest = {}
+        slope = {}
         for j, (re, data) in enumerate(sorted(suite.items())):
             block = data["dlra"]
             steps_at = block.get("singular_value_steps") or []
@@ -273,12 +274,23 @@ def make_paper_figures(results, out, paper_dir, used, skipped, colors) -> None:
                 kept = int(np.count_nonzero(
                     final >= 1e-10 * final[0])) if final[0] > 0 else 0
                 slowest[re] = kept
+                # The draft's caption says "slower decay at higher Re".  Measured,
+                # that is true and small: sigma_20/sigma_1 rises monotonically
+                # with Re by about 19% across a 50x range, which is invisible on
+                # a log axis spanning fifteen decades.  The number is printed so
+                # the claim is quantified instead of asserted, and so a reader
+                # can see how weak it is.
+                slope[re] = float(final[19] / final[0]) if final.size > 19 else None
             ax.set_xlabel("mode index $r$")
             if j == 0:
                 ax.set_ylabel(r"$\sigma_r/\sigma_1$")
             ax.set_title(
-                f"Re={re}\n" + (f"{slowest.get(re, 0)} modes at $10^{{-10}}$"
-                                if re in slowest else ""),
+                f"Re={re}\n"
+                + (f"{slowest.get(re, 0)} modes at $10^{{-10}}$"
+                   f"   $\\sigma_{{20}}/\\sigma_1$ = {slope[re]:.2e}"
+                   if re in slowest and slope.get(re) is not None
+                   else (f"{slowest.get(re, 0)} modes at $10^{{-10}}$"
+                         if re in slowest else "")),
                 fontsize=8.5,
             )
         fig.suptitle(
@@ -290,10 +302,16 @@ def make_paper_figures(results, out, paper_dir, used, skipped, colors) -> None:
         plt.close(fig)
         emit(fig, "fig_sv_decay",
              r"Singular-value decay of the full-grid state at every recorded "
-             r"time, one panel per Reynolds number, darker for later. The mode "
-             r"count above the $10^{-10}$ relative-amplitude cutoff is printed "
-             r"per panel and read from the artifact, so the panels can be "
-             r"compared without re-deriving them.")
+             r"time, one panel per Reynolds number, darker for later. Both "
+             r"numbers per panel are read from the artifact. **On the draft's "
+             r"claim that the decay is slower at higher $\mathrm{Re}$: it is "
+             r"true and small.** $\sigma_{20}/\sigma_1$ rises monotonically "
+             r"with $\mathrm{Re}$ (1.97e-3, 2.31e-3, 2.34e-3 at Re = 100, 1000, "
+             r"5000), which is +19% across a 50-fold range of Reynolds numbers "
+             r"and invisible on a log axis spanning the fifteen decades these "
+             r"panels cover. The mode count above the $10^{-10}$ cutoff is 43 at "
+             r"all three. The two cliffs are the initial condition's numerical "
+             r"rank (17) and the top of the band the grid resolves (43).")
 
     # --- fig_error_vs_ref (fig:error) ---------------------------------------
     if suite:
@@ -322,6 +340,10 @@ def make_paper_figures(results, out, paper_dir, used, skipped, colors) -> None:
         fig.savefig(out / "fig_error_vs_ref.png", bbox_inches="tight")
         plt.close(fig)
         emit(fig, "fig_error_vs_ref",
+             r"**The three SP-DLRA curves coincide**, so two of them are hidden "
+             r"behind the third: over this window the reduced method's error is "
+             r"the same at all three Reynolds numbers, and the legend's six "
+             r"entries are three distinct curves rather than six. "
              r"Relative $L^2$ against the full-grid spectral reference, the "
              r"adaptive method against the static POD baseline at each Reynolds "
              r"number. **The window is $t\leq0.1$ and the figure says so, because "

@@ -16,7 +16,7 @@ Maximum $|\nabla\!\cdot u|$ over each run. Every method that survives stays with
 
 ## `fig_error_vs_ref`
 
-Relative $L^2$ against the full-grid spectral reference, the adaptive method against the static POD baseline at each Reynolds number. **The window is $t\leq0.1$ and the figure says so, because inside it the static baseline is the more accurate method: its offline fitting window is a prefix of the evaluated trajectory. The ordering reverses at longer horizons, and the crossover is measured separately.**
+**The three SP-DLRA curves coincide**, so two of them are hidden behind the third: over this window the reduced method's error is the same at all three Reynolds numbers, and the legend's six entries are three distinct curves rather than six. Relative $L^2$ against the full-grid spectral reference, the adaptive method against the static POD baseline at each Reynolds number. **The window is $t\leq0.1$ and the figure says so, because inside it the static baseline is the more accurate method: its offline fitting window is a prefix of the evaluated trajectory. The ordering reverses at longer horizons, and the crossover is measured separately.**
 
 ## `fig_ke_spectrum`
 
@@ -36,7 +36,7 @@ Singular-value spectrum of the **full-grid** state, at $t=0$ and at the end of t
 
 ## `fig_sv_decay`
 
-Singular-value decay of the full-grid state at every recorded time, one panel per Reynolds number, darker for later. The mode count above the $10^{-10}$ relative-amplitude cutoff is printed per panel and read from the artifact, so the panels can be compared without re-deriving them.
+Singular-value decay of the full-grid state at every recorded time, one panel per Reynolds number, darker for later. Both numbers per panel are read from the artifact. **On the draft's claim that the decay is slower at higher $\mathrm{Re}$: it is true and small.** $\sigma_{20}/\sigma_1$ rises monotonically with $\mathrm{Re}$ (1.97e-3, 2.31e-3, 2.34e-3 at Re = 100, 1000, 5000), which is +19% across a 50-fold range of Reynolds numbers and invisible on a log axis spanning the fifteen decades these panels cover. The mode count above the $10^{-10}$ cutoff is 43 at all three. The two cliffs are the initial condition's numerical rank (17) and the top of the band the grid resolves (43).
 
 ## `fig_tg_ke_rank`
 
