@@ -12,7 +12,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "static (projected every step, basis never refitted)",
-      "wall_seconds": 6.123733963118866
+      "wall_seconds": 4.478483332088217
     },
     {
       "arm": "2_fluctuation_snapshots_static_stepper",
@@ -26,7 +26,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "static (projected every step, basis never refitted)",
-      "wall_seconds": 4.103347253985703
+      "wall_seconds": 3.1496827281080186
     },
     {
       "arm": "3_dlra_basis_frozen",
@@ -40,7 +40,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "DLRA, check_every=10**9 (frozen; expect rebuilds=0)",
-      "wall_seconds": 6.669172136113048
+      "wall_seconds": 5.8984181608539075
     },
     {
       "arm": "4_dlra_basis_refreshing",
@@ -54,7 +54,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "DLRA, check_every=5 (refreshes)",
-      "wall_seconds": 8.620682580862194
+      "wall_seconds": 6.159851306118071
     }
   ],
   "case": "static_basis_construction",
@@ -87,15 +87,26 @@
     "train_window": 0.5
   },
   "provenance": {
+    "captured_at": "launch",
     "driver": "experiments/run_static_basis_construction.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "ab2961f9c14aebcb5eada09aa9a6eff11d46df0a832f6fb5fdbbc8a0fddaf379",
-    "git_commit": "acbb0ad9c940efea580c1b469d24bc72b28c9d78",
-    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "driver_matches_HEAD_at_write": true,
+    "driver_sha256": "dcaaa897957c15c3a306054cd46c206f8d645b5fa15b0e4f2ed1d77ce7e24026",
+    "driver_sha256_at_write": "dcaaa897957c15c3a306054cd46c206f8d645b5fa15b0e4f2ed1d77ce7e24026",
+    "git_commit": "f403ab6b1986e9743839b649bccd235fb7213822",
+    "git_commit_at_write": "f403ab6b1986e9743839b649bccd235fb7213822",
+    "git_commit_how": "git log -1 --before=1790412053",
+    "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_dirty": false,
-    "working_tree_dirty_paths": []
+    "sources_files_at_launch": 30,
+    "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+    "tree_moved_during_run": false,
+    "working_tree_diff_sha256": "eb19b0990e2f51e8d9deb7adf4cf7cedd63c4a956d125acc917f56a4ea02aba9",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "state/coder/results/peak_memory.json"
+    ]
   },
   "rank_sweep": [
     {
@@ -107,7 +118,7 @@
       "final_time_reached": 5.478,
       "max_abs_divergence": 1.6414204589195224e+132,
       "rank": 14,
-      "wall_seconds": 6.780263631138951
+      "wall_seconds": 3.8873618468642235
     },
     {
       "basis": "fluctuations",
@@ -118,7 +129,7 @@
       "final_time_reached": 4.08,
       "max_abs_divergence": 6.477610257926561e+224,
       "rank": 14,
-      "wall_seconds": 5.826417803065851
+      "wall_seconds": 2.8975342358462512
     },
     {
       "basis": "raw",
@@ -129,7 +140,7 @@
       "final_time_reached": 3.922,
       "max_abs_divergence": 2.8392137667797144e+133,
       "rank": 15,
-      "wall_seconds": 5.613968692952767
+      "wall_seconds": 2.793237438192591
     },
     {
       "basis": "fluctuations",
@@ -140,7 +151,7 @@
       "final_time_reached": 4.96,
       "max_abs_divergence": 2.864581841720371e+89,
       "rank": 15,
-      "wall_seconds": 7.282449014950544
+      "wall_seconds": 3.518186707980931
     },
     {
       "basis": "raw",
@@ -151,7 +162,7 @@
       "final_time_reached": 5.388,
       "max_abs_divergence": 2.138644039510404e+191,
       "rank": 16,
-      "wall_seconds": 7.9747730570379645
+      "wall_seconds": 3.8191482808906585
     },
     {
       "basis": "fluctuations",
@@ -162,7 +173,7 @@
       "final_time_reached": 4.438,
       "max_abs_divergence": 3.8194424556271614e+89,
       "rank": 16,
-      "wall_seconds": 6.557428947882727
+      "wall_seconds": 3.1330193190369755
     },
     {
       "basis": "raw",
@@ -173,7 +184,7 @@
       "final_time_reached": 2.952,
       "max_abs_divergence": 1.4196068833898572e+132,
       "rank": 17,
-      "wall_seconds": 3.2538919469807297
+      "wall_seconds": 2.115489653078839
     },
     {
       "basis": "fluctuations",
@@ -184,7 +195,7 @@
       "final_time_reached": 6.0,
       "max_abs_divergence": 7.105427357601002e-14,
       "rank": 17,
-      "wall_seconds": 8.520269950851798
+      "wall_seconds": 4.272218049038202
     },
     {
       "basis": "raw",
@@ -195,7 +206,7 @@
       "final_time_reached": 6.0,
       "max_abs_divergence": 6.394884621840902e-14,
       "rank": 18,
-      "wall_seconds": 8.676165394019336
+      "wall_seconds": 4.2719342990312725
     },
     {
       "basis": "fluctuations",
@@ -206,7 +217,7 @@
       "final_time_reached": 2.876,
       "max_abs_divergence": 2.0859248397665138e+93,
       "rank": 18,
-      "wall_seconds": 4.152616209117696
+      "wall_seconds": 2.061947900103405
     }
   ],
   "seed_replication": [
@@ -220,7 +231,7 @@
       "initial_energy": 22.28992861738245,
       "max_abs_divergence": 2.138644039510404e+191,
       "seed": 20260925,
-      "wall_seconds": 5.7078353320248425
+      "wall_seconds": 3.8265863191336393
     },
     {
       "basis": "fluctuations",
@@ -232,7 +243,7 @@
       "initial_energy": 22.28992861738245,
       "max_abs_divergence": 3.8194424556271614e+89,
       "seed": 20260925,
-      "wall_seconds": 5.021903202170506
+      "wall_seconds": 3.173670988995582
     },
     {
       "basis": "raw",
@@ -244,7 +255,7 @@
       "initial_energy": 22.215153823348857,
       "max_abs_divergence": 5.558020283391177e+78,
       "seed": 7,
-      "wall_seconds": 5.102371867047623
+      "wall_seconds": 3.1987658268772066
     },
     {
       "basis": "fluctuations",
@@ -256,7 +267,7 @@
       "initial_energy": 22.215153823348857,
       "max_abs_divergence": 2.4550429559221064e+150,
       "seed": 7,
-      "wall_seconds": 3.499162877909839
+      "wall_seconds": 2.7803753870539367
     },
     {
       "basis": "raw",
@@ -268,7 +279,7 @@
       "initial_energy": 22.286048551199556,
       "max_abs_divergence": 4.1010951089681474e+99,
       "seed": 991,
-      "wall_seconds": 5.286515793064609
+      "wall_seconds": 4.062167312018573
     },
     {
       "basis": "fluctuations",
@@ -280,7 +291,7 @@
       "initial_energy": 22.286048551199556,
       "max_abs_divergence": 2.154551665274214e+214,
       "seed": 991,
-      "wall_seconds": 4.509381401119754
+      "wall_seconds": 2.830278577050194
     }
   ]
 }

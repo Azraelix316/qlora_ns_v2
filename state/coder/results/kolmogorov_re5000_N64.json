@@ -885,10 +885,10 @@
       "status": "projected_discrete_balance_with_projection_work"
     },
     "initial_energy": 22.20670331293339,
-    "initialization_seconds": 0.0005848798900842667,
+    "initialization_seconds": 0.00041924393735826015,
     "linear_algebra_calls": 841,
-    "linear_algebra_seconds": 0.4434413886629045,
-    "linear_algebra_seconds_per_step": 0.0022172069433145226,
+    "linear_algebra_seconds": 0.2970114622730762,
+    "linear_algebra_seconds_per_step": 0.0014850573113653809,
     "max_abs_divergence": 2.6645352591003757e-14,
     "max_cfl": 0.014747385514922155,
     "max_energy_increase": 0.002445655599142782,
@@ -897,7 +897,7 @@
     "max_relative_l2_vs_full": 0.00010108416677874297,
     "max_scaled_pde_energy_residual": 0.00046923135768045965,
     "max_scaled_projected_energy_residual": 0.0007700258068321355,
-    "offline_plus_online_seconds": 1.971402334049344,
+    "offline_plus_online_seconds": 1.3515086369588971,
     "projection_energy_history": [
       -4.213816602316456e-07,
       -5.109879275266849e-07,
@@ -2056,17 +2056,59 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 1.9708174541592598,
-    "wall_seconds_per_step": 0.0098540872707963,
+    "wall_seconds": 1.3510893930215389,
+    "wall_seconds_per_step": 0.006755446965107694,
     "zonal_energy_fraction": {
       "at_final_step": 0.18397748201028016,
       "at_t0": 0.16207103178372204
+    },
+    "zonal_energy_fraction_components": {
+      "at_final_step": {
+        "fluctuation_energy": 18.500498140409178,
+        "total_energy": 22.67155345907041,
+        "zonal_energy": 4.171055318661232
+      },
+      "at_t0": {
+        "fluctuation_energy": 18.607639994491276,
+        "total_energy": 22.20670331293339,
+        "zonal_energy": 3.599063318442113
+      }
+    },
+    "zonal_energy_fraction_fluctuation": {
+      "at_final_step": 0.8160225179897198,
+      "at_t0": 0.8379289682162779
     },
     "zonal_enstrophy_fraction": {
       "at_final_step": 0.038345578566446416,
       "at_t0": 0.03501861052034957
     },
-    "zonal_fraction_definition": "zonal/total at t=0 and at the final step, from the psi' series"
+    "zonal_enstrophy_fraction_components": {
+      "at_final_step": {
+        "fluctuation_energy": 1282.5948694710974,
+        "total_energy": 1333.7378177486178,
+        "zonal_energy": 51.14294827752042
+      },
+      "at_t0": {
+        "fluctuation_energy": 1290.8059314276234,
+        "total_energy": 1337.6485241064267,
+        "zonal_energy": 46.842592678803385
+      }
+    },
+    "zonal_enstrophy_fraction_fluctuation": {
+      "at_final_step": 0.9616544214335536,
+      "at_t0": 0.9649813894796504
+    },
+    "zonal_fraction_definition": "zonal/total at t=0 and at the final step, from the psi' series. For the formula, the index, and the exact-complement identity, read zonal_fraction_semantics -- do not infer the ratio from the series names.",
+    "zonal_fraction_semantics": {
+      "energy_history": "kinetic energy E = 1/2||grad psi||^2 of the FULL field psi, summed over the grid",
+      "fluctuation_energy_history": "the same functional of psi' = psi - x-avg(psi), i.e. with the zonal (x-independent) mode removed",
+      "formula_fluctuation": "fluctuation_energy_history / energy_history",
+      "formula_zonal": "(energy_history - fluctuation_energy_history) / energy_history",
+      "how_to_miscompute_it": "the recorded value is the ZONAL share. Taking fluctuation_energy_history / energy_history instead gives its complement -- a legitimate different number, roughly four times larger here, whose Re trend is the reverse because it is the same trend seen from the other half. Name which one is being quoted.",
+      "index": "each share is reported at TWO indices and the key names which: 'at_t0' is the initial state, 'at_final_step' is the last step of the run. They are not interchangeable -- the share moves over a run.",
+      "the_two_are_exact_complements": "E(psi) = E(zonal) + E(psi') exactly, because the Parseval inner product of grad(psi_zonal) with grad(psi') vanishes: the zonal mode occupies only kx=0 and psi' occupies only kx!=0. So the two shares sum to 1 to machine precision, and either may be recovered from the other. Asserted in the test suite.",
+      "which_to_quote": "quote zonal_energy_fraction for 'what fraction of the energy sits in the zonal mean'; quote fluctuation_energy_fraction for the same statement about the eddy part. Both are at the final step unless the key says at_t0."
+    }
   },
   "full": {
     "checkpoint_steps": [
@@ -3665,17 +3707,59 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 1.0396559280343354,
-    "wall_seconds_per_step": 0.005198279640171677,
+    "wall_seconds": 0.9033733189571649,
+    "wall_seconds_per_step": 0.004516866594785824,
     "zonal_energy_fraction": {
       "at_final_step": 0.18397942647862772,
       "at_t0": 0.16207103178372245
+    },
+    "zonal_energy_fraction_components": {
+      "at_final_step": {
+        "fluctuation_energy": 18.50045394488433,
+        "total_energy": 22.671553322545964,
+        "zonal_energy": 4.171099377661633
+      },
+      "at_t0": {
+        "fluctuation_energy": 18.607639994491254,
+        "total_energy": 22.206703312933374,
+        "zonal_energy": 3.59906331844212
+      }
+    },
+    "zonal_energy_fraction_fluctuation": {
+      "at_final_step": 0.8160205735213722,
+      "at_t0": 0.8379289682162775
     },
     "zonal_enstrophy_fraction": {
       "at_final_step": 0.038346809285558586,
       "at_t0": 0.03501861052034979
     },
-    "zonal_fraction_definition": "zonal/total at t=0 and at the final step, from the psi' series. The fluctuation dominates at these settings (about 5:1 at N=64), so the total KE is NOT zonal-dominated and a figure of the total alone does not show the zonal part at all."
+    "zonal_enstrophy_fraction_components": {
+      "at_final_step": {
+        "fluctuation_energy": 1282.5925458331526,
+        "total_energy": 1333.7371083646856,
+        "zonal_energy": 51.14456253153298
+      },
+      "at_t0": {
+        "fluctuation_energy": 1290.805931427621,
+        "total_energy": 1337.6485241064247,
+        "zonal_energy": 46.84259267880361
+      }
+    },
+    "zonal_enstrophy_fraction_fluctuation": {
+      "at_final_step": 0.9616531907144414,
+      "at_t0": 0.9649813894796502
+    },
+    "zonal_fraction_definition": "zonal/total at t=0 and at the final step, from the psi' series. The fluctuation dominates at these settings (about 5:1 at N=64), so the total KE is NOT zonal-dominated and a figure of the total alone does not show the zonal part at all. For the formula, the index, and the exact-complement identity, read zonal_fraction_semantics -- do not infer the ratio from the series names.",
+    "zonal_fraction_semantics": {
+      "energy_history": "kinetic energy E = 1/2||grad psi||^2 of the FULL field psi, summed over the grid",
+      "fluctuation_energy_history": "the same functional of psi' = psi - x-avg(psi), i.e. with the zonal (x-independent) mode removed",
+      "formula_fluctuation": "fluctuation_energy_history / energy_history",
+      "formula_zonal": "(energy_history - fluctuation_energy_history) / energy_history",
+      "how_to_miscompute_it": "the recorded value is the ZONAL share. Taking fluctuation_energy_history / energy_history instead gives its complement -- a legitimate different number, roughly four times larger here, whose Re trend is the reverse because it is the same trend seen from the other half. Name which one is being quoted.",
+      "index": "each share is reported at TWO indices and the key names which: 'at_t0' is the initial state, 'at_final_step' is the last step of the run. They are not interchangeable -- the share moves over a run.",
+      "the_two_are_exact_complements": "E(psi) = E(zonal) + E(psi') exactly, because the Parseval inner product of grad(psi_zonal) with grad(psi') vanishes: the zonal mode occupies only kx=0 and psi' occupies only kx!=0. So the two shares sum to 1 to machine precision, and either may be recovered from the other. Asserted in the test suite.",
+      "which_to_quote": "quote zonal_energy_fraction for 'what fraction of the energy sits in the zonal mean'; quote fluctuation_energy_fraction for the same statement about the eddy part. Both are at the final step unless the key says at_t0."
+    }
   },
   "grid": {
     "L": 6.283185307179586,
@@ -4190,7 +4274,7 @@
     "final_energy": 22.671553356880874,
     "final_enstrophy": 1333.7371073126726,
     "final_relative_l2_vs_full": 9.927879871812374e-09,
-    "fit_seconds": 0.005457679042592645,
+    "fit_seconds": 0.003616055939346552,
     "fluctuation_energy_history": [
       18.607639994491258,
       18.607172283405802,
@@ -4612,7 +4696,7 @@
     "max_relative_l2_vs_full": 9.927879871812374e-09,
     "max_scaled_pde_energy_residual": 0.00025882197697179064,
     "max_scaled_projected_energy_residual": 0.033448867445314806,
-    "offline_plus_online_seconds": 1.387525057187304,
+    "offline_plus_online_seconds": 1.0227109240368009,
     "projection_energy_history": [
       -8.189470485575612e-05,
       -8.188690760491113e-05,
@@ -5771,32 +5855,78 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 1.3820673781447113,
-    "wall_seconds_per_step": 0.006910336890723556,
+    "wall_seconds": 1.0190948680974543,
+    "wall_seconds_per_step": 0.005095474340487271,
     "zonal_energy_fraction": {
       "at_final_step": 0.1839794261830451,
       "at_t0": 0.1620710317837223
+    },
+    "zonal_energy_fraction_components": {
+      "at_final_step": {
+        "fluctuation_energy": 18.50045397960364,
+        "total_energy": 22.671553356880874,
+        "zonal_energy": 4.171099377277233
+      },
+      "at_t0": {
+        "fluctuation_energy": 18.607639994491258,
+        "total_energy": 22.206703312933374,
+        "zonal_energy": 3.5990633184421164
+      }
+    },
+    "zonal_energy_fraction_fluctuation": {
+      "at_final_step": 0.8160205738169549,
+      "at_t0": 0.8379289682162777
     },
     "zonal_enstrophy_fraction": {
       "at_final_step": 0.038346809184474834,
       "at_t0": 0.03501861052034979
     },
-    "zonal_fraction_definition": "zonal/total at t=0 and at the final step, from the psi' series. The fluctuation dominates at these settings (about 5:1 at N=64), so the total KE is NOT zonal-dominated and a figure of the total alone does not show the zonal part at all."
+    "zonal_enstrophy_fraction_components": {
+      "at_final_step": {
+        "fluctuation_energy": 1282.5925449563001,
+        "total_energy": 1333.7371073126726,
+        "zonal_energy": 51.14456235637249
+      },
+      "at_t0": {
+        "fluctuation_energy": 1290.805931427621,
+        "total_energy": 1337.6485241064247,
+        "zonal_energy": 46.84259267880361
+      }
+    },
+    "zonal_enstrophy_fraction_fluctuation": {
+      "at_final_step": 0.9616531908155251,
+      "at_t0": 0.9649813894796502
+    },
+    "zonal_fraction_definition": "zonal/total at t=0 and at the final step, from the psi' series. The fluctuation dominates at these settings (about 5:1 at N=64), so the total KE is NOT zonal-dominated and a figure of the total alone does not show the zonal part at all. For the formula, the index, and the exact-complement identity, read zonal_fraction_semantics -- do not infer the ratio from the series names.",
+    "zonal_fraction_semantics": {
+      "energy_history": "kinetic energy E = 1/2||grad psi||^2 of the FULL field psi, summed over the grid",
+      "fluctuation_energy_history": "the same functional of psi' = psi - x-avg(psi), i.e. with the zonal (x-independent) mode removed",
+      "formula_fluctuation": "fluctuation_energy_history / energy_history",
+      "formula_zonal": "(energy_history - fluctuation_energy_history) / energy_history",
+      "how_to_miscompute_it": "the recorded value is the ZONAL share. Taking fluctuation_energy_history / energy_history instead gives its complement -- a legitimate different number, roughly four times larger here, whose Re trend is the reverse because it is the same trend seen from the other half. Name which one is being quoted.",
+      "index": "each share is reported at TWO indices and the key names which: 'at_t0' is the initial state, 'at_final_step' is the last step of the run. They are not interchangeable -- the share moves over a run.",
+      "the_two_are_exact_complements": "E(psi) = E(zonal) + E(psi') exactly, because the Parseval inner product of grad(psi_zonal) with grad(psi') vanishes: the zonal mode occupies only kx=0 and psi' occupies only kx!=0. So the two shares sum to 1 to machine precision, and either may be recovered from the other. Asserted in the test suite.",
+      "which_to_quote": "quote zonal_energy_fraction for 'what fraction of the energy sits in the zonal mean'; quote fluctuation_energy_fraction for the same statement about the eddy part. Both are at the final step unless the key says at_t0."
+    }
   },
   "provenance": {
+    "captured_at": "launch",
     "driver": "experiments/run_kolmogorov.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "b01fd88e4cfd4b31a4ac8aa657836b2b0b82b7687b999e78c63c4e772b438cef",
-    "git_commit": "5d0790158cd65f00284728fdf372cd50796830c8",
-    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "driver_matches_HEAD_at_write": true,
+    "driver_sha256": "db48a5a6f86eafaa91a6a0fa5167f00b647e2740e36eb431455954035dc43f50",
+    "driver_sha256_at_write": "db48a5a6f86eafaa91a6a0fa5167f00b647e2740e36eb431455954035dc43f50",
+    "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
+    "git_commit_at_write": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
+    "git_commit_how": "git log -1 --before=1790411850",
+    "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_diff_sha256": "edde54d5498b9abb5a0a4e8e7bbf41ef71b2b17efc9a46dfc16150aef36930ad",
-    "working_tree_dirty": true,
-    "working_tree_dirty_paths": [
-      "state/coder/results/kolmogorov_re1000_N64.json",
-      "state/coder/results/kolmogorov_re100_N64.json"
-    ]
+    "sources_files_at_launch": 30,
+    "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+    "tree_moved_during_run": false,
+    "working_tree_dirty": false,
+    "working_tree_dirty_paths": []
   },
   "reynolds": 5000,
   "viscosity": 0.0002

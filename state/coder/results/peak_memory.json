@@ -3,16 +3,16 @@
   "case_family": "cost",
   "environment": {
     "load_average_at_end": [
-      11.63330078125,
-      10.076171875,
-      10.96923828125
+      2.287109375,
+      2.37646484375,
+      2.3359375
     ],
     "numpy": "2.5.3",
     "parent_thread_settings": {
-      "MKL_NUM_THREADS": "2",
+      "MKL_NUM_THREADS": "1",
       "NUMEXPR_NUM_THREADS": null,
-      "OMP_NUM_THREADS": "2",
-      "OPENBLAS_NUM_THREADS": "2",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
       "VECLIB_MAXIMUM_THREADS": null
     },
     "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
@@ -25,22 +25,31 @@
       "VECLIB_MAXIMUM_THREADS": null
     }
   },
-  "interpretation": "Report the overhead over the full-grid step, not raw RSS: the interpreter and BLAS baseline is tens of MiB and no method choice affects it. THE ANSWER TO THE QUESTION THAT MATTERS IS NEGATIVE AND ROBUST: the reduced integrator does not save memory. It costs MORE than the full-grid step at both grids and every rank, because its state is a full N x N field plus its factors plus the factorization workspace, and that overhead is many times the run-to-run noise floor measured here from repeating one configuration, so it is real. For the midpoint BUG integrator, peak RSS N=64: varies by 0.57 MiB, which is 147.0x the noise floor -- RESOLVED, so the variation with rank is real; N=128: varies by 1.78 MiB, which is 456.0x the noise floor -- RESOLVED, so the variation with rank is real. The variation with rank is resolved at every grid, so 'flat in rank' would assert the opposite of the measurement. For the projected integrator, peak RSS N=64: varies by 0.19 MiB, which is 49.0x the noise floor -- RESOLVED, so the variation with rank is real; N=128: varies by 0.25 MiB, which is 65.0x the noise floor -- RESOLVED, so the variation with rank is real. The variation with rank is resolved at every grid, so 'flat in rank' would assert the opposite of the measurement. The BUG integrator trades memory for time: its overhead is SMALLER than the projected integrator's at both grids, while its cost per step is 3.4-5.1x the projected one. Its spread over rank is also larger, in the direction its construction predicts, since it holds augmented factors of size up to 4r rather than a whole-field factorization.",
+  "interpretation": "Report the overhead over the full-grid step, not raw RSS: the interpreter and BLAS baseline is tens of MiB and no method choice affects it. THE ANSWER TO THE QUESTION THAT MATTERS IS NEGATIVE AND ROBUST: the reduced integrator does not save memory. It costs MORE than the full-grid step at both grids and every rank, because its state is a full N x N field plus its factors plus the factorization workspace, and that overhead is many times the run-to-run noise floor measured here from repeating one configuration, so it is real. For the midpoint BUG integrator, peak RSS N=64: varies by 0.68 MiB, which is 1.6x the noise floor (threshold 2x, so the margin is 0.8x either side) -- NOT resolved, so no variation is established; N=128: varies by 1.73 MiB, which is 4.1x the noise floor (threshold 2x, so the margin is 2.0x either side) -- RESOLVED, so the variation with rank is real. Neither 'flat in rank' nor 'varies with rank' is supported here, because the two grids disagree about whether a variation exists at all. For the projected integrator, peak RSS N=64: varies by 0.47 MiB, which is 1.1x the noise floor (threshold 2x, so the margin is 0.6x either side) -- NOT resolved, so no variation is established; N=128: varies by 0.34 MiB, which is 0.8x the noise floor (threshold 2x, so the margin is 0.4x either side) -- NOT resolved, so no variation is established. No variation with rank is resolved at any grid, so the spread is consistent with zero but does not demonstrate it. THE NOISE FLOOR IS A DISTRIBUTION, not a point: it is the largest of 92 re-measurements of one configuration (0.0000 to 0.4258 MiB, a factor of nan between them). With a single repeat this number has been observed at 0.1328, 0.0664, 0.0977 and 0.0039 MiB -- a factor of 34 -- and the verdicts above flip between 'resolved' and 'not established' across that range for the projected integrator. **Any claim of the form 'the variation with rank is N times the noise floor' therefore carries the floor's own spread, and the verdicts here are taken against its maximum so that the error can only fall on the side of not claiming a rank dependence.** The BUG integrator trades memory for time: its overhead is SMALLER than the projected integrator's at both grids, while its cost per step is 3.4-5.1x the projected one. Its spread over rank is also larger, in the direction its construction predicts, since it holds augmented factors of size up to 4r rather than a whole-field factorization.",
   "measurements": [
     {
       "N": 64,
-      "interpreter_and_library_mib": 3.9453125,
+      "interpreter_and_library_mib": 3.859375,
       "method": "full",
       "peak_overhead_fraction": 0.0,
+      "peak_overhead_samples_mib": {
+        "max_mib": 0.3359375,
+        "median_mib": 0.0,
+        "min_mib": -0.3359375,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 81,
+        "spread_mib": 0.671875,
+        "spreads_over_median": null
+      },
       "peak_overhead_vs_full_grid_mib": 0.0,
-      "peak_rss_mib": 37.19140625,
+      "peak_rss_mib": 37.296875,
       "rank": 0,
       "repeat": 0,
-      "rss_after_init_mib": 36.875,
-      "rss_after_setup_mib": 36.875,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "rss_after_init_mib": 36.93359375,
+      "rss_after_setup_mib": 36.93359375,
+      "rss_baseline_at_start_mib": 33.07421875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 0.9560658971313387,
+      "wall_seconds_not_a_timing_measurement": 0.6290108170360327,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -51,16 +60,16 @@
     },
     {
       "N": 64,
-      "interpreter_and_library_mib": 3.9453125,
+      "interpreter_and_library_mib": 3.984375,
       "method": "full",
-      "peak_rss_mib": 37.1875,
+      "peak_rss_mib": 37.41796875,
       "rank": 0,
       "repeat": 1,
-      "rss_after_init_mib": 36.875,
-      "rss_after_setup_mib": 36.875,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "rss_after_init_mib": 37.05859375,
+      "rss_after_setup_mib": 37.05859375,
+      "rss_baseline_at_start_mib": 33.07421875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 0.9477417031303048,
+      "wall_seconds_not_a_timing_measurement": 0.597402396146208,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -71,18 +80,167 @@
     },
     {
       "N": 64,
-      "interpreter_and_library_mib": 4.0703125,
+      "interpreter_and_library_mib": 3.87109375,
+      "method": "full",
+      "peak_rss_mib": 37.2734375,
+      "rank": 0,
+      "repeat": 2,
+      "rss_after_init_mib": 36.9453125,
+      "rss_after_setup_mib": 36.9453125,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 0.6045015868730843,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.8828125,
+      "method": "full",
+      "peak_rss_mib": 37.31640625,
+      "rank": 0,
+      "repeat": 3,
+      "rss_after_init_mib": 36.95703125,
+      "rss_after_setup_mib": 36.95703125,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 0.9654511909466237,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 4.109375,
+      "method": "full",
+      "peak_rss_mib": 37.5390625,
+      "rank": 0,
+      "repeat": 4,
+      "rss_after_init_mib": 37.18359375,
+      "rss_after_setup_mib": 37.18359375,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 0.6573411650024354,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.984375,
+      "method": "full",
+      "peak_rss_mib": 37.41796875,
+      "rank": 0,
+      "repeat": 5,
+      "rss_after_init_mib": 37.05859375,
+      "rss_after_setup_mib": 37.05859375,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 0.66834308905527,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.98046875,
+      "method": "full",
+      "peak_rss_mib": 37.4140625,
+      "rank": 0,
+      "repeat": 6,
+      "rss_after_init_mib": 37.0546875,
+      "rss_after_setup_mib": 37.0546875,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 0.7824592711403966,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.76953125,
+      "method": "full",
+      "peak_rss_mib": 37.203125,
+      "rank": 0,
+      "repeat": 7,
+      "rss_after_init_mib": 36.84375,
+      "rss_after_setup_mib": 36.84375,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 0.8361432359088212,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.8984375,
+      "method": "full",
+      "peak_rss_mib": 37.328125,
+      "rank": 0,
+      "repeat": 8,
+      "rss_after_init_mib": 36.97265625,
+      "rss_after_setup_mib": 36.97265625,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 0.6238045308273286,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.61328125,
       "method": "dlra",
-      "peak_overhead_fraction": 0.06364877638903477,
-      "peak_overhead_vs_full_grid_mib": 2.3671875,
-      "peak_rss_mib": 39.55859375,
+      "peak_overhead_fraction": 0.05519480519480519,
+      "peak_overhead_samples_mib": {
+        "max_mib": 2.5234375,
+        "median_mib": 2.15234375,
+        "min_mib": 1.69921875,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 45,
+        "spread_mib": 0.82421875,
+        "spreads_over_median": 0.38294010889292196
+      },
+      "peak_overhead_vs_full_grid_mib": 2.05859375,
+      "peak_rss_mib": 39.35546875,
       "rank": 2,
       "repeat": 0,
-      "rss_after_init_mib": 38.3046875,
-      "rss_after_setup_mib": 37.0,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "rss_after_init_mib": 38.16796875,
+      "rss_after_setup_mib": 36.6875,
+      "rss_baseline_at_start_mib": 33.07421875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 1.7872416630852968,
+      "wall_seconds_not_a_timing_measurement": 1.1816953108645976,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -93,18 +251,107 @@
     },
     {
       "N": 64,
-      "interpreter_and_library_mib": 3.9453125,
+      "interpreter_and_library_mib": 3.7421875,
       "method": "dlra",
-      "peak_overhead_fraction": 0.059762629975842876,
-      "peak_overhead_vs_full_grid_mib": 2.22265625,
-      "peak_rss_mib": 39.4140625,
+      "peak_rss_mib": 39.484375,
+      "rank": 2,
+      "repeat": 1,
+      "rss_after_init_mib": 38.296875,
+      "rss_after_setup_mib": 36.81640625,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.1947777941823006,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.4921875,
+      "method": "dlra",
+      "peak_rss_mib": 39.23828125,
+      "rank": 2,
+      "repeat": 2,
+      "rss_after_init_mib": 38.05078125,
+      "rss_after_setup_mib": 36.56640625,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.2188499530311674,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.859375,
+      "method": "dlra",
+      "peak_rss_mib": 39.6015625,
+      "rank": 2,
+      "repeat": 3,
+      "rss_after_init_mib": 38.4140625,
+      "rss_after_setup_mib": 36.93359375,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.206925004022196,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 4.109375,
+      "method": "dlra",
+      "peak_rss_mib": 39.7265625,
+      "rank": 2,
+      "repeat": 4,
+      "rss_after_init_mib": 38.53515625,
+      "rss_after_setup_mib": 37.18359375,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.2241847990080714,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.98046875,
+      "method": "dlra",
+      "peak_overhead_fraction": 0.06671554252199413,
+      "peak_overhead_samples_mib": {
+        "max_mib": 2.5859375,
+        "median_mib": 2.3671875,
+        "min_mib": 2.046875,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 45,
+        "spread_mib": 0.5390625,
+        "spreads_over_median": 0.22772277227722773
+      },
+      "peak_overhead_vs_full_grid_mib": 2.48828125,
+      "peak_rss_mib": 39.78515625,
       "rank": 8,
       "repeat": 0,
-      "rss_after_init_mib": 38.1875,
-      "rss_after_setup_mib": 36.875,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "rss_after_init_mib": 38.53125,
+      "rss_after_setup_mib": 37.0546875,
+      "rss_baseline_at_start_mib": 33.07421875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 1.9822831149213016,
+      "wall_seconds_not_a_timing_measurement": 1.284784704912454,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -115,18 +362,107 @@
     },
     {
       "N": 64,
-      "interpreter_and_library_mib": 4.0703125,
+      "interpreter_and_library_mib": 3.80078125,
       "method": "dlra",
-      "peak_overhead_fraction": 0.06490914819871862,
-      "peak_overhead_vs_full_grid_mib": 2.4140625,
-      "peak_rss_mib": 39.60546875,
+      "peak_rss_mib": 39.61328125,
+      "rank": 8,
+      "repeat": 1,
+      "rss_after_init_mib": 38.359375,
+      "rss_after_setup_mib": 36.875,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.2864953940734267,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.98046875,
+      "method": "dlra",
+      "peak_rss_mib": 39.78515625,
+      "rank": 8,
+      "repeat": 2,
+      "rss_after_init_mib": 38.53515625,
+      "rss_after_setup_mib": 37.0546875,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.2920184028334916,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.78125,
+      "method": "dlra",
+      "peak_rss_mib": 39.5859375,
+      "rank": 8,
+      "repeat": 3,
+      "rss_after_init_mib": 38.3359375,
+      "rss_after_setup_mib": 36.85546875,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.2662875258829445,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.984375,
+      "method": "dlra",
+      "peak_rss_mib": 39.7890625,
+      "rank": 8,
+      "repeat": 4,
+      "rss_after_init_mib": 38.5390625,
+      "rss_after_setup_mib": 37.05859375,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.265234159072861,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.96875,
+      "method": "dlra",
+      "peak_overhead_fraction": 0.06304985337243402,
+      "peak_overhead_samples_mib": {
+        "max_mib": 2.59375,
+        "median_mib": 2.34375,
+        "min_mib": 2.08203125,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 45,
+        "spread_mib": 0.51171875,
+        "spreads_over_median": 0.21833333333333332
+      },
+      "peak_overhead_vs_full_grid_mib": 2.3515625,
+      "peak_rss_mib": 39.6484375,
       "rank": 16,
       "repeat": 0,
-      "rss_after_init_mib": 38.3125,
-      "rss_after_setup_mib": 37.0,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "rss_after_init_mib": 38.39453125,
+      "rss_after_setup_mib": 37.04296875,
+      "rss_baseline_at_start_mib": 33.07421875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 1.9620064308401197,
+      "wall_seconds_not_a_timing_measurement": 1.2893252139911056,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -137,18 +473,16 @@
     },
     {
       "N": 64,
-      "interpreter_and_library_mib": 3.8203125,
+      "interpreter_and_library_mib": 4.03125,
       "method": "dlra",
-      "peak_overhead_fraction": 0.06070790883310576,
-      "peak_overhead_vs_full_grid_mib": 2.2578125,
-      "peak_rss_mib": 39.44921875,
-      "rank": 32,
-      "repeat": 0,
-      "rss_after_init_mib": 38.1875,
-      "rss_after_setup_mib": 36.75,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "peak_rss_mib": 39.7109375,
+      "rank": 16,
+      "repeat": 1,
+      "rss_after_init_mib": 38.45703125,
+      "rss_after_setup_mib": 37.10546875,
+      "rss_baseline_at_start_mib": 33.07421875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 1.8817181889899075,
+      "wall_seconds_not_a_timing_measurement": 1.299717019079253,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -159,106 +493,87 @@
     },
     {
       "N": 64,
-      "interpreter_and_library_mib": 3.9453125,
+      "interpreter_and_library_mib": 3.9921875,
       "method": "dlra",
-      "peak_overhead_fraction": 0.061233063753807375,
+      "peak_rss_mib": 39.671875,
+      "rank": 16,
+      "repeat": 2,
+      "rss_after_init_mib": 38.41796875,
+      "rss_after_setup_mib": 37.06640625,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.297611687099561,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.80078125,
+      "method": "dlra",
+      "peak_rss_mib": 39.62109375,
+      "rank": 16,
+      "repeat": 3,
+      "rss_after_init_mib": 38.3671875,
+      "rss_after_setup_mib": 36.875,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.3057809418532997,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.984375,
+      "method": "dlra",
+      "peak_rss_mib": 39.796875,
+      "rank": 16,
+      "repeat": 4,
+      "rss_after_init_mib": 38.54296875,
+      "rss_after_setup_mib": 37.05859375,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.3043315010145307,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.76953125,
+      "method": "dlra",
+      "peak_overhead_fraction": 0.06105990783410138,
+      "peak_overhead_samples_mib": {
+        "max_mib": 2.6796875,
+        "median_mib": 2.28515625,
+        "min_mib": 2.01953125,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 45,
+        "spread_mib": 0.66015625,
+        "spreads_over_median": 0.28888888888888886
+      },
       "peak_overhead_vs_full_grid_mib": 2.27734375,
-      "peak_rss_mib": 39.46875,
-      "rank": 43,
-      "repeat": 0,
-      "rss_after_init_mib": 38.1875,
-      "rss_after_setup_mib": 36.875,
-      "rss_baseline_at_start_mib": 32.9296875,
-      "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 1.9100544990506023,
-      "worker_thread_settings": {
-        "MKL_NUM_THREADS": "1",
-        "NUMEXPR_NUM_THREADS": "1",
-        "OMP_NUM_THREADS": "1",
-        "OPENBLAS_NUM_THREADS": "1",
-        "VECLIB_MAXIMUM_THREADS": null
-      }
-    },
-    {
-      "N": 64,
-      "interpreter_and_library_mib": 3.9453125,
-      "method": "bug",
-      "peak_overhead_fraction": 0.04316773448167209,
-      "peak_overhead_vs_full_grid_mib": 1.60546875,
-      "peak_rss_mib": 38.796875,
-      "rank": 2,
-      "repeat": 0,
-      "rss_after_init_mib": 38.1796875,
-      "rss_after_setup_mib": 36.875,
-      "rss_baseline_at_start_mib": 32.9296875,
-      "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 6.96102372999303,
-      "worker_thread_settings": {
-        "MKL_NUM_THREADS": "1",
-        "NUMEXPR_NUM_THREADS": "1",
-        "OMP_NUM_THREADS": "1",
-        "OPENBLAS_NUM_THREADS": "1",
-        "VECLIB_MAXIMUM_THREADS": null
-      }
-    },
-    {
-      "N": 64,
-      "interpreter_and_library_mib": 4.0703125,
-      "method": "bug",
-      "peak_overhead_fraction": 0.05440604978468648,
-      "peak_overhead_vs_full_grid_mib": 2.0234375,
-      "peak_rss_mib": 39.21484375,
-      "rank": 8,
-      "repeat": 0,
-      "rss_after_init_mib": 38.3125,
-      "rss_after_setup_mib": 37.0,
-      "rss_baseline_at_start_mib": 32.9296875,
-      "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 8.802228876855224,
-      "worker_thread_settings": {
-        "MKL_NUM_THREADS": "1",
-        "NUMEXPR_NUM_THREADS": "1",
-        "OMP_NUM_THREADS": "1",
-        "OPENBLAS_NUM_THREADS": "1",
-        "VECLIB_MAXIMUM_THREADS": null
-      }
-    },
-    {
-      "N": 64,
-      "interpreter_and_library_mib": 3.9453125,
-      "method": "bug",
-      "peak_overhead_fraction": 0.05566642159437034,
-      "peak_overhead_vs_full_grid_mib": 2.0703125,
-      "peak_rss_mib": 39.26171875,
-      "rank": 16,
-      "repeat": 0,
-      "rss_after_init_mib": 38.19140625,
-      "rss_after_setup_mib": 36.875,
-      "rss_baseline_at_start_mib": 32.9296875,
-      "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 9.578809865983203,
-      "worker_thread_settings": {
-        "MKL_NUM_THREADS": "1",
-        "NUMEXPR_NUM_THREADS": "1",
-        "OMP_NUM_THREADS": "1",
-        "OPENBLAS_NUM_THREADS": "1",
-        "VECLIB_MAXIMUM_THREADS": null
-      }
-    },
-    {
-      "N": 64,
-      "interpreter_and_library_mib": 3.9453125,
-      "method": "bug",
-      "peak_overhead_fraction": 0.058607289150299335,
-      "peak_overhead_vs_full_grid_mib": 2.1796875,
-      "peak_rss_mib": 39.37109375,
+      "peak_rss_mib": 39.57421875,
       "rank": 32,
       "repeat": 0,
-      "rss_after_init_mib": 38.1953125,
-      "rss_after_setup_mib": 36.875,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "rss_after_init_mib": 38.3203125,
+      "rss_after_setup_mib": 36.84375,
+      "rss_baseline_at_start_mib": 33.07421875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 9.245620716828853,
+      "wall_seconds_not_a_timing_measurement": 1.3344257709104568,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -269,18 +584,742 @@
     },
     {
       "N": 64,
-      "interpreter_and_library_mib": 3.8203125,
-      "method": "bug",
-      "peak_overhead_fraction": 0.05566642159437034,
-      "peak_overhead_vs_full_grid_mib": 2.0703125,
-      "peak_rss_mib": 39.26171875,
+      "interpreter_and_library_mib": 3.75,
+      "method": "dlra",
+      "peak_rss_mib": 39.55859375,
+      "rank": 32,
+      "repeat": 1,
+      "rss_after_init_mib": 38.3046875,
+      "rss_after_setup_mib": 36.82421875,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.3350460811052471,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.96484375,
+      "method": "dlra",
+      "peak_rss_mib": 39.6484375,
+      "rank": 32,
+      "repeat": 2,
+      "rss_after_init_mib": 38.39453125,
+      "rss_after_setup_mib": 37.0390625,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.3358624789398164,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.8515625,
+      "method": "dlra",
+      "peak_rss_mib": 39.6640625,
+      "rank": 32,
+      "repeat": 3,
+      "rss_after_init_mib": 38.41015625,
+      "rss_after_setup_mib": 36.92578125,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.3006963920779526,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.98828125,
+      "method": "dlra",
+      "peak_rss_mib": 39.8828125,
+      "rank": 32,
+      "repeat": 4,
+      "rss_after_init_mib": 38.546875,
+      "rss_after_setup_mib": 37.0625,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.3844387619756162,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.9921875,
+      "method": "dlra",
+      "peak_overhead_fraction": 0.06786761625471303,
+      "peak_overhead_samples_mib": {
+        "max_mib": 2.625,
+        "median_mib": 2.3828125,
+        "min_mib": 2.10546875,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 45,
+        "spread_mib": 0.51953125,
+        "spreads_over_median": 0.2180327868852459
+      },
+      "peak_overhead_vs_full_grid_mib": 2.53125,
+      "peak_rss_mib": 39.828125,
       "rank": 43,
       "repeat": 0,
-      "rss_after_init_mib": 38.0703125,
-      "rss_after_setup_mib": 36.75,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "rss_after_init_mib": 38.54296875,
+      "rss_after_setup_mib": 37.06640625,
+      "rss_baseline_at_start_mib": 33.07421875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 9.608238541986793,
+      "wall_seconds_not_a_timing_measurement": 1.594085888005793,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.92578125,
+      "method": "dlra",
+      "peak_rss_mib": 39.796875,
+      "rank": 43,
+      "repeat": 1,
+      "rss_after_init_mib": 38.48046875,
+      "rss_after_setup_mib": 37.0,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.3347038698848337,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.984375,
+      "method": "dlra",
+      "peak_rss_mib": 39.796875,
+      "rank": 43,
+      "repeat": 2,
+      "rss_after_init_mib": 38.54296875,
+      "rss_after_setup_mib": 37.05859375,
+      "rss_baseline_at_start_mib": 33.07421875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.355370634002611,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.73828125,
+      "method": "dlra",
+      "peak_rss_mib": 39.69921875,
+      "rank": 43,
+      "repeat": 3,
+      "rss_after_init_mib": 38.4140625,
+      "rss_after_setup_mib": 36.9375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.3838025671429932,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.84375,
+      "method": "dlra",
+      "peak_rss_mib": 39.64453125,
+      "rank": 43,
+      "repeat": 4,
+      "rss_after_init_mib": 38.39453125,
+      "rss_after_setup_mib": 37.04296875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 1.3804336530156434,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.77734375,
+      "method": "bug",
+      "peak_overhead_fraction": 0.04419773774612484,
+      "peak_overhead_samples_mib": {
+        "max_mib": 1.7734375,
+        "median_mib": 1.52734375,
+        "min_mib": 1.26171875,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 45,
+        "spread_mib": 0.51171875,
+        "spreads_over_median": 0.3350383631713555
+      },
+      "peak_overhead_vs_full_grid_mib": 1.6484375,
+      "peak_rss_mib": 38.9453125,
+      "rank": 2,
+      "repeat": 0,
+      "rss_after_init_mib": 38.33203125,
+      "rss_after_setup_mib": 36.9765625,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.495633780956268,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.63671875,
+      "method": "bug",
+      "peak_rss_mib": 38.8046875,
+      "rank": 2,
+      "repeat": 1,
+      "rss_after_init_mib": 38.19140625,
+      "rss_after_setup_mib": 36.8359375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.269644820829853,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.5078125,
+      "method": "bug",
+      "peak_rss_mib": 38.80078125,
+      "rank": 2,
+      "repeat": 2,
+      "rss_after_init_mib": 38.1875,
+      "rss_after_setup_mib": 36.70703125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.50518076797016,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.63671875,
+      "method": "bug",
+      "peak_rss_mib": 38.84765625,
+      "rank": 2,
+      "repeat": 3,
+      "rss_after_init_mib": 38.19140625,
+      "rss_after_setup_mib": 36.8359375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.5611444029491395,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.80078125,
+      "method": "bug",
+      "peak_rss_mib": 38.9765625,
+      "rank": 2,
+      "repeat": 4,
+      "rss_after_init_mib": 38.36328125,
+      "rss_after_setup_mib": 37.0,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.610931247007102,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.65234375,
+      "method": "bug",
+      "peak_overhead_fraction": 0.054252199413489736,
+      "peak_overhead_samples_mib": {
+        "max_mib": 2.1171875,
+        "median_mib": 1.8125,
+        "min_mib": 1.54296875,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 45,
+        "spread_mib": 0.57421875,
+        "spreads_over_median": 0.3168103448275862
+      },
+      "peak_overhead_vs_full_grid_mib": 2.0234375,
+      "peak_rss_mib": 39.3203125,
+      "rank": 8,
+      "repeat": 0,
+      "rss_after_init_mib": 38.33203125,
+      "rss_after_setup_mib": 36.8515625,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.244865217944607,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.7109375,
+      "method": "bug",
+      "peak_rss_mib": 39.16015625,
+      "rank": 8,
+      "repeat": 1,
+      "rss_after_init_mib": 38.265625,
+      "rss_after_setup_mib": 36.91015625,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.243778690928593,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.625,
+      "method": "bug",
+      "peak_rss_mib": 39.12890625,
+      "rank": 8,
+      "repeat": 2,
+      "rss_after_init_mib": 38.1796875,
+      "rss_after_setup_mib": 36.82421875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.2994590571615845,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.6171875,
+      "method": "bug",
+      "peak_rss_mib": 39.18359375,
+      "rank": 8,
+      "repeat": 3,
+      "rss_after_init_mib": 38.171875,
+      "rss_after_setup_mib": 36.81640625,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.125735352979973,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.62890625,
+      "method": "bug",
+      "peak_rss_mib": 39.08203125,
+      "rank": 8,
+      "repeat": 4,
+      "rss_after_init_mib": 38.18359375,
+      "rss_after_setup_mib": 36.828125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.199353026924655,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.78125,
+      "method": "bug",
+      "peak_overhead_fraction": 0.05634687892752409,
+      "peak_overhead_samples_mib": {
+        "max_mib": 2.25,
+        "median_mib": 2.03515625,
+        "min_mib": 1.73046875,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 45,
+        "spread_mib": 0.51953125,
+        "spreads_over_median": 0.255278310940499
+      },
+      "peak_overhead_vs_full_grid_mib": 2.1015625,
+      "peak_rss_mib": 39.3984375,
+      "rank": 16,
+      "repeat": 0,
+      "rss_after_init_mib": 38.33984375,
+      "rss_after_setup_mib": 36.98046875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.760634156875312,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.63671875,
+      "method": "bug",
+      "peak_rss_mib": 39.37109375,
+      "rank": 16,
+      "repeat": 1,
+      "rss_after_init_mib": 38.3125,
+      "rss_after_setup_mib": 36.8359375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.748417302966118,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.53515625,
+      "method": "bug",
+      "peak_rss_mib": 39.26953125,
+      "rank": 16,
+      "repeat": 2,
+      "rss_after_init_mib": 38.2109375,
+      "rss_after_setup_mib": 36.734375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.797742788912728,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.63671875,
+      "method": "bug",
+      "peak_rss_mib": 39.3515625,
+      "rank": 16,
+      "repeat": 3,
+      "rss_after_init_mib": 38.1875,
+      "rss_after_setup_mib": 36.8359375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.685035238973796,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.859375,
+      "method": "bug",
+      "peak_rss_mib": 39.453125,
+      "rank": 16,
+      "repeat": 4,
+      "rss_after_init_mib": 38.41796875,
+      "rss_after_setup_mib": 37.05859375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.730469307862222,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.55078125,
+      "method": "bug",
+      "peak_overhead_fraction": 0.052471721826560534,
+      "peak_overhead_samples_mib": {
+        "max_mib": 2.4765625,
+        "median_mib": 2.03125,
+        "min_mib": 1.71484375,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 45,
+        "spread_mib": 0.76171875,
+        "spreads_over_median": 0.375
+      },
+      "peak_overhead_vs_full_grid_mib": 1.95703125,
+      "peak_rss_mib": 39.25390625,
+      "rank": 32,
+      "repeat": 0,
+      "rss_after_init_mib": 38.1171875,
+      "rss_after_setup_mib": 36.75,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 6.121527775889263,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.640625,
+      "method": "bug",
+      "peak_rss_mib": 39.328125,
+      "rank": 32,
+      "repeat": 1,
+      "rss_after_init_mib": 38.1953125,
+      "rss_after_setup_mib": 36.83984375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 6.289388974895701,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.6328125,
+      "method": "bug",
+      "peak_rss_mib": 39.31640625,
+      "rank": 32,
+      "repeat": 2,
+      "rss_after_init_mib": 38.18359375,
+      "rss_after_setup_mib": 36.83203125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 6.176603143103421,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.80078125,
+      "method": "bug",
+      "peak_rss_mib": 39.4921875,
+      "rank": 32,
+      "repeat": 3,
+      "rss_after_init_mib": 38.359375,
+      "rss_after_setup_mib": 37.0,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 6.874854694120586,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.98828125,
+      "method": "bug",
+      "peak_rss_mib": 39.6796875,
+      "rank": 32,
+      "repeat": 4,
+      "rss_after_init_mib": 38.546875,
+      "rss_after_setup_mib": 37.1875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 6.401403384050354,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.859375,
+      "method": "bug",
+      "peak_overhead_fraction": 0.062316715542521994,
+      "peak_overhead_samples_mib": {
+        "max_mib": 2.41796875,
+        "median_mib": 2.1796875,
+        "min_mib": 1.8671875,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 45,
+        "spread_mib": 0.55078125,
+        "spreads_over_median": 0.25268817204301075
+      },
+      "peak_overhead_vs_full_grid_mib": 2.32421875,
+      "peak_rss_mib": 39.62109375,
+      "rank": 43,
+      "repeat": 0,
+      "rss_after_init_mib": 38.4140625,
+      "rss_after_setup_mib": 37.05859375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 6.5747310349252075,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.875,
+      "method": "bug",
+      "peak_rss_mib": 39.515625,
+      "rank": 43,
+      "repeat": 1,
+      "rss_after_init_mib": 38.43359375,
+      "rss_after_setup_mib": 37.07421875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 6.541398358065635,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.734375,
+      "method": "bug",
+      "peak_rss_mib": 39.49609375,
+      "rank": 43,
+      "repeat": 2,
+      "rss_after_init_mib": 38.2890625,
+      "rss_after_setup_mib": 36.93359375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 6.509877043077722,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.7421875,
+      "method": "bug",
+      "peak_rss_mib": 39.53125,
+      "rank": 43,
+      "repeat": 3,
+      "rss_after_init_mib": 38.29296875,
+      "rss_after_setup_mib": 36.94140625,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 6.3978169108740985,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 64,
+      "interpreter_and_library_mib": 3.63671875,
+      "method": "bug",
+      "peak_rss_mib": 39.40625,
+      "rank": 43,
+      "repeat": 4,
+      "rss_after_init_mib": 38.32421875,
+      "rss_after_setup_mib": 36.8359375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 6.356769644888118,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -291,18 +1330,47 @@
     },
     {
       "N": 128,
-      "interpreter_and_library_mib": 5.8984375,
+      "interpreter_and_library_mib": 5.5078125,
       "method": "full",
       "peak_overhead_fraction": 0.0,
+      "peak_overhead_samples_mib": {
+        "max_mib": 0.25,
+        "median_mib": 0.0,
+        "min_mib": -0.25,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 25,
+        "spread_mib": 0.5,
+        "spreads_over_median": null
+      },
       "peak_overhead_vs_full_grid_mib": 0.0,
-      "peak_rss_mib": 39.58203125,
+      "peak_rss_mib": 39.46484375,
       "rank": 0,
       "repeat": 0,
+      "rss_after_init_mib": 38.70703125,
+      "rss_after_setup_mib": 38.70703125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 2.085688134189695,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.62890625,
+      "method": "full",
+      "peak_rss_mib": 39.54296875,
+      "rank": 0,
+      "repeat": 1,
       "rss_after_init_mib": 38.828125,
       "rss_after_setup_mib": 38.828125,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "rss_baseline_at_start_mib": 33.19921875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 3.3492690920829773,
+      "wall_seconds_not_a_timing_measurement": 2.0800744101870805,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -313,84 +1381,87 @@
     },
     {
       "N": 128,
-      "interpreter_and_library_mib": 5.77734375,
+      "interpreter_and_library_mib": 5.453125,
+      "method": "full",
+      "peak_rss_mib": 39.43359375,
+      "rank": 0,
+      "repeat": 2,
+      "rss_after_init_mib": 38.65234375,
+      "rss_after_setup_mib": 38.65234375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 2.092263552127406,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.7265625,
+      "method": "full",
+      "peak_rss_mib": 39.68359375,
+      "rank": 0,
+      "repeat": 3,
+      "rss_after_init_mib": 38.92578125,
+      "rss_after_setup_mib": 38.92578125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 2.1064610260073096,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.5859375,
+      "method": "full",
+      "peak_rss_mib": 39.54296875,
+      "rank": 0,
+      "repeat": 4,
+      "rss_after_init_mib": 38.78515625,
+      "rss_after_setup_mib": 38.78515625,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 2.101820348063484,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.5,
       "method": "dlra",
-      "peak_overhead_fraction": 0.09898351919471035,
-      "peak_overhead_vs_full_grid_mib": 3.91796875,
-      "peak_rss_mib": 43.5,
+      "peak_overhead_fraction": 0.10957141443135703,
+      "peak_overhead_samples_mib": {
+        "max_mib": 4.53125,
+        "median_mib": 4.29296875,
+        "min_mib": 4.04296875,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 25,
+        "spread_mib": 0.48828125,
+        "spreads_over_median": 0.11373976342129208
+      },
+      "peak_overhead_vs_full_grid_mib": 4.32421875,
+      "peak_rss_mib": 43.7890625,
       "rank": 2,
       "repeat": 0,
-      "rss_after_init_mib": 39.078125,
-      "rss_after_setup_mib": 38.70703125,
-      "rss_baseline_at_start_mib": 32.9296875,
-      "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 6.2477789770346135,
-      "worker_thread_settings": {
-        "MKL_NUM_THREADS": "1",
-        "NUMEXPR_NUM_THREADS": "1",
-        "OMP_NUM_THREADS": "1",
-        "OPENBLAS_NUM_THREADS": "1",
-        "VECLIB_MAXIMUM_THREADS": null
-      }
-    },
-    {
-      "N": 128,
-      "interpreter_and_library_mib": 5.7734375,
-      "method": "dlra",
-      "peak_overhead_fraction": 0.0990822066515346,
-      "peak_overhead_vs_full_grid_mib": 3.921875,
-      "peak_rss_mib": 43.50390625,
-      "rank": 8,
-      "repeat": 0,
-      "rss_after_init_mib": 39.07421875,
-      "rss_after_setup_mib": 38.703125,
-      "rss_baseline_at_start_mib": 32.9296875,
-      "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 6.441512088058516,
-      "worker_thread_settings": {
-        "MKL_NUM_THREADS": "1",
-        "NUMEXPR_NUM_THREADS": "1",
-        "OMP_NUM_THREADS": "1",
-        "OPENBLAS_NUM_THREADS": "1",
-        "VECLIB_MAXIMUM_THREADS": null
-      }
-    },
-    {
-      "N": 128,
-      "interpreter_and_library_mib": 5.7734375,
-      "method": "dlra",
-      "peak_overhead_fraction": 0.10214151781308596,
-      "peak_overhead_vs_full_grid_mib": 4.04296875,
-      "peak_rss_mib": 43.625,
-      "rank": 16,
-      "repeat": 0,
-      "rss_after_init_mib": 39.07421875,
-      "rss_after_setup_mib": 38.703125,
-      "rss_baseline_at_start_mib": 32.9296875,
-      "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 6.44949634000659,
-      "worker_thread_settings": {
-        "MKL_NUM_THREADS": "1",
-        "NUMEXPR_NUM_THREADS": "1",
-        "OMP_NUM_THREADS": "1",
-        "OPENBLAS_NUM_THREADS": "1",
-        "VECLIB_MAXIMUM_THREADS": null
-      }
-    },
-    {
-      "N": 128,
-      "interpreter_and_library_mib": 5.76953125,
-      "method": "dlra",
-      "peak_overhead_fraction": 0.09878614428106187,
-      "peak_overhead_vs_full_grid_mib": 3.91015625,
-      "peak_rss_mib": 43.4921875,
-      "rank": 32,
-      "repeat": 0,
-      "rss_after_init_mib": 39.0703125,
+      "rss_after_init_mib": 39.02734375,
       "rss_after_setup_mib": 38.69921875,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "rss_baseline_at_start_mib": 33.19921875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 6.557607370894402,
+      "wall_seconds_not_a_timing_measurement": 4.64213651814498,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -401,40 +1472,16 @@
     },
     {
       "N": 128,
-      "interpreter_and_library_mib": 5.77734375,
+      "interpreter_and_library_mib": 5.48828125,
       "method": "dlra",
-      "peak_overhead_fraction": 0.09572683311951051,
-      "peak_overhead_vs_full_grid_mib": 3.7890625,
-      "peak_rss_mib": 43.37109375,
-      "rank": 43,
-      "repeat": 0,
-      "rss_after_init_mib": 39.078125,
-      "rss_after_setup_mib": 38.70703125,
-      "rss_baseline_at_start_mib": 32.9296875,
-      "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 6.6255627509672195,
-      "worker_thread_settings": {
-        "MKL_NUM_THREADS": "1",
-        "NUMEXPR_NUM_THREADS": "1",
-        "OMP_NUM_THREADS": "1",
-        "OPENBLAS_NUM_THREADS": "1",
-        "VECLIB_MAXIMUM_THREADS": null
-      }
-    },
-    {
-      "N": 128,
-      "interpreter_and_library_mib": 5.76953125,
-      "method": "bug",
-      "peak_overhead_fraction": 0.043915918286785746,
-      "peak_overhead_vs_full_grid_mib": 1.73828125,
-      "peak_rss_mib": 41.3203125,
+      "peak_rss_mib": 43.7265625,
       "rank": 2,
-      "repeat": 0,
-      "rss_after_init_mib": 38.9453125,
-      "rss_after_setup_mib": 38.69921875,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "repeat": 1,
+      "rss_after_init_mib": 39.05859375,
+      "rss_after_setup_mib": 38.6875,
+      "rss_baseline_at_start_mib": 33.19921875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 30.298498588148504,
+      "wall_seconds_not_a_timing_measurement": 4.678869169903919,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -445,18 +1492,87 @@
     },
     {
       "N": 128,
-      "interpreter_and_library_mib": 5.65234375,
-      "method": "bug",
-      "peak_overhead_fraction": 0.05437678871015494,
-      "peak_overhead_vs_full_grid_mib": 2.15234375,
-      "peak_rss_mib": 41.734375,
+      "interpreter_and_library_mib": 5.64453125,
+      "method": "dlra",
+      "peak_rss_mib": 43.96484375,
+      "rank": 2,
+      "repeat": 2,
+      "rss_after_init_mib": 39.21484375,
+      "rss_after_setup_mib": 38.84375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.672115192050114,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.609375,
+      "method": "dlra",
+      "peak_rss_mib": 43.84765625,
+      "rank": 2,
+      "repeat": 3,
+      "rss_after_init_mib": 39.1796875,
+      "rss_after_setup_mib": 38.80859375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.590310069033876,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.74609375,
+      "method": "dlra",
+      "peak_rss_mib": 43.7890625,
+      "rank": 2,
+      "repeat": 4,
+      "rss_after_init_mib": 39.19140625,
+      "rss_after_setup_mib": 38.9453125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.691524443915114,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.60546875,
+      "method": "dlra",
+      "peak_overhead_fraction": 0.1046223893892903,
+      "peak_overhead_samples_mib": {
+        "max_mib": 4.20703125,
+        "median_mib": 4.05078125,
+        "min_mib": 3.69140625,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 25,
+        "spread_mib": 0.515625,
+        "spreads_over_median": 0.12729026036644167
+      },
+      "peak_overhead_vs_full_grid_mib": 4.12890625,
+      "peak_rss_mib": 43.59375,
       "rank": 8,
       "repeat": 0,
-      "rss_after_init_mib": 38.953125,
-      "rss_after_setup_mib": 38.58203125,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "rss_after_init_mib": 39.17578125,
+      "rss_after_setup_mib": 38.8046875,
+      "rss_baseline_at_start_mib": 33.19921875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 29.541681452887133,
+      "wall_seconds_not_a_timing_measurement": 4.766601315932348,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -467,18 +1583,167 @@
     },
     {
       "N": 128,
-      "interpreter_and_library_mib": 5.8984375,
-      "method": "bug",
-      "peak_overhead_fraction": 0.06385078456528176,
-      "peak_overhead_vs_full_grid_mib": 2.52734375,
-      "peak_rss_mib": 42.109375,
+      "interpreter_and_library_mib": 5.7578125,
+      "method": "dlra",
+      "peak_rss_mib": 43.63671875,
+      "rank": 8,
+      "repeat": 1,
+      "rss_after_init_mib": 39.328125,
+      "rss_after_setup_mib": 38.95703125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.912669105920941,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.5234375,
+      "method": "dlra",
+      "peak_rss_mib": 43.375,
+      "rank": 8,
+      "repeat": 2,
+      "rss_after_init_mib": 39.09375,
+      "rss_after_setup_mib": 38.72265625,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.763442319119349,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.45703125,
+      "method": "dlra",
+      "peak_rss_mib": 43.5546875,
+      "rank": 8,
+      "repeat": 3,
+      "rss_after_init_mib": 39.15234375,
+      "rss_after_setup_mib": 38.65625,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.742212468991056,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.65625,
+      "method": "dlra",
+      "peak_rss_mib": 43.640625,
+      "rank": 8,
+      "repeat": 4,
+      "rss_after_init_mib": 39.2265625,
+      "rss_after_setup_mib": 38.85546875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.7528270778711885,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.46875,
+      "method": "dlra",
+      "peak_overhead_fraction": 0.10729486291200634,
+      "peak_overhead_samples_mib": {
+        "max_mib": 4.3046875,
+        "median_mib": 4.15625,
+        "min_mib": 3.84375,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 25,
+        "spread_mib": 0.4609375,
+        "spreads_over_median": 0.11090225563909774
+      },
+      "peak_overhead_vs_full_grid_mib": 4.234375,
+      "peak_rss_mib": 43.69921875,
       "rank": 16,
       "repeat": 0,
+      "rss_after_init_mib": 39.0390625,
+      "rss_after_setup_mib": 38.66796875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.788046103902161,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.50390625,
+      "method": "dlra",
+      "peak_rss_mib": 43.73828125,
+      "rank": 16,
+      "repeat": 1,
       "rss_after_init_mib": 39.07421875,
+      "rss_after_setup_mib": 38.703125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.829044425860047,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.41796875,
+      "method": "dlra",
+      "peak_rss_mib": 43.52734375,
+      "rank": 16,
+      "repeat": 2,
+      "rss_after_init_mib": 38.98828125,
+      "rss_after_setup_mib": 38.6171875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.915207031881437,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.62890625,
+      "method": "dlra",
+      "peak_rss_mib": 43.6484375,
+      "rank": 16,
+      "repeat": 3,
+      "rss_after_init_mib": 39.19921875,
       "rss_after_setup_mib": 38.828125,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "rss_baseline_at_start_mib": 33.19921875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 31.45126039814204,
+      "wall_seconds_not_a_timing_measurement": 4.927993478020653,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -489,18 +1754,47 @@
     },
     {
       "N": 128,
-      "interpreter_and_library_mib": 5.65234375,
-      "method": "bug",
-      "peak_overhead_fraction": 0.08121977696634758,
-      "peak_overhead_vs_full_grid_mib": 3.21484375,
-      "peak_rss_mib": 42.796875,
+      "interpreter_and_library_mib": 5.48828125,
+      "method": "dlra",
+      "peak_rss_mib": 43.7109375,
+      "rank": 16,
+      "repeat": 4,
+      "rss_after_init_mib": 39.05859375,
+      "rss_after_setup_mib": 38.6875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.890846125083044,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.71484375,
+      "method": "dlra",
+      "peak_overhead_fraction": 0.10096011085816094,
+      "peak_overhead_samples_mib": {
+        "max_mib": 4.02734375,
+        "median_mib": 3.90234375,
+        "min_mib": 3.6328125,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 25,
+        "spread_mib": 0.39453125,
+        "spreads_over_median": 0.1011011011011011
+      },
+      "peak_overhead_vs_full_grid_mib": 3.984375,
+      "peak_rss_mib": 43.44921875,
       "rank": 32,
       "repeat": 0,
-      "rss_after_init_mib": 38.953125,
-      "rss_after_setup_mib": 38.58203125,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "rss_after_init_mib": 39.28515625,
+      "rss_after_setup_mib": 38.9140625,
+      "rss_baseline_at_start_mib": 33.19921875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 34.414323289878666,
+      "wall_seconds_not_a_timing_measurement": 5.031156605109572,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -511,18 +1805,742 @@
     },
     {
       "N": 128,
-      "interpreter_and_library_mib": 5.78125,
-      "method": "bug",
-      "peak_overhead_fraction": 0.08891739859863812,
-      "peak_overhead_vs_full_grid_mib": 3.51953125,
-      "peak_rss_mib": 43.1015625,
+      "interpreter_and_library_mib": 5.72265625,
+      "method": "dlra",
+      "peak_rss_mib": 43.4609375,
+      "rank": 32,
+      "repeat": 1,
+      "rss_after_init_mib": 39.29296875,
+      "rss_after_setup_mib": 38.921875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.140145851066336,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.58203125,
+      "method": "dlra",
+      "peak_rss_mib": 43.31640625,
+      "rank": 32,
+      "repeat": 2,
+      "rss_after_init_mib": 39.0859375,
+      "rss_after_setup_mib": 38.78125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.506205457961187,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.73046875,
+      "method": "dlra",
+      "peak_rss_mib": 43.37890625,
+      "rank": 32,
+      "repeat": 3,
+      "rss_after_init_mib": 39.30078125,
+      "rss_after_setup_mib": 38.9296875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.044159522978589,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.7265625,
+      "method": "dlra",
+      "peak_rss_mib": 43.4453125,
+      "rank": 32,
+      "repeat": 4,
+      "rss_after_init_mib": 39.296875,
+      "rss_after_setup_mib": 38.92578125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.027042055036873,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.51171875,
+      "method": "dlra",
+      "peak_overhead_fraction": 0.10868058992378501,
+      "peak_overhead_samples_mib": {
+        "max_mib": 4.4140625,
+        "median_mib": 4.2421875,
+        "min_mib": 3.99609375,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 25,
+        "spread_mib": 0.41796875,
+        "spreads_over_median": 0.09852670349907919
+      },
+      "peak_overhead_vs_full_grid_mib": 4.2890625,
+      "peak_rss_mib": 43.75390625,
       "rank": 43,
       "repeat": 0,
-      "rss_after_init_mib": 38.9453125,
+      "rss_after_init_mib": 39.08203125,
       "rss_after_setup_mib": 38.7109375,
-      "rss_baseline_at_start_mib": 32.9296875,
+      "rss_baseline_at_start_mib": 33.19921875,
       "steps": 400,
-      "wall_seconds_not_a_timing_measurement": 36.276557540055364,
+      "wall_seconds_not_a_timing_measurement": 5.122218090109527,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.68359375,
+      "method": "dlra",
+      "peak_rss_mib": 43.8359375,
+      "rank": 43,
+      "repeat": 1,
+      "rss_after_init_mib": 39.25390625,
+      "rss_after_setup_mib": 38.8828125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.291148490039632,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.5859375,
+      "method": "dlra",
+      "peak_rss_mib": 43.84765625,
+      "rank": 43,
+      "repeat": 2,
+      "rss_after_init_mib": 39.2109375,
+      "rss_after_setup_mib": 38.78515625,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.90579141699709,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.6953125,
+      "method": "dlra",
+      "peak_rss_mib": 43.70703125,
+      "rank": 43,
+      "repeat": 3,
+      "rss_after_init_mib": 39.265625,
+      "rss_after_setup_mib": 38.89453125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 5.005459391046315,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.48828125,
+      "method": "dlra",
+      "peak_rss_mib": 43.6796875,
+      "rank": 43,
+      "repeat": 4,
+      "rss_after_init_mib": 39.05859375,
+      "rss_after_setup_mib": 38.6875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 4.995665120892227,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.640625,
+      "method": "bug",
+      "peak_overhead_fraction": 0.05552806097198852,
+      "peak_overhead_samples_mib": {
+        "max_mib": 2.3125,
+        "median_mib": 2.07421875,
+        "min_mib": 1.8515625,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 25,
+        "spread_mib": 0.4609375,
+        "spreads_over_median": 0.2222222222222222
+      },
+      "peak_overhead_vs_full_grid_mib": 2.19140625,
+      "peak_rss_mib": 41.65625,
+      "rank": 2,
+      "repeat": 0,
+      "rss_after_init_mib": 39.2109375,
+      "rss_after_setup_mib": 38.83984375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 19.6338693019934,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.66796875,
+      "method": "bug",
+      "peak_rss_mib": 41.53515625,
+      "rank": 2,
+      "repeat": 1,
+      "rss_after_init_mib": 39.23828125,
+      "rss_after_setup_mib": 38.8671875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 19.118211737135425,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.59765625,
+      "method": "bug",
+      "peak_rss_mib": 41.5390625,
+      "rank": 2,
+      "repeat": 2,
+      "rss_after_init_mib": 39.203125,
+      "rss_after_setup_mib": 38.796875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 19.695790166966617,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.8046875,
+      "method": "bug",
+      "peak_rss_mib": 41.74609375,
+      "rank": 2,
+      "repeat": 3,
+      "rss_after_init_mib": 39.25,
+      "rss_after_setup_mib": 39.00390625,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 20.33104322012514,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.73046875,
+      "method": "bug",
+      "peak_rss_mib": 41.54296875,
+      "rank": 2,
+      "repeat": 4,
+      "rss_after_init_mib": 39.30078125,
+      "rss_after_setup_mib": 38.9296875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 21.12696143006906,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.70703125,
+      "method": "bug",
+      "peak_overhead_fraction": 0.06285261803424726,
+      "peak_overhead_samples_mib": {
+        "max_mib": 2.5546875,
+        "median_mib": 2.3671875,
+        "min_mib": 2.03125,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 25,
+        "spread_mib": 0.5234375,
+        "spreads_over_median": 0.22112211221122113
+      },
+      "peak_overhead_vs_full_grid_mib": 2.48046875,
+      "peak_rss_mib": 41.9453125,
+      "rank": 8,
+      "repeat": 0,
+      "rss_after_init_mib": 39.1015625,
+      "rss_after_setup_mib": 38.90625,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 19.324851393001154,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.50390625,
+      "method": "bug",
+      "peak_rss_mib": 41.98828125,
+      "rank": 8,
+      "repeat": 1,
+      "rss_after_init_mib": 39.07421875,
+      "rss_after_setup_mib": 38.703125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 19.316383986035362,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.48828125,
+      "method": "bug",
+      "peak_rss_mib": 41.71484375,
+      "rank": 8,
+      "repeat": 2,
+      "rss_after_init_mib": 39.05859375,
+      "rss_after_setup_mib": 38.6875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 18.972777978051454,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.4921875,
+      "method": "bug",
+      "peak_rss_mib": 41.828125,
+      "rank": 8,
+      "repeat": 3,
+      "rss_after_init_mib": 39.0625,
+      "rss_after_setup_mib": 38.69140625,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 19.093118199147284,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.68359375,
+      "method": "bug",
+      "peak_rss_mib": 41.91015625,
+      "rank": 8,
+      "repeat": 4,
+      "rss_after_init_mib": 39.12890625,
+      "rss_after_setup_mib": 38.8828125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 20.112756985938177,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.49609375,
+      "method": "bug",
+      "peak_overhead_fraction": 0.06938533108977532,
+      "peak_overhead_samples_mib": {
+        "max_mib": 2.85546875,
+        "median_mib": 2.66015625,
+        "min_mib": 2.328125,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 25,
+        "spread_mib": 0.52734375,
+        "spreads_over_median": 0.19823788546255505
+      },
+      "peak_overhead_vs_full_grid_mib": 2.73828125,
+      "peak_rss_mib": 42.203125,
+      "rank": 16,
+      "repeat": 0,
+      "rss_after_init_mib": 39.06640625,
+      "rss_after_setup_mib": 38.6953125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 20.356075435876846,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.578125,
+      "method": "bug",
+      "peak_rss_mib": 42.203125,
+      "rank": 16,
+      "repeat": 1,
+      "rss_after_init_mib": 39.1484375,
+      "rss_after_setup_mib": 38.77734375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 19.49523853790015,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.41015625,
+      "method": "bug",
+      "peak_rss_mib": 42.01171875,
+      "rank": 16,
+      "repeat": 2,
+      "rss_after_init_mib": 38.98046875,
+      "rss_after_setup_mib": 38.609375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 19.29214442986995,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.65625,
+      "method": "bug",
+      "peak_rss_mib": 42.2890625,
+      "rank": 16,
+      "repeat": 3,
+      "rss_after_init_mib": 39.1015625,
+      "rss_after_setup_mib": 38.85546875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 19.370052383979782,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.53125,
+      "method": "bug",
+      "peak_rss_mib": 42.14453125,
+      "rank": 16,
+      "repeat": 4,
+      "rss_after_init_mib": 38.9765625,
+      "rss_after_setup_mib": 38.73046875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 19.71149608097039,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.578125,
+      "method": "bug",
+      "peak_overhead_fraction": 0.08997327526477283,
+      "peak_overhead_samples_mib": {
+        "max_mib": 3.64453125,
+        "median_mib": 3.47265625,
+        "min_mib": 3.14453125,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 25,
+        "spread_mib": 0.5,
+        "spreads_over_median": 0.1439820022497188
+      },
+      "peak_overhead_vs_full_grid_mib": 3.55078125,
+      "peak_rss_mib": 43.015625,
+      "rank": 32,
+      "repeat": 0,
+      "rss_after_init_mib": 39.1484375,
+      "rss_after_setup_mib": 38.77734375,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 23.44389672903344,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.60546875,
+      "method": "bug",
+      "peak_rss_mib": 43.01953125,
+      "rank": 32,
+      "repeat": 1,
+      "rss_after_init_mib": 39.17578125,
+      "rss_after_setup_mib": 38.8046875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 22.845277359941974,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.3828125,
+      "method": "bug",
+      "peak_rss_mib": 42.828125,
+      "rank": 32,
+      "repeat": 2,
+      "rss_after_init_mib": 38.953125,
+      "rss_after_setup_mib": 38.58203125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 21.765671792905778,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.7265625,
+      "method": "bug",
+      "peak_rss_mib": 43.078125,
+      "rank": 32,
+      "repeat": 3,
+      "rss_after_init_mib": 39.296875,
+      "rss_after_setup_mib": 38.92578125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 21.72098661889322,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.5390625,
+      "method": "bug",
+      "peak_rss_mib": 43.015625,
+      "rank": 32,
+      "repeat": 4,
+      "rss_after_init_mib": 39.109375,
+      "rss_after_setup_mib": 38.73828125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 21.556626745965332,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.60546875,
+      "method": "bug",
+      "peak_overhead_fraction": 0.09947540334554093,
+      "peak_overhead_samples_mib": {
+        "max_mib": 4.01171875,
+        "median_mib": 3.84765625,
+        "min_mib": 3.59375,
+        "note": "every pairing of this configuration's repeats with the reference's repeats, so the spread includes the reference's own variation and not only this configuration's",
+        "samples": 25,
+        "spread_mib": 0.41796875,
+        "spreads_over_median": 0.10862944162436548
+      },
+      "peak_overhead_vs_full_grid_mib": 3.92578125,
+      "peak_rss_mib": 43.390625,
+      "rank": 43,
+      "repeat": 0,
+      "rss_after_init_mib": 39.05078125,
+      "rss_after_setup_mib": 38.8046875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 22.390748374862596,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.73046875,
+      "method": "bug",
+      "peak_rss_mib": 43.4453125,
+      "rank": 43,
+      "repeat": 1,
+      "rss_after_init_mib": 39.30078125,
+      "rss_after_setup_mib": 38.9296875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 22.19512336491607,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.50390625,
+      "method": "bug",
+      "peak_rss_mib": 43.32421875,
+      "rank": 43,
+      "repeat": 2,
+      "rss_after_init_mib": 39.07421875,
+      "rss_after_setup_mib": 38.703125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 21.27225734014064,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.48828125,
+      "method": "bug",
+      "peak_rss_mib": 43.27734375,
+      "rank": 43,
+      "repeat": 3,
+      "rss_after_init_mib": 39.05859375,
+      "rss_after_setup_mib": 38.6875,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 21.303563689813018,
+      "worker_thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    {
+      "N": 128,
+      "interpreter_and_library_mib": 5.7265625,
+      "method": "bug",
+      "peak_rss_mib": 43.41015625,
+      "rank": 43,
+      "repeat": 4,
+      "rss_after_init_mib": 39.296875,
+      "rss_after_setup_mib": 38.92578125,
+      "rss_baseline_at_start_mib": 33.19921875,
+      "steps": 400,
+      "wall_seconds_not_a_timing_measurement": 21.815527340164408,
       "worker_thread_settings": {
         "MKL_NUM_THREADS": "1",
         "NUMEXPR_NUM_THREADS": "1",
@@ -532,7 +2550,110 @@
       }
     }
   ],
-  "noise_floor_mib": 0.00390625,
+  "noise_floor_mib": 0.42578125,
+  "noise_floor_samples_mib": {
+    "max_mib": 0.42578125,
+    "max_over_min": null,
+    "median_mib": 0.083984375,
+    "min_mib": 0.0,
+    "samples": 92,
+    "used_for_verdicts": "max_mib",
+    "values_mib": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.00390625,
+      0.00390625,
+      0.00390625,
+      0.01171875,
+      0.01171875,
+      0.015625,
+      0.01953125,
+      0.01953125,
+      0.0234375,
+      0.0234375,
+      0.02734375,
+      0.02734375,
+      0.03125,
+      0.03125,
+      0.03125,
+      0.03125,
+      0.03125,
+      0.03515625,
+      0.0390625,
+      0.0390625,
+      0.04296875,
+      0.04296875,
+      0.046875,
+      0.046875,
+      0.046875,
+      0.05078125,
+      0.0546875,
+      0.0546875,
+      0.05859375,
+      0.05859375,
+      0.0625,
+      0.0625,
+      0.0625,
+      0.0625,
+      0.06640625,
+      0.0703125,
+      0.07421875,
+      0.07421875,
+      0.07421875,
+      0.078125,
+      0.078125,
+      0.08203125,
+      0.0859375,
+      0.08984375,
+      0.08984375,
+      0.08984375,
+      0.09375,
+      0.09375,
+      0.09765625,
+      0.10546875,
+      0.11328125,
+      0.11328125,
+      0.1171875,
+      0.1171875,
+      0.1171875,
+      0.1171875,
+      0.12109375,
+      0.12109375,
+      0.12109375,
+      0.125,
+      0.12890625,
+      0.12890625,
+      0.12890625,
+      0.1328125,
+      0.13671875,
+      0.140625,
+      0.14453125,
+      0.1484375,
+      0.16015625,
+      0.171875,
+      0.171875,
+      0.17578125,
+      0.18359375,
+      0.1875,
+      0.19140625,
+      0.19140625,
+      0.19921875,
+      0.21484375,
+      0.21875,
+      0.21875,
+      0.23046875,
+      0.23828125,
+      0.23828125,
+      0.2421875,
+      0.24609375,
+      0.30859375,
+      0.37109375,
+      0.42578125
+    ],
+    "why_max": "the verdicts ask whether a spread over rank exceeds twice this quantity. Taking the maximum is the conservative side: it can only turn a 'varies with rank' verdict into 'not established', never the reverse, and a false claim of rank-independence is the error this project has been correcting all cycle."
+  },
   "parameters": {
     "grids": [
       64,
@@ -543,7 +2664,9 @@
       "dlra",
       "bug"
     ],
-    "noise_floor": "one configuration is measured twice; the difference is the measurement's own resolution, and a spread over rank is only meaningful if it exceeds it",
+    "noise_floor": "the largest of the same-configuration differences between a repeat and the first measurement; the resolution against which a spread over rank is judged, taken at its MAXIMUM so the error can only fall on the side of not claiming a rank dependence",
+    "noise_repeats": 8,
+    "overhead_repeats": 5,
     "process_isolation": "one fresh subprocess per configuration, because peak RSS is a process high-water mark and sharing a process would report the largest allocation any configuration made for all of them",
     "ranks": [
       2,
@@ -552,29 +2675,38 @@
       32,
       43
     ],
+    "repeats_note": "EVERY configuration is measured `overhead_repeats` times, so the noise floor is estimated from `noise_floor_samples_mib.samples` same-configuration differences rather than one, and each overhead is a distribution. Both were single-sample until 2026-09-26, which is why four registry rows pinned to a single-sample overhead could not be satisfied by any correct measurement: the projected integrator's N=64 overhead was measured at 0.098, 0.230 and 0.231 MiB across three runs, a factor of 1.36 apart.",
     "steps": 400
   },
   "provenance": {
+    "captured_at": "launch",
     "driver": "experiments/bench_memory.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "3fda13009962463d43b1270c89f275d89ea5c6625b06c9046d4e7cd770b464a5",
-    "git_commit": "a1a42dcf32a29f0c81e3eff83483a51470d82b15",
-    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "driver_matches_HEAD_at_write": true,
+    "driver_sha256": "d77ac5fd6d4b6e525c00197ff6e64b92ab8e3f8f67b041a71d9316e471d7ddbf",
+    "driver_sha256_at_write": "d77ac5fd6d4b6e525c00197ff6e64b92ab8e3f8f67b041a71d9316e471d7ddbf",
+    "git_commit": "4923f79f6596f92c4862540a4fe4640566abafb5",
+    "git_commit_at_write": "4923f79f6596f92c4862540a4fe4640566abafb5",
+    "git_commit_how": "git log -1 --before=1790418700",
+    "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_diff_sha256": "c5576cf175143d19294d5228e0cb2cd409e9043ca5302e08bc7337236651fc84",
-    "working_tree_dirty": true
+    "sources_files_at_launch": 31,
+    "sources_fingerprint_at_launch": "7aeba4b7a2eb283f1277715b541aaeed746532eb80a770674831af1791f3c71c",
+    "tree_moved_during_run": false,
+    "working_tree_dirty": false,
+    "working_tree_dirty_paths": []
   },
   "rank_scaling": [
     {
       "N": 64,
       "method": "dlra",
-      "noise_floor_mib": 0.00390625,
-      "overhead_vs_full_grid_mib": 2.4140625,
-      "peak_mib_max": 39.60546875,
-      "peak_mib_min": 39.4140625,
+      "noise_floor_mib": 0.42578125,
+      "overhead_vs_full_grid_mib": 2.53125,
+      "peak_mib_max": 39.828125,
+      "peak_mib_min": 39.35546875,
       "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
-      "rank_independence_resolved": true,
+      "rank_independence_resolved": false,
       "ranks": [
         2,
         8,
@@ -582,17 +2714,17 @@
         32,
         43
       ],
-      "spread_over_rank_mib": 0.19140625
+      "spread_over_rank_mib": 0.47265625
     },
     {
       "N": 64,
       "method": "bug",
-      "noise_floor_mib": 0.00390625,
-      "overhead_vs_full_grid_mib": 2.1796875,
-      "peak_mib_max": 39.37109375,
-      "peak_mib_min": 38.796875,
+      "noise_floor_mib": 0.42578125,
+      "overhead_vs_full_grid_mib": 2.32421875,
+      "peak_mib_max": 39.62109375,
+      "peak_mib_min": 38.9453125,
       "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
-      "rank_independence_resolved": true,
+      "rank_independence_resolved": false,
       "ranks": [
         2,
         8,
@@ -600,17 +2732,17 @@
         32,
         43
       ],
-      "spread_over_rank_mib": 0.57421875
+      "spread_over_rank_mib": 0.67578125
     },
     {
       "N": 128,
       "method": "dlra",
-      "noise_floor_mib": 0.00390625,
-      "overhead_vs_full_grid_mib": 4.04296875,
-      "peak_mib_max": 43.625,
-      "peak_mib_min": 43.37109375,
+      "noise_floor_mib": 0.42578125,
+      "overhead_vs_full_grid_mib": 4.32421875,
+      "peak_mib_max": 43.7890625,
+      "peak_mib_min": 43.44921875,
       "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
-      "rank_independence_resolved": true,
+      "rank_independence_resolved": false,
       "ranks": [
         2,
         8,
@@ -618,15 +2750,15 @@
         32,
         43
       ],
-      "spread_over_rank_mib": 0.25390625
+      "spread_over_rank_mib": 0.33984375
     },
     {
       "N": 128,
       "method": "bug",
-      "noise_floor_mib": 0.00390625,
-      "overhead_vs_full_grid_mib": 3.51953125,
-      "peak_mib_max": 43.1015625,
-      "peak_mib_min": 41.3203125,
+      "noise_floor_mib": 0.42578125,
+      "overhead_vs_full_grid_mib": 3.92578125,
+      "peak_mib_max": 43.390625,
+      "peak_mib_min": 41.65625,
       "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
       "rank_independence_resolved": true,
       "ranks": [
@@ -636,10 +2768,745 @@
         32,
         43
       ],
-      "spread_over_rank_mib": 1.78125
+      "spread_over_rank_mib": 1.734375
     }
   ],
-  "run_to_run_noise_mib": {
-    "N64_full_r0": 0.00390625
-  }
+  "run_to_run_noise_mib": [
+    {
+      "N": 64,
+      "config": "N64_full_r0",
+      "delta_mib": 0.12109375,
+      "method": "full",
+      "rank": 0,
+      "repeat": 1
+    },
+    {
+      "N": 64,
+      "config": "N64_full_r0",
+      "delta_mib": 0.0234375,
+      "method": "full",
+      "rank": 0,
+      "repeat": 2
+    },
+    {
+      "N": 64,
+      "config": "N64_full_r0",
+      "delta_mib": 0.01953125,
+      "method": "full",
+      "rank": 0,
+      "repeat": 3
+    },
+    {
+      "N": 64,
+      "config": "N64_full_r0",
+      "delta_mib": 0.2421875,
+      "method": "full",
+      "rank": 0,
+      "repeat": 4
+    },
+    {
+      "N": 64,
+      "config": "N64_full_r0",
+      "delta_mib": 0.12109375,
+      "method": "full",
+      "rank": 0,
+      "repeat": 5
+    },
+    {
+      "N": 64,
+      "config": "N64_full_r0",
+      "delta_mib": 0.1171875,
+      "method": "full",
+      "rank": 0,
+      "repeat": 6
+    },
+    {
+      "N": 64,
+      "config": "N64_full_r0",
+      "delta_mib": 0.09375,
+      "method": "full",
+      "rank": 0,
+      "repeat": 7
+    },
+    {
+      "N": 64,
+      "config": "N64_full_r0",
+      "delta_mib": 0.03125,
+      "method": "full",
+      "rank": 0,
+      "repeat": 8
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r2",
+      "delta_mib": 0.12890625,
+      "method": "dlra",
+      "rank": 2,
+      "repeat": 1
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r2",
+      "delta_mib": 0.1171875,
+      "method": "dlra",
+      "rank": 2,
+      "repeat": 2
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r2",
+      "delta_mib": 0.24609375,
+      "method": "dlra",
+      "rank": 2,
+      "repeat": 3
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r2",
+      "delta_mib": 0.37109375,
+      "method": "dlra",
+      "rank": 2,
+      "repeat": 4
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r8",
+      "delta_mib": 0.171875,
+      "method": "dlra",
+      "rank": 8,
+      "repeat": 1
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r8",
+      "delta_mib": 0.0,
+      "method": "dlra",
+      "rank": 8,
+      "repeat": 2
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r8",
+      "delta_mib": 0.19921875,
+      "method": "dlra",
+      "rank": 8,
+      "repeat": 3
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r8",
+      "delta_mib": 0.00390625,
+      "method": "dlra",
+      "rank": 8,
+      "repeat": 4
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r16",
+      "delta_mib": 0.0625,
+      "method": "dlra",
+      "rank": 16,
+      "repeat": 1
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r16",
+      "delta_mib": 0.0234375,
+      "method": "dlra",
+      "rank": 16,
+      "repeat": 2
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r16",
+      "delta_mib": 0.02734375,
+      "method": "dlra",
+      "rank": 16,
+      "repeat": 3
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r16",
+      "delta_mib": 0.1484375,
+      "method": "dlra",
+      "rank": 16,
+      "repeat": 4
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r32",
+      "delta_mib": 0.015625,
+      "method": "dlra",
+      "rank": 32,
+      "repeat": 1
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r32",
+      "delta_mib": 0.07421875,
+      "method": "dlra",
+      "rank": 32,
+      "repeat": 2
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r32",
+      "delta_mib": 0.08984375,
+      "method": "dlra",
+      "rank": 32,
+      "repeat": 3
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r32",
+      "delta_mib": 0.30859375,
+      "method": "dlra",
+      "rank": 32,
+      "repeat": 4
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r43",
+      "delta_mib": 0.03125,
+      "method": "dlra",
+      "rank": 43,
+      "repeat": 1
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r43",
+      "delta_mib": 0.03125,
+      "method": "dlra",
+      "rank": 43,
+      "repeat": 2
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r43",
+      "delta_mib": 0.12890625,
+      "method": "dlra",
+      "rank": 43,
+      "repeat": 3
+    },
+    {
+      "N": 64,
+      "config": "N64_dlra_r43",
+      "delta_mib": 0.18359375,
+      "method": "dlra",
+      "rank": 43,
+      "repeat": 4
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r2",
+      "delta_mib": 0.140625,
+      "method": "bug",
+      "rank": 2,
+      "repeat": 1
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r2",
+      "delta_mib": 0.14453125,
+      "method": "bug",
+      "rank": 2,
+      "repeat": 2
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r2",
+      "delta_mib": 0.09765625,
+      "method": "bug",
+      "rank": 2,
+      "repeat": 3
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r2",
+      "delta_mib": 0.03125,
+      "method": "bug",
+      "rank": 2,
+      "repeat": 4
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r8",
+      "delta_mib": 0.16015625,
+      "method": "bug",
+      "rank": 8,
+      "repeat": 1
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r8",
+      "delta_mib": 0.19140625,
+      "method": "bug",
+      "rank": 8,
+      "repeat": 2
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r8",
+      "delta_mib": 0.13671875,
+      "method": "bug",
+      "rank": 8,
+      "repeat": 3
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r8",
+      "delta_mib": 0.23828125,
+      "method": "bug",
+      "rank": 8,
+      "repeat": 4
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r16",
+      "delta_mib": 0.02734375,
+      "method": "bug",
+      "rank": 16,
+      "repeat": 1
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r16",
+      "delta_mib": 0.12890625,
+      "method": "bug",
+      "rank": 16,
+      "repeat": 2
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r16",
+      "delta_mib": 0.046875,
+      "method": "bug",
+      "rank": 16,
+      "repeat": 3
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r16",
+      "delta_mib": 0.0546875,
+      "method": "bug",
+      "rank": 16,
+      "repeat": 4
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r32",
+      "delta_mib": 0.07421875,
+      "method": "bug",
+      "rank": 32,
+      "repeat": 1
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r32",
+      "delta_mib": 0.0625,
+      "method": "bug",
+      "rank": 32,
+      "repeat": 2
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r32",
+      "delta_mib": 0.23828125,
+      "method": "bug",
+      "rank": 32,
+      "repeat": 3
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r32",
+      "delta_mib": 0.42578125,
+      "method": "bug",
+      "rank": 32,
+      "repeat": 4
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r43",
+      "delta_mib": 0.10546875,
+      "method": "bug",
+      "rank": 43,
+      "repeat": 1
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r43",
+      "delta_mib": 0.125,
+      "method": "bug",
+      "rank": 43,
+      "repeat": 2
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r43",
+      "delta_mib": 0.08984375,
+      "method": "bug",
+      "rank": 43,
+      "repeat": 3
+    },
+    {
+      "N": 64,
+      "config": "N64_bug_r43",
+      "delta_mib": 0.21484375,
+      "method": "bug",
+      "rank": 43,
+      "repeat": 4
+    },
+    {
+      "N": 128,
+      "config": "N128_full_r0",
+      "delta_mib": 0.078125,
+      "method": "full",
+      "rank": 0,
+      "repeat": 1
+    },
+    {
+      "N": 128,
+      "config": "N128_full_r0",
+      "delta_mib": 0.03125,
+      "method": "full",
+      "rank": 0,
+      "repeat": 2
+    },
+    {
+      "N": 128,
+      "config": "N128_full_r0",
+      "delta_mib": 0.21875,
+      "method": "full",
+      "rank": 0,
+      "repeat": 3
+    },
+    {
+      "N": 128,
+      "config": "N128_full_r0",
+      "delta_mib": 0.078125,
+      "method": "full",
+      "rank": 0,
+      "repeat": 4
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r2",
+      "delta_mib": 0.0625,
+      "method": "dlra",
+      "rank": 2,
+      "repeat": 1
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r2",
+      "delta_mib": 0.17578125,
+      "method": "dlra",
+      "rank": 2,
+      "repeat": 2
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r2",
+      "delta_mib": 0.05859375,
+      "method": "dlra",
+      "rank": 2,
+      "repeat": 3
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r2",
+      "delta_mib": 0.0,
+      "method": "dlra",
+      "rank": 2,
+      "repeat": 4
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r8",
+      "delta_mib": 0.04296875,
+      "method": "dlra",
+      "rank": 8,
+      "repeat": 1
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r8",
+      "delta_mib": 0.21875,
+      "method": "dlra",
+      "rank": 8,
+      "repeat": 2
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r8",
+      "delta_mib": 0.0390625,
+      "method": "dlra",
+      "rank": 8,
+      "repeat": 3
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r8",
+      "delta_mib": 0.046875,
+      "method": "dlra",
+      "rank": 8,
+      "repeat": 4
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r16",
+      "delta_mib": 0.0390625,
+      "method": "dlra",
+      "rank": 16,
+      "repeat": 1
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r16",
+      "delta_mib": 0.171875,
+      "method": "dlra",
+      "rank": 16,
+      "repeat": 2
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r16",
+      "delta_mib": 0.05078125,
+      "method": "dlra",
+      "rank": 16,
+      "repeat": 3
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r16",
+      "delta_mib": 0.01171875,
+      "method": "dlra",
+      "rank": 16,
+      "repeat": 4
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r32",
+      "delta_mib": 0.01171875,
+      "method": "dlra",
+      "rank": 32,
+      "repeat": 1
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r32",
+      "delta_mib": 0.1328125,
+      "method": "dlra",
+      "rank": 32,
+      "repeat": 2
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r32",
+      "delta_mib": 0.0703125,
+      "method": "dlra",
+      "rank": 32,
+      "repeat": 3
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r32",
+      "delta_mib": 0.00390625,
+      "method": "dlra",
+      "rank": 32,
+      "repeat": 4
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r43",
+      "delta_mib": 0.08203125,
+      "method": "dlra",
+      "rank": 43,
+      "repeat": 1
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r43",
+      "delta_mib": 0.09375,
+      "method": "dlra",
+      "rank": 43,
+      "repeat": 2
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r43",
+      "delta_mib": 0.046875,
+      "method": "dlra",
+      "rank": 43,
+      "repeat": 3
+    },
+    {
+      "N": 128,
+      "config": "N128_dlra_r43",
+      "delta_mib": 0.07421875,
+      "method": "dlra",
+      "rank": 43,
+      "repeat": 4
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r2",
+      "delta_mib": 0.12109375,
+      "method": "bug",
+      "rank": 2,
+      "repeat": 1
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r2",
+      "delta_mib": 0.1171875,
+      "method": "bug",
+      "rank": 2,
+      "repeat": 2
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r2",
+      "delta_mib": 0.08984375,
+      "method": "bug",
+      "rank": 2,
+      "repeat": 3
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r2",
+      "delta_mib": 0.11328125,
+      "method": "bug",
+      "rank": 2,
+      "repeat": 4
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r8",
+      "delta_mib": 0.04296875,
+      "method": "bug",
+      "rank": 8,
+      "repeat": 1
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r8",
+      "delta_mib": 0.23046875,
+      "method": "bug",
+      "rank": 8,
+      "repeat": 2
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r8",
+      "delta_mib": 0.1171875,
+      "method": "bug",
+      "rank": 8,
+      "repeat": 3
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r8",
+      "delta_mib": 0.03515625,
+      "method": "bug",
+      "rank": 8,
+      "repeat": 4
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r16",
+      "delta_mib": 0.0,
+      "method": "bug",
+      "rank": 16,
+      "repeat": 1
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r16",
+      "delta_mib": 0.19140625,
+      "method": "bug",
+      "rank": 16,
+      "repeat": 2
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r16",
+      "delta_mib": 0.0859375,
+      "method": "bug",
+      "rank": 16,
+      "repeat": 3
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r16",
+      "delta_mib": 0.05859375,
+      "method": "bug",
+      "rank": 16,
+      "repeat": 4
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r32",
+      "delta_mib": 0.00390625,
+      "method": "bug",
+      "rank": 32,
+      "repeat": 1
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r32",
+      "delta_mib": 0.1875,
+      "method": "bug",
+      "rank": 32,
+      "repeat": 2
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r32",
+      "delta_mib": 0.0625,
+      "method": "bug",
+      "rank": 32,
+      "repeat": 3
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r32",
+      "delta_mib": 0.0,
+      "method": "bug",
+      "rank": 32,
+      "repeat": 4
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r43",
+      "delta_mib": 0.0546875,
+      "method": "bug",
+      "rank": 43,
+      "repeat": 1
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r43",
+      "delta_mib": 0.06640625,
+      "method": "bug",
+      "rank": 43,
+      "repeat": 2
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r43",
+      "delta_mib": 0.11328125,
+      "method": "bug",
+      "rank": 43,
+      "repeat": 3
+    },
+    {
+      "N": 128,
+      "config": "N128_bug_r43",
+      "delta_mib": 0.01953125,
+      "method": "bug",
+      "rank": 43,
+      "repeat": 4
+    }
+  ]
 }

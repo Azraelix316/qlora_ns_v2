@@ -1,0 +1,37 @@
+{
+  "case": "caption_verdicts",
+  "note": "Which of the draft's figure captions the artifacts do not support, recorded so the check reports DRIFT rather than repeating a known list. Keyed on figure label and topic, not on the message text, so rewording a verdict is not a change.",
+  "provenance": {
+    "captured_at": "launch",
+    "driver": "experiments/check_figure_captions.py",
+    "driver_dirty": false,
+    "driver_matches_HEAD": true,
+    "driver_matches_HEAD_at_write": true,
+    "driver_sha256": "af77b95bfea5611582a36e7339071e20ec433de5a2e4bd10ee63ef61eaed1559",
+    "driver_sha256_at_write": "af77b95bfea5611582a36e7339071e20ec433de5a2e4bd10ee63ef61eaed1559",
+    "git_commit": "74644bef54328139dba62aad1c937759bae70968",
+    "git_commit_at_write": "74644bef54328139dba62aad1c937759bae70968",
+    "git_commit_how": "git log -1 --before=1790415493",
+    "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "reproducible": true,
+    "sources_files_at_launch": 31,
+    "sources_fingerprint_at_launch": "7927ee3fc1bcaf33ef8899703ba0e9d94a0007342ca25204351fc96c146dcb38",
+    "tree_moved_during_run": false,
+    "working_tree_diff_sha256": "3e71a1a9fbcb8390f06443f63135391d6eed27d1a01776875efc0ed0773c74d0",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "state/coder/results/caption_verdicts.json"
+    ]
+  },
+  "verdicts": [
+    "fig:cost|peak memory",
+    "fig:cost|per Re",
+    "fig:cost|static POD",
+    "fig:error|per Re",
+    "fig:error|static POD",
+    "fig:kestats|other",
+    "fig:rank|r*(Re)",
+    "fig:svd|mode count",
+    "fig:tg|rank decays"
+  ]
+}

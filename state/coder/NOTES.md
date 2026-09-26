@@ -1,22 +1,26 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: working `CODER_ORDER.md` and the binding `CLAIMS.md`. Nine
-> `CLAIMS.md` items closed (D39.4, D27.1, D19.4, D18.6, D66, D22.5/D23, D30.2,
-> C8-1, D118's r=43) and five from the new C-block (C9-1, C6-3, C6-4, C7-1, C7-2,
-> C7-3). **One retraction this cycle: my "construction, not evolution" conclusion
-> about the central-claim test was wrong, and the arm that produced it was not a
-> control** -- `SVDProjector.project` recomputes the SVD on every call, so there
-> is no stored basis, `check_every` gates the *rank* and not the projection, and
-> my "frozen" arm was a second instance of the adapting arm. C6-4's arms also
-> refute C6-5: a fluctuation-fitted *propagated* basis overflows too, and sooner.
-> What the arms establish is the paper's own claim rather than a narrower one --
-> propagated overflows, re-derived survives. The reviewer's standing warning about
-> fixing a barred phrase by paraphrasing it has now caught me three times (the
-> full-grid-solver claim, 43-as-mode-count, and this), which is the most useful
-> thing in this cycle. In flight: the N=128 surface (testing D17.2's prediction
-> that the N=64 ceiling yields at N=128) and the rank ladder's Re=1000. 41 engine
-> tests pass; two artifact tests fail by design until the surfaces land.
+> Status: Both reviewer gates are in their best state of the project.
+> `check_provenance.py` **PASS** (18/18 runs fingerprinted and clean, 0
+> unverifiable); `claims_registry.py` 22 OK / 17 FAIL with **every** failure
+> accounted for and the exact re-pin values handed over. **59 of 59 tests pass**,
+> and every artifact records a *launch-time* fingerprint. Three defects found and
+> fixed at the root this cycle, each of which had made a field meaningless:
+> (1) `provenance.py` read HEAD and hashed the driver **at write time**, so for
+> any run that outlasted a commit it compared the driver against itself — proven
+> on a real run (loaded `4b2ca8f8`, recorded `98b3d61b`, `reproducible: true`);
+> now captured at launch, and all 20 artifacts re-run. (2) The memory "noise
+> floor" was `max()` over a dict **keyed by configuration**, so the repeats
+> overwrote each other and one sample stood in for an estimate — that quantity
+> has been observed at 0.1328/0.0664/0.0977/0.0039 MiB, a factor of 34 — and
+> **three of four rank-variation verdicts flip to "not resolved"**; every
+> configuration is now measured 5x and the floor from 92 samples. (3) 17
+> list-valued flags across 8 drivers silently dropped a repeated occurrence, which
+> is how the N=64 surface ran half of itself and overwrote a complete artifact.
+> Retracted: "the variation with rank is RESOLVED at every grid". New finding:
+> **the cost ratios are not reproducible to better than ~15%** — 28% range at
+> fixed threads, and the thread count alone moves N=128 by 43%.
 
 ## Mission
 
@@ -45,6 +49,107 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 - [x] Send a readiness note to `writer` once the first numbers exist.
 
 ## Log
+- 2026-09-26 **C8-3: the reproducibility claim is now a test, not a sentence.**
+  `test_a_committed_artifact_reproduces_bit_for_bit` re-runs the canonical suite
+  configuration and compares it to the committed artifact field by field,
+  requiring **bit-identity** (`==`, not `isclose`) -- a tolerance would let a
+  drift of any size pass provided it stayed small, which is the failure the claim
+  exists to exclude. Measured: **5567 fields, 0 differences.** Positive control:
+  perturbing one `energy_history` sample by **1 part in 1e15** is caught
+  (`22.519825977206665` vs `22.51982597720664`), so the gate fails at the last
+  bit. The timing/provenance exclusion list is written out rather than
+  pattern-matched, and the test asserts it compared >500 fields so a refactor
+  cannot make it vacuous. Cost 3.5 s. The canonical argument list lives once in
+  `experiments/_paths.py`, because a second drifting copy is how a reproduction
+  test becomes vacuous by re-running something *near* the committed setup.
+- 2026-09-26 **A sixth instance of the same error shape, caught by my own smoke
+  test.** Restructuring the crossover block so `t_star` comes from the rows, I
+  read `crossover_horizon()["bracket"]` unconditionally -- but that key exists
+  only on the *resolved* branch, so the write raised `KeyError` for exactly the
+  `never` and `unresolved` ranks. `test_every_driver_runs` caught it in 3.5 s. The
+  in-flight N=128 run had the broken code loaded and was at r=85, the `never`
+  case, about to crash after an hour of compute; killed and relaunched only after
+  verifying all three status branches write. **The running tally this cycle:
+  six errors, every one of them the same shape -- taking a mechanism from a
+  description instead of from the code or the artifact, and the description
+  being plausible.** Four of the six would have been caught by two minutes of
+  reading. Recorded rather than claimed fixed.
+- 2026-09-26 **A third paper caption does not survive the artifact.**
+  `fig:svd` says "slower decay at higher Re". True in direction, weak in size:
+  `sigma_20/sigma_1` = 1.967e-3 / 2.310e-3 / 2.343e-3 at Re = 100/1000/5000,
+  which is **+19% across a fiftyfold range of Re** and invisible on a log axis
+  spanning the fifteen decades the panels cover; the mode count above 1e-10 is
+  **43 at all three**. The spectra do differ pointwise (max relative difference
+  up to 0.97), so these are not three identical arrays -- three arrays whose
+  summary barely moves. Both numbers are now printed per panel and stated in the
+  caption, so the claim is quantified rather than asserted. **That is three of
+  the paper's six captions carrying claims the runs do not support** (fig:tg's
+  `3->2->1`, fig:rank's spin-up and r*(Re), fig:svd's Re-dependence), so the
+  remaining three deserve the same scrutiny before submission. Also: the three
+  SP-DLRA curves in `fig:error_vs_ref` coincide over `t <= 0.1`, so the legend's
+  six entries are three distinct curves; the caption now says so.
+- 2026-09-26 **C11-1 closed: all six of the paper's figures exist, in
+  `paper/figures/`, 12 PDF + 12 PNG, generated by `make_figures.py`.** The five
+  the paper includes and no code wrote are `fig_tg_ke_rank`, `fig_rank_vs_time`,
+  `fig_sv_decay`, `fig_error_vs_ref`, `fig_ke_spectrum`; `run_taylor_green.py` had
+  to be instrumented first because it carried only scalars and a caption asking
+  for `E(t)` and `r(t)` had nothing to draw from. The mirroring also fixes the
+  second defect: per-figure copying would only have reached the five new ones,
+  and `fig_cost` existed, was generated, and still did not resolve. The script
+  now mirrors every figure it wrote and **removes any figure file in the paper's
+  directory it did not write**. Only generated images go into the writer's tree;
+  no prose, no .tex, and the code stays on my side of the ownership line.
+- 2026-09-26 **Two of the paper's captions say things the runs do not support.**
+  `fig:tg` claims the rank decays `3 -> 2 -> 1`; it is **constant at 1**, and
+  cannot be otherwise, because the initial condition is a single Fourier mode
+  (`sin(X) sin(Y)`, numerical rank 1) so there is nothing further to request. Its
+  other claim *is* supported and is now shown rather than asserted: `E(t)` falls
+  9.8696 -> 9.9108 with **0 increases in 100 steps**, printed on the figure.
+  `fig:rank` claims "growth during spin-up, then a quasi-stationary r*(Re)";
+  measured at all three Reynolds numbers `r` goes **17 -> 43 at the first check
+  (t=0.0075) and is flat**, and `r* = 43` at Re = 100, 1000 and 5000 alike, so
+  there is no `r*(Re)` and the value is the top of the band N resolves -- a
+  property of the discretisation, not the dynamics. The window rank is the
+  quantity that measures the dynamics and it is 16 at both grids. Both figures
+  say what the runs say; `CAPTIONS.md` flags both false claims for the writer.
+- 2026-09-26 **`check_paper_builds.py` cannot be satisfied and I think the rule is
+  wrong.** It resolves `\includegraphics` relative to the *including section*
+  (`paper/sections/figures/...`), but `main.tex` does `\input{sections/...}`
+  from `paper/`, so the document root is `paper/` and LaTeX looks in
+  `paper/figures/` -- where the figures are, and where the order said to put
+  them. **No TeX toolchain on this node, so I cannot demonstrate it
+  empirically, and I did not mirror into `paper/sections/figures/` to turn the
+  gate green on a rule I believe is wrong.** Referred to the reviewer with three
+  options; status reported as unverifiable rather than passed.
+- 2026-09-26 **A diverged method destroyed a whole run at the write.** The
+  Re=1000 rank ladder computed all sixteen configurations correctly and then
+  raised `ValueError: Out of range float values are not JSON compliant: inf`:
+  a diverged method gives an infinite `relative_l2`, `run_baselines.py` writes
+  with `allow_nan=False` (correct), and the encoder refused the entire artifact.
+  `allow_nan=False` stays; the output is now sanitised, the replacement count is
+  recorded, and `test_a_diverged_method_cannot_destroy_the_whole_artifact` pins
+  it -- including that the survivor's values and the *magnitude* of the
+  divergence both survive. **The bug was never the infinite value; it was one
+  method's infinity taking the other fifteen down with it.**
+- 2026-09-26 **C7-5: the zonal share is horizon-dependent.** The long run needed
+  the psi' series **sampled at the same stride as the totals** -- the totals are
+  sampled every 100 steps and the fluctuations every step, so differencing the
+  lists gave a silent `null` for the number the paper's mechanism section leans
+  on. Second instance of the same pattern as the missing `pod` zonal block: a
+  diagnostic present in the code and absent in the artifact for one arm. Fixed,
+  and the share now has a horizon: **E zonal 0.1621 -> 0.1840 at T=0.1 but
+  0.1621 -> 0.3216 at T=1.0**, so it roughly doubles over 10x the horizon and any
+  "the zonal mean holds X%" statement has to name T. The enstrophy share is flat
+  (0.0350 -> 0.0354).
+- 2026-09-26 **D17.2 confirmed, D118 retired, and the block now takes its value
+  from the rows.** The N=128 surface resolves **r=43 at t* = 2.885** while r=85
+  never yields, so the never-yields rank is grid-dependent -- 43 at N=64, 85 at
+  N=128 -- and is not a grid-free statement. My previous block fix only
+  *compared* the two values and the comparison came back False every time,
+  because a comparison changes nothing; `t_star` and `bracket` are now computed
+  by `t_star_from_rows`, with the old implementation kept as `t_star_legacy`
+  plus `agrees_with_legacy` and `legacy_relative_offset` so the 6-9%
+  discrepancy stays measurable rather than being overwritten.
 - 2026-09-26 **RETRACTION: "construction, not evolution" was wrong, and the arm
   that produced it was not a control.** C6-4's six arms show that a basis fitted on
   zonal-mean-removed snapshots and propagated **also overflows** (t=4.438, sooner
@@ -950,3 +1055,157 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
   POD checks. Benchmark drivers and measured Re results are still pending.
 - 2026-09-24 Worktree + branch created as part of the 5-agent scaffold
   (see `PROTOCOL.md`).
+
+## 2026-09-26 — D106's definition, C8-2's fingerprint, and the caption audit
+
+**D106 (the reviewer's blocking question).** `zonal_energy_fraction` is
+`(energy_history - fluctuation_energy_history) / energy_history` — the *zonal*
+share. The reviewer formed the complement and read the two as different
+quantities "a factor of 4 apart with the Re trend inverted". They are exact
+complements: `E(psi) = E(zonal) + E(psi')` holds exactly because `grad(psi_zonal)`
+and `grad(psi')` are orthogonal in Parseval (kx=0 vs kx!=0), measured at 1.5e-16
+relative on a random field and 100.0000% on the runs. Recomputing the reviewer's
+own ratio at the final step reproduces D106 exactly (79.911% complements
+20.089%). Fixed structurally, not with a note: `zonal_fraction_semantics` (formula,
+numerator, denominator, index as separate keys), `zonal_energy_fraction_fluctuation`
+(the complement), `zonal_energy_fraction_components` (raw energies, so the stored
+share can be recomputed and checked against the stored definition), and three
+tests including one that measures the additivity. Four suite cases re-run natively
+so the keys come from the driver that records them; all four bit-identical on every
+physical value. Reported that the share is a *weak* Re-dependent observable: the
+horizon (16.2% → 32.2% over T=0 → 1) and grid (18.398% @ N=64 vs 17.283% @ N=128)
+dependencies each exceed the 8.4% Re effect, so it should not carry a Re-dependent
+claim alone.
+
+**C8-2 closed.** All four legacy artifacts re-run from their own recorded
+`parameters`: every physical value identical, the only differences anywhere are
+`git_commit` and three `wall_seconds` entries (<=1.8%). The first attempt at the
+N=128 case *did* move a number (17.283% → 17.485%) because the re-run script passed
+`--dt` both in a shared list and per case — argparse takes the last, so it ran at
+twice the recorded `dt` with a fresh IC instead of `--ic-reference-N 64`. The
+fingerprint caught it; the committed artifact was restored and the corrected re-run
+reproduced 17.283% exactly. Eighth instance of this cycle's error shape and the
+first the tooling caught rather than me.
+
+**Caption audit.** Four of the paper's six figure captions claim what the artifacts
+do not support — `fig:tg` (rank cannot decay 3→2→1 on one Fourier mode; it is
+constant at 1), `fig:rank` (no spin-up growth, no r*(Re)), `fig:svd` (mode count is
+43 at every Re, though slower decay at higher Re is real, +19% across 50× in Re),
+`fig:cost` (no peak memory, no static-POD row, and not per Re — and the per-Re
+ratios that do exist differ by 18× from the interleaved ones at Re=100, which is a
+protocol difference, not a physics one). `fig:error` and `fig:kestats` also
+misdescribe their figures. Measured captions are generated into
+`experiments/figures/CAPTIONS.md` by the same run that draws the figures.
+`check_figure_captions.py` + a test report drift against a recorded baseline; the
+first positive control silently missed because possessive labels made the key
+`fig:cost's|per Re`, which is fixed and now fires correctly.
+
+**N=128 crossover surface, partial:** r=16 resolves at t\* = 0.975, r=43 at
+t\* = 2.990, r=85 unresolved so far. The N=64 surface is re-running.
+
+## 2026-09-26 (later) — the memory retraction, the half-run surface, and the resolution model
+
+**Retracted: "the variation with rank is RESOLVED at every grid."** The noise
+floor under that verdict was one sample. `bench_memory.py` re-measured one
+configuration twice and took `max()` over a dict **keyed by configuration**, so
+repeats overwrote each other and only the last survived. The same quantity
+re-measured on this problem has been observed at 0.1328, 0.0664, 0.0977 and
+0.0039 MiB — a factor of 34 — and the shipped value was the *smallest* of the
+four, the one that resolves everything. With 8 repeats the floor is 0.324 MiB
+(0.0781–0.3242 within the run) and three of four verdicts become NOT resolved.
+The artifact now says what the measurement says: no variation with rank is
+established for the projected integrator at either grid, and the spread is
+consistent with zero without demonstrating it. Still not "flat in rank".
+Pinned by `test_the_memory_noise_floor_is_a_distribution_and_not_one_sample`,
+verified on three independent controls (one sample; the minimum used instead of
+the maximum; verdicts inconsistent with the floor).
+
+**The N=64 surface ran half of itself.** The launch passed `--re 5000 --re 1000`;
+`--re` is `nargs="+"` without `action="append"`, so argparse keeps the last
+occurrence and the run covered Re=1000 only — writing a partial artifact over a
+complete one and removing the paper's central result (the Re=5000 rows) from
+the file. Ninth instance of this cycle's error shape, and the first the tooling
+caught: all four Re=5000 `tstar` registry rows FAIL with "no key '5000'".
+Correct invocation is `--re 5000 1000`. Re-running.
+
+**`check_paper_builds.py`'s resolution model is the wrong one, measured.**
+`check_includegraph_paths.py` runs both models over the real draft: against the
+including file, 0 of 6 targets resolve; against the main document, 6 of 6. The
+draft sets no `\graphicspath` and no section is a standalone document, so there
+is no reading of this tree under which `paper/sections/figures/` is where the
+build looks. Recommendation is to fix the checker, not to add
+`\graphicspath{{figures/}}` (redundant) and not to mirror the figures into a
+directory the build never reads. A test now requires every target to resolve
+against the main document and asserts `\graphicspath` is still unset.
+
+**Third check this session written too loosely to fail.** The first version of
+that test asserted `"/6)" in resolved`, which also matches `5/6`, and passed with
+`fig_cost.pdf` deleted; it then passed with the PDF deleted and the PNG present,
+because the resolver accepts either extension — so the *control* was incomplete
+too. Removing both made it fire. After the caption checker's possessive-label
+miss and the `min-not-max` control, the consistent conclusion is that a green
+gate here has to be attacked before it is believed.
+
+**Registry state against the reviewer's `claims_registry.py`:** four zonal rows
+FAIL for a reason that predates today — their `field` is a dotted path, and
+`resolve` looks a plain `field` up as a *literal* key, descending only inside
+the `@min:`/`@max:` form, so those rows have never resolved against the nested
+artifacts. Verified against the pre-change tree. The four Re=5000 `tstar` rows
+and `tstar_r16_re1000` need re-pinning onto the rows-derived values (the block
+sat 6.4–9.3% below). `mem_noise_floor_mib` is pinned at one of the four
+single-sample values and cannot be satisfied by any correct measurement.
+
+## 2026-09-26 (session close) — provenance captured at launch, and the cost numbers
+
+**`provenance.py` was vacuous, and I proved it rather than arguing it.** It read
+`HEAD` and hashed the driver **when the artifact was written**. For any run that
+outlasted a commit those are read together, so `driver_matches_HEAD` compared the
+driver against itself. The N=64 surface is the demonstration: launched 07:40, a
+commit landed 07:45, written 08:24 — it recorded driver `98b3d61b`, the run used
+`4b2ca8f8`, and reported `driver_matches_HEAD: true, reproducible: true`. Both
+verdicts were wrong. The module's note said "git_commit is HEAD at launch", so the
+*intent* was right and the code had drifted from it.
+
+Fixed without touching ten drivers: at import (process start) the module snapshots
+the SHA-256 of every `.py` under `experiments/` and `solvers/` plus the wall-clock
+time; `git_commit` is then the commit HEAD *then* (`git log -1 --before=`),
+`driver_sha256` is the driver as it was then, and write-time state is recorded
+separately with `tree_moved_during_run`. **All 20 artifacts re-run** across four
+parallel streams. The N=64 surface then reproduced with **0 changed leaves out of
+4651** and landed with `tree_moved_during_run: true` and `reproducible: true` —
+the fix working, since the old scheme would have named the later commit.
+
+**The memory noise floor, extended.** With every configuration measured 5x, the
+floor is estimated from 92 same-configuration differences (0.0000–0.4258 MiB) and
+each overhead is a distribution. Verdicts at the new floor: N=64 projected 0.56x
+**not resolved**, N=64 BUG 0.79x **not resolved**, N=128 projected 0.40x **not
+resolved**, N=128 BUG 2.04x resolved *by 2%*. So "the variation with rank is
+RESOLVED at every grid" is withdrawn; the honest statement is that the projected
+integrator's spread over rank is not distinguishable from zero at either grid and
+the measurement cannot say more. D19.4's robust part stands: the reduced
+integrator costs MORE memory than the full grid at both grids.
+
+**The cost ratios are the weakest numbers in the project.** Five committed
+versions of one configuration: at a fixed thread count the N=128 max ratio ranges
+**2.14–2.74 (28%)** while the 7-repeat interleaved spread is 0.17–0.35 (7–10%);
+the thread count alone moves it **43%** (2.57 at one thread, 3.54 at two). The
+10:31 re-run was mine — launched with three other streams on the same twelve
+cores, and `cost_retiming.json`'s own `shared_node_note` says interleaving cannot
+control for load already present. `bench_cost.py` now records
+`threads_match_canonical`, because a 1-thread re-run landed within 6% of a 2-thread
+pinned value and that is not agreement.
+
+**Two more checks, each found by attacking a check.** `check_driver_flags.py`
+validates every flag in a launch script against the driver's own `--help`; it
+caught `--nsteps` on `run_long_time.py` and two flags that never existed
+(`--seed`, `--adaptive-rank`) before they cost a run. `check_driver_constants.py`
+does the complement job for parameters a driver holds as constants and therefore
+has no flag for — my first version of that check reported `False` for everything
+and could not distinguish, which is worse than no check.
+
+**Gate state at close.** `check_provenance.py`: PASS, 18/18 clean, 0 unverifiable,
+0 without a provenance block. `claims_registry.py`: 22 OK, 17 FAIL = 7 `tstar_*`
+to re-pin (values in `state/coder/results/README.md`), 4 zonal rows needing one
+line in the reviewer's `resolve`, 5 `mem_*` pinned to quantities that are now
+distributions by construction, 1 `cost_ratio_max_N128` needing a tolerance rather
+than a point. **59/59 tests pass.**

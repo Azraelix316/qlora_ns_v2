@@ -7,6 +7,11 @@
     "pod_late_r32",
     "pod_late_r42"
   ],
+  "energy_residual_semantics": {
+    "max_scaled_projected_energy_residual": "per method, the kinetic-energy balance residual of the *projected* discrete dynamics: the projection's measured energy increment is subtracted first, so this is the balance the reduced integrator actually satisfies. For full_grid it coincides with the PDE balance, because there is no projection. null where the runner cannot compute it (the DMD baseline), which is an absence and not a zero.",
+    "scale": "divided by max(1, |dissipation|, |forcing input|) evaluated at the step, so it is a relative residual and the scale varies during a run",
+    "why_it_is_here": "D39.4: this is the one *continuous* diagnostic that can say how the methods differ before one of them overflows, and the artifact did not carry it. It is a discriminator only once measured; it is recorded here, not claimed."
+  },
   "framing_note": "The adaptive rank reported here is a per-step SPATIAL rank: the dimension the candidate field needs at one stage, which is what an adaptive rule can return. It is NOT the windowed rank (the modes a trajectory sweeps through over a window, which grows 1 -> 16 over [0, 8] and is grid-independent) and the two must not be compared or interchanged. On this case the rule selected rank 1, and the matched-rank baselines are run at that rank so the comparison isolates adaptivity from rank.",
   "initial_state": {
     "dtype": "float64",
@@ -19,6 +24,9 @@
     ]
   },
   "interpretation": "Ranks are matched by construction: the adaptive rank is read from the DLRA run and then requested explicitly from static POD and POD-DMD. Accuracy is judged on time-averaged fluctuation KE and enstrophy over the statistical window and on the spectra over the resolved range; pointwise L2 is reported last and is labelled trajectory divergence. A method marked diverged went non-finite part way through: its statistics cover only the window it reached and accuracy_metrics_valid is false, so it is reported as a divergence rather than as an accuracy. If the adaptive method does not win at matched rank, that is recorded here rather than argued away.",
+  "json_sanitisation": {
+    "note": "non-finite floats were replaced by null so the artifact is valid JSON. Every replacement is in a field of a method that went non-finite, so null there means 'the run diverged before this was computable', not 'this was never measured'."
+  },
   "methods": {
     "dlra_adaptive": {
       "accuracy_metrics_valid": true,
@@ -29,6 +37,7 @@
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.6101424102644945,
       "max_abs_divergence": 9.581224702515101e-14,
+      "max_scaled_projected_energy_residual": null,
       "max_trajectory_divergence": 0.6619229910988825,
       "metrics": {
         "E_fluct": [
@@ -548,7 +557,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 670.653904214967
+      "wall_seconds": 90.24122231011279
     },
     "dlra_fixed_r1": {
       "accuracy_metrics_valid": true,
@@ -559,6 +568,7 @@
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.6182138537442916,
       "max_abs_divergence": 1.1093903573566877e-13,
+      "max_scaled_projected_energy_residual": 0.001390649645366253,
       "max_trajectory_divergence": 0.6711733968303278,
       "metrics": {
         "E_fluct": [
@@ -1077,7 +1087,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 3043.985676232027
+      "wall_seconds": 76.32352253911085
     },
     "dlra_fixed_r16": {
       "accuracy_metrics_valid": true,
@@ -1088,6 +1098,7 @@
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 1.0881659298058666,
       "max_abs_divergence": 8.393286066166183e-14,
+      "max_scaled_projected_energy_residual": 0.03101928543154917,
       "max_trajectory_divergence": 1.0881659298058666,
       "metrics": {
         "E_fluct": [
@@ -1606,7 +1617,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 455.43924128008075
+      "wall_seconds": 80.53986883815378
     },
     "dlra_fixed_r24": {
       "accuracy_metrics_valid": true,
@@ -1617,6 +1628,7 @@
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.962067210723793,
       "max_abs_divergence": 8.504308368628699e-14,
+      "max_scaled_projected_energy_residual": 0.011436834017264487,
       "max_trajectory_divergence": 0.994247431374831,
       "metrics": {
         "E_fluct": [
@@ -2135,7 +2147,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 741.8438263251446
+      "wall_seconds": 82.11355727096088
     },
     "dlra_fixed_r32": {
       "accuracy_metrics_valid": true,
@@ -2146,6 +2158,7 @@
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.6518715587019407,
       "max_abs_divergence": 9.370282327836321e-14,
+      "max_scaled_projected_energy_residual": 0.004725123626047382,
       "max_trajectory_divergence": 0.653821392926782,
       "metrics": {
         "E_fluct": [
@@ -2664,7 +2677,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 994.7860552810598
+      "wall_seconds": 83.34162191092037
     },
     "dlra_fixed_r42": {
       "accuracy_metrics_valid": true,
@@ -2675,6 +2688,7 @@
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.5102435589102388,
       "max_abs_divergence": 7.638334409421077e-14,
+      "max_scaled_projected_energy_residual": 0.00033532258200535205,
       "max_trajectory_divergence": 0.5102435589102388,
       "metrics": {
         "E_fluct": [
@@ -3193,7 +3207,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 282.68014946812764
+      "wall_seconds": 85.7591413129121
     },
     "full_grid": {
       "accuracy_metrics_valid": true,
@@ -3214,6 +3228,7 @@
         ]
       },
       "max_abs_divergence": 7.638334409421077e-14,
+      "max_scaled_projected_energy_residual": 2.257740810591688e-06,
       "max_trajectory_divergence": 0.0,
       "metrics": {
         "E_fluct": [
@@ -3741,8 +3756,9 @@
       "diverged_at_time": null,
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.8834010524830029,
-      "fit_seconds": 7.886486127972603e-05,
+      "fit_seconds": 5.45731745660305e-05,
       "max_abs_divergence": 2.2648549702353193e-14,
+      "max_scaled_projected_energy_residual": null,
       "max_trajectory_divergence": 0.883478154111058,
       "metrics": {
         "E_fluct": [
@@ -3937,7 +3953,7 @@
       "rank_requested": 1,
       "ridge": 0.0,
       "role": "dynamic data-driven baseline at a matched rank; it does no PDE work per step, so its cost is reported per operator application as well as per step",
-      "seconds_per_application": 0.0013343986691324971,
+      "seconds_per_application": 0.0005628748927847482,
       "steps_per_application": 100,
       "training_pairs": 56,
       "training_steps": 5700,
@@ -4267,7 +4283,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 0.2135028971824795,
+      "wall_seconds": 0.09005943988449872,
       "window": "early"
     },
     "pod_dmd_r16": {
@@ -4279,8 +4295,9 @@
       "diverged_at_time": null,
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.8056549009968295,
-      "fit_seconds": 7.7810138463974e-05,
+      "fit_seconds": 5.820789374411106e-05,
       "max_abs_divergence": 3.907985046680551e-14,
+      "max_scaled_projected_energy_residual": null,
       "max_trajectory_divergence": 0.9000700325016758,
       "metrics": {
         "E_fluct": [
@@ -4475,7 +4492,7 @@
       "rank_requested": 16,
       "ridge": 0.0,
       "role": "dynamic data-driven baseline at a matched rank; it does no PDE work per step, so its cost is reported per operator application as well as per step",
-      "seconds_per_application": 0.001302156873862259,
+      "seconds_per_application": 0.0005711020930903032,
       "steps_per_application": 100,
       "training_pairs": 56,
       "training_steps": 5700,
@@ -4805,7 +4822,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 0.20834433799609542,
+      "wall_seconds": 0.09137572790496051,
       "window": "early"
     },
     "pod_dmd_r24": {
@@ -4817,8 +4834,9 @@
       "diverged_at_time": null,
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.7192841545736088,
-      "fit_seconds": 8.545606397092342e-05,
+      "fit_seconds": 5.723792128264904e-05,
       "max_abs_divergence": 1.1368683772161603e-13,
+      "max_scaled_projected_energy_residual": null,
       "max_trajectory_divergence": 1.01338724937664,
       "metrics": {
         "E_fluct": [
@@ -5013,7 +5031,7 @@
       "rank_requested": 24,
       "ridge": 0.0,
       "role": "dynamic data-driven baseline at a matched rank; it does no PDE work per step, so its cost is reported per operator application as well as per step",
-      "seconds_per_application": 0.0013049080371274613,
+      "seconds_per_application": 0.0005824428691994399,
       "steps_per_application": 100,
       "training_pairs": 56,
       "training_steps": 5700,
@@ -5343,7 +5361,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 0.20878477790392935,
+      "wall_seconds": 0.09319041087292135,
       "window": "early"
     },
     "pod_dmd_r32": {
@@ -5355,8 +5373,9 @@
       "diverged_at_time": null,
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 60.694156570094535,
-      "fit_seconds": 0.00010000611655414104,
+      "fit_seconds": 6.299815140664577e-05,
       "max_abs_divergence": 1.0459189070388675e-11,
+      "max_scaled_projected_energy_residual": null,
       "max_trajectory_divergence": 76.51473962264755,
       "metrics": {
         "E_fluct": [
@@ -5551,7 +5570,7 @@
       "rank_requested": 32,
       "ridge": 0.0,
       "role": "dynamic data-driven baseline at a matched rank; it does no PDE work per step, so its cost is reported per operator application as well as per step",
-      "seconds_per_application": 0.0016852682994795032,
+      "seconds_per_application": 0.0006319126681773923,
       "steps_per_application": 100,
       "training_pairs": 56,
       "training_steps": 5700,
@@ -5881,7 +5900,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 0.26964241988025606,
+      "wall_seconds": 0.10110557987354696,
       "window": "early"
     },
     "pod_dmd_r42": {
@@ -5893,8 +5912,9 @@
       "diverged_at_time": null,
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.7183272398904665,
-      "fit_seconds": 0.00013165408745408058,
+      "fit_seconds": 9.267893619835377e-05,
       "max_abs_divergence": 3.552713678800501e-14,
+      "max_scaled_projected_energy_residual": null,
       "max_trajectory_divergence": 0.8771412344438722,
       "metrics": {
         "E_fluct": [
@@ -6089,7 +6109,7 @@
       "rank_requested": 42,
       "ridge": 0.0,
       "role": "dynamic data-driven baseline at a matched rank; it does no PDE work per step, so its cost is reported per operator application as well as per step",
-      "seconds_per_application": 0.0013862097621313296,
+      "seconds_per_application": 0.0006635426310822367,
       "steps_per_application": 100,
       "training_pairs": 56,
       "training_steps": 5700,
@@ -6419,7 +6439,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 0.22179295006208122,
+      "wall_seconds": 0.10616638604551554,
       "window": "early"
     },
     "pod_early_r1": {
@@ -6432,6 +6452,7 @@
       "final_trajectory_divergence": 0.5992962206190455,
       "initial_projection_relative_l2": 0.4759461327168815,
       "max_abs_divergence": 8.526512829121202e-14,
+      "max_scaled_projected_energy_residual": 1.109151119048735,
       "max_trajectory_divergence": 0.6078053749934235,
       "metrics": {
         "E_fluct": [
@@ -6951,7 +6972,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 67.65653638495132,
+      "wall_seconds": 52.312957397894934,
       "window": "early",
       "window_end": 2.8,
       "window_snapshots": 57,
@@ -6967,6 +6988,7 @@
       "final_trajectory_divergence": 0.6526408418637719,
       "initial_projection_relative_l2": 0.01914270377423757,
       "max_abs_divergence": 1.9895196601282805e-13,
+      "max_scaled_projected_energy_residual": 32.974075378529854,
       "max_trajectory_divergence": 0.6552236101273216,
       "metrics": {
         "E_fluct": [
@@ -7486,7 +7508,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 73.44736133003607,
+      "wall_seconds": 52.88097404688597,
       "window": "early",
       "window_end": 2.8,
       "window_snapshots": 57,
@@ -7502,6 +7524,7 @@
       "final_trajectory_divergence": 4.489024939763226,
       "initial_projection_relative_l2": 0.006230051429284829,
       "max_abs_divergence": 2.1114606319687295e+216,
+      "max_scaled_projected_energy_residual": 2.4733986647848284e+90,
       "max_trajectory_divergence": 4.489024939763226,
       "metrics": {
         "E_fluct": [
@@ -7931,7 +7954,7 @@
           "time": 6.0
         }
       ],
-      "wall_seconds": 62.134282847866416,
+      "wall_seconds": 40.49643719405867,
       "window": "early",
       "window_end": 2.8,
       "window_snapshots": 57,
@@ -7947,6 +7970,7 @@
       "final_trajectory_divergence": 6.314076190293584,
       "initial_projection_relative_l2": 0.002135426646223241,
       "max_abs_divergence": 4.607412760499377e+64,
+      "max_scaled_projected_energy_residual": 3.6056106158060647e+117,
       "max_trajectory_divergence": 6.314076190293584,
       "metrics": {
         "E_fluct": [
@@ -8416,7 +8440,7 @@
           "time": 6.9
         }
       ],
-      "wall_seconds": 79.81368608982302,
+      "wall_seconds": 48.40956544596702,
       "window": "early",
       "window_end": 2.8,
       "window_snapshots": 57,
@@ -8432,6 +8456,7 @@
       "final_trajectory_divergence": 4.050440566875361,
       "initial_projection_relative_l2": 0.00020682840368930542,
       "max_abs_divergence": 3.827252586451049e+199,
+      "max_scaled_projected_energy_residual": 1.350605457771494e+84,
       "max_trajectory_divergence": 4.050440566875361,
       "metrics": {
         "E_fluct": [
@@ -8847,7 +8872,7 @@
           "time": 5.7
         }
       ],
-      "wall_seconds": 76.78962276084349,
+      "wall_seconds": 41.63290146901272,
       "window": "early",
       "window_end": 2.8,
       "window_snapshots": 57,
@@ -8863,6 +8888,7 @@
       "final_trajectory_divergence": 1.179303646575844,
       "initial_projection_relative_l2": 4.568133505803022,
       "max_abs_divergence": 1.8784973576657649e-13,
+      "max_scaled_projected_energy_residual": 3.3829178765901586,
       "max_trajectory_divergence": 4.568133505803022,
       "metrics": {
         "E_fluct": [
@@ -9382,7 +9408,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 67.1983913029544,
+      "wall_seconds": 49.09162784088403,
       "window": "late",
       "window_end": 8.0,
       "window_snapshots": 57,
@@ -9398,6 +9424,7 @@
       "final_trajectory_divergence": 0.47144471790319314,
       "initial_projection_relative_l2": 4.153281892635747,
       "max_abs_divergence": 1.4210854715202004e-13,
+      "max_scaled_projected_energy_residual": 13.344847266005058,
       "max_trajectory_divergence": 4.153281892635747,
       "metrics": {
         "E_fluct": [
@@ -9917,7 +9944,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 85.92475065705366,
+      "wall_seconds": 53.60188290011138,
       "window": "late",
       "window_end": 8.0,
       "window_snapshots": 57,
@@ -9933,6 +9960,7 @@
       "final_trajectory_divergence": 2.791917703432538,
       "initial_projection_relative_l2": 4.118724036036916,
       "max_abs_divergence": 7.389644451905042e-13,
+      "max_scaled_projected_energy_residual": 252.43117418060913,
       "max_trajectory_divergence": 4.118724036036916,
       "metrics": {
         "E_fluct": [
@@ -10452,7 +10480,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 81.08117708214559,
+      "wall_seconds": 55.53397705918178,
       "window": "late",
       "window_end": 8.0,
       "window_snapshots": 57,
@@ -10468,6 +10496,7 @@
       "final_trajectory_divergence": 42.51796296066392,
       "initial_projection_relative_l2": 4.103244443541276,
       "max_abs_divergence": 7.090649168385425e+278,
+      "max_scaled_projected_energy_residual": 3.398475914626155e+114,
       "max_trajectory_divergence": 42.51796296066392,
       "metrics": {
         "E_fluct": [
@@ -10875,7 +10904,7 @@
           "time": 5.5
         }
       ],
-      "wall_seconds": 64.10924904281273,
+      "wall_seconds": 38.69846096402034,
       "window": "late",
       "window_end": 8.0,
       "window_snapshots": 57,
@@ -10891,6 +10920,7 @@
       "final_trajectory_divergence": 11.937090120334256,
       "initial_projection_relative_l2": 4.094851768933464,
       "max_abs_divergence": 1.9917674730628766e+182,
+      "max_scaled_projected_energy_residual": 1.3099942202387257e+78,
       "max_trajectory_divergence": 11.937090120334256,
       "metrics": {
         "E_fluct": [
@@ -11370,7 +11400,7 @@
           "time": 7.1000000000000005
         }
       ],
-      "wall_seconds": 96.15127587900497,
+      "wall_seconds": 53.70784091902897,
       "window": "late",
       "window_end": 8.0,
       "window_snapshots": 57,
@@ -11385,6 +11415,7 @@
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.397490995524371,
       "max_abs_divergence": 6.517009154549669e-14,
+      "max_scaled_projected_energy_residual": 7.595935181057643,
       "max_trajectory_divergence": 0.4753707904142047,
       "metrics": {
         "E_fluct": [
@@ -11905,7 +11936,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 91.61827265983447
+      "wall_seconds": 47.114033880177885
     }
   },
   "parameters": {
@@ -11949,14 +11980,54 @@
     ]
   },
   "provenance": {
+    "captured_at": "launch",
     "driver": "experiments/run_baselines.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "e1ee4b9eb86db79ec790fa27db2dfa52d1c2e2a12556d5efc97e05f346754621",
-    "git_commit": "6601b959e029bafa83d7249f93a019fd544772de",
-    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "driver_matches_HEAD_at_write": true,
+    "driver_sha256": "5571a456305a533b901dee33740e4df33f57b87afb3292b06971fd3e89553d7f",
+    "driver_sha256_at_write": "5571a456305a533b901dee33740e4df33f57b87afb3292b06971fd3e89553d7f",
+    "git_commit": "66dbb2b3a8954db2409c2e5ab1a4eeccf00c14b3",
+    "git_commit_at_write": "2aff39a41f39f772544917273da5e7489c43fe53",
+    "git_commit_how": "git log -1 --before=1790414260",
+    "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_dirty": false
+    "sources_files_at_launch": 31,
+    "sources_fingerprint_at_launch": "66d0e0121e43b379f625d48c8000d47014dfe311eb913509a2e99d3a7989797f",
+    "tree_moved_during_run": true,
+    "working_tree_diff_sha256": "28e9b88b30785f16d3a96c3d3f3839ee288d5d3b415ae321f09fe9c0db630f95",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "experiments/figures/CAPTIONS.md",
+      "experiments/figures/PROVENANCE.md",
+      "experiments/figures/fig_bug_cost.pdf",
+      "experiments/figures/fig_cost.pdf",
+      "experiments/figures/fig_div_free.pdf",
+      "experiments/figures/fig_divergence.pdf",
+      "experiments/figures/fig_error_vs_ref.pdf",
+      "experiments/figures/fig_ke_spectrum.pdf",
+      "experiments/figures/fig_rank_vs_time.pdf",
+      "experiments/figures/fig_spectra_ek.pdf",
+      "experiments/figures/fig_spectrum.pdf",
+      "experiments/figures/fig_sv_decay.pdf",
+      "experiments/figures/fig_tg_ke_rank.pdf",
+      "experiments/figures/fig_window_rank.pdf",
+      "experiments/make_figures.py",
+      "experiments/make_summary.py",
+      "paper/figures/fig_bug_cost.pdf",
+      "paper/figures/fig_cost.pdf",
+      "paper/figures/fig_div_free.pdf",
+      "paper/figures/fig_divergence.pdf",
+      "paper/figures/fig_error_vs_ref.pdf",
+      "paper/figures/fig_ke_spectrum.pdf",
+      "paper/figures/fig_rank_vs_time.pdf",
+      "paper/figures/fig_spectra_ek.pdf",
+      "paper/figures/fig_spectrum.pdf",
+      "paper/figures/fig_sv_decay.pdf",
+      "paper/figures/fig_tg_ke_rank.pdf",
+      "paper/figures/fig_window_rank.pdf",
+      "state/coder/results/benchmark_summary.json"
+    ]
   },
   "rank_quantities": {
     "adaptive_rank": "per-step spatial rank from the rank_criterion below, applied to one candidate field per check",

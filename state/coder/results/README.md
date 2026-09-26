@@ -175,3 +175,360 @@ instance of the same arm. The narrower claim the artifact actually earns is the
 one above.
 
 The files are intentionally compact JSON rather than raw field snapshots.
+
+## The zonal share and the fluctuation share are complements, not two quantities
+
+`zonal_energy_fraction` is `(energy_history - fluctuation_energy_history) /
+energy_history` — the share of the kinetic energy in the **zonal** (x-independent)
+mode. That definition was ambiguous until 2026-09-26, when the reviewer formed
+the *other* ratio from the same two series, got ≈82%, and read the recorded
+≈20% as a different quantity "a factor of 4 apart with the Re trend inverted".
+Neither is true. The two are exact complements, because
+
+    E(psi) = E(zonal) + E(psi')    exactly,
+
+since the Parseval inner product of `grad(psi_zonal)` with `grad(psi')` vanishes —
+the zonal mode occupies only kx=0 and `psi'` occupies only kx≠0. Measured, not
+argued: on a random field at N=16/32/64 the defect is 1.5e-16, 0, 0 relative;
+on the runs the two shares sum to 100.0000% at the final step at every Re.
+
+So ≈20% and ≈82% are the *same* measurement with the halves named in opposite
+order, and the Re trend is the same trend seen from the other side:
+
+| | Re=100 | Re=1000 | Re=5000 | N=128 |
+|---|---|---|---|---|
+| zonal share of total E (recorded) | 20.089% | 18.533% | 18.398% | 17.283% |
+| fluctuation share of total E (complement) | 79.911% | 81.467% | 81.602% | 82.717% |
+
+**Three things were added because of this**, all in `run_kolmogorov.py` and all in
+every artifact:
+
+- `zonal_fraction_semantics` — the formula, the numerator, the denominator and
+  the index as separate keys, so the definition is read rather than inferred;
+- `zonal_energy_fraction_fluctuation` — the complement, recorded so nobody takes
+  it by hand;
+- `zonal_energy_fraction_components` — the raw total/fluctuation/zonal energies
+  at each index, so the stored share can be recomputed and *checked* against
+  the stored definition rather than trusted.
+
+Asserted by `test_the_zonal_share_and_the_fluctuation_share_are_exact_complements`
+and `test_the_energy_is_additive_under_the_zonal_split`. Four suite cases were
+re-run natively so the keys come from the driver that records them; all four came
+back bit-identical on every physical value, which is also the check that the
+configuration was reproduced.
+
+**What the share is, and is not, good for.** It *is* a Re-dependent observable,
+and it *decreases* with Re at fixed N and T: 20.089% → 18.533% → 18.398% across
+50× in Re, an 8.4% change. But it is weak, and two of its dependencies are larger
+than the Re effect, so it cannot carry a Re-dependent claim alone:
+
+- **horizon**: 16.21% at t=0 → 18.40% at T=0.1 → **32.16%** at T=1.0
+  (`run_long_time.py`, A=0.2), i.e. it nearly doubles over the first unit of time
+  while Re is fixed;
+- **grid**: 18.398% at N=64 vs 17.283% at N=128 at the same Re — a 6.1% change,
+  comparable to the whole Re range.
+
+The enstrophy share is flat in Re over the same range, so this is specific to the
+energy, not to the split.
+
+## C8-2: the legacy runs reproduce bit-for-bit
+
+Four artifacts named a commit but recorded no `reproducible`, so nothing had ever
+checked the driver that produced them. All four were re-run with the parameters
+each one's own `parameters` block records, and all four came back **identical in
+every physical value** — the equality is the check:
+
+| artifact | physical values | what differs |
+|---|---|---|
+| `regime_pilot_re5000_A0p2.json` | identical | nothing (byte-identical) |
+| `regime_pilot_re5000_N128_A0p2.json` | identical | nothing (byte-identical) |
+| `baselines_re5000_N64_T8.json` | identical | nothing (byte-identical) |
+| `regime_pilot_re5000_A0p5.json` | identical | provenance + 3 `wall_seconds` (≤1.8% timing noise) |
+
+Not one energy, enstrophy, divergence, rank, singular value or spectrum entry
+moved in any of the four. The only non-determinism anywhere is wall-clock time,
+which is the one quantity that is not supposed to be reproducible.
+
+The first attempt at this re-run *did* change a number, and the reason is worth
+recording: the shell script put `--dt` in a shared argument list *and* per case,
+and argparse takes the last occurrence, so the N=128 case ran at twice its
+recorded `dt` and with a freshly-generated initial condition instead of the
+`--ic-reference-N 64` one — a different case written under the same filename. It
+was caught by the fingerprint failing (17.485% against a recorded 17.283%), the
+committed artifact was restored, the driver was committed so
+`driver_matches_HEAD` could be true, and the re-run then reproduced 17.283% exactly.
+**A fingerprint that fails is doing its job; the bug was in the invocation, not
+in the driver.**
+
+## The memory "noise floor" was one sample, and three verdicts were resting on it
+
+`peak_memory.json` reported a "run-to-run noise floor" of 0.0039 MiB, and four
+verdicts in its `interpretation` rested on it at a threshold of
+`spread_over_rank > 2 x floor`. Two defects, one on top of the other.
+
+**The floor was a single sample.** `bench_memory.py` re-measured one configuration
+twice and took `max()` over a dict **keyed by configuration** — so the repeats
+overwrote each other and only the last survived, whatever the repeat count. The
+artifact read as though it carried an estimate. The *same quantity*, re-measured
+on this problem, has been observed at:
+
+| measurement | noise floor (MiB) |
+|---|---|
+| `dfd1a0b` | 0.1328 |
+| `896b3bf` | 0.0664 |
+| `dcc4a64` (what the registry row is pinned at) | 0.0977 |
+| `e59e790` (what the artifact carried) | **0.0039** |
+
+**A factor of 34**, and the value the artifact shipped was the *smallest* of the
+four — the one that makes every verdict come out resolved.
+
+**Fixed at the source, not annotated.** The repeats are now a **list** (a
+distribution stored in a dict keyed by the thing it varies over is a distribution
+of size one), the default is 8 repeats, the artifact records
+`noise_floor_samples_mib` with min/median/max and the sample values, and the
+verdicts are taken against the **maximum** — the conservative side, since a
+larger floor can only turn "varies with rank" into "not established", never the
+reverse.
+
+**What that did to the verdicts.** With 8 samples the floor is **0.324 MiB**
+(0.0781 to 0.3242, factor 4.2 within the run alone):
+
+| | spread over rank | margin vs threshold 2x | old verdict | new verdict |
+|---|---|---|---|---|
+| N=64, projected | 0.29 MiB | **0.44x** | RESOLVED | **NOT resolved** |
+| N=64, BUG | 0.52 MiB | **0.80x** | RESOLVED | **NOT resolved** |
+| N=128, projected | 0.50 MiB | **0.77x** | RESOLVED | **NOT resolved** |
+| N=128, BUG | 1.77 MiB | 2.73x | RESOLVED | RESOLVED |
+
+**So the old sentence — "the variation with rank is RESOLVED at every grid, so
+'flat in rank' would assert the opposite of the measurement" — was false.** Three
+of the four pairs are not resolved. The honest reading is the *opposite* of the
+old one and is stated in the new artifact: no variation with rank is established
+for the projected integrator at either grid, and the spread is *consistent with
+zero without demonstrating it*. That is not "flat in rank" either — and
+`test_the_memory_noise_floor_is_a_distribution_and_not_one_sample` is what keeps
+it from drifting back.
+
+The robust part of D19.4 is untouched: **the reduced integrator does not save
+memory — it costs more than the full-grid step at both grids**, and that is
+several times any of the four noise floors ever measured.
+
+The registry row `mem_noise_floor_mib` is pinned at 0.0977 MiB, one of the four
+single-sample values above, and cannot be satisfied by any correct measurement of
+this quantity. It needs re-pinning against the distribution, or replacing by a
+claim about the distribution — see the message to the reviewer.
+
+## Driver drift: which artifacts are actually in question
+
+`provenance.py` sets `driver_matches_HEAD` by comparing the driver on disk with
+the one in the recorded `git_commit`, and `reproducible` follows it. That is the
+right check and it is unforgiving on purpose. But it currently conflates two very
+different situations:
+
+* the driver's **computation** changed, so the recorded numbers may no longer be
+  what the code produces — re-run required; and
+* only the **command-line wiring** changed, so the computation is byte-identical
+  and the numbers still are what the current code produces.
+
+The second case is real. On 2026-09-26 all 17 list-valued flags across 8 drivers
+gained `action=ListOnce` so that a repeated flag fails loudly instead of silently
+running half the parameter space (see `experiments/_cli.py`). That touched seven
+drivers and so invalidated the recorded provenance of every artifact they
+produced — including a T=8 baseline and a T=20 pilot — while changing no
+arithmetic.
+
+`experiments/check_driver_drift.py` separates them **by parsed structure**: it
+recovers the driver at the recorded commit, strips `action=ListOnce` and its
+import from the current file, and compares `ast.dump` of the two. Identical means
+the computation is unchanged; different means name what changed.
+
+A *line-based* comparison is the obvious implementation and it is wrong: adding
+`action=ListOnce` to an `add_argument` that already spanned two lines pushes its
+`default=` onto a continuation line, so a pure wiring change produced
+`+ default=[64, 128])` and **13 of 20 artifacts were mislabelled "substantive"**.
+Comparing parsed structure cannot have that failure, because a continuation line
+is not a node.
+
+At the time of writing: **7 current, 9 wiring-only, 4 substantive.** All four
+substantive ones are changes to what is written or described rather than to the
+arithmetic — two gained a description string, one gained the zonal-share keys,
+and one (`json_safe`) changes non-finite floats to `null`, which only bites
+artifacts that contain one.
+
+## Flags that do not exist, checked before the run
+
+`experiments/check_driver_flags.py` asks each driver for its own `--help` and
+verifies every flag in a launch script against it. It exists because two bad
+invocations cost real time on 2026-09-26, both of the same shape — an argument
+the parser does not have, or has differently — and **neither failed loudly**: a
+shared `--dt` plus a per-case `--dt` ran one case at twice its recorded timestep,
+and `--re 5000 --re 1000` ran half the parameter space and overwrote a complete
+artifact. Both produced complete-looking files from runs that did not do what
+their names said.
+
+The first draft of the refresh script that this check validated contained two
+flags that do not exist (`--seed` on `run_static_basis_construction.py`, which
+takes `--seeds` only, and `--adaptive-rank` on `run_baselines.py`, whose adaptive
+rank is read off the adaptive run rather than given). Both would have failed at
+parse time, so they were caught for free — but they were caught by *asking the
+parser*, not by reading the driver, which is the point.
+
+**What the check cannot see:** a flag the parser *has* but means differently
+still runs happily and still produces a wrong artifact. Every argument list in
+these runs is transcribed from the artifact's own recorded `parameters` block
+for that reason, and written out in full rather than assembled from a shared
+block — the shared block is what produced the duplicated `--dt`.
+
+## Registry rows that need re-pinning, with the values (2026-09-26)
+
+Run against the reviewer's `claims_registry.py` with the writer's draft from
+`origin/agent/writer`: **23 rows OK, 16 FAIL.** Every failure is accounted for,
+and none of them is a number that moved for a reason we do not know.
+
+**Seven `tstar_*` rows — the block fix, 3.9% to 9.3%.** The rows-derived `t*` is
+above the value quoted from the un-provenanced crossover block, consistently and
+in one direction. These are the values to pin, at full precision:
+
+| row | value | was | change |
+|---|---|---|---|
+| `tstar_r16` | `0.7076762337623602` | 0.6493281145096707 | +8.99% |
+| `tstar_r32` | `1.5981858222903682` | 1.4816252539052939 | +7.87% |
+| `tstar_r32_W0p5` | `1.5899768518577335` | 1.4739544217813643 | +7.87% |
+| `tstar_r32_W1p0` | `1.5995931156857837` | 1.4832176727372877 | +7.85% |
+| `tstar_r16_re1000` | `0.7283236032445684` | 0.6665645808117523 | +9.27% |
+| `tstar_r32_re1000` | `1.7200204892865198` | 1.6094633714766546 | +6.87% |
+| `tstar_N128_r16` | `0.9754557646562387` | 0.9386425215032279 | +3.92% |
+
+Brackets are unaffected and exact under both derivations: `[0.5, 1.0]` for r=16,
+`[1.0, 2.0]` for r=32. The legacy block sat 6.4–8.5% below the rows in all 18
+resolved cases across both Reynolds numbers, so the direction and the size are
+both systematic rather than scatter.
+
+**Four `zonal_share_energy_*` rows — a bug in `resolve`, predating today.** The
+rows use `field="zonal_energy_fraction.at_final_step"`, and `resolve` looks a
+plain `field` up as a **literal key**; it only descends on `.` inside the
+`@min:`/`@max:` form. The artifacts have always been nested, so these rows have
+never resolved against any version of the data. Verified against the pre-change
+artifacts, so it is not from the zonal-share work. Either descend on `.`
+generally, or point the rows at the new sibling keys
+(`zonal_energy_fraction_fluctuation`, `zonal_energy_fraction_components`) —
+which would also let a row check the value *and* its definition.
+
+**Five `mem_*` rows — the rows are pinned to a quantity that is not reproducible.**
+`mem_noise_floor_mib` is pinned at 0.0977 MiB, one of four single-sample values
+that quantity has taken (0.1328 / 0.0664 / 0.0977 / 0.0039 — a factor of 34), and
+no correct measurement of it can be 0.0977: it is now the **maximum of eight
+re-measurements** by construction. The four `mem_overhead_*` rows are 1.3–5.5%
+out, which the gate itself calls "plausibly a re-run" — and it is: across three
+independent measurements the overhead of the projected integrator at N=64 moved by
+**+136%**. These rows need a stated tolerance or a distribution, not a point
+pinned to `sf=8`.
+
+## The cost ratios are not reproducible to better than ~15% on this node
+
+Five committed versions of `cost_retiming.json`, all the same configuration
+(N=64/128/256, ranks {2, 64}, 7 interleaved repeats of 2000 steps), with the
+maximum per-configuration `full_step_ratio_vs_reference`:
+
+| committed | OMP threads | load at end | N=64 | N=128 | N=256 |
+|---|---|---|---|---|---|
+| 09-25 16:17 | 1 | – | 2.071 | 2.144 | 2.181 |
+| 09-25 23:23 | 1 | 1.36 | 2.426 | 2.710 | 2.308 |
+| 09-26 02:42 | 1 | 1.33 | 2.480 | **2.740** | 2.346 |
+| 09-26 10:31 | 2 | 2.27 | 2.562 | 3.640 | 3.048 |
+| 09-26 13:xx | 2 | 1.82 | 2.437 | 3.543 | 2.400 |
+
+**At a fixed thread count the N=128 ratio has ranged 2.14 – 2.74, a 28% spread
+on an identical configuration**, and the within-run spread over 7 interleaved
+repeats is only 0.17 – 0.35 (7–10%). So the protocol's precision is roughly a
+third of the between-run uncertainty, and quoting a cost ratio as a point
+overstates what was measured.
+
+**The thread count moves it by 43% at N=128** (2.57 at one thread, 3.54 at two),
+which is larger than every other effect here and is a property of the node rather
+than of the method. `bench_cost.py` now records `threads_match_canonical` and
+`threads_differing_from_canonical`, because a 1-thread re-run landed within 6% of
+the 2-thread pinned value at one grid — close enough to look like agreement, and
+not agreement.
+
+**One measurement failure was mine and is worth recording.** The 10:31 re-run was
+launched while three other streams were using the same twelve cores. Its N=128
+ratio of 3.640 is the highest in the table, and interleaving only controls for load
+that arrives *within* a run — it cannot control for load that was already there.
+`cost_retiming.json`'s `shared_node_note` says as much, and I ran it anyway. The
+re-run at 13:xx was done with nothing else on the machine and gave 3.543, so
+contention accounts for about 3% of that particular gap and the rest is the
+thread-count and machine-state effects above.
+
+**What the paper can honestly say.** The ratio of projected-DLRA step time to
+full-grid step time is **2.1–2.7 at one thread** and **3.4–3.6 at two threads**,
+N=128, on this node, with a between-run spread comparable to the thread-count
+effect. Any cost claim needs its thread count and load stated next to it, and
+should be a range rather than a value. That is not a weakness in the
+interleaving — the interleaving is what makes the *ratio* usable at all on a noisy
+node — it is a statement about what the ratio can be resolved to.
+
+## The never-yields rank is the grid's de-aliasing ceiling, at both grids measured
+
+`cost_retiming.json` records `dealias_rank_ceiling` = **43, 85, 171** for N = 64,
+128, 256 (D30.2: a wavenumber-derived bound, not a mode count). The crossover
+surfaces report exactly one rank as `never` at each grid:
+
+| grid | never-yields rank | de-aliasing ceiling | equal? |
+|---|---|---|---|
+| N=64, Re=5000 | **43** | **43** | yes |
+| N=128, Re=5000 | **85** | **85** | yes |
+
+and the reason the surface records is the same at both: *"the DLRA is exact at
+every horizon here (relative error at roundoff), so no static baseline can
+overtake it."*
+
+**So this is a mechanism, not an observation.** A rank that reproduces the whole
+resolved band has nothing left to adapt: its subspace is the band, its error is at
+roundoff, and no static baseline can overtake it. The crossover cannot exist above
+the ceiling, which is why "the rank at which the DLRA never yields" is a statement
+about the grid and not about the method — and why the never-yields rank moves from
+43 to 85 when the grid is refined (D17.2, D118 retired).
+
+Pinned by `test_the_rank_at_which_the_dlra_never_yields_is_the_grid_dealiasing_ceiling`,
+which also asserts the *reason* is the exactness one — if a rank ever reported
+`never` for a different reason, the identity would stop being a mechanism and the
+claim would need rewording rather than re-measuring.
+
+**Two points is thin, and that is stated rather than hidden.** The test asserts the
+identity at both grids where it is measured, and fails if a third grid is added
+without extending the check.
+
+## The full rank picture at Re=5000, both grids
+
+| rank | N=64 | N=128 |
+|---|---|---|
+| 2, 4, 8 | **unresolved** — the static baseline leads at every horizon | not measured |
+| 16 | resolved, t\* = 0.7077, bracket [0.5, 1.0] | resolved, t\* = 0.9755, bracket [0.5, 1.0] |
+| 32 | resolved, t\* = 1.5982, bracket [1.0, 2.0] | — |
+| 43 | **never** (it is the N=64 ceiling) | resolved, t\* = 2.9897, bracket [2.0, 3.0] |
+| 85 | not measured | **never** (it is the N=128 ceiling) |
+
+**The crossover exists in a band, and the band is bounded by the grid.** Below it
+the static baseline wins everywhere; above it the DLRA is exact. The highest rank
+that yields at all is the largest rank below the ceiling — 32 at N=64, 43 at N=128.
+
+### Superseded numbers still live in the reviewer's paste-ready blocks
+
+The values the writer will paste are in `state/reviewer/WRITER_ORDER.md` and
+`state/reviewer/START_HERE.md`, and they are the **un-provenanced block** values.
+Full correction set, all four crossings plus the two derived ratios:
+
+| quantity | in the paste-ready blocks | from the rows | change |
+|---|---|---|---|
+| N=64, Re=5000, r=16, W=0.25 | 0.649 | **0.7076762337623602** | +9.0% |
+| N=64, Re=5000, r=32, W=0.25 | 1.482 | **1.5981858222903682** | +7.8% |
+| N=128, Re=5000, r=16, W=0.25 | 0.939 | **0.9754557646562387** | +3.9% |
+| N=128, Re=5000, r=32, W=0.25 | 2.433 | **2.6942** | +10.7% |
+| N=128 / N=64 at r=16 | 1.45× | **1.378×** | −4.7% |
+| N=128 / N=64 at r=32 | 1.64× | **1.686×** | +2.7% |
+
+`WRITER_ORDER.md` line 42 also says the old pair is *"verified bit-for-bit"*, which
+is now false — and it is the sentence that discourages anyone from checking. The
+brackets are unaffected and exact under both derivations: [0.5, 1.0] for r=16 at
+both grids, [1.0, 2.0] for r=32 at N=64, [2.0, 3.0] for r=43 at N=128.

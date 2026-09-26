@@ -7257,8 +7257,29 @@
     ]
   },
   "provenance": {
+    "captured_at": "launch",
     "driver": "experiments/run_regime_pilot.py",
-    "git_commit": "1968c46224861c1f8b1f70df8457b8dfb6e516d6"
+    "driver_dirty": false,
+    "driver_matches_HEAD": true,
+    "driver_matches_HEAD_at_write": true,
+    "driver_sha256": "f2e920fed9cf3d82a770c0dde7a1568671a272fe8f537b6bbd91353b4700c384",
+    "driver_sha256_at_write": "f2e920fed9cf3d82a770c0dde7a1568671a272fe8f537b6bbd91353b4700c384",
+    "git_commit": "f403ab6b1986e9743839b649bccd235fb7213822",
+    "git_commit_at_write": "f403ab6b1986e9743839b649bccd235fb7213822",
+    "git_commit_how": "git log -1 --before=1790412301",
+    "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "reproducible": true,
+    "sources_files_at_launch": 30,
+    "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+    "tree_moved_during_run": false,
+    "working_tree_diff_sha256": "394157ea2fd03a6ea079f6ccf4ae82384d2f76035f0b571e86bba207585a04ee",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "state/coder/results/peak_memory.json",
+      "state/coder/results/rank_rule_energy.json",
+      "state/coder/results/regime_pilot_re5000_A0p2.json",
+      "state/coder/results/static_basis_construction_N32.json"
+    ]
   },
   "qualifying_horizons": [],
   "rank_quantities": {
@@ -7302,7 +7323,7 @@
         }
       },
       "samples": 51,
-      "wall_seconds": 17.496477122884244,
+      "wall_seconds": 16.895054628141224,
       "zonal_share_of_total_energy_at_end": 0.19436134685060888
     },
     {
@@ -7340,7 +7361,7 @@
         }
       },
       "samples": 101,
-      "wall_seconds": 34.06093276105821,
+      "wall_seconds": 35.724889487959445,
       "zonal_share_of_total_energy_at_end": 0.22338205161569952
     },
     {
@@ -7378,7 +7399,7 @@
         }
       },
       "samples": 201,
-      "wall_seconds": 65.63097931607626,
+      "wall_seconds": 68.69652567012236,
       "zonal_share_of_total_energy_at_end": 0.2946893425394793
     },
     {
@@ -7422,7 +7443,7 @@
         }
       },
       "samples": 401,
-      "wall_seconds": 130.56323959399015,
+      "wall_seconds": 136.0660313470289,
       "zonal_share_of_total_energy_at_end": 0.5218913124575163
     },
     {
@@ -7468,7 +7489,7 @@
         }
       },
       "samples": 801,
-      "wall_seconds": 259.9210331989452,
+      "wall_seconds": 271.56845655082725,
       "zonal_share_of_total_energy_at_end": 0.7425005048722252
     }
   ],

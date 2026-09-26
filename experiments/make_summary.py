@@ -201,6 +201,23 @@ def load(name: str) -> dict | None:
         "reproducible": prov.get("reproducible"),
         "working_tree_dirty": prov.get("working_tree_dirty"),
     }
+    # The launch-time fields, so a reader of the summary can tell an input that
+    # was captured when its process loaded its code from one captured when the
+    # artifact was written.  Before 2026-09-26 those were the same moment and the
+    # distinction did not exist, which is exactly how an input could name a
+    # commit whose driver it never ran -- see the note in `provenance.py`.
+    for key in ("captured_at", "git_commit_how", "tree_moved_during_run",
+                "driver_matches_HEAD", "sources_fingerprint_at_launch"):
+        if key in prov:
+            entry[key] = prov[key]
+    if prov.get("captured_at") != "launch":
+        entry["provenance_is_write_time"] = (
+            "this input predates the 2026-09-26 fix to provenance.py: its "
+            "commit and driver hash were read when the artifact was WRITTEN, "
+            "so for a run that outlasted a commit the two were read together "
+            "and the reproducible verdict compared the driver against itself. "
+            "Re-run the driver to make this input verifiable."
+        )
     if prov.get("reproducible") is False:
         entry["WARNING"] = (
             "this input records itself as NOT reproducible: the driver on disk "
@@ -242,6 +259,10 @@ def input_provenance_block() -> dict:
         "inputs": INPUT_PROVENANCE,
         "inputs_absent": [e["artifact"] for e in absent],
         "inputs_with_warnings": [e["artifact"] for e in stale],
+        "inputs_without_launch_provenance": [
+            e["artifact"] for e in INPUT_PROVENANCE
+            if e.get("present") and e.get("captured_at") != "launch"
+        ],
         "all_inputs_reproducible": not stale,
         "how_to_read_this": (
             "every number in this file comes from one of the artifacts listed "

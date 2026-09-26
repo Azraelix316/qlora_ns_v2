@@ -34,6 +34,8 @@ from __future__ import annotations
 
 import argparse
 import json
+
+from _cli import ListOnce
 import sys
 from pathlib import Path
 
@@ -188,7 +190,8 @@ def main() -> None:
     parser.add_argument("--cutoff", type=int, default=8)
     parser.add_argument("--seed", type=int, default=20260925)
     parser.add_argument("--check-every", type=int, default=5)
-    parser.add_argument("--gaps", type=int, nargs="+", default=[1, 20, 100, 400],
+    parser.add_argument("--gaps", type=int, nargs="+", action=ListOnce,
+                        default=[1, 20, 100, 400],
                         help="how many checks ahead of the rule's columns the "
                              "target field lies; each is a separate row, because "
                              "the answer depends on how far the rank has to hold")
