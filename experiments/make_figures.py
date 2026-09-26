@@ -364,10 +364,16 @@ def main() -> None:
         ax.legend(fontsize=6.5, ncol=2)
         ax = axes[1]
         # Two series, and the second one was previously missing.  The paper's
-        # statistics are on psi' = psi - x-average(psi) (D11/S1); total KE is
-        # dominated by the zonal mean -- at t=0 the fluctuation is only 32% of it
-        # -- so plotting the total alone shows the part every method shares and
-        # erases the part that separates them.
+        # statistics are on psi' = psi - x-average(psi) (D11/S1).  The comment
+        # that used to sit here had this backwards: it said the fluctuation was
+        # "only 32%" of the total, which is the N=32 figure, on a panel built
+        # from N=64, where the fluctuation is **83.8%** of the initial energy
+        # (18.6076 of 22.2067) and the zonal mean 16.2% rising to 18.4% at
+        # t=0.1.  So the total is fluctuation-DOMINATED here, and the reason to
+        # plot the split is not that the total hides the fluctuation -- it is
+        # that the two curves are then nearly the same curve, so a reader cannot
+        # see the zonal part at all, and a claim about the zonal mean has to be
+        # visible to be checked.
         plotted = False
         for re, result in suite.items():
             dt = result["parameters"]["dt"]
@@ -911,19 +917,37 @@ def main() -> None:
         # pair understates this by a factor of several and hides that the spread
         # is essentially zero at short horizons and largest from t ~ 1.
         ax = axes[1]
+        # BOTH series, because the title has to describe the axis (C7-1) and the
+        # two series say different things.  Over all ranks the spread is large
+        # from t ~ 1 -- rank buys a static baseline *something* below r=16.  Over
+        # r >= 16 alone it is 0.0% at every horizon: the extra modes are not
+        # merely unhelpful, they buy nothing measurable at all.  Plotting only
+        # the subset would hide the first fact; plotting only all-ranks would make
+        # the title a claim the panel does not show.  A referee checks the axis,
+        # so the axis and the title have to agree.
+        high = [r for r in ranks if r >= 16]
         for j, (re_key, re_case) in enumerate(sorted(by_re.items())):
+            base = colors["dlra"] if j == 0 else colors["ref"]
             series = static_error_spread(
                 re_case["static_moving_window"], ranks, windows[0]
             )
-            if not series:
-                continue
-            ax.semilogx(
-                [s["time"] for s in series],
-                [100.0 * s["spread_over_min"] for s in series],
-                "o-", markersize=3.5, linewidth=1.3,
-                color=colors["dlra"] if j == 0 else colors["ref"],
-                label=f"static, Re={re_key}",
-            )
+            if series:
+                ax.semilogx(
+                    [s["time"] for s in series],
+                    [100.0 * s["spread_over_min"] for s in series],
+                    "o-", markersize=3.5, linewidth=1.3, color=base,
+                    label=f"all ranks {ranks}, Re={re_key}",
+                )
+            subset = static_error_spread(
+                re_case["static_moving_window"], high, windows[0]
+            ) if high else []
+            if subset:
+                ax.semilogx(
+                    [s["time"] for s in subset],
+                    [100.0 * s["spread_over_min"] for s in subset],
+                    "s--", markersize=3.0, linewidth=1.1, color=base, alpha=0.55,
+                    label=rf"$r\geq16$ only ({high}), Re={re_key}",
+                )
         ax.axhline(10.0, color=colors["full"], linestyle=":", linewidth=1.0)
         ax.annotate("10%", (ax.get_xlim()[0], 10.0), textcoords="offset points",
                     xytext=(2, 2), fontsize=6.5, color=colors["full"])
@@ -932,14 +956,26 @@ def main() -> None:
         # of nearly two, and a reader comparing against a number quoted the other
         # way would be comparing conventions rather than results.
         ax.set_ylabel("spread of the static error across ranks\n"
-                      r"($\max-\min)/\min$, all ranks, %)", fontsize=8)
+                      r"($\max-\min)/\min$, %)", fontsize=8)
+        # C7-2: scoped to the grid, because the r=16 saturation contrast is an
+        # N=64 result and cannot exist at N=128 -- where r=16 is half the band.
         ax.set_title(
-            "A static subspace saturates in rank:\n"
-            r"$r\geq16$ buys it nothing, at any horizon", fontsize=9
+            f"A static subspace saturates in rank, at $N={xover['parameters'].get('N', 64)}$:\n"
+            r"$r\geq16$ buys it nothing, while $r<16$ buys plenty", fontsize=9
         )
-        ax.legend(fontsize=6.5, loc="upper left")
+        ax.legend(fontsize=5.6, loc="upper left")
         CAPTIONS["fig_crossover"] = (
-            'Left: error against horizon by rank, for the evolving basis (solid) and an oracle trailing-window static baseline (dashed). Right: the spread of the static error across ranks as a function of horizon, for every Reynolds number measured, with the 10% level marked. The spread is the mechanism: a static subspace stops improving with rank, while the evolving one does not.'
+            rf"Left: error against horizon by rank, for the evolving basis (solid) "
+            rf"and an oracle trailing-window static baseline (dashed). Right: the "
+            rf"spread of the static error across ranks as a function of horizon, "
+            rf"at $N={xover['parameters'].get('N', 64)}$, for every Reynolds number "
+            rf"measured, with the 10% level marked. **Both rank sets are plotted "
+            rf"and the distinction is the result**: over all ranks {ranks} the "
+            rf"spread is large from $t\approx1$ -- rank buys a static baseline "
+            rf"something below $r=16$ -- while over $r\geq16$ alone it is 0.0% at "
+            rf"every horizon, so the extra modes buy nothing measurable at all. The "
+            rf"saturation contrast is an $N=64$ result and does not exist at "
+            rf"$N=128$, where $r=16$ is half the resolved band."
         )
         FIGURES_WRITTEN.add("fig_crossover")
         fig.savefig(args.output_dir / "fig_crossover.pdf", bbox_inches="tight")
