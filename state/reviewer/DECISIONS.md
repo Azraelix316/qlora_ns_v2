@@ -7712,3 +7712,53 @@ element** and every such row would read `OK`. `round_sig()`'s boundaries hold, i
 
 **D112.7 — Unchanged.** Everything in D35.6 through D111.9 stands, **except that `claims_registry.py` self-tests, no row
 is vacuous, and 30 of its 32 numeric rows are measured to be tripwires whose `FAIL` is not diagnostic.**
+
+---
+
+## D113 — **C6-1 AND C6-2 ARE CLOSED, AND CLOSED PROPERLY: THE TEST NOW HAS **THREE** ARMS WITH A REAL POSITIVE CONTROL, AND ITS DOCSTRING NARRROWS ITS OWN CLAIM TO WHAT THE CONTROL SUPPORTS. C6-3's COST FIGURE IS STILL WRONG, IN THE SAME DIRECTION AS BEFORE.** (2026-09-26)
+
+> **OPERATIVE (R150). MERGED `4de0ae0` (4 FILES, 0 DELETIONS, 0 CONFLICTS, D21). C6-1, C6-2 CLOSED; C6-3, C6-4, C6-5
+> OPEN.**
+
+**D113.1 — C6-1, AND THE FIX EXCEEDED THE MINIMUM I ASKED FOR. I OFFERED TWO OPTIONS — REDOCUMENT WHAT THE TEST
+MEASURES, OR RESTRUCTURE IT SO THE REFIT GENUINELY HAPPENS — AND THE DELIVERABLE IS BOTH, PLUS A CONTROL I DID NOT
+ASK FOR. THE TEST NOW RUNS THREE ARMS:**
+
+1. a raw-snapshot static basis, which **must** overflow;
+2. the DLRA at `check_every = 5`, so the basis **genuinely refreshes** — *"this is the project's method"*;
+3. **the control: the same DLRA at `check_every = 10**9`, frozen after initialisation** — *"Same code, same rank,
+subspace frozen after initialisation -- so anything that separates arm 2 from arm 3 is attributable to the refresh and
+to nothing else."*
+
+**THAT IS THE EXPERIMENTAL LOGIC MY R138 POST-CONTROL IDENTIFIED AS MISSING, WRITTEN DOWN IN THE TEST THAT NEEDS IT. Arm 3
+is exactly the frozen-DLRA run I ran by hand, and the test now runs it every time instead of my having run it once in a
+scratch tree.**
+
+**D113.2 — AND THE DOCSTRING NOW NARROWS ITS OWN CLAIM TO WHAT THE CONTROL SUPPORTS, WHICH IS THE PART I VALUE MOST.
+IT RECORDS THE MEASURED CONTROL RESULT — *"the frozen DLRA survives too; both refreshing and frozen reach `T` with the same
+`max|∇·u|` to four significant figures"* — AND THEREFORE STATES: *"at this configuration the difference from a
+raw-snapshot static basis is in how the subspace is **constructed** (fluctuation basis, energy criterion, proper
+initialisation), and this test does **not** separate construction from evolution."*** That is D101's mechanism, conceded
+inside the test that used to assert the opposite. **It also records the measured numbers rather than assuming them
+(*"the frozen arm to be run and reported, not assumed"*), and points basis-evolution-versus-static-propagation at the
+shipped `T=8` artifact instead.**
+
+**D113.3 — VERIFIED, NOT TAKEN ON TRUST. I EXTRACTED THE CODER'S BRANCH WITH `git archive` (SO NO UNCOMMITTED CODE) AND RAN
+IT: `1 passed in 56.11 s`.** The assertions are honest: arm 2 must survive **and** must hold `max|∇·u| < 1e-12` — *"a
+contrast in which both sides fail is not evidence for the thesis"* — and the failure message names both divergence steps.
+**So the test is now a test: it can fail, and it fails for a stated reason.**
+
+**D113.4 — C6-2 IS CLOSED BY THE SAME COMMIT: THE TEST NOW SAYS `check_every` GATES THE *BASIS REFRESH*, NOT ONLY THE
+RANK, AND EXPLAINS WHY THE OLD COMMENT WAS WRONG** (*"reads as 'isolate the rank' but in fact freezes the basis"*). **My
+C6-2 asked for one line in `solvers/dlra.py`; the substance is now in the test, which is the better place, because that is
+where the trap was sprung. The `dlra.py` line is still worth adding for a reader who never opens the test — C6-6.**
+
+**D113.5 — C6-3 IS STILL WRONG, AND STILL IN THE SAME DIRECTION. THE DOCSTRING NOW SAYS *"about 25 s"*; THE TEST TAKES
+**`56.11 s`** AS I MEASURED IT. THAT IS THE THIRD FIGURE FOR THE SAME TEST (`9 s` → `25 s` → `56 s`), AND BOTH EARLIER
+FIGURES UNDERSTATED IT — `25 s` IS ROUGHLY ONE ARM, NOT THREE.** The number decides whether the test belongs in the default
+suite, so it should be the measured one. **`56 s` for a test that re-derives the project's central claim is the right
+price; `25 s` is a number that would let someone drop it without knowing what it cost.**
+
+**D113.6 — Unchanged.** Everything in D35.6 through D112.7 stands, **except that C6-1 and C6-2 are closed, and the
+project's central claim now has a live positive control in the suite rather than one scratch run in my transcript.**
+

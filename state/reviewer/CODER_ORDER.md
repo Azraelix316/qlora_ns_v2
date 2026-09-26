@@ -60,6 +60,7 @@ is lost; the `C` numbering is the order and the `T` numbering is history.**
 | **C9-1** record WHICH paths were dirty | *C9* — **the provenance note's own exemption ("a rewritten result file alone does not invalidate a run") is unclaimable, because the block records only that the tree was dirty plus a hash. One line. `true` with a non-empty hash on both cost artifacts.** |
 | **C8-1..3** provenance is now a gate, and it found two things | *C8* — **the provenance block was read by NOTHING, and `benchmark_summary.json` has no provenance block while aggregating one LEGACY (formerly DIRTY) run. Also: the N=128 re-run reproduced every series BYTE-IDENTICALLY, which is a reproducibility claim the paper should make.** |
 | **C7-1..6** `fig_crossover`'s title contradicts its own axis; a comment is wrong by 2.6x | *C7* — **C1-3d and C1-3g are closed properly, and the new `fluctuation_*_history` diagnostic quantifies D101 (zonal mode = `18.4%` of energy, `3.8%` of enstrophy) and is the FIRST Re-DEPENDENT observable in the artifact set. But the title claims `r>=16` while the axis plots all six ranks, and it is unscoped in grid (D93.4), and one comment states the opposite of the truth.** |
+| **C6-1, C6-2** the central-claim test | **BOTH CLOSED in `4de0ae0` (D113).** Three arms with a real control (frozen DLRA), and the docstring now concedes that at this configuration the difference is subspace **construction**, not evolution. C6-3 (cost figure: says 25 s, measured 56 s), C6-4 (land the measurement as an artifact), C6-5 (long run has no fluctuation diagnostic) remain open; **C6-6** below. |
 | **C6-1..5** the new "central claim" test | *C6* — **it is green and pinning the wrong thing; `check_every` gates basis refresh, not only rank** |
 | protocol work, after the above | `## 2. Tier 2` |
 | background | `## 0. Where the project is`, `## 1. Tier 1`, `## 4. Standing` |
@@ -664,3 +665,14 @@ its `≥1.4×` floor come from. **No cost result is invalidated** (the driver is
 `driver_matches_HEAD: true`), **but the exemption your own note grants is currently unclaimable, and a path list makes it
 claimable in one line.** The list is also what lets a future reader tell a benign re-run of a results file from a real
 contamination without re-deriving anything.
+
+
+---
+
+## C6-6 — **ONE LINE, AND C6-2's SUBSTANCE BELONGS IN `solvers/dlra.py` AS WELL AS IN THE TEST.** (C6-2 is closed by the test; this is the remaining half)
+
+C6-2 asked for a line at the `check_every` assignment in `solvers/dlra.py` saying it gates **basis refresh**, not only the
+rank. **Your test now says it, which is the better place — that is where the trap was sprung.** But a reader who reads
+`dlra.py` and not the test still sees a parameter named for rank that also controls the only per-step factorisation, and
+`check_every=10**9` still silently yields a *static* subspace from something that reports itself as a `DLRA`. One line at
+the assignment closes it.

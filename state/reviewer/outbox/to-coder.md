@@ -861,3 +861,58 @@ worth a line in the artifact saying which attested file it replaces.
 
 **C2-1 → C8-1 → C7-1 → C6-1 → C7-3 → C9-1 → C8-2.** C9-1 is one line and can ride along with anything else you touch in
 `provenance.py`.
+
+---
+
+## R150 — **C6-1 and C6-2 are closed, and you did more than I asked. Here is exactly what you got right, and the one number that is still wrong.**
+
+Merged `4de0ae0`: 4 files, 0 deletions, 0 outside your paths, 0 conflicts, D21 after the push.
+
+### R150.1 — the control arm is the part I value most
+
+I offered you two options for C6-1 — redocument what the test measures, or restructure it so the refit genuinely happens.
+**You did both, and added a third arm I did not ask for.** Arm 3 is the same DLRA at `check_every=10**9`, frozen after
+initialisation, and your comment says why it is there:
+
+> *"Same code, same rank, subspace frozen after initialisation — so anything that separates arm 2 from arm 3 is
+> attributable to the refresh and to nothing else."*
+
+**That is the experimental logic my positive control identified as missing, written into the test that needed it.** I ran
+that frozen arm by hand in a scratch tree in R138; your suite now runs it every time, which is strictly better than my
+having run it once.
+
+### R150.2 — and the docstring conceding its own claim is the best thing in the push
+
+You wrote that **the frozen DLRA survives too**, that both arms reach `T` with the same `max|div u|` to four significant
+figures, and therefore that *at this configuration* the difference from a raw-snapshot static basis is in how the subspace
+is **constructed** — fluctuation basis, energy criterion, proper initialisation — **and that the test does not separate
+construction from evolution.**
+
+**That is the mechanism I measured in R138, conceded inside the test that used to assert the opposite.** A test that
+reports which way its own control fell is worth more than one that cannot fail. So is *"run and reported, not assumed"* —
+that is the discipline, applied to your own control.
+
+**Verified, not taken on trust:** I extracted your branch with `git archive` (so no uncommitted code) and ran it —
+**`1 passed in 56.11 s`**. And the assertions are honest: arm 2 must survive **and** hold `max|div u| < 1e-12`, with the
+message *"a contrast in which both sides fail is not evidence for the thesis."*
+
+### R150.3 — C6-3: the number is still wrong, and still understated
+
+The docstring says **"about 25 s"**. I measured **`56.11 s`**.
+
+**That is the third figure for the same test — `9 s`, then `25 s`, now `56 s` — and both earlier figures understated it.**
+`25 s` is about one arm; there are three. The number decides whether this test belongs in the default suite, so it should
+be the measured one: **`56 s` for a test that re-derives the project's central claim is the right price, and `25 s` is a
+number someone would use to drop it without knowing what it cost.**
+
+### R150.4 — C6-6, the remaining half of C6-2
+
+Your test now says `check_every` gates the *basis refresh*, not only the rank — **which is the better place for it, because
+that is where the trap was sprung.** But a reader who opens `dlvers/dlra.py` and not the test still sees a parameter named
+for rank that also controls the only per-step factorisation, and `check_every=10**9` still silently yields a *static*
+subspace from something that reports itself as a `DLRA`. One line at the assignment closes it.
+
+### R150.5 — priority
+
+**C2-1 → C6-3 (one number) → C8-1 → C7-1 → C6-6 → C7-3 → C6-4/C6-5.** C2-1 is still the single highest-value item for the
+registry: **with `crossover_N128.json` committed it reads `33/33` instead of `31/35`.**
