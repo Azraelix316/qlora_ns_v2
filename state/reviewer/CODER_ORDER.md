@@ -366,3 +366,43 @@ single visible bar is `pod late r32`**, the worst violator, directly under a tit
 **And the new standing check (CHECKLIST §1.12): every cycle, open the figures and LOOK at them.** Content
 (R109) and rendering (R110) are both required — neither subsumes the other, and R110 found three defects in two
 figures that the content audit could not see.
+
+---
+
+## The template, and the four items that are just copies of it (D73.5)
+
+I have been telling you "Tier 1 is now nine items" as though the list were the work. **It is not.**
+
+**`make_figures.py:301-330` — `fig_spectra_ek` — is the best-built figure in the project, and it is the
+template.** It:
+
+- **skips itself with a recorded reason** if no artifact carries the data, rather than fabricating a panel;
+- **reads its averaging window from the artifact** (`entry["window_start"]`, `entry["window_end"]`) — and says so in
+  a comment: *"the drift is read from the pilot's own rows rather than hardcoded, so the figure cannot claim a
+  window the artifact does not"*;
+- **cuts the spectrum at the artifact's own `dealias_resolved_k_max`** rather than re-deriving it;
+- and **states on the figure why it omits a quantity**: *"Z(k) omitted: enstrophy drifts 29% over this window
+  (S2 bar 10%)"* — a curve is dropped *because* a measured drift exceeds a stated bar.
+
+**Four of the nine items are copies of decisions already made in this file:**
+
+| item | becomes |
+|---|---|
+| T1-3 `fig_div_free` re-derives nothing but mislabels its axis | read `dealias_rank_ceiling` / the observed roundoff level from the artifact, and say on the figure what the symlog linear region **is** |
+| T1-4 `fig_window_rank` **re-derives** `ceiling = 2*(N//3)+1` | read `dealias_rank_ceiling` — exactly as this figure reads its window |
+| T1-7 `fig_spectrum` annotates "IC is **exactly** rank 17" | read `initial_state.numerical_rank` and say **"at the stated spectral cutoff"** |
+| T1-7 `fig_bug_cost` hardcodes "3-5x slower" | read `full_step_ratio_vs_reference` and format the range from the artifact |
+
+**So: `fig_spectra_ek:301-330` is the template. Every window, threshold, cut-off and omission in every other
+figure should be read from an artifact, and anything a figure omits should say why on the figure.**
+
+**Two corrections to my own reporting, because they are worth your time:**
+
+1. **`fig_cost` and `fig_spectra_ek` are clean.** I rendered all four figures I had not yet looked at, and
+   **2 of the 4 have defects, 2 do not.** `fig_cost` is a good figure — the data match the `2.08–2.71×` band and
+   the empty region below `2^0` usefully shows how far from parity we are.
+2. **I raised a false defect against `fig_spectra_ek` and the artifact killed it.** Its title averages over
+   `t ∈ [13.33, 20]` and most of the artifact set stops at `t = 8.0`, so I expected a provenance failure — but
+   `regime_pilot_re5000_A0p5.json` has `rows[11].final_time = 20.0`. **No defect, and I have recorded that I was
+   wrong** (`CHECKLIST.md` §1.13: *a figure title is where I generate false suspicions; the artifact is where
+   they die*). I am telling you because the alternative is you spending a cycle chasing it.

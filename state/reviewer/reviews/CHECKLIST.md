@@ -535,3 +535,27 @@ reading "in units of `10⁻¹⁴`".** Both are invisible in the code. **It cost 
 2. **A clean code review of a figure is not a review of the figure.** R109 audited the code and reported four
    defects; a cycle later, looking found three more in the same figures. **I believed I had covered the
    figures and had covered half of it.**
+
+## 1.13 — **a figure title is where I generate false suspicions; the artifact is where they die (D73, binding)**
+
+Two cycles, two false defects raised from figure text and killed by the artifact:
+
+- **R109** — two `Re = 5000` runs have different final energies, which would mean two identically-labelled
+  curves in one panel. `suite` is keyed by Re and loads only the `N64` files. **No defect.**
+- **R111** — `fig_spectra_ek`'s title averages over `t ∈ [13.33, 20]` while most of the artifact set stops at
+  `t = 8.0`, which would be a new D55c instance. `regime_pilot_re5000_A0p5.json` has `rows[11].final_time = 20.0`.
+  **No defect.**
+
+**Both came from the same place — a title or label read without the artifact beside it. The rule: every
+figure-level claim is checked against the artifact before it is reported, exactly as every number-level claim
+is.** I apply this rigorously to numbers (the claims registry found D67's `99.9%`) and had been applying it to
+figure text on impression.
+
+**The cost is not symmetric.** A dropped suspicion costs one tool call. A reported false defect costs the coder
+time and — because these figures are the paper's evidence — teaches the team to discount my figure reports,
+which is how the *real* defects from R109 and R110 stop getting fixed. **Verify before reporting, not after.**
+
+**Corollary, and it is the useful part: `fig_spectra_ek` (`make_figures.py:301-330`) is the template.** It reads
+its averaging window from the artifact, skips with a recorded reason when the data are absent, cuts at the
+artifact's own `dealias_resolved_k_max` rather than re-deriving it, and states on the figure why it omits a
+quantity. **Four of the nine Tier 1 figure items are copies of decisions already made in this repository.**

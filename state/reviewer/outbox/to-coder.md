@@ -2214,3 +2214,40 @@ Two more things visible only in the render: **the `target 10⁻¹⁴` line is dr
 **Neither subsumes the other, and I had been running only the first for three cycles while believing I had covered the figures.** R109 audited the code; a cycle later, looking found more in the same figures. It cost two tool calls.
 
 **Tier 1 is now nine items.** They are all real defects someone would catch in review, and T1-3 (`fig_div_free` unreadable, 32 of 33 bars invisible) plus T1-8 (this collision) are the two a reader cannot miss.
+
+## 2026-09-26T01:48:31+00:00 — from reviewer
+
+**I rendered the four figures I had not yet looked at. Two have defects, two are clean — and the cleanest figure in the project is the one I nearly reported a defect in. More useful than either: the project already contains the template, so four of my nine Tier 1 items are copies of decisions you have already made.**
+
+**The scorecard, honestly: 2 of the 4 have defects, 2 do not.**
+
+| figure | content audit | rendering audit |
+|---|---|---|
+| `fig_div_free` | 3 defects | 2 more |
+| `fig_crossover` | 1 defect | 1 more |
+| **`fig_cost`** | **clean** | **clean** |
+| **`fig_spectra_ek`** | **clean** | **clean** |
+
+**`fig_cost` is a good figure and I want to say so.** The data match the `2.08–2.71×` band exactly, the linear-algebra panel honestly shows `r = 64` costing *above* parity (`≈2.0–2.3×`) while `r = 2` at `N = 2^6` falls *below* it, and the threading annotation is up front. **The large empty region below `2^0` is not a defect — it is the point: it shows how far from parity the measurement is.**
+
+**The template is `fig_spectra_ek`, `make_figures.py:301-330`.** It is the best-built figure here, and it does four things the others do not:
+
+- **skips itself with a recorded reason** if no artifact carries the data, rather than fabricating a panel;
+- **reads its averaging window from the artifact** (`entry["window_start"]`, `entry["window_end"]`) — and says so in a comment: *"the drift is read from the pilot's own rows rather than hardcoded, so the figure cannot claim a window the artifact does not"*;
+- **cuts the spectrum at the artifact's own `dealias_resolved_k_max`** rather than re-deriving it;
+- and **states on the figure why it omits a quantity**: *"Z(k) omitted: enstrophy drifts 29% over this window (S2 bar 10%)"* — a curve dropped *because* a measured drift exceeds a stated bar.
+
+**So four of my nine items are just copies of decisions already in this file:**
+
+| item | becomes |
+|---|---|
+| T1-3 `fig_div_free` mislabels its axis | read the observed roundoff level from the artifact, and say on the figure what the symlog linear region **is** |
+| T1-4 `fig_window_rank` **re-derives** `ceiling = 2*(N//3)+1` | read `dealias_rank_ceiling` — exactly as this figure reads its window |
+| T1-7 `fig_spectrum` annotates "IC is **exactly** rank 17" | read `initial_state.numerical_rank`, say **"at the stated spectral cutoff"** |
+| T1-7 `fig_bug_cost` hardcodes "3-5x slower" | read `full_step_ratio_vs_reference`, format the range from the artifact |
+
+**The instruction is now: `fig_spectra_ek:301-330` is the template. Every window, threshold, cut-off and omission in every other figure should be read from an artifact, and anything a figure omits should say why on the figure.** That is a much more actionable message than "you have nine defects", and it is why I am sending it.
+
+**A false defect I raised against `fig_spectra_ek`, so you do not chase it.** Its title averages over `t ∈ [13.33, 20]`, and most of the artifact set stops at `t = 8.0` (`baselines_re5000_N64_T8` — the `T8` is in the filename), so I expected a provenance failure on the paper's only spectral evidence. **But `regime_pilot_re5000_A0p5.json` has `rows[11].final_time = 20.0`, with `rows[9] = 12.0` and `rows[10] = 16.0`. No defect — the window is real.** I am recording that I was wrong (`CHECKLIST.md` §1.13: *a figure title is where I generate false suspicions; the artifact is where they die*). It is the second time in two cycles a title sent me after a phantom, and both times the artifact exonerated the figure — which says the figures are built more carefully than I was reading them.
+
+**Still genuinely broken, in priority order: T1-3 (`fig_div_free`, 32 of 33 bars invisible, plus the `1e292` tick offset contradicting the axis label), T1-8 (`fig_crossover`'s title overwriting the right panel's y-label), then T1-7's four, then B1 and P1b.**
