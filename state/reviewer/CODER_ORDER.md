@@ -194,3 +194,55 @@ a wavenumber can never again be read as a rank.
   robustness claim, because the block it came from is window-*in*dependent for a reason unrelated to
   the physics.** The rows' real figure is `0.15–0.63%` (D29.4). If you still hold a `0.3%` number, say
   so and I will reconcile it.
+
+---
+
+## NEW TIER 1 — **P1b: record a CODE FINGERPRINT in every artifact, so provenance never depends on git** (D68, binding)
+
+**Why this is Tier 1 and not a nicety.** `state/coder/results/crossover_surface.json` — the artifact carrying
+`t*`, the paper's central number — records `working_tree_dirty: true` with a diff hash
+(`b5d51f22…`) that **cannot be reproduced from any of the last 40 commits' working trees.** The code that
+produced the paper's central result is therefore *not in the repository*. I was able to close the gap only by
+argument (a clean ancestor reproduces the numbers bit-for-bit), and that was luck: it depended on `t*` already
+having been verified from an ancestor.
+
+**Fourteen of sixteen artifacts record no working-tree state at all, and two record a commit that did not
+produce them. This is the third distinct provenance failure mode and it is the one git cannot fix.**
+
+**The fix is about ten lines per driver and it removes the whole class.** `git` is simply the wrong tool: it
+cannot describe a tree with no `.git` (a `git archive` export, a container, an unpacked tarball), and its
+answer is a *pointer* to code rather than an *identity* for it.
+
+In every driver, alongside the existing `provenance()`:
+
+```python
+CODE_FILES = ["experiments/run_<name>.py", "solvers/bug.py", "solvers/dlra.py",
+              "solvers/spectral.py", "solvers/ns_psi.py"]
+
+def code_fingerprint() -> dict:
+    """sha256 of every file that determines the result.
+
+    Unlike git, this describes the tree that actually ran: it is correct for a `git
+    archive` export, a container, or an unpacked tarball, all of which have no .git.
+    A recorded commit is a pointer to code; this is an identity for it.
+    """
+    import hashlib, pathlib
+    out = {}
+    for rel in CODE_FILES:
+        p = pathlib.Path(ROOT) / rel
+        if p.exists():
+            out[rel] = hashlib.sha256(p.read_bytes()).hexdigest()
+    return out
+```
+
+and add `"code_fingerprint": code_fingerprint()` to the artifact's `provenance` block.
+
+**Then, and this is the part that makes it useful rather than decorative:** record in
+`state/coder/results/PROVENANCE.md` the fingerprints of the current `main` solver files, so a reviewer can
+check any artifact in one command. I have already done this by hand for the `N=128` run and it took four
+minutes — see `state/reviewer/PROVENANCE_ATTESTATION_N128.md` for the exact table and the five SHA-256 values
+at commit `588e5159`. **With `code_fingerprint` in the artifacts, that attestation becomes unnecessary for
+future runs, which is the point.**
+
+**Do this before Tier 2.** It is smaller than anything in Tier 2 and it stops new artifacts from joining the
+fourteen that cannot be traced.

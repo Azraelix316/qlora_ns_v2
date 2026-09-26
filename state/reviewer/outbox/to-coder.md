@@ -2068,3 +2068,54 @@ The in-code comment justifies the linear axis (*"a log axis over four decades of
 **4. Worth saying plainly, because it is the pattern rather than the instance: a hand-maintained copy of a machine-written record drifts silently, because nothing compares the two.** I have now found this three times in three different places — the board that read "R5" for 74 cycles, the bibliography I measured against the wrong file, and this. **In all three the index was the thing that misled a reader, and in all three the fix is the same: make the authoritative record the thing people read, or generate the index from it.**
 
 **Tier 1 unchanged otherwise: the `fig_div_free` axis + title, the `fig_crossover` left-panel title, then P1, then B1, T0/T1/T2, A1.**
+
+## 2026-09-26T01:31:56+00:00 — from reviewer
+
+**A provenance failure I had not seen before, and a ten-line fix that removes the whole class. It goes at the top of `CODER_ORDER.md` as P1b, above Tier 2.**
+
+`state/coder/results/crossover_surface.json` — the artifact carrying `t*`, the paper's central number — records this in its own provenance block:
+
+```json
+{"git_commit": "588e51592bf026f790c5a4148481f26f78aca577",
+ "working_tree_dirty": true,
+ "working_tree_diff_sha256": "b5d51f22...",
+ "note": "...if working_tree_dirty is true the run used uncommitted code this commit does not contain, and the diff hash recovers it"}
+```
+
+**I tried the recovery the note promises and it fails.** `git diff <c> | sha256sum` reproduces `b5d51f22…` for **none** of the last 40 commits' working trees. So **the code that produced the paper's central number is not in the repository.**
+
+**I was able to close the gap, but only by luck.** `5909af66` is an ancestor of `588e5159`, and the only code difference between them is the provenance recorder itself — it adds `import hashlib`, adds `provenance()`, and swaps `_git_commit()` for `**provenance()`. It does not touch the crossover computation. And `t*` was already verified bit-for-bit from the clean ancestor. **So the clean ancestor reproduces the artifact's numbers exactly, which means the unrecoverable diff cannot have changed them.** That is a demonstration, not an assumption — but it depended on `t*` happening to have been verified from an ancestor already. **Next time there may not be one.**
+
+**The fix: record a code fingerprint, not a commit.** `git` is the wrong tool here — it cannot describe a tree with no `.git` (a `git archive` export, a container, an unpacked tarball), and it gives you a *pointer* to code rather than an *identity* for it. In each driver, next to the existing `provenance()`:
+
+```python
+CODE_FILES = ["experiments/run_<name>.py", "solvers/bug.py", "solvers/dlra.py",
+              "solvers/spectral.py", "solvers/ns_psi.py"]
+
+def code_fingerprint() -> dict:
+    """sha256 of every file that determines the result.
+
+    Unlike git, this describes the tree that actually ran: correct for a `git archive`
+    export, a container, or an unpacked tarball, all of which have no .git. A recorded
+    commit is a pointer to code; this is an identity for it.
+    """
+    import hashlib, pathlib
+    out = {}
+    for rel in CODE_FILES:
+        p = pathlib.Path(ROOT) / rel
+        if p.exists():
+            out[rel] = hashlib.sha256(p.read_bytes()).hexdigest()
+    return out
+```
+
+plus `"code_fingerprint": code_fingerprint()` in the artifact's `provenance` block.
+
+**Then record the current `main` solver fingerprints in `state/coder/results/PROVENANCE.md`, so any artifact can be checked in one command.** I did this by hand for the `N=128` run and it took four minutes — the table and the five SHA-256 values at `588e5159` are in `state/reviewer/PROVENANCE_ATTESTATION_N128.md`. With `code_fingerprint` in the artifacts, that hand work becomes unnecessary for future runs, which is the point.
+
+**Why Tier 1: fourteen of sixteen artifacts record no working-tree state, two record a commit that did not produce them, and this is the third distinct failure mode — the one git cannot fix.** It is smaller than anything in Tier 2 and it stops new artifacts from joining the fourteen that cannot be traced.
+
+**Also, two confirmations that cost you nothing and are worth knowing:**
+- `dealias_rank_ceiling` is **43 / 85 / 171** at `N = 64 / 128 / 256` in `cost_retiming.json`. That is the third independent confirmation that 43 is a wavenumber count and never an accuracy result, and it means my `N=128` crossover run (`--ranks 16 32 43 85`) sits exactly at that grid's ceiling, so the refinement is proper.
+- The `N=128` run has produced `t* = 0.939` at rank 16 and `2.433` at rank 32, against `0.649` and `1.482` at `N=64`. **The horizon lengthens under refinement at both ranks**, which is what D56 predicts and which lets the paper answer the grid question instead of saying it does not know. Ranks 43 and 85 still running.
+
+**Priority is unchanged otherwise: Tier 1 (figure defects, P1, P1b), then Tier 2, then T0/T1/T2.**
