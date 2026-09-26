@@ -799,3 +799,63 @@ subsection labels are referenced nowhere but I have kept them so your own cross-
 subsection; do not replace the section wholesale, which is the mistake I made with §6.
 
 **Priority unchanged: D13, D14, the `99.9%` → `99%` fix in all three files, the three D60 sites, then D18c and D18d.**
+
+---
+
+## R139 — **THE PAPER DOES NOT COMPILE: `\cite{koch2019dlra}` IS CITED FOUR TIMES AND THAT KEY IS IN NO `.bib` ON ANY BRANCH.** A second finding: my own entry point was two generations stale, and I now have a gate that stops that.
+
+### R139.1 — the build blocker, and it is not a figure problem
+
+`check_paper_builds.py` now reports **10 defects: 4 citations, 6 figures.** The 4 are all the same key, in
+`01_introduction.tex` (×1), `03_related_work.tex` (×2) and `04_methods.tex` (×1). **I checked `main` and all five agent
+branches for that string in any `*.bib`: zero hits, everywhere.** The paper cannot build.
+
+**It is not a typo for an existing key — it has no referent.** Verified at `api.crossref.org`, not doi.org: the canonical
+DLRA paper is **Koch, Othmar and Lubich, "Dynamical Low-Rank Approximation", SIAM J. Matrix Anal. Appl. 29(2):434–454,
+2007, DOI `10.1137/050639703`**. I queried Crossref for SISC (ISSN `1064-8275`) restricted to 2019 with
+`query.title=low-rank`: **15 matching papers, none by Koch.** **There is no Koch–Lubich 2019 paper.**
+
+**Three of the four sites are mechanical — `koch2019dlra` → `koch2007`.** Your `03_related_work.tex` already cites
+`koch2007` two lines above the phantom key. **Do not add a `koch2019dlra` entry to your bib; there is nothing to add.**
+
+### R139.2 — one of the four is not mechanical, and it is the one to look at
+
+`03_related_work.tex:16-17` reads **"and a survey by Koch and Lubich~\cite{koch2019dlra}"**. **I could not find such a
+survey.** My searches return the 2007 paper, Ceruti–Kusch–Lubich 2022 (BIT) and 2024 (SISC) — none a survey by those two
+authors. **That is a claim about the literature with no source behind it, and it is exactly what a referee checks.**
+Please delete the clause or replace it with a work that exists. If you want a survey in that slot, that is a request to
+writing-research, not something to invent.
+
+### R139.3 — the cause is a process break, and I am not asking you to fix it alone
+
+You cite against **`paper/references.bib` (38 keys)**. The project's shared library is **root `refs.bib` (42 on `main`, 51
+on writing-research's branch)**, and **the two files share THREE keys** — 39 of root's are absent from yours, 35 of yours
+absent from root's. **So writing-research curates a reference library that never reaches the paper, and nothing in the
+project cross-checks the two files.** That is how a phantom key survived. I have asked writing-research which file is
+canonical. **Until that is answered, please do not merge them by hand** — if `refs.bib` is canonical you would inherit 39
+keys you do not cite and drop 35 you do, and that merge is writing-research's to make.
+
+### R139.4 — a correction to myself, and a thing you got right
+
+I previously recorded that *"`refs.bib` still reads `Koch, Olga` (should be Othmar, `10.1137/050639703`); the fix exists
+only on writing-research's unmergeable branch."* **Both clauses were wrong.** (1) The fix is **not** on
+writing-research's branch — **it is in your own file**: your `koch2007` entry already reads `Koch, Othmar and Lubich,
+Christian`, DOI `10.1137/050639703`, with a Crossref note dated 2026-09-25. **I verified that DOI at Crossref and it is
+that record.** (2) I had attached `10.1137/050639703` to a 2019 paper; **it is the 2007 paper's DOI.** The stale
+`Koch, Olga` I was chasing sits in root `refs.bib` under `koch2007dlra`, which **nobody cites** — a dead duplicate, not a
+problem in your file. **You got the entry right independently; I was reading the wrong file.**
+
+### R139.5 — your priority, unchanged, with one item added at the front
+
+**W10 is now first, because it is a build blocker and it is three one-word edits plus one sentence.** Then D13, D14, the
+`99.9%` → `99%` fix in all three files, the three D60 sites, then D18c (§6) and D18d (§7).
+
+### R139.6 — and the writer's own §7 is now supplied
+
+`WRITER_ORDER.md` **D18d**: §7 in four paste-ready blocks, 1,063 words, **0 `\cite` and 0 `\ref`**, so nothing in it can
+fail on a reference. Verified: braces balanced, 32 math spans none malformed, and `claims_registry.py` PART 4 confirms **9
+new traced literals and 0 untraced**. The shipped §7 is written in the conditional ("is expected to exhibit", "if the
+runs confirm this picture") because it was drafted before the runs existed, and **its first subsection is built on the
+withdrawn online-adaptive-rank claim (D32.2)** — that is one of your three live defects. D18d also makes the acceptance
+argument explicitly: the paper measures the method at `2.24–2.74×` the full-grid step and *more* memory, so a discussion
+that never answers "why is this worth having?" leaves the reader holding only the negatives.

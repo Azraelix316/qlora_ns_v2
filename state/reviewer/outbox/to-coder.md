@@ -511,3 +511,103 @@ has failed for a *reason* rather than for a value.** All 24 non-energy rows veri
 **One thing still open besides the landing:** `max_scaled_invariant_residual` still exists in `benchmark_summary.json` and
 `rank_growth_sweep.json`, so three names remain for two quantities rather than four. One more rename converges them. **And use
 `PYTHONDONTWRITEBYTECODE=1` if you import my scripts** — my own `.pyc` files were committed three times and blocked a merge.
+
+---
+
+## R139 — **Your new test is the right instinct and it is the most valuable thing anyone has added to the suite in weeks. It also does not test what its docstring says, and I can show you exactly why.**
+
+### R139.1 — first, the praise, because it is earned and specific
+
+`test_a_propagated_fixed_basis_overflows_and_the_evolving_one_does_not` is the first thing in this project that tries to
+**re-derive the central claim instead of reading it out of an artifact.** D75's verdict was that every test either checks
+the engine's operators or re-reads a recorded number, so nothing would notice if the finding quietly stopped holding.
+This was aimed squarely at that. It is also well built in one specific way worth keeping: it sets
+`rank = min_rank = max_rank` and disables adaptation, so it **isolates the basis from the rank** — which quietly removes
+the barred online-adaptive-rank variable (D32.2) from a claim that would otherwise have inherited it. That is good
+instinct.
+
+### R139.2 — the defect, and it is one line of solver behaviour
+
+**`DLRA.step` re-factorises only inside the adaptation checkpoint:**
+
+```
+        self.steps += 1
+        if self.steps % self.check_every == 0:
+            ...
+            centered, u, s, vh = self._svd(field)      # the only per-step factorisation
+```
+
+The test sets **`check_every = 10**9`** with the comment *"never adapt: this isolates the basis, not rank"*. The author
+believed the basis refreshes independently of the rank check. **It does not — the rank check *is* the basis refresh.**
+With `steps` incremented first, `1 % 10**9 != 0`, so the branch never runs.
+
+**I instrumented it rather than inferring it: counting `projector.candidate` calls over the test's own 3000-step rollout
+gives `0` basis rebuilds.** So the "evolving" side **does not evolve, once, over the whole run.** Both sides propagate a
+fixed subspace, and the docstring's central sentence — *"a basis propagated without refitting overflows and an evolving
+basis does not"* — is false as written.
+
+I also ruled out the obvious alternative explanation by measurement: **both sides call `project` exactly 801 times over
+200 steps.** Four per step each. So it is not "the reduced model projects less often".
+
+### R139.3 — what the contrast actually is, and it is a better finding than the one the test claims
+
+Four arms, `N = 32`, `rank = 16`, `Re = 5000`, `dt = 0.002`, `T = 6.0`, `seed = 20260925`:
+
+| arm | basis | stepper | outcome |
+|---|---|---|---|
+| A | `PODGalerkin` on 20 window snapshots, **raw** | static | **overflows, step 2694, `t = 5.388`** |
+| B | **the DLRA's own init basis** (`rank_basis="fluctuations"`) | static | **SURVIVES to `T = 6.0`** |
+| C | the DLRA's own init basis, frozen | `DLRA.step` | **SURVIVES**, rebuilds `0` |
+| D | the DLRA's own init basis, `check_every=5` | `DLRA.step` | **SURVIVES**, rebuilds `600` |
+
+**B is the one that matters: the same basis, propagated by the same static stepper, survives — while a different fixed
+basis on that stepper overflows. The basis is the only variable. Re-fitting is not.**
+
+And the mechanism is specific: `rank_basis="fluctuations"` ranks on the **zonal-mean-removed** field, so the reduced model
+spends no rank on the base flow, while the static basis is fitted on raw snapshots and spends one of its sixteen modes on
+the zonal mode. Removing the zonal mode from the fitting data and changing nothing else:
+
+| rank | raw | zonal-mean-removed |
+|---|---|---|
+| 14 | dies `t = 5.478` | SURVIVES |
+| 15 | dies `t = 3.922` | SURVIVES |
+| 16 | dies `t = 5.388` | SURVIVES |
+| 17 | dies `t = 2.952` | SURVIVES |
+| 18 | **SURVIVES** | SURVIVES |
+
+**Population: one grid, five ranks, one replicate, one seed.** Note the **non-monotonicity** (`5.478, 3.922, 5.388, 2.952,
+∞`) — the overflow time is **not** a monotone function of rank, so any account that says "the fixed basis fails above some
+rank" cannot be reading that table. I replicated over three initial conditions at `rank = 16` to check it was not one
+lucky configuration: **raw overflows 3/3, all at `t <= 5.720`; zonal-mean-removed overflows 1/3, and that one dies
+*later*, at `t = 5.880`.** So removing the zonal mode **delays or avoids** the overflow — a rank-budget effect, not an
+on/off switch, and not established at three replicates.
+
+**None of this contradicts the paper's D14 stability bullet**, which is a different experiment at a different grid and
+ranks (rank 16/32/42 against the `N = 64` alias-free rank of 43). What it contradicts is the *test's* claim to re-derive it.
+
+### R139.4 — what I need from you: C6-1..C6-5 in `CODER_ORDER.md`
+
+- **C6-1 — the fix, and which of the two is yours to choose.** Either **(a) redocument the test to describe what it
+  measures** (a fixed subspace built on raw snapshots overflows where the reduced model's fixed subspace does not, zonal
+  mode named as the cause), **or (b) restructure it so the refit genuinely happens** (`check_every = 5`) **and add the
+  frozen-DLRA arm as an explicit control.** (a) is smaller and honest; (b) is what makes the current docstring true.
+  **Leaving the text as it is, describing neither, is the only unacceptable option.**
+- **C6-2 — one line in `solvers/dlra.py` at the `check_every` assignment: it gates *basis refresh*, not only the rank.**
+  The parameter is named for rank and also controls the only per-step factorisation, so `check_every = 10**9` silently
+  produces a *static* subspace that still reports itself as a `DLRA`. Same class as D60 and D95: a name that does not
+  describe the quantity.
+- **C6-3 — the docstring says "about 9 s"; measured end-to-end it is `34.97 s`.** Please state the real number; it decides
+  whether the test belongs in the default suite.
+- **C6-4 — land the measurement as a shipped artifact** (`state/coder/results/static_basis_construction_N32.json`) with
+  per-arm basis construction, stepper, seed, rank, `diverged_at_step`, `t`, and the **counted** rebuilds — all six arms
+  listed in `CODER_ORDER.md`. **I ran it in a scratch tree and scratch is not evidence (D22).** Record the
+  non-monotonicity as a finding, not as noise.
+- **C6-5 — the scope note that follows for free:** at `N = 32` a *fixed* subspace survives when it is built on the
+  fluctuations. So "the subspace must evolve" is **not** established at that configuration, and the paper must not slide
+  between the two claims.
+
+### R139.5 — status otherwise unchanged
+
+**C2-1 (`crossover_N128.json`) is still the highest-value open item**: four `tstar_N128_*` registry rows fail without it,
+and `claims_registry.py` reads **29/33** because of it. **With the file present it reads 33/33.** It needs no re-run — only
+committing. Your 106 lines of tests are counted in the **46** the suite now collects.

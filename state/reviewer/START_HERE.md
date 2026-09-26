@@ -44,26 +44,36 @@ judgement or new information.**
   `N=64` (`2.7×` the floor) and **not** at `N=128` (`1.9×`), so never write "flat in rank" —
   and do not write "grows with rank" either: neither is supported at `N=128`.)*
 
-## 4. Run these four checks before you trust anything
+## 4. Run these six checks before you trust anything
 
 ```
 python3 state/reviewer/claims_registry.py        # every load-bearing number vs an artifact key path
 python3 state/reviewer/check_order_withdrawn.py  # candidates: claims later decisions withdrew
 python3 state/reviewer/check_paper_builds.py     # can the paper build? (the only build check that runs here)
-python3 -m pytest experiments/ -q                # 44 tests, ~180 s (pin OMP/OPENBLAS/MKL=1)
+python3 state/reviewer/check_headings.py         # my own documents: no heading wrapped across two lines
+python3 state/reviewer/check_start_here.py       # is THIS file still true? (it computes the numbers below)
+python3 -m pytest experiments/ -q                # 46 tests, ~200 s (pin OMP/OPENBLAS/MKL=1)
 ```
 
-**`claims_registry.py` reports `20/24` verified** and **one finding: the draft's `99.9%` where the
-runs used `99%`.** The four failures are all `crossover_N128.json`, which **already exists and verifies
-— with it present the registry reads `24/24`**; it was never committed, and the coder is landing it
-(D93). **It needs no re-run.**
-**`check_paper_builds.py` reports `6` defects: every figure `§6` includes is missing, five of them
-never having been specified — there is no LaTeX toolchain on this node, so this static check is the
-only build check that can run.** `check_order_withdrawn.py` is a **candidate list, not a pass/fail**:
-a "clean" from it means *no candidates*, not *no defects*.
+**`claims_registry.py` reports `29/33` verified.** The **4** failures are the `crossover_N128.json` rows, and that file
+**already exists and verifies — with it present the registry reads `33/33`**; it is not committed yet and the coder is
+landing it (C2-1). **It needs no re-run.**
 
-**Every one of these four prints the population it measured over. A result without a population above
-it is not a result (D87, and CHECKLIST §1.15).**
+**`check_paper_builds.py` reports `10 defect` — 4 of them citations, 6 of them figures.** The 4 are
+`\cite{koch2019dlra}`, a key that is **in no `.bib` on any branch**; three of the four are mechanical
+(`koch2019dlra` → `koch2007`) and one supports a "survey by Koch and Lubich" clause that **has no source I could verify**
+(D102, W10). The 6 are the missing figures (C1-1/C1-2). **There is no LaTeX toolchain on this node, so this static check
+is the only build check that can run.**
+
+**`check_order_withdrawn.py` is a candidate list, not a pass/fail**: a "clean" from it means *no candidates*, not *no
+defects*. **`check_headings.py` reports `0 wrapped heading` across all 8 of my documents** — it exists because five
+headings in `DECISIONS.md` were wrapped across two lines and one of them impersonated decision D12 (D101).
+**`check_start_here.py` is the one that keeps this file honest**: it runs the gates above, extracts their headline
+numbers, and fails if any is missing from this section. It found this section two generations stale.
+
+**Every one of these six prints the population it measured over. A result without a population above it is not a result
+(D87, and CHECKLIST §1.15). And a number in THIS file is a claim: `check_start_here.py` exists so that you never have to
+take one on trust.**
 
 ## 5. The five documents, and which one you want
 

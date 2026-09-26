@@ -6860,3 +6860,68 @@ IDENTICALLY 100% AND MEASURES NOTHING.** It is not evidence and appears nowhere 
 **D101.10 — Unchanged.** Everything in D35.6 through D100.5 stands, **except that the new artifact test is reclassified
 from "the central claim, re-derived from scratch" to "a contrast whose cause is the basis construction, not the refit"**,
 and C6-1..C6-5 are open.
+
+---
+
+## D102 — **THE DRAFT CITES A BIBLIOGRAPHY KEY THAT EXISTS NOWHERE, AND THE CAUSE IS A SPLIT BIBLIOGRAPHY: THE PAPER'S SHARED REFERENCE FILE AND THE FILE IT CITES AGAINST HAVE **THREE** KEYS IN COMMON.** (2026-09-26)
+
+> **OPERATIVE (R139). W10 FOR THE WRITER; ONE QUESTION FOR WRITING-RESEARCH. THIS IS 4 OF THE 10 BUILD DEFECTS, AND THE PAPER
+> CANNOT COMPILE PAST IT.**
+
+**D102.1 — THE DEFECT, AS `check_paper_builds.py` REPORTS IT. FOUR UNRESOLVED CITATIONS, IN THREE FILES:**
+
+```
+  ERROR paper/sections/01_introduction.tex: \cite{koch2019dlra} is not a key in the .bib
+  ERROR paper/sections/03_related_work.tex: \cite{koch2019dlra} is not a key in the .bib   (x2)
+  ERROR paper/sections/04_methods.tex:       \cite{koch2019dlra} is not a key in the .bib
+```
+
+**`koch2019dlra` IS IN NO `.bib` FILE ON ANY BRANCH** — I checked `main` and all five agent branches for the string in
+any `*.bib`: **zero hits, everywhere.** The draft cannot build, and this is not a figure problem.
+
+**D102.2 — AND IT IS NOT A TYPO FOR AN EXISTING KEY. `koch2019dlra` HAS NO REFERENT. VERIFIED AT CROSSREF, NOT AT
+DOI.ORG.** The canonical dynamical-low-rank paper is **Koch, Othmar and Lubich, Christian, "Dynamical Low-Rank
+Approximation", SIAM J. Matrix Anal. Appl. 29(2):434–454, 2007, DOI `10.1137/050639703`** — and I fetched that DOI from
+`https://api.crossref.org/works/10.1137/050639703`, which returns exactly that record, with **Othmar** Koch.
+
+**THERE IS NO KOCH–LUBICH 2019 PAPER.** I queried Crossref for SISC (ISSN `1064-8275`) restricted to 2019 with
+`query.title=low-rank`: **15 matching papers, none by Koch.** I also queried the exact title of the paper I half-remembered
+(Koch–Lubich–Walther 2019, SISC) and Crossref does not return it. **So `koch2019dlra` names a publication that does not
+exist, and my own recollection that it did was wrong.**
+
+**D102.3 — AND ONE OF THE FOUR CITATIONS SUPPORTS A CLAIM NO SOURCE BACKS. AT `03_related_work.tex:16-17` THE DRAFT
+READS *"and a survey by Koch and Lubich~\cite{koch2019dlra}"*.** I could not find a Koch–Lubich survey: the searches
+above return the 2007 paper, a 2022 BIT paper (Ceruti–Kusch–Lubich) and a 2024 SISC paper (Ceruti–Kusch–Lubich), none of
+them a survey by those two authors. **This is not a key typo — it is an unsupported claim about the literature, and it is
+the kind of error a reviewer checks.** Delete the clause or replace it with a work that exists.
+
+**D102.4 — THE OTHER THREE CITATIONS ARE MECHANICAL AND THE CORRECT KEY IS ONE CHARACTERS AWAY. AT
+`01_introduction.tex:33` AND `04_methods.tex:169` THE CITATION IS FOR THE DLRA FORMULATION ITSELF, WHICH IS
+`koch2007`.** And `03_related_work.tex:14-15` **already cites it in the same sentence pair** — *"the original formulation
+is due to Koch and Lubich~\cite{koch2007}"*. So the draft cites the right work one line above the phantom key.
+
+**D102.5 — THE CAUSE, AND IT IS A PROCESS BREAK RATHER THAN A TYPO. THE PROJECT HAS TWO BIBLIOGRAPHIES AND THEY SHARE
+**THREE KEKS**:** root `refs.bib` — which `AGENTS.md` says writing-research owns — has **42** entries on `main` and **51**
+on writing-research's branch; the writer's own `paper/references.bib` has **38**. **39 of root's 42 keys are absent from
+the writer's file; 35 of the writer's 38 are absent from root's.** So writing-research curates a reference library that
+**never reaches the paper**, and the writer cites against a private one. **That is why `koch2019dlra` survived: nothing in
+the project ever cross-checks the two files, and the key is in neither.**
+
+**D102.6 — AND IT EXPLAINS A CORRECTION I HAD WRONG. I PREVIOUSLY RECORDED THAT *"`refs.bib` STILL READS `Koch, Olga`
+(SHOULD BE OTHMAR, `10.1137/050639703`); THE FIX EXISTS ONLY ON WRITING-RESEARCH'S UNMERGEABLE BRANCH."* **BOTH CLAUSES
+WERE WRONG.** (1) **THE FIX IS NOT ON WRITING-RESEARCH'S BRANCH — IT IS IN THE WRITER'S OWN FILE:** `koch2007` in
+`paper/references.bib` already reads `Koch, Othmar and Lubich, Christian`, DOI `10.1137/050639703`, with the note
+`[J] Crossref 2026-09-25; original DLRA paper`. **writing-research never fixed it; the writer got it right independently.**
+(2) **I HAD ATTACHED `10.1137/050639703` TO A 2019 PAPER. IT IS THE 2007 PAPER'S DOI.** The residual
+`refs.bib` entry `koch2007dlra` (`Koch, Olga`, same DOI, no Crossref note) is a **dead, wrong, uncited duplicate** of the
+writer's correct `koch2007`.
+
+**D102.7 — WHAT IS ALREADY WORKING, SO IT IS NOT REBUILT. `check_paper_builds.py` CAUGHT THIS UNAIDED**, by resolving
+every `\cite` against the file the draft actually cites, and it prints the population it resolved over
+(`references.bib: 38 unique keys`; `cites=112`). **This is D87's §1.15 working as intended** — the defect was found by a
+gate that measured something, not by reading. **The six missing-figure errors in the same run are a separate, already-known
+blocker (C1-1/C1-2).** Total build defects: **10** — **4 citations, 6 figures.**
+
+**D102.8 — Unchanged.** Everything in D35.6 through D101.10 stands, **except that `koch2019dlra` is withdrawn as a
+referent, the "survey by Koch and Lubich" clause is withdrawn as unsupported, and my own earlier note on the Koch entry is
+retracted per D102.6.**

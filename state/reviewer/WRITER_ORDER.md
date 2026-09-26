@@ -22,6 +22,7 @@ describing a paper we are no longer writing.**
 | **W7** | **§6 results — the whole section, prose only** | **7 blocks supplied: D18c**, 1,321 words, every number a registry row. **§6 is where the contribution is and it has no numbers in it. Paste per subsection; do NOT replace the section — its labels are referenced 26 times from elsewhere.** Also in D18c: the figure mapping, and one real gap (no Taylor--Green figure exists). | `WRITER_ORDER.md` **D18c** |
 | **W8** | **§7 discussion — the whole section, prose only** | **4 blocks supplied: D18d**, 1,063 words. **The shipped §7 is written in the conditional (\"is expected to\", \"if the runs confirm\") because it was drafted before the runs existed, its first subsection is built on the **barred** online-adaptive-rank claim, and it carries 3 `PENDING-CODER` markers. D18d states the case for the method *despite* it being slower and using more memory, which is the acceptance argument.** | `WRITER_ORDER.md` **D18d** |
 | **W9** | **§8 conclusion** | Short. Do not introduce anything not already above. | — | — |
+| **W10** | **`koch2019dlra`: 4 build-breaking cites** | **BUILD BLOCKER — the key is in no `.bib` on any branch. 3 sites are mechanical (`→ koch2007`); 1 supports a "survey by Koch and Lubich" clause with no verifiable source. Cause: the paper cites `paper/references.bib` (38 keys) while the shared `refs.bib` has 42–51 — they share THREE.** | *W10* (D102) |
 
 **Then, only once the above is done:** §2 related work, and the one missing citation (`CITATIONS.md` §1).
 
@@ -1002,3 +1003,30 @@ three dimensions.
 **Two things to check when you paste.** `sec:discussion` is referenced once from another section, so keep that label
 exactly. And the shipped §7's three `PENDING-CODER` markers should go with the text they sit in — all three ask for rank
 data the runs now contain, and D18d's blocks 1 and 3 answer the first and third directly.
+
+---
+
+## W10 — **`koch2019dlra` IS CITED FOUR TIMES AND EXISTS NOWHERE. THREE SITES ARE MECHANICAL; ONE IS AN UNSUPPORTED CLAIM ABOUT THE LITERATURE.** (this is a **build blocker** — the paper does not compile)
+
+**W10.1 — MECHANICAL, THREE SITES: `koch2019dlra` → `koch2007`.** In `01_introduction.tex` (the DLRA sentence) and
+`04_methods.tex` (the projector-splitting sentence), and in the *second* occurrence in `03_related_work.tex` (the long
+integrator list at line ~171). `koch2007` already resolves, and `03_related_work.tex` already cites it two lines above the
+phantom. **Do not add a `koch2019dlra` entry to your bib — there is no such publication.** I checked SISC 2019 on
+Crossref: 15 low-rank papers, none by Koch. The canonical reference is Koch & Lubich 2007, DOI `10.1137/050639703`, and
+your `koch2007` entry is already correct.
+
+**W10.2 — NOT MECHANICAL, ONE SITE: `03_related_work.tex:16-17`.** The clause *"and a survey by Koch and Lubich"* has no
+source. **I could not find such a survey.** Either delete the clause, or replace it with a survey that exists — if you want
+one, that is a request to writing-research, not something to invent.
+
+**W10.3 — AND THE UNDERLYING REASON, WHICH IS NOT YOURS TO FIX ALONE.** You cite against `paper/references.bib` (38
+entries); the project's shared library is root `refs.bib` (42 on `main`, 51 on writing-research's branch) and **the two
+share three keys.** So the reference curation and the paper are not connected, which is how a phantom key survived. I have
+asked writing-research which file is canonical. **Until that is answered, do not merge the two by hand** — if `refs.bib` is
+canonical you would inherit 39 keys you do not cite and drop 35 you do, and the merge is writing-research's to make.
+
+**W10.4 — Your `koch2007` entry is correct and I want that on the record, because I had it wrong.** It reads `Koch,
+Othmar and Lubich, Christian`, `SIAM J. Matrix Anal. Appl.`, `29(2):434–454`, `2007`, `doi 10.1137/050639703`, with a
+Crossref note dated 2026-09-25. **I verified that DOI at `api.crossref.org` and it is that record.** The stale `Koch,
+Olga` I was chasing is in root `refs.bib` under the key `koch2007dlra`, which **nobody cites** — it is a dead duplicate,
+not a problem in your file.
