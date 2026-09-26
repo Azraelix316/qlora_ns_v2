@@ -57,7 +57,8 @@ python3 state/reviewer/check_provenance.py      # can every shipped run say whet
 python3 -m pytest experiments/ -q                # 48 tests, ~240 s (pin OMP/OPENBLAS/MKL=1)
 ```
 
-**`claims_registry.py` reports `29/35` verified.** The **4** failures are the `crossover_N128.json` rows, and that file **Six of those are red BY DECISION (D119): the coder's push silently regenerated `peak_memory.json` and the noise floor moved `25x`, so the overheads and the floor genuinely disagree. Do not re-pin them to make the gate green - the coder has been asked what the floor now measures.**
+**`claims_registry.py` reports `29/39` verified.** The **4** failures are the `crossover_N128.json` rows, and that file **Six of those are red BY DECISION (D119): the coder's push silently regenerated `peak_memory.json` and the noise floor moved `25x`, so the overheads and the floor genuinely disagree. Do not re-pin them to make the gate green - the coder has been asked what the floor now measures.** **Ten of those are red BY DESIGN: six are D119's memory-floor rows (the coder's push moved the noise floor `25x` and the rows are left red rather than re-pinned to an unexplained artifact), and four are D126's zonal-share rows, which pin `dlra.zonal_energy_fraction.at_final_step` and are red **because the coder's code is merged but the artifacts are not yet regenerated** - they will go green when the runs land, and fail loudly if they never do.**
+
 
 **already exists and verifies — with it present the registry reads `33/33`**; it is not committed yet and the coder is
 landing it (C2-1). **It needs no re-run.**

@@ -96,6 +96,23 @@ REGISTRY = [
     # resolves to nothing. The first version of this row used `selector=None` and FAILED with "did not
     # resolve to a non-empty list" -- the aggregate cannot express a two-level path. The envelope is
     # therefore pinned one grid at a time, and the comment above records what the envelope is.
+    # D126: the REPLACEMENT for the withdrawn r*(Re), pinned so it can never again be withheld for
+    # want of a check. The quantity is (total - fluct)/total -- the zonal share OF THE TOTAL -- and the
+    # definition lives in run_kolmogorov.py:_zonal_fraction and in the artifact's own
+    # `zonal_fraction_definition` string. D106s four values reproduce to 0.0002 percentage points.
+    #
+    # THESE ARE RED ON PURPOSE. C7-4s code is merged; its artifacts are not regenerated (0 of 21 carry
+    # the key). A row that pins a key fails until the run lands, and fails loudly if it never does. That
+    # is the point: in D122.5 I refused to cite this quantity because I could not verify it, having
+    # computed the wrong ratio. Pinning it is the durable answer.
+    ("zonal_share_energy_Re100_N64", "kolmogorov_re100_N64.json", "dlra", None,
+     "zonal_energy_fraction.at_final_step", 0.200891, 4),
+    ("zonal_share_energy_Re1000_N64", "kolmogorov_re1000_N64.json", "dlra", None,
+     "zonal_energy_fraction.at_final_step", 0.185328, 4),
+    ("zonal_share_energy_Re5000_N64", "kolmogorov_re5000_N64.json", "dlra", None,
+     "zonal_energy_fraction.at_final_step", 0.183979, 4),
+    ("zonal_share_energy_Re5000_N128", "kolmogorov_re5000_N128.json", "dlra", None,
+     "zonal_energy_fraction.at_final_step", 0.172832, 4),
     ("cost_ratio_max_N128", "cost_retiming.json", "grids", {"N": 128},
      "@max:rows.full_step_ratio_vs_reference", 2.7404672498718976, 1),
     ("cost_ratio_min_N64", "cost_retiming.json", "grids", {"N": 64},

@@ -1,7 +1,7 @@
 # NOTES.md — reviewer
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
-> Status: 8 gates green (registry 29/35, 10 build defects, 48 tests; provenance 21 artifacts, 11 clean, 1 DIRTY, 6 LEGACY). Paper NOT submittable: 3 things block it - writer's 4 citations, C11-1's 5 figures, then the 24 blocks. The 50 PENDING-CODER markers are 3 buckets: ~20 transcription (writer, closable now), ~8 figures (C11-1), 5 r*(Re) traps (delete). Six registry reds are BY DECISION (D119). Start at START_HERE.md section 0.
+> Status: 8 gates green (registry 29/39, 10 build defects, 48 tests; provenance 21 artifacts, 11 clean, 1 DIRTY, 6 LEGACY). Paper NOT submittable: 3 things block it - writer's 4 citations, C11-1's 5 figures, then the 24 blocks. The 50 PENDING-CODER markers are 3 buckets: ~20 transcription (writer, closable now), ~8 figures (C11-1), 5 r*(Re) traps (delete). Six registry reds are BY DECISION (D119). Start at START_HERE.md section 0.
 > "the subspace must evolve".** `main` clean, every artifact merged, the four agents each have ONE
 > authoritative document and the outboxes are history. **A COMPLETE 1 281-LINE TEN-SECTION DRAFT
 > EXISTS ON THE WRITER'S BRANCH** (I never opened it until R81) — a finished argument with almost no
@@ -3154,6 +3154,26 @@
   FIELD IS NOW **GENERATED FROM THE ARMS** (`_interpretation()`) RATHER THAN WRITTEN, SO IT READS OFF WHICH ARMS SURVIVED AND
   **CANNOT ASSERT A MECHANISM THE RUN DOES NOT SUPPORT. GENERATING THE SENTENCE FROM THE DATA IS THE ONLY VERSION OF THAT FIX
   THAT CANNOT ROT.***
+- 2026-09-26 **R162 - D126: I WAS WRONG IN D122.5, AND THE CODE SAYS SO IN ONE LINE. `_zonal_fraction` RETURNS `(total - fluct) / total`; I COMPUTED `fluct / total`. D106 IS CONFIRMED TO 0.0002 PERCENTAGE POINTS AT ALL FOUR POINTS. THE REPLACEMENT OBSERVABLE WAS ALWAYS AVAILABLE.**
+  **D126.1-2 - `run_kolmogorov.py:228`: `out[label] = (whole - part) / whole` WITH `whole = total[index]`, `part =
+  fluct[index]`. **SO THE QUANTITY IS `(total - fluct) / total` - THE ZONAL SHARE OF THE TOTAL - AND I COMPUTED `fluct /
+  total`, ITS COMPLEMENT.** THE DRIVER RECORDS THE DEFINITION IN WORDS BESIDE THE NUMBER. RECOMPUTED THE DRIVER`S WAY:
+  **20.0889% / 18.5326% / 18.3977% / 17.2831%** AGAINST D106`S `20.0891 / 18.5328 / 18.3979 / 17.2832` - **FOUR POINTS,
+  AGREEMENT TO `0.0002` PERCENTAGE POINTS, AND THE Re TREND **DECREASES** EXACTLY AS D106 RECORDED AND THE OPPOSITE OF
+  WHAT I SAID IT WAS.***
+  **D126.3 - THE ERROR IS D111 AGAIN AND THE THIRD INSTANTIATION IS THE POINT. MY FIRST ATTEMPT RETURNED `122%` -
+  IMPOSSIBLE - AND I DIAGNOSED IT CORRECTLY AS A RECIPROCAL, THEN "CORRECTED" IT TO 82% BY TAKING THE **OTHER** COMPLEMENT.
+  **THE RIGHT MOVE WAS TO QUESTION THE NUMERATOR. I FIXED THE INVERSION AND NEVER QUESTIONED THE NUMERATOR. A RESULT THAT
+  IS IMPOSSIBLE TELLS YOU THE FORMULA IS WRONG, NOT THAT THE INVERSION IS - AND I TREATED IT AS THE SECOND INSTEAD OF THE
+  FIRST.***
+  **D126.4-5 - THE COST: I TOLD THE WRITER TO **DELETE** THE `r*(Re)` SENTENCES AND **SUBSTITUTE NOTHING**, BECAUSE I COULD
+  NOT VERIFY THE SUBSTITUTE. **THE SUBSTITUTE WAS CORRECT, VERIFIED, AND WAITING - I TOLD THE WRITER TO DELETE A TRUE CLAIM
+  BECAUSE I COULD NOT DO A SUBTRACTION**, AND THE INSTRUCTION WAS WRONG IN THE DIRECTION THAT LOSES INFORMATION. THE FOUR
+  REGISTRY ROWS THAT WOULD HAVE CAUGHT IT WERE NOT WRITTEN UNTIL THIS MESSAGE, SO FOR ONE CYCLE THE PROJECT HELD A CORRECT
+  NUMBER WITH NO GATE ON IT. **THE ROWS EXIST NOW AND ARE DELIBERATELY RED** - CODE MERGED, ARTIFACTS NOT YET REGENERATED -
+  **WHICH IS THE OPPOSITE OF WITHHOLDING: PIN THE NUMBER AND LET THE PIN BE RED.***
+  **AND `START_HERE.md` AND THE STATUS LINE NOW CARRY `29/39` WITH THE REASON FOR ALL TEN REDS STATED, SO A READER DOES NOT
+  READ A DELIBERATE PIN AS A REGRESSION.***
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
 **Everything below this line, up to `## Mission`, is superseded history.** The `> Status:` line
