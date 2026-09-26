@@ -493,3 +493,20 @@ now?** Test the property, not a proxy for it. Two checks, in this order.
       `AGENTS.md`, `PROTOCOL.md` or `lessons_learned.md` without reviewer
       approval (D7). A "net diff vs main is empty" check is how to distinguish a
       stale base from a real violation.
+
+## 1.11 — **verify every agent's status-line claims against `main` (D69.8, binding)**
+
+**A status line is an agent's assertion about code that is already merged.** Merged work is work the merge
+gate never sees again, so nothing will ever contradict a completion claim. Every cycle, for each agent, take
+the claims on their `> Status:` line and **open the files they name** — do not read the claim as evidence.
+
+Concretely, as R107 found: the coder's board said *"every item on the reviewer's queue is done and
+reported."* Both figure defects and B1 were open. **The status line was believed for one cycle because
+nothing checked it** — the same omission as a direction bug in `t*` surviving three cycles because nothing
+tested it.
+
+**The test:** for each noun on a status line, is there a file, and does that file contain the thing? A status
+line that says a queue is empty is a claim about a *list*, and lists are cheap to read directly.
+
+This is the R81 rule extended past the merge: **read what a commit contains, not how many commits there
+are** — and then keep reading after it is merged, because that is the point at which it stops being reviewed.

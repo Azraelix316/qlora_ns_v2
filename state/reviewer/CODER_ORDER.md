@@ -25,7 +25,7 @@ cover is the results layer — see Tier 2.
 
 ---
 
-## 1. Tier 1 — three items, and two of them change what the paper *claims*
+## 1. Tier 1 — FOUR items. Your board says the queue is done; three of these are open (D69)
 
 **1.1 `fig_div_free`: split it into two panels, and fix three title strings. No new data, no compute.**
 The figure loops over every method in `baselines_re5000_N64_T8.json` **including the four that
@@ -246,3 +246,37 @@ future runs, which is the point.**
 
 **Do this before Tier 2.** It is smaller than anything in Tier 2 and it stops new artifacts from joining the
 fourteen that cannot be traced.
+
+### T1-3. `fig_div_free` is unreadable AND its title is false (D69.1–D69.3) — **not done**
+
+It plots **33 bars spanning 304 decades** (`2.26` to `7.09e+292`) on a **linear** axis in units of `1e-14`:
+
+- **32 of 33 bars are invisible** — the smallest is `3.19e-293` of the largest;
+- **all 33 bars exceed the line annotated `target $10^{-14}$`** — our own `dlra` by **`11.1×`**;
+- and the title, `make_figures.py:248`, is **`"Exact divergence-freeness holds for every method"`** while
+  **four of its own bars reach `4.6e+64`, `2.0e+182`, `3.8e+199`, `7.1e+278`**.
+
+**The comment at `:240-241` is the bug:** *"a log axis over four decades of roundoff is hard to read"* — the
+scale was chosen as if the data were the roundoff band, but the same loop adds the diverged baselines.
+
+**Fix:** `ax.set_xscale("symlog", linthresh=1)`; retitle to something true; relabel the line as the
+*observed* roundoff level of the reduced integrator (`1.1e-13`) rather than a target everything crosses; and
+annotate the four overflow bars with their magnitudes. **Do not drop the diverged methods** — `fig_divergence`
+shows *trajectory* divergence, so `|∇·u|` overflow appears in no other figure, and dropping them would delete
+D31's evidence.
+
+### T1-4. `fig_crossover` still says "the dealiasing ceiling" (D69.4) — **not done**
+
+`make_figures.py:522`. `dealias_rank_ceiling` is `43 / 85 / 171` at `N = 64 / 128 / 256` — **a wavenumber
+count** (third confirmation, D68). In a figure whose y-axis is accuracy, that phrase invites the reading D30
+bars. **It should read "the largest rank tested".** Same phrase at `:7` in a docstring.
+
+### T1-5. B1 — the two false-`git_commit` artifacts (D55c) — **not done**
+
+`kolmogorov_re5000_N128.json` and `rank_growth_sweep.json` both still record `git_commit: 78607f3a…`, which is
+a **merge** commit (`Merge remote-tracking branch 'origin/main' into agent/…`), not the commit that produced
+them. Re-run them, or record why not.
+
+**P1 is DONE — `make_figures.py:85` generates `PROVENANCE.md`. D57 is closed. And thank you for adding
+`test_crossover_horizon_detects_a_downward_crossing` — a direction bug in the central number survived three
+cycles because that function had no test, and closing it with a real six-case test is the right response.**

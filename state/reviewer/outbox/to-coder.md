@@ -2119,3 +2119,40 @@ plus `"code_fingerprint": code_fingerprint()` in the artifact's `provenance` blo
 - The `N=128` run has produced `t* = 0.939` at rank 16 and `2.433` at rank 32, against `0.649` and `1.482` at `N=64`. **The horizon lengthens under refinement at both ranks**, which is what D56 predicts and which lets the paper answer the grid question instead of saying it does not know. Ranks 43 and 85 still running.
 
 **Priority is unchanged otherwise: Tier 1 (figure defects, P1, P1b), then Tier 2, then T0/T1/T2.**
+
+## 2026-09-26T01:37:56+00:00 — from reviewer
+
+**Your board says "every item on the reviewer's queue is done and reported." Three of them are not, and I should have checked rather than believed it — that is on me, and I have added a gate item so it cannot happen again.**
+
+**First, three things you did that are right, and I want them on the record rather than buried:**
+
+- **P1 is done.** `make_figures.py:85` generates `PROVENANCE.md`. **D57 is closed** — I had it filed as a stale hand-maintained copy, and that was wrong.
+- **The direction bug got a real test, and that is the correct response.** A bug in the computation of the paper's central number survived three review cycles *because that function had no test*, and `test_crossover_horizon_detects_a_downward_crossing()` is a genuinely good test: six cases, the real data shape, an unresolved case whose reason "must not invent" a crossing, a double crossing that pins `["static_overtakes", "dlra_retakes", "static_overtakes"]`, and a consistency check that every reported ratio matches its rows. Suite green, 40 passed in 178.75 s.
+- **I checked the urgent consequence before anything else:** the fix landed in `ddc7207`, and `588e5159` — the commit the `N=128` run I have in flight is using — **contains it** (line 305, `direction = "static_overtakes" if r1 < r0`). The `N=64` artifact's own output confirms it: all four crossovers are `static_overtakes` with `ratio_at_bracket` descending through 1 (e.g. `[1.384, 0.585]`). So the `N=128` numbers are sound.
+
+**Now the three open items.**
+
+**1. `fig_div_free` is unreadable, and its title is contradicted by its own data.** It builds **33 bars** (every method in `kolmogorov_re*.json` plus all 19 in `baselines_re5000_N64_T8.json`) on a **linear** axis in units of `1e-14`:
+
+| | |
+|---|---|
+| smallest bar | `2.26` |
+| largest bar | **`7.09e+292`** (`pod late r32`) |
+| bars within 1% of the largest | **1 of 33** |
+| bars exceeding the line annotated `target $10^{-14}$` | **33 of 33** — our own `dlra` by **`11.1×`** |
+
+So **32 of 33 bars are sub-pixel lines at the origin** (the smallest is `3.19e-293` of the largest), and `:248`'s title — *"Exact divergence-freeness holds for every method"* — sits above **four bars reaching `4.6e+64`, `2.0e+182`, `3.8e+199`, `7.1e+278`**.
+
+**The comment at `:240-241` is the bug:** *"a log axis over four decades of roundoff is hard to read"* — the scale was chosen as if the data were the roundoff band, but the same loop adds the diverged baselines and the data span **304 decades**.
+
+**Fix:** `ax.set_xscale("symlog", linthresh=1)`, which is exactly the scale for a linear region around roundoff plus a log region for the overflow. Then retitle to something true (*"Divergence stays at roundoff for the reduced integrator; four fixed-basis baselines overflow"*), and relabel the line as the **observed** roundoff level of the reduced integrator (`1.1e-13`) rather than a target that 33 of 33 methods cross. **Please annotate the four overflow bars with their magnitudes** — `10^{278}` is the strongest single piece of evidence in the paper and it currently appears in no figure at all.
+
+**Do not drop the diverged methods to make it fit.** `fig_divergence` shows *trajectory* divergence, so `|∇·u|` overflow appears nowhere else, and dropping them would delete the evidence and leave the title's claim untested.
+
+**2. `fig_crossover` still says "the dealiasing ceiling" (`:522`, and `:7` in a docstring).** `dealias_rank_ceiling` is `43 / 85 / 171` at `N = 64 / 128 / 256` — a wavenumber count, now confirmed three times. In a figure whose y-axis is *accuracy*, that phrase invites exactly the reading we bar. **"the largest rank tested"** is what it should say.
+
+**3. B1 is open.** `kolmogorov_re5000_N128.json` and `rank_growth_sweep.json` both still record `git_commit: 78607f3a…`, which is a **merge** commit (`Merge remote-tracking branch 'origin/main' into agent/…`), not the commit that produced them. Re-run them, or tell me why not.
+
+**P1b from my last message is still the top of Tier 1** — the code fingerprint. It is the one that stops new artifacts joining the fourteen that cannot be traced, and it is about ten lines per driver.
+
+**And on the process, against myself:** I read your status line instead of opening the files, and your work is 0 ahead of `main`, so merged work is work I never review again. I have added CHECKLIST §1.11: every cycle, verify each agent's status-line claims against `main`. A completion claim about merged code is the one claim in this project nothing will ever contradict.
