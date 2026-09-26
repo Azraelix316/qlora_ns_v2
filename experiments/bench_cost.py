@@ -286,6 +286,7 @@ def measure(
             max(full_runs) - min(full_runs)
         ) / statistics.median(full_runs),
         "dealias_rank_ceiling": 2 * (N // 3) + 1,
+        "dealias_rank_ceiling_is": "a WAVENUMBER (the largest k the 2/3 rule leaves resolved), not a mode count and not a rank; the dealiased NxN grid carries far more degrees of freedom than it (~1849 at N=64). The key name is historical and is kept because claims_registry.py verifies against it; D30.2 forbids expressing a rank as a multiple of it.",
         "rows": rows,
     }
 

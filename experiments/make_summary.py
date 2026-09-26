@@ -56,32 +56,42 @@ def _rank_finding(regime_data: dict) -> str:
         }
     )
     N = grids[0] if grids else None
-    ceiling = 2 * (N // 3) + 1 if N else None
-    # The first window at which the amplitude rule's request reaches the top of
-    # the resolved band: past that point its answer is set by the grid.
+    # D30.2: 2*floor(N/3)+1 is a WAVENUMBER, not a mode count and not a rank.
+    # The dealiased N x N grid carries far more degrees of freedom than it (about
+    # 1849 at N=64), so nothing may be expressed as a multiple of it and it is
+    # not "the number of modes the grid resolves".  The claim is that the
+    # amplitude rule's REQUEST GROWS WITH THE GRID; that is what is said here.
+    largest_wavenumber = 2 * (N // 3) + 1 if N else None
+    # The first window at which the request is comparable with the wavenumber
+    # scale, i.e. far larger than any rank this project has run.
     pinned = next(
-        (w for w, a in zip(windows, amp) if ceiling is not None and a >= ceiling),
+        (w for w, a in zip(windows, amp)
+         if largest_wavenumber is not None and a >= largest_wavenumber),
         None,
     )
     parts = [
         "window_rank_table gives the modes needed to represent the fluctuations "
         f"over [0, W]: r99 grows {r99[0]} -> {max(r99)} over the first "
-        f"{windows[-1]:g} time units"
+        f"{windows[-1]:g} time units, and that is a property of the dynamics"
     ]
-    if pinned is not None and ceiling is not None:
+    if pinned is not None and largest_wavenumber is not None:
         parts.append(
-            f"while the amplitude rule's request passes the top of the band that "
-            f"N={N} resolves without aliasing ({ceiling} = 2*floor(N/3)+1) by "
-            f"W = {pinned:g} -- a request larger than the grid can represent is not "
-            f"a measurement of the dynamics, so its rank trace is the grid's"
+            f"while the amplitude rule's request reaches {max(amp)} modes by "
+            f"W = {pinned:g} at N={N} -- larger than the largest rank this project "
+            f"has ever run, and a number that grows with the grid, so it measures "
+            f"the discretisation rather than the dynamics and no fixed relative "
+            f"cutoff repairs it"
         )
     else:
         parts.append(
-            f"while the amplitude rule's request stays within the {ceiling} modes "
-            f"N={N} resolves without aliasing at every measured window"
+            f"while the amplitude rule's request reaches {max(amp)} modes at "
+            f"N={N}, a grid-dependent number rather than a measurement of the "
+            f"dynamics"
         )
     parts.append(
-        "(the two are different quantities; see rank_quantities in the artifact)"
+        "(the two are different quantities; see rank_quantities in the artifact. "
+        "2*floor(N/3)+1 is a wavenumber and is deliberately not quoted here as a "
+        "mode count or a rank, D30.2)"
     )
     return ", ".join(parts) + "."
 
@@ -147,11 +157,101 @@ def _git_commit() -> str:
         return "unknown"
 
 
+def _tree_dirty() -> bool:
+    """Whether the tree was dirty when the summary was generated.
+
+    Recorded because a dirty tree means the summary was built from code the
+    generation commit does not contain, which is the condition that let a stale
+    commit reach a derived file before.
+    """
+    try:
+        diff = subprocess.check_output(
+            ["git", "diff", "HEAD"], cwd=ROOT, text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return False
+    return bool(diff.strip())
+
+
+# Every artifact this summary read, with the provenance each one carried at the
+# moment it was read.  C8: the summary aggregated artifacts while recording
+# nothing about them, so a stale input was indistinguishable from a fresh one and
+# a reader could not tell which commit any number in the file came from.  The
+# block is emitted from what was actually loaded, so it cannot describe an input
+# this run did not read.
+INPUT_PROVENANCE: list[dict] = []
+
+
 def load(name: str) -> dict | None:
     path = RESULTS / name
     if not path.exists():
+        INPUT_PROVENANCE.append({
+            "artifact": name, "present": False,
+            "note": "absent; nothing in the summary comes from it",
+        })
         return None
-    return json.loads(path.read_text())
+    data = json.loads(path.read_text())
+    prov = data.get("provenance", {}) or {}
+    entry = {
+        "artifact": name,
+        "present": True,
+        "git_commit": prov.get("git_commit"),
+        "driver": prov.get("driver"),
+        "reproducible": prov.get("reproducible"),
+        "working_tree_dirty": prov.get("working_tree_dirty"),
+    }
+    if prov.get("reproducible") is False:
+        entry["WARNING"] = (
+            "this input records itself as NOT reproducible: the driver on disk "
+            "differed from the driver at the commit it names, so numbers taken "
+            "from it are not covered by that commit"
+        )
+    elif "reproducible" not in prov:
+        # Distinct from False, and the distinction matters: False is a failed
+        # check, absent is a check that was never run.  The artifact names a
+        # commit, so its numbers are traceable -- they are just not *verified*
+        # against the driver that produced them.
+        entry["NOTE"] = (
+            "this input predates the reproducible field: it names a commit but "
+            "nothing checked the driver against it"
+        )
+    if "git_commit" not in prov:
+        entry["WARNING"] = (
+            "this input records no commit at all, so no number from it is "
+            "traceable to code"
+        )
+    INPUT_PROVENANCE.append(entry)
+    return data
+
+
+def input_provenance_block() -> dict:
+    """The summary's own provenance: what it was built from, and from what code.
+
+    The summary is a *derived* artifact, so its provenance is not one commit --
+    it is the set of inputs and each input's commit.  Recording only the
+    generator's commit, as it used to, is what let a summary aggregate a stale
+    run without saying so.
+    """
+    stale = [e for e in INPUT_PROVENANCE if e.get("WARNING")]
+    absent = [e for e in INPUT_PROVENANCE if not e.get("present")]
+    return {
+        "generated_by": "experiments/make_summary.py",
+        "generator_git_commit": _git_commit(),
+        "generator_dirty": _tree_dirty(),
+        "inputs": INPUT_PROVENANCE,
+        "inputs_absent": [e["artifact"] for e in absent],
+        "inputs_with_warnings": [e["artifact"] for e in stale],
+        "all_inputs_reproducible": not stale,
+        "how_to_read_this": (
+            "every number in this file comes from one of the artifacts listed "
+            "under `inputs`, at the commit listed beside it. An artifact whose "
+            "`reproducible` is not true was produced by a driver that did not "
+            "match its own recorded commit, so a number taken from it is not "
+            "covered by that commit. An artifact listed under `inputs_absent` "
+            "contributed nothing."
+        ),
+    }
 
 
 def method_row(block: dict, key: str) -> dict:
@@ -206,6 +306,7 @@ def suite_case(data: dict, file_name: str) -> dict:
         "dlra": method_row(dlra, "dlra"),
         "pod_requested_rank": pod.get("effective_rank"),
         "dealias_rank_ceiling": 2 * (data["grid"]["N"] // 3) + 1,
+        "dealias_rank_ceiling_is": "a WAVENUMBER (the largest k the 2/3 rule leaves resolved), not a mode count and not a rank; the dealiased NxN grid carries far more degrees of freedom than it (~1849 at N=64). The key name is historical and is kept because claims_registry.py verifies against it; D30.2 forbids expressing a rank as a multiple of it.",
         # CHECKLIST 1.0: a POD baseline at r=16 against an adaptive method that
         # reached r=43 is not a rank-matched comparison.  The mismatch is
         # stated rather than hidden; making it matched is F5's job and is
@@ -500,6 +601,12 @@ def main() -> None:
     output = {
         "generated_by": "experiments/make_summary.py",
         "git_commit": _git_commit(),
+        # C8: the summary used to record only its own commit while aggregating
+        # artifacts of unknown provenance, so a stale input was indistinguishable
+        # from a fresh one.  Every input and its own commit are listed, with a
+        # WARNING on any that is not reproducible.  Built after the loads, so it
+        # describes what this run actually read.
+        "provenance": input_provenance_block(),
         "protocol": (
             "N=64 suite: Re={100,1000,5000}, dt=5e-4, T=0.1, force amplitude 0.5, "
             "base speed 0.5, perturbation velocity RMS 1.0, band-limit box 8, "

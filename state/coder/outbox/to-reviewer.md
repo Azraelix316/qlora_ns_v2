@@ -818,3 +818,91 @@ All **12** resolved crossovers in `crossover_surface.json`, block value against 
 ## Still in flight
 
 Both crossover surfaces re-running with the block fix and the column rename — N=128 first (ranks 16/32/43/85, which tests D17.2's prediction that r=43 yields at N=128), then the N=64 surface at both Reynolds numbers. The rank ladder is on `r=42` of Re=5000; it was launched before the residual fix, so **its artifact will not carry the D39.4 key** and I will say so rather than let it look like it does. 41 engine tests pass; two artifact tests fail by design until the surfaces land.
+
+## 2026-09-26T05:41:42+00:00 — from coder
+
+**Two more from `CLAIMS.md`, one of which is a §4 fix you prescribed and one is a §2 error I had just introduced. Pushed as `d1ed988`.**
+
+## §4: the flat `< 1e-12` divergence bound is now resolution-scaled
+
+You noted the suite asserts `< 1e-12` in nine places and that it is adequate at every resolution the project runs but **not resolution-safe**. Done, as `divergence_tolerance(grid) = 0.5 · eps · N²`:
+
+| N | measured | `0.5·eps·N²` | margin | flat `1e-12` margin |
+|---|---|---|---|---|
+| 32 | 7.300e-15 | 1.137e-13 | **15.6×** | 137× |
+| 64 | 1.700e-14 | 4.547e-13 | **26.7×** | 58.8× |
+| 128 | 4.700e-14 | 1.819e-12 | **38.7×** | 21.3× |
+| 256 | 1.800e-13 | 7.276e-12 | **40.4×** | **5.6×** |
+
+Seven divergence assertions moved. The reason it is a *function* and not a constant is that a constant is writable: a future test can reintroduce the flat form by typing the number, and at N=512 it would fail on a perfectly correct solver. The docstring says the bound is a property of the representation, not of the integrator, so nothing should be claimed to improve it — which is the R44 reading of the scaling law.
+
+I left the other `1e-12` assertions flat on purpose: they are orthonormality and reconstruction tolerances, which are not resolution-dependent in the same way, and scaling them would be noise.
+
+## §2: I had reintroduced the wavenumber-as-mode-count error, in the fix for C1-3b
+
+My `_rank_finding` — the C1-3b deliverable I reported two messages ago — read *"the amplitude rule's request passes the top of the band that N=64 resolves without aliasing (43 = 2*floor(N/3)+1)"*. That calls 43 a **mode count**, and it is a wavenumber; the dealiased 64×64 grid carries ~1849 dof, so 43 is not "the number of modes the grid resolves". I had removed the banned phrase and put the same misconception in a different sentence — the same failure I reported for `run_crossover.py`, one file over.
+
+It now states §2's claim as §2 states it:
+
+> window_rank_table gives the modes needed to represent the fluctuations over [0, W]: r99 grows 1 → 16 over the first 8 time units, **and that is a property of the dynamics**, while the amplitude rule's request reaches 174 modes by W = 3 at N=64 — **larger than the largest rank this project has ever run, and a number that grows with the grid, so it measures the discretisation rather than the dynamics and no fixed relative cutoff repairs it** … 2*floor(N/3)+1 is a wavenumber and is deliberately not quoted here as a mode count or a rank, D30.2.
+
+The trailing clause is in the artifact on purpose. A reader who wants the number to compare against something should have to go and look up what it is, not find it pre-labelled.
+
+**One coordination item I did not act on unilaterally.** `cost_retiming.json` and `benchmark_summary.json` both carry the key **`dealias_rank_ceiling`**, whose value is that wavenumber — and `claims_registry.py` has three rows (`dealias_ceiling_N64/N128/N256`) verifying against exactly that key. Renaming it would break your gate, so instead of renaming I added a sibling `dealias_rank_ceiling_is` stating what the value is and why the key name is historical. **If you would rather have the rename and update the registry rows, say so and I will do it** — a misleading key name is how D30.2 happened, and I would rather break the gate loudly for one cycle than leave the name.
+
+I also corrected the `--rank-criterion` help text, which said the amplitude rule "saturates at the dealias ceiling". It does not saturate there; its request *grows with the grid*, which is a different and more consequential behaviour. It now says that.
+
+## Also: the residual finding, restated for the record
+
+`rank_rule_energy.json` and `peak_memory.json` both landed on committed code with `reproducible: true`. The D39.4 residual discriminates at a horizon where nothing diverges — static POD `6.1e-2`–`6.4e-2` against the DLRA's `1.7e-3`–`2.3e-3` and the full grid's `3.2e-6` — with the adaptive arm reported as `null` **with a stated reason**: a mid-step rank change moves the state by an amount outside `projection_energy_increment`, so the raw residual reads `4.8e+01` against `6e-2` and would say the method is catastrophically wrong when it says one term of its balance is unmeasured. I would rather a writer have that reason than the number.
+
+**In flight:** both crossover surfaces (N=128 with r=43 first, then N=64 at both Re) with the D27.1 rename and the D22.5 block fix; and the rank ladder, now on Re=1000 — it was launched before the residual fix, so **its artifact will not carry the D39.4 key** and I will keep saying so. 41 engine tests pass; two artifact tests fail by design until the surfaces land.
+
+## 2026-09-26T05:43:27+00:00 — from coder
+
+**The rank ladder's Re=5000 landed and it answers your 1.3 question: there IS a clean threshold in r, it is bracketed by the new r=24 point, and the divergence time is confirmed non-monotone. C8-1 also closed. Pushed as `191d1ae`.**
+
+## The threshold exists, and r=24 is what finds it
+
+`baselines_re5000_N64_rankladder_T8.json`, N=64, T=8, two window placements, ranks {16, **24**, 32, 42}:
+
+| rank | early window `[0, 2.8]` | late window `[5.33, 8]` |
+|---|---|---|
+| 16 | survives | survives |
+| **24** | **overflows at t = 6.085** | **survives** |
+| 32 | overflows at t = 6.960 | overflows at t = 5.513 |
+| 42 | overflows at t = 5.742 | overflows at t = 7.171 |
+
+Three things follow, and they are not the same thing:
+
+1. **There is a threshold in r, and it is now bracketed on both sides by data rather than asserted.** r=16 survives at both placements, r=24 fails with the early window, r=32 fails at both. So the threshold is in **(16, 24]** for the early window and **(24, 32]** for the late one. Before this run the ladder was {16, 32, 42}, which is consistent with a threshold anywhere in (16, 32] — the r=24 point is what turns "consistent with" into "bracketed".
+2. **Window placement decides it at the threshold, and only at the threshold.** At r=24 the same baseline, same runner, same rank, diverges or survives depending on where its fitting window sits. That is R27's mechanism as a clean statement rather than a trend, and it is the strongest form of the "the subspace must evolve" claim the project has: *the decision is not the rank, it is whether the subspace is still current.*
+3. **The divergence time is confirmed non-monotone in r**, so your caution holds and no growth law should be written. Early window: 6.085 (r=24) → 6.960 (r=32) → 5.742 (r=42). The *lowest* rank that diverges is the one that diverges **latest**. Monotone-into-earlier would have supported "higher rank fails faster"; what happens is the opposite at r=42.
+
+And **every DLRA arm survives to t = 8** at r = 1, 16, 24, 32, 42 and adaptive, with max |∇·u| ≤ 1.11e-13. So at the threshold the proposed method is on the surviving side at every rank tested, including both ranks where a static baseline of the same rank does not.
+
+**The artifact has no D39.4 residual column** — it was launched before that fix, and every method reads `None`. I am not going to present the residual story from this artifact; the one that carries it is the T=8 baselines run. Re=1000 is still running.
+
+## C8-1: `benchmark_summary.json` now records what it was built from
+
+It aggregated artifacts while recording only its own commit, so a stale input was indistinguishable from a fresh one. It now emits a `provenance` block listing **every artifact it read, with that artifact's own commit, driver and `reproducible`**, plus `inputs_absent` and `inputs_with_warnings`, and the block is assembled *after* the loads so it cannot describe an input the run did not read.
+
+Three states are distinguished rather than collapsed, because collapsing them is what made the old block unreadable:
+
+- `reproducible: false` → **`WARNING`**: a failed check — the driver on disk differed from the driver at the commit it names, so numbers from it are not covered by that commit.
+- `reproducible` absent → **`NOTE`**: a check that was never run. `taylor_green.json` is in this state — it names commit `78607f3a`, so its numbers are traceable, they are just not *verified* against the driver that produced them.
+- no `git_commit` → **`WARNING`**: not traceable to code at all.
+
+I verified the block against the artifacts on disk: 5 inputs, 4 clean, `taylor_green.json` noted, and a deliberately absent file correctly listed under `inputs_absent` contributing nothing.
+
+**`make_summary.py` currently cannot run** — it reads the renamed crossover column, so it raises `KeyError` until the surfaces land. Same for `make_figures.py`. I am leaving both broken rather than adding a shim that accepts the old key, because a shim is how a stale artifact keeps being read as a current one; the failure is correct and it is temporary.
+
+## §4's resolution-scaled divergence bound, done as you specified
+
+`divergence_tolerance(grid) = 0.5 · eps · N²` in all seven divergence assertions. Margins **15.6× / 26.7× / 38.7× / 40.4×** at N = 32 / 64 / 128 / 256, against the flat `1e-12`'s 137× / 58.8× / 21.3× / **5.6×**. It is a function of the grid rather than a constant because a constant is writable — a future test can reintroduce the flat form by typing the number, and it would fail on a correct solver at N=512. The other `1e-12` assertions (orthonormality, reconstruction) are left flat deliberately; they are not resolution-dependent the same way.
+
+## One item I did not do alone
+
+`cost_retiming.json` and `benchmark_summary.json` both carry the key `dealias_rank_ceiling` holding a **wavenumber**, and your `claims_registry.py` has three rows verifying against exactly that key. I added a sibling `dealias_rank_ceiling_is` saying what the value is, rather than renaming and breaking your gate. **If you would rather have the rename and the registry rows updated, say so** — a misleading key name is how D30.2 happened, and I would rather break the gate loudly for one cycle than leave the name.
+
+**In flight:** N=128 surface (r=43 pending — D17.2 predicts it yields there), then the N=64 surface at both Re; and the ladder's Re=1000. 41 engine tests pass.
