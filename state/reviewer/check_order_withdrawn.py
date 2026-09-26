@@ -92,6 +92,22 @@ WITHDRAWN = [
     ("D52.5", r"\$\d\.\d\$?\\?--\\?\$?\d\.\d\\times\$?\s*(?:the\s+)?full[-\s]grid",
      "a per-step cost band attributed to the full-grid step (D52.5: 2.2-2.7, floor 1.4)"),
 
+    # D132. THE DRAFT'S ABSTRACT AND CONCLUSION CARRIED THREE MORE CLAIMS THAT D104, D117 AND D122 HAD
+    # WITHDRAWN, AND THE SUPPLIED BLOCKS WERE CLEAN ON ALL THREE. The cost band was ALREADY caught --
+    # D52.5's entry above fires on the abstract -- so "nobody caught it" was too strong for that one;
+    # these two had NO pattern at all, which is the only reason they survived. Keyed to the CLAIM'S
+    # TEXT rather than to its numbers, per D95 and D132.5.
+    ("D104",  r"static baseline[^.]{0,60}grows by (?:three|3) orders of magnitude",
+     "the static baseline growing under refinement (D104: it IMPROVES, 9.93e-09 -> 1.89e-09; none of 36 shared error quantities grows >10x)"),
+    # NARROWED AFTER MEASURING THE POPULATION. The first pattern also matched the bare phrase
+    # "a quasi-stationary rank", which returned 13 sites of which 3 are CORRECT PROSE:
+    # 04_methods.tex:252 and :275 ("with a quasi-stationary rank afterwards") and
+    # 08_limitations.tex:76 ("whether the quasi-stationary rank and the statistical quantities...").
+    # Neither asserts Re-dependence. **The claim is not the PHRASE; it is the FUNCTION FORM** --
+    # r*(Re), or an explicit statement that the rank increases with Re. Keying to the phrase would
+    # have shipped a gate firing on 3 correct sites, which is the failure mode D95 exists to prevent.
+    ("D122",  r"r\^\*\(\\mathrm\{Re\}\)|r\^\*\{\\mathrm\{Re\}\}|r\^\*\(\\mathrm\{Re\}\)|quasi-stationary rank[^.]{0,80}increases with|r\*\(Re\)",
+     "the withdrawn r*(Re) (D122: the rank history is byte-identical across all three Re, sha1 a317f44b850b)"),
     ("D56",   r"1\.46\s*(?:→|->)\s*1\.99|2\.45\s*(?:→|->)\s*6\.04", "the STRUCK N=128 multipliers"),
     # D60.1: the DEFECT is a UNIVERSAL QUANTIFIER over a roundoff number, not the number.
     # "at the level of the 10^-14 roundoff floor" is CORRECT and says so; "~1e-14 at every
