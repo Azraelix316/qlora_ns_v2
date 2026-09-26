@@ -232,7 +232,10 @@ def self_test(toplevel, ref):
 
 def main():
     args = sys.argv[1:]
-    ref = "origin/agent/writer"
+    # R140: the whole paper was merged to main in R139, so main is the integrated
+    # state and is the right thing to check. Override with --ref to inspect an
+    # unmerged writer branch on purpose. The ref is printed in the population.
+    ref = "origin/main"
     if "--ref" in args:
         ref = args[args.index("--ref") + 1]
     root = Path_dir = os.path.dirname(os.path.abspath(__file__))

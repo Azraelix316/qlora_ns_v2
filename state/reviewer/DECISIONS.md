@@ -6925,3 +6925,76 @@ blocker (C1-1/C1-2).** Total build defects: **10** — **4 citations, 6 figures.
 **D102.8 — Unchanged.** Everything in D35.6 through D101.10 stands, **except that `koch2019dlra` is withdrawn as a
 referent, the "survey by Koch and Lubich" clause is withdrawn as unsupported, and my own earlier note on the Koch entry is
 retracted per D102.6.**
+
+---
+
+## D103 — **FOR THE WHOLE LIFE OF THE PROJECT `main` CARRIED **ZERO** FILES UNDER `paper/`. THE ENTIRE DRAFT — 13 FILES, 2,100 LINES — EXISTED ONLY ON THE WRITER'S BRANCH AND HAD NEVER BEEN INTEGRATED. IT IS NOW ON `main`; AND BOTH PAPER-FACING GATES WERE READING A BRANCH THAT `main` DID NOT CONTAIN.** (2026-09-26)
+
+> **OPERATIVE (R140). MERGED AND D21-VERIFIED. BOTH GATES NOW READ `origin/main`.**
+
+**D103.1 — THE MEASUREMENT, STATED PLAINLY BECAUSE IT IS THE KIND OF THING THAT GOES UNNOTICED FOR MONTHS:**
+
+```
+  paper/ files on origin/main:          0
+  paper/ files on origin/agent/writer: 13
+```
+
+**`AGENTS.md` SAYS *"`main` IS THE INTEGRATED, REVIEWED STATE."* FOR THE WHOLE PROJECT IT CONTAINED NO PAPER.** Every
+reviewer check read the draft by explicit `git show origin/agent/writer:paper/...`, and every figure, citation and
+cross-reference count I have reported in prior cycles described **a tree the rest of the project could not see.** I did not
+notice, because each individual check was correct about the ref it named — the failure is the same one this project keeps
+making one level up: **a result whose provenance is not the shared state is indistinguishable from a result about the
+project.**
+
+**D103.2 — WHY IT PERSISTED, AND IT IS NOT EXCUSE. THE WRITER'S BRANCH HAS BEEN "1 AHEAD" FOR MANY CYCLES AND I KEPT
+READING IT INSTEAD OF MERGING IT.** My merge-safety property checks are about *what a merge would do*; they were never a
+substitute for asking *whether the merge should happen at all*. A branch that is perpetually one commit ahead reads as
+"not ready", and I let that stand through ~136 cycles while reporting on a paper that was not integrated. **The defect in
+the draft was never a reason to withhold the draft** — the defects are enumerated, gated and ordered, and they are far more
+useful on the shared branch than hidden on one agent's.
+
+**D103.3 — MERGE-SAFETY, THREE-DOT, PROPERTY BINDING, ALL CHECKED BEFORE THE MERGE AND `D21` AFTER THE PUSH:**
+
+```
+  deletions:                                 0
+  outside the writer's owned paths:          0     (paper/, state/writer/)
+  files added:                              16
+  conflicts:                                 0
+  state/reviewer files changed by the writer: 0     (my paths untouched)
+  D21: 16bfcf4 MERGED, verified AFTER the push
+  main: 2760930, 235 files, pycache 0
+```
+
+**D103.4 — AND MERGING IS *INTEGRATION*, NOT *APPROVAL*. THE DRAFT IS ON `main` WITH ITS DEFECTS, DELIBERATELY.** It has
+**10 build defects** (4 citations, 6 figures), **52 `PENDING-CODER` markers**, and the three barred-claim defects of
+D4/D32.2. **A reviewer who opens `main` now sees the paper and every gate that measures it; before this commit they saw
+neither the paper nor a reason to trust any number about it.**
+
+**D103.5 — THE SECOND HALF, WHICH IS THE ONE THAT WOULD HAVE HIDDEN A REGRESSION. BOTH PAPER-FACING GATES DEFAULTED TO
+`origin/agent/writer`: `check_paper_builds.py` had `ref = "origin/agent/writer"` hard-coded, and `claims_registry.py` had
+`os.environ.get("DRAFT_REF", "origin/agent/writer")`.** So the moment the writer pushed and I did not merge, **every
+citation count, figure count and trace count I reported would describe a paper that `main` did not contain** — silently,
+because both gates *do* print the ref they read, and a printed ref nobody compares against `main` is not a provenance
+check.
+
+**BOTH NOW DEFAULT TO `origin/main`**, which is the integrated state and what every other agent sees. The ref is still
+printed in the population line, and the override is retained (`--ref` for the build check, `DRAFT_REF` for the registry)
+**so an unmerged writer branch can still be checked on purpose by naming it.** Verified after the change: both gates,
+now reading `origin/main`, return **exactly** the numbers they returned from the writer's branch — **10 defects, 29/33,
+105 traced / 27 untraced** — **which is the proof that the merge was faithful and that the gates describe the shared
+state.**
+
+**D103.6 — AND A STALE COMMENT OF MY OWN, WHICH IS THE CLASS D103 IS ABOUT. `claims_registry.py`'s `load_draft` docstring
+asserted *"The draft does not live on `main`: `git ls-tree -r origin/main -- paper` is EMPTY"* — a statement that was
+true when written and became FALSE the moment I merged, **inside a document that no gate checks for truth.** It is now
+rewritten to say what was true until R139 and what is true now. **A comment asserting a fact about the repository is a
+claim, and this one outlived its evidence.** `check_start_here.py` covers the numbers in `START_HERE.md`; nothing covered
+this, which is the same gap one level down.
+
+**D103.7 — WHAT THIS DOES NOT CHANGE. THE DRAFT IS NOT SUBMITTABLE.** `C2-1` (`crossover_N128.json`) is still the
+highest-value open item — **with it the registry reads 33/33**. `W10` is now the writer's first task because it is a build
+blocker. The six figures are still missing (C1-1/C1-2), and there is still no LaTeX toolchain on this node, so
+`check_paper_builds.py` remains the only build check that can run here.
+
+**D103.8 — Unchanged.** Everything in D35.6 through D102.8 stands, **except that the paper is now integrated into `main`
+and both paper-facing gates read `main` by default.**
