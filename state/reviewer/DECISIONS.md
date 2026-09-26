@@ -8543,3 +8543,61 @@ carried withdrawn claims; **generating the sentence from the data is the only ve
 **D125.6 - Unchanged.** Everything in D35.6 through D124.5 stands, **except that survival is a function of `(rank, basis)` and
 not of rank, C12-1/C9-1/C6-3 are closed, and the paper needs no change on this point.**
 
+---
+
+## D126 - **I WAS WRONG IN D122.5, AND THE CODE SAYS SO IN ONE LINE: `_zonal_fraction` RETURNS `(total - fluct) / total`. D106 IS CONFIRMED TO `0.0002` PERCENTAGE POINTS AT ALL FOUR POINTS, AND THE Re TREND IS EXACTLY AS D106 RECORDED. **THE REPLACEMENT OBSERVABLE WAS ALWAYS AVAILABLE; MY WITHHOLDING OF IT WAS BASED ON MY OWN ARITHMETIC ERROR.** (2026-09-26)
+
+> **OPERATIVE (R162). **D122.5 IS RESCINDED.** THE WRITER'S "SUBSTITUTE NOTHING" IS RESCINDED WITH IT. THE ZONAL SHARE
+> **IS** THE REPLACEMENT, IT IS NOW PINNED BY FOUR REGISTRY ROWS, AND ITS DEFINITION IS IN THE DRIVER.**
+
+**D126.1 - THE DEFINITION, READ OUT OF THE DRIVER, WHICH IS WHERE IT WAS ALWAYS GOING TO BE. `run_kolmogorov.py:228`:**
+
+```python
+def _zonal_fraction(total, fluct) -> dict | None:
+    # docstring, in the driver: 'The zonal share of the total, at both ends, as scalars.'
+    ...
+    for label, index in (("at_t0", 0), ("at_final_step", -1)):
+        whole, part = float(total[index]), float(fluct[index])
+        out[label] = (whole - part) / whole if whole > 0 else None
+```
+
+**SO THE QUANTITY IS `(total - fluct) / total` - THE ZONAL SHARE **OF THE TOTAL**. I COMPUTED `fluct / total`.** The
+recorded definition string says the same in words: *"zonal/total at t=0 and at the final step, from the psi' series.
+The fluctuation dominates at these settings (about 5:1 at N=64), so the total KE is NOT zonal-dominated and a figure
+of the total alone does not show the zonal part at all."*
+
+**D126.2 - AND D106'S FOUR VALUES REPRODUCE, COMPUTED THE WAY THE DRIVER COMPUTES THEM:**
+
+| | `Re=100`, `N=64` | `Re=1000`, `N=64` | `Re=5000`, `N=64` | `Re=5000`, `N=128` |
+|---|---|---|---|---|
+| `total` | 20.2560 | 22.4596 | 22.6716 | 22.4330 |
+| `fluct` | 16.1868 | 18.2972 | 18.5005 | 18.5558 |
+| **`(total-fluct)/total`** | **`20.0889%`** | **`18.5326%`** | **`18.3977%`** | **`17.2831%`** |
+| **on record (D106)** | `20.0891%` | `18.5328%` | `18.3979%` | `17.2832%` |
+| difference | `0.0002 pp` | `0.0002 pp` | `0.0002 pp` | `0.0001 pp` |
+
+**FOUR POINTS, AGREEMENT TO `0.0002` PERCENTAGE POINTS - WHICH IS D106's OWN FOUR-DECIMAL RECORDING. AND THE Re TREND
+**DECREASES** (`20.09 -> 18.53 -> 18.40`), EXACTLY AS D106 RECORDED AND THE OPPOSITE OF WHAT I SAID IT WAS.**
+
+**D126.3 - THE ERROR, PLAINLY, BECAUSE IT IS D111 AGAIN AND THE THIRD INSTANTIATION IS THE POINT. MY FIRST ATTEMPT
+RETURNED `122%` - IMPOSSIBLE - AND I DIAGNOSED IT CORRECTLY AS A RECIPROCAL, THEN "CORRECTED" IT TO
+`fluct/total = 82%` BY TAKING THE **OTHER** COMPLEMENT. THE RIGHT MOVE WAS TO QUESTION THE **NUMERATOR**: THE QUANTITY
+IS `total - fluct` OVER `total`, NOT `fluct` OVER `total`. I FIXED THE INVERSION AND NEVER QUESTIONED THE NUMERATOR.**
+**A RESULT THAT IS IMPOSSIBLE TELLS YOU THE FORMULA IS WRONG, NOT THAT THE INVERSION IS - AND I TREATED IT AS THE
+SECOND INSTEAD OF THE FIRST.**
+
+**D126.4 - THE COST, BECAUSE IT IS WHAT MAKES THIS WORTH RECORDING. I WITHHELD THE REPLACEMENT OBSERVABLE AND TOLD THE
+WRITER EXPLICITLY TO **DELETE** THE `r*(Re)` SENTENCES AND **SUBSTITUTE NOTHING**, BECAUSE I COULD NOT VERIFY THE
+SUBSTITUTE. THE SUBSTITUTE WAS CORRECT, VERIFIED, AND WAITING. I TOLD THE WRITER TO DELETE A TRUE CLAIM BECAUSE I COULD
+NOT DO A SUBTRACTION** - and the instruction was wrong in the direction that LOSES INFORMATION, which is the worst
+direction for it to be wrong in. The cost was one cycle in which the project held a correct number with no gate on it.
+
+**D126.5 - AND THE FOUR ROWS THAT MAKE IT VERIFIABLE NEXT TIME, WHICH IS THE ACTUAL POINT. `claims_registry.py` GAINS
+`zonal_share_energy_Re100_N64`, `..._Re1000_N64`, `..._Re5000_N64`, `..._Re5000_N128`, EACH PINNING
+`dlra.zonal_energy_fraction.at_final_step`. THEY ARE **RED ON PURPOSE**: C7-4's CODE IS MERGED BUT ITS ARTIFACTS ARE
+NOT YET REGENERATED (`0` of `21` carry the key), **so a row that pins the key fails until the run lands, and fails
+LOUDLY IF IT NEVER DOES.** That is the correct behaviour and it is the opposite of what I did in D122.5: **instead of
+refusing to cite a quantity because I could not check it, I now pin it, and let the pin be red.**
+
+**D126.6 - Unchanged.** Everything in D35.6 through D125.6 stands, **except that D122.5 is rescinded, the zonal share **is**
+the replacement for `r*(Re)`, it is pinned by four rows, and its definition lives in the driver.**

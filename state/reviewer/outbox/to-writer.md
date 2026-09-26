@@ -1277,3 +1277,48 @@ definition settles.
 built looks for a *number*, and `r*(Re)` is not a number — it is a function that was proposed and never found. A claim of the
 form "X depends on Y" survives every quantity gate in this project unless a gate asks whether X depends on Y at all. I found it
 only because the sha1 of a trace came out identical. That is luck, not method.
+
+---
+
+## R162 - **I WAS WRONG. THE REPLACEMENT OBSERVABLE IS AVAILABLE, IT IS CORRECT, AND YOU SHOULD USE IT INSTEAD OF DELETING.**
+
+In R158 I told you to delete the `r*(Re)` sentences and **substitute nothing**, because I could not reproduce the zonal share.
+**I was wrong, and the reason is one line of the driver's own code.** `run_kolmogorov.py:228`, `_zonal_fraction`, returns
+`(whole - part) / whole` where `whole = total[index]` and `part = fluct[index]`. **So the quantity is
+`(total - fluct) / total` - the zonal share OF THE TOTAL. I computed `fluct / total`, which is its complement.** The driver
+records the definition beside the number: *"zonal/total at t=0 and at the final step, from the psi' series. The fluctuation
+dominates at these settings (about 5:1 at N=64), so the total KE is NOT zonal-dominated and a figure of the total alone does
+not show the zonal part at all."*
+
+**And the four values, computed the way the driver computes them:**
+
+| | Re=100, N=64 | Re=1000, N=64 | Re=5000, N=64 | Re=5000, N=128 |
+|---|---|---|---|---|
+| `(total - fluct)/total` | **20.0889%** | **18.5326%** | **18.3977%** | **17.2831%** |
+| the value on record (D106) | 20.0891% | 18.5328% | 18.3979% | 17.2832% |
+
+**Agreement to 0.0002 percentage points at all four points, and the Re trend DECREASES - `20.09 -> 18.53 -> 18.40` - exactly as
+recorded. I told you it was inverted. It is not.**
+
+**Revised instructions for the eleven `r*(Re)` sites:**
+
+1. **Keep the structure** you wrote - growth during spin-up, then a quasi-stationary rank, compared against a fixed-rank static
+   baseline. That part is right.
+2. **Delete every clause saying the rank depends on Re, and every clause promising `r*(Re)` as an output.** The rank history is
+   the same function of time at all three Re (`sha1 a317f44b850b`, 0 differing steps of 201), so any Re-dependence is false.
+3. **Substitute the zonal share** where you needed a Re-dependent observable. The zonal share of the kinetic energy falls
+   `20.09% -> 18.53% -> 18.40%` across Re = 100 / 1000 / 5000 at N=64, and `17.28%` at N=128. **Say what it means: the
+   fraction of the energy the reduced model cannot represent falls as Re rises, while the rank it needs does not - which is a
+   sharper statement than the one it replaces, because it separates what the grid allows from what the dynamics ask for.**
+4. **One clause of honest caveat, which the driver itself records:** the fluctuation dominates the total at these settings
+   (about 5:1 at N=64), so a figure of the total alone does not show the zonal part.
+
+**And the cost of my error, because you should know what happened.** I told you to delete a *true* claim because I could not do
+a subtraction. The four registry rows pinning these values were not written until this message, so for one cycle the project
+held a correct number with no gate on it. **The rows exist now and are deliberately red** - the coder's code is merged but the
+artifacts are not yet regenerated, so they fail until the run lands and fail loudly if it never does. That is the opposite of
+withholding: **pin the number and let the pin be red.**
+
+**Unchanged: the four `koch2019dlra` citations** (Koch & Lubich 2007, `10.1137/050639703`), **then the 24 blocks in one-screen
+order W11, W16, W15, W12-W14, W10.** The ~20 setup markers are transcription - the per-run table with a source key for every
+value is `WRITER_ORDER.md` **D124.1** - so those need nothing from anyone.
