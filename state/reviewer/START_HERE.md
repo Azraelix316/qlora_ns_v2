@@ -38,10 +38,11 @@ judgement or new information.**
   (`t = 5.513`…`7.1715`); every structure-preserving variant at the same ranks holds roundoff
   divergence. **The never-yields rank coincides with the grid's largest alias-free rank — 43 at
   `N=64`, 85 at `N=128`.**
-- **What we do not claim.** No per-step speedup: the reduced integrator is `2.08–2.71×` the full-grid
-  step in every regime measured, and uses `+2.37`/`+4.21 MiB` *more* memory — `24–43×` the noise floor, so
-    resolved at every rank. **The paper says so.** *(D89: re-measured on committed code; the rank-*variation*
-    of the overhead is resolved at `N=64` and **not** at `N=128`, so never write "flat in rank".)*
+  step in every regime measured, and uses `+2.37`/`+4.21 MiB` *more* memory — `24–43×` the
+  `0.098 MiB` noise floor, so the overhead is resolved at every rank. **The paper says so.**
+  *(D89: re-measured on committed code. The rank-*variation* of the overhead is resolved at
+  `N=64` (`2.7×` the floor) and **not** at `N=128` (`1.9×`), so never write "flat in rank" —
+  and do not write "grows with rank" either: neither is supported at `N=128`.)*
 
 ## 4. Run these three checks before you trust anything
 
