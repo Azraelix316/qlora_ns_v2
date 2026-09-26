@@ -606,3 +606,48 @@ distinct numbers, because 2.5757e-14, 2.6645e-14 and 2.4869e-14 each appear as
 the *full-grid* value at one Reynolds number and as the *DLRA* value at another.
 That is correct — the runs are deterministic and the divergence is at roundoff —
 but a reader seeing three values rotate through four cases should be told why.
+
+## The complete stale-number set in paper-facing text, with the corrections
+
+Measured on 2026-09-26 against the merged `main` (35972b1). **The build is clean**
+— `check_paper_builds.py` reports **0 defects** and the `koch2019dlra` citation key
+was corrected to `koch2007` in all four places. What remains is arithmetic.
+
+Every stale number traces to the same cause: the un-provenanced crossover block,
+which sat 3.9–9.3% below the rows in all 18 resolved cases. The two numbers I
+could not account for last message are now accounted for.
+
+| quantity | stale | from the rows | where |
+|---|---|---|---|
+| t\*, N=64, r=16, W=0.25 | 0.649 | **0.7076762337623602** | `00_abstract.tex:8` |
+| t\*, N=64, r=32, W=0.25 | 1.482 | **1.5981858222903682** | `00_abstract.tex:9` |
+| N=128/N=64 factor, r=16 | 1.45 | **1.3784** | `00_abstract.tex:15` |
+| N=128/N=64 factor, r=32 | 1.71 | **1.6858** | `00_abstract.tex:15` |
+| t\*, N=128, r=16 | 0.939 | **0.9754557646562387** | `WRITER_ORDER.md:794` |
+| t\*, N=128, r=32 | 2.526 | **2.6942** | `WRITER_ORDER.md:671, 794` |
+| t\* linear, N=64, r=32 | 1.609 | **1.7407** | `WRITER_ORDER.md:784` |
+
+**`1.71` is resolved.** It is `2.526 / 1.4816 = 1.7050` — the r=32 refinement
+factor computed from the *stale* N=128 and N=64 values, which is why it matched
+neither the old nor the new r=32 factor when I searched for it alone. From the
+rows it is `2.6942 / 1.5982 = 1.6858`. Likewise `1.45` is `0.9386 / 0.6493 =
+1.4456`, and from the rows `0.9755 / 0.7077 = 1.3784`.
+
+**Brackets, which the corrections do not touch:** `[0.5, 1.0]` for r=16 at both
+grids, `[1.0, 2.0]` for r=32 at N=64, `[2.0, 3.0]` for r=43 at N=128. They are
+exact under both the log and the linear derivation, which is the one part of the
+crossover claim that never moved.
+
+### What `claims_registry.py` says about all this
+
+Against the merged draft: **34 OK, 1 FAIL**, and PART 4 traces **18 of 19**
+four-significant-figure literals in the draft's prose. The one untraced is `1.482`
+in the abstract, and PART 4 names its nearest registry value at 0.9321× — the gate
+*does* see it, through PART 4's 100× band, which is wider than PART 3's exact
+match. So the abstract's `1.482` is caught by one part of the gate and missed by
+the other, which is worth knowing: **PART 3's exact match is the weaker check, and
+PART 4's "nearest registry value" line is the one that localises the error.**
+
+The remaining FAIL, `mem_noise_floor_mib`, is not a number: the floor is the
+maximum of 92 same-configuration differences, so no point value pins it. It needs
+a tolerance or a distributional claim.
