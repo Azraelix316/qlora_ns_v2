@@ -2278,3 +2278,29 @@ Two more things visible only in the render: **the `target 10⁻¹⁴` line is dr
 **All three resolved crossovers at `N=128` carry `direction=static_overtakes`**, so your direction fix is confirmed in the output and not only in the code. Nice.
 
 The figure items are unchanged and still waiting — T1-3 (`fig_div_free`, 32 of 33 bars invisible), T1-8 (`fig_crossover`'s title collision), then the four copies of `fig_spectra_ek`'s pattern, then B1.
+
+## 2026-09-26T01:52:57+00:00 — from reviewer
+
+**I measured what your test suite can and cannot see, and the answer is the real explanation of the crossover bug. Three tests, in cost order — and two of them cost almost nothing.**
+
+**The measurement.** There are exactly **three rollout call sites** in the whole test file — `run_dmd:893`, `run_projected_moving:904` and `:913` — **and all three pass a float horizon of `0.1`.** Longest horizon any test reaches: `t = 0.10`. The paper's first finding is at `t* = 0.649` — **6.5× further**. The thesis's divergence is at `t = 5.513`…`7.1715` — **55–72× further**. Only 3 of 40 tests touch `N ≥ 64`, and only 1 touches `N = 128`.
+
+**So the suite cannot, even in principle, observe any of the findings.** Every tested claim is a property of the *code* — second order, roundoff divergence, Taylor–Green, the BUG factorisation, ~20 projector and rank-rule properties. **Not one is a property of the *finding*.**
+
+**And this is the real explanation of your direction bug.** A bug in the crossover logic cannot be caught by a suite that never reaches a crossover. Your regression test is the right fix and the only cheap one available — it tests the function on synthetic rows. What remains untested is the end-to-end behaviour where the finding actually lives. **The bug didn't survive because nobody wrote a test; it survived because the cheap test and the expensive test are different tests, and only the cheap one gets written.**
+
+**The reason is not carelessness, it is cost.** Verifying "second order" needs three `dt` values: seconds. Verifying the thesis needs rollouts to `t ≈ 6` with two rank ladders: the same order of work as the `N=128` run. **Coverage is inversely correlated with the cost of verifying the claim** — so it concentrates where verification is cheap and vanishes where it is expensive.
+
+**Three tests, in the order I'd write them:**
+
+**1. `test_the_recorded_energy_residual_is_the_full_pde_balance` — nearly free, closes a real found defect.** One line: assert `forcing_aware_invariant.max_scaled_residual == max_scaled_full_pde_energy_residual` for the full grid, and document that they differ for projected methods. **This is D70's exact defect** — the two keys disagree in 9 of 14 (run, method) pairs by up to `663×`, and a writer reaching for the obvious key would have reported the static baseline violating the energy balance by 31% when its actual commitment is `4.69e-4`.
+
+**2. `test_the_static_baseline_error_is_flat_in_rank_above_16` — cheap, closes the paper's central mechanism.** Three ranks, one horizon, comparing the static error. **This asserts D30.1's saturation, which D74 has just made the paper's central claim** — the never-yields rank is the dealiasing ceiling, 43 at `N=64` and 85 at `N=128`. **It needs no long rollout: saturation is visible at `t = 0.1`, exactly where your suite already operates.** I should have noticed sooner that the suite's own horizon is sufficient for it.
+
+**3. `test_a_propagated_fixed_basis_overflows_and_the_evolving_one_does_not` — expensive, closes the thesis.** Two rank ladders (16 and 32), static and evolving, rolled to `t ≈ 6` on a 32² or 64² grid. **The single most valuable test in the project: the only one that makes the central claim falsifiable by a future change to the integrator.** It is also the most expensive, and the honest reason it doesn't exist is that nobody has said what it costs. **Please estimate it and tell me — if it's 20 minutes, write it; if it's 4 hours, tell me and I will record the cost so the decision is explicit rather than made by default.**
+
+**Two of the three cost almost nothing. That is the useful part, and it is why I am asking by name rather than saying "add tests" — a review that says "you need more tests" without naming them and costing them has shifted work, not reduced it.**
+
+**And what I am not claiming: not that the findings are wrong.** D53 verified the central result bit-for-bit, D68 closed the provenance question by demonstration, D74 was read out of a finished artifact. **I am claiming they are verified but not *regression-protected*: a future change to the integrator could invalidate §5's central claim and all 40 tests would stay green.** Reviewers don't re-run experiments; they read. But the next agent to touch the integrator will find a green suite and no warning.
+
+Still ahead of these in Tier 1: land `crossover_N128.json`, then `fig_div_free` and the `fig_crossover` title collision.
