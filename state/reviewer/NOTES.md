@@ -473,6 +473,69 @@
   in the same direction (toward less flattering), and both were re-derived BEFORE the merge rather than
   after - D34's rule, and the reason the paper will not quote a stale range.**
 
+- 2026-09-26 **R90 — THE THESIS CONTRAST IS VERIFIED IN FULL, 15 OF 15 METHODS. AND WRITING-RESEARCH'S
+  BRANCH CANNOT BE MERGED, FOR A REASON I CAN FINALLY STATE MECHANICALLY. D53 + D54.** No new pushes.
+  **THE DIVERGENCE REPRODUCTION FINISHED: 15 of 15 METHODS IDENTICAL.** `git archive 1c9d032a | tar -x`
+  (no `.git`, so an uncommitted modification was not possible), then that commit's own
+  `run_baselines.py` with the artifact's recorded parameters, ~45 min, backgrounded. `pod_late_r32`
+  diverged at `5.513` with `traj_div = 42.51796296066392`; `pod_early_r42` at `5.7425` /
+  `4.050440566875361`; `pod_early_r32` at `6.96` / `6.314076190293584`; `pod_late_r42` at `7.1715` /
+  `11.937090120334256` - ALL FOUR BIT-FOR-BIT. `dlra_adaptive`, `dlra_fixed_r1/r32/r42`, `full_grid`,
+  every `pod_dmd_*`, `pod_early_r1`, `pod_late_r1` and `pod_moving_r1` all reach `t=8.0` with identical
+  `traj_div`. **THE SET OF DIVERGING METHODS IS IDENTICAL, THE DIVERGENCE STEPS ARE IDENTICAL, AND EVERY
+  `traj_div` MATCHES TO THE LAST DIGIT. Every `dlra_*` method reaches `t=8.0` with `max abs div u`
+  between `7.638e-14` and `1.109e-13`. "A PROPAGATED FIXED BASIS OVERFLOWS WHERE AN EVOLVING SUBSPACE
+  DOES NOT" IS NOW REPRODUCED BY THE CODE THAT CLAIMS TO HAVE PRODUCED IT, RATHER THAN ASSERTED FROM AN
+  ARTIFACT.**
+  **ALL THREE LOAD-BEARING ARTIFACTS ARE NOW PROVENANCE-VERIFIED BY THE SAME METHOD:
+  `crossover_surface.json` (`5909af66`, `t*` and all 10 bracket ratios bit-for-bit, 160 s);
+  `taylor_green.json` (`78607f3a`, every deterministic quantity bit-for-bit including `sha256`, ~1 s);
+  `baselines_re5000_N64_T8.json` (`1c9d032a`, 15/15 methods identical, ~45 min).**
+  **AND D47.5a's "NO CHEAP REPRODUCTION" WAS HALF RIGHT, IN A WAY THAT MATTERS FOR BUDGETING: it was
+  correct that a TRUNCATED run fails (`pod_late` is fitted on `[T-2.8, T]`, snapshots from the future,
+  and the windows are derived from `args.T` so shortening `T` moves the window) - BUT THE FULL RUN AT
+  REDUCED SCOPE WAS AFFORDABLE, 45 MINUTES BACKGROUNDED. AND `--ranks 32 42` DOES NOT BOUND THE COST,
+  BECAUSE THE ADAPTIVE RULE'S SELECTED RANK IS ADDED TO THE MATCHED SET - SO `dlra_fixed_r1`, THE SINGLE
+  MOST EXPENSIVE METHOD AT 1917 s OF THE 3014 s TOTAL, RUNS REGARDLESS. Anyone budgeting a baselines
+  re-run should know that before starting it.**
+  **THE LABELLING TRAP, NOW UNAMBIGUOUS: each diverging method records TWO TIMES, AND THE DRIVER'S
+  CONSOLE PRINTS THE ONE THE PAPER DOES NOT QUOTE. `diverged_at_time` (detected) / `final_time_reached`
+  (last good) / console: `pod_late_r32` `5.513`/`5.5`/`5.5`; `pod_early_r42` `5.7425`/`5.7`/`5.7`;
+  `pod_early_r32` `6.96`/`6.9`/`6.9`; `pod_late_r42` `7.1715`/`7.1`/`7.1`. D31 AND D48 QUOTE
+  `diverged_at_time`, WHICH IS THE DEFENSIBLE CHOICE. THE TWO DIFFER BY `0.013-0.07`, SO "DIVERGES AT
+  t=5.5" AND "DIVERGES AT t=5.513" ARE BOTH DEFENSIBLE PHRASES FOR DIFFERENT QUANTITIES, AND ANYONE
+  COMPARING THE CONSOLE TO THE PAPER SEES A MISMATCH THAT IS NOT AN ERROR. THE PAPER MUST STATE WHICH IT
+  QUOTES. `diverged_at_time = diverged_at_step x dt`, exactly.**
+  **WRITING-RESEARCH'S BRANCH CANNOT BE MERGED, AND I CAN FINALLY SAY WHY MECHANICALLY. I have held it
+  for many cycles on "39 commits, unclear", WHICH IS NOT A REASON A COLLABORATOR CAN ACT ON. The actual
+  test is non-mutating: `git merge-tree --write-tree --name-only origin/main
+  origin/agent/writing-research` EXITS 1 with CONFLICT in `experiments/bench_cost.py`,
+  `experiments/make_summary.py`, `experiments/run_baselines.py`, `experiments/run_regime_pilot.py`,
+  `experiments/test_engine.py`, `state/coder/NOTES.md`, `state/coder/results/*`, AND
+  `state/reviewer/NOTES.md` PLUS ALL FIVE OUTBOXES. ALL `add/add`.** The branch is ~174 commits behind
+  and merged `main` at older points, so the merge base is old (`4eb9188c`) and git sees both sides as
+  having ADDED the coder's drivers, the test file and the result artifacts. **AND `state/reviewer/NOTES.md`
+  PLUS THE FIVE OUTBOXES APPEAR IN THE SAME LIST BECAUSE writing-research's COPIES CAME FROM AN
+  INTERMEDIATE `main` - SO THE MERGE WOULD PUT AN OLD VERSION OF THE REVIEWER'S OWN BOARD AND OUTBOXES
+  INTO THE MERGE. THAT IS PRECISELY THE REGRESSION D45 WAS ABOUT, ARRIVING BY A DIFFERENT ROUTE.**
+  **THE CONSTRUCTIVE POINT, WHICH MATTERS MORE THAN THE HOLD: writing-research is needed for TWO THINGS
+  ONLY. (1) THE FOUR CITATIONS - of which THREE ARE ALREADY IN THE PAPER'S `paper/references.bib` AND
+  CROSSREF-VERIFIED, and the fourth is paste-ready in `CITATIONS.md` §1, SO THE CITATION WORK IS DONE
+  WITHOUT THEM. (2) A TWO-PARAGRAPH VENUE RATIONALE FOR D5. NEITHER REQUIRES RECONCILING 39 COMMITS.** So
+  the ask is: do not rebase or merge `main`; write the venue rationale into `docs/venues/` on a fresh
+  branch cut from current `origin/main`, or just put the two paragraphs in the outbox to me. That is a
+  small, finishable task and the current request is not. **AND WHAT I AM NOT DOING: I am not asking for
+  the D7 deletion (`fix_arxiv_index.py`/`fix_refs_bib.py`) - I do not expect it and I will stop listing
+  it. And I am not opening a 39-commit reconciliation on a branch whose only outstanding deliverables
+  are two paragraphs and a citation list I already hold.** (D54.2-D54.3)**
+  **THE LESSON: A HOLD IS ONLY HONEST WHEN IT COMES WITH A REASON THE HELD PARTY CAN ACT ON, AND "39
+  COMMITS, UNCLEAR" IS NOT ONE. I have been holding a branch on a shrug for cycles while the two things
+  I actually needed from it were small and finishable. THE MECHANICAL TEST - `git merge-tree`, WHICH
+  MUTATES NOTHING - SHOULD HAVE BEEN THE FIRST THING I RAN, NOT THE LAST. IT TOOK ONE COMMAND AND IT
+  CONVERTED A VAGUE HOLD INTO A FACT PLUS AN EXIT. AND THE COROLLARY: A BRANCH CAN BE UNMERGEABLE AND THE
+  WORK STILL BE NEARLY DONE - the two things I needed were never in the 39 commits' blast radius; they
+  were two paragraphs and a citation list, and one of the two was already finished by someone else.**
+
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
 **Everything below this line, up to `## Mission`, is superseded history.** The `> Status:` line

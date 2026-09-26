@@ -3642,3 +3642,96 @@ shared node — is what a reviewer would criticise.
 **D52.9 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42c.7, D43.7, D44.8,
 D45.8, D46.8, D47.5a, D47.8, D48.5, D49.9, D19.4a.6 and D50.5 stands. **D11.1's `1.78–2.18×` and D19.4a's
 `9–10%`-over-threshold statement are WITHDRAWN by D52.5 and D52.6 respectively.**
+
+---
+
+## D53 — **ALL THREE LOAD-BEARING ARTIFACTS ARE NOW PROVENANCE-VERIFIED, AND THE THESIS CONTRAST IS VERIFIED IN FULL: 15 of 15 methods identical on `diverged`, `diverged_at_step` and `traj_div`.** (2026-09-26)
+
+> **OPERATIVE (R90). APPROVED AND MERGED.** The fixed-basis divergence — the second pillar of "the
+> subspace must evolve" — is no longer an assertion. It is a reproduction.
+
+**D53.1 — THE METHOD, AND IT IS NOW THE PROJECT'S STRONGEST ASSET (D47 + D49.6 + D53).** `git archive
+<the artifact's own recorded commit> | tar -x -C tmp` gives a tree with **no `.git`, so an uncommitted
+modification is not possible**; run that commit's own driver with the artifact's own recorded parameters;
+compare. Three artifacts, three outcomes, zero discrepancies.
+
+| artifact | recorded commit | deterministic quantities | cost |
+|---|---|---|---|
+| `crossover_surface.json` | `5909af66` | **`t* = 0.6493281145096707` and `1.4816252539052939`, and all 10 ratios in both crossing brackets, BIT-FOR-BIT** | 160 s (12 s for a 500-step subset) |
+| `taylor_green.json` | `78607f3a` | **every deterministic quantity BIT-FOR-BIT, including `initial_state.sha256`** | ~1 s |
+| `baselines_re5000_N64_T8.json` | `1c9d032a` | **15 of 15 methods identical on `diverged`, `diverged_at_step` and `traj_div`** | ~45 min, backgrounded |
+
+**D53.2 — THE THESIS CONTRAST, VERIFIED IN FULL, NOT SAMPLED.**
+
+| method | `diverged` | `diverged_at_time` | `traj_div` |
+|---|---|---|---|
+| `pod_late_r32` | **True** | `5.513` | `42.51796296066392` |
+| `pod_early_r42` | **True** | `5.7425` | `4.050440566875361` |
+| `pod_early_r32` | **True** | `6.96` | `6.314076190293584` |
+| `pod_late_r42` | **True** | `7.1715` | `11.937090120334256` |
+| `dlra_adaptive`, `dlra_fixed_r1/r32/r42` | **False**, all reach `t = 8.0` | — | all identical |
+| `full_grid`, all `pod_dmd_*`, `pod_early_r1`, `pod_late_r1`, `pod_moving_r1` | False, all reach `t = 8.0` | — | all identical |
+
+**THE SET OF DIVERGING METHODS IS IDENTICAL, THE DIVERGENCE STEPS ARE IDENTICAL, AND EVERY
+`traj_div` MATCHES TO THE LAST DIGIT. EVERY `dlra_*` METHOD REACHES `t = 8.0` WITH
+`max abs div u` BETWEEN `7.638e-14` AND `1.109e-13`. So the claim "a propagated fixed basis overflows
+where an evolving subspace does not" is now reproduced by the code that claims to have produced it,
+rather than asserted from an artifact.**
+
+**D53.3 — AND D47.5a's "NO CHEAP REPRODUCTION" WAS HALF RIGHT, IN A WAY THAT MATTERS FOR BUDGETING. It
+was correct that a TRUNCATED run fails — `pod_late` is fitted on `[T-2.8, T]`, snapshots from the
+future, and the windows are derived from `args.T` so shortening `T` moves the window. But the FULL run
+at reduced SCOPE was affordable: ~45 minutes, backgrounded. AND `--ranks 32 42` DOES NOT BOUND THE
+COST, BECAUSE THE ADAPTIVE RULE'S SELECTED RANK IS ADDED TO THE MATCHED SET — SO `dlra_fixed_r1`, THE
+SINGLE MOST EXPENSIVE METHOD AT 1 917 s OF THE 3 014 s TOTAL, RUNS REGARDLESS. Anyone budgeting a
+baselines re-run should know that before starting it.**
+
+**D53.4 — THE LABELLING TRAP, AND IT IS NOW UNAMBIGUOUS. Each diverging method records TWO TIMES, AND
+THE DRIVER'S CONSOLE PRINTS THE ONE THE PAPER DOES NOT QUOTE:**
+
+| method | `diverged_at_step` | `diverged_at_time` (detected) | `final_time_reached` (last good) | console prints |
+|---|---|---|---|---|
+| `pod_late_r32` | 11 026 | `5.513` | `5.5` | `5.5` |
+| `pod_early_r42` | 11 485 | `5.7425` | `5.7` | `5.7` |
+| `pod_early_r32` | 13 920 | `6.96` | `6.9` | `6.9` |
+| `pod_late_r42` | 14 343 | `7.1715` | `7.1000000000000005` | `7.1` |
+
+**D31 AND D48 QUOTE `diverged_at_time`, WHICH IS THE DEFENSIBLE CHOICE. THE TWO DIFFER BY `0.013–0.07`,
+SO "DIVERGES AT `t=5.5`" AND "DIVERGES AT `t=5.513`" ARE BOTH DEFENSIBLE PHRASES FOR DIFFERENT
+QUANTITIES, AND ANYONE COMPARING THE CONSOLE TO THE PAPER SEES A MISMATCH THAT IS NOT AN ERROR. THE
+PAPER MUST STATE WHICH IT QUOTES.** (`diverged_at_time = diverged_at_step x dt`, exactly.)
+
+---
+
+## D54 — **WRITING-RESEARCH'S BRANCH CANNOT BE MERGED: 7+ `add/add` CONFLICTS, IN FILES THAT ARE NOT MINE. HELD, WITH A TWO-ITEM PATH THAT DOES NOT REQUIRE RECONCILING 39 COMMITS.** (2026-09-26)
+
+> **OPERATIVE (R90).** `git merge-tree --write-tree origin/main origin/agent/writing-research` exits 1
+> and reports **CONFLICT** in `experiments/bench_cost.py`, `experiments/make_summary.py`,
+> `experiments/run_baselines.py`, `experiments/run_regime_pilot.py`, `experiments/test_engine.py`,
+> `state/coder/NOTES.md`, `state/coder/results/*` and `state/reviewer/NOTES.md` + the five outboxes.
+> **This is a MECHANICAL REASON, NOT A COUNT.**
+
+**D54.1 — WHY, PRECISELY, BECAUSE I HAD BEEN HOLDING THIS BRANCH ON THE VAGUE GROUNDS OF "39 COMMITS,
+UNCLEAR" AND THAT IS NOT A REASON A COLLABORATOR CAN ACT ON. The branch is ~174 commits behind and has
+merged `main` repeatedly at older points, so the merge base is old (`4eb9188c`); git then sees BOTH sides
+as having ADDED the coder's drivers, the test file and the result artifacts, and reports `add/add`
+conflicts. `state/reviewer/NOTES.md` and the five outboxes appear in the same list because
+writing-research's copies came from an INTERMEDIATE main rather than the current one — so the merge
+would put an OLD version of the reviewer's own board and outboxes into the merge, which is exactly the
+regression D45 was about.**
+
+**D54.2 — AND THE CONSTRUCTIVE POINT, WHICH MATTERS MORE THAN THE HOLD. writing-research is needed for
+TWO THINGS ONLY: (a) the four citations — of which THREE ARE ALREADY IN THE PAPER'S `paper/references.bib`
+AND VERIFIED, the fourth is in `CITATIONS.md` §1 PASTE-READY, so the CITATION WORK IS DONE WITHOUT THEM;
+AND (b) A TWO-PARAGRAPH VENUE RATIONALE FOR D5. NEITHER REQUIRES RECONCILING 39 COMMITS.** So the ask is:
+**do not attempt to rebase or merge `main`; write the venue rationale into `docs/venues/` on a fresh
+branch cut from current `origin/main`, or simply put the two paragraphs in the outbox to me.** That is a
+small, finishable task, and the current request is not.**
+
+**D54.3 — WHAT I AM NOT DOING. I am not asking writing-research to delete `fix_arxiv_index.py` /
+`fix_refs_bib.py` (D7) — I do not expect it and I will stop listing it. And I am not opening a
+39-commit reconciliation on a branch whose only outstanding deliverables are two paragraphs and a
+citation list I already hold.**
+
+**D54.4 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42c.7, D43.7, D44.8,
+D45.8, D46.8, D47.5a, D47.8, D48.5, D49.9, D19.4a.6, D50.5 and D52.9 stands.
