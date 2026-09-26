@@ -13,7 +13,7 @@ describing a paper we are no longer writing.**
 
 | # | target | the one change | numbers to use | detail |
 |---|---|---|---|---|
-| **W1** | **abstract** | **replace it whole.** 180 words now, none of them survivable. 197-word replacement supplied. | `t*` = `0.649` / `1.482`; `10^{278}`; `2.1–2.7×`; *"we identify no end-to-end speedup, and say so"* | **D13** |
+| **W1** | **abstract** | **replace it whole.** 180 words now, none of them survivable. 200 words replacement supplied. | `t*` = `0.649` / `1.482`; `10^{278}`; `2.1–2.7×`; *"we identify no end-to-end speedup, and say so"* | **D13** |
 | **W2** | **contributions list** | **replace it whole.** Argues the wrong contribution; contains two barred claims. | thesis *"the subspace must evolve"*; the horizon is a property of **how the subspace is built**, not its dimension | **D14** |
 | **W3** | **§1 intro, the summary sentence** | Clauses (ii)–(iii) + the validation sentence. Keeps clause (i). | `1.1e-13` (not `1e-14`); `2.1–2.7×`; **no** "turbulent dynamics", **no** "rank growth" | **D11** |
 | **W4** | **§3 method + invariants** | The credibility. Both invariants as equations, then the verification. **For the energy invariant use the FULL-PDE key, not the one named `forcing_aware_invariant`** — they differ by up to `663×` and the wrong one reports a 31% violation that does not exist. | `\ | ∇·u\ | ≤ 1.1e-13`; balance `dE/dt + nu‖ω‖² − ⟨ψ,ζ⟩ = 0`, advection input vanishing to roundoff, *not assumed away*; Taylor–Green `2.8e-14` / `2.3e-14` over 200 steps; balance residual `3.2e-4` | **D2**, **D8** |
@@ -113,32 +113,27 @@ Ask me if a number looks unfamiliar; every one above is traced in `CLAIMS.md`.
 | *"the per-step cost is **comparable to, and in regimes slower than**, a full-grid solver"* | **false for every measurement we have** — the minimum observed is `2.08×`, so it is *always* slower and never comparable |
 | *"which we report alongside **the benefits**"* | **what benefits?** we identify **no** end-to-end benefit: no speedup, and `+2.2`–`+4.3 MiB` *more* memory |
 
-**The replacement, 197 words, every number verified:**
+**The replacement, 200 words, every number verified:**
 
 ```latex
 \begin{abstract}
-Reducing the cost of an incompressible Navier--Stokes solve by approximating the
-state raises a question that is usually asked the wrong way round: not how
-accurately a reduced model can track a trajectory, but when a reduced
-trajectory is worth having at all. We study forced two-dimensional
-incompressible flow in stream-function form, where a structure-preserving
-projected integrator integrates the viscous part exactly and the nonlinear part
-by a midpoint step on the projected dynamics. Comparing such an integrator
-against a static subspace of the same rank, we measure the horizon at which the
-reduced integrator becomes the more accurate of the two --- $t^\ast = 0.649$ at
-rank $16$ and $1.482$ at rank $32$ --- and find that this horizon is a property
-of how the static subspace is built rather than of its dimension: above rank
-$\approx 8$ additional rank buys the static baseline nothing measurable at any
-horizon, with ranks $16$, $32$ and $43$ in agreement to four decimals. The same
-comparison shows why the distinction matters. A fixed basis propagated through
-the nonlinearity overflows at ranks $32$ and $42$, reaching $10^{278}$, while
-every structure-preserving variant at the same ranks holds roundoff divergence
-throughout; and under grid refinement the reduced integrator's error falls by a
-factor $2.2$ while the static baseline's grows by up to three orders of
-magnitude. The evidence is deliberately narrow: one forcing, horizons of order
-unity, a rank criterion whose growth we report but do not extrapolate, and a
-per-step cost $2.1$--$2.7\times$ the full-grid reference with no compensating
-memory benefit. We identify no end-to-end speedup, and say so.
+Approximating the state to cut the cost of a Navier--Stokes solve raises a
+question usually asked backwards: not how accurately a reduced model tracks a
+trajectory, but when a reduced trajectory is worth having at all. In forced
+two-dimensional stream-function flow, a structure-preserving projected integrator
+treats the viscous part exactly and the nonlinear part by a midpoint step.
+Against a static subspace of equal rank, we measure the horizon at which it
+is the more accurate --- $t^\ast = 0.649$ at rank $16$ and
+$1.482$ at rank $32$ --- and find it reflects how the subspace is built,
+not its dimension: above rank $\approx 8$ extra rank buys it nothing measurable,
+ranks $16$, $32$ and $43$ agreeing to four decimals. A fixed basis propagated
+through the nonlinearity overflows at ranks $32$ and $42$, reaching $10^{278}$,
+while every structure-preserving variant holds roundoff divergence; under grid
+refinement the reduced error falls by a factor $2.2$ while the static baseline's
+grows by three orders of magnitude. The evidence is narrow: one
+forcing, horizons of order unity, a rank criterion we report but do not
+extrapolate, and a per-step cost $2.1$--$2.7\times$ the full grid with no memory
+saving. We identify no end-to-end speedup, and say so.
 \end{abstract}
 ```
 
@@ -166,13 +161,43 @@ memory benefit. We identify no end-to-end speedup, and say so.
 
 **The replacement — this is a substitution, and the ready-made source is the blueprint. Replace items 2 and 3 with these four, and apply D60's wording to item 1:**
 
-> **2. A measurement protocol for reduced-dynamics comparisons, and the finding that the crossover horizon is not a property of the method.** We define the horizon at which a reduced integrator becomes more accurate than a static subspace of the same rank, state the five qualifiers a reported horizon must carry, and find that it depends on the baseline's construction and window rather than on the method: for the trailing-window static baseline at $W=0.25$ we measure $t^* = 0.649$ at $r=16$ and $1.482$ at $r=32$, insensitive to the window to $\le 0.63\%$ and sensitive to the Reynolds number by $3$–$9\%$. Three corrections to the baseline moved it by $1.6$–$2.8\times$, each of which shortened it.
->
-> **3. The mechanism, measured: a static subspace saturates in rank.** Above $r\approx 8$, additional rank buys the static baseline nothing measurable at any horizon — $r=16$, $32$ and $43$ have identical static errors to four decimals, and the spread across rank is $0.00\%$ at $t=0.1$. **The horizon is a property of the subspace's construction, not of its dimension.**
->
-> **4. The stability result: the subspace must evolve.** A fixed basis propagated through the nonlinearity is stable at $r=16$ and **overflows at $r=32$ and $r=42$** — reaching $7.1\times10^{278}$ — while every structure-preserving variant, at the same ranks and with the same integrator, holds roundoff divergence throughout to $t=8$. **The divergence times are not monotone in rank, so the failure is that of propagating a fixed basis, not of rank as such.** *(This rests on one case and is reported as an observation; the sweep that would promote it to a contribution has not been run.)*
->
-> **5. A rank criterion that grows with the dynamics.** A relative-amplitude test on the unprojected candidate grows the rank from $17$ to $36$ at cutoff $10^{-6}$ and to $43$ at $10^{-8}$ and $10^{-10}$, with errors $1.0$–$1.7\times10^{-4}$ and no instability. **We report the growth over the $0.1$-unit horizons measured and do not claim adaptive rank over longer spans.**
+```latex
+\begin{itemize}
+\item \textbf{A structure-preserving reduced integrator for two-dimensional
+incompressible Navier--Stokes in stream-function form.} The viscous part is
+integrated exactly along a separable exponential flow that preserves the low-rank
+ansatz, so divergence-freeness holds identically in exact arithmetic; the measured
+residual is no larger than $1.1\times 10^{-13}$, seven orders of magnitude below
+the reduced solver's own trajectory error, and grows by a factor $2.6$ from a
+$64^2$ to a $128^2$ grid. The nonlinear part is advanced by a second-order
+projected step, and the cleanup is a QR factorisation of the $n\times r$ factors
+rather than a re-factorisation of the full state.
+
+\item \textbf{A measurement protocol for reduced-dynamics comparisons, and the
+finding that the accuracy horizon is not a property of the method.} A reported
+horizon must state its window length, refit interval, schedule offset, in-sample
+check, and the grid and largest rank tested. Under that protocol, correcting four
+baseline defects \emph{shortened} our own advantage and cost three of six ranks
+their crossover; we report the corrected numbers.
+
+\item \textbf{The mechanism, measured: a static subspace saturates in rank.} Above
+$r\approx 8$, additional rank buys a propagated static subspace nothing measurable
+at any horizon --- ranks $16$, $32$ and $43$ agree to four decimals --- because its
+own per-step truncation accumulates onto a saturation plateau. The advantage
+horizon therefore reflects how a subspace is \emph{built}, not how large it is.
+
+\item \textbf{The stability result: the subspace must evolve.} A fixed basis
+propagated through the nonlinearity, with the same integrator, splitting and
+orthonormal basis, is stable at rank $16$ and overflows at ranks $32$ and $42$,
+reaching $10^{278}$. Every structure-preserving variant at the same ranks holds
+roundoff divergence throughout.
+
+\item \textbf{An honest cost accounting.} The reduced integrator costs
+$2.1$--$2.7\times$ a pinned-thread full-grid spectral reference per step in every
+regime and grid we measured, and uses slightly \emph{more} memory. Rank buys the
+ability to run, not speed.
+\end{itemize}
+```
 
 **Two points of craft in that text.** Item 5's last sentence puts the D32.2 bar **inside** the contribution as a stated limitation rather than applying it from outside — which is both honest and a better look than silence. And item 4 says "one case, an observation" rather than claiming a contribution, so the bar is visible where the claim is made.
 
