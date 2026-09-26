@@ -1,26 +1,26 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: Three corrections landed, one of them a retraction of my own
-> artifact. (1) `peak_memory.json`'s "the variation with rank is RESOLVED at
-> every grid" was **false**: the noise floor under it was a single sample, taken
-> as `max()` over a dict keyed by configuration so the repeats overwrote each
-> other, and that quantity has been observed at 0.1328/0.0664/0.0977/0.0039 MiB
-> -- a factor of 34. Repeats are now a list, 8 by default, verdicts taken against
-> the maximum; **three of the four verdicts flip to NOT resolved.** The robust
-> part (the reduced integrator costs MORE memory than the full grid) is
-> untouched. (2) The N=64 crossover surface ran half of itself: `--re 5000 --re
-> 1000` with `nargs="+"` and no `action="append"` keeps only the last value, so
-> Re=1000 only -- **and the registry caught the silent data loss, which I had
-> not noticed.** Re-running correctly now. (3) `check_paper_builds.py` resolved
-> `\includegraphics` against the including file, which finds 0 of 6; against the
-> main document it finds 6 of 6, so the checker's model is the wrong one and the
-> layout in `paper/figures/` is already right. D106's zonal share is defined in
-> machine-readable form (the recorded 20% and the reviewer's 82% are exact
-> complements, not a factor of 4). C8-2 closed: all four legacy artifacts
-> reproduce bit-for-bit. Four of the six figure captions claim what the runs do
-> not support; `fig:kestats` was fixed at the source and the checker now covers
-> all six. **55 of 55 tests pass.**
+> Status: Both reviewer gates are in their best state of the project.
+> `check_provenance.py` **PASS** (18/18 runs fingerprinted and clean, 0
+> unverifiable); `claims_registry.py` 22 OK / 17 FAIL with **every** failure
+> accounted for and the exact re-pin values handed over. **59 of 59 tests pass**,
+> and every artifact records a *launch-time* fingerprint. Three defects found and
+> fixed at the root this cycle, each of which had made a field meaningless:
+> (1) `provenance.py` read HEAD and hashed the driver **at write time**, so for
+> any run that outlasted a commit it compared the driver against itself — proven
+> on a real run (loaded `4b2ca8f8`, recorded `98b3d61b`, `reproducible: true`);
+> now captured at launch, and all 20 artifacts re-run. (2) The memory "noise
+> floor" was `max()` over a dict **keyed by configuration**, so the repeats
+> overwrote each other and one sample stood in for an estimate — that quantity
+> has been observed at 0.1328/0.0664/0.0977/0.0039 MiB, a factor of 34 — and
+> **three of four rank-variation verdicts flip to "not resolved"**; every
+> configuration is now measured 5x and the floor from 92 samples. (3) 17
+> list-valued flags across 8 drivers silently dropped a repeated occurrence, which
+> is how the N=64 surface ran half of itself and overwrote a complete artifact.
+> Retracted: "the variation with rank is RESOLVED at every grid". New finding:
+> **the cost ratios are not reproducible to better than ~15%** — 28% range at
+> fixed threads, and the thread count alone moves N=128 by 43%.
 
 ## Mission
 
@@ -1154,3 +1154,58 @@ artifacts. Verified against the pre-change tree. The four Re=5000 `tstar` rows
 and `tstar_r16_re1000` need re-pinning onto the rows-derived values (the block
 sat 6.4–9.3% below). `mem_noise_floor_mib` is pinned at one of the four
 single-sample values and cannot be satisfied by any correct measurement.
+
+## 2026-09-26 (session close) — provenance captured at launch, and the cost numbers
+
+**`provenance.py` was vacuous, and I proved it rather than arguing it.** It read
+`HEAD` and hashed the driver **when the artifact was written**. For any run that
+outlasted a commit those are read together, so `driver_matches_HEAD` compared the
+driver against itself. The N=64 surface is the demonstration: launched 07:40, a
+commit landed 07:45, written 08:24 — it recorded driver `98b3d61b`, the run used
+`4b2ca8f8`, and reported `driver_matches_HEAD: true, reproducible: true`. Both
+verdicts were wrong. The module's note said "git_commit is HEAD at launch", so the
+*intent* was right and the code had drifted from it.
+
+Fixed without touching ten drivers: at import (process start) the module snapshots
+the SHA-256 of every `.py` under `experiments/` and `solvers/` plus the wall-clock
+time; `git_commit` is then the commit HEAD *then* (`git log -1 --before=`),
+`driver_sha256` is the driver as it was then, and write-time state is recorded
+separately with `tree_moved_during_run`. **All 20 artifacts re-run** across four
+parallel streams. The N=64 surface then reproduced with **0 changed leaves out of
+4651** and landed with `tree_moved_during_run: true` and `reproducible: true` —
+the fix working, since the old scheme would have named the later commit.
+
+**The memory noise floor, extended.** With every configuration measured 5x, the
+floor is estimated from 92 same-configuration differences (0.0000–0.4258 MiB) and
+each overhead is a distribution. Verdicts at the new floor: N=64 projected 0.56x
+**not resolved**, N=64 BUG 0.79x **not resolved**, N=128 projected 0.40x **not
+resolved**, N=128 BUG 2.04x resolved *by 2%*. So "the variation with rank is
+RESOLVED at every grid" is withdrawn; the honest statement is that the projected
+integrator's spread over rank is not distinguishable from zero at either grid and
+the measurement cannot say more. D19.4's robust part stands: the reduced
+integrator costs MORE memory than the full grid at both grids.
+
+**The cost ratios are the weakest numbers in the project.** Five committed
+versions of one configuration: at a fixed thread count the N=128 max ratio ranges
+**2.14–2.74 (28%)** while the 7-repeat interleaved spread is 0.17–0.35 (7–10%);
+the thread count alone moves it **43%** (2.57 at one thread, 3.54 at two). The
+10:31 re-run was mine — launched with three other streams on the same twelve
+cores, and `cost_retiming.json`'s own `shared_node_note` says interleaving cannot
+control for load already present. `bench_cost.py` now records
+`threads_match_canonical`, because a 1-thread re-run landed within 6% of a 2-thread
+pinned value and that is not agreement.
+
+**Two more checks, each found by attacking a check.** `check_driver_flags.py`
+validates every flag in a launch script against the driver's own `--help`; it
+caught `--nsteps` on `run_long_time.py` and two flags that never existed
+(`--seed`, `--adaptive-rank`) before they cost a run. `check_driver_constants.py`
+does the complement job for parameters a driver holds as constants and therefore
+has no flag for — my first version of that check reported `False` for everything
+and could not distinguish, which is worse than no check.
+
+**Gate state at close.** `check_provenance.py`: PASS, 18/18 clean, 0 unverifiable,
+0 without a provenance block. `claims_registry.py`: 22 OK, 17 FAIL = 7 `tstar_*`
+to re-pin (values in `state/coder/results/README.md`), 4 zonal rows needing one
+line in the reviewer's `resolve`, 5 `mem_*` pinned to quantities that are now
+distributions by construction, 1 `cost_ratio_max_N128` needing a tolerance rather
+than a point. **59/59 tests pass.**
