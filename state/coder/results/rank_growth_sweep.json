@@ -45,10 +45,11 @@
     "driver_dirty": false,
     "driver_matches_HEAD": true,
     "driver_sha256": "bc47cb1efc512af0cd20e9b18193ecb7b569de1e77070479949a3b83beaca66d",
-    "git_commit": "dfbf2629912addf8d0c09635381da5dce1c410ae",
+    "git_commit": "7825a3be2b5a2e85a00f02ed98cc6a96788fe666",
     "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_dirty": false
+    "working_tree_diff_sha256": "cb10617cf33941d69c3fb3e5f63df24d68812891340e86bc3d321c7988ff58b1",
+    "working_tree_dirty": true
   },
   "rows": [
     {
@@ -58,7 +59,7 @@
       "rank_max": 36,
       "rank_min": 17,
       "relative_amplitude_cutoff": 1e-06,
-      "seconds_per_step": 0.010122991009848193,
+      "seconds_per_step": 0.009635197080206126,
       "stable": true
     },
     {
@@ -68,7 +69,7 @@
       "rank_max": 43,
       "rank_min": 17,
       "relative_amplitude_cutoff": 1e-08,
-      "seconds_per_step": 0.009884946205420419,
+      "seconds_per_step": 0.01044434682931751,
       "stable": true
     },
     {
@@ -78,7 +79,7 @@
       "rank_max": 43,
       "rank_min": 17,
       "relative_amplitude_cutoff": 1e-10,
-      "seconds_per_step": 0.010376681929919869,
+      "seconds_per_step": 0.00987230300437659,
       "stable": true
     }
   ]

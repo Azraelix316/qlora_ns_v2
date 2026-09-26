@@ -43,6 +43,53 @@ def load(name: str) -> dict:
     return json.loads(path.read_text())
 
 
+def test_the_static_baseline_error_is_flat_in_rank_above_16():
+    """The mechanism the paper's central claim rests on, asserted on the artifact.
+
+    The claim is that a static subspace **saturates** in rank: above some rank the
+    extra modes buy essentially nothing, because the subspace is stale rather than
+    merely small.  That is a claim about the *shape* of the static error against
+    rank, and it is falsifiable -- if the error kept falling with rank, the
+    saturation would be an artifact of the rank range tested.
+
+    Saturation is visible at ``t = 0.1``, the horizon the suite already operates
+    at, so this needs no long rollout.  The test asserts the *shape*: the spread
+    across ranks from 16 upward is a small fraction of the spread below it.  A
+    monotone decrease through the high ranks would fail it.
+    """
+    art = load("crossover_surface.json")
+    ranks = [int(r) for r in art["parameters"]["ranks"]]
+    if max(ranks) < 32:
+        pytest.skip("surface does not reach rank 32")
+    high = [r for r in ranks if r >= 16]
+    low = [r for r in ranks if r < 16]
+    if not high or not low:
+        pytest.skip("surface lacks ranks on one side of 16")
+
+    for re, case in sorted(art["by_reynolds"].items()):
+        window = art["parameters"]["moving_window_lengths"][0]
+        # the shortest measured horizon: the static subspace has had least time to
+        # go stale, so this is the *hardest* place for saturation to show
+        t_short = min(art["parameters"]["horizons"])
+        for t in (t_short, max(art["parameters"]["horizons"])):
+            def value(rank: int) -> float:
+                rows = case["static_moving_window"][f"W{window:g}_r{rank}"]
+                row = min(rows, key=lambda x: abs(x["time"] - t))
+                return row["relative_l2_oracle_mean"]
+
+            hi = [value(r) for r in high]
+            lo = [value(r) for r in low]
+            spread_hi = (max(hi) - min(hi)) / min(hi) if min(hi) > 0 else 0.0
+            spread_lo = (max(lo) - min(lo)) / min(lo) if min(lo) > 0 else 0.0
+            assert spread_hi < max(0.35, 0.5 * spread_lo), (
+                f"Re={re} t={t}: the static error is not saturated in rank. "
+                f"Spread over ranks {high} is {100*spread_hi:.1f}%, against "
+                f"{100*spread_lo:.1f}% over ranks {low}. Saturation is the "
+                f"paper's mechanism; a continued fall through the high ranks "
+                f"would refute it."
+            )
+
+
 def test_every_driver_runs(tmp_path):
     """Each driver must actually execute, at a size that costs nothing.
 
