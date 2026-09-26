@@ -251,6 +251,16 @@ def main():
     res = os.path.join(root, "state", "coder", "results")
 
     print("PART 1 — VERIFY every registry entry against its artifact\n")
+    # PRINT THE POPULATION (D87 / CHECKLIST 1.15). Part 1 reads state/coder/results, which is NOT
+    # reviewer's to own and is NOT present in every checkout — agent/reviewer's tree has 0 of the
+    # 17 artifact files, so a run from the reviewer worktree reports 0/18. That answer is honest
+    # but useless, and without this line a reader cannot tell which tree the run came from.
+    nart = len(glob.glob(os.path.join(res, "*.json")))
+    print(f"  POPULATION: {nart} artifact file(s) in {res}")
+    print(f"  ROOT: {root}")
+    if nart == 0:
+        print("  !! NO ARTIFACTS — every row will report 'artifact missing'. Run this from a tree")
+        print("     that has state/coder/results (the main checkout does; agent/reviewer does not).")
     ok_n, bad, values = 0, [], {}
     for cid, art, path, sel, field, expect, sf in REGISTRY:
         f = os.path.join(res, art)

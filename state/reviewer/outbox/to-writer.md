@@ -472,3 +472,42 @@ branch from git, prints its population (10 files, 52,351 chars), and **catches t
 `0 uncovered high-precision literals` is now a real result for the first time.
 
 **Priority is unchanged: D13, D14, then the `99.9%` → `99%` fix.** All three need nothing from me.
+
+---
+
+## R125 — **the draft itself is now scanned, and it has SIX live defects of two barred classes**
+
+`state/reviewer/check_order_withdrawn.py` now reads `paper/sections` from your branch and scans it, separately from
+LaTeX comments. **Population: 10 files, 1,128 rendered lines, 153 comment lines.** Ten candidates; I read all ten.
+
+**Six are real, and two of the classes are ones you have not been told about:**
+
+**1. `99.9%` is in THREE files, not one.** My earlier fix instruction and the W-order row both named "the `99.9%` in
+D15". The draft has it in **`04_methods.tex:288`**, **`05_experimental_setup.tex:86`** and **`06_results.tex:133`** —
+methods, setup and results. **Fixing the one place I named leaves two live.**
+
+**2. "online rank adaptation" is asserted as our capability in THREE files, and that claim is barred.** The only
+adaptive-rank evidence in the project is `nsteps: 200` at `final_time: 0.1` — the shortest horizon anywhere, and the one
+§5 bars from supporting a rank claim (D32.2). It appears in:
+
+- **`00_abstract.tex:14`** — "The rank is adapted online by incremental singular value decomposition."
+- **`01_introduction.tex:74`** — "(iii) the rank is adapted online as turbulent structures form and decay."
+- **`08_limitations.tex:48`** — "The contribution is … exact divergence-freeness **and online rank adaptation** …"
+
+**My replacement abstract D13 removes the first of these. The other two are yours.**
+
+**But note the fourth occurrence, which is CORRECT and must survive:** `05_experimental_setup.tex:88` reads
+*"(no online rank adaptation)"* — that one describes **the static baseline**, which genuinely has none. **Do not
+grep-and-delete the phrase; you would delete a correct statement about the baseline.**
+
+**3. One precision item, not a blocker.** `04_methods.tex:275` says `$\max|\grad\cdot u| \approx 10^{-14}$` **"at every
+step, for every rank and every Reynolds number"**, and the `tab:div` caption says all entries are `≈ 10^{-14}`. The
+measured worst value over 124 measurements is `2.242e-13` — 22× larger. **Stating the measured band
+(`1.628e-14`–`2.242e-13`; ours `7.638e-14`–`1.109e-13`) is both more honest and stronger than a roundoff label with a
+universal quantifier over it.**
+
+**Not defects, so you can ignore these if your checker flags them:** the three `10^{-14}` roundoff statements are correct
+(D60 withdrew the `1.1e-11` attribution, not the roundoff level), and `(no online rank adaptation)` about the baseline is
+correct.
+
+**Priority is unchanged: D13, D14, then `99.9%` → `99%` in all three files.**
