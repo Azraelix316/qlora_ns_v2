@@ -1,24 +1,25 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: Submittable-code state reached on the coder side. **62 of 62 tests
-> pass; all four reviewer gates run; working tree clean; everything pushed.**
-> `check_provenance.py` **PASS** (18/18 runs fingerprinted and clean, 0
-> unverifiable, 0 without a provenance block). `claims_registry.py` 22 OK / 17
-> FAIL with **every** failure diagnosed and the exact re-pin values handed over.
-> `check_order_withdrawn.py` 4 candidates: **one live error in the paste-ready
-> blocks** (D52.5's "2.2-2.7x in every regime" is false at N=128 under the
-> canonical thread setting -- 3.37-3.54) and three verified correct (D104, D67,
-> D122). All six paper figures regenerate as PDF+PNG in `paper/figures/`;
-> `make_summary.py` reports `all_inputs_reproducible: true` with no input lacking
-> launch-time provenance. **20 of 23 artifacts now record their software stack**
-> (`provenance.environment`): 14 of 23 recorded none at all before this, so a
-> `reproducible: true` claim rested on the driver matching and on nothing about
-> the numpy, BLAS or thread count. The code state is finished; what remains is
-> the reviewer's: 7 `tstar_*` re-pins, a one-line dotted-path fix in their
-> `resolve`, 5 `mem_*` rows that now pin distributions by construction, 1 cost
-> row needing a tolerance, and the `check_paper_builds.py` resolution model
-> (measured: 0/6 against the including file, 6/6 against the main document).
+> Status: **64 of 64 tests pass; all four reviewer gates run; working tree
+> clean; everything pushed at `6bbd1aa`.** Gate state: `check_provenance.py` **PASS**
+> (18/18 runs fingerprinted and clean, 0 unverifiable, 24 artifacts).
+> `claims_registry.py` **34 OK / 1 FAIL** — up from 22/17, because the reviewer
+> applied all seven `tstar_*` re-pins at the values I supplied and fixed the
+> dotted-path descent in their `resolve`, so the four zonal rows resolve for the
+> first time. The one remaining failure is `mem_noise_floor_mib`, and it is **not a
+> number problem**: the floor is by construction the maximum of 92 same-configuration
+> differences, so no point value can pin it; it wants a tolerance or a
+> distributional claim, and the decision is the reviewer's.
+> `check_paper_builds.py` 4 defects, all the single wrong citation key
+> (`koch2019dlra`); `check_order_withdrawn.py` 4 candidates, 3 verified correct.
+> Re-pin requests are now **generated from the gate's own output**
+> (`make_repin_requests.py`) with a test that fails if the list goes stale, so
+> twelve 16-significant-figure values are never hand-transcribed. Measured this
+> cycle: `claims_registry.py` PART 3 checks **1 of 296** numbers in the paper's
+> prose, and the abstract's headline `0.649` is invisible to it at 3 significant
+> figures. Two abstract numbers remain untraceable from the artifacts (`1.71` and
+> "85%") and are flagged rather than guessed. Nothing outstanding on my side.
 
 ## Mission
 
@@ -1248,3 +1249,43 @@ files: it takes the draft from `origin/main`, so against my branch it needs
 **Final state: 62/62 tests pass. `check_provenance.py` PASS. `claims_registry.py`
 22 OK / 17 FAIL, all diagnosed. Six paper figures regenerate as PDF+PNG. Working
 tree clean, branch pushed.**
+
+## 2026-09-26 (close) — the registry closed to one row, and the list is now generated
+
+**`claims_registry.py` went 22 OK / 17 FAIL → 34 OK / 1 FAIL.** The reviewer applied
+all seven `tstar_*` re-pins at exactly the values supplied from the rows
+(`0.7076762337623602`, `1.5981858222903682`, …) and made `resolve` descend on `.`,
+so the four `zonal_share_energy_*` rows resolve against the nested artifacts for the
+first time — verified against the pre-change artifacts, where they never could.
+
+**The last row is a decision, not a value.** `mem_noise_floor_mib` holds 0.328125
+and the floor now measures 0.3984375, but neither is durable: the floor is *by
+construction* the maximum of 92 same-configuration differences, and it has been
+0.1328 / 0.0664 / 0.0977 / 0.0039 as a single sample and 0.3242 / 0.1289 / 0.1445 /
+0.3281 / 0.3984 as a max-of-92. It wants either a tolerance on the median (0.2031)
+or a distributional claim reading `noise_floor_samples_mib`. Recommended the
+second, because the verdicts are taken against the maximum on purpose and a median
+row would understate the resolution they use — the same class of error as D67's
+99.9%: a true number that is not the one the claim is about.
+
+**`experiments/make_repin_requests.py` generates the list from the gate's own
+output**, so a row that stops failing leaves it and a row that starts failing joins
+it. That is why it reads one row today and seventeen yesterday — not because it was
+edited, but because sixteen were fixed. A hand-maintained list would be stale the
+moment the gate moved. `test_the_repin_request_list_is_current_and_explains_every_row`
+regenerates and fails on any difference, and asserts every row carries a stated
+reason so an unexplained failure is listed rather than dropped.
+
+**`claims_registry.py` PART 3 checks 1 of 296 numbers in the paper's prose.** The
+abstract's headline `0.649` is `sig_figs == 3`, one digit short of the threshold —
+and it is the literal `sig_figs`'s own docstring uses as its example. Of the
+eighteen a 3-s.f. threshold would give, ten are correct and merely unregistered
+(including all four divergence values and all four zonal shares — verified, not
+assumed), three are stale (`0.649`, `1.482`, `1.45`) and one (`1.71`) reconciles
+with nothing constructible from the artifacts. Correcting to `0.7077` fixes the
+number *and* brings it under the gate, because four significant figures clears the
+threshold.
+
+**Two numbers left open rather than guessed:** `1.71` and the abstract's "differ by
+up to 85%". A value search is a haystack — 0.85 appears 671 times and 1.71 134 times
+across the series, every hit coincidental — so no match is claimed.

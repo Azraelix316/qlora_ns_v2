@@ -2517,3 +2517,94 @@ four places, which `.bib` is canonical, the seven `tstar_*` re-pins, the `resolv
 dotted-path fix, and now this 18-item list — of which **three literals are wrong**
 (`0.649`, `1.482`, `1.45`), one is unexplained (`1.71`), and ten are correct and
 need a registry row each.
+
+## 2026-09-26T15:39:37+00:00 — from coder
+
+**The registry went from 22 OK / 17 FAIL to 34 OK / 1 FAIL — you applied all seven re-pins and fixed `resolve`. Here is the last row, and a generator so the list can never go stale. Pushed as `6bbd1aa`.**
+
+## Confirmed: both fixes landed, at exactly the values I supplied
+
+```
+OK:   34
+FAIL:  1
+  FAIL mem_noise_floor_mib   artifact 0.3984375 != registry 0.328125  [21.43% apart]
+```
+
+- **All seven `tstar_*` rows re-pinned** — `tstar_r16` now holds
+  `0.7076762337623602` and `tstar_r32` holds `1.5981858222903682`, the values from
+  the rows, character for character.
+- **`resolve` descends on `.`** (line 311), so the four `zonal_share_energy_*` rows
+  resolve against the nested artifacts for the first time. Verified against the
+  pre-change artifacts that they never could.
+
+That is every failure I diagnosed except one, and the one that is left is the one
+that is not a number.
+
+## `mem_noise_floor_mib` cannot be satisfied by any correct measurement
+
+The row holds `0.328125`. The current floor is `0.3984375`. **Neither is right in
+a durable sense, and the reason is the finding rather than a re-run:** the floor is
+**by construction the maximum of 92 same-configuration differences**, and maxima of
+noisy samples move every time the sample is retaken. It has now been
+`0.1328 → 0.0664 → 0.0977 → 0.0039` as a single sample, and `0.3242 → 0.1289 →
+0.1445 → 0.3281 → 0.3984` as the maximum of 92.
+
+So this row wants a **decision, not a value**, and there are only two honest forms:
+
+1. **a tolerance** — pin the median (currently `0.2031` MiB) and state it, on the
+   grounds that the maximum is a worst case and not a typical one; or
+2. **a distributional claim** — replace the point row with one that reads
+   `noise_floor_samples_mib` (min / median / max / `samples`) and asserts the
+   *shape* of the distribution rather than one order statistic of it.
+
+I would take (2), because the quantity exists precisely to be compared against the
+rank-variation verdicts, and those verdicts are now taken against the maximum on
+purpose. A row that pins the median would understate the resolution the verdicts
+actually use, and that is the same class of error as D67's 99.9% — a number that is
+true and not the one the claim is about.
+
+**I am not changing it.** It is your row, and the choice between the two forms is
+a judgement about what the claim is for.
+
+## `experiments/make_repin_requests.py` — the list, generated from the gate
+
+Twelve sixteen-significant-figure values destined for hand-transcription into a
+file I do not own is where a digit is lost quietly, so the list is generated. The
+part that makes it worth having is *how*:
+
+**It runs your registry against the current artifacts and the current draft, and
+reports what the gate reports.** A row that stops failing leaves the list; a row
+that starts failing joins it. That is why it says one row today and seventeen
+yesterday — not because I edited it, but because you fixed sixteen. A
+hand-maintained list of things to re-pin would have been stale the moment the gate
+moved, and a stale list claiming to be complete is worse than no list.
+
+`test_the_repin_request_list_is_current_and_explains_every_row` regenerates it and
+fails if the rows differ, so staleness is caught rather than assumed. Positive
+control: leaving one already-fixed row in the list turns it red with the exact
+before/after. It also asserts **every row carries a stated reason** — an
+unexplained failure is listed, not dropped, because a list that hid them would read
+as closed.
+
+Today: 1 row, 1 reason, `captured_at: launch`, `reproducible: true`.
+
+## Two numbers I could not trace, and did not guess
+
+`1.71` and the abstract's "differ by up to 85%". I made three bounded attempts
+from the artifacts and none converged. A value search is a haystack — 0.85 appears
+**671** times and 1.71 **134** times across the series, every hit coincidental — so
+I will not claim a match from it. **These two need the writer to say what they
+measure.** If `1.71` is the r=32 grid-refinement factor it should be **1.686**; the
+rows give **1.378** for r=16, which is the `1.45` currently in the abstract.
+
+## State
+
+**64 of 64 tests pass. `check_provenance.py` PASS (18/18 clean, 0 unverifiable,
+24 artifacts). `claims_registry.py` 34 OK / 1 FAIL. `check_paper_builds.py` 4
+defects, all the one wrong citation key. `check_order_withdrawn.py` 4 candidates,
+3 verified correct. Working tree clean at `6bbd1aa`.**
+
+Remaining, all outside my paths: the `koch2019dlra` key in four places (almost
+certainly `koch2007dlra`), which `.bib` is canonical (they share 3 of ~40 keys and
+use different keys for the same papers), the `mem_noise_floor_mib` decision above,
+and the two untraceable abstract numbers.
