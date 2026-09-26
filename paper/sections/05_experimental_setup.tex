@@ -3,10 +3,15 @@
 \section{Experimental setup}
 \label{sec:setup}
 
-The validation follows the reviewer's acceptance ladder
-(CHECKLIST, items L1--L4): a laminar smoke test, forced turbulent runs at
-three Reynolds numbers, a full-grid spectral reference, and a static POD
-baseline.
+The validation is staged so that each step tests one thing. We first verify the
+scheme on a laminar flow with a known solution, then run the forced turbulent
+problem at three Reynolds numbers, and we compare against two references
+throughout: a full-grid spectral solution of the same problem, which supplies
+the error and the energy statistics, and a static proper orthogonal
+decomposition baseline built from the reference run, which isolates what the
+reduced representation buys at equal rank. We report the reduced method against
+both at every Reynolds number, and we report the invariants in Section
+\ref{sec:invariants} for every method rather than for the reduced one alone.
 
 \subsection{L1: Taylor--Green laminar decay}
 \label{sec:taylor-green}
@@ -25,13 +30,14 @@ with $A = 1$
 and viscosity $\nu$ fixed by the chosen Reynolds number
 $\mathrm{Re} = 2\pi/\nu^2$
 % [PENDING-CODER: confirm Re value used for the laminar decay run.]
-, the flow decays monotonically: $E(t)$ is non-increasing by
-\eqref{eq:energy}, and the singular values of $\psi(\cdot,\cdot,t)$ decay
-rapidly. This test verifies (i) the discrete energy monotonicity (I2,
-unforced), (ii) the exact divergence-free property (I1), and (iii) the
-$\sigma_{\mathrm{tol}}$ decay rule of Section~\ref{sec:rank-adaptation},
-which should drive the rank $3 \to 2 \to 1$ as the vortex dissipates
-(Figure~\ref{fig:tg}).
+. This test verifies (i) the discrete energy monotonicity (I2, unforced) and
+(ii) the exact divergence-free property (I1). It also fixes what the rank
+criterion must \emph{not} do. The Taylor--Green stream function is a single
+Fourier mode, so the state has numerical rank one from the outset, and the
+criterion must recognise that rather than spend rank on a spectrum that is not
+there: the run holds rank one throughout, as it should. Establishing how the
+criterion behaves as a state \emph{gains} breadth is a question about the forced
+runs, and we take it up there.
 
 \subsection{L2: forced turbulent runs}
 \label{sec:forced}
@@ -40,22 +46,67 @@ The main experiments are forced Kolmogorov-flow runs with
 $f = F\sin y\, e_x$ at
 \begin{equation}
   \mathrm{Re} \in \{100,\; 1000,\; 5000\},
-  \qquad \mathrm{Re} = 2\pi F/\nu^2,
+  \qquad \mathrm{Re} = 2U/\nu,
   \label{eq:re-set}
 \end{equation}
-% [PENDING-CODER: confirm the (F, nu) pairing for each Re in
-% {100, 1000, 5000}.]
-on grid resolution $N = \text{[PENDING-CODER]}$
-% [PENDING-CODER: grid resolution N (and any resolution dependence check) for
-% each Re.]
-with time step $\Delta t = \text{[PENDING-CODER]}$
-% [PENDING-CODER: time step / time-stepping policy for each Re.]
-and initial condition
-$\text{[PENDING-CODER: initial condition, e.g.\ Kolmogorov equilibrium plus
-perturbation]}$.
-% [PENDING-CODER: confirm IC and total simulation time, including the length
-% of the spin-up (discarded) phase and the statistical (retained) window.]
-Each run records the invariants I1--I4 of
+on grid resolution $N = 64$, and $N = 128$ at $\mathrm{Re} = 5000$, with time
+step $\Delta t = 5\times 10^{-4}$ and $2.5\times 10^{-4}$ respectively --- the
+step halves with the resolution, which holds the Courant number fixed rather
+than the step alone, and the measured Courant numbers of the two runs differ by
+under $6\%$. The initial condition is the Kolmogorov equilibrium at base speed
+$0.5$ perturbed by a field of velocity RMS $1.0$ built from the modes below
+cutoff $8$, from a fixed seed. Runs are integrated to $t = 0.1$, and the
+$\mathrm{Re} = 5000$ case is also run to $t = 1.0$ at ten times the step count.
+The per-run configuration is transcribed from the run records in
+\texttt{state/coder/results/} ---
+\texttt{kolmogorov\_re100\_N64.json}, \texttt{kolmogorov\_re1000\_N64.json},
+\texttt{kolmogorov\_re5000\_N64.json} and
+\texttt{kolmogorov\_re5000\_N128.json}, referred to by their stems --- with
+the source key named in each row of Table~\ref{tab:forced-params}.
+\begin{table}[t]
+\centering
+\caption{Forced-run configuration, per run (Section~\ref{sec:forced}); bold
+marks the values that differ between runs. The longer run
+\texttt{kolmogorov\_re5000\_N64\_long.json} reuses the
+\texttt{re5000\_N64} column with $T = 1.0$ at ten times the step count.}
+\label{tab:forced-params}
+\small
+\begin{tabular}{lccccl}
+\toprule
+parameter
+  & \texttt{re100\_N64}
+  & \texttt{re1000\_N64}
+  & \texttt{re5000\_N64}
+  & \texttt{re5000\_N128}
+  & source key \\
+\midrule
+$N$ & 64 & 64 & 64 & \textbf{128} & \texttt{grid/N} \\
+$L$ & $2\pi$ & $2\pi$ & $2\pi$ & $2\pi$ & \texttt{grid/L} \\
+$\Delta t$ & $5\times10^{-4}$ & $5\times10^{-4}$ & $5\times10^{-4}$
+  & \textbf{$2.5\times10^{-4}$} & \texttt{parameters/dt} \\
+$T$ & 0.1 & 0.1 & 0.1 & \textbf{0.05} & \texttt{parameters/final\_time} \\
+$F$ & 0.5 & 0.5 & 0.5 & 0.5 & \texttt{parameters/force\_amplitude} \\
+$U$ & 0.5 & 0.5 & 0.5 & 0.5 & \texttt{parameters/base\_speed} \\
+$\nu$ & \textbf{$10^{-2}$} & \textbf{$10^{-3}$} & \textbf{$2\times10^{-4}$}
+  & $2\times10^{-4}$ & \texttt{viscosity} \\
+$\mathrm{Re}$ (stated) & 100 & 1000 & 5000 & 5000 & \texttt{reynolds} \\
+cutoff & 8 & 8 & 8 & 8 & \texttt{parameters/cutoff} \\
+$r$ min / initial & 2 / 2 & 2 / 2 & 2 / 2 & 2 / 2
+  & \texttt{parameters/dlra\_min\_rank}, \texttt{dlra\_initial\_rank} \\
+$r$ max & 43 & 43 & 43 & \textbf{85} & \texttt{parameters/dlra\_max\_rank} \\
+basis-refresh interval & 5 & 5 & 5 & 5
+  & \texttt{parameters/dlra\_check\_every} \\
+relative amplitude cutoff & $10^{-10}$ & $10^{-10}$ & $10^{-10}$ & $10^{-10}$
+  & \texttt{parameters/dlra\_relative\_amplitude\_cutoff} \\
+$\max|\grad\cdot u|$ (full grid) & $2.58\times10^{-14}$ & $2.66\times10^{-14}$
+  & $2.49\times10^{-14}$ & \textbf{$6.22\times10^{-14}$}
+  & \texttt{full/max\_abs\_divergence} \\
+\bottomrule
+\end{tabular}
+\end{table}
+The halving of $\Delta t$ and $T$ with the grid means the two resolutions are
+compared over the same number of steps (200), the right choice for a
+per-step cost comparison. Each run records the invariants I1--I4 of
 Section~\ref{sec:invariants}: rank over time, singular-value decay,
 divergence-free residuals, kinetic energy and its spectrum, and per-step
 costs.
@@ -68,9 +119,6 @@ stream-function formulation \eqref{eq:stream-ns} on the full grid with a
 spectral method (Fourier collocation, exact $\Delta$ and $\Delta^{-1}$,
 same de-aliasing policy and time-stepping policy as the SP-DLRA runs)
 \cite{orszag1971}.
-% [PENDING-CODER: confirm the reference scheme's integrator, de-aliasing,
-% time step, and grid (possibly finer than the SP-DLRA grid), and how
-% reference fields are sampled for error/invariant comparison.]
 The reference solution $\psi_{\mathrm{ref}}$ is the ground truth for the
 relative error
 $\norm{\Psi - \psi_{\mathrm{ref}}}_2 / \norm{\psi_{\mathrm{ref}}}_2$ and for
@@ -81,15 +129,14 @@ the kinetic-energy statistics of I4.
 
 As the static-basis baseline we build an offline proper orthogonal
 decomposition (POD) from snapshots of the reference run of each
-Reynolds number \cite{sirovich1987, lumley1967}: the snapshot matrix is
-eigen-decomposed and truncated at the smallest number of modes
-$r_{\mathrm{POD}}$ resolving 99\% of the (snapshot) energy. The baseline
-model is the Galerkin projection of the dynamics onto this \emph{fixed}
-basis (no online rank adaptation), advanced with the same nonlinear
-residual evaluation as SP-DLRA.
-% [PENDING-CODER: confirm the snapshot window used for the POD (statistical
-% window only), the exact energy threshold (99%), the Galerkin baseline
-% integrator, and how the POD basis handles the forcing term.]
+Reynolds number \cite{sirovich1987, lumley1967}: the fit set is the initial
+state and every fifth state of the first $100$ steps of the reference run, and
+the snapshot matrix is eigen-decomposed and truncated at the fixed rank
+$r_{\mathrm{POD}} = 16$. The baseline model is the Galerkin projection of the
+dynamics onto this \emph{fixed} basis (no online rank adaptation), advanced
+with the same nonlinear residual evaluation as SP-DLRA, the forcing term
+included: the forcing is evaluated on the full grid and the state is
+re-projected onto the basis at each stage boundary.
 The POD baseline measures the cost of staticity: whether a fixed basis of
 size $r_{\mathrm{POD}}$ can track the dynamics at a cost and accuracy
 comparable to the adaptive rank-$r(t)$ SP-DLRA model.
@@ -117,11 +164,12 @@ We report, per Reynolds number:
 \subsection{Hardware and reproducibility}
 \label{sec:repro}
 
-All experiments are single-node.
-% [PENDING-CODER: hardware (CPU/GPU), software stack and versions, and total
-% compute budget per (Re, N).]
-Per the project's reproducibility checklist (CHECKLIST, item 1.1), every
-number and figure in the paper is traceable to a run record in
+All experiments run on a single x86_64 Linux node (Python 3.12.3, NumPy
+2.5.3), with the linear-algebra thread pools pinned to two threads in the
+timing runs, the pinning recorded in each timing artifact. Wall-clock time
+is recorded per run, and the timing protocol and its caveats are given in
+Section~\ref{sec:cost}.
+Every number and figure in the paper is traceable to a run record in
 \texttt{state/coder/results/} with its configuration, driver script, and
 source commit; figures are generated from those records by scripts under
 \texttt{experiments/}.
