@@ -1639,3 +1639,73 @@ the guard existed this morning, the deleted Re=5000 surface would still be there
 I will report the corrected Re=5000 `t*` values, then run `make_summary.py` →
 `make_figures.py` → `benchmark_summary.json` → `check_provenance.py` and the
 registry, and give you the §1/§3 numbers that move.
+
+## 2026-09-26T07:50:41+00:00 — from coder
+
+**A consequence of the `ListOnce` change I owe you before it becomes a surprise: it invalidated the recorded provenance of 10 artifacts, and I built a gate that says which of them actually matter. Pushed as `ff418a9`.**
+
+## The problem I created
+
+`provenance.py` decides `driver_matches_HEAD` by comparing the driver on disk with
+the one in the recorded `git_commit`, and `reproducible` follows it. Editing seven
+drivers to add `action=ListOnce` therefore made every artifact those drivers
+produced non-reproducible — including a T=8 baseline and a T=20 pilot — while
+changing **no arithmetic anywhere**. `reproducible: true` is now false on ten
+committed artifacts, and that is the system working correctly, not a regression.
+
+I could not avoid it (the fix was right) and I cannot re-run everything (the T=20
+pilot alone is hours), so the useful thing is to say **which artifacts are in
+question and why**, mechanically.
+
+## `experiments/check_driver_drift.py`
+
+For each artifact it recovers the driver as it was at the recorded commit, strips
+`action=ListOnce` and its import from the current file, and compares the **parsed
+structure**:
+
+| state | count | meaning |
+|---|---|---|
+| `current` | 7 | driver on disk matches the recorded sha256 |
+| `wiring-only` | 9 | parsed structure **identical** once the wiring is removed |
+| `substantive` | 4 | parsed structure differs beyond the wiring |
+
+**This classifier was wrong the first time and the way it was wrong matters.** My
+first version compared *lines*, and adding `action=ListOnce` to an `add_argument`
+that already spanned two lines pushes its `default=` onto a continuation line — so
+a pure wiring change produced `+ default=[64, 128])` and **13 of 20 artifacts were
+labelled "substantive"**. Comparing parsed structure cannot have that failure: a
+continuation line is not a node. `test_the_driver_drift_classifier_separates_wiring_from_computation`
+tests both directions on synthetic sources (a changed `default=` inside the same
+`add_argument` call must count as substantive; a changed `return` must too), and
+positive control — making the classifier always say "wiring-only" — turns it red.
+
+## The four substantive ones, named
+
+All four are changes to what is *written or described*, not to the arithmetic:
+
+- **`cost_retiming.json`, `cost_bug_port.json`** — a `dealias_rank_ceiling_is`
+  description string was added to the artifact. The numbers are untouched; the
+  file gains a key. (This is D30.2's documentation, landing after those runs.)
+- **`kolmogorov_re5000_N64_long.json`** — the zonal-share refactor from this
+  morning (`_zonal_fraction` → `_share_block` + `zonal_fraction_semantics`). The
+  share is the same formula; the artifact gains keys.
+- **`baselines_re5000_N64_rankladder_T8.json`** — `json_safe` was added, and this
+  one *does* change written values: any non-finite float is now `null` rather
+  than `Infinity`. It only bites artifacts that contain a non-finite entry.
+
+**So: nine artifacts need no re-run for a provable reason, one needs a judgement
+call about `json_safe`, and three gain keys without changing values.** I am not
+asking you to accept the wiring-only nine on my word — the gate prints the AST
+comparison that establishes it, and you can re-run it.
+
+**One thing I should flag rather than let you discover.** The crossover surface
+currently in flight launched at 07:40 and I committed the `ListOnce` change at
+07:47, so it will land with `driver_matches_HEAD: false` for the same reason. That
+one **I will simply re-run** — it is the paper's central artifact and an hour is
+a fair price for `reproducible: true` on it. The T=8 baseline and the T=20 pilot
+are the ones where re-running is not obviously worth it, and that is your call,
+not mine.
+
+## In flight
+
+N=64 surface on Re=5000 rank 8 of 6. **57 of 57 tests pass.**
