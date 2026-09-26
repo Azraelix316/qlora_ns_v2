@@ -1231,3 +1231,73 @@ and Zhang, and claims no priority it cannot support. **Leave it exactly as it is
 (*"with adaptive rank"*) **is correct** — the runs did use an adaptive rank criterion — and `check_order_withdrawn.py` is
 deliberately scoped not to flag it. **Do not "fix" a sentence that is right; I have changed two gate patterns this cycle
 and one of them had a false positive precisely because a correct sentence looked like a defect.**
+
+---
+
+## D124 — **THE SETUP MARKERS ARE ALL CLOSABLE NOW: EVERY PARAMETER THEY ASK FOR IS IN THE ARTIFACTS. AND ONE OF THEM HAS A REAL DEFECT — THE **Re CONVENTION** IS UNSTATED, AND THE TWO COMMON CONVENTIONS DIFFER BY A FACTOR OF `π`.** (2026-09-26)
+
+**POPULATION: `50` `PENDING-CODER` MARKERS. `5` ASK FOR A WITHDRAWN QUANTITY (D122 — delete, do not fill). `~8` ARE
+FIGURE/DATA AND ARE C11-1. THE REST — `~20` — SAY "CONFIRM X" WHERE X IS A SETUP PARAMETER, AND **EVERY ONE OF THE `13`
+PARAMETER CLASSES THEY NAME IS ALREADY IN `state/coder/results/`. I SCANNED `21` ARTIFACTS AND `441` DISTINCT KEYS; ALL `13`
+ARE PRESENT. SO ~20 MARKERS NEED NO CODER AT ALL — THEY ARE TRANSCRIPTION.** This is the block below.
+
+### `D124.1` — THE CANONICAL CONFIGURATION, PER RUN, WITH THE KEY IT COMES FROM
+
+| parameter | `re100_N64` | `re1000_N64` | `re5000_N64` | `re5000_N128` | source key |
+|---|---|---|---|---|---|
+| `N` | 64 | 64 | 64 | **128** | `grid/N` |
+| `L` | 2π | 2π | 2π | 2π | `grid/L` |
+| `dt` | 5e-4 | 5e-4 | 5e-4 | **2.5e-4** | `parameters/dt` |
+| `T` | 0.1 | 0.1 | 0.1 | **0.05** | `parameters/final_time` |
+| forcing amplitude `F` | 0.5 | 0.5 | 0.5 | 0.5 | `parameters/force_amplitude` |
+| base speed `U` | 0.5 | 0.5 | 0.5 | 0.5 | `parameters/base_speed` |
+| `nu` | **1e-2** | **1e-3** | **2e-4** | 2e-4 | `viscosity` |
+| `Re` (stated) | 100 | 1000 | 5000 | 5000 | `reynolds` |
+| `cutoff` | 8 | 8 | 8 | 8 | `parameters/cutoff` |
+| `r` min / initial | 2 / 2 | 2 / 2 | 2 / 2 | 2 / 2 | `parameters/dlra_min_rank`, `dlra_initial_rank` |
+| `r` max | 43 | 43 | 43 | **85** | `parameters/dlra_max_rank` |
+| basis-refresh interval | 5 | 5 | 5 | 5 | `parameters/dlra_check_every` |
+| relative amplitude cutoff | 1e-10 | 1e-10 | 1e-10 | 1e-10 | `parameters/dlra_relative_amplitude_cutoff` |
+| `max abs div u` (full grid) | 2.58e-14 | — | — | — | `full/max_abs_divergence` |
+
+`dt` **halves with `N`** (5e-4 → 2.5e-4) and `T` halves with it (0.1 → 0.05), so the two grids are compared over the **same
+number of steps** — which is the right choice for a cost-per-step comparison and should be said.
+
+### `D124.2` — **AND HERE IS THE DEFECT: THE Re CONVENTION IS NOT STATED ANYWHERE, AND THE TWO COMMON CONVENTIONS DIFFER BY `π`.**
+
+The artifacts' stated `Re` is **exactly `2U/nu`** in all three runs — verified: `2(0.5)/0.01 = 100`, `2(0.5)/0.001 = 1000`,
+`2(0.5)/0.0002 = 5000`, all exact. Equivalently `Re = U/(nu k)` with **`k = pi/L = 0.5`, the fundamental**, not `k = 2pi/L`.
+
+| convention | `Re` at `U=0.5, nu=0.01, L=2pi` |
+|---|---|
+| **`2U/nu` — what the artifacts use** | **100** |
+| `U/(nu k)` with `k = 2pi/L` | 50 |
+| `U L / nu` | 314.2 |
+
+**SO A READER WHO ASSUMES EITHER OTHER CONVENTION IS OFF BY A FACTOR OF `2` OR `π`, AND §4/§5 CURRENTLY ASK THE CODER TO
+"CONFIRM THE Re DEFINITION" WITHOUT THE DRAFT EVER STATING ONE.** Two of the three conventions are common in the literature, so
+this is a real ambiguity, not a technicality. **State it in §4 in one clause: `Re = 2U/nu`, with `U` the Kolmogorov base
+speed and `L = 2pi`; equivalently `U/(nu k)` at the fundamental `k = 1`.** Then the `nu` values above are unambiguous and the
+markers asking for "the exact `(F, nu)` pairing for each Re" are answered by the table.
+
+### `D124.3` — WHAT THIS CLOSES, AND WHAT IT DOES NOT
+
+**CLOSES WITHOUT THE CODER (~20 markers):** every "confirm `N` / `dt` / stepping policy / `F` / `nu` / `Re` / `IC` / total
+time / snapshot window / cutoff / de-aliasing policy / rank rule and tolerances / spin-up / `max abs div u` / hardware and
+software stack / results-directory layout" marker. The values are the table; the source key is named so a reader can check
+any of them in one command.
+
+**STILL THE CODER'S (C11-1):** the eight "generate from the LN run records" / "confirm the curves and the error magnitudes" /
+"confirm the times and values shown" markers — **those are waiting for the five figures that no code generates, and they cannot
+be closed before C11-1 lands.**
+
+**STILL DELETED, NOT FILLED (D122):** the five `r*(Re)` / `r_POD(Re)` markers.
+
+### `D124.4` — AND ONE HONEST CAVEAT, BECAUSE I ALMOST SHIPPED A MISLEADING TABLE
+
+My first attempt at this table took **the first artifact that had each key**, which mixed runs and reported `T = 0.1` beside
+`N = 128`'s other values — a number that is right for one run and wrong for another, presented as though it were *the* value.
+**That is D111's error and I caught it because `T = 0.1` looked wrong next to a 201-step trace.** **The table above is
+per-run, with the artifact named, because these parameters are per-run and §5 must present them that way.** If §5 states a
+single canonical configuration instead, it must say which run it is.
+

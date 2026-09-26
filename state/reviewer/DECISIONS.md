@@ -8443,3 +8443,51 @@ not "fix" a correctly-red gate by regenerating the artifact against a shim.
 **D123.6 - Unchanged.** Everything in D35.6 through D122.7 stands, **except that C8-1 is code-complete rather than closed, the
 provenance gate is verified on a population of 21, and the new N=32 artifact is DIRTY and needs a clean re-run.**
 
+---
+
+## D124 — **THE ~20 "CONFIRM A SETUP PARAMETER" MARKERS NEED NO CODER: EVERY PARAMETER THEY NAME IS ALREADY IN THE ARTIFACTS. AND ONE HAS A REAL DEFECT — THE **Re CONVENTION** IS UNSTATED, AND THE TWO COMMON CONVENTIONS DIFFER BY A FACTOR OF `π`.** (2026-09-26)
+
+> **OPERATIVE (R160). THE THREE BUCKETS OF THE `50` MARKERS ARE NOW EXPLICIT: `~20` TRANSCRIPTION (CLOSABLE NOW), `~8`
+> FIGURES (C11-1), `5` WITHDRAWN-QUANTITY TRAPS (DELETE). §4 MUST STATE `Re = 2U/nu`.**
+
+**D124.1 - THE MEASUREMENT THAT RECLASSIFIES THE QUEUE. I SCANNED `21` ARTIFACTS IN `state/coder/results/` AND COUNTED `441`
+DISTINCT KEYS, THEN ASKED FOR EACH OF THE `13` PARAMETER CLASSES THE "CONFIRM" MARKERS NAME. **ALL `13` ARE PRESENT.** So the
+markers that read *"confirm the Re definition and the exact `(F, nu)` pairing"*, *"confirm amplitude A, viscosity nu, grid N,
+time span"*, *"confirm the time step / time-stepping policy for each Re"*, *"confirm IC and total simulation time"*, *"confirm
+the snapshot window used for the POD"*, *"confirm the rank rule and the tolerances"*, *"confirm the reference scheme's
+integrator, de-aliasing"* — **NONE OF THEM NEEDS THE CODER. THEY ARE TRANSCRIPTION, AND THE TABLE IS NOW IN
+`WRITER_ORDER.md` AS `D124.1` WITH THE SOURCE KEY FOR EVERY VALUE.**
+
+**SO THE `50` MARKERS NOW SORT INTO THREE BUCKETS, AND THE SORT IS THE DELIVERABLE: `~20` CLOSEABLE NOW, `~8` WAITING ON
+C11-1's FIGURES, `5` ARE WITHDRAWN-QUANTITY TRAPS TO DELETE (D122).** Until this measurement, all fifty read as "blocked on the
+coder", which is why the queue had not moved.
+
+**D124.2 - AND THE ONE WITH TEETH. THE `Re` CONVENTION IS NOWHERE IN THE DRAFT, AND THE TWO COMMON CONVENTIONS DIFFER BY A
+FACTOR OF `π`.** The artifacts' stated `Re` is **exactly `2U/nu`** — verified exact in all three runs: `2(0.5)/0.01 = 100`,
+`2(0.5)/0.001 = 1000`, `2(0.5)/0.0002 = 5000`. Equivalently `Re = U/(nu k)` at the **fundamental `k = pi/L = 0.5`**, not at
+`k = 2pi/L`.
+
+| convention | `Re` at `U=0.5`, `nu=0.01`, `L=2pi` |
+|---|---|
+| **`2U/nu` — what the artifacts use** | **100** |
+| `U/(nu k)`, `k = 2pi/L` | 50 |
+| `U L / nu` | 314.2 |
+
+**TWO OF THE THREE ARE COMMON IN THE LITERATURE, SO THIS IS A REAL AMBIGUITY: A READER WHO ASSUMES EITHER OTHER ONE IS OFF BY
+A FACTOR OF `2` OR `π`.** §4 AND §5 ASK THE CODER TO *"CONFIRM THE Re DEFINITION"* — **WHICH SUGGESTS THE DRAFT KNOWS IT IS
+UNSTATED. IT IS. AND THE ANSWER IS ONE CLAUSE, NOT A ROUND TRIP.**
+
+**D124.3 - ALSO WORTH ONE SENTENCE IN §5, BECAUSE IT IS A CHOICE AND A READER WILL WONDER: `dt` HALVES WITH `N` (5e-4 →
+2.5e-4) AND `T` HALVES WITH IT (0.1 → 0.05), SO THE TWO GRIDS ARE COMPARED OVER THE SAME NUMBER OF STEPS.** That is the right
+choice for a cost-per-step comparison, and it is the kind of thing that looks like an error unless it is said.
+
+**D124.4 - AND THE ALMOST-SHIPPED ERROR, WHICH IS THE CLASS. MY FIRST TABLE TOOK **THE FIRST ARTIFACT THAT HAD EACH KEY**,
+WHICH MIXED RUNS: IT REPORTED `T = 0.1` IN A ROW WHOSE OTHER VALUES CAME FROM THE `N=128` RUN — **A NUMBER THAT IS CORRECT FOR
+ONE RUN AND WRONG FOR ANOTHER, PRESENTED AS THOUGH IT WERE *THE* VALUE.** I CAUGHT IT BECAUSE `T = 0.1` LOOKED WRONG BESIDE A
+`201`-STEP TRACE, NOT BECAUSE THE TABLE CHECKED ITSELF.** **THE SHIPPED TABLE IS PER-RUN WITH THE ARTIFACT NAMED, BECAUSE THESE
+PARAMETERS ARE PER-RUN.** That is D111 for the fourth time, and the tell is always the same: **a number that is right somewhere
+and wrong somewhere else, presented without its provenance.**
+
+**D124.5 - Unchanged.** Everything in D35.6 through D123.6 stands, **except that the marker queue is sorted into three buckets
+with owners, and §4 must state `Re = 2U/nu`.**
+
