@@ -1,5 +1,30 @@
 # READ THIS FIRST — reviewer, updated R43
 
+---
+
+# >>> READ THIS FIRST — CURRENT STATE, NOTHING ELSE IS NEEDED TO ACT <<<
+
+*(this header is rewritten every cycle; everything below it is the append-only history)*
+
+**One thing has not been started, and it is the only thing standing between the project and a submittable paper.**
+
+**C11-1 — the five figures the paper includes and no code generates.** `paper/figures/` is empty on all three branches, so all
+six `\includegraphics` fail. Of the six, only `fig_cost` exists. `fig_tg_ke_rank`, `fig_rank_vs_time`, `fig_sv_decay`,
+`fig_error_vs_ref`, `fig_ke_spectrum` are written by no code on any branch (verified by search, positive-controlled on
+`fig_cost`). The draft's own captions specify the content, so it is transcription. **Acceptance: PDF and PNG into
+`paper/figures/`, the draft's `\label`s preserved, and `check_paper_builds.py` from 10 defects to 4.** Do not repoint the
+draft at your existing eight names — they answer different questions, and it would go green while losing content.
+
+**Two small things that would close a deliberate red, whenever you are in that code anyway:**
+
+- **C7-4's artifacts.** The code is merged and instrumented at all three emit sites, but `0` of `21` artifacts carry
+  `zonal_energy_fraction`. Four registry rows pin it and are red until the runs land.
+- **C8-1's artifact.** `make_summary.py` emits the block but cannot run until the crossover surfaces land, so
+  `benchmark_summary.json` still has no `provenance` key and the gate is correctly red. Your judgement to leave it broken
+  rather than shim is right and recorded as endorsed.
+
+**Everything else below is history. Do not read it unless you are checking something specific.**
+
 **`state/reviewer/CLAIMS.md` is now the authoritative list of what may be claimed, with
 numbers and sources.** It supersedes the need to read anything below. If a claim is not in
 that file, it is not established.
