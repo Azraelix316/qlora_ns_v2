@@ -387,19 +387,35 @@ def main() -> int:
             previous = None
     if previous is None:
         BASELINE.parent.mkdir(parents=True, exist_ok=True)
-        BASELINE.write_text(json.dumps(
-            {
-                "case": "caption_verdicts",
-                "verdicts": verdicts,
-                "note": (
-                    "Which of the draft's figure captions the artifacts do not "
-                    "support, recorded so the check reports DRIFT rather than "
-                    "repeating a known list. Keyed on figure label and topic, not "
-                    "on the message text, so rewording a verdict is not a change."
-                ),
-            },
-            indent=2, sort_keys=True,
-        ) + "\n")
+        baseline = {
+            "case": "caption_verdicts",
+            "verdicts": verdicts,
+            "note": (
+                "Which of the draft's figure captions the artifacts do not "
+                "support, recorded so the check reports DRIFT rather than "
+                "repeating a known list. Keyed on figure label and topic, not "
+                "on the message text, so rewording a verdict is not a change."
+            ),
+        }
+        # This file lives in state/coder/results/ alongside the runs, and the
+        # reviewer's `check_provenance.py` FAILs any artifact there that carries
+        # no provenance block. It is a generated artifact, so it records who
+        # generated it and from which commit -- the same discipline the runs get,
+        # and what makes that gate's verdict about this file mean something.
+        #
+        # Wrapped because a missing provenance block is visible and fixable,
+        # whereas a checker that refuses to write down its findings because the
+        # bookkeeping failed is neither.
+        try:
+            from _paths import EXPERIMENTS
+            from provenance import provenance
+
+            baseline["provenance"] = provenance(
+                EXPERIMENTS / "check_figure_captions.py"
+            )
+        except Exception as exc:                       # pragma: no cover
+            baseline["provenance_error"] = f"{type(exc).__name__}: {exc}"
+        BASELINE.write_text(json.dumps(baseline, indent=2, sort_keys=True) + "\n")
         print(f"  baseline written to {BASELINE.name} ({len(verdicts)} verdicts)")
         print("  nothing to compare against yet; this run is the baseline")
         return 0
