@@ -18,6 +18,7 @@ import numpy as np
 
 # Make direct ``python experiments/run_*.py`` execution work from any cwd.
 ROOT = Path(__file__).resolve().parents[1]
+from provenance import provenance as _provenance
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -111,7 +112,7 @@ def run_case(
     return {
         "case": "taylor_green",
         "provenance": {
-            "git_commit": _git_commit(),
+            **_provenance(Path(__file__).resolve()),
             "driver": "experiments/run_taylor_green.py",
         },
         "grid": {"N": N, "L": grid.L},

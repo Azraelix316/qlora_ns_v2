@@ -16,6 +16,7 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
+from provenance import provenance as _provenance
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -193,7 +194,7 @@ def run_case(
     return {
         "case": "kolmogorov_long_time",
         "provenance": {
-            "git_commit": _git_commit(),
+            **_provenance(Path(__file__).resolve()),
             "driver": "experiments/run_long_time.py",
         },
         "grid": {"N": N, "L": grid.L},
