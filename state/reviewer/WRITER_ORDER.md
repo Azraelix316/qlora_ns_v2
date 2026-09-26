@@ -333,3 +333,27 @@ $$P_{\mathrm{in}} = 2\pi^2 F^2/\nu \qquad\text{and}\qquad P_{\mathrm{in}}(\psi_K
 **We start essentially at rest and are driven up toward a steady state we are $2.5\times10^3$ below in velocity.** So replace "no stationary state is observed" with a quantified statement — *"the forced equilibrium $\psi_K = -(F/\nu)\cos y$ is an exact solution of the discretised equations, and the runs are initialised at $E(0)/E_K = 3.6\times10^{-7}$ of its energy, so the absence of stationarity over the horizons measured is a property of the initial condition rather than of the flow."* **A reader can check that in one line, and it is a stronger claim than an unexplained negative.**
 
 **5. And it gives the "not Kolmogorov flow" statement a number instead of an attribution.** $\psi_K$ coincides with the *classical* Kolmogorov flow only when $A=\nu$ (where $u_K=(1-\cos y)e_x$, $\mathrm{Re}=1/\nu$). **We run $A/\nu = 2500$.** Same family, not the same flow — and now that is a quantity rather than a citation.
+
+## §3 and §4.6 — Invariants I1 and I3, checked against the code (D60, binding)
+
+**I checked every implementable claim in §4's invariants list. I1 is wrong three ways, I3 describes a measurement that is not performed, and I2 is correct.**
+
+**1. I1's magnitude is wrong by three orders of magnitude, and its universality is false.** The paper says $\max|\nabla\cdot u| = O(\varepsilon_{\rm mach}) \approx 10^{-14}$ *"at every step, for every rank and every Reynolds number"*. Over every method, rank and Reynolds number measured — **restricted to methods that remain finite**, since the diverging ones are the subject of §5 and not a violation of I1 — the range is **`2.26e-14` to `1.0459e-11`** (`pod_dmd_r32`). **So `≈10⁻¹⁴` understates the worst finite case by `1046×`, and a `462×` spread means no single number can be the bound.**
+
+**2. "A property of the formulation, not of the numerics" is measurably wrong — it is resolution-dependent.** If it were a property of the formulation it would not change with the grid. At fixed Re and forcing: `full` `2.58×`, `dlra` `2.65×`, `pod` `2.59×` from `N=64` to `N=128`. **Consistent `2.6×` across all three methods.** The residual is the roundoff of the *discrete* spectral derivative pair: the cancellation $\partial_x\partial_y\psi-\partial_y\partial_x\psi$ is exact in real arithmetic, and its floating-point residue is scaled by the conditioning of those operators, which grows with the resolved wavenumber.
+
+**3. The correction is a stronger claim, which is the point — and this is the binding text:**
+
+> **"The velocity is recovered as $u=(\psi_y,-\psi_x)$, so $\nabla\cdot u=0$ identically in exact arithmetic. The measured residual never exceeds $\mathbf{1.1\times10^{-11}}$ over every method, rank and Reynolds number we ran, which is seven orders of magnitude below the reduced solver's own error ($\sim10^{-4}$), and therefore cannot account for it. The residual is the roundoff of the discrete spectral derivative pair, and grows as the operators' conditioning does: $2.6\times$ from $N=64$ to $N=128$, consistently across methods."**
+
+**That says what the number is, where it comes from, how it scales, and why it is irrelevant to the method's accuracy. `≈10⁻¹⁴`, "a property of the formulation" says none of those and is wrong on the number.**
+
+**4. I3 describes a measurement the code never performs.** The paper says *"the number of POD modes required to resolve 99.9% of the kinetic energy of the reference run"* and that $r(t)\le r_{\mathrm{POD}}$ *"is the expected (and measured) outcome"*. Three checkable problems:
+
+- **the threshold is `99%`, not `99.9%`** — every artifact records `energy_fraction: 0.99`;
+- **the quantity is the fluctuations, not the kinetic energy** — the artifacts record `rank_basis: "fluctuations"` and `pod_fit_includes_ic: true`;
+- **and the "POD count" is an input, not a measurement.** `effective_rank` is `16` in every `kolmogorov_*` artifact — **constant across three Reynolds numbers and two resolutions, and equal to the requested `pod_rank`.** **A quantity that does not move with the dynamics is an input.**
+
+**So: either measure it (record the rank at which the energy fraction is actually reached, per case, and let it vary — one line, one cheap run), or drop the sentence and report $r_{\mathrm{POD}}=16$ as the rank the static baselines were *given*.** The second is honest and costs nothing; the first is better.
+
+**5. I2 is correct, and it is worth keeping exactly as written.** Your $P_{\mathrm{in}}=-F\langle\psi,\cos y\rangle$ matches the code's recorded invariant `dE/dt + nu*||omega||^2 - <psi,zeta> + <psi,adv>` with $\zeta=-A\cos y$, same identity and same sign, **plus an explicit advection term that vanishes to roundoff rather than being assumed away** — which is the better formulation and you have it.
