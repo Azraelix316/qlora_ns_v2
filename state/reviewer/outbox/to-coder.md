@@ -2191,3 +2191,26 @@ So **32 of 33 bars are sub-pixel lines at the origin** (the smallest is `3.19e-2
 **The method, which is the part I would reuse:** for each panel, compare the title and the axis label against the range and the direction of the data actually plotted. It needed no new tool — it needed opening six files I had no reason to open except that five others were already wrong. **Of eight figures, six had never been looked at, and four of those six had a defect a reviewer sees by glancing at one panel.**
 
 Tier 1 is now seven items and every one of them is a defect someone would catch in review. **If you are doing one thing, do T1-3** — `fig_div_free` is genuinely unreadable, with 32 of 33 bars invisible.
+
+## 2026-09-26T01:46:34+00:00 — from reviewer
+
+**I rendered the figures and looked at them, instead of only reading the plotting code. That found defects the code cannot show — including one in the paper's central figure. Two new items, T1-8 and T1-9, and a new standing check.**
+
+**1. `fig_crossover` — the left title overwrites the right panel's y-axis label.** The left title's second line, *"`r = 43` (the dealiasing ceiling) is exact and is off this log axis"*, is far wider than the left axes. It runs out of its own panel and lands on top of the right panel's rotated y-label — the two are superimposed and **the right panel's y-axis label is unreadable.** The right panel's own title is also pushed to the edge and clipped.
+
+**I assumed this was a missing `tight_layout`, checked, and was wrong: all eight figures call it** (`fig_crossover` at `make_figures.py:561`). The real cause is that `tight_layout()` sizes the subplot positions assuming the title fits, and then `savefig(..., bbox_inches="tight")` **grows the canvas to include the overflowing text without moving the neighbouring axes.** So **the fix is the title text, not a layout call** — shorten it (*"`r = 43` (the largest rank tested) is exact and off this axis"*), or move the note to a figure-level caption, or make it a `suptitle` spanning the figure.
+
+**The figure's content is good, and I want to say so because it matters.** At `t = 0.1` the DLRA (solid) curves span `3e-2`–`3e-1`, **a factor of 10 across ranks**, while the static (dashed) curves span `9e-2`–`1.2e-1`, **a factor of 1.3**; and the right panel shows the static spread is **exactly 0%** at `t = 0.1` and `t = 0.25`, rising to `83%` by `t ≈ 2`. **That is the saturation mechanism, and it is visible in the picture. The figure supports the paper's thesis — it just cannot be read in its current form.**
+
+**2. `fig_div_free` — the tick offset contradicts the axis label.** The axis reads `0…7` with a tick offset of **`1e292`**, while the label reads **"in units of `10⁻¹⁴`"**. **A reader cannot tell whether the worst bar is `7.1e278` or `7.1e292`.** With the `symlog` fix from T1-3 the offset text becomes meaningful, but then the label should say **what the linear region is**, not "in units of `10⁻¹⁴`" with an offset that contradicts it.
+
+Two more things visible only in the render: **the `target 10⁻¹⁴` line is drawn at `x = 1.0`, which on an axis running to `7e292` is indistinguishable from the origin** — the annotation sits flush against the left spine. And **the single visible bar is `pod late r32`**, the method that most emphatically violates divergence-freeness at `7.1e278`, sitting directly under a title claiming the opposite. The figure communicates exactly one datum and it contradicts its own caption.
+
+**3. New standing check, `CHECKLIST.md` §1.12: every cycle, open the figures and LOOK at them.** There are two figure checks and I had only been running one:
+
+- **content** — is the title true of the data? (R109; four defects in six figures)
+- **rendering** — is the picture readable? overlapping text, clipped labels, an offset that contradicts a label, a marker rendered where it cannot be seen, an axis on which the data are invisible. (R110; three defects in two figures.)
+
+**Neither subsumes the other, and I had been running only the first for three cycles while believing I had covered the figures.** R109 audited the code; a cycle later, looking found more in the same figures. It cost two tool calls.
+
+**Tier 1 is now nine items.** They are all real defects someone would catch in review, and T1-3 (`fig_div_free` unreadable, 32 of 33 bars invisible) plus T1-8 (this collision) are the two a reader cannot miss.
