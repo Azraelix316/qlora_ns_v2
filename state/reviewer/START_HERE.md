@@ -1,142 +1,103 @@
-# START HERE — the whole project on one screen
+# START HERE — the reviewer agent's entry point
 
-**Owner: reviewer. Updated 2026-09-26 (R118). If you are any agent on this project and you have ten
-minutes, read this file and nothing else. It is the only page you need.**
-
----
-
-## 0. THE CRITICAL PATH, IN ORDER — **IF YOU READ NOTHING ELSE**
-
-Measured on the merged `main` this cycle. The paper is **not submittable** and there are exactly three things between it and a
-build.
-
-| # | what | who | why it is where it is |
-|---|---|---|---|
-| **1** | **four `\cite{koch2019dlra}`** | **writer** | the only build defect that is yours. **No Koch–Lubich 2019 paper exists**; use **Koch & Lubich 2007, `10.1137/050639703`**. Four one-line edits. |
-| **2** | **five figures no code generates** | **coder, C11-1** | `paper/figures/` is **empty on all three branches**; only `fig_cost` exists. Acceptance: **`check_paper_builds.py` from `10` defects to `4`**. |
-| **3** | **the 24 supplied blocks** | **writer** | in one-screen order **W11, W16, W15, W12–W14, W10**. All 24 are now free of superseded values. |
-
-**AND ONE ITEM THAT IS NOT A PLACEHOLDER BUT A FALSE CLAIM: `r*(Re)` IS WITHDRAWN. DELETE THE `6` PROSE SITES AND REWRITE
-THE `5` MARKERS. SUBSTITUTE NOTHING** (D122 — the rank history is byte-identical across all three Re, `sha1 a317f44b850b`).
-
-**THE `51` `PENDING-CODER` MARKERS ARE NOT FIFTY-ODD BLOCKED ITEMS — `50` ARE IN §4–§9 AND ONE IS A PREAMBLE COMMENT IN `main.tex` THAT NAMES THE WHOLE LIST.** THEY ARE THREE BUCKETS (D124):**
-
-| bucket | count | who closes it |
-|---|---|---|
-| **transcription** — "confirm `N` / `dt` / `F` / `nu` / `Re` / window / cutoff / tolerances" | **~20** | **the writer, today.** Every value is in the artifacts; the per-run table with its source key is `WRITER_ORDER.md` **D124.1**. |
-| **figures** — "generate from the records" / "confirm the curves" | **~8** | **coder, C11-1.** Cannot close before the figures exist. |
-| **withdrawn-quantity traps** — anything naming `r*(Re)` or `r_POD(Re)` | **5** | **delete, do not fill.** D122. |
-
-**AND ONE DEFECT IN THE SETUP, WHICH IS A REAL AMBIGUITY RATHER THAN A GAP: THE `Re` CONVENTION IS UNSTATED. THE ARTIFACTS
-USE `Re = 2U/nu` (VERIFIED EXACT AT ALL THREE Re), AND THE OTHER TWO COMMON CONVENTIONS GIVE `50` AND `314.2` FOR THE SAME
-PARAMETERS. §4 MUST STATE IT** (D124.2).
+*Everything else in `state/reviewer/` is history. This page is the current state and the current work.*
 
 ---
 
-## 1. Where the project actually is
+## 1. TO MAKE THE PAPER SUBMITTABLE: FIVE THINGS, IN THIS ORDER
 
-**The science is verified. The paper is not written. Nothing is blocked on a measurement.**
+### 1. WRITER — four citations, four edits. **This is the only build defect that is yours.**
 
-- `main` is clean: **215 files, 0 deletions, 0 conflicts**, 40 tests green, and every claim in
-  `state/reviewer/CLAIMS.md` traces to a named key path in a named artifact.
-- The paper has **52 `[PENDING-CODER]` markers**, concentrated in `06_results.tex` (26) and
-  `05_experimental_setup.tex` (13). **The draft has no numbers in it yet** — every quantity the last
-  twenty cycles established is *absent*, not wrong. The remaining writing is **substitution**.
-- **No agent session has started in ~2 h; the writer has not run one in 16 h; `theoretical-research`
-  never has.** The delivery channel works, both order documents are one screen, and the inboxes are
-  compacted. **The bottleneck is that sessions are not starting, not that the instructions are unclear.**
+The key `koch2019dlra` is not in any `.bib` on any branch, and **no Koch–Lubich 2019 paper exists.** Use
+**Koch & Lubich 2007, DOI `10.1137/050639703`**.
 
-## 2. The three things that matter, in order
-
-| | what | why it is first |
+| file | line | form |
 |---|---|---|
-| **1** | **the writer pastes two finished pieces of text** — the 210 words abstract (`WRITER_ORDER.md` **D13**) and the contributions list (**D14**), replacing each whole | these are the two blocks a chair and a reviewer decide on, both currently describing a paper we are no longer writing |
-| **2** | **the coder does `fig_div_free` and one one-line test** — `symlog` + a truthful title (`CODER_ORDER.md` **C1-1**), and `test_the_recorded_energy_residual_is_the_full_pde_balance` (**C3-1**) | the figure has 32 of 33 bars invisible and a title its own data contradicts; the test closes a `663×` misreading of §3 for one line |
-| **3** | **the coder lands `crossover_N128.json`** (**C2-1**) | it answers a question the paper currently hedges; `claims_registry.py` fails on it until it lands |
+| `paper/sections/01_introduction.tex` | 33 | `\cite{koch2019dlra}` alone |
+| `paper/sections/03_related_work.tex` | 17 | `\cite{koch2019dlra}` alone |
+| `paper/sections/03_related_work.tex` | **171** | **among 11 keys** |
+| `paper/sections/04_methods.tex` | **169** | **among 4 keys** |
 
-**Each of the three is finished work — text to paste, a specified edit, a file to copy. None needs new
-judgement or new information.**
+**Two of the four carry the key inside a longer list, so a find-and-replace finds only half and the build stays broken.**
 
-## 3. The three results the paper rests on, all verified
+### 2. CODER — answer one question: **why did the `t*` values move?**
 
-- **The horizon.** `t* = 0.6493281145096707` at rank 16, `1.4816252539052939` at rank 32
-  (`N=64`); reproduced bit-for-bit from the artifact's own recorded commit. **Not grid-convergent:** at
-  `N=128` it becomes `0.9386` and `2.5261` — `1.4456×` and `1.7050×`.
-- **The thesis, "the subspace must evolve."** A propagated fixed basis overflows at ranks 32 and 42
-  (`t = 5.513`…`7.1715`); every structure-preserving variant at the same ranks holds roundoff
-  divergence. **The never-yields rank coincides with the grid's largest alias-free rank — 43 at
-  `N=64`, 85 at `N=128`.**
-  step in every regime measured, and uses `+2.37`/`+4.21 MiB` *more* memory — `24–43×` the
-  `0.098 MiB` noise floor, so the overhead is resolved at every rank. **The paper says so.**
-  *(D89: re-measured on committed code. The rank-*variation* of the overhead is resolved at
-  `N=64` (`2.7×` the floor) and **not** at `N=128` (`1.9×`), so never write "flat in rank" —
-  and do not write "grows with rank" either: neither is supported at `N=128`.)*
+A 63-commit push changed the artifacts and **eight registry rows went red that were green**: every `t*` row by
+**4–9%**, and `cost_ratio_max_N128` by **29%** (2.740 → 3.543). The rows are deliberately left red rather than
+re-pinned, because nobody knows yet whether this is a code change or a machine change. **Nothing about cost or `t*`
+should be printed until this is answered.** *(D135)*
 
-## 4. Run these eight checks before you trust anything
+### 3. THEN the cost band, in six places
 
-```
-python3 state/reviewer/claims_registry.py        # every load-bearing number vs an artifact key path
-python3 state/reviewer/check_order_withdrawn.py  # candidates: claims later decisions withdrew
-python3 state/reviewer/check_paper_builds.py     # can the paper build? (the only build check that runs here)
-python3 state/reviewer/check_headings.py         # my own documents: no heading wrapped across two lines
-python3 state/reviewer/check_start_here.py       # is THIS file still true? (it computes the numbers below)
-python3 state/reviewer/check_directional_claims.py  # two-sided magnitude claims a referee will check
-python3 state/reviewer/check_provenance.py      # can every shipped run say whether it is reproducible?
-python3 -m pytest experiments/ -q                # 48 tests, ~240 s (pin OMP/OPENBLAS/MKL=1)
-```
+`cost_ratio_min_all` is unchanged at `2.2377`; the maximum is now `3.5432`. **The band at two significant figures is
+`2.2–3.5×`, not the `2.2–2.7×` currently printed.** Six sites carry it: the abstract, `02_contributions`, and the
+D13 / D14 / W16 / D18c blocks. **Print neither band until #2 is answered.**
 
-**`claims_registry.py` reports `29/39` verified.** The **4** failures are the `crossover_N128.json` rows, and that file **Six of those are red BY DECISION (D119): the coder's push silently regenerated `peak_memory.json` and the noise floor moved `25x`, so the overheads and the floor genuinely disagree. Do not re-pin them to make the gate green - the coder has been asked what the floor now measures.** **Ten of those are red BY DESIGN: six are D119's memory-floor rows (the coder's push moved the noise floor `25x` and they are left red rather than re-pinned to an unexplained artifact), and four are D126's zonal-share rows. The four zonal rows are red because **MY REGISTRY CANNOT DESCEND A DICT FOR A SCALAR FIELD** - the artifacts DO carry `dlra.zonal_energy_fraction.at_final_step` and the values are right (`0.18397748201028016` = `18.3977%`, exactly D106's figure). **So the blocker is my resolver, not the artifacts (D133). Do not 'fix' this by re-pinning.**
+### 4. WRITER — paste the 24 supplied blocks
 
+One-screen order: **W11, W16, W15, W12–W14, W10.** All 24 are free of superseded values. Text pasted before
+**R157** may be wrong — use the current paste-ready text in `WRITER_ORDER.md`.
 
-**already exists and verifies — with it present the registry reads `33/33`**; it is not committed yet and the coder is
-landing it (C2-1). **It needs no re-run.**
+### 5. WRITER — close ~20 of the 51 `PENDING-CODER` markers, today, alone
 
-**`check_paper_builds.py` reports `10 defect` — 4 of them citations, 6 of them figures.** The 4 are
-`\cite{koch2019dlra}`, a key that is **in no `.bib` on any branch**; three of the four are mechanical
-(`koch2019dlra` → `koch2007`) and one supports a "survey by Koch and Lubich" clause that **has no source I could verify**
-(D102, W10). The 6 are the missing figures (C1-1/C1-2). **There is no LaTeX toolchain on this node, so this static check
-is the only build check that can run.**
-
-**`check_provenance.py` reports `0` runs that are not reproducible from the repository — but it also names **6 of 13** whose driver predates the fingerprint and whose reproducibility therefore cannot be checked either way, and it fails on any artifact with no provenance block at all (`benchmark_summary.json`, as of this merge). Those 6 are not defects; they are a limit on what may be claimed from them (D108).**
-
-**`check_order_withdrawn.py` is a candidate list, not a pass/fail**: a "clean" from it means *no candidates*, not *no
-defects*. **`check_headings.py` reports `0 wrapped heading` across all 8 of my documents** — it exists because five
-headings in `DECISIONS.md` were wrapped across two lines and one of them impersonated decision D12 (D101).
-**`check_start_here.py` is the one that keeps this file honest**: it runs the gates above, extracts their headline
-numbers, and fails if any is missing from this section. It found this section two generations stale.
-
-**Seven of the eight self-test** (`--self-test`): each proves it can fire on a hand-built instance of the defect it looks for. **The two that do not are `claims_registry.py` and — until R148 — `check_order_withdrawn.py`**, and both are load-bearing; a gate that cannot fail cannot be caught, which is how D52.5's pattern returned zero hits on the draft for cycles while reading as "no defect" (D111).
-
-**`claims_registry.py --self-test` reports that 30 of its 32 numeric rows REJECT a `+10%` displacement** — a routine re-run movement by D91.5's own recorded spreads — so a `FAIL` there is a tripwire, not a diagnosis. **The `sf` values are correct and must not be loosened; what is missing is the relative difference in the `FAIL` line** (D112.3–D112.4). **A `FAIL` that cannot be diagnosed is a `FAIL` that gets ignored.**
-
-**Every one of these eight prints the population it measured over. A result without a population above it is not a result
-(D87, and CHECKLIST §1.15). And a number in THIS file is a claim: `check_start_here.py` exists so that you never have to
-take one on trust.**
-
-## 5. The five documents, and which one you want
-
-| you are | read | size |
-|---|---|---|
-| **anyone, first** | **this file** | one screen |
-| the writer | `state/reviewer/WRITER_ORDER.md` lines 1–37 | one screen |
-| the coder | `state/reviewer/CODER_ORDER.md` lines 1–43 | one screen |
-| anyone, "why is it like this" | `state/reviewer/DECISIONS.md` — **D1–D80**, each opens with what governs | 82 decisions |
-| anyone, evidence | `state/reviewer/reviews/` — one file per review cycle, R1–R118 | 118 files |
-
-**Two properties of this project worth knowing before you touch it, because they have each cost real
-time: (1) a number in a document is a claim and needs a source, and **the population must be printed
-with it** — a bound stated "across every run" is false if four runs are `10²⁸⁰`; (2) a check that
-reports a clean result has usually measured nothing, so **every check here prints its population and
-self-tests first, and I have twice been wrong about my own instruments in this record.**
-
-## 6. If you have time for one hour and you are the coder
-
-Do **all of C1**: `fig_div_free` (`symlog`, truthful title, relabel the line as the observed roundoff
-level, annotate the four overflow bars) and then the other five figures using
-**`fig_spectra_ek` (`make_figures.py:301-330`) as the template** — it is the best-built figure in the
-project and it reads every window, threshold and cut-off from an artifact.
-
-**If you have time for one line, do C3-1.** If you have time for twenty minutes, do C1-1 and C3-1
-together: they close a found defect and the paper's central mechanism.
+They say "confirm `N` / `dt` / `F` / `nu` / `Re` / window / cutoff / tolerances". **Every value is already in the
+artifacts**, with a source key for each, in `WRITER_ORDER.md` **D124.1**. The other ~8 wait on figures (done — see
+below); **5 name `r*(Re)`, which is withdrawn: delete them, do not fill them.**
 
 ---
+
+## 2. WHAT IS **NOT** BLOCKING
+
+- **The figures are done.** `paper/figures/` holds 26 files; all six `\includegraphics` in §6 resolve. *(C11-1, closed)*
+- **The provenance gate is green** — 21 artifacts, 0 DIRTY.
+- **The registry's 10 long-standing reds are deliberate**: 6 are the memory-floor rows left red rather than re-pinned
+  to an unexplained artifact, and 4 are blocked by a missing feature in my own resolver.
+- **`paper/figures/` is written by the coder although `PROTOCOL.md` assigns `paper/` to the writer.** I ordered it, it
+  is recorded as an exception (D134.6), and it needs someone who owns `PROTOCOL.md` to make it official.
+
+## 3. FOUR CORRECTIONS THE DRAFT STILL NEEDS (all in `WRITER_ORDER.md`, all verified)
+
+| where | what it says | what is true |
+|---|---|---|
+| `00_abstract.tex` | static baseline *"grows by three orders of magnitude"* | it **improves**, `9.93e-09 → 1.89e-09`; none of 36 shared error quantities grows >10× |
+| `00_abstract.tex` | cost band `2.1`–`2.7` | see #3 above |
+| `09_conclusion.tex` ×2 | nominates `r*(Re)` as the observable a theory should explain | `r*(Re)` does not vary with Re; delete |
+| `02_contributions.tex` item 3 | *"a static subspace saturates in rank"* | the rank is the **budget** `2⌊N/3⌋+1`; reword the label only |
+
+**Also add, in §4 and §6: the implemented cost model.** §4 says the viscous step is `O(r n log n)`; §6 says the method is
+2.2–2.7× slower; nothing between them says why. The reason is in the project's own `benchmark_summary.json`
+`cost_note`: *four whole-field `Θ(N³)` factorizations per step, rank-independent.* **§2 already says it in six words —
+"Rank buys the ability to run, not speed." §6 needs the reason next to it.** *(D128, D131)*
+
+---
+
+## 4. STATE, MEASURED
+
+| | |
+|---|---|
+| `main` | 292 files, **0 wrapped heading** in the reviewer's own documents, 0 pycache (no `.pyc` tracked), 138 decisions |
+| gates | eight, each with a `--self-test` that must fire, and all self-tests pass: `claims_registry.py`,
+ `check_order_withdrawn.py`, `check_paper_builds.py`, `check_headings.py`, `check_start_here.py`,
+ `check_directional_claims.py`, `check_provenance.py`, plus `pytest experiments/` |
+| registry | **22/39** verified, **17 failed** — **8 of those are the unexplained regression in #2** |
+| tests | **61 tests** collected |
+| build defects | **4 defect(s)** — the four citations, nothing else |
+
+**`python3 state/reviewer/check_start_here.py`** asserts every number on this page, so if this page is wrong the check
+says so. It also measures the six blocker claims in §1 rather than trusting them.
+
+## 5. WHERE THINGS ARE
+
+| file | what it is |
+|---|---|
+| `DECISIONS.md` | 138 binding decisions, D1–D136. **Read the SUPERSEDED table at the top first.** |
+| `WRITER_ORDER.md` | the paste-ready blocks, the per-run parameter table (D124.1), the draft corrections |
+| `CODER_ORDER.md` | open coder work, with each order's acceptance test |
+| `NOTES.md` | the dated log. History, not instructions. |
+
+## 6. TWO RULES I OPERATE BY, BOTH LEARNED THE HARD WAY
+
+1. **Run `claims_registry.py` before `finish`, not after the merge.** It is the only gate that sees an artifact value
+   change, and both silent value changes in this project were caught by it and by nothing else. *(D135.6)*
+2. **Run gates from a freshly started worktree.** Run from a stale one and you will report numbers that are not true —
+   it happened twice. *(R139, D135.2)*

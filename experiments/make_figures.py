@@ -86,6 +86,436 @@ def tree_is_dirty() -> bool:
     return bool(diff.strip())
 
 
+def _crossover_schema_ok(xover: dict) -> bool:
+    """Whether the surface carries the error column this driver reads.
+
+    A cheap structural check rather than a try/except around the whole figure:
+    it names the missing column in the skip reason, so a reader is told what to
+    regenerate instead of only that something went wrong.
+    """
+    case = next(iter(xover.get("by_reynolds", {}).values()), None)
+    if not case:
+        return False
+    if "relative_l2_fluct_over_full" not in (case.get("error_columns")
+                                            or xover.get("error_columns") or {}):
+        return False
+    for rows in case.get("static_moving_window", {}).values():
+        if rows and "relative_l2_fluct_over_full" not in rows[0]:
+            return False
+    return True
+
+
+def make_paper_figures(results, out, paper_dir, used, skipped, colors) -> None:
+    """The five figures the paper includes that no code wrote (C11-1).
+
+    Names and content are the draft's: ``fig_tg_ke_rank`` (fig:tg),
+    ``fig_rank_vs_time`` (fig:rank), ``fig_sv_decay`` (fig:svd),
+    ``fig_error_vs_ref`` (fig:error), ``fig_ke_spectrum`` (fig:kestats).  Each is
+    written as both .pdf and .png, and to both output roots.
+
+    Two rules the rest of this script also follows:
+
+    * every number on an axis or in a title is read out of the artifact, so a
+      re-run cannot leave a stale claim in the paper's rendering path;
+    * a figure whose data is absent is *skipped with a reason*, never drawn from
+      whatever else is in the directory -- which is the failure the stale-file
+      guard below exists to prevent.
+    """
+    suite = {
+        re: load(results / f"kolmogorov_re{re}_N64.json")
+        for re in (100, 1000, 5000)
+    }
+    suite = {k: v for k, v in suite.items() if v}
+
+    def emit(fig, name, caption) -> None:
+        # Mirroring is done once, for every figure the run wrote, after the fact
+        # -- doing it per figure here would only ever reach the five new ones, and
+        # the blocker was that `fig_cost` existed, was generated, and still did
+        # not resolve because the paper looks in a different directory.
+        CAPTIONS[name] = caption
+        FIGURES_WRITTEN.add(name)
+
+    # --- fig_tg_ke_rank (fig:tg) -------------------------------------------
+    tg = load(results / "taylor_green.json")
+    if tg and tg.get("energy_history") and tg.get("rank_history"):
+        used.append("taylor_green.json")
+        dt = tg["parameters"]["dt"]
+        steps = np.arange(len(tg["energy_history"]))
+        fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.6), layout="constrained")
+        ax = axes[0]
+        ax.plot(steps * dt, tg["energy_history"], color=colors["full"],
+                label="full grid")
+        if tg.get("dlra_energy_history"):
+            ax.plot(steps * dt, tg["dlra_energy_history"], color=colors["dlra"],
+                    linestyle="--", label="reduced (rank 1)")
+        # I2 is a *monotonicity* claim, so it is shown as one rather than
+        # asserted in prose: the increments are non-positive throughout.
+        increments = np.diff(tg["energy_history"])
+        ax.set_title(
+            r"$E(t)$: monotone non-increasing"
+            f"\n({int(np.count_nonzero(increments > 0))} increases in "
+            f"{len(increments)} steps)", fontsize=9,
+        )
+        ax.set_xlabel("time $t$")
+        ax.set_ylabel(r"$E$")
+        ax.legend(fontsize=7)
+        ax = axes[1]
+        ranks = np.asarray(tg["rank_history"], dtype=float)
+        ax.plot(steps * dt, ranks, color=colors["dlra"], drawstyle="steps-post")
+        ax.set_ylim(0, max(2.0, ranks.max() + 0.5))
+        ax.set_xlabel("time $t$")
+        ax.set_ylabel(r"adaptive rank $r(t)$")
+        # The caption says 3 -> 2 -> 1; the run gives a constant.  The figure
+        # says what the run gives, and CAPTIONS.md carries the discrepancy.
+        distinct = sorted(set(int(r) for r in tg["rank_history"]))
+        ax.set_title(
+            r"adaptive $r(t)$: constant at " + str(distinct[0]) + "\n"
+            "(single Fourier mode: numerical rank 1)", fontsize=9,
+        )
+        fig.savefig(out / "fig_tg_ke_rank.pdf", bbox_inches="tight")
+        fig.savefig(out / "fig_tg_ke_rank.png", bbox_inches="tight")
+        plt.close(fig)
+        emit(fig, "fig_tg_ke_rank",
+             "Taylor--Green laminar decay. Left: kinetic energy of the full grid "
+             "and of the reduced state; the increments are non-positive at every "
+             "step, which is the monotonicity invariant I2 stated as a property "
+             "of the figure rather than of the prose. Right: the adaptive rank, "
+             "which is **constant at 1** because the initial condition is a "
+             "single Fourier mode, so the numerical rank is 1 and there is "
+             "nothing further to request. **The draft's caption says the rank "
+             "decays 3 -> 2 -> 1; that is not what this run produces and it "
+             "cannot, since a rank-3 start would need a 3-mode initial "
+             "condition.**")
+    else:
+        skipped.append((
+            "fig_tg_ke_rank",
+            "`taylor_green.json` has no energy/rank history, so E(t) and r(t) "
+            "cannot be drawn from it",
+        ))
+
+    # --- fig_rank_vs_time (fig:rank) ----------------------------------------
+    if suite:
+        used += [f"kolmogorov_re{re}_N64.json" for re in suite]
+        fig, ax = plt.subplots(figsize=(3.6, 2.7), layout="constrained")
+        cmap = plt.get_cmap("viridis")
+        final_ranks = {}
+        for i, (re, data) in enumerate(sorted(suite.items())):
+            history = data["dlra"].get("rank_history")
+            if not history:
+                continue
+            dt = data["parameters"]["dt"]
+            t = np.arange(len(history)) * dt
+            ax.plot(t, history, color=cmap(i / 2.0), linewidth=1.3,
+                    label=f"Re={re}")
+            final_ranks[re] = int(history[-1])
+        ax.set_xlabel("time $t$")
+        ax.set_ylabel(r"adaptive rank $r(t)$")
+        ax.set_title(
+            # The measured behaviour, not the draft's caption.  There is no
+            # spin-up growth phase -- the rank reaches its final value at the
+            # FIRST check and stays there -- and r* is the same number at every
+            # Reynolds number, so there is no r*(Re) to quote.  The value it
+            # takes is the top of the band the grid resolves, which makes it a
+            # property of the discretisation rather than of the dynamics.
+            r"$r(t)$: one jump at the first check, then flat"
+            + (f"\n$r^*$ = {sorted(set(final_ranks.values()))[0]} at every Re "
+               f"(the top of the band $N$ resolves)"
+               if final_ranks and len(set(final_ranks.values())) == 1
+               else "\nfinal: " + ", ".join(
+                   f"Re={k}: {v}" for k, v in sorted(final_ranks.items()))),
+            fontsize=8.5,
+        )
+        ax.legend(fontsize=7)
+        fig.savefig(out / "fig_rank_vs_time.pdf", bbox_inches="tight")
+        fig.savefig(out / "fig_rank_vs_time.png", bbox_inches="tight")
+        plt.close(fig)
+        emit(fig, "fig_rank_vs_time",
+             r"Adaptive rank $r(t)$ for the forced flow at each Reynolds number, "
+             r"from the suite runs. **Two things the draft's caption asserts that "
+             r"this figure does not show.** There is no spin-up growth phase: the "
+             r"rank reaches its final value at the *first* check and is flat "
+             r"thereafter. And $r^*(\mathrm{Re})$ does not depend on "
+             r"$\mathrm{Re}$ -- it is the same number at all three -- so there is "
+             r"no $r^*(\mathrm{Re})$ to quote. The value it takes is the top of "
+             r"the band the grid resolves without aliasing, which makes it a "
+             r"property of the discretisation rather than of the dynamics; the "
+             r"**window** rank, which does measure the dynamics, is a different "
+             r"quantity and is 16 at both grids. Read it with the horizon too: "
+             r"these runs reach $t=0.1$, and the same rule at $T=8$ still sits at "
+             r"the top of the band at every cutoff while the error grows to "
+             r"$0.1$--$0.5$.")
+
+    # --- fig_sv_decay (fig:svd) ---------------------------------------------
+    if suite:
+        fig, axes = plt.subplots(1, len(suite), figsize=(2.3 * len(suite) + 0.4, 2.5),
+                                 layout="constrained", squeeze=False)
+        slowest = {}
+        slope = {}
+        for j, (re, data) in enumerate(sorted(suite.items())):
+            block = data["dlra"]
+            steps_at = block.get("singular_value_steps") or []
+            spectra = block.get("singular_values") or []
+            ax = axes[0][j]
+            if not steps_at or not spectra:
+                ax.set_visible(False)
+                continue
+            dt = data["parameters"]["dt"]
+            for i, step in enumerate(steps_at):
+                if i >= len(spectra):
+                    break
+                s = np.asarray(spectra[i], dtype=float)
+                if s.size == 0 or s[0] <= 0:
+                    continue
+                shade = 0.25 + 0.75 * i / max(len(steps_at) - 1, 1)
+                ax.semilogy(np.arange(1, s.size + 1), s / s[0],
+                            color=colors["dlra"], alpha=shade, linewidth=1.0)
+            final = np.asarray(spectra[-1], dtype=float)
+            if final.size:
+                kept = int(np.count_nonzero(
+                    final >= 1e-10 * final[0])) if final[0] > 0 else 0
+                slowest[re] = kept
+                # The draft's caption says "slower decay at higher Re".  Measured,
+                # that is true and small: sigma_20/sigma_1 rises monotonically
+                # with Re by about 19% across a 50x range, which is invisible on
+                # a log axis spanning fifteen decades.  The number is printed so
+                # the claim is quantified instead of asserted, and so a reader
+                # can see how weak it is.
+                slope[re] = float(final[19] / final[0]) if final.size > 19 else None
+            ax.set_xlabel("mode index $r$")
+            if j == 0:
+                ax.set_ylabel(r"$\sigma_r/\sigma_1$")
+            ax.set_title(
+                f"Re={re}\n"
+                + (f"{slowest.get(re, 0)} modes at $10^{{-10}}$"
+                   f"   $\\sigma_{{20}}/\\sigma_1$ = {slope[re]:.2e}"
+                   if re in slowest and slope.get(re) is not None
+                   else (f"{slowest.get(re, 0)} modes at $10^{{-10}}$"
+                         if re in slowest else "")),
+                fontsize=8.5,
+            )
+        fig.suptitle(
+            r"Singular-value decay of $\psi$ at increasing times"
+            r" (darker = later)", fontsize=9,
+        )
+        fig.savefig(out / "fig_sv_decay.pdf", bbox_inches="tight")
+        fig.savefig(out / "fig_sv_decay.png", bbox_inches="tight")
+        plt.close(fig)
+        emit(fig, "fig_sv_decay",
+             r"Singular-value decay of the full-grid state at every recorded "
+             r"time, one panel per Reynolds number, darker for later. Both "
+             r"numbers per panel are read from the artifact. **On the draft's "
+             r"claim that the decay is slower at higher $\mathrm{Re}$: it is "
+             r"true and small.** $\sigma_{20}/\sigma_1$ rises monotonically "
+             r"with $\mathrm{Re}$ (1.97e-3, 2.31e-3, 2.34e-3 at Re = 100, 1000, "
+             r"5000), which is +19% across a 50-fold range of Reynolds numbers "
+             r"and invisible on a log axis spanning the fifteen decades these "
+             r"panels cover. The mode count above the $10^{-10}$ cutoff is 43 at "
+             r"all three. The two cliffs are the initial condition's numerical "
+             r"rank (17) and the top of the band the grid resolves (43).")
+
+    # --- fig_error_vs_ref (fig:error) ---------------------------------------
+    if suite:
+        fig, ax = plt.subplots(figsize=(3.6, 2.7), layout="constrained")
+        cmap = plt.get_cmap("viridis")
+        for i, (re, data) in enumerate(sorted(suite.items())):
+            for key, colour, style, label in (
+                ("dlra", colors["dlra"], "-", "SP-DLRA (adaptive)"),
+                ("pod", colors["pod"], "--", "static POD"),
+            ):
+                rows = (data.get(key) or {}).get("comparison") or []
+                if not rows:
+                    continue
+                ax.plot([r["time"] for r in rows], [r["relative_l2"] for r in rows],
+                        style, color=cmap(i / 2.0), linewidth=1.2,
+                        label=f"{label}, Re={re}")
+        ax.set_yscale("log")
+        ax.set_xlabel("time $t$")
+        ax.set_ylabel(r"relative $L^2$ against the full grid")
+        ax.set_title(
+            r"Error against the full-grid reference"
+            "\n(over the suite window $t\\leq0.1$ only)", fontsize=9,
+        )
+        ax.legend(fontsize=5.8, ncol=2)
+        fig.savefig(out / "fig_error_vs_ref.pdf", bbox_inches="tight")
+        fig.savefig(out / "fig_error_vs_ref.png", bbox_inches="tight")
+        plt.close(fig)
+        # By how much static POD wins inside this window, computed here rather
+        # than written into the caption by hand: a magnitude in prose that is
+        # not read off the artifact is a magnitude that rots on the next re-run,
+        # and this figure's whole point is that the ordering is counter-intuitive
+        # and therefore needs the number attached.
+        pod_advantage = {}
+        for re, block in sorted(suite.items()):
+            dlra_err = block["dlra"].get("max_relative_l2_vs_full")
+            pod_err = block["pod"].get("max_relative_l2_vs_full")
+            if dlra_err and pod_err and pod_err > 0:
+                pod_advantage[re] = dlra_err / pod_err
+
+        emit(fig, "fig_error_vs_ref",
+             r"**The three SP-DLRA curves coincide**, so two of them are hidden "
+             r"behind the third: over this window the reduced method's error is "
+             r"the same at all three Reynolds numbers, and the legend's six "
+             r"entries are three distinct curves rather than six. "
+             r"Relative $L^2$ against the full-grid spectral reference, the "
+             r"adaptive method against the static POD baseline at each Reynolds "
+             r"number. **The window is $t\leq0.1$ and the figure says so, because "
+             r"inside it the static baseline is the more accurate method: its "
+             r"offline fitting window is a prefix of the evaluated trajectory. "
+             r"The ordering reverses at longer horizons, and the crossover is "
+             r"measured separately.** The size of the gap inside the window is "
+             r"not small and should not be read off the log axis without it: by "
+             r"max relative $L^2$, static POD beats SP-DLRA by "
+             + (
+                 ", ".join(
+                     f"{r:.0f}$\\times$ at Re={k}"
+                     for k, r in sorted(pod_advantage.items())
+                 )
+                 if pod_advantage
+                 else "(see the artifact; POD is the more accurate method at "
+                      "every Re measured)"
+             )
+             + r", because a basis fitted offline on a prefix of the evaluated "
+             r"trajectory is a very good representation of a short, smooth "
+             r"window. **The two methods' Reynolds-sensitivities differ by two "
+             r"orders of magnitude** -- SP-DLRA's error is flat in Re to within a "
+             r"factor of 1.03, static POD's moves by a factor of 105 -- so a "
+             r"single $\\mathrm{Re}$ axis spanning both shows one method's "
+             r"sensitivity and hides the other's.")
+
+    # --- fig_ke_spectrum (fig:kestats) --------------------------------------
+    pilot = None
+    for name in ("regime_pilot_re5000_A0p2.json", "regime_pilot_re5000_N128_A0p2.json"):
+        candidate = load(results / name)
+        if candidate and candidate.get("windowed_spectra"):
+            pilot = (name, candidate)
+            break
+    if pilot is None:
+        skipped.append((
+            "fig_ke_spectrum",
+            "no regime pilot carries time-averaged fluctuation spectra",
+        ))
+    else:
+        name, data = pilot
+        used.append(name)
+        entry = next(iter(data["windowed_spectra"].values()))
+        k = np.asarray(entry["k"], dtype=float)
+        e = np.asarray(entry["E_fluct"], dtype=float)
+        w0, w1 = entry["window_start"], entry["window_end"]
+        fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.6), layout="constrained")
+        ax = axes[0]
+        # The draft's caption for this figure promises "SP-DLRA against the
+        # full-grid reference".  Plotting one E(t) per Reynolds number -- which is
+        # what this panel did -- cannot deliver that: there is no second curve to
+        # compare against.  So plot the comparison itself, one Re per colour, the
+        # full grid solid and SP-DLRA dashed on top of it.
+        #
+        # The answer is that they coincide, and that is a result rather than a
+        # defect -- but "coincide" is not a caption, so the maximum relative
+        # difference is annotated per Re.  It is also the reason static POD looks
+        # no worse here: on the *total* energy all three methods agree to ~1e-7,
+        # and the methods separate on the fluctuation field (fig:error), not here.
+        max_rel: dict[int, float] = {}
+        # Colour encodes the Reynolds number and the line style encodes the
+        # method.  The first attempt did it the other way round -- one colour for
+        # "the full grid" at every Re -- so the three Re were indistinguishable and
+        # only the two line styles separated, which defeats the point of a
+        # per-Re panel.
+        re_list = sorted(suite)
+        palette = ["#264653", "#0072B2", "#E76F51"]
+        colour = dict(zip(re_list, palette))
+        for re, block in sorted(suite.items()):
+            ref = block["full"].get("energy_history") or []
+            dlra = block["dlra"].get("energy_history") or []
+            if not ref or len(ref) != len(dlra):
+                continue
+            dt = block["parameters"]["dt"]
+            t = np.arange(len(ref)) * dt
+            ax.plot(t, ref, color=colour[re], linewidth=1.5,
+                    label=f"Re={re}")
+            rel = np.abs(np.asarray(dlra) - np.asarray(ref)) / np.asarray(ref)
+            max_rel[re] = float(rel.max())
+            ax.plot(t, dlra, color=colour[re], linewidth=1.1, linestyle="--")
+        ax.set_xlabel("time $t$")
+        ax.set_ylabel(r"$E$")
+        ax.set_title(
+            r"$E(t)$, SP-DLRA against the full grid" "\n"
+            r"(curves coincide; $\max|\Delta E|/E$ below)", fontsize=9,
+        )
+        # One box, not one annotation per curve: three annotations at the curve
+        # ends overlapped each other and the legend, which is worse than no
+        # annotation at all.
+        if max_rel:
+            ax.text(
+                0.02, 0.03,
+                r"$\max_t|\Delta E|/E$:" + "\n" + "\n".join(
+                    rf"  Re={re}: {rel:.1e}" for re, rel in sorted(max_rel.items())
+                ),
+                transform=ax.transAxes, fontsize=6, va="bottom", ha="left",
+                bbox={"facecolor": "white", "edgecolor": "0.8", "pad": 2},
+            )
+        # Below the axes, and one entry per Reynolds number rather than two: the
+        # six-entry version put the legend on top of the Re=1000 and Re=5000
+        # curves, and duplicated every Re just to restate the line style.
+        ax.legend(
+            fontsize=6, ncol=3, loc="upper center", frameon=False,
+            bbox_to_anchor=(0.5, -0.28),
+            title="solid: full grid    dashed: SP-DLRA", title_fontsize=6,
+        )
+        ax = axes[1]
+        ref = block["full"].get("energy_history") or []
+        total = ref[-1] if ref else None
+        # Labelled "full grid" on purpose.  The draft's caption promises this
+        # panel is a method comparison, and it cannot be: the pilot is the only
+        # artifact carrying a time-averaged spectrum and it carries ONE, from the
+        # full-grid arm.  The suite runs with --spectrum-count unset and so carry
+        # no spectrum at all, which is why a per-method version would have to be a
+        # new run rather than a redraw.  Saying whose it is beats implying it is
+        # a comparison.
+        ax.semilogy(k, e, color=colors["full"], linewidth=1.2,
+                    label=rf"full grid, time-averaged $\psi'$")
+        if total:
+            ax.axvline(k.max(), color=colors["ref"], linestyle=":", linewidth=1.0)
+            ax.annotate("dealiased range", (k.max(), e.max()), fontsize=6,
+                        color=colors["ref"], ha="right", va="top")
+        ax.set_xlabel("wavenumber $k$")
+        ax.set_ylabel(r"$E_{\mathrm{fluct}}(k)$")
+        ax.set_title(
+            rf"$\psi'$ spectrum, full grid only, $t\in[{w0:.4g},{w1:.4g}]$"
+            "\n$Z(k)$ omitted: enstrophy drifts, so it would\n"
+            "average a moving quantity", fontsize=8,
+        )
+        ax.legend(fontsize=6.5)
+        fig.savefig(out / "fig_ke_spectrum.pdf", bbox_inches="tight")
+        fig.savefig(out / "fig_ke_spectrum.png", bbox_inches="tight")
+        plt.close(fig)
+        emit(fig, "fig_ke_spectrum",
+             r"Kinetic-energy statistics. Left: $E(t)$, **SP-DLRA against the "
+             r"full-grid reference at each Reynolds number** -- the comparison the "
+             r"draft's caption promised, which the previous version of this panel "
+             r"could not deliver because it plotted one curve per Re and so had "
+             r"nothing to compare against. The answer is that they coincide, and "
+             r"the figure annotates the gap rather than asserting it: the maximum "
+             r"relative difference is "
+             + ", ".join(
+                 f"{rel:.1e} at Re={re}"
+                 for re, rel in sorted(max_rel.items())
+             )
+             + ". **So the total energy does not discriminate between the methods "
+             r"here** -- static POD is within 1.1e-07 of the full grid on this "
+             r"quantity too, which is why the methods separate on the *fluctuation* "
+             r"field in fig:error and not on the total. Right: the time-averaged "
+             r"fluctuation spectrum against wavenumber, over the window named in "
+             r"the title. **This panel is the full grid only, and cannot be a "
+             r"method comparison: the regime pilot is the only artifact carrying a "
+             r"time-averaged spectrum and it carries one, from the full-grid arm. "
+             r"The suite runs with `--spectrum-count` unset and so carries no "
+             r"spectrum at all, so a per-method version is a new run rather than a "
+             r"redraw.** The $Z(k)$ half of the enstrophy spectrum is omitted and "
+             r"the reason is on the figure: the fluctuation enstrophy drifts across "
+             r"this averaging window, outside the 10% stationary bar, so a "
+             r"time-averaged $Z(k)$ would be averaging a moving quantity.")
+
+
 def provenance(
     results: Path, out: Path, names: list[str], skipped: list[tuple[str, str]]
 ) -> None:
@@ -191,8 +621,21 @@ def main() -> None:
     parser.add_argument(
         "--output-dir", type=Path, default=ROOT / "experiments" / "figures"
     )
+    parser.add_argument(
+        # C11-1: the draft's `\includegraphics{figures/...}` resolves against the
+        # paper's own directory, which was empty on every branch -- so even
+        # `fig_cost`, which existed and was generated, did not resolve.  The
+        # paper's figures are GENERATED here and copied there; no prose and no
+        # .tex is written into the writer's tree.  `--paper-figures-dir ''`
+        # disables it.
+        "--paper-figures-dir", type=Path, default=ROOT / "paper" / "figures",
+        help="second output root for the figures the paper includes; pass an "
+             "empty string to write only to --output-dir",
+    )
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    if not str(args.paper_figures_dir or "").strip():
+        args.paper_figures_dir = None
     R = args.results
     colors = {"full": "#264653", "pod": "#8C8C8C", "dlra": "#E76F51",
               "ref": "#0072B2", "a": "#2A9D8F", "b": "#E9C46A"}
@@ -523,7 +966,10 @@ def main() -> None:
             "and four fixed-subspace methods that do not",
             fontsize=9.5,
         )
-        ax.set_xlim(left=0.0)
+        # No explicit left limit: this is a log axis, and `set_xlim(left=0.0)` on
+        # one is not a no-op warning -- matplotlib refuses it and the axis keeps
+        # whatever lower bound the data implies. Which is what we want, but the
+        # call was doing nothing except emitting a warning on every figure run.
         ax.invert_yaxis()
         if diverged:
             ax2 = axes[1][0]
@@ -607,6 +1053,37 @@ def main() -> None:
             fontsize=6.5, y=1.02,
         )
         fig.tight_layout()
+        CAPTIONS["fig_cost"] = (
+            "Cost against the full-grid spectral reference: full-step time, "
+            "median of "
+            f"{grids[0]['repeats']} repeats over {grids[0]['steps_per_repeat']} "
+            "steps under one interleaved protocol, with the thread settings "
+            "named above the panel. **These ratios are only good to about 15%, "
+            "and the figure should be read as a range rather than a value.** "
+            "Five committed versions of this same configuration give an N=128 "
+            "ratio spanning 2.14-2.74 at ONE thread (28%), against a within-run "
+            "spread over "
+            f"{grids[0]['repeats']} interleaved repeats of 0.17-0.35 (7-10%), "
+            "and the thread count alone moves the N=128 ratio by 43% (2.57 at "
+            "one thread, 3.54 at two). The interleaving is what makes the ratio "
+            "usable on a shared node -- it cannot control for machine state "
+            "between runs, and the thread count has to be stated beside any cost "
+            "number. **Three things this figure does NOT contain, which the "
+            "draft's caption currently claims it does.** (1) *Peak memory* is in "
+            "a different artifact from a different driver (`peak_memory.json`, "
+            "`bench_memory.py`), measured for the full-grid, projected and BUG "
+            "integrators at N=64 and N=128 only. (2) *The static POD baseline has "
+            "no cost row here at all*: this driver times `full_grid_reference` "
+            "and `projected_dlra`, and POD's memory was never measured, so the "
+            "third method in the caption's list does not appear in this figure. "
+            "(3) *It is not per Reynolds number* -- this protocol varies N, and "
+            "Re is not one of its parameters. Per-Re wall times do exist in the "
+            "suite artifacts, but they are single un-interleaved runs and are "
+            "**not comparable with these**: the suite's dlra/full ratio is 33.6x "
+            "at Re=100, 5.03x at Re=1000 and 1.90x at Re=5000, against 2.2-3.6x "
+            "here. Quoting the two families side by side would be comparing "
+            "measurement protocols, not methods."
+        )
         FIGURES_WRITTEN.add("fig_cost")
         fig.savefig(args.output_dir / "fig_cost.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_cost.png", bbox_inches="tight")
@@ -810,9 +1287,23 @@ def main() -> None:
             "`crossover_surface.json` predates the `by_reynolds` layout, so it "
             "cannot be read by this driver; regenerate it with run_crossover.py",
         ))
+    elif not _crossover_schema_ok(xover):
+        # A renamed column is a *skip*, not a crash.  The alternative -- letting
+        # a KeyError abort the run -- makes one stale central artifact the
+        # hostage of every other figure, which is how a paper ends up unable to
+        # build because of a figure it does not even include.  The reason names
+        # the column and says what to do.
+        skipped.append((
+            "fig_crossover",
+            "`crossover_surface.json` predates the error-column rename "
+            "(`relative_l2_fluct_over_full`); regenerate it with run_crossover.py. "
+            "Every other figure is unaffected, which is why this is a skip rather "
+            "than a failure.",
+        ))
+        xover = None
     else:
-        used.append("crossover_surface.json")
         by_re = xover["by_reynolds"]
+        used.append("crossover_surface.json")
         primary = list(by_re)[0]
         case = by_re[primary]
         ranks = sorted(int(r) for r in case["dlra"])
@@ -982,7 +1473,50 @@ def main() -> None:
         fig.savefig(args.output_dir / "fig_crossover.png", bbox_inches="tight")
         plt.close(fig)
 
+    # ---------------------------------------------------------------- C11-1
+    # The paper includes six figures and only `fig_cost` existed, and
+    # `paper/figures/` was empty on every branch, so even that one did not
+    # resolve.  These five are the paper's own names, bound by the draft's
+    # `\label`s, and their content is transcribed from the captions the draft
+    # already carries -- this is transcription, not design.
+    #
+    # They are written to BOTH output roots.  `experiments/figures/` is where the
+    # project's figures live and where PROVENANCE.md and CAPTIONS.md point;
+    # `paper/figures/` is where the draft's `\includegraphics{figures/...}` looks.
+    # Only generated images are written into the paper's tree -- no prose, no
+    # .tex -- and the generating code stays on this side of the ownership line.
+    if args.paper_figures_dir is not None:
+        args.paper_figures_dir.mkdir(parents=True, exist_ok=True)
+    make_paper_figures(
+        R, args.output_dir, args.paper_figures_dir, used, skipped, colors
+    )
+
     provenance(R, args.output_dir, sorted(set(used)), skipped)
+
+    if args.paper_figures_dir is not None:
+        # Every figure this run wrote, mirrored into the paper's directory, and
+        # any figure file already there that this run did NOT write removed --
+        # the same stale-file rule as the primary root, because a stale image in
+        # the paper is the one a referee actually looks at.
+        mirrored, removed = [], []
+        for ext in ("pdf", "png"):
+            for name in sorted(FIGURES_WRITTEN):
+                src = args.output_dir / f"{name}.{ext}"
+                if not src.exists():
+                    continue
+                (args.paper_figures_dir / f"{name}.{ext}").write_bytes(
+                    src.read_bytes()
+                )
+                mirrored.append(f"{name}.{ext}")
+            for existing in sorted(args.paper_figures_dir.glob(f"fig_*.{ext}")):
+                if existing.name not in mirrored:
+                    existing.unlink()
+                    removed.append(existing.name)
+        print(
+            f"mirrored {len(mirrored)} file(s) to {args.paper_figures_dir}"
+            + (f"; removed {len(removed)} stale: {', '.join(removed)}"
+               if removed else "")
+        )
     print(f"figures written to {args.output_dir}")
 
 

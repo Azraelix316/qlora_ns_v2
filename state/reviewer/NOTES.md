@@ -1,7 +1,7 @@
 # NOTES.md — reviewer
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
-> Status: 8 gates green (registry 29/39, 10 build defects, 48 tests; provenance 12 clean, 0 DIRTY of 21). Paper NOT submittable: writer's 4 citations, C11-1's 5 figures, then the 24 blocks. 50 PENDING-CODER markers = ~20 transcription (writer, closable now), ~8 figures, 5 r*(Re) traps to delete. Ten registry reds are BY DESIGN (6 D119 memory; 4 D126 zonal, blocked by MY resolver, not the artifacts). Start at START_HERE.md section 0.
+> Status: registry 22/39, 4 build defects, 61 tests; 8 gates all self-test green. C11-1 DONE (paper/figures: 26 files). Submittable needs 5 things, in order, in START_HERE.md section 1. Eight registry rows red pending the coder's answer on why t* moved.
 > "the subspace must evolve".** `main` clean, every artifact merged, the four agents each have ONE
 > authoritative document and the outboxes are history. **A COMPLETE 1 281-LINE TEN-SECTION DRAFT
 > EXISTS ON THE WRITER'S BRANCH** (I never opened it until R81) — a finished argument with almost no

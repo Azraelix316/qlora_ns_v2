@@ -27,15 +27,27 @@
     "window": 16
   },
   "provenance": {
+    "captured_at": "launch",
     "driver": "experiments/run_rank_rule_energy.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "7310a88f88ecf6cfa7b2dcd6aa5ef84da2cbdbfc83eb9d0190dcc720ada55deb",
-    "git_commit": "a1a42dcf32a29f0c81e3eff83483a51470d82b15",
-    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "driver_matches_HEAD_at_write": true,
+    "driver_sha256": "d6fd1e5d1cc10cc625c63ca426738aed50246a0e1807ad229387096be531733d",
+    "driver_sha256_at_write": "d6fd1e5d1cc10cc625c63ca426738aed50246a0e1807ad229387096be531733d",
+    "git_commit": "f403ab6b1986e9743839b649bccd235fb7213822",
+    "git_commit_at_write": "f403ab6b1986e9743839b649bccd235fb7213822",
+    "git_commit_how": "git log -1 --before=1790412127",
+    "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_diff_sha256": "c498a0579150aec6a8fbc05c10cc116a1be64071170fee256dc4f46648f1f14c",
-    "working_tree_dirty": true
+    "sources_files_at_launch": 30,
+    "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+    "tree_moved_during_run": false,
+    "working_tree_diff_sha256": "4e742229421d2ba344c4029e806f9806d67af7ded53bd921b48f4ddf770ed9ea",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "state/coder/results/peak_memory.json",
+      "state/coder/results/static_basis_construction_N32.json"
+    ]
   },
   "rows": [
     {

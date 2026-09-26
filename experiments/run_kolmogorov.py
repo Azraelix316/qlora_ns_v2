@@ -225,20 +225,119 @@ def _energy_residual(
     return abs(residual) / scale
 
 
-def _zonal_fraction(total: list[float], fluct: list[float]) -> dict | None:
-    """The zonal share of the total, at both ends, as scalars.
+def zonal_fraction_semantics() -> dict:
+    """What the two share keys mean, recorded in every artifact. GATEABLE.
 
-    Recorded rather than derived at read time (C7-4).  The share is a difference
-    of two long series, and a number that has to be reconstructed by subtraction
-    before it can be quoted is a number nobody will check.
+    The reviewer asked for this definition in machine-readable form, and was right
+    to: on 2026-09-26 they recomputed the same pair of series, formed
+    ``fluctuation / total`` -- the *fluctuation* share, ~82% -- and read the
+    recorded ~20% as a different quantity that was "a factor of 4 apart with the
+    Re trend inverted". Neither is true.  The recorded number is
+    ``(total - fluctuation) / total``, the *zonal* share, and because the energy
+    is additive under this split the two are exact complements summing to 1
+    (measured: 100.0000% at the final step at all three Re, and 1.5e-16 relative
+    on a random psi).  So the 20% and the 82% are the same measurement with the
+    two halves named in the opposite order, and the Re trend runs the same way in
+    both once the complement is taken.
+
+    The fix is not prose -- prose is what was misread.  Every quantity is named
+    by the key that holds it, the formula is given symbolically, and the index
+    the value is taken at is part of the key (``at_final_step``).  A reader can
+    now get the definition from the artifact without reading a sentence.
+    """
+    return {
+        "formula_zonal": "(energy_history - fluctuation_energy_history) / energy_history",
+        "formula_fluctuation": "fluctuation_energy_history / energy_history",
+        "energy_history": (
+            "kinetic energy E = 1/2||grad psi||^2 of the FULL field psi, summed "
+            "over the grid"
+        ),
+        "fluctuation_energy_history": (
+            "the same functional of psi' = psi - x-avg(psi), i.e. with the zonal "
+            "(x-independent) mode removed"
+        ),
+        "index": (
+            "each share is reported at TWO indices and the key names which: "
+            "'at_t0' is the initial state, 'at_final_step' is the last step of "
+            "the run. They are not interchangeable -- the share moves over a run."
+        ),
+        "the_two_are_exact_complements": (
+            "E(psi) = E(zonal) + E(psi') exactly, because the Parseval inner "
+            "product of grad(psi_zonal) with grad(psi') vanishes: the zonal mode "
+            "occupies only kx=0 and psi' occupies only kx!=0. So the two shares "
+            "sum to 1 to machine precision, and either may be recovered from the "
+            "other. Asserted in the test suite."
+        ),
+        "how_to_miscompute_it": (
+            "the recorded value is the ZONAL share. Taking "
+            "fluctuation_energy_history / energy_history instead gives its "
+            "complement -- a legitimate different number, roughly four times "
+            "larger here, whose Re trend is the reverse because it is the same "
+            "trend seen from the other half. Name which one is being quoted."
+        ),
+        "which_to_quote": (
+            "quote zonal_energy_fraction for 'what fraction of the energy sits in "
+            "the zonal mean'; quote fluctuation_energy_fraction for the same "
+            "statement about the eddy part. Both are at the final step unless "
+            "the key says at_t0."
+        ),
+    }
+
+
+def _zonal_fraction(total: list[float], fluct: list[float]) -> dict | None:
+    """The zonal AND fluctuation shares of the total, at both ends.
+
+    ``zonal`` is ``(total - fluct) / total`` -- the share in the zonal mean.
+    ``fluctuation`` is its exact complement, and is recorded separately so that
+    nobody has to take the complement by hand, which is how the two halves came
+    to be reported as disagreeing by a factor of four on 2026-09-26.
+
+    The raw component energies are recorded alongside at each index, so the ratio
+    can be recomputed from the artifact and checked against the stored share
+    rather than trusted.  Recorded rather than derived at read time (C7-4): the
+    share is a ratio of two long series, and a number that has to be
+    reconstructed before it can be quoted is a number nobody will check.
     """
     if not total or not fluct or len(total) != len(fluct):
         return None
-    out = {}
+    zonal, fluctuation, components = {}, {}, {}
     for label, index in (("at_t0", 0), ("at_final_step", -1)):
         whole, part = float(total[index]), float(fluct[index])
-        out[label] = (whole - part) / whole if whole > 0 else None
-    return out
+        if whole <= 0:
+            zonal[label] = fluctuation[label] = None
+            components[label] = None
+            continue
+        zonal[label] = (whole - part) / whole
+        fluctuation[label] = part / whole
+        components[label] = {
+            "total_energy": whole,
+            "fluctuation_energy": part,
+            "zonal_energy": whole - part,
+        }
+    return {
+        "zonal": zonal,
+        "fluctuation": fluctuation,
+        "components": components,
+    }
+
+
+def _share_block(total: list[float], fluct: list[float], key: str) -> dict:
+    """The artifact shape for a share: both halves, the components.
+
+    ``key`` is the existing key's stem -- ``zonal_energy_fraction`` or
+    ``zonal_enstrophy_fraction``.  The stored key keeps reading exactly as it
+    did before, so the existing consumers (make_summary, make_figures, the
+    registry) do not change; the complement and the components are *added*
+    alongside rather than substituted for it.
+    """
+    block = _zonal_fraction(total, fluct)
+    if block is None:
+        return {key: None, f"{key}_fluctuation": None, f"{key}_components": None}
+    return {
+        key: block["zonal"],
+        f"{key}_fluctuation": block["fluctuation"],
+        f"{key}_components": block["components"],
+    }
 
 
 def energy_residual_semantics() -> dict:
@@ -418,17 +517,20 @@ def _run_full(
         # section, so it is recorded as a scalar rather than left as the
         # difference of two long series -- a reader should not have to redo the
         # subtraction to cite it, and a registry row cannot verify a derivation.
-        "zonal_energy_fraction": _zonal_fraction(
-            energy_history, fluctuation_energy_history
+        **_share_block(
+            energy_history, fluctuation_energy_history, "zonal_energy_fraction"
         ),
-        "zonal_enstrophy_fraction": _zonal_fraction(
-            enstrophy_history, fluctuation_enstrophy_history
+        **_share_block(
+            enstrophy_history, fluctuation_enstrophy_history, "zonal_enstrophy_fraction"
         ),
+        "zonal_fraction_semantics": zonal_fraction_semantics(),
         "zonal_fraction_definition": (
             "zonal/total at t=0 and at the final step, from the psi' series. The "
             "fluctuation dominates at these settings (about 5:1 at N=64), so the "
             "total KE is NOT zonal-dominated and a figure of the total alone does "
-            "not show the zonal part at all."
+            "not show the zonal part at all. For the formula, the index, and the "
+            "exact-complement identity, read zonal_fraction_semantics -- do not "
+            "infer the ratio from the series names."
         ),
         "max_energy_increase": finite_or_none(max_energy_increase),
         "stable": stability["stable"],
@@ -571,17 +673,20 @@ def _run_projected(
         "max_scaled_pde_energy_residual": finite_or_none(max_full_pde_residual),
         "max_scaled_projected_energy_residual": finite_or_none(max_residual),
         "energy_residual_semantics": energy_residual_semantics(),
-        "zonal_energy_fraction": _zonal_fraction(
-            energy_history, fluctuation_energy_history
+        **_share_block(
+            energy_history, fluctuation_energy_history, "zonal_energy_fraction"
         ),
-        "zonal_enstrophy_fraction": _zonal_fraction(
-            enstrophy_history, fluctuation_enstrophy_history
+        **_share_block(
+            enstrophy_history, fluctuation_enstrophy_history, "zonal_enstrophy_fraction"
         ),
+        "zonal_fraction_semantics": zonal_fraction_semantics(),
         "zonal_fraction_definition": (
             "zonal/total at t=0 and at the final step, from the psi' series. The "
             "fluctuation dominates at these settings (about 5:1 at N=64), so the "
             "total KE is NOT zonal-dominated and a figure of the total alone does "
-            "not show the zonal part at all."
+            "not show the zonal part at all. For the formula, the index, and the "
+            "exact-complement identity, read zonal_fraction_semantics -- do not "
+            "infer the ratio from the series names."
         ),
         "max_energy_increase": finite_or_none(max_energy_increase),
         "stable": stability["stable"],
@@ -868,14 +973,20 @@ def run_case(
         "max_scaled_pde_energy_residual": finite_or_none(dlra_max_full_pde_residual),
         "max_scaled_projected_energy_residual": finite_or_none(dlra_max_residual),
         "energy_residual_semantics": energy_residual_semantics(),
-        "zonal_energy_fraction": _zonal_fraction(
-            dlra_energy_history, dlra_fluctuation_energy_history
+        **_share_block(
+            dlra_energy_history, dlra_fluctuation_energy_history,
+            "zonal_energy_fraction",
         ),
-        "zonal_enstrophy_fraction": _zonal_fraction(
-            dlra_enstrophy_history, dlra_fluctuation_enstrophy_history
+        **_share_block(
+            dlra_enstrophy_history, dlra_fluctuation_enstrophy_history,
+            "zonal_enstrophy_fraction",
         ),
+        "zonal_fraction_semantics": zonal_fraction_semantics(),
         "zonal_fraction_definition": (
-            "zonal/total at t=0 and at the final step, from the psi' series"
+            "zonal/total at t=0 and at the final step, from the psi' series. For "
+            "the formula, the index, and the exact-complement identity, read "
+            "zonal_fraction_semantics -- do not infer the ratio from the series "
+            "names."
         ),
         "max_energy_increase": finite_or_none(dlra_max_energy_increase),
         "stable": dlra_stability["stable"],

@@ -30,6 +30,8 @@ from __future__ import annotations
 
 import argparse
 import json
+
+from _cli import ListOnce
 import subprocess
 import sys
 import time
@@ -461,7 +463,8 @@ def main() -> None:
         "--refit-interval", type=float, default=1.0,
         help="time between moving-window refits",
     )
-    parser.add_argument("--ranks", type=int, nargs="+", default=[16, 32, 42])
+    parser.add_argument("--ranks", type=int, nargs="+", action=ListOnce,
+                        default=[16, 32, 42])
     parser.add_argument("--dmd-ridge", type=float, default=0.0)
     parser.add_argument("--dlra-relative-amplitude-cutoff", type=float, default=1e-10)
     parser.add_argument(
