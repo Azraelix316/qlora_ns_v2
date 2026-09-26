@@ -600,6 +600,42 @@
   CASE ALREADY ESTABLISHED BY HAND. VERIFY THE VERIFIER, AND VERIFY IT AGAINST SOMETHING ALREADY KNOWN,
   BEFORE BELIEVING WHAT IT SAYS ABOUT ANYTHING NEW.**
 
+- 2026-09-26 **R92 — D55 OVERSTATED THE DEFECT: TWO artifacts have a false `git_commit`, NOT FIVE. Three
+  were my instrument's fault, and I wrote the self-test discipline in D55.6 and then failed to apply it
+  in the very next cycle. D55c.** No new pushes.
+  **WHAT WENT WRONG, PRECISELY: `run_kolmogorov.py` HAS *TWO* `"parameters"` DICT LITERALS, AND MY D55
+  CHECK COMPARED ONLY THE FIRST.** Block #1 (22 keys) does not write `pod_fit_includes_ic` or
+  `spectrum_count`; **block #2 (21 keys) writes ALL 20 of the artifact's keys.** The artifact came from
+  block #2's code path, so `78607f3a` **can** have written it. The corrected check takes the UNION over
+  every `"parameters"` literal in the driver, and on that basis **THREE OF D55'S FIVE ARE MATCH.**
+  `kolmogorov_re{100,1000,5000}_N64.json` are **WITHDRAWN from the defect list.**
+  **THE TWO THAT GENUINELY FAIL, AND THE MECHANISM IS THE SAME IN BOTH: `kolmogorov_re5000_N128.json`
+  (one key: `ic_reference_N`) and `rank_growth_sweep.json` (18 keys).** `ic_reference_N` was introduced
+  in `a26cccb` and `78607f3a` **is an ancestor** of `a26cccb`, so it predates the flag. The driver has a
+  `--ic-reference-N` option, so the artifact recorded that it was run with a non-default value **WHILE
+  HEAD DID NOT YET HAVE THE FLAG THAT RECORDS IT** - the dirty-driver case on a single flag, which is a
+  smaller and cleaner story than D55's.
+  **BOTH SELF-TESTS BEHAVED CORRECTLY: the hand-verified `rank_growth_sweep` case is STILL DETECTED (no
+  regression), and the false positive is gone. So the check did not break - it was OVER-FITTED to the
+  shape of the single artifact it was built on.**
+  **AND THIS CONCENTRATES THE RISK RATHER THAN SPREADING IT. `kolmogorov_re5000_N128.json` IS THE
+  `N=128` CASE - THE ONE ARTIFACT CARRYING THE `1.46->1.99` / `2.45->6.04` GRID MULTIPLIERS THAT I HAVE
+  REPEATEDLY CALLED **MY** NUMBERS, CARRYING **MY** INDEX SHIFT, AND **UNVERIFIED**. SO THE ONE ARTIFACT
+  WITH A FALSE PROVENANCE RECORD IS ALSO THE ONE WHOSE NUMBERS ARE LEAST ESTABLISHED. THE `N=128` GRID
+  MULTIPLIERS ARE UNVERIFIED *AND* THE ARTIFACT THEY COME FROM RECORDS A COMMIT THAT DID NOT PRODUCE IT.
+  THAT IS THE WORST COMBINATION AVAILABLE IN THIS PROJECT AND IT IS STILL A CHEAP RE-RUN (T=0.1, SECONDS).**
+  **THE LESSON, AND IT IS THE THIRD VARIANT OF ONE FAILURE, AND I COMMITTED IT IN THE CYCLE AFTER NAMING
+  IT. D55.6 SAID: "VERIFY THE VERIFIER, AND VERIFY IT AGAINST SOMETHING ALREADY KNOWN, BEFORE BELIEVING
+  WHAT IT SAYS ABOUT ANYTHING NEW." I WROTE THAT AND THEN, IN THE NEXT CYCLE, GENERALISED A CHECK BUILT ON
+  ONE ARTIFACT - WHOSE DRIVER HAS ONE `"parameters"` BLOCK - ACROSS SIXTEEN, ONE OF WHICH HAS TWO,
+  WITHOUT TESTING THE GENERALISATION. THE SELF-TEST DISCIPLINE IS NOT "TEST THE EXTRACTOR ONCE"; IT IS
+  "TEST IT ON AN ARTIFACT THAT DIFFERS STRUCTURALLY FROM THE ONE IT WAS BUILT ON." A CHECK VALIDATED
+  ONLY ON THE SHAPE THAT PRODUCED IT WILL REPRODUCE THAT SHAPE'S FAILURES ON EVERY OTHER SHAPE.**
+  **ALSO WORTH RECORDING: a second useful by-product. When an artifact's recorded commit is falsified,
+  THE SCHEMA TELLS YOU WHICH COMMITS ARE CANDIDATES - any commit at or after the one that introduced the
+  missing key - and the EARLIEST SUCH COMMIT IS THE BEST REPAIR TARGET. For `kolmogorov_re5000_N128.json`
+  that is `a26cccb`, one flag later.**
+
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
 **Everything below this line, up to `## Mission`, is superseded history.** The `> Status:` line

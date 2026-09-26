@@ -3822,3 +3822,50 @@ KNOWN, BEFORE BELIEVING WHAT IT SAYS ABOUT ANYTHING NEW.**
 
 **D55.8 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42c.7, D43.7, D44.8,
 D45.8, D46.8, D47.5a, D47.8, D48.5, D49.9, D19.4a.6, D50.5, D52.9, D53.4 and D54.4 stands.
+
+---
+
+## D55c — **D55 OVERSTATED THE DEFECT: TWO artifacts have a false `git_commit`, not five. Three were my instrument's fault, and I wrote the self-test discipline in D55.6 and then failed to apply it in the very next cycle.** (2026-09-26) — **CORRECTS D55's LIST.**
+
+> **OPERATIVE (R92). GENUINELY FALSE: `kolmogorov_re5000_N128.json` (one key) and
+> `rank_growth_sweep.json` (18 keys).** `kolmogorov_re{100,1000,5000}_N64.json` **MATCH** and D55's
+> verdict on them is **WITHDRAWN**. Both self-tests behaved correctly; the hand-verified case is still
+> detected, so the check did not regress — it was over-fitted.
+
+**D55c.1 — WHAT WENT WRONG, PRECISELY. `run_kolmogorov.py` HAS *TWO* `"parameters"` DICT LITERALS, AND MY
+D55 CHECK COMPARED ONLY THE FIRST.** Block #1 (22 keys) does not write `pod_fit_includes_ic` or
+`spectrum_count`; **block #2 (21 keys) writes all 20 of the artifact's keys.** The artifact came from
+block #2's code path, so `78607f3a` **can** have written it. **The corrected check takes the UNION over
+every `"parameters"` literal in the driver, and on that basis three of D55's five are MATCH.**
+
+**D55c.2 — THE TWO THAT GENUINELY FAIL, AND THE MECHANISM IS THE SAME IN BOTH.**
+
+| artifact | recorded | keys that commit's driver never writes |
+|---|---|---|
+| `kolmogorov_re5000_N128.json` | `78607f3a` | **`ic_reference_N`** (1 key) |
+| `rank_growth_sweep.json` | `78607f3a` | **18 keys** |
+
+**`ic_reference_N` WAS INTRODUCED IN `a26cccb`, AND `78607f3a` IS AN ANCESTOR OF `a26cccb` — SO IT
+PREDATES THE FLAG. THE DRIVER HAS A `--ic-reference-N` OPTION, SO THE ARTIFACT RECORDED THAT IT WAS RUN
+WITH A NON-DEFAULT VALUE WHILE HEAD DID NOT YET HAVE THE FLAG THAT RECORDS IT. THAT IS THE SAME
+DIRTY-DRIVER CASE AS `rank_growth_sweep`, AND IT IS ALSO A SMALLER AND CLEANER STORY: ONE FLAG, ONE
+COMMIT, ONE ARTIFACT.**
+
+**D55c.3 — AND THIS CONCENTRATES THE RISK RATHER THAN SPREADING IT. `kolmogorov_re5000_N128.json` IS THE
+`N=128` CASE — THE ONE ARTIFACT CARRYING THE `1.46->1.99` / `2.45->6.04` GRID MULTIPLIERS THAT I HAVE
+REPEATEDLY CALLED **MY** NUMBERS, CARRYING **MY** INDEX SHIFT, AND **UNVERIFIED**. SO THE ONE ARTIFACT
+WITH A FALSE PROVENANCE RECORD IS ALSO THE ONE WHOSE NUMBERS ARE LEAST ESTABLISHED. **THE `N=128` GRID
+MULTIPLIERS ARE UNVERIFIED *AND* THE ARTIFACT THEY COME FROM RECORDS A COMMIT THAT DID NOT PRODUCE IT.
+THAT IS THE WORST COMBINATION AVAILABLE IN THIS PROJECT AND IT IS STILL A CHEAP RE-RUN.**
+
+**D55c.4 — THE LESSON, AND IT IS THE THIRD VARIANT OF ONE FAILURE, AND I COMMITTED IT IN THE CYCLE
+AFTER NAMING IT. D55.6 SAID: *"VERIFY THE VERIFIER, AND VERIFY IT AGAINST SOMETHING ALREADY KNOWN,
+BEFORE BELIEVING WHAT IT SAYS ABOUT ANYTHING NEW."* I WROTE THAT AND THEN, IN THE NEXT CYCLE, GENERALISED
+A CHECK BUILT ON ONE ARTIFACT — WHOSE DRIVER HAS ONE `"parameters"` BLOCK — ACROSS SIXTEEN, ONE OF WHICH
+HAS TWO, **WITHOUT TESTING THE GENERALISATION.** THE SELF-TEST DISCIPLINE IS NOT "TEST THE EXTRACTOR
+ONCE"; IT IS **"TEST IT ON AN ARTIFACT THAT DIFFERS STRUCTURALLY FROM THE ONE IT WAS BUILT ON."** A CHECK
+VALIDATED ONLY ON THE SHAPE THAT PRODUCED IT WILL REPRODUCE THAT SHAPE'S FAILURES ON EVERY OTHER SHAPE.**
+
+**D55c.5 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42c.7, D43.7, D44.8,
+D45.8, D46.8, D47.5a, D47.8, D48.5, D49.9, D19.4a.6, D50.5, D52.9, D53.4 and D54.4 stands. **D55's
+MECHANISM (D55.3) AND ITS LESSON (D55.7) STAND; ONLY ITS LIST IS CORRECTED, FROM FIVE ARTIFACTS TO TWO.**
