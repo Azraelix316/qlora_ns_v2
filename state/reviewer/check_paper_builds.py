@@ -150,13 +150,27 @@ def run_checks(files, bibkeys, treefiles, verbose=True):
         bad.append(("ERROR", f"\\ref{{{target}}} has no \\label  (used {len(unresolved[target])}x in "
                             f"{', '.join(os.path.basename(w) for w in where)})"))
 
+    # D134/D136. \includegraphics resolves RELATIVE TO THE MAIN DOCUMENT'S DIRECTORY in LaTeX, not
+    # the including file's. This check only tried the including file's directory, so for
+    # `\includegraphics{figures/X}` inside paper/sections/06_results.tex it looked for
+    # paper/sections/figures/X while the figure -- correctly -- lives at paper/figures/X. It therefore
+    # reported all six figures MISSING on the very push that created them (C11-1), and would have
+    # gone on reporting it forever. THIS EDIT IS PURELY ADDITIVE: every original candidate is kept and
+    # the document-root ones are APPENDED. The previous attempt REPLACED the candidate list and the
+    # self-test correctly caught that it had stopped seeing a missing figure ("MISSED missing
+    # \includegraphics target"). A check that cannot see what is absent is worse than one that
+    # mis-reports what is present, so the additive form is the one that ships.
+    docroot = next((os.path.dirname(x) for x in sorted(files) if x.endswith("main.tex")), "")
     for path, g in graphics:
         stem = re.sub(r"\.(pdf|png|jpg|eps)$", "", g)
-        ok = any(cand in treefiles or cand in files
-                 for cand in (g, stem + ".pdf", stem + ".png",
-                              os.path.normpath(os.path.join(os.path.dirname(path), g)),
-                              os.path.normpath(os.path.join(os.path.dirname(path), stem + ".pdf")),
-                              os.path.normpath(os.path.join(os.path.dirname(path), stem + ".png"))))
+        cands = [g, stem + '.pdf', stem + '.png',
+                 os.path.normpath(os.path.join(os.path.dirname(path), g)),
+                 os.path.normpath(os.path.join(os.path.dirname(path), stem + ".pdf")),
+                 os.path.normpath(os.path.join(os.path.dirname(path), stem + ".png"))]
+        for base in (docroot, os.path.dirname(path)):
+            for nm in (g, stem + '.pdf', stem + '.png'):
+                cands.append(os.path.normpath(os.path.join(base, nm)))
+        ok = any(cand in treefiles or cand in files for cand in cands)
         if not ok:
             bad.append(("ERROR", f"{path}: \\includegraphics{{{g}}} resolves to no file in the tree"))
 

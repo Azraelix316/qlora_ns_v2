@@ -1,7 +1,7 @@
 # NOTES.md — reviewer
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
-> Status: 8 gates green (registry 29/39, 10 build defects, 49 tests; provenance 21 artifacts). C11-1 DONE: paper/figures has 26 files. Left: the writer's 4 citations, then the 24 blocks. Ten registry reds BY DESIGN. Start at START_HERE.md section 0.
+> Status: registry 22/39, 4 build defects, 61 tests; 8 gates all self-test green. C11-1 DONE (paper/figures: 26 files). Submittable needs 5 things, in order, in START_HERE.md section 1. Eight registry rows red pending the coder's answer on why t* moved.
 > "the subspace must evolve".** `main` clean, every artifact merged, the four agents each have ONE
 > authoritative document and the outboxes are history. **A COMPLETE 1 281-LINE TEN-SECTION DRAFT
 > EXISTS ON THE WRITER'S BRANCH** (I never opened it until R81) — a finished argument with almost no

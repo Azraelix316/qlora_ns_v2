@@ -112,9 +112,16 @@ def collect_facts() -> list[tuple[str, str, str, str]]:
 
 
 def section4(text: str) -> str:
-    """The region of START_HERE that carries the claims: §4 up to the next `## `."""
+    """The region of START_HERE that carries the claims.
+
+    Historically this was "section 4", and when START_HERE was rewritten with a different layout every
+    number assertion failed with "ABSENT from section 4" -- not because a number was wrong but because a
+    HEADING had moved. **The numbers are the claim; the section numbering is presentation.** So if there is
+    no `## 4.` heading, the whole document is the claims region. A gate that breaks when a heading is
+    renamed is a gate that gets disabled.
+    """
     m = re.search(r"^## 4\..*?(?=^## \d)", text, re.S | re.M)
-    return m.group(0) if m else ""
+    return m.group(0) if m else text
 
 
 def listed_checks(sec: str) -> int:
@@ -221,28 +228,20 @@ def run_gate_pytest():
 # to make when there are four, two of which a find-and-replace cannot see. D95, and the reason this
 # function counts cite COMMANDS CONTAINING the key rather than occurrences of a string.
 SECTION0_CLAIMS = [
-    # (what section 0 asserts, THE NUMBER, the substring that must appear, how to measure it)
+    # (what the entry point asserts, THE NUMBER, a literal that must appear, how to measure it)
     #
-    # THE NUMBER IS A FIELD, NOT PARSED OUT OF THE SUBSTRING. The first version extracted it with
-    # `re.search(r"\\d+", literal)` and duly reported "asserts 2019" -- because the literal contains
-    # the string `koch2019dlra`, so the first digit run in the sentence about the number of phantom
-    # citations is the year in a citation key. And the figure claim, written "five figures no code
-    # generates", has no digit at all, so it asserted None. **A NUMBER PARSED OUT OF PROSE IS A TOKEN,
-    # NOT A CLAIM** -- D111 again, this time inside the check written to catch exactly that. The
-    # substring is now a PRESENCE check only; the number is stated.
-    #
-    # A BUCKET DEFINED BY JUDGEMENT IS NOT A MEASUREMENT AND IS DELIBERATELY NOT HERE. Section 0
-    # also says "~20 of the 50 markers are transcription" and that is a judgement about which
-    # markers are closable by reading a table, not something this function can count. Putting it in
-    # a measured table would be the same error as parsing a number out of prose: it would acquire the
-    # authority of a measurement without being one. Six crisp claims; the judgement stays prose.
-    ("the phantom citations",        4, "four `\\cite{koch2019dlra}`",                    "phantom_cite_sites"),
-    ("the figures with no generator", 0, "~~five figures no code generates~~ **DONE**",              "missing_generators"),
-    ("the unresolvable figure files", 0, "~~`paper/figures/` is **empty on all three branches**~~ now **26 files**", "unresolvable_files"),
-    ("the supplied blocks",          24, "the 24 supplied blocks",                          "paste_ready_blocks"),
-    ("the marker total",             51, "**THE `51` `PENDING-CODER` MARKERS ARE NOT FIFTY-ODD BLOCKED ITEMS",               "pending_markers"),
-    ("the withdrawn-quantity traps",  5, "**withdrawn-quantity traps**",                                         "rstar_traps"),
+    # D137: the literals were re-pointed at the rewritten entry point. They had been written for the
+    # previous layout, so all five whose wording changed reported "does not contain ..." -- which is the
+    # gate WORKING (a claim it cannot find is a claim it cannot check) but is only useful if the reason
+    # is printed, and it is now.
+    ("the phantom citations",         4, "`koch2019dlra` is not in any",              "phantom_cite_sites"),
+    ("the figures with no generator",  0, "**The figures are done.**",                  "missing_generators"),
+    ("the unresolvable figure files", 0, "all six `\\includegraphics` in §6 resolve", "unresolvable_files"),
+    ("the supplied blocks",          24, "the 24 supplied blocks",                    "paste_ready_blocks"),
+    ("the marker total",             51, "51 `PENDING-CODER` markers",                "pending_markers"),
+    ("the withdrawn-quantity traps",  5, "5 name `r*(Re)`",                            "rstar_traps"),
 ]
+
 
 
 CITE_RX = re.compile(r"\\cite[a-zA-Z]*\*?(?:\[[^\]]*\])?\{([^}]*)\}")
@@ -284,13 +283,16 @@ def section0_facts():
     if not doc.exists():
         return 1, "START_HERE.md absent, skipped"
     text = doc.read_text()
-    i = text.find("## 0. THE CRITICAL PATH")
-    if i < 0:
-        return 1, "START_HERE.md has no '## 0. THE CRITICAL PATH' section -- the entry point's"
-    sec0 = text[i:]
-    j = sec0.find("\n## 1. ")
-    if j > 0:
-        sec0 = sec0[:j]
+    # D137: this used to require a heading named "## 0. THE CRITICAL PATH", so RENAMING that heading
+    # turned the whole section-0 check into a silent failure (its reason was returned but never
+    # printed -- a gate that fails without saying why is the D87/D123 class). It now searches for any
+    # of the accepted headings and falls back to the whole document, and every failure path PRINTS.
+    # D137: checked against the WHOLE page. The claims used to be read out of one numbered section, so
+    # two of the six -- the figure ones -- reported "does not contain ..." purely because they sit in the
+    # "what is NOT blocking" section, where they belong. **The claim is that the entry point STATES the
+    # fact, not which heading it sits under.** Presentation is not a claim; this is the third time in
+    # this file that the two got confused, and the fix each time has been the same.
+    sec0 = text
     draft = _draft_text()
 
     # 1. cite COMMANDS containing the key, not occurrences of the string
@@ -417,19 +419,20 @@ def check() -> int:
     n = listed_checks(sec)
     m = re.search(r"^## 4\.\s*Run these (\w+) checks?\b", sec, re.M)
     print()
-    if not m:
-        print("  FAIL  the §4 heading does not state a number of checks, so it cannot go stale")
-        print("        silently -- but it also cannot be checked. Rewrite it as 'Run these N checks'.")
+    # D137: there is no "## 4. Run these N checks" heading to read a count from, and there need not
+    # be -- the entry point was reorganised and every NUMBER still verified. That branch used to fail
+    # whenever the heading was absent or reworded, i.e. whenever PRESENTATION changed while every claim
+    # stayed true, and the natural response to a gate that cries wolf on a rename is to stop running it.
+    # What is asserted instead is the thing that actually matters: THE ENTRY POINT NAMES EVERY GATE.
+    GATES = ["claims_registry.py", "check_order_withdrawn.py", "check_paper_builds.py",
+             "check_headings.py", "check_start_here.py", "check_directional_claims.py",
+             "check_provenance.py"]
+    missing = [g for g in GATES if g not in start]
+    good = not missing
+    print(f"  {'ok  ' if good else 'FAIL'}  the entry point names all {len(GATES)} gates"
+          + (f"; missing: {missing}" if missing else ""))
+    if not good:
         bad += 1
-    else:
-        said = m.group(1)
-        expect = WORD.get(n, str(n))
-        good = said == expect
-        print(f"  {'ok  ' if good else 'FAIL'}  section 4 heading says {said!r} checks; "
-              f"it lists {n} check command(s) (expected {expect!r})")
-        if not good:
-            bad += 1
-
     print()
     sbad2, sev2 = status_line_facts()
     print(f"  {'FAIL' if sbad2 else 'ok  '}  NOTES.md '> Status:' line CONTENT: {sev2}")
