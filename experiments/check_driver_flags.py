@@ -67,8 +67,19 @@ def check(script: Path) -> list[str]:
 
 
 def main() -> int:
+    # `--help` has to be handled explicitly. This script takes a list of paths
+    # positionally, so without this it treats `--help` as a filename, reports
+    # "no such file" and exits 1 -- a tool for inspecting drivers that cannot be
+    # asked for its own help. Found by
+    # `test_every_driver_can_print_its_own_help`, which is the check that
+    # `check_driver_flags.py` exists to make reliable.
+    if any(a in ("-h", "--help") for a in sys.argv[1:]):
+        print(__doc__)
+        print("usage: check_driver_flags.py <script.sh> [more scripts ...]")
+        return 0
     if len(sys.argv) < 2:
         print(__doc__)
+        print("usage: check_driver_flags.py <script.sh> [more scripts ...]")
         return 2
     all_problems: list[str] = []
     for arg in sys.argv[1:]:

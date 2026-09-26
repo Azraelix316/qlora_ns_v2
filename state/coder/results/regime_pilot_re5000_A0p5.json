@@ -9071,19 +9071,32 @@
     "driver_matches_HEAD_at_write": true,
     "driver_sha256": "f2e920fed9cf3d82a770c0dde7a1568671a272fe8f537b6bbd91353b4700c384",
     "driver_sha256_at_write": "f2e920fed9cf3d82a770c0dde7a1568671a272fe8f537b6bbd91353b4700c384",
-    "git_commit": "66dbb2b3a8954db2409c2e5ab1a4eeccf00c14b3",
-    "git_commit_at_write": "66dbb2b3a8954db2409c2e5ab1a4eeccf00c14b3",
-    "git_commit_how": "git log -1 --before=1790413919",
+    "environment": {
+      "numpy": "2.5.3",
+      "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
+      "processor": "x86_64",
+      "python": "3.12.3",
+      "thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": null,
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    "git_commit": "ca8f9ccd4a1f8ae6b37f615f202b5e68b22136a8",
+    "git_commit_at_write": "ca8f9ccd4a1f8ae6b37f615f202b5e68b22136a8",
+    "git_commit_how": "git log -1 --before=1790433043",
     "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "sources_files_at_launch": 31,
-    "sources_fingerprint_at_launch": "66d0e0121e43b379f625d48c8000d47014dfe311eb913509a2e99d3a7989797f",
+    "sources_files_at_launch": 32,
+    "sources_fingerprint_at_launch": "1ae129ff26e49e278062e1e406ca7b80f58e325dea05683c1d58144b1ecfb533",
     "tree_moved_during_run": false,
-    "working_tree_diff_sha256": "f96d806e77bd4da1d110db21a78efd37819777ab4e6cd95a220f48179253fafb",
+    "working_tree_diff_sha256": "042daca16372db78b1a572a12d11c81a595fad248bcedd1b6399f65172eac4e2",
     "working_tree_dirty": true,
     "working_tree_dirty_paths": [
       "state/coder/results/baselines_re5000_N64_T8.json",
-      "state/coder/results/rank_growth_sweep_T8.json"
+      "state/coder/results/regime_pilot_re5000_N128_A0p2.json"
     ]
   },
   "qualifying_horizons": [],
@@ -9128,7 +9141,7 @@
         }
       },
       "samples": 6,
-      "wall_seconds": 0.6782070780172944,
+      "wall_seconds": 0.6929999939166009,
       "zonal_share_of_total_energy_at_end": 0.18397942647862783
     },
     {
@@ -9166,7 +9179,7 @@
         }
       },
       "samples": 14,
-      "wall_seconds": 1.2509448509663343,
+      "wall_seconds": 1.3067341390997171,
       "zonal_share_of_total_energy_at_end": 0.21463112917237984
     },
     {
@@ -9204,7 +9217,7 @@
         }
       },
       "samples": 26,
-      "wall_seconds": 2.2813484519720078,
+      "wall_seconds": 2.8551708329468966,
       "zonal_share_of_total_energy_at_end": 0.24378416515662507
     },
     {
@@ -9242,7 +9255,7 @@
         }
       },
       "samples": 51,
-      "wall_seconds": 4.609141792869195,
+      "wall_seconds": 4.820353424875066,
       "zonal_share_of_total_energy_at_end": 0.32163117679826075
     },
     {
@@ -9280,7 +9293,7 @@
         }
       },
       "samples": 101,
-      "wall_seconds": 9.254238762892783,
+      "wall_seconds": 8.805125354090706,
       "zonal_share_of_total_energy_at_end": 0.49688615984890105
     },
     {
@@ -9324,7 +9337,7 @@
         }
       },
       "samples": 151,
-      "wall_seconds": 13.667701845988631,
+      "wall_seconds": 13.922247999114916,
       "zonal_share_of_total_energy_at_end": 0.48603747944525777
     },
     {
@@ -9368,7 +9381,7 @@
         }
       },
       "samples": 201,
-      "wall_seconds": 17.744075607974082,
+      "wall_seconds": 18.24330523284152,
       "zonal_share_of_total_energy_at_end": 0.5534467976724189
     },
     {
@@ -9414,7 +9427,7 @@
         }
       },
       "samples": 301,
-      "wall_seconds": 26.886854026000947,
+      "wall_seconds": 27.39211381995119,
       "zonal_share_of_total_energy_at_end": 0.6108846415672203
     },
     {
@@ -9460,7 +9473,7 @@
         }
       },
       "samples": 401,
-      "wall_seconds": 35.17136371508241,
+      "wall_seconds": 36.31990158301778,
       "zonal_share_of_total_energy_at_end": 0.7371225718971963
     },
     {
@@ -9510,7 +9523,7 @@
         }
       },
       "samples": 601,
-      "wall_seconds": 51.520439505111426,
+      "wall_seconds": 53.49051974294707,
       "zonal_share_of_total_energy_at_end": 0.8427156748023765
     },
     {
@@ -9562,7 +9575,7 @@
         }
       },
       "samples": 801,
-      "wall_seconds": 68.7540523740463,
+      "wall_seconds": 69.37230944004841,
       "zonal_share_of_total_energy_at_end": 0.931213298329932
     },
     {
@@ -9616,7 +9629,7 @@
         }
       },
       "samples": 1001,
-      "wall_seconds": 88.00832161097787,
+      "wall_seconds": 86.52579596708529,
       "zonal_share_of_total_energy_at_end": 0.9379530346632285
     }
   ],

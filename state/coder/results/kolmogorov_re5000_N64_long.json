@@ -14221,7 +14221,7 @@
     ]
   },
   "linear_algebra_calls": 8401,
-  "linear_algebra_seconds": 3.4789567231200635,
+  "linear_algebra_seconds": 3.190037213265896,
   "max_relative_l2_dlra_vs_full": 0.0003346509368601237,
   "method_note": "Long-time run compares full-grid and DLRA only; see the short Re suite for static POD.",
   "parameters": {
@@ -14253,23 +14253,32 @@
     "driver_matches_HEAD_at_write": true,
     "driver_sha256": "77680c67d463c223eeaad1c66838b141b5a5cb8c878c3bc8fced810c3312fc0f",
     "driver_sha256_at_write": "77680c67d463c223eeaad1c66838b141b5a5cb8c878c3bc8fced810c3312fc0f",
-    "git_commit": "f403ab6b1986e9743839b649bccd235fb7213822",
-    "git_commit_at_write": "f403ab6b1986e9743839b649bccd235fb7213822",
-    "git_commit_how": "git log -1 --before=1790413476",
+    "environment": {
+      "numpy": "2.5.3",
+      "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
+      "processor": "x86_64",
+      "python": "3.12.3",
+      "thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": null,
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    "git_commit": "c74432641a4b3fd6a44ab0b9a8cafc6d4c041279",
+    "git_commit_at_write": "c74432641a4b3fd6a44ab0b9a8cafc6d4c041279",
+    "git_commit_how": "git log -1 --before=1790432407",
     "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "sources_files_at_launch": 30,
-    "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+    "sources_files_at_launch": 32,
+    "sources_fingerprint_at_launch": "1ae129ff26e49e278062e1e406ca7b80f58e325dea05683c1d58144b1ecfb533",
     "tree_moved_during_run": false,
-    "working_tree_diff_sha256": "3c329ec4166941ebabf29ba7eee93e2fc387d66408413e5422e79221299a5e90",
+    "working_tree_diff_sha256": "6941e2d641cf3490fad0652f7a92b606adf70f03beb5a7cf585353bfba722dda",
     "working_tree_dirty": true,
     "working_tree_dirty_paths": [
-      "state/coder/results/crossover_N128.json",
-      "state/coder/results/peak_memory.json",
-      "state/coder/results/rank_rule_energy.json",
-      "state/coder/results/regime_pilot_re5000_A0p2.json",
-      "state/coder/results/regime_pilot_re5000_N128_A0p2.json",
-      "state/coder/results/static_basis_construction_N32.json"
+      "state/coder/results/rank_growth_sweep_T8.json",
+      "state/coder/results/regime_pilot_re5000_A0p2.json"
     ]
   },
   "reynolds": 5000,
@@ -14380,5 +14389,5 @@
       "time": 1.0
     }
   ],
-  "wall_seconds": 21.29201940004714
+  "wall_seconds": 20.69114440283738
 }

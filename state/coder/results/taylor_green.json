@@ -106,8 +106,8 @@
   "dlra_rank_final": 1,
   "dlra_rank_max": 1,
   "dlra_rank_min": 1,
-  "dlra_seconds": 0.2828449020162225,
-  "dlra_seconds_per_step": 0.0028284490201622246,
+  "dlra_seconds": 0.2572539260145277,
+  "dlra_seconds_per_step": 0.002572539260145277,
   "energy_history": [
     9.869604401089358,
     9.86171187499986,
@@ -315,8 +315,8 @@
     9.118084705770684,
     9.110793155015253
   ],
-  "full_seconds": 0.14009847515262663,
-  "full_seconds_per_step": 0.0014009847515262664,
+  "full_seconds": 0.11742243287153542,
+  "full_seconds_per_step": 0.0011742243287153542,
   "grid": {
     "L": 6.283185307179586,
     "N": 64
@@ -351,15 +351,28 @@
     "driver_matches_HEAD_at_write": true,
     "driver_sha256": "b62ae061e6f39bbdb4a07e450a4052547f46057b2dcdf86b8bc92d85bee4b2cd",
     "driver_sha256_at_write": "b62ae061e6f39bbdb4a07e450a4052547f46057b2dcdf86b8bc92d85bee4b2cd",
-    "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
-    "git_commit_at_write": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
-    "git_commit_how": "git log -1 --before=1790411870",
+    "environment": {
+      "numpy": "2.5.3",
+      "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
+      "processor": "x86_64",
+      "python": "3.12.3",
+      "thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": null,
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+    "git_commit_at_write": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+    "git_commit_how": "git log -1 --before=1790430667",
     "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "sources_files_at_launch": 30,
-    "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+    "sources_files_at_launch": 32,
+    "sources_fingerprint_at_launch": "e6ddf4bede78ffc0b2637ecb18b818cfaee82cbd887dc1bc45140b0839a6b787",
     "tree_moved_during_run": false,
-    "working_tree_diff_sha256": "e1ad79c873abc75d9d7aaa12c1972a612c63b2b79d8937bd2c503024d88b7b52",
+    "working_tree_diff_sha256": "626b26529f51b0e07458f79f7dd6fd5a43c232a68465a824cf0b73bad7bd1ca8",
     "working_tree_dirty": true,
     "working_tree_dirty_paths": [
       "state/coder/results/kolmogorov_re1000_N64.json",
