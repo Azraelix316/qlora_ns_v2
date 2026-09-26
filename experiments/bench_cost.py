@@ -37,6 +37,7 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
+from provenance import provenance as _provenance
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -51,34 +52,6 @@ def _git_commit() -> str:
     except (OSError, subprocess.CalledProcessError):
         return "unknown"
 
-
-def provenance() -> dict:
-    """Commit, plus whether the tree that ran is the commit that is named.
-
-    A run started with uncommitted changes produces numbers from code that its
-    recorded commit does not contain, which is the staleness D14.4 is about --
-    just one commit further out, and therefore easy to miss.  The diff's hash is
-    recorded so the exact code can be recovered.
-    """
-    commit = _git_commit()
-    try:
-        diff = subprocess.check_output(
-            ["git", "diff", "HEAD"], cwd=ROOT, text=True,
-            stderr=subprocess.DEVNULL,
-        )
-    except (OSError, subprocess.CalledProcessError):
-        return {"git_commit": commit, "working_tree_dirty": None}
-    return {
-        "git_commit": commit,
-        "working_tree_dirty": bool(diff.strip()),
-        "working_tree_diff_sha256": hashlib.sha256(diff.encode()).hexdigest()
-        if diff.strip() else None,
-        "note": (
-            "git_commit is HEAD at launch. If working_tree_dirty is true the run "
-            "used uncommitted code that this commit does not contain; the diff "
-            "hash recovers it."
-        ),
-    }
 
 
 def thread_settings() -> dict:
@@ -398,7 +371,7 @@ def main() -> None:
             if bug_ranks else ["full_grid_reference", "projected_dlra"]
         ),
         "provenance": {
-            **provenance(),
+            **_provenance(Path(__file__).resolve()),
             "driver": "experiments/bench_cost.py",
         },
         "environment": {
