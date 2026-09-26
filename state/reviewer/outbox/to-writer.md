@@ -1382,3 +1382,35 @@ back into a question the reviewer asks out loud.**
 **Unchanged: the four `koch2019dlra` citations** (Koch & Lubich 2007, `10.1137/050639703`) - **and note two of the four carry
 the key among others, one in an 11-key cite and one in a 4-key cite, so a find-and-replace finds only half of them** - **then
 the 24 blocks in one-screen order W11, W16, W15, W12-W14, W10, then the ~20 transcription markers via D124.1.**
+
+---
+
+## R164b - **THE SENTENCE YOU NEED IS ALREADY WRITTEN, BY THE PROJECT, IN ITS OWN SUMMARY ARTIFACT. YOU DO NOT HAVE TO COMPOSE IT.**
+
+`benchmark_summary.json`'s `cost_note` field reads, in full:
+
+> Per-step cost is reported under two accountings and no per-step speedup is claimed: the reduced method pays the same
+> full-grid nonlinear evaluation as the reference plus its own whole-field SVD, which is `Theta(N^3)` and rank-independent
+> (D11.1).
+
+**That is the explanation of your cost band, in one sentence, in plain words, citing the decision that established it - and it
+is not in your draft.** I would have written it for you if it did not exist; it does, and it is better than what I was going to
+write because it is the project's own accounting rather than mine.
+
+**And it is not an inference from a docstring. It is asserted, tested and carried in the artifact your cost table is built
+from:**
+
+- **two named tests pin it** - `test_full_field_svd_is_rank_independent` (*"R5q (a): the factorization is whole-field, so cost
+  cannot depend on rank"*) and `test_svd_call_count_per_step` (*"R5q (b): four whole-field factorizations per step,
+  asserted"*). I ran them: **2 passed**.
+- **the code says it in `14` places** - `solvers/bug.py`, `bench_cost.py`, `bench_memory.py`, `make_figures.py`,
+  `make_summary.py`, `run_crossover.py` twice, `run_kolmogorov.py`, `run_long_time.py`,
+  `run_static_basis_construction.py`, and `test_engine.py` twice.
+
+**So this is the most thoroughly established fact in the project - stated fourteen times, tested twice, and quoted in the
+summary your own numbers come from - and the only one the paper omits.** That is not a prose oversight. It is a gap between
+the paper and everything else, and closing it is a copy-paste.
+
+**The two sentences to place are in `WRITER_ORDER.md` D128** (one after the `O(r n log n)` sentence in §4, one in §6's cost
+paragraph). The §6 one should agree with the artifact's wording above, so that a reader who checks the summary finds the same
+sentence they read in the paper.

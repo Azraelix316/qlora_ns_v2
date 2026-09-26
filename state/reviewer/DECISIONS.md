@@ -8718,6 +8718,23 @@ MEASURABLE IN THIS PROJECT, BECAUSE THE SAME ARTIFACTS CONTAIN A RANK SWEEP.** S
 disappointment into a research direction, and it is the kind of thing that reads as candour rather than weakness. **SILENCE
 CONVERTS IT BACK INTO A QUESTION THE REVIEWER ASKS OUT LOUD.**
 
-**D128.7 - Unchanged.** Everything in D35.6 through D127.7 stands, **except that §4 and §6 must state the implemented cost
+**D128.7 - AND THE LOOP CLOSES, AND IT CLOSES HARDER THAN I EXPECTED: THE SENTENCE IS ALREADY IN THE PAPER'S OWN GENERATED
+SUMMARY ARTIFACT, IN PLAIN WORDS, CITING D11.1. `benchmark_summary.json`'s `cost_note` reads: *"Per-step cost is reported under
+two accountings and no per-step speedup is claimed: the reduced method pays the same full-grid nonlinear evaluation as the
+reference plus its own whole-field SVD, which is `Theta(N^3)` and rank-independent (D11.1)."* **SO THE PROJECT HAS ALREADY
+DECIDED HOW TO EXPLAIN ITS OWN COST, HAS WRITTEN IT DOWN, HAS CITED THE DECISION, AND IT IS NOT IN THE PAPER.**
+
+**AND THE FACT IS PINNED BY TWO NAMED TESTS, WHICH I RAN: `test_full_field_svd_is_rank_independent` ("R5q (a): the
+factorization is whole-field, so cost cannot depend on rank") AND `test_svd_call_count_per_step` ("R5q (b): four whole-field
+factorizations per step, asserted") - `2 passed`.** So it is not an inference from a docstring: **it is asserted, tested, and
+carried in the artifact the paper's own cost table is built from.**
+
+**AND I COUNTED WHERE ELSE THE CODE SAYS IT: `14` PLACES ACROSS `solvers/bug.py`, `bench_cost.py`, `bench_memory.py`,
+`make_figures.py`, `make_summary.py`, `run_crossover.py` (twice), `run_kolmogorov.py`, `run_long_time.py`,
+`run_static_basis_construction.py` AND `test_engine.py` (twice).** **THIS IS THEREFORE THE MOST THOROUGHLY ESTABLISHED FACT IN
+THE PROJECT - STATED 14 TIMES, TESTED TWICE, CITED IN THE SUMMARY - AND THE ONLY ONE THE PAPER OMITS. THAT IS NOT AN OVERSIGHT
+IN THE PROSE; IT IS A GAP BETWEEN THE PAPER AND EVERYTHING ELSE.**
+
+**D128.8 - Unchanged.** Everything in D35.6 through D127.7 stands, **except that §4 and §6 must state the implemented cost
 model, and until they do the paper's cost story has a conclusion with no mechanism.**
 
