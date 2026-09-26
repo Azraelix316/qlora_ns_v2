@@ -1,25 +1,19 @@
-% Abstract — problem -> method -> quantitative result -> limitation.
-% Quantitative claims are placeholders until coder pushes verified numbers.
-
 \begin{abstract}
-Solving the incompressible Navier--Stokes equations at high Reynolds numbers
-requires resolving the full velocity field on every time step, even when the
-dynamically active degrees of freedom are comparatively few. We propose a
-structure-preserving dynamical low-rank approximation (SP-DLRA) for the
-two-dimensional incompressible Navier--Stokes equations in stream-function
-form. The method splits the dynamics into a viscous part, which is integrated
-\emph{exactly} along a separable exponential flow that preserves the low-rank
-ansatz and keeps the velocity exactly divergence-free to machine precision,
-and a nonlinear part, which is advanced by a second-order projected integrator.
-The rank is adapted online by incremental singular value decomposition. We
-validate the method on forced 2D turbulent dynamics at Reynolds numbers
-$100$, $1000$, and $5000$ against a full-grid spectral reference and a static
-POD baseline, tracking rank growth, accuracy, and cost.
-% [PENDING-CODER: one-sentence quantitative summary, e.g. rank range,
-% max relative L2 error, speedup/slowdown vs full-grid spectral and vs POD]
-The method is restricted to two dimensions, periodic domains, and single-mode
-forcing; rank adaptation combines indicator-driven growth with tolerance-based
-decay, and at the tested Reynolds numbers
-the per-step cost is comparable to, and in regimes slower than, a full-grid
-spectral solver, which we report alongside the benefits.
+Approximating the state to cut the cost of a Navier--Stokes solve raises a
+question usually asked backwards: not how accurately a reduced model tracks a
+trajectory, but when a reduced trajectory is worth having. In forced
+two-dimensional stream-function flow, a structure-preserving projected integrator
+treats the viscous part exactly and the nonlinear part by midpoint.
+Against a static subspace of equal rank, we measure the horizon at which it
+is more accurate --- $t^\ast = 0.649$ at rank $16$ and
+$1.482$ at rank $32$ --- and find it reflects how the subspace is built,
+not its dimension: from rank $16$ the static subspace stops improving altogether, with
+ranks $16$, $32$ and $43$ identical at every horizon and both Reynolds
+numbers, while ranks $2$, $4$ and $8$ differ by up to $85\%$. A fixed basis propagated
+through the nonlinearity overflows at ranks $32$ and $42$, reaching $10^{278}$; every structure-preserving variant holds roundoff divergence; under grid
+refinement the reduced error falls by a factor $2.2$ while the static baseline's
+grows by three orders of magnitude. The evidence is narrow: one
+forcing, horizons of order unity, a rank criterion we report but do not
+extrapolate, and a per-step cost $2.1$--$2.7\times$ the full grid with no memory
+saving. We identify no end-to-end speedup, and say so.
 \end{abstract}

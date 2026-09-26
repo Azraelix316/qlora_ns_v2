@@ -83,12 +83,12 @@ As the static-basis baseline we build an offline proper orthogonal
 decomposition (POD) from snapshots of the reference run of each
 Reynolds number \cite{sirovich1987, lumley1967}: the snapshot matrix is
 eigen-decomposed and truncated at the smallest number of modes
-$r_{\mathrm{POD}}$ resolving 99.9\% of the (snapshot) energy. The baseline
+$r_{\mathrm{POD}}$ resolving 99\% of the (snapshot) energy. The baseline
 model is the Galerkin projection of the dynamics onto this \emph{fixed}
 basis (no online rank adaptation), advanced with the same nonlinear
 residual evaluation as SP-DLRA.
 % [PENDING-CODER: confirm the snapshot window used for the POD (statistical
-% window only), the exact energy threshold (99.9%), the Galerkin baseline
+% window only), the exact energy threshold (99%), the Galerkin baseline
 % integrator, and how the POD basis handles the forcing term.]
 The POD baseline measures the cost of staticity: whether a fixed basis of
 size $r_{\mathrm{POD}}$ can track the dynamics at a cost and accuracy

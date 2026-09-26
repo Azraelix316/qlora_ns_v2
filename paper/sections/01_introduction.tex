@@ -70,14 +70,18 @@ enforced.
 We develop a \emph{structure-preserving} dynamical low-rank method for the
 \emph{incompressible} NS equations in which (i) the viscous part is
 integrated exactly, preserving the rank; (ii) the velocity is represented by a
-stream function, so divergence-freeness holds \emph{by construction} to
-machine precision; and (iii) the rank is adapted online as turbulent
-structures form and decay. We validate the method on forced two-dimensional
-turbulent dynamics at Reynolds numbers $100$, $1000$, and $5000$ --- the
-regime of rank growth beyond a handful of modes and slow singular-value decay
---- against a full-grid spectral reference and a static POD baseline, and we
-benchmark cost honestly, including regimes where the method is slower than
-full-grid computation.
+stream function, so divergence-freeness holds identically in exact
+arithmetic, with a measured residual no larger than $1.1\times10^{-13}$ for
+the reduced integrator and the full-grid reference, and no larger than
+$1.1\times10^{-11}$ over every method we ran --- seven orders of magnitude
+below the reduced solver's own error; and (iii) the subspace is refitted as
+the dynamics develop, which we show is necessary: a fixed basis propagated
+through the nonlinearity overflows at ranks $32$ and $42$ where the refitted
+one does not. We validate the method on forced two-dimensional flow at
+Reynolds numbers $100$, $1000$ and $5000$ against a full-grid spectral
+reference and a static POD baseline, and we benchmark cost honestly: the
+reduced integrator is $2.1$--$2.7\times$ the full-grid step in every regime
+we measured, with no compensating memory benefit.
 
 % [FLAG-D4 / REVIEWER: Short form of the BINDING R5d claim wording (see
 % state/reviewer/reviews/2026-09-25-R5d-prior-art-map-and-final-claim.md,
