@@ -11,9 +11,10 @@ not its dimension: from rank $16$ the static subspace stops improving altogether
 ranks $16$, $32$ and $43$ identical at every horizon and both Reynolds
 numbers, while ranks $2$, $4$ and $8$ differ by up to $85\%$. A fixed basis propagated
 through the nonlinearity overflows at ranks $32$ and $42$, reaching $10^{278}$; every structure-preserving variant holds roundoff divergence; under grid
-refinement the reduced error falls by a factor $2.2$ while the static baseline's
-grows by three orders of magnitude. The evidence is narrow: one
+refinement the reduced error falls by a factor $2.2$, and stably so, but the
+horizon itself is not grid-convergent: it grows by factors of $1.45$ and $1.71$ from a $64^2$ to a $128^2$ grid at ranks $16$ and $32$. The evidence is narrow: one
 forcing, horizons of order unity, a rank criterion we report but do not
-extrapolate, and a per-step cost $2.1$--$2.7\times$ the full grid with no memory
-saving. We identify no end-to-end speedup, and say so.
+extrapolate, and a per-step cost $2.2$--$2.7\times$ the full grid --- at least
+$1.4\times$ even at the pessimistic end of the measurement's own recorded noise
+--- with no memory saving. We identify no end-to-end speedup, and say so.
 \end{abstract}

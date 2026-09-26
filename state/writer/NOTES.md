@@ -1,7 +1,7 @@
 # NOTES.md — writer
 
 > Branch: `agent/writer` · Worktree: `worktrees/writer`
-> Status: working the reviewer's WRITER_ORDER (R104, supersedes all outbox history): W1 abstract (D13) + W2 contributions (D14) + W3 intro summary (D11) pasted verbatim, D15 `99.9%`→`99%` fixed; reviewer-owned paths reset to origin/main; pre-push registry run done (memory rows fail on a not-landed D89 artifact — on agent/coder — and 4 N=128 rows on missing crossover_N128.json, both flagged to reviewer); next W4 (§3) and W5 (§4).
+> Status: reissued binding WRITER_ORDER (1364 lines, atop main@24d7700): batch 1 pushed — unit A (W11 abstract re-paste, W16 two intro sentences, W2 contributions re-paste, W10 koch2019dlra purge + README flag #5) + W15 (13 sites in 06/08/09: four verbatim paste blocks byte-verified, five marker edits) + D130 (item 3 label + stopping-rank sentence); next unit C: W12–W14 in 05 + D124 (eq:re-set fix Re = 2U/ν + §5 per-run parameters) + D128 §4 sentence; then W4–W9 (W7 = D18c §6 per subsection + D128 §6 sentence + R165 re-derivation sentence; W8 = D18d §7; W9 = banned-item-9 purge at 09:9 + 08:19–20); flags to reviewer incl. W15.2 "forced Kolmogorov flow" vs banned item 9 (pasted verbatim, binding, pending ruling).
 
 ## Mission
 
@@ -19,16 +19,16 @@ Write the paper. Draft in `paper/`, integrating: theory from
 
 | File | Status |
 |---|---|
-| `00_abstract.tex` | **replaced 2026-09-26 with D13's 210-word abstract (W1)**, pasted verbatim, diff-verified against the order's fenced block; all numbers reviewer-verified |
-| `01_introduction.tex` | **W3 applied 2026-09-26**: D11 summary sentence (clauses ii–iii + validation replaced, clause i kept; `1.1e-13`/`1.1e-11`, `2.1–2.7×`, no "turbulent dynamics"/"rank growth"); D4 short form (R5d binding wording, FLAG-D4) unchanged |
-| `02_contributions.tex` | **replaced 2026-09-26 with D14's 5-item list (W2)**, pasted verbatim (fixed my own `$10^{278}}` typo); section heading/label + "Our contributions are:" kept |
-| `03_related_work.tex` | drafted; D4 full form (R5d binding wording, FLAG-D4); `tab:related` High-Re cell = `target`; Osepko flagged |
-| `04_methods.tex` | drafted; governing section: I1–I4 numbering, eq:pin/energy, prop:viscous, eq:step, eq:indicator; **D15 fix 2026-09-26** (`99\%` at :288) |
+| `00_abstract.tex` | **W11 re-paste 2026-09-26 from the current D13 block** (byte-verified; `1.45`/`1.71` grid-convergence sentence, `2.2–2.7×` band, `1.4×` pessimistic floor); resolves R168 items 1–2; all numbers reviewer-verified |
+| `01_introduction.tex` | **W16 applied 2026-09-26**: W16.1 cost band `2.1–2.7×` → `2.2–2.7×` + `1.4×` pessimistic floor; W16.2 basis-claim sentence (clauses ii–iii: subspace rebuilt as dynamics develop; "reaches the rank budget within fifteen steps and stays there"); W10 `koch2019dlra` → `koch2007` (:33); W3 D11 + D4 short form (R5d, FLAG-D4) unchanged |
+| `02_contributions.tex` | **W2 re-paste 2026-09-26 from the current D14 block** (`2.2` band in item 5); **D130 applied 2026-09-26**: item 3 label → "a static subspace's advantage stops at a rank budget, not at a rank the dynamics chooses"; invented "saturation plateau" clause → stopping-rank sentence ($2\lfloor N/3\rfloor+1$ = the rank budget we set from the grid); last sentence kept exactly |
+| `03_related_work.tex` | drafted; D4 full form (R5d binding wording, FLAG-D4); `tab:related` High-Re cell = `target`; Osepko flagged; **W10 applied 2026-09-26**: Koch–Lubich "survey" sentence deleted (no such paper, R139/R140) + `koch2019dlra` removed from the cite list |
+| `04_methods.tex` | drafted; governing section: I1–I4 numbering, eq:pin/energy, prop:viscous, eq:step, eq:indicator; **D15 fix 2026-09-26** (`99\%` at :288); **W10 applied 2026-09-26**: `koch2019dlra` → `koch2007` |
 | `05_experimental_setup.tex` | drafted; scheme parameters [PENDING-CODER] (grids, Δt, ICs, windows, hardware); **D15 fix 2026-09-26** (`99\%` at :86 + stale PENDING comment :91) |
-| `06_results.tex` | drafted; all numbers/figures [PENDING-CODER]; `tab:div` placeholders; step-0 per R5m (0.319, not 0.0); **D15 fix 2026-09-26** (`99\%` at :133) |
+| `06_results.tex` | drafted; all numbers/figures [PENDING-CODER]; `tab:div` placeholders; step-0 per R5m (0.319, not 0.0); **D15 fix 2026-09-26** (`99\%` at :133); **W15 applied 2026-09-26**: L2 expected-outcome sentence → W15.1 saturation block (byte-verified) + standalone slow-decay sentence; `fig:rank` caption → W15.2 ("Retained rank"; budget within fifteen steps; three curves coincide); r*(Re) dropped from the four L2/L4 markers; L4 expected-outcome sentence deleted ("retained rank" in marker); L1 subsection (`fig:tg`, `3 \to 2 \to 1`) and L4 subsection untouched — both to be replaced by D18c in W7 |
 | `07_discussion.tex` | drafted 2026-09-25 (rank as diagnostic, invariants/long-time, dimensional regimes, 3D) |
-| `08_limitations.tex` | drafted 2026-09-25 (2D/periodic/Re≤5000, TG-only decay, no per-step speedup, no stability analysis, D3 open, no V2 study) |
-| `09_conclusion.tex` | drafted 2026-09-25 (summary + [PENDING-CODER] headline + future work) |
+| `08_limitations.tex` | drafted 2026-09-25 (2D/periodic/Re≤5000, TG-only decay, no per-step speedup, no stability analysis, D3 open, no V2 study); **W15 applied 2026-09-26**: L1 bullet body → W15.3 (TG state a single Fourier mode from the outset, numerical rank one; forced rank rises to the budget; decay-events marker deleted — 2000-step run has none); "online rank adaptation" → measured rank-criterion phrasing (W15.4); V2 sentence → "rank already at its ceiling for $99\%$ of the longer run" (W15.6); lines 19–20 "turbulent-validation ladder" still to purge in W9 (banned item 9) |
+| `09_conclusion.tex` | drafted 2026-09-25 (summary + [PENDING-CODER] headline + future work); **W15 applied 2026-09-26**: (iii) "online rank adaptation …" → "a rank criterion whose saturation at the grid's alias-free ceiling we measure and report" (W15.4); headline marker shrunk (r*(Re) items dropped); research question → W15.5 (retained rank does not grow with Re; zonal share falls $20\%$→$18\%$; resolved-band-vs-flow question); PENDING-THEORETICAL-RESEARCH marker rewritten to the tolerance-driven-criterion question; line 9 "turbulent dynamics" still to purge in W9 (banned item 9) |
 | `main.tex` | venue-agnostic `article` skeleton + swap-in comment; plain `\cite`, no natbib |
 | `references.bib` | 38 entries, all web-verified 2026-09-25 (15 [V] arXiv, 14 [J], 9 [C] classics) |
 | `README.md` | counts, flags, placeholder legend; D4 flag = GATED on D10 |
@@ -53,6 +53,38 @@ Write the paper. Draft in `paper/`, integrating: theory from
 
 ## Log
 
+- 2026-09-26 (later) Reissued order: batch 1 (units A + W15 + D130) pushed
+  Merged `origin/main`@24d7700 and `origin/agent/reviewer`@b46f291 into
+  `agent/writer` (de3738e) — brings D128 into the order, R162–R168, the
+  re-modified `crossover_N128.json`. Read the full reissued order (1364
+  lines): banned list (items 1–13), W15, D124, D128, D130; read the outbox
+  in full through R168; extracted all 24 fenced blocks to
+  `/tmp/opencode/order4_block_{0..23}.tex`. Applied and byte-verified
+  (whitespace-normalized diff against the order's blocks): **W11** (D13
+  abstract re-paste: `1.45`/`1.71` grid-convergence sentence, `2.2–2.7×`,
+  `1.4×` floor — resolves R168 items 1–2), **W16.1/W16.2** (intro cost band
+  + basis-claim sentence), **W2** (D14 contributions re-paste, `2.2`),
+  **W10** (zero `koch2019dlra` in `paper/` except the README flag; 01:33 +
+  04 repointed to `koch2007`, 03 survey sentence + cite removed, README
+  Classics 9→8 + flag #5), **W15** (13 sites in 06/08/09: W15.1 saturation
+  block + standalone slow-decay sentence; W15.2 `fig:rank` caption
+  "Retained rank … budget within fifteen steps … three curves coincide" —
+  contains "forced Kolmogorov flow" as in the binding block, flagged; W15.3
+  L1 bullet (TG numerical rank one from the outset; forced rank rises to
+  the budget; decay-events marker deleted, answered by the 2000-step run);
+  W15.4 both "online rank adaptation" sites; W15.5 conclusion research
+  question; W15.6 V2 sentence; five marker edits dropping r*(Re) items and
+  "adaptive rank"→"retained rank" in the L4 marker), **D130** (item 3:
+  label + stopping-rank sentence, last sentence kept exactly). Verified: no
+  "saturat" outside the binding blocks; remaining "quasi-stationary" sites
+  are 04:252 (descriptive, kept per site list), 07 (deferred to W8/D18d),
+  and 06 L1+L4 subsections (to be replaced by D18c in W7);
+  `taylor_green.json` confirms rank 1 throughout (numerical rank 1 from the
+  outset) — the `3 \to 2 \to 1` text lives only in W7-replaced subsection
+  text, so left untouched. 06:41 "the adaptive rank $r(t)$" left as is
+  (descriptive; the gate deliberately does not match it) — flagged for
+  confirmation. Next: unit C (W12–W14 in 05 + D124 + D128 §4 sentence),
+  then outbox with all open flags, then W4–W9.
 - 2026-09-26 Session after the reviewer's overnight restructure
   (DECISIONS now D1–D91; `WRITER_ORDER.md` R104 "supersedes every message";
   `START_HERE.md` R118; compacted outbox). Merged `origin/main` into

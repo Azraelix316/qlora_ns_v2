@@ -28,16 +28,12 @@ them are deliberate scope choices rather than oversights.
   % forward-looking limitation.]
 
   \item \textbf{Rank decay is only fully exercised in the laminar run.}
-  The tolerance-based decay rule (Section~\ref{sec:rank-adaptation}) is
-  exercised in its full $3 \to 2 \to 1$ form in the Taylor--Green decay of
-  Section~\ref{sec:res-tg}. In the forced runs of Section~\ref{sec:results},
-  the rank is expected to be quasi-stationary over the statistical window,
-  so the interaction of decay with sustained forcing is not strongly
-  tested. In particular, we do not know yet whether the decay rule can
-  trigger spurious drops during the transient spin-up phase.
-  % [PENDING-CODER: report whether any decay events occur in the forced
-  % runs, and whether any are followed by immediate regrowth (a sign of
-  % indicator/decay-rule interaction).]
+  The tolerance-based decay rule is exercised only where a state genuinely loses
+  modes. In the Taylor--Green decay the state is a single Fourier mode from the
+  outset, so its numerical rank is one and the criterion must hold it there
+  rather than spend rank on a spectrum that is not present; the run does. Under
+  sustained forcing the rank instead rises, and it does so to the budget, which bounds what the decay rule can be tested against
+  here.
 
   \item \textbf{No per-step speedup claim.} Because the nonlinear residual
   is evaluated on the full grid at rank-independent $O(n \log n)$ cost
@@ -45,8 +41,10 @@ them are deliberate scope choices rather than oversights.
   spectral reference per step at small rank, and the cost section reports
   the regimes where it is \emph{slower} (Figure~\ref{fig:cost}). The
   contribution is the reduced-model capability with exact
-  divergence-freeness and online rank adaptation, validated in a
-  high-Reynolds-number turbulent regime; a wall-clock advantage is
+  divergence-freeness and a rank criterion that is measured, and whose
+  saturation at the grid's alias-free ceiling we report as a finding,
+  validated in a high-Reynolds-number turbulent regime; a wall-clock
+  advantage is
   neither claimed nor assumed.
 
   \item \textbf{No stability analysis of the full coupled scheme.} The
@@ -73,7 +71,7 @@ them are deliberate scope choices rather than oversights.
   windows of Section~\ref{sec:setup} are fixed in advance; we do not study
   how the statistics (kinetic-energy spectrum, dissipation rate) converge as
   the window length grows, nor do we run longer than the retained windows.
-  Whether the quasi-stationary rank and the statistical quantities of
-  Section~\ref{sec:res-fidelity} are stable under longer runs is part of the
-  open validation items (V2 in the project's validation ladder).
+  The rank is already at its ceiling for $99\%$ of the longer run, so what
+  longer runs leave open is the statistical quantities, not the rank (V2 in
+  the project's validation ladder).
 \end{itemize}

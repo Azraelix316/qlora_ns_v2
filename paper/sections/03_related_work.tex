@@ -13,8 +13,8 @@ equations; and low-rank approaches that are closest in setting to ours.
 DLRA approximates a high-dimensional trajectory by a low-rank matrix whose
 factors evolve in time; the original formulation is due to Koch and
 Lubich~\cite{koch2007}, with early numerical experiments on reaction--diffusion
-PDEs by Nonnenmacher and Lubich~\cite{nonnenmacher2008} and a survey by Koch
-and Lubich~\cite{koch2019dlra}. The key practical idea for stiff dynamics is
+PDEs by Nonnenmacher and Lubich~\cite{nonnenmacher2008}. The key practical idea
+for stiff dynamics is
 the \emph{projector split}: integrate the linear part exactly with the frozen
 factors, then update the factors for the nonlinear part
 \cite{lubich2014}. Rank adaptation via incremental SVD (the row-action
@@ -168,8 +168,7 @@ Hamiltonian, kinetic, Vlasov--Poisson and wave equations, and robust low-rank
 integrators for conservative PDEs (advection--diffusion, hyperbolic moment
 systems) are established as well
 \cite{koch2007,lubich2014,kusch2023stability,einkemmer2023,ceruti2024,
-rail2025,koellermeier2024,cui2026,goutaudier2026,koch2019dlra,
-einkemmer2024review}. For the incompressible Navier--Stokes equations, the
+rail2025,koellermeier2024,cui2026,goutaudier2026,einkemmer2024review}. For the incompressible Navier--Stokes equations, the
 existing dynamical low-rank work we are aware of is the dynamically
 orthogonal approximation of Musharbash and Nobile~\cite{musharbash2018} for
 stochastic problems with random boundary conditions, and the existing

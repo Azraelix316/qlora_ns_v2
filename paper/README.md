@@ -73,9 +73,9 @@ Every entry was verified on 2026-09-25 (38 entries total):
   `kusch2023stability` (SIAM J. Sci. Comput. 45(1):A1–A24), `rail2025`
   (SIAM J. Sci. Comput. 47(2):A1145–A1169), `koellermeier2024` (Adv. Comput.
   Math. 50(4):76).
-- **Classics (9, `[C]`)** — journal-only, no arXiv version; standard
+- **Classics (8, `[C]`)** — journal-only, no arXiv version; standard
   literature, entered from bibliographic knowledge and flagged for a final
-  check by writing-research: `koch2019dlra`, `haasdonk2012`, `lumley1967`,
+  check by writing-research: `haasdonk2012`, `lumley1967`,
   `sirovich1987` (cited as Q. Appl. Math. 45(3):561–590, the standard POD
   reference), `orszag1971`, `kraichnan1967`, `batchelor1969`, `leray1934`,
   `temam1977`.
@@ -113,3 +113,11 @@ Every entry was verified on 2026-09-25 (38 entries total):
    are recoverable via `git show 6a41b2a:refs.bib`; they are **not** cited in
    the current draft (the related-work table uses only entries in
    `references.bib`).
+5. **`koch2019dlra` was a phantom key (R139/R140) — removed.** No such
+   paper exists (Crossref: the only Koch–Lubich DLRA record is the 2007
+   SIAM J. Matrix Anal. Appl. paper, `koch2007`); the bib entry was deleted
+   and the four `\cite{koch2019dlra}` sites repaired: two repointed to
+   `koch2007` (introduction, methods), one removed from a cite list
+   (related work), and the "and a survey by Koch and Lubich" clause in
+   related work deleted along with its cite, since no such survey could be
+   sourced. Do not re-add the key.

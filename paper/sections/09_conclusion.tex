@@ -10,8 +10,8 @@ lives: forced, high-Reynolds-number turbulent dynamics at
 $\mathrm{Re} \in \{100, 1000, 5000\}$. The scheme combines (i) an exact,
 rank-preserving viscous step along the separable exponential flow of
 Proposition~\ref{prop:viscous}, (ii) a second-order projected midpoint step
-for the nonlinear part (eq.~\eqref{eq:step}), and (iii) online rank
-adaptation by residual-indicator growth and tolerance-based decay
+for the nonlinear part (eq.~\eqref{eq:step}), and (iii) a rank criterion
+whose saturation at the grid's alias-free ceiling we measure and report
 (Section~\ref{sec:rank-adaptation}). Divergence-freeness is exact by
 representation, at every rank and every step (I1,
 Table~\ref{tab:div}); the energy balance of eq.~\eqref{eq:energy} is
@@ -23,11 +23,10 @@ against the full-grid spectral reference (Section~\ref{sec:res-error}), the
 rank economy against the static POD baseline (Section~\ref{sec:res-pod}),
 and the honest cost picture, including the regimes in which SP-DLRA is
 slower than the full-grid reference (Section~\ref{sec:res-cost}).
-% [PENDING-CODER: the headline numbers of the conclusion -- quasi-stationary
-% rank r*(Re) per Re, relative L2 error over the statistical window per Re,
-% r_POD(Re) vs r*(Re), and the per-step and total cost ratios vs the
-% full-grid reference and the POD baseline -- go here once the runs land;
-% every number traceable to state/coder/results/ (CHECKLIST 1.1).]
+% [PENDING-CODER: the headline numbers of the conclusion -- relative L2 error
+% over the statistical window per Re, and the per-step and total cost ratios
+% vs the full-grid reference and the POD baseline -- go here once the runs
+% land; every number traceable to state/coder/results/ (CHECKLIST 1.1).]
 
 Several directions follow directly from the open items identified in
 Section~\ref{sec:limitations}. First, a three-dimensional formulation: the
@@ -35,13 +34,15 @@ exact viscous step carries over because $\Delta$ remains separable on the
 periodic box, but the incompressibility constraint must then be carried by a
 vector potential and gauge, and the nonlinear step must be redesigned around
 the vortex-stretching term (Section~\ref{sec:disc-3d}). Second, a theory of
-rank growth in forced turbulence: the quasi-stationary rank $r^*(\mathrm{Re})$
-measured in Section~\ref{sec:results} is, to our experience with the
-numerics, the observable that a turbulent-rank-growth theory should explain;
-we do not attempt this here.
-% [PENDING-THEORETICAL-RESEARCH: if theoretical-research produces a
-% prediction for r*(Re) or for the spin-up rank dynamics, cite it in
-% Section 07 (sec:disc-rank) when finalizing this paragraph.]
+rank growth in forced turbulence. The measurement here is
+that the retained rank does \emph{not} grow with Reynolds number: it reaches the budget within fifteen steps at every $\mathrm{Re}$ we
+ran, and stays there, while the share of the energy in the zonal mode falls
+from $20\%$ to $18\%$ across the same runs. Why a criterion driven by a
+tolerance should report the resolved band rather than the flow, and what would
+make it report the flow instead, is the question we think this leaves open.
+% [PENDING-THEORETICAL-RESEARCH: if theoretical-research addresses why a
+% tolerance-driven rank criterion reports the resolved band rather than the
+% flow, cite it in Section 07 (sec:disc-rank) when finalizing this paragraph.]
 Third, the forcing-aware invariant of the reduced model (Section~\ref{sec:limitations})
 and a statistical-convergence study of the retained windows (V2). And fourth,
 replacing the projected midpoint step with a robust (BUG-family) integrator,

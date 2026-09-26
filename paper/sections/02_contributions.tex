@@ -23,12 +23,12 @@ check, and the grid and largest rank tested. Under that protocol, correcting fou
 baseline defects \emph{shortened} our own advantage and cost three of six ranks
 their crossover; we report the corrected numbers.
 
-\item \textbf{The mechanism, measured: a static subspace saturates in rank.} From
-rank $16$ a propagated static subspace stops improving altogether: ranks $16$, $32$ and $43$
+\item \textbf{The mechanism, measured: a static subspace's advantage stops at a rank budget, not at a rank the dynamics
+chooses.} From rank $16$ a propagated static subspace stops improving altogether: ranks $16$, $32$ and $43$
 agree exactly at every horizon and both Reynolds numbers, while ranks $2$, $4$ and $8$
-differ from them by up to $85\%$, because its own per-step truncation accumulates onto a
-saturation plateau. The advantage
-horizon therefore reflects how a subspace is \emph{built}, not how large it is.
+differ from them by up to $85\%$. The stopping rank is $2\lfloor N/3\rfloor+1$ --- the rank budget we set from
+the grid --- so we cannot say whether the subspace would have continued to improve above it. The
+advantage horizon therefore reflects how a subspace is \emph{built}, not how large it is.
 
 \item \textbf{The stability result: the subspace must evolve.} A fixed basis
 propagated through the nonlinearity, with the same integrator, splitting and
@@ -37,7 +37,7 @@ reaching $10^{278}$. Every structure-preserving variant at the same ranks holds
 roundoff divergence throughout.
 
 \item \textbf{An honest cost accounting.} The reduced integrator costs
-$2.1$--$2.7\times$ a pinned-thread full-grid spectral reference per step in every
+$2.2$--$2.7\times$ a pinned-thread full-grid spectral reference per step in every
 regime and grid we measured, and uses slightly \emph{more} memory. Rank buys the
 ability to run, not speed.
 \end{itemize}
