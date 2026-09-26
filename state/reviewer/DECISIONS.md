@@ -6046,3 +6046,48 @@ WERE. HISTORY IS NOT A DEFECT TO BE FIXED; IT IS THE RECORD OF WHAT WAS TRUE AT 
 `3.41×`/`10.29×` resolution claim are SUPERSEDED by the table in D89.3; the claim that the reduced integrator uses more
 memory than the full grid is UNAFFECTED and is now stated with its `24–43×` margin; rank-independence of the memory
 overhead is established at `N=64` and UNRESOLVED at `N=128`; and the coder's two commits are merged.**
+
+---
+
+## D90 — **THE MEMORY NUMBERS WERE LOAD-BEARING IN FOUR DOCUMENTS AND THE REGISTRY ASSERTED NONE OF THEM, WHICH IS EXACTLY HOW D19.4a's NUMBERS SURVIVED TWO REGENERATIONS: SIX ROWS NOW PIN THEM, PLUS A BOOLEAN ROW THAT PINS THE *UNRESOLVED* FLAG, AND ALL SIX ARE POSITIVE-CONTROLLED.** (2026-09-26)
+
+> **OPERATIVE (R127). A REGISTRY ROW THAT HAS NEVER BEEN OBSERVED TO FAIL HAS NOT BEEN SHOWN TO WORK. THESE SIX HAVE NOW
+> BEEN, AND THE CONTROL SHOWS EACH FAILS ON **ITS OWN** QUANTITY AND ONLY ITS OWN.**
+
+**D90.1 — THE GAP, STATED PLAINLY. `claims_registry.py` HAD **ZERO** ROWS FOR `peak_memory.json`.** YET
+`+2.37`/`+4.21 MiB` APPEAR IN `START_HERE.md`, `WRITER_ORDER.md`, `CLAIMS.md` AND WILL APPEAR IN THE PAPER'S §6, AND
+D89.6's WHOLE LESSON IS THAT A NUMBER IN A DOCUMENT IS A CLAIM AND NEEDS A SOURCE. **THE REGISTRY VERIFIED
+`crossover_surface.json`, `cost_retiming.json` AND `baselines_*.json` TO 16 SIGNIFICANT FIGURES AND WOULD HAVE
+REPORTED `14/18` WITH A `peak_memory.json` THAT HAD MOVED BY 6%.**
+
+**D90.2 — SIX ROWS ADDED, AND TWO OF THEM ARE ABOUT A *FLAG*, NOT A NUMBER.**
+
+| row | pins |
+|---|---|
+| `mem_noise_floor_mib` | `0.09765625` — the denominator every "resolved" statement divides by |
+| `mem_overhead_N64_dlra` / `N128_dlra` | `2.37109375` / `4.2109375` — **the sign and size of the load-bearing claim** |
+| `mem_overhead_N64_bug` / `N128_bug` | `2.17578125` / `3.6328125` — the BUG port, which the paper also compares against |
+| `mem_rank_resolved_N128_dlra` | **asserts `rank_independence_resolved` is `False`** |
+
+**D90.3 — THE BOOLEAN ROW IS THE INTERESTING ONE, AND IT REQUIRED A NEW VERIFICATION BRANCH. THE EXISTING NON-NUMERIC
+PATH ACCEPTS A **STATUS WORD** (`never`/`unresolved`/`resolved`); `rank_independence_resolved` IS A `bool`, SO THE ROW
+WOULD HAVE FAILED WITH *"True is not a status word"* — A CONFUSING FAILURE THAT LOOKED LIKE A BUG IN THE GATE. I ADDED
+AN EXPLICIT BOOLEAN BRANCH THAT ACCEPTS **ONLY `False`**, WITH A NOTE NAMING THE CONSEQUENCE: **A FUTURE RUN THAT
+*RESOLVES* THE FLAG FAILS THIS ROW, AND THE `NEVER WRITE "FLAT IN RANK"` GUIDANCE MUST BE REVISITED.** THAT IS THE
+CORRECT DIRECTION OF FAILURE — THE ROW SHOULD BREAK WHEN THE WORLD CHANGES, NOT WHEN THE WORLD AGREES.
+
+**D90.4 — THE POSITIVE CONTROL, AND THE PART THAT ACTUALLY PROVES THE ROWS ARE GOOD. I COPIED THE ARTIFACTS, PERTURBED
+EXACTLY THREE THINGS (`N=64` projected overhead `2.371 → 2.50`; `N=128` projected `resolved False → True`; noise floor
+`0.098 → 0.066`), AND RE-RAN. **THE THREE CORRESPONDING ROWS FAILED, AND THE **THREE UNPERTURBED ROWS STAYED `OK`** —
+`mem_overhead_N128_dlra`, `mem_overhead_N64_bug` AND `mem_overhead_N128_bug` ARE THE ONES I DID NOT TOUCH. THAT IS THE
+SPECIFICITY CHECK: A GATE THAT FAILS EVERYTHING WHEN ANYTHING MOVES IS NOT A GATE, IT IS A TRIPWIRE. **EXIT 1.**
+
+**D90.5 — AND THE STANDING LESSON, WHICH IS D86's D86.3 WITH A NEW EXAMPLES. A ROW I ADDED *BECAUSE* A NUMBER WENT
+STALE, WHICH I FOUND BY HAND, IS A ROW THAT WILL CATCH THE NEXT ONE AUTOMATICALLY. **THE GENERAL FORM: WHEN YOU FIND A
+STALE NUMBER BY HAND, ADD A ROW THAT WOULD HAVE CAUGHT IT — OTHERWISE THE FINDING IS A ONE-TIME FIX AND THE SAME
+DRIFT PAYS THE SAME COST AGAIN.** `crossover_N128.json` IS THE FOUR REMAINING FAILURES AND IS A MISSING ARTIFACT, NOT A
+STALE NUMBER; WHEN IT LANDS THOSE ROWS WILL VERIFY OR FAIL ON THEIR OWN.
+
+**D90.6 — Unchanged.** Everything in D35.6 through D89.8 stands, **except that the registry now carries six
+`peak_memory.json` rows (24 total), the non-numeric branch accepts an asserted-`False` boolean with a note naming the
+guidance that depends on it, and all six rows are positive-controlled to fail individually and specifically.**
