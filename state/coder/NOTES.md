@@ -55,6 +55,58 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 - [x] Send a readiness note to `writer` once the first numbers exist.
 
 ## Log
+- 2026-09-26 **The rank ladder found the threshold, and r=24 is what found it.**
+  Re=5000, N=64, T=8, ranks {16, 24, 32, 42} at two window placements: r=16
+  survives both; **r=24 overflows at t=6.085 with the early window and survives
+  with the late one**; r=32 and r=42 overflow at both. So the threshold is
+  bracketed -- (16, 24] early, (24, 32] late -- where the previous ladder
+  {16, 32, 42} was merely *consistent with* a threshold anywhere in (16, 32].
+  Three separate findings, not one: (a) a clean threshold in r exists; (b) at the
+  threshold **window placement decides the outcome** and only at the threshold,
+  which is R27's mechanism as a clean statement rather than a trend, and is the
+  strongest form of "the subspace must evolve" the project has; (c) the
+  divergence time is confirmed **non-monotone** in r (6.085 -> 6.960 -> 5.742),
+  so no growth law may be written -- the lowest rank that diverges is the one
+  that diverges *latest*. Every DLRA arm survives to t=8 at r = 1/16/24/32/42
+  with max|div u| <= 1.11e-13, so the proposed method is on the surviving side
+  at both ranks where a static baseline of the same rank is not. This artifact
+  has **no D39.4 residual column** (launched before the fix) and is not used for
+  the residual claim.
+- 2026-09-26 **D22.5 made executable, and it is a two-sided result.** The
+  `crossovers` block sits **6.4-8.5% below the rows in all 12 resolved cases**,
+  one-signed, at both Re, all three windows, both ranks -- and I could not
+  reproduce D23's 0.52-0.64x (my factor is 0.915-0.936x), so the recorded
+  magnitude should be 6-9%, not 36-48%. It is not a column choice (0.5%) and not
+  a convention (7%); the block is further away than the whole interpolation
+  spread. **Every bracket agrees exactly**, so the qualitative statement survives
+  and the point estimate does not. `t_star_from_rows(rows, rows, column,
+  log_interp)` is now the single path, the column is required and never
+  defaulted, and the block carries the rows' value plus both conventions plus
+  `agrees_with_rows` at a 2% tolerance.
+- 2026-09-26 **C8-1: the summary records what it was built from.**
+  `benchmark_summary.json` now emits a `provenance` block listing every input
+  with its own commit, driver and `reproducible`, assembled *after* the loads.
+  Three states are distinguished rather than collapsed: `false` is a **failed
+  check** (WARNING), absent is a **check never run** (NOTE -- `taylor_green.json`
+  names a commit but nothing verified the driver against it), and no commit is
+  **not traceable** (WARNING). Collapsing them is what made the old block
+  unreadable.
+- 2026-09-26 **D30.2 caught me a second time, in the fix for C1-3b.** My
+  `_rank_finding` called 43 "the top of the band N=64 resolves without aliasing",
+  i.e. a mode count. It is a *wavenumber*; the dealiased 64x64 grid carries ~1849
+  dof. Now stated as CLAIMS.md section 2 states it: r99 grows 1->16 and measures
+  the dynamics, the amplitude rule's request reaches 174 modes and measures the
+  discretisation, it grows with the grid and no fixed cutoff repairs it, and the
+  wavenumber is deliberately not quoted as a mode count. The `--rank-criterion`
+  help text said the amplitude rule "saturates at the dealias ceiling"; it does
+  not, its request grows with the grid.
+- 2026-09-26 **D66: the flat `< 1e-12` divergence bound is now resolution-scaled.**
+  `divergence_tolerance(grid) = 0.5*eps*N**2` in all seven divergence assertions,
+  margins 15.6x/26.7x/38.7x/40.4x at N=32/64/128/256 against the flat bound's
+  137x/58.8x/21.3x/**5.6x**. It is a *function* because a constant is writable: a
+  future test can reintroduce the flat form by typing the number, and it would
+  fail on a correct solver at N=512. Orthonormality and reconstruction tolerances
+  are left flat deliberately.
 - 2026-09-26 **D23 confirmed and quantified: the `crossovers` block disagrees with
   the rows it sits beside, by 6.4-8.5%, one-signed, in all 12 cases.** I
   recomputed every resolved crossover from `dlra` / `static_moving_window` under
