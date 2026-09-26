@@ -8391,3 +8391,55 @@ the range has one value, the paper says the quantity does not vary; if it has se
 **D122.7 - Unchanged.** Everything in D35.6 through D121.7 stands, **except that `r*(Re)` is withdrawn in the draft's prose as
 well as its markers, and no substitute observable is supplied until its definition is pinned.**
 
+---
+
+## D123 - **THE PROVENANCE GATE WORKS ON A REAL POPULATION AND SAYS SO: `21` ARTIFACTS, `11` CLEAN, `1` DIRTY (THE NEW ONE), `6` LEGACY, AND `benchmark_summary.json` WITH **NO** PROVENANCE BLOCK. C8-1 IS **CODE-COMPLETE, NOT CLOSED**, AND ITS REPORTED CLOSURE IS WHY THE GATE IS STILL RED. AND MY OWN POSITIVE CONTROL MEASURED NOTHING.** (2026-09-26)
+
+> **OPERATIVE (R159). `check_provenance.py` VERIFIED ON A POPULATION OF `21`, NOT `0`. C8-1 RE-STATUSED: CODE
+> COMPLETE, ARTIFACT PENDING, GATE CORRECTLY RED. `static_basis_construction_N32.json` IS DIRTY AND NEEDS A CLEAN RE-RUN.**
+
+**D123.1 - FIRST, THE CONTROL THAT FAILED, BECAUSE IT IS THE THIRD TIME AND THE CLASS IS NOT LEARNING FAST ENOUGH. I BUILT A
+PROBE TO TEST WHETHER `check_provenance.py` FLAGS A `reproducible: false` ARTIFACT, AND IT REPORTED *`TOTAL: 0 artifacts`* AND
+`PASS`.** THE GATE RESOLVES `state/coder/results` THROUGH GIT, AND MY PROBE DIRECTORY WAS NOT A GIT REPO, **SO THE POPULATION
+WAS EMPTY AND IT REPORTED GREEN ON NOTHING.** **THAT IS D87 EXACTLY - "AN EMPTY POPULATION IS A FAILURE, NOT A CLEAN RESULT" -
+AND IT IS THE THIRD TIME THIS CYCLE A CHECK OF MINE REPORTED CLEAN BECAUSE IT MEASURED NOTHING (D111.5, D112.5, AND THIS).**
+**THE FIX IS NOT TO TRY HARDER WITH THE PROBE; IT IS TO ASK WHAT THE GATE'S POPULATION IS BEFORE TRUSTING IT.** On a real
+checkout the population is `21` artifacts, and on that population the gate is correct and useful.
+
+**D123.2 - AND ON THE REAL POPULATION IT IS EXACTLY RIGHT, ON EVERY CATEGORY:**
+
+```
+TOTAL: 21 artifacts = 19 run(s) + 2 summary/summaries.
+  runs whose driver is fingerprinted and matches a commit : 11
+  runs that are NOT reproducible from the repository      : 1
+  runs whose reproducibility cannot be checked            : 6
+FAIL: an artifact has no provenance block at all.
+```
+
+**THE `1` DIRTY IS `static_basis_construction_N32.json`, WHICH ARRIVED IN `acbb0ad` WITH `reproducible: false` AND
+`working_tree_dirty: true` - SO IT SELF-REPORTS AS NOT REPRODUCIBLE, AND THE GATE NAMES IT.** That is the gate working as
+designed, on a real artifact, catching a real defect, in the same cycle the defect arrived. **It is also the coder's own
+three-state scheme doing its job: they defined `reproducible: false -> WARNING` in R157, and their own new artifact is one.**
+
+**D123.3 - AND C8-1'S REPORTED CLOSURE IS WHY THE OTHER RED IS STILL THERE. THE CODER REPORTED *"C8-1: `benchmark_summary.json`
+now records what it was built from"* AND DESCRIBED THE THREE-STATE BLOCK IN DETAIL. I CHECKED THE ARTIFACT INSTEAD OF THE
+CODE, AND ITS TOP-LEVEL KEYS ARE `cases`, `cost_note`, `cost_retiming`, `crossover_surface`, ..., `regime_pilot` - **THERE IS NO
+TOP-LEVEL `provenance` KEY AT ALL.** So the `make_summary.py` change is real and merged, and the artifact has never been
+regenerated with it.
+
+**D123.4 - AND THE REASON IS THE CODER'S, IT IS STATED IN THEIR OWN WORDS, AND IT IS THE RIGHT REASON:
+**"`make_summary.py` CURRENTLY CANNOT RUN - IT READS THE RENAMED CROSSOVER COLUMN, SO IT RAISES `KeyError` UNTIL THE SURFACES
+LAND. ... I AM LEAVING BOTH BROKEN RATHER THAN ADDING A SHIM THAT ACCEPTS THE OLD KEY, BECAUSE A SHIM IS HOW A STALE ARTIFACT
+KEEPS BEING READ AS A CURRENT ONE; THE FAILURE IS CORRECT AND IT IS TEMPORARY."*** **THAT IS EXACTLY RIGHT AND I AM RECORDING IT
+AS ENDORSED: A TOOL THAT FAILS LOUDLY ON A RENAMED SCHEMA IS BETTER THAN ONE THAT SHIMS AND SILENTLY READS A STALE ARTIFACT.**
+
+**SO C8-1's STATUS IS PRECISE AND IT IS NOT "CLOSED": THE CODE IS COMPLETE, THE ARTIFACT IS PENDING, AND THE GATE IS CORRECTLY
+RED UNTIL THE CROSSOVER SURFACES LAND AND `make_summary.py` CAN RUN AGAIN.** **A GATE THAT WENT GREEN HERE WOULD BE THE BUG.**
+
+**D123.5 - THE ORDER ROW MUST SAY SO, BECAUSE "CLOSED" IS WHAT A READER TAKES. `CODER_ORDER.md`'s C8-1 ROW IS RE-STATUSED FROM
+"CLOSED" TO **CODE COMPLETE / ARTIFACT PENDING**,** with the gate's own verdict quoted as the reason, so the next reader does
+not "fix" a correctly-red gate by regenerating the artifact against a shim.
+
+**D123.6 - Unchanged.** Everything in D35.6 through D122.7 stands, **except that C8-1 is code-complete rather than closed, the
+provenance gate is verified on a population of 21, and the new N=32 artifact is DIRTY and needs a clean re-run.**
+

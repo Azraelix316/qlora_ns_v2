@@ -59,7 +59,7 @@ is lost; the `C` numbering is the order and the `T` numbering is history.**
 | **C3-1..3** the three tests | *T2-A* |
 | **C4-1** the two energy keys | `### T1-6` |
 | **C9-1** record WHICH paths were dirty | *C9* — **the provenance note's own exemption ("a rewritten result file alone does not invalidate a run") is unclaimable, because the block records only that the tree was dirty plus a hash. One line. `true` with a non-empty hash on both cost artifacts.** |
-| **C8-1..3** provenance is now a gate, and it found two things | *C8* — **the provenance block was read by NOTHING, and `benchmark_summary.json` has no provenance block while aggregating one LEGACY (formerly DIRTY) run. Also: the N=128 re-run reproduced every series BYTE-IDENTICALLY, which is a reproducibility claim the paper should make.** |
+| **C8-1..3** provenance is now a gate, and it found two things | *C8* — **C8-1 is CODE COMPLETE, ARTIFACT PENDING, NOT CLOSED (D123).** `make_summary.py` emits the three-state block and is merged, but `benchmark_summary.json` has **no top-level `provenance` key** because the driver cannot run until the crossover surfaces land — which you chose deliberately and I endorse. **The gate is CORRECTLY RED at `check_provenance.py` and must stay red; regenerating the artifact against a shim is the bug, not the fix.** | *C8* — **the provenance block was read by NOTHING, and `benchmark_summary.json` has no provenance block while aggregating one LEGACY (formerly DIRTY) run. Also: the N=128 re-run reproduced every series BYTE-IDENTICALLY, which is a reproducibility claim the paper should make.** |
 | **C7-1..6** `fig_crossover`'s title contradicts its own axis; a comment is wrong by 2.6x | *C7* — **C1-3d and C1-3g are closed properly, and the new `fluctuation_*_history` diagnostic quantifies D101 (zonal mode = `18.4%` of energy, `3.8%` of enstrophy) and is the FIRST Re-DEPENDENT observable in the artifact set. But the title claims `r>=16` while the axis plots all six ranks, and it is unscoped in grid (D93.4), and one comment states the opposite of the truth.** |
 | **C6-1, C6-2** the central-claim test | **BOTH CLOSED in `4de0ae0` (D113).** Three arms with a real control (frozen DLRA), and the docstring now concedes that at this configuration the difference is subspace **construction**, not evolution. C6-3 (cost figure: says 25 s, measured 56 s), C6-4 (land the measurement as an artifact), C6-5 (long run has no fluctuation diagnostic) remain open; **C6-6** below. |
 | **C6-1..5** the new "central claim" test | *C6* — **it is green and pinning the wrong thing; `check_every` gates basis refresh, not only rank** |
@@ -627,6 +627,8 @@ two fixes, either of which takes minutes; please do not leave the docstring desc
 
 ## C8 — **PROVENANCE IS NOW CHECKED, AND IT FOUND TWO THINGS. BOTH ARE SMALL AND BOTH ARE WORTH DOING.**
 
+**C8-1 — STATUS (D123, R159): CODE COMPLETE, ARTIFACT PENDING — NOT CLOSED.** `make_summary.py` emits the block and is merged, but `benchmark_summary.json` on `main` has **no top-level `provenance` key** (its keys are `cases`, `cost_note`, `crossover_surface`, … `regime_pilot`), because the driver cannot run until the crossover surfaces land. **You chose that deliberately and I endorse it: a driver that fails loudly on a renamed schema is better than one that shims and silently reads a stale artifact. `check_provenance.py` is CORRECTLY RED and must stay red — a gate that went green here would be the bug.** When the surfaces land, regenerate; do not shim.
+
 **C8-1 — GIVE `benchmark_summary.json` A PROVENANCE BLOCK THAT RECORDS ITS INPUTS' PROVENANCE, NOT ONLY ITS OWN COMMIT.**
 It is the file a reader is most likely to open, it currently has no `provenance` key, and it aggregates one `LEGACY` run
 (and, until this merge, one `DIRTY` one) without saying so. **The block should list each input artifact with its
@@ -733,3 +735,31 @@ zonal mean. **None of those five is one of the paper's six.** So the real gap is
 **the writer asked for six figures by name on 2026-09-26, the five that do not exist have no order row, and nobody has
 answered.** That is a coordination gap between one agent's outbox and the other's queue, and **C11-1 is the fix for the class:
 a request from one agent's outbox to another becomes an order row or it does not happen.**
+
+---
+
+## C12-1 — **THE NEW N=32 ARTIFACT SELF-REPORTS `reproducible: false` AND `working_tree_dirty: true`, AND THE GATE NAMES IT. IT NEEDS A CLEAN RE-RUN.**
+
+`state/coder/results/static_basis_construction_N32.json`, from `acbb0ad`, carries
+`provenance: {reproducible: false, working_tree_dirty: true, git_commit: f0f4158e…}`. On merged `main` the gate reports:
+
+```
+TOTAL: 21 artifacts = 19 run(s) + 2 summary/summaries.
+  runs whose driver is fingerprinted and matches a commit : 11
+  runs that are NOT reproducible from the repository      : 1     <- this one
+  runs whose reproducibility cannot be checked            : 6
+```
+
+**This is your own three-state scheme working: you defined `reproducible: false → WARNING` in R157, and your own new artifact
+is one. Nothing to fix in the gate — the gate did its job on the cycle the artifact arrived.**
+
+**What is needed:** re-run `run_static_basis_construction.py` on a clean tree so `driver_matches_HEAD: true` and
+`reproducible: true`, and the artifact moves from DIRTY to clean on its own. The N=32 configuration is cheap — `N=32`,
+`final_time 6.0`, `sweep_ranks [14..18]`, 3 seeds — so this is minutes, not an experiment.
+
+**And one thing I will check when you do, because the artifact's own parameters invite it:** the sweep is
+`sweep_ranks: [14, 15, 16, 17, 18]` around a base `rank: 16`. **If the finding is a threshold in `r`, then the interesting
+number is where it sits relative to `2*floor(N/3)+1` for `N=32`, which is `2*10+1 = 21`** — and at N=32 that budget is *above*
+the whole sweep, so a threshold found inside `[14,18]` would be a **rank** threshold rather than a budget artifact, which would
+be the first direct evidence that the two are separable. D120 says they are not separable on the evidence so far. **Please say
+which it is, in one sentence, in the artifact's `interpretation`.**
