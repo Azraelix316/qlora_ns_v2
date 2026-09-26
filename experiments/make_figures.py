@@ -821,7 +821,7 @@ def main() -> None:
             ax.plot([r["time"] for r in dl], [r["relative_l2"] for r in dl],
                     color=shade, linewidth=1.3)
             ax.plot([r["time"] for r in st],
-                    [r["relative_l2_oracle_mean"] for r in st],
+                    [r["relative_l2_fluct_over_full"] for r in st],
                     color=shade, linewidth=1.3, linestyle="--")
         ax.plot([], [], color=colors["full"], linewidth=1.3,
                 label="DLRA, fixed rank (solid)")
@@ -835,7 +835,7 @@ def main() -> None:
             for row in case["dlra"][str(rank)] if row["time"] > 0
         ]
         ys += [
-            row["relative_l2_oracle_mean"]
+            row["relative_l2_fluct_over_full"]
             for rank in plotted
             for row in case["static_moving_window"][f"W{windows[0]:g}_r{rank}"]
         ]
@@ -848,10 +848,10 @@ def main() -> None:
             # anywhere on the panel; the range over those ranks is what the title
             # reports.  A literal here would be a number no re-run could correct.
             static_floor = min(
-                (row["relative_l2_oracle_mean"]
+                (row["relative_l2_fluct_over_full"]
                  for rank in plotted
                  for row in case["static_moving_window"][f"W{windows[0]:g}_r{rank}"]
-                 if row["relative_l2_oracle_mean"] > 0.0),
+                 if row["relative_l2_fluct_over_full"] > 0.0),
                 default=None,
             )
             decades = sorted(

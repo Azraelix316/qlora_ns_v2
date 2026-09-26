@@ -75,7 +75,7 @@ def test_the_static_baseline_error_is_flat_in_rank_above_16():
             def value(rank: int) -> float:
                 rows = case["static_moving_window"][f"W{window:g}_r{rank}"]
                 row = min(rows, key=lambda x: abs(x["time"] - t))
-                return row["relative_l2_oracle_mean"]
+                return row["relative_l2_fluct_over_full"]
 
             hi = [value(r) for r in high]
             lo = [value(r) for r in low]

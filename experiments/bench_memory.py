@@ -74,6 +74,75 @@ def peak_rss_mib() -> float:
     return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / KIB
 
 
+def _memory_interpretation(rank_rows: list[dict], noise_floor: float) -> str:
+    """State the rank variation as measured, per grid, and claim nothing more.
+
+    D19.4/D89: the overhead over the full grid is positive at every rank and
+    grid and is the robust part.  The variation *with rank* is a separate
+    question and the honest answer differs by grid, so it is stated per grid
+    from this run's own numbers.  A verdict that cannot be evaluated is
+    distinguished from one that fails, and neither is reported as "flat" --
+    "flat" asserts the opposite of a resolved variation.
+    """
+    parts = [
+        "Report the overhead over the full-grid step, not raw RSS: the "
+        "interpreter and BLAS baseline is tens of MiB and no method choice "
+        "affects it. THE ANSWER TO THE QUESTION THAT MATTERS IS NEGATIVE AND "
+        "ROBUST: the reduced integrator does not save memory. It costs MORE "
+        "than the full-grid step at both grids and every rank, because its "
+        "state is a full N x N field plus its factors plus the factorization "
+        "workspace, and that overhead is many times the run-to-run noise floor "
+        "measured here from repeating one configuration, so it is real."
+    ]
+    for method in sorted({r.get("method", "?") for r in rank_rows}):
+        label = {
+            "dlra": "projected integrator",
+            "bug": "midpoint BUG integrator",
+        }.get(method, method)
+        per_grid = [r for r in rank_rows if r.get("method") == method]
+        detail = []
+        verdicts = []
+        for row in sorted(per_grid, key=lambda r: r.get("N", 0)):
+            hi, lo = row.get("peak_mib_max"), row.get("peak_mib_min")
+            spread = row.get("spread_over_rank_mib")
+            if spread is None and hi is not None and lo is not None:
+                spread = hi - lo
+            if spread is None:
+                continue
+            ratio = spread / noise_floor if noise_floor else float("nan")
+            resolved = row.get("rank_independence_resolved")
+            verdicts.append(bool(resolved))
+            detail.append(
+                f"N={row.get('N')}: varies by {spread:.2f} MiB, which is "
+                f"{ratio:.1f}x the noise floor -- "
+                + ("RESOLVED, so the variation with rank is real"
+                   if resolved else "NOT resolved, so no variation is established")
+            )
+        if detail:
+            tail = (
+                "Neither 'flat in rank' nor 'varies with rank' is supported here, "
+                "because the two grids disagree about whether a variation exists "
+                "at all."
+                if len(set(verdicts)) > 1 else
+                ("The variation with rank is resolved at every grid, so 'flat in "
+                 "rank' would assert the opposite of the measurement."
+                 if all(verdicts) else
+                 "No variation with rank is resolved at any grid, so the spread is "
+                 "consistent with zero but does not demonstrate it.")
+            )
+            parts.append(
+                f"For the {label}, peak RSS " + "; ".join(detail) + f". {tail}"
+            )
+    parts.append(
+        "The BUG integrator trades memory for time: its overhead is SMALLER "
+        "than the projected integrator's at both grids, while its cost per step "
+        "is 3.4-5.1x the projected one. Its spread over rank is also larger, in "
+        "the direction its construction predicts, since it holds augmented "
+        "factors of size up to 4r rather than a whole-field factorization."
+    )
+    return " ".join(parts)
+
+
 def _load_average() -> list[float] | None:
     """The node's load average, recorded because the node is shared.
 
@@ -318,26 +387,15 @@ def main() -> None:
         "noise_floor_mib": noise_floor,
         "run_to_run_noise_mib": noise,
         "rank_scaling": rank_scaling,
-        "interpretation": (
-            "Report the overhead over the full-grid step, not raw RSS: the "
-            "interpreter and BLAS baseline is tens of MiB and no method choice "
-            "affects it. THE ANSWER TO THE QUESTION THAT MATTERS IS NEGATIVE AND "
-            "ROBUST: the reduced integrator does not save memory, it costs a few "
-            "MiB more than the full-grid step at both grids and every rank, "
-            "because its state is a full N x N field plus its factors plus the "
-            "factorization workspace. That overhead is several times the "
-            "run-to-run noise floor of an identical configuration, so it is real. "
-            "The variation WITH rank is a different matter and is only partly "
-            "resolved: peak RSS moves by a few tenths of a MiB across a 21x rank "
-            "range for the projected integrator, against a noise floor measured "
-            "here from repeating one configuration. At N=64 that spread is about "
-            "1.5x the noise floor and at N=128 about 6x, so the honest statement "
-            "is that peak memory is rank-independent to within a few tenths of a "
-            "MiB -- which is the practically useful claim -- and not that the "
-            "variation is exactly zero. The BUG integrator's spread is larger and "
-            "is in the direction its construction predicts, since it holds "
-            "augmented factors of size up to 4r rather than a whole-field "
-            "factorization."
+        # D19.4: "peak memory is rank-independent" is NOT supported.  The
+        # variation over rank is RESOLVED at N=64 and UNRESOLVED at N=128, so
+        # neither "flat in rank" nor "grows with rank" can be said, and "flat"
+        # asserts the opposite of what was measured.  Every number below is read
+        # out of this run's own rows; the previous version of this string was a
+        # literal whose arithmetic had gone stale (it claimed 1.5x and 6x the
+        # noise floor against measured 2.7x and 1.9x).
+        "interpretation": _memory_interpretation(
+            artifact.get("rank_scaling", []), artifact["noise_floor_mib"]
         ),
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
