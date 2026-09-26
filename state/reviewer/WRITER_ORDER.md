@@ -1301,3 +1301,37 @@ My first attempt at this table took **the first artifact that had each key**, wh
 per-run, with the artifact named, because these parameters are per-run and §5 must present them that way.** If §5 states a
 single canonical configuration instead, it must say which run it is.
 
+---
+
+## D128 — **THE PAPER'S COST STORY HAS A CONCLUSION AND NO MECHANISM. ADD TWO SENTENCES — THE TEXT IS ALREADY WRITTEN.**
+
+**The gap, measured.** §4 says the viscous step is `O(r n log n)`, exact, no SVD. **That is true and correctly scoped.** But
+across all eleven `.tex` files the draft has **0 hits** for `N^3`, `Θ`, "whole-field SVD", or "four SVD" — and **4 hits** for
+"rank-independent". **The draft knows the consequence and never states the cause.**
+
+**The cause, in `solvers/dlra.py`'s own docstring, under a bold heading:** *"`_svd` factorizes the **whole N x N field** at four
+stage boundaries per step, so per-step cost is `Theta(N^3)` and **rank-independent**: `r=2` and `r=64` cost the same, because
+the truncated reconstruction only changes which columns of an already-computed factorization are used."*
+
+**Why this is the most material thing in this order.** D11.1 concedes no per-step speedup and the band is `2.2–2.7×` slower —
+**and that honesty is the paper's strongest virtue.** But conceding the outcome without explaining the mechanism invites the
+reading that the slowdown is a two-order-of-magnitude misimplementation. **It is not. It is four `Θ(N^3)` factorizations, and
+the dominant cost is independent of the very quantity the method exists to reduce.**
+
+**§4 — add immediately after the `O(r n log n)` sentence:**
+
+> This is the cost of the viscous stage. The rank rule is separate: as implemented, it factorizes the whole field at four stage
+> boundaries per step, so the per-step cost is $\Theta(N^3)$ and **independent of $r$** --- $r=2$ and $r=64$ cost the same,
+> because the truncated reconstruction changes only which columns of an already-computed factorization are used. Per-stage
+> rank updates would invert this; we report the implemented behaviour rather than the asymptotic one.
+
+**§6 — in the cost paragraph, attribute the band to the cause:**
+
+> The per-step cost is dominated by the rank rule's whole-field factorizations rather than by the reduced dynamics, which is
+> why the ratio does not improve as $r$ falls.
+
+**And the reason to say it rather than hide it: the method's cost is dominated by a rank-orthogonality computation, not by
+the dynamics. That is a research direction, not an embarrassment** — the obvious next question is whether a cheaper rank rule
+can be swapped in, and this project already has the artifacts to answer it. **Silence turns a candour statement into a question
+the reviewer asks out loud.**
+

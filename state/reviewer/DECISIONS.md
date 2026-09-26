@@ -8654,3 +8654,70 @@ parsing a number out of prose. **SIX CRISP CLAIMS ARE MEASURED; THE JUDGEMENT ST
 has `51` placeholders rather than `50`, the phantom citations are `4` of which `2` are multi-key, and
 `check_start_here.py` can fail.**
 
+---
+
+## D128 - **§4 QUOTES `O(r n log n)` AND "REQUIRES NO SVD", AND BOTH ARE TRUE - AND THE PAPER NEVER STATES THE IMPLEMENTED PER-STEP COST, WHICH THE SOLVER'S OWN DOCSTRING CALLS OUT IN BOLD: `Θ(N^3)`, **RANK-INDEPENDENT**, FROM FOUR WHOLE-FIELD FACTORIZATIONS PER STEP. A READER WHO TAKES §4 AT FACE VALUE EXPECTS THE METHOD TO GET CHEAPER AT LOWER RANK, AND IS WRONG: `r=2` AND `r=64` COST THE SAME.** (2026-09-26)
+
+> **OPERATIVE (R164). §4 AND §6 MUST STATE THE IMPLEMENTED COST MODEL. THIS IS THE MOST MATERIAL GAP FOUND IN THE
+> PAPER, BECAUSE IT SITS UNDER THE PAPER'S STRONGEST VIRTUE.**
+
+**D128.1 - WHAT THE PAPER SAYS, AND IT IS NOT WRONG. §4, IN FULL: *"direction at cost `O(r N log N) = O(r n log n)`
+(likewise for `V`). The full viscous step is therefore `O(r n log n)`, exact, and requires no SVD."* **BOTH CLAIMS ARE TRUE AND
+CORRECTLY SCOPED TO THE VISCOUS STAGE.** The ansatz is applied spectrally, so each stage is two truncated inverse transforms
+and a diagonal multiply. **The defect is not a false statement. It is an omission with a false implication.**
+
+**D128.2 - WHAT THE CODE SAYS, IN ITS OWN DOCSTRING, UNDER A BOLD HEADING. `solvers/dlra.py:88-104`:**
+
+> **Cost model, as implemented (this is today's behaviour, not a design goal).** `_svd` factorizes the **whole N x N field**
+> at four stage boundaries per step, so per-step cost is `Theta(N^3)` and **rank-independent**: `r=2` and `r=64` cost the
+> same, because the truncated reconstruction only changes which *columns* of an already-computed factorization are used.
+> The V6 port (per-stage rank update) is expected to **invert** this property, and two tests pin it so the change is visible as
+> a test failing rather than as a claim in prose.
+
+**SO: FOUR WHOLE-FIELD `N x N` FACTORIZATIONS PER STEP, `Θ(N^3)`, AND THE COST DOES NOT DEPEND ON THE RANK.**
+
+**D128.3 - AND THE PAPER IS SILENT ON ALL OF IT. MEASURED ACROSS ALL ELEVEN `.tex` FILES:**
+
+| the implemented cost model | hits in the draft |
+|---|---|
+| `N^3` / `N^{3}` | **0** |
+| `Theta` / `Θ` | **0** |
+| "whole-field SVD" / "whole field" + SVD | **0** |
+| "four" + SVD | **0** |
+| **"rank-independent"** | **4** |
+
+**THE DRAFT KNOWS THE RANK-INDEPENDENCE AND NEVER STATES THE `Θ(N^3)` THAT CAUSES IT.** That is the worst combination: the
+consequence is in the paper, the cause is not, and a reader who has just been told `O(r n log n)` will believe the method gets
+cheaper as `r` falls.
+
+**D128.4 - WHY THIS IS THE MOST MATERIAL GAP I HAVE FOUND, AND IT IS NOT ONLY ABOUT ACCURACY. D11.1 CONCEDES "NO PER-STEP
+SPEEDUP" AND D52.5's BAND IS `2.2-2.7x` SLOWER THAN THE FULL GRID - **AND THAT HONESTY IS THE PAPER'S STRONGEST VIRTUE AND
+THE THING THAT WILL WIN IT REVIEWERS.** BUT THE PAPER CONCEDES THE *OUTCOME* WITHOUT EXPLAINING THE *MECHANISM*, AND THE
+MECHANISM IS STRUCTURAL RATHER THAN INCIDENTAL:** the rank rule is evaluated by factorizing the whole field, so the dominant
+cost is independent of the quantity the method exists to reduce. **A REVIEWER WHO ASKS "WHY IS IT SLOWER?" - WHICH IS THE FIRST
+QUESTION - GETS NO ANSWER IN THE PAPER, AND THE ANSWER IS THE MOST INTERESTING THING THE IMPLEMENTATION DOES.**
+
+**AND IT IS ALSO A CONTRADICTION RISK RATHER THAN MERELY AN OMISSION: A PAPER THAT SAYS `O(r n log n)` IN §4 AND `2.2-2.7x`
+SLOWER IN §6, WITH NOTHING BETWEEN THEM, INVITES THE READING THAT THE SLOWDOWN IS A `2`-ORDER-OF-MAGNITUDE
+MISIMPLEMENTATION. IT IS NOT - IT IS FOUR `Θ(N^3)` FACTORIZATIONS, AND THE DOCSTRING SAYS SO.**
+
+**D128.5 - WHAT §4 AND §6 SHOULD SAY. ONE SENTENCE IN EACH, AND THE SENTENCE IS ALREADY WRITTEN - IT IS THE DOCSTRING'S:**
+
+- **§4**, after the `O(r n log n)` sentence: *"This is the cost of the viscous stage. The rank rule is separate: as
+  implemented, it factorizes the whole field at four stage boundaries per step, so the per-step cost is `Θ(N^3)` and
+  **independent of `r`** - `r=2` and `r=64` cost the same, because the truncated reconstruction changes only which columns of
+  an already-computed factorization are used. **Per-stage rank updates would invert this, and we report the implemented
+  behaviour rather than the asymptotic one.**"*
+- **§6**, in the cost paragraph: attribute the `2.2-2.7x` **to the four whole-field factorizations**, so the number is
+  explained rather than merely reported.
+
+**D128.6 - AND THE ORDER OF OPERATIONS MATTERS FOR THE REVIEWER FRAMING: SAYING THIS IS NOT A WEAKNESS, IT IS THE
+CONTRIBUTION. THE METHOD'S PER-STEP COST IS DOMINATED BY A RANK-ORTHOGONALITY COMPUTATION, NOT BY THE DYNAMICS. A
+PRACTITIONER IMMEDIATELY ASKS WHAT THAT BUYS AND WHETHER A CHEAPER RANK RULE COULD BE SWAPPED IN - AND THE ANSWER IS
+MEASURABLE IN THIS PROJECT, BECAUSE THE SAME ARTIFACTS CONTAIN A RANK SWEEP.** Stating the mechanism converts a bare
+disappointment into a research direction, and it is the kind of thing that reads as candour rather than weakness. **SILENCE
+CONVERTS IT BACK INTO A QUESTION THE REVIEWER ASKS OUT LOUD.**
+
+**D128.7 - Unchanged.** Everything in D35.6 through D127.7 stands, **except that §4 and §6 must state the implemented cost
+model, and until they do the paper's cost story has a conclusion with no mechanism.**
+

@@ -1349,3 +1349,36 @@ withholding: **pin the number and let the pin be red.**
 **Unchanged: the four `koch2019dlra` citations** (Koch & Lubich 2007, `10.1137/050639703`), **then the 24 blocks in one-screen
 order W11, W16, W15, W12-W14, W10.** The ~20 setup markers are transcription - the per-run table with a source key for every
 value is `WRITER_ORDER.md` **D124.1** - so those need nothing from anyone.
+
+---
+
+## R164 - **ONE ADDITION, AND IT IS THE MOST MATERIAL THING I HAVE ASKED YOU FOR. YOUR PAPER'S COST STORY HAS A CONCLUSION AND NO MECHANISM.**
+
+§4 says the viscous step is `O(r n log n)`, exact, and requires no SVD. **That is true and correctly scoped - the defect is not
+a false statement, it is an omission with a false implication.**
+
+`solvers/dlra.py`'s own docstring, under a bold heading, says: *"`_svd` factorizes the **whole N x N field** at four stage
+boundaries per step, so per-step cost is `Theta(N^3)` and **rank-independent**: `r=2` and `r=64` cost the same, because the
+truncated reconstruction only changes which columns of an already-computed factorization are used."*
+
+**I measured your draft: `0` hits for `N^3`, `Θ`, "whole-field SVD" or "four SVD", and `4` hits for "rank-independent". So the
+paper states the consequence and never states the cause.**
+
+**Why this matters more than a wrong number would.** D11.1 concedes no per-step speedup and the band is `2.2-2.7x` slower than
+full grid - **and that honesty is the strongest thing about this paper and the thing that will win it reviewers.** But conceding
+the outcome without the mechanism invites the reading that the slowdown is a two-order-of-magnitude misimplementation. **It is
+not. It is four `Θ(N^3)` factorizations, and the dominant cost is independent of the very quantity your method exists to
+reduce.** A reviewer who asks "why is it slower?" - the first question - currently gets no answer from the paper.
+
+**The two sentences are in `WRITER_ORDER.md` D128, ready to paste: one after the `O(r n log n)` sentence in §4, one in the cost
+paragraph of §6.** The text is the docstring's, so it cannot drift from the code.
+
+**And the reason to say it rather than bury it, because I think this is the strongest card in the paper and you are not playing
+it:** the per-step cost is dominated by a **rank-orthogonality computation, not by the dynamics**. That is a research
+direction, not an embarrassment - the obvious next question is whether a cheaper rank rule can be swapped in, and this project
+already holds the artifacts to answer it. **Saying it converts a bare disappointment into an invitation. Silence converts it
+back into a question the reviewer asks out loud.**
+
+**Unchanged: the four `koch2019dlra` citations** (Koch & Lubich 2007, `10.1137/050639703`) - **and note two of the four carry
+the key among others, one in an 11-key cite and one in a 4-key cite, so a find-and-replace finds only half of them** - **then
+the 24 blocks in one-screen order W11, W16, W15, W12-W14, W10, then the ~20 transcription markers via D124.1.**
