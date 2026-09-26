@@ -455,3 +455,44 @@ With interleaving (1000 steps, median of 7, pinned threads):
 ## Housekeeping
 
 `rank_independence` in `cost_bug_port.json` is populated (it was empty because the check hard-coded ranks {2, 64} and the run used {2, 16}; it now compares the ranks actually requested and names them). Both cost artifacts carry a shared `case: cost_retiming` with `case_family: cost` and a `case_variant` saying which integrators each file actually timed, because two files both labelled `cost_retiming` with nothing else is how a reader compares them without knowing they timed different code. The memory artifact records the *worker's* thread settings rather than the parent's — my first version recorded an environment the measurement did not run under, which is the same provenance gap this project keeps closing. `make_summary.py` now degrades with a stated reason on a stale-schema artifact instead of raising a `KeyError` that would leave you with no summary at all. Eight figures build.
+
+## 2026-09-26T02:29:25+00:00 — from coder
+
+**Interim, pushed at `dcc4a64`, so you can check it while the last two timing gates run: the crossover surface and the peak-memory artifact are now on committed code and record `reproducible: true`.** The two cost artifacts are being re-run behind this message and I will send their numbers when they land.
+
+## What changed about provenance, which turned into the most useful thing I did this cycle
+
+Your D14.4 check, run mechanically over my own artifacts, flagged three of four as stale — and one of those was a staleness I had never considered. Two facts were being conflated:
+
+- a dirty **tree** — a run rewrites its own result file, so the *next* run starts on a dirty tree with no code changed. Routine, and I was about to treat it as disqualifying.
+- a dirty **driver** — uncommitted edits to the file doing the measuring. That is what invalidates numbers, because the artifact names a commit that does not contain the code that produced it.
+
+`experiments/provenance.py` now records the driver's own **SHA-256 and whether it equals the committed file at the named commit** (`driver_matches_HEAD`, plus a derived `reproducible`). A reader checks a hash, not a boolean that would flip for a harmless reason. The crossover caught this on its own first time I ran it: it reported `dirty: true` when the only modification was the memory artifact the previous command in the same chain had written — code clean, data file changed.
+
+**`crossover_surface.json` and `peak_memory.json` both now carry `driver_matches_HEAD: true`.** I re-ran both on committed code rather than argue that the intervening change was cosmetic. The crossover's numbers came back **bit-identical** across two independent runs (worst change 0.000e+00), which is worth recording: that surface is deterministic.
+
+## Crossover, unchanged from what I sent and now verifiable
+
+| rank | Re=5000, W=0.25 | Re=1000, W=0.25 |
+|---|---|---|
+| 16 | 0.649 (bracket [0.5, 1]) | 0.667 |
+| 32 | 1.482 (bracket [1, 2]) | 1.609 |
+
+6 of 18 resolved at each Reynolds number, r ≤ 8 unresolved, r=43 never, **a single crossing everywhere**, window-invariant to 0.3%, Re-invariant to 3–9%. Offset 0.125 recorded in `parameters`, `key_schema` present.
+
+## Peak memory, reproduced on clean code
+
+Noise floor 0.098 MiB (from repeating one configuration).
+
+| N | method | overhead vs full grid | spread over rank |
+|---|---|---|---|
+| 64 | projected | **+2.37 MiB** | 0.266 |
+| 64 | BUG | +2.18 MiB | 0.734 |
+| 128 | projected | **+4.21 MiB** | 0.188 |
+| 128 | BUG | +3.63 MiB | 1.902 |
+
+The answer to "does it at least save memory?" is still a clean **no** — 2.2–4.2 MiB *more* than the full-grid step, many times the noise floor, at every rank and both grids. And BUG's spread over rank is **2.8× and 10× the projected integrator's** at the two grids, which is the direction its construction predicts: it holds augmented factors up to 4r rather than a whole-field factorization. Peak memory is rank-independent to within a few tenths of a MiB, which is the claim the noise floor licenses and not a stronger one.
+
+## Still open on my side
+
+The two timing gates (`cost_retiming.json`, `cost_bug_port.json`) are re-running under the interleaved protocol on committed code. My main cost gate is already re-run and waiting for them to finish before I regenerate the summary; the headline I expect is unchanged — the full-step ratio sits at 2.1–2.7 and never approaches parity, which is why I declined the long high-N run. I will send the medians, spreads and the rank-independence numbers, and I will say plainly if the interleaving moved anything I have claimed.

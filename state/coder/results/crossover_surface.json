@@ -1540,49 +1540,49 @@
       "reference": {
         "max_abs_divergence": 4.773959005888173e-14,
         "nsteps": 16000,
-        "wall_seconds": 33.424504870781675
+        "wall_seconds": 31.88909615809098
       },
       "run_diagnostics": {
         "16": {
           "dlra": {
             "max_abs_divergence": 5.0182080713057076e-14,
             "rank_actual": 16,
-            "wall_seconds": 92.51061877910979
+            "wall_seconds": 91.38016684819013
           }
         },
         "2": {
           "dlra": {
             "max_abs_divergence": 5.845324224651449e-14,
             "rank_actual": 2,
-            "wall_seconds": 90.20506219612435
+            "wall_seconds": 89.63530504400842
           }
         },
         "32": {
           "dlra": {
             "max_abs_divergence": 4.796163466380676e-14,
             "rank_actual": 32,
-            "wall_seconds": 97.13240371691063
+            "wall_seconds": 96.94814140582457
           }
         },
         "4": {
           "dlra": {
             "max_abs_divergence": 4.851674617611934e-14,
             "rank_actual": 4,
-            "wall_seconds": 91.11900639208034
+            "wall_seconds": 90.82951512304135
           }
         },
         "43": {
           "dlra": {
             "max_abs_divergence": 4.951594689828198e-14,
             "rank_actual": 43,
-            "wall_seconds": 102.1629675689619
+            "wall_seconds": 101.64032968808897
           }
         },
         "8": {
           "dlra": {
             "max_abs_divergence": 4.707345624410664e-14,
             "rank_actual": 8,
-            "wall_seconds": 91.24164313799702
+            "wall_seconds": 90.35810744715855
           }
         },
         "W0.25_r16": {
@@ -1590,126 +1590,126 @@
           "max_abs_divergence": 4.973799150320701e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 38.20996305299923
+          "wall_seconds": 38.05486380099319
         },
         "W0.25_r2": {
           "diverged": false,
           "max_abs_divergence": 4.468647674116255e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 32.55649030581117
+          "wall_seconds": 34.569104984169826
         },
         "W0.25_r32": {
           "diverged": false,
           "max_abs_divergence": 4.973799150320701e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 38.470462932949886
+          "wall_seconds": 39.847939343890175
         },
         "W0.25_r4": {
           "diverged": false,
           "max_abs_divergence": 4.6074255521943996e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 34.14417259278707
+          "wall_seconds": 36.434966824017465
         },
         "W0.25_r43": {
           "diverged": false,
           "max_abs_divergence": 4.973799150320701e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 37.80216507893056
+          "wall_seconds": 40.258681003935635
         },
         "W0.25_r8": {
           "diverged": false,
           "max_abs_divergence": 4.796163466380676e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 35.829400124028325
+          "wall_seconds": 35.720714373048395
         },
         "W0.5_r16": {
           "diverged": false,
           "max_abs_divergence": 4.929390229335695e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 37.83686289913021
+          "wall_seconds": 39.33188625914045
         },
         "W0.5_r2": {
           "diverged": false,
           "max_abs_divergence": 4.674038933671909e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 34.09016557293944
+          "wall_seconds": 35.692403867142275
         },
         "W0.5_r32": {
           "diverged": false,
           "max_abs_divergence": 4.6407322429331543e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 39.55887289787643
+          "wall_seconds": 40.520916243083775
         },
         "W0.5_r4": {
           "diverged": false,
           "max_abs_divergence": 4.707345624410664e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 39.84060512599535
+          "wall_seconds": 36.780680543975905
         },
         "W0.5_r43": {
           "diverged": false,
           "max_abs_divergence": 4.6407322429331543e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 38.677471186965704
+          "wall_seconds": 39.93316948204301
         },
         "W0.5_r8": {
           "diverged": false,
           "max_abs_divergence": 4.574118861455645e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 36.793040303047746
+          "wall_seconds": 36.29298229399137
         },
         "W1_r16": {
           "diverged": false,
           "max_abs_divergence": 4.884981308350689e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 39.05731209018268
+          "wall_seconds": 40.53503661509603
         },
         "W1_r2": {
           "diverged": false,
           "max_abs_divergence": 4.907185768843192e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 34.25865452596918
+          "wall_seconds": 33.47225531283766
         },
         "W1_r32": {
           "diverged": false,
           "max_abs_divergence": 4.574118861455645e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 2,
-          "wall_seconds": 42.396689641987905
+          "wall_seconds": 40.43235877295956
         },
         "W1_r4": {
           "diverged": false,
           "max_abs_divergence": 4.418687638008123e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 35.747038840083405
+          "wall_seconds": 37.694470369955525
         },
         "W1_r43": {
           "diverged": false,
           "max_abs_divergence": 4.8627768478581856e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 3,
-          "wall_seconds": 42.73813162394799
+          "wall_seconds": 43.34646340692416
         },
         "W1_r8": {
           "diverged": false,
           "max_abs_divergence": 4.3520742565306136e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 36.43794250395149
+          "wall_seconds": 35.48298200010322
         }
       },
       "static_moving_window": {
@@ -4749,49 +4749,49 @@
       "reference": {
         "max_abs_divergence": 5.129230373768223e-14,
         "nsteps": 16000,
-        "wall_seconds": 37.6159034690354
+        "wall_seconds": 36.03915111091919
       },
       "run_diagnostics": {
         "16": {
           "dlra": {
             "max_abs_divergence": 5.10702591327572e-14,
             "rank_actual": 16,
-            "wall_seconds": 92.18068490503356
+            "wall_seconds": 92.0169603091199
           }
         },
         "2": {
           "dlra": {
             "max_abs_divergence": 4.723998969780041e-14,
             "rank_actual": 2,
-            "wall_seconds": 97.74740466102958
+            "wall_seconds": 96.04142908216454
           }
         },
         "32": {
           "dlra": {
             "max_abs_divergence": 4.907185768843192e-14,
             "rank_actual": 32,
-            "wall_seconds": 96.62820548890159
+            "wall_seconds": 98.67415115609765
           }
         },
         "4": {
           "dlra": {
             "max_abs_divergence": 4.96269692007445e-14,
             "rank_actual": 4,
-            "wall_seconds": 90.75179668399505
+            "wall_seconds": 90.08356912387535
           }
         },
         "43": {
           "dlra": {
             "max_abs_divergence": 5.040412531798211e-14,
             "rank_actual": 43,
-            "wall_seconds": 101.99261219101027
+            "wall_seconds": 101.55906086601317
           }
         },
         "8": {
           "dlra": {
             "max_abs_divergence": 4.374278717023117e-14,
             "rank_actual": 8,
-            "wall_seconds": 92.56368813780136
+            "wall_seconds": 90.8216027840972
           }
         },
         "W0.25_r16": {
@@ -4799,126 +4799,126 @@
           "max_abs_divergence": 5.062616992290714e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 36.68859876296483
+          "wall_seconds": 39.07166929496452
         },
         "W0.25_r2": {
           "diverged": false,
           "max_abs_divergence": 4.951594689828198e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 35.03112573409453
+          "wall_seconds": 33.90114158694632
         },
         "W0.25_r32": {
           "diverged": false,
           "max_abs_divergence": 5.062616992290714e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 37.37924172193743
+          "wall_seconds": 39.299700438044965
         },
         "W0.25_r4": {
           "diverged": false,
           "max_abs_divergence": 4.707345624410664e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 34.83679121709429
+          "wall_seconds": 35.400710051180795
         },
         "W0.25_r43": {
           "diverged": false,
           "max_abs_divergence": 5.062616992290714e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 38.509121474809945
+          "wall_seconds": 38.60679215891287
         },
         "W0.25_r8": {
           "diverged": false,
           "max_abs_divergence": 4.796163466380676e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 36.745884782169014
+          "wall_seconds": 34.667302060872316
         },
         "W0.5_r16": {
           "diverged": false,
           "max_abs_divergence": 4.75175454539567e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 38.90541344322264
+          "wall_seconds": 39.78083789907396
         },
         "W0.5_r2": {
           "diverged": false,
           "max_abs_divergence": 4.8627768478581856e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 35.54276352818124
+          "wall_seconds": 34.085467430064455
         },
         "W0.5_r32": {
           "diverged": false,
           "max_abs_divergence": 4.618527782440651e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 40.22991654393263
+          "wall_seconds": 41.52114220592193
         },
         "W0.5_r4": {
           "diverged": false,
           "max_abs_divergence": 4.8183679268731794e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 38.423008549027145
+          "wall_seconds": 39.09499956690706
         },
         "W0.5_r43": {
           "diverged": false,
           "max_abs_divergence": 4.618527782440651e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 32,
-          "wall_seconds": 39.57852459605783
+          "wall_seconds": 41.89681319799274
         },
         "W0.5_r8": {
           "diverged": false,
           "max_abs_divergence": 4.596323321948148e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 36.661815045867115
+          "wall_seconds": 37.812858012039214
         },
         "W1_r16": {
           "diverged": false,
           "max_abs_divergence": 4.6851411639181606e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 38.60854289494455
+          "wall_seconds": 37.935822762781754
         },
         "W1_r2": {
           "diverged": false,
           "max_abs_divergence": 5.728750807065808e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 34.481451296946034
+          "wall_seconds": 34.61586295906454
         },
         "W1_r32": {
           "diverged": false,
           "max_abs_divergence": 5.5067062021407764e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 2,
-          "wall_seconds": 40.36238116608001
+          "wall_seconds": 39.1296619460918
         },
         "W1_r4": {
           "diverged": false,
           "max_abs_divergence": 4.707345624410664e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 0,
-          "wall_seconds": 35.33929605712183
+          "wall_seconds": 37.328052775003016
         },
         "W1_r43": {
           "diverged": false,
           "max_abs_divergence": 4.9960036108132044e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 3,
-          "wall_seconds": 44.38352334382944
+          "wall_seconds": 41.808188857045025
         },
         "W1_r8": {
           "diverged": false,
           "max_abs_divergence": 4.529709940470639e-14,
           "refits": 32,
           "refits_with_fewer_snapshots_than_rank": 1,
-          "wall_seconds": 39.40734033496119
+          "wall_seconds": 41.13416240783408
         }
       },
       "static_moving_window": {
@@ -6487,9 +6487,13 @@
   },
   "provenance": {
     "driver": "experiments/run_crossover.py",
-    "git_commit": "588e51592bf026f790c5a4148481f26f78aca577",
-    "note": "git_commit is HEAD at launch; if working_tree_dirty is true the run used uncommitted code this commit does not contain, and the diff hash recovers it",
-    "working_tree_diff_sha256": "b5d51f2230a815fc69b32f2d3f65e5fcce99d973dacf6d8c3e893a04c05dc872",
+    "driver_dirty": false,
+    "driver_matches_HEAD": true,
+    "driver_sha256": "55650a425336a313920145f21023f969b66c3cc3a92393c5c4e3a8ccdf8e379f",
+    "git_commit": "896b3bfb1ef49ff1a9ebea8f0c3802e9e0ad0182",
+    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "reproducible": true,
+    "working_tree_diff_sha256": "1f404e6c8fd1b95159534e6eb1834372972ddca9cfea84d457698c8d039fab96",
     "working_tree_dirty": true
   }
 }

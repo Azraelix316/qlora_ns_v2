@@ -231,22 +231,105 @@ def main() -> None:
     baselines = load(R / "baselines_re5000_N64_T8.json")
     if baselines:
         used.append("baselines_re5000_N64_T8.json")
-        for name, m in baselines["methods"].items():
-            rows.append((name.replace("_", " "), m["max_abs_divergence"]))
-    if rows:
-        fig, ax = plt.subplots(figsize=(6.9, 0.22 * len(rows) + 1.1))
-        names = [r[0] for r in rows]
-        # Linear axis in units of the 1e-14 target: a log axis over four decades
-        # of roundoff is hard to read and its tick locator overflows.
-        values = [float(r[1]) / 1e-14 for r in rows]
+        # Diverged runs are kept *out* of the stable panel and given their own.
+        # Plotting them on the same linear axis is not a cosmetic problem: the
+        # worst is 7.1e+278 against stable values of ~1e-14, so the axis must span
+        # 292 decades and every finite bar becomes about 1e-290 of the width --
+        # a figure that renders cleanly and shows nothing.  The guard below makes
+        # that failure loud instead of silent.
+        diverged = [
+            (n.replace("_", " "), m) for n, m in baselines["methods"].items()
+            if m.get("diverged")
+        ]
+        # One list for the stable panel: the suite rows and the finite baseline
+        # rows are different namespaces, and indexing one by a label from the
+        # other is how a label silently goes missing.
+        stable = [(r[0], float(r[1]), None) for r in rows if r[1] < 1e6 * 1e-14]
+        stable += [
+            (n.replace("_", " "), float(m["max_abs_divergence"]), m)
+            for n, m in baselines["methods"].items() if not m.get("diverged")
+        ]
+        n_panels = 2 if diverged else 1
+        fig, axes = plt.subplots(
+            n_panels, 1, figsize=(6.9, 0.24 * len(stable) + 1.6),
+            squeeze=False,
+        )
+        ax = axes[0][0]
+        names = [s[0] for s in stable]
+        values = [s[1] / 1e-14 for s in stable]
+        # A guard, not a hope: if anything here were large enough to compress the
+        # rest, the figure says so instead of drawing an unreadable one.
+        largest = max(values) if values else 0.0
+        if largest > 1e4:
+            raise SystemExit(
+                f"fig_div_free: a value of {largest:.3e} (in units of 1e-14) "
+                f"would compress every other bar below 1e-4 of the axis. Plot it "
+                f"in its own panel; see the diverged-run panel for the pattern."
+            )
+        # A log axis, against the reviewer's suggestion of linear, and the
+        # deviation is deliberate: one finite method sits at 1046x the target, so
+        # a linear axis would render the other fifteen as sub-pixel slivers --
+        # reproducing exactly the defect this figure is being split to fix.  Over
+        # the three decades the finite methods actually span, a log axis shows
+        # every one of them and keeps the target line meaningful.
         ax.barh(names, values, color=colors["full"])
+        ax.set_xscale("log")
+        finite_max = max(values) if values else 1.0
+        ax.set_xlim(0.5, finite_max * 4.0)
+        for i, (label, value, m) in enumerate(stable):
+            v = value / 1e-14
+            # The one method that degraded a thousandfold without diverging is
+            # named, because it is the only finite bar far from the others and
+            # an unexplained outlier is the thing a reader should notice.  The
+            # label goes to the right of its own bar so it cannot collide with
+            # the axis labels.
+            if v > 100.0:
+                ax.annotate(f"{v:.0f}$\\times$ the target, finite",
+                            (v, i), textcoords="offset points", xytext=(4, 0),
+                            ha="left", va="center", fontsize=6.2,
+                            color=colors["dlra"])
         ax.axvline(1.0, color=colors["dlra"], linestyle="--", linewidth=1.0)
-        ax.annotate("target $10^{-14}$", (1.0, len(rows) - 0.4),
-                    textcoords="offset points", xytext=(4, 0), fontsize=7,
+        ax.annotate("target $10^{-14}$", (1.0, -0.6),
+                    textcoords="offset points", xytext=(3, 0), fontsize=7,
                     color=colors["dlra"])
-        ax.set_xlabel(r"max $|\nabla\!\cdot u|$ over the run, in units of $10^{-14}$")
-        ax.set_title("Exact divergence-freeness holds for every method")
+        ax.set_xlabel(
+            r"max $|\nabla\!\cdot u|$ over the run, in units of $10^{-14}$ "
+            r"(log: one finite method is $10^3\times$ the target)"
+        )
+        ax.set_title(
+            "Exact divergence-freeness for every method that survives —\n"
+            "and four fixed-subspace methods that do not",
+            fontsize=9.5,
+        )
+        ax.set_xlim(left=0.0)
         ax.invert_yaxis()
+        if diverged:
+            ax2 = axes[1][0]
+            # No shared axis: these four failed at four different times, with four
+            # different magnitudes, and a common scale would say nothing.
+            dnames = [d[0] for d in diverged]
+            dvals = [float(d[1]["max_abs_divergence"]) for d in diverged]
+            # Barred as log10 on a *linear* axis.  A log axis here would have to
+            # place ticks across 214 decades, and matplotlib's decade locator
+            # overflows on that; barring the exponent says the same thing and
+            # cannot.
+            dexps = [np.log10(v) if v > 0 else 0.0 for v in dvals]
+            ax2.barh(dnames, dexps, color=colors["dlra"])
+            for i, ((label, m), v, e) in enumerate(zip(diverged, dvals, dexps)):
+                ax2.annotate(
+                    f"diverged at $t={m['diverged_at_time']:.2f}$",
+                    (e, i), textcoords="offset points", xytext=(4, 0),
+                    ha="left", va="center", fontsize=6.4, color=colors["full"],
+                )
+            ax2.set_xlabel(
+                r"$\log_{10}$ of max $|\nabla\!\cdot u|$ before the run "
+                r"went non-finite"
+            )
+            ax2.set_title(
+                "The four fixed-subspace runs that overflowed "
+                "(one parameter set)", fontsize=8.5,
+            )
+            ax2.invert_yaxis()
         fig.tight_layout()
         fig.savefig(args.output_dir / "fig_div_free.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_div_free.png", bbox_inches="tight")
