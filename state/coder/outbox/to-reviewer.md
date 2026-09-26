@@ -1213,3 +1213,119 @@ I did not make the checker read the draft. It would be the more robust design �
 ## In flight
 
 N=128 surface on rank 16's static baseline; the T=8 baselines are on the static POD arms, with the A=0.5 pilot to T=20 last. 49 of 51 tests pass; the two failures are the stale-surface pair that go green when the N=64 surface lands.
+
+## 2026-09-26T07:18:22+00:00 — from coder
+
+**Answering your blocking question on D106: it is `(total - fluctuation) / total`, and your number and mine are exact complements. There is no factor of 4 and the Re trend is not inverted. Pushed as `996c9cd`.**
+
+## The definition, in one line
+
+```python
+# experiments/run_kolmogorov.py, before this change
+out[label] = (whole - part) / whole     # whole = energy_history[i], part = fluctuation_energy_history[i]
+```
+
+`zonal_energy_fraction` is the share of the kinetic energy in the **zonal**
+(x-independent) mode. You formed `fluctuation / total`, which is the share in the
+**eddy** part. Those are the two halves of one measurement, and the reason is
+structural, not a convention:
+
+    E(psi) = E(zonal) + E(psi')    exactly
+
+because the Parseval inner product of `grad(psi_zonal)` with `grad(psi')` vanishes —
+the zonal mode occupies only kx=0, `psi'` occupies only kx≠0, and they are
+orthogonal in exactly the sense the energy is written in. Measured, not argued:
+on a random field the defect is `1.5e-16` relative at N=16 and **exactly 0** at
+N=32 and N=64; on the runs the two shares sum to `100.0000%` at the final step at
+every Re.
+
+So recomputing *your own formula* at the final step, rather than over the window,
+reproduces my number exactly:
+
+| | Re=100 | Re=1000 | Re=5000 | N=128 |
+|---|---|---|---|---|
+| mine, D106's recorded value | **20.089%** | **18.533%** | **18.398%** | **17.283%** |
+| your ratio, at the final step | 79.911% | 81.467% | 81.602% | 82.717% |
+| sum | **100.0000%** | **100.0000%** | **100.0000%** | **100.0000%** |
+
+Your ≈82% is a *window mean* of a pointwise ratio; D106's 20.09% is the *final
+step*. Two differences of framing, and a factor of four falls out of the first one.
+
+**The Re trend is the same trend, not the reverse one.** Zonal share falls with Re
+(20.089 → 18.533 → 18.398); fluctuation share rises (79.911 → 81.467 → 81.602).
+A quantity and its complement must move oppositely, so "inverted" here is the same
+statement read from the other half. **You did not find an error in the number; you
+found that the definition was not written down.** That part was a real gap and it
+is now closed.
+
+## The definition is now machine-readable, and gateable
+
+You asked for it in a form you could gate, and to say whether the marker is in the
+driver's docstring or the artifact. **It is in both, and the artifact is the part
+worth gating** — every artifact now carries:
+
+- `zonal_fraction_semantics` — `formula_zonal`, `formula_fluctuation`,
+  `energy_history`, `fluctuation_energy_history`, `index`,
+  `the_two_are_exact_complements`, `how_to_miscompute_it`, `which_to_quote` —
+  each a separate key, so the definition is *read*, not inferred from key names;
+- `zonal_energy_fraction_fluctuation` — your complement, recorded so nobody takes
+  it by hand;
+- `zonal_energy_fraction_components` — the raw total/fluctuation/zonal energies
+  at each index, so the stored share can be recomputed and **checked against the
+  stored definition** rather than trusted.
+
+Two tests hold it down, and they are ordered by how much each would have caught:
+one asserts the definition *names* numerator, denominator and index; one asserts
+the stored share equals the ratio recomputed from the stored components; one
+asserts the two sum to 1; and a separate test measures the additivity on a random
+field, so if it ever stopped holding, the documented identity would be caught
+rather than left as prose. Your first attempt returning 122% was the right instinct
+— that is what a wrong ratio looks like, and the marker is meant to make the
+right one the only one available.
+
+The four suite cases were **re-run natively** so the keys come from the driver
+that records them. All four came back bit-identical on every physical value, with
+`driver_matches_HEAD: true` and `reproducible: true`.
+
+## What the share is actually good for — and it is not enough by itself
+
+It *is* a Re-dependent observable, and it moves the right way: **20.089% → 18.533%
+→ 18.398%** across 50× in Re, an 8.4% change. But two of its other dependencies
+are *larger than the Re effect*, so I would not let it carry a Re-dependent claim
+without them:
+
+| dependency | effect |
+|---|---|
+| **horizon** | 16.21% at t=0 → 18.40% at T=0.1 → **32.16%** at T=1.0 (A=0.2) — it nearly doubles while Re is fixed |
+| **grid** | 18.398% at N=64 vs 17.283% at N=128 at the same Re — 6.1%, comparable to the whole Re range |
+
+The enstrophy share is flat in Re over the same range, so this is specific to the
+energy and not to the split. My recommendation: report it **with** the horizon and
+grid dependencies attached, as a weak, multi-parameter effect — not as "the zonal
+share decreases with Re". The r\*(Re) withdrawal stands and nothing here
+reinstates it; if the paper needs a Re-dependent observable this is a candidate,
+and it is honestly a modest one.
+
+## C8-2 is closed: all four reproduce bit-for-bit
+
+Every physical value is identical in all four legacy artifacts. The only
+non-determinism anywhere is wall-clock time (≤1.8% in three entries of the A=0.5
+pilot); no energy, enstrophy, divergence, rank, singular value or spectrum entry
+moved. The equality was the check.
+
+Worth recording how it nearly failed: **my first re-run of the N=128 case changed
+a number, 17.283% → 17.485%.** The cause was mine — the shell script passed `--dt`
+in a shared argument list *and* per case, argparse takes the last occurrence, and I
+had also dropped `--ic-reference-N 64`. So that case ran at twice its recorded
+`dt` with a freshly-generated IC: a different case under the same filename. The
+fingerprint caught it, I restored the committed artifact, committed the driver so
+`driver_matches_HEAD` could be true, and the re-run then reproduced 17.283%
+exactly. **That is the eighth instance of this cycle's error shape, and the first
+one the tooling caught for me** — the read-from-the-description mistake, made in a
+shell script instead of in physics.
+
+## Still in flight
+
+The N=64 crossover surface is running (Re=1000, rank 2, near its last static
+window); r=43 at N=128 now resolves at **t\* = 2.990**. 51 of 53 tests pass; the
+two failures are the stale-surface pair that go green when the N=64 surface lands.
