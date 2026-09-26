@@ -93,7 +93,7 @@ measured.**
 > `1.46`, `2.45`, `1.24`, `2.53`, `1.33`, and the `≤7%`/`1–4%` robustness figures — all mine, all
 > from the shifted lookup. D29.2, D29.4.
 >
-> **One item still suspect:** the `N=128` grid-dependence multipliers (`1.46→1.99`, `2.45→6.04`)
+> **One item still suspect:** the `N=128` grid-dependence multipliers (**STRUCK (D56)**, **STRUCK (D56)**)
 > may carry the same error. **D17.1's conclusion is probably right; the multipliers are not
 > currently verifiable** and must be re-derived from time-aligned rows on both grids (D29.7).
 
@@ -166,7 +166,7 @@ committed block, at `N=64`:
 |---|---|---|---|
 | baseline window | 4× (`0.25 → 1.0`) | **`0.15–0.63%`** | **measured, both Re, both ranks** |
 | Reynolds number | 5× (`1000 → 5000`) | **`2.8%` (`r=16`), `8.6%` (`r=32`)** | **measured** |
-| **grid** | 2× (`64 → 128`) | **NOT ESTABLISHED** | **withdrawn (D29.7) — the `N=128` multipliers are mine and may carry an index shift. Do not quote `1.46→1.99`, `2.45→6.04` or `6.41`.** |
+| **grid** | 2× (`64 → 128`) | **NOW MEASURED (D56)** — the reduced integrator **improves `≈2.18×`**, stably to `1.2%` (ratios `0.4581–0.4637`, apparent order `1.13` in relative L2); the static rank-16 baseline **degrades `2.5×` to `1464×`**, unstably (`575×` spread). Shared 64-grid initial condition, rank-matched baseline, so the ratio is the resolution effect alone. **A two-grid comparison, not a convergence study** | **withdrawn (D29.7) — the `N=128` multipliers are mine and may carry an index shift. Do not quote **STRUCK (D56)**, **STRUCK (D56)** or `6.41`.** |
 
 **AND TWO CORRECTIONS TO THE OLD FRAMING OF THIS AXIS. (1) The `r`/ceiling ratios are
 MEANINGLESS — they divide a rank by a WAVENUMBER.** `2·floor(N/3)+1` is the largest wavenumber 2/3
@@ -541,7 +541,7 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | **`t* = 1.26` / `2.44`, or window robustness `≤7%`, or Re robustness `1–4%`** | **D29.2** — my values, from a one-horizon index shift in the `dlra` list. The block is correct: `0.649`/`1.482`, window `≤0.63%`, Re `3–9%`. |
 | "the `crossovers` block is stale / un-provenanced / not derived from the rows" | **D29.2** — all withdrawn. It is the rows, time-aligned, to `1e-9`. |
 | "the rows are authoritative" (R58) / "the rows are a fixed floor" (R62) | **both withdrawn** — the block and the rows agree exactly; neither is privileged. The rows are correct, bit-reproducible, and out-of-sample. |
-| the `N=128` grid multipliers `1.46→1.99`, `2.45→6.04` | **D29.7** — suspect for the same index shift; the *conclusion* (`t*` is not grid-independent) probably stands, the numbers are unverified |
+| the `N=128` grid multipliers **STRUCK (D56)**, **STRUCK (D56)** | **D29.7** — suspect for the same index shift; the *conclusion* (`t*` is not grid-independent) probably stands, the numbers are unverified |
 | calling the central column `relative_l2_oracle_mean`, or describing it as an oracle-mean / perfect-mean error | **D27.1** — it is `d_fluct/‖ref‖` with **each field's own** zonal mean removed, which the artifact's `error_columns` block documents as the opposite. Rename it or compute the column its name promises. |
 | **the `crossovers` block's `0.649` / `1.482`, or "the crossover is window-invariant to 0.3%"** | **D28.3/D28.5** — the block is **window-independent** while the rows are window-dependent, so it was not derived from the rows; it is stale. Quote the rows' `1.26`/`2.44`. |
 | "a static floor" / "rank-independent floor" as a description of the baseline's construction | **D28.2** — refuted: it is a genuine refitted trailing-window baseline, strictly out-of-sample. The floor language survives only as D16.2's measured horizon-qualified statement. |
