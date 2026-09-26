@@ -7529,3 +7529,55 @@ THE MEASUREMENT IS WEAKEST, WHICH IS HOW IT SHOULD BE.**
 
 **D109.5 — Unchanged.** Everything in D35.6 through D108.10 stands, **except that the working-tree exemption is recorded as
 a boolean plus a hash and is therefore unactionable, and D91.5's cost noise is not machine contention.**
+
+---
+
+## D110 — **THE PAPER'S SECOND CONTRIBUTION IS ASSERTED AT **SEVEN** SITES AND IS MEASURED FALSE AT ALL SEVEN. `r^*(Re)` — A QUASI-STATIONARY RANK THAT INCREASES WITH REYNOLDS NUMBER — APPEARS IN THE RESULTS, IN A FIGURE CAPTION, IN THE LIMITATIONS AND IN THE CONCLUSION, WHERE IT IS **NOMINATED AS THE KEY OBSERVABLE FOR A FUTURE THEORY**. D105 MEASURED THE RANK TRACE **BYTE-IDENTICAL** AT Re = 100, 1000 AND 5000.** (2026-09-26)
+
+> **OPERATIVE (R147). W15 SUPPLIES ONE VERIFIED RANK STORY AND A PER-SITE TABLE. THE OBSERVABLE THAT ACTUALLY VARIES
+> WITH Re IS THE ZONAL SHARE OF THE ENERGY, AND §9's RESEARCH AGENDA IS STRONGER FOR THE SUBSTITUTION.**
+
+**D110.1 — THE SITES, AND THEY SPLIT CLEANLY INTO TWO KINDS. I AM NOT ASKING FOR THE MECHANISM DESCRIPTION TO CHANGE.**
+
+**KEEP (DESCRIPTIVE — CORRECT AND NECESSARY).** `01_introduction.tex:116` and `03_related_work.tex:188` (*"at Reynolds
+numbers … with adaptive rank"*); `04_methods.tex:287` (*"**I3 (rank economy).** The adaptive rank $r(t)$ against the
+static …"* — a statement of what I3 measures). **DESCRIBING THE RANK CRITERION IS WHAT §4 IS FOR.**
+
+**FIX (OUTCOME CLAIMS — SEVEN SITES, ALL FALSE).**
+
+| # | site | what it says | why it is false |
+|---|---|---|---|
+| 1 | `06_results.tex:43`–`45` | *"The qualitative picture **we expect, and which the runs must confirm**, is: a growth phase during spin-up … followed by a quasi-stationary rank $r^*(\mathrm{Re})$ **that increases with $\mathrm{Re}$**"* | **The runs have now refuted it.** The rank is byte-identical at all three Re, so there is no Re-dependence to confirm. Also conditional voice about results that exist. |
+| 2 | `06_results.tex:59`–`61` (**figure caption**) | *"Adaptive rank $r(t)$ … Growth during spin-up, then a quasi-stationary rank $r^*(\mathrm{Re})$."* | **A FIGURE CAPTION ASSERTING THE FALSE CLAIM** — and `fig_rank` is one of the six missing figures, so this caption is being written for a figure that does not yet exist. |
+| 3 | `08_limitations.tex` (L1 bullet) | *"The tolerance-based decay rule … **is exercised in its full $3 \to 2 \to 1$ form in the Taylor--Green decay**"* | **W14 already established this is false** — that run is `parameters.rank = 1`, `rank_min = rank_max = rank_final = 1`, `initial_state.numerical_rank = 1`, and **has no rank trace at all**. **W14 FIXES §5; §8 REPEATS IT.** |
+| 4 | `08_limitations.tex:48` | *"…divergence-freeness and **online rank adaptation**, validated in a high-Reynolds-number turbulent regime"* | **THE BARRED CLAIM (D32.2), AND D105 SHARPENS THE BAR: THE RANK IS AT THE CAP FOR `92.5%`–`99.2%` OF EVERY RUN, SO FOR MOST OF ANY RUN THE CRITERION IS NOT ADAPTING — THE CAP IS.** |
+| 5 | `08_limitations.tex:76` | *"Whether **the quasi-stationary rank** … is stable under longer runs is part of the open validation items (V2)"* | **AN OPEN QUESTION THE DATA ALREADY ANSWERS.** D105.6: the 2000-step run is at the cap for `99.2%` of itself. A limitation stated as open that the project's own long run closes is a weakness — it invites the referee to ask a question the paper could have answered. |
+| 6 | `09_conclusion.tex:14` | *"and (iii) **online rank adaptation** by residual-indicator growth and tolerance-based decay"* | **THE BARRED CLAIM, IN THE CONCLUSION'S METHOD SUMMARY** — the last thing a reader reads. |
+| 7 | `09_conclusion.tex:38` | *"a theory of rank growth in forced turbulence: the quasi-stationary rank $r^*(\mathrm{Re})$ measured in Section 4 is, **to our experience with the numerics, the observable that a turbulent-rank-growth theory should explain**"* | **THE WORST INSTANCE, AND IT IS THE ONE TO FIX FIRST. THE PAPER'S FORWARD-LOOKING RESEARCH AGENDA IS BUILT ON A QUANTITY THAT IS CONSTANT IN Re. A REFEREE WHO CHECKS FINDS THAT THE OBSERVABLE THE PAPER HANDS TO FUTURE THEORY DOES NOT VARY WITH THE PARAMETER THE THEORY IS ABOUT.** |
+
+**D110.2 — §7's SITES ARE THE ONLY ONES ALREADY COVERED, AND ONLY BY REPLACEMENT. NONE OF MY 18 PASTE-READY BLOCKS
+MENTIONS `r^\ast`, `quasi-stationary` OR `3 \to 2 \to 1`.** D18d replaces §7's first subsection wholesale, so §7's three sites
+(17–20, 40, 105) disappear with the text. **D18c replaces §6, so §6's two sites go if and only if D18c is pasted whole.
+§8's THREE AND §9's TWO ARE COVERED BY NOTHING.**
+
+**D110.3 — THE VERIFIED FACTS W15 IS BUILT ON. EVERY ONE IS MEASURED, AND THE POPULATIONS ARE IN D105 AND D106:**
+
+- The retained rank goes `17 → 42 → 43` in the first **15 steps** and then never moves. **`92.5%`** of a 200-step run and
+  **`99.2%`** of the 2000-step run is spent at the cap. *(sha1 of the whole `rank_history`: `a317f44b850b`.)*
+- **That trace is byte-identical at Re = 100, 1000 and 5000.** So the retained rank carries **no Reynolds-number
+  information**, and `r^*(Re)` **does not exist as a quantity.**
+- `43` is simultaneously `dlra_max_rank` **and `dealias_ceiling_N64`** — the grid's largest alias-free rank. So for most of
+  any run the rank is set by the cap, not by the tolerance.
+- **The observable that does vary with Re is the zonal share of the energy:** **`20.0891%` (Re=100) → `18.5328%`
+  (Re=1000) → `18.3979%` (Re=5000)** at `N=64`, and `17.2832%` at `N=128`. Monotone in Re, lower on the finer grid, both
+  the expected directions. The zonal mode carries `18.4%` of the energy and `3.8%` of the enstrophy, so a basis fitted on
+  raw snapshots spends `6.25%` of a sixteen-mode budget on one mode.
+
+**D110.4 — SO THE PAPER LOSES A QUANTITY AND GAINS A BETTER RESEARCH QUESTION, AND THE SUBSTITUTION IS NOT A RETRACTION.**
+The honest question is **not** *"why does `r^\ast(Re)` grow?"* — it is **"why does the retained rank not depend on Re, when
+the energy distribution does?"** And the data already suggests the answer: **the rank saturates at the grid's alias-free
+ceiling, which is a property of the grid, so the criterion reports the resolved band rather than the flow.** That is a
+sharper question, it is answerable, and the zonal-share measurement is the first evidence bearing on it.
+
+**D110.5 — Unchanged.** Everything in D35.6 through D109.5 stands, **except that the rank-outcome claim is withdrawn at
+seven sites, and `r^*(Re)` is withdrawn as a quantity.**

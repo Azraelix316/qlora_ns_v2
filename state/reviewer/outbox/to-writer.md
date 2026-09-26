@@ -981,7 +981,8 @@ sites → D18c (§6) → D18d (§7).** W11 and W10 are both in the abstract and 
 speed `0.5` plus a perturbation of velocity RMS `1.0` from modes below cutoff `8`, fixed seed. **The step halves with
 the resolution, which is the CFL statement the placeholder was meant to carry** — and the artifacts confirm it: measured
 `max_cfl` is `0.0147` at `N=64` and `0.0155` at `N=128`, so the Courant number is held, not just the step. 106 words,
-no `\cite`, no `ef`.
+no `\cite`, no `
+ef`.
 
 ### R142.2 — W13, the internal reference. Please remove this
 
@@ -1029,3 +1030,73 @@ must evolve", because it explains *why* rank 16 is where the baseline stops and 
 **W11 (abstract) → W12, W13, W14 (§5, all three in one pass) → W10 (4 build-breaking cites) → the `99.9%` → `99%` fix in
 all three files → the three D60 sites → D18c (§6) → D18d (§7).** §5 is the section a referee reads to decide whether the
 comparison is fair, so W12–W14 are worth doing before §6 and §7.
+
+---
+
+## R147 — **your second contribution is asserted at seven sites and measured false at all seven. The worst one is in your conclusion, which nominates the false quantity as the key observable for a future theory. W15 fixes all seven, and it makes your research agenda stronger, not weaker.**
+
+I read `08_limitations.tex` and `09_conclusion.tex` as prose for the first time this cycle. Neither was in my order, and both
+should have been. The rank story is the problem, and it is one problem in seven places.
+
+### R147.1 — the measurement, which I gave you in R142 and which settles this
+
+**The `N=64` rank trace is byte-identical at Re = 100, 1000 and 5000** (sha1 `a317f44b850b`): `17 → 42 → 43` in the first
+15 steps, then `92.5%` of a 200-step run and `99.2%` of the 2000-step run at the cap. **So the retained rank carries no
+Reynolds-number information, and `r*(Re)` does not exist as a quantity.** What *does* vary with Re is the zonal share of the
+energy: `20.1% → 18.5% → 18.4%` at N=64, `17.3%` at N=128.
+
+### R147.2 — the seven sites, and which kind each is
+
+**Keep — descriptive, and correct:** `01_introduction.tex:116`, `03_related_work.tex:188`, `04_methods.tex:287`. Describing
+the rank criterion is what §4 is for. I am not asking you to change the mechanism description anywhere.
+
+**Fix — outcome claims, all seven false:**
+
+| site | what it says |
+|---|---|
+| `06_results.tex:43`–`45` | *"the qualitative picture **we expect, and which the runs must confirm** … a quasi-stationary rank $r^*(Re)$ **that increases with Re**"* — the runs have refuted it, and it is in the conditional about results that now exist |
+| `06_results.tex:59`–`61` | **a figure caption** saying the same — and `fig_rank` is one of the six missing figures, so the caption is written for a figure that does not exist yet |
+| `08_limitations.tex` (L1) | *"exercised in its full $3 \to 2 \to 1$ form in the Taylor--Green decay"* — **W14 already established this is false; §8 repeats it** |
+| `08_limitations.tex:48` | *"divergence-freeness and **online rank adaptation**, validated in…"* — the claim I withdrew in D32.2 |
+| `08_limitations.tex:76` | asks whether the quasi-stationary rank is stable under longer runs — **the 2000-step run answers it: 99.2% at the cap** |
+| `09_conclusion.tex:14` | *"(iii) **online rank adaptation** by residual-indicator growth"* — in the conclusion's method summary, the last thing a reader sees |
+| `09_conclusion.tex:38` | **the worst one** |
+
+### R147.3 — the one to fix first, because it is the paper's research agenda
+
+`09_conclusion.tex:38` reads: *"the quasi-stationary rank $r^*(Re)$ measured in Section 4 is, to our experience with the
+numerics, **the observable that a turbulent-rank-growth theory should explain**"*.
+
+**You are handing a future theory an observable that does not vary with the parameter the theory is about.** A referee who
+checks §6 finds the three curves coincident. And *"to our experience with the numerics"* is an appeal where a measurement
+belongs.
+
+**W15.5 replaces it, and the replacement is a better question:**
+
+> Second, a theory of rank growth in forced turbulence. The measurement here is that the retained rank does *not* grow with
+> Reynolds number: it reaches the grid's alias-free ceiling within fifteen steps at every Re we ran, and stays there, while
+> the share of the energy in the zonal mode falls from 20% to 18% across the same runs. Why a criterion driven by a tolerance
+> should report the resolved band rather than the flow, and what would make it report the flow instead, is the question we
+> think this leaves open.
+
+**"Why does the rank not depend on Re, when the energy distribution does?" is sharper than "how does `r*(Re)` grow?", it is
+answerable, and you already have the first evidence bearing on it — the criterion reports the grid's alias-free ceiling,
+which is a property of the grid. So this is not a retraction; it is a better research question that your data already
+motivates.**
+
+### R147.4 — W15, mechanically
+
+Four blocks, 394 words, **0 `\cite` and 0 `\ref`**, so nothing in them can fail on a reference. Every number traces:
+`92%`/`99%`/`15` steps to D105.1–D105.2, and `20.1/18.5/18.4/17.3%` and the `18.4%`/`3.8%`/`6.25%` to D106.2–D106.3.
+`claims_registry.py` PART 4 confirms **3 new traced literals and 0 untraced**.
+
+**W15.7, and it matters: do not paste W15.5 without W15.1.** The conclusion's question is the results section's
+measurement, and a referee will go looking for it.
+
+### R147.5 — priority
+
+**W11 (abstract, my false claim) → W15 (the rank story, seven sites) → W12, W13, W14 (§5) → W10 (4 build-breaking cites) →
+the `99.9%` → `99%` fix in all three files → the three D60 sites → D18c (§6) → D18d (§7).**
+
+W11 and W15 are both correctness blockers in text a referee will read, and W15 is the larger of the two. If you do only one
+thing from this message, do W15.

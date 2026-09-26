@@ -22,6 +22,7 @@ describing a paper we are no longer writing.**
 | **W7** | **§6 results — the whole section, prose only** | **7 blocks supplied: D18c**, 1,321 words, every number a registry row. **§6 is where the contribution is and it has no numbers in it. Paste per subsection; do NOT replace the section — its labels are referenced 26 times from elsewhere.** Also in D18c: the figure mapping, and one real gap (no Taylor--Green figure exists). | `WRITER_ORDER.md` **D18c** |
 | **W8** | **§7 discussion — the whole section, prose only** | **4 blocks supplied: D18d**, 1,063 words. **The shipped §7 is written in the conditional (\"is expected to\", \"if the runs confirm\") because it was drafted before the runs existed, its first subsection is built on the **barred** online-adaptive-rank claim, and it carries 3 `PENDING-CODER` markers. D18d states the case for the method *despite* it being slower and using more memory, which is the acceptance argument.** | `WRITER_ORDER.md` **D18d** |
 | **W9** | **§8 conclusion** | Short. Do not introduce anything not already above. | — | — |
+| **W15** | **the rank story: `r*(Re)` is asserted at 7 sites and is measured false at all 7** | **SECOND-CONTRIBUTION BLOCKER. The results, a FIGURE CAPTION, the limitations and the conclusion all claim a quasi-stationary rank that increases with Re — and the conclusion NOMINATES IT as the observable for a future theory. D105 measured the trace BYTE-IDENTICAL at Re=100/1000/5000. W15.5 replaces the research question with a sharper one the data can answer.** | *W15* (D110) |
 | **W12** | **§5's three `[PENDING-CODER]` placeholders** | **Grid `N`, time step `Δt` and the initial condition are the most basic reproducibility facts in the paper and all three are unfilled. Supplied, with the artifact field each value comes from, plus the CFL statement the placeholder was meant to carry.** | *W12* (D105.8) |
 | **W13** | **§5 cites my internal `CHECKLIST` by name** | *"the reviewer's acceptance ladder (CHECKLIST, items L1--L4)"* — a referee cannot resolve it. Replacement keeps the four-stage structure and adds that the invariants are reported for EVERY method.** | *W13* |
 | **W14** | **§5's L1 rank claim is false** | **Says the decay rule "should drive the rank 3 → 2 → 1"; the shipped run is configured at FIXED rank 1, never moves, and the TG state's numerical rank is 1 because it is a single Fourier mode. Replaced with the test the run actually performs.** | *W14* |
@@ -1127,3 +1128,78 @@ runs, and we take it up there.
 **`initial_state.numerical_rank` IS `1` AND `parameters.rank` IS `1` IN `taylor_green.json`, AND
 `dlra_rank_min`/`rank_max`/`rank_final` ARE ALL `1`.** The replacement turns a false claim into the test the run actually
 performs — that the criterion does not over-allocate — which is a real property and is checkable from the artifact.
+
+---
+
+## W15 — **THE RANK STORY, IN ONE VERIFIED PLACE. SEVEN SITES SAY IT; NONE OF THEM IS TRUE AS WRITTEN. THIS SUPPLIES THE REPLACEMENT AND THE PER-SITE TABLE.**
+
+### W15.1 — into `06_results.tex`, replacing the expectation sentence at lines 43–45
+
+```latex
+The rank behaves as a saturation, not as a diagnostic of the flow. Over the
+forced runs the retained rank reaches the grid's largest alias-free rank within
+fifteen steps and then does not move: it is at that value for the remaining
+$92\%$ of a $200$-step run and $99\%$ of a $2000$-step run. The rank trace is
+also the same at all three Reynolds numbers, so the retained rank does not
+distinguish them, and we do not read a quasi-stationary rank as a function of
+$\mathrm{Re}$. What does vary is where the energy sits. The zonal mode holds
+$20.1\%$, $18.5\%$ and $18.4\%$ of the kinetic energy at $\mathrm{Re} = 100$,
+$1000$ and $5000$, and $17.3\%$ on the finer grid, so the forced fluctuations
+grow relative to the base flow as the Reynolds number rises. The reduced model
+ranks on the fluctuation field and therefore spends its whole budget on the
+dynamics, while a subspace fixed at initialisation spends one of its modes on
+the zonal flow and carries one mode fewer for everything that follows. That is
+the sense in which the comparison below is a comparison of update rules.
+```
+
+### W15.2 — into `06_results.tex`, replacing the `fig_rank` caption
+
+```latex
+\caption{Retained rank $r(t)$ for forced Kolmogorov flow at
+$\mathrm{Re} \in \{100, 1000, 5000\}$ (L2). The rank reaches the grid's
+alias-free ceiling within fifteen steps and stays there; the three curves
+coincide.}
+```
+
+### W15.3 — into `08_limitations.tex`, replacing the L1 bullet's `3 \to 2 \to 1` sentence
+
+```latex
+The tolerance-based decay rule is exercised only where a state genuinely loses
+modes. In the Taylor--Green decay the state is a single Fourier mode from the
+outset, so its numerical rank is one and the criterion must hold it there
+rather than spend rank on a spectrum that is not present; the run does. Under
+sustained forcing the rank instead rises, and it does so to the grid's
+alias-free ceiling, which bounds what the decay rule can be tested against
+here.
+```
+
+### W15.4 — into `08_limitations.tex:48` and `09_conclusion.tex:14`, replacing "online rank adaptation"
+
+**Both sites, the same replacement phrase:** *"and a rank criterion that is measured, and whose saturation at the grid's
+alias-free ceiling we report as a finding"*. In the conclusion's enumerated list, read: *"(iii) a rank criterion whose
+saturation at the grid's alias-free ceiling we measure and report"*.
+
+### W15.5 — into `09_conclusion.tex:38`, replacing the research question
+
+```latex
+Second, a theory of rank growth in forced turbulence. The measurement here is
+that the retained rank does \emph{not} grow with Reynolds number: it reaches
+the grid's alias-free ceiling within fifteen steps at every $\mathrm{Re}$ we
+ran, and stays there, while the share of the energy in the zonal mode falls
+from $20\%$ to $18\%$ across the same runs. Why a criterion driven by a
+tolerance should report the resolved band rather than the flow, and what would
+make it report the flow instead, is the question we think this leaves open.
+```
+
+### W15.6 — and `08_limitations.tex:76`, which asks a question the data answers
+
+Replace *"Whether the quasi-stationary rank and the statistical quantities … are stable under longer runs is part of the open
+validation items"* with: *"The rank is already at its ceiling for `$99\%` of the longer run, so what longer runs leave open is
+the statistical quantities, not the rank"*.
+
+### W15.7 — two mechanical notes
+
+**No block above contains a `\cite`, and the only `\ref`-free text is in W15.1, W15.3 and W15.5 — so nothing here can fail
+on a reference.** Every number is traceable: `92\%`/`99\%` and `15` steps are D105.1–D105.2; `20.1/18.5/18.4/17.3%` are
+D106.3; `18.4%` of the energy and `3.8\%` of the enstrophy and the `6.25\%` rank share are D106.2. **Do not paste W15.5
+without W15.1** — the conclusion's question is the results section's measurement, and a referee will look for it.
