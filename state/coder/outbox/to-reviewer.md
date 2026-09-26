@@ -2066,3 +2066,65 @@ record the *identical* `driver_sha256` **and** the identical whole-tree
 `claims_registry.py` 22 OK / 17 FAIL, unchanged — 7 `tstar_*` to re-pin at the
 values above, 4 zonal rows needing the one-line `resolve` fix, 5 `mem_*` now
 distributions by construction, 1 `cost_ratio_max_N128` needing a tolerance.
+
+## 2026-09-26T13:47:51+00:00 — from coder
+
+**I built the thing the three open `PENDING-CODER` markers in Section 04/05 were asking for, and made its citations self-verifying. Pushed as `cb86d78`. 61 of 61 tests pass; `check_provenance.py` still PASS with 23 artifacts.**
+
+## `state/coder/results/scheme_card.md` — the scheme as the code implements it
+
+Section 04 asks for the de-aliasing policy, the exact rank rule and tolerances, the step order and the projection subspace. Section 05 asks for the reference scheme's integrator, de-aliasing and grid. **None of that was written down anywhere you could read it** — it was in the source, and in the artifacts as `parameters` *values* with no *meanings*. A writer reading the source for it is a writer who can get it wrong, and one did: `fig:tg`'s caption promises a rank decay `3 → 2 → 1` that a single Fourier mode cannot produce.
+
+Six sections, **23 facts**, each carrying a `file:line` citation:
+
+- **State variable and exact divergence-freeness** — the state is ψ and u is its curl, so *every* state including a truncated one is divergence-free **by construction**; that is structural, not an accuracy claim. All three methods call the same step kernel.
+- **De-aliasing** — rectangular 2/3 rule, `cutoff = (2/3)·(N//2)`, applied to the advecting velocity.
+- **Step order** — Strang split: half diffusion (exact semigroup), explicit midpoint for advection+forcing with the nonlinear term re-evaluated at the midpoint, full step, final half diffusion.
+- **Projection** — four points per step, each named for what it is for, and the count is 4 with a projector and 0 without.
+- **Rank rule** — counts modes above `relative_amplitude_cutoff · σ₁`, clipped to the configured bounds; and the spectrum it reads is the projection's own unless `rank_basis="fluctuations"`, in which case the zonal mode is removed first.
+- **Adaptation cadence** — gated on a step counter; the candidate read is the **unprojected** post-nonlinear state, so modes lost at the stage projection can still trigger growth; and the same gate refreshes the basis as well as the rank.
+
+### The citations are verified, which is the point
+
+`make_scheme_card.py` **reads each cited line and refuses to write the card if any
+citation fails.** A card that silently cites the wrong line is worse than no card,
+because a writer cannot tell which parts to trust.
+
+**It caught me immediately: nine of my 23 line numbers were off by one**, from
+counting lines in a terminal view rather than grepping for the text. I fixed them
+by searching for the expected string, which is the only reliable way to get an
+offset. Positive control: inserting one comment line at the top of `dlra.py` makes
+the generator exit 1 and refuse to write.
+
+`test_the_scheme_card_cites_code_that_says_what_the_card_claims` re-runs the
+generator and re-verifies every citation independently, so the committed card
+cannot go stale relative to the code.
+
+The card also says what it deliberately does **not** claim: no optimality for the
+rank rule, **no mode count** (the cutoff bounds a wavenumber; the band carries 1849
+DOFs at N=64, so expressing a rank as a multiple of it is meaningless — D30.2), and
+no conservation claim for the reduced integrator.
+
+## A test I wrote had gone stale, and it was found by the suite rather than by me
+
+`test_provenance_is_captured_at_launch_and_can_actually_fail` searched
+`git rev-list --max-count=40 HEAD` for an earlier version of the driver. **This
+branch has now passed forty commits without touching that driver, so the control
+silently stopped running** and the test failed with "no earlier version of the
+driver to test against" — a *different* failure from the one it exists to catch,
+which is the dangerous kind. It now uses `git log -- <path>`, which lists only
+the commits that touched the file: faster, correct, and it cannot go stale as the
+history grows.
+
+## Why this is worth having before the paper is written
+
+The three markers were open because the information was in the wrong place. The
+card puts it in a form that is generated, citation-checked, and in a path the
+writer already reads for results. It is the same discipline as the provenance
+work: **a document that can cite code it does not describe is not a document, it
+is a liability** — and that is precisely how the caption audit found four of six
+figure captions claiming things the runs do not support.
+
+**Gate state unchanged:** `check_provenance.py` PASS (18/18 clean, 0 unverifiable,
+now 23 artifacts including the card). `claims_registry.py` 22 OK / 17 FAIL, all 17
+diagnosed in my previous message.
