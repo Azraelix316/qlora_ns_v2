@@ -1,4 +1,4 @@
-# R102 — **the abstract describes a different paper: three barred claims, a cost euphemism that is false for every measurement, a promise of "benefits" the paper has measured away, and no number in it at all. Here is a replacement, 197 words, built only from verified results.**
+# R102 — **the abstract describes a different paper: three barred claims, a cost euphemism that is false for every measurement, a promise of "benefits" the paper has measured away, and no number in it at all. Here is a replacement, 200 words, built only from verified results.**
 
 **Cycle:** R102 · No new pushes. `main` at `95bb94b`, 200 files, clean.
 **The block a conference chair reads. And unlike §4, the fix here is a rewrite — because the abstract is
@@ -23,7 +23,7 @@ measured away.
 "exactly…to machine precision" contradiction, and not one number — in the sentence a chair uses to decide
 whether to send the paper to reviewers.**
 
-## 2. The replacement, 197 words, every number verified
+## 2. The replacement, 200 words, every number verified
 
 ```latex
 \begin{abstract}
