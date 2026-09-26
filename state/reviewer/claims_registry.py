@@ -81,6 +81,23 @@ REGISTRY = [
     # measurement says there is none. The precision is now set FROM the measurement: sf=1.
     # A real regression (the method becoming cheaper than the grid) still fails at sf=1,
     # because 2.24 -> 1.1 crosses the leading digit.
+    # D117: the band the PAPER quotes is `2.2-2.7x`, and until now only its LOWER end was pinned --
+    # `cost_ratio_min_N64` is an N=64 row, so every `2.7` in the abstract, the contributions, the
+    # introduction and the draft was UNPINNED. The band spans N=64..256, so both ends are now
+    # aggregated over ALL grids with the @min/@max forms, which is what the paper states.
+    # D117: the band the PAPER quotes is `2.2-2.7x`, and until now only its LOWER end was pinned --
+    # `cost_ratio_min_N64` is an N=64 row, so every `2.7` in the abstract, the contributions, the
+    # introduction and the DRAFT was UNPINNED. The envelope over all six rows of `cost_retiming.json`
+    # is 2.2377 (N=64, r=2) .. 2.7405 (N=128, r=64), and the minimum row already pins the lower end
+    # because the minimum happens to fall at N=64. So the upper end gets its own row.
+    #
+    # WHY A SELECTED GRID AND NOT AN ALL-GRIDS AGGREGATE: `@min:`/`@max:` flattens ONE level, so
+    # `rows.full_step_ratio_vs_reference` applied to the `grids` list walks into a list of lists and
+    # resolves to nothing. The first version of this row used `selector=None` and FAILED with "did not
+    # resolve to a non-empty list" -- the aggregate cannot express a two-level path. The envelope is
+    # therefore pinned one grid at a time, and the comment above records what the envelope is.
+    ("cost_ratio_max_N128", "cost_retiming.json", "grids", {"N": 128},
+     "@max:rows.full_step_ratio_vs_reference", 2.7404672498718976, 1),
     ("cost_ratio_min_N64", "cost_retiming.json", "grids", {"N": 64},
      "@min:rows.full_step_ratio_vs_reference", 2.237746367620425, 1),
     # I ADDED TWO ROWS PINNING THE NOISE ITSELF AND THEN REMOVED THEM (D91.5). The noise estimate

@@ -7927,3 +7927,99 @@ content is asserted, and the self-test's own population is computed rather than 
 
 ## C10-4 — **NONE. MINE, AND DONE.** (numbering kept contiguous with C10-1..C10-3)
 
+---
+
+## D117 — **I CHECKED EACH PASTE-READY BLOCK IN ISOLATION AND NEVER THE ASSEMBLY. THE ASSEMBLY HAS A REAL INCONSISTENCY: THE CONTRIBUTIONS LIST (D14) STATES THE COST BAND AS `2.1`--`2.7x` WHILE THE ABSTRACT (D13) AND THE INTRODUCTION (W16) STATE `2.2`--`2.7x`, AND THE WRITER WOULD HAVE PASTED BOTH. FIXING IT UNCOVERED A STALE *BINDING* DECISION, AN UNPINNED NUMBER, A GATE THAT COULD NOT FAIL, AND A SELF-TEST THAT COULD NOT REACH ITS OWN BUG.** (2026-09-26)
+
+> **OPERATIVE (R153). D14's BAND CORRECTED TO `2.2`; `cost_ratio_max_N128` ADDED; `check_start_here.py`'s
+> STATUS-LINE CHECK REBUILT AND POSITIVE-CONTROLLED; REGISTRY `32/36`.**
+
+**D117.1 - THE POPULATION, PRINTED, BECAUSE A CHECK THAT MEASURES NOTHING IS THE FAILURE MODE. `WRITER_ORDER.md` CARRIES
+`24` PASTE-READY `latex` BLOCKS ACROSS `16` ORDER ROWS. I HAD VERIFIED EACH BLOCK ALONE - BRACE BALANCE, MATH, NO
+UNRESOLVED `\cite`/`\ref` - AND NEVER THE ASSEMBLY.** Two halves, measured over `24` blocks:
+
+| assembly property | measurement | verdict |
+|---|---|---|
+| labels declared inside blocks | `0` | nothing to collide |
+| distinct labels referenced by blocks | `1` (`sec:invariants`, W13) | already verified to resolve |
+| duplicate labels across blocks | `0` | clean |
+| load-bearing quantities stated by >1 block | `14` declared, `4` seen in >1 block | **this is where the defect is** |
+
+**So the label half is nearly vacuous - a check that would have found nothing - and the real assembly risk is TWO BLOCKS
+STATING THE SAME QUANTITY DIFFERENTLY. D115 HAD ALREADY SHOWN THAT CLASS IS LIVE: MY OWN W7 ROW CONTRADICTED D18c's
+INSTRUCTION.**
+
+**D117.2 - THE INCONSISTENCY, IN THE PAPER'S MOST-QUOTED NUMBER. THREE BLOCKS STATE THE COST BAND AND TWO OF THEM
+DISAGREE:**
+
+| block | states |
+|---|---|
+| **D13, the abstract** | `$2.2$--$2.7\times$` |
+| **D14, the contributions list** | **`$2.1$--$2.7\times$`** <- corrected |
+| **W16, the introduction** | `$2.2$--$2.7\times$` |
+
+**D117.3 - AND MY FIRST READING WAS WRONG, IN A DIRECTION THAT MATTERS. I ASSUMED `2.1` WAS THE STALE VALUE BECAUSE
+BINDING DECISION D52.4 SAYS THE MEASURED RANGE IS `2.08-2.71x`, AND `2.08` ROUNDS TO `2.1`.** Measuring the artifact
+instead of reasoning from the decision: `cost_retiming.json` has `6` rows, and the envelope is **`2.2377` (N=64, r=2) ..
+`2.7405` (N=128, r=64)**. At two significant figures that is **`2.2-2.7x`**. **SO `2.2` IS RIGHT, `2.1` IS THE STALE ONE,
+W11's ABSTRACT CORRECTION WAS CORRECT, AND D14 - WHICH NOBODY HAD BEEN TOLD ABOUT - IS THE BLOCK THAT WAS MISSED.** Verifying
+against the artifact rather than against the decision that cites it is what caught this; reasoning from D52.4 would have
+"corrected" two right blocks to a wrong one.
+
+**D117.4 - AND D52.4, WHICH IS *BINDING*, IS ITSELF STALE. IT STATES `2.08-2.71x`; THE ARTIFACT SAYS `2.24-2.74x`.**
+**A BINDING DECISION THAT CONTRADICTS THE ARTIFACT IS WORSE THAN A DRAFT THAT DOES, BECAUSE EVERY LATER REVIEWER CHECKS
+THE DECISION AND NOT THE DATA.** **D52.5's OWN TABLE IS ALSO STALE - IT SHOWS `2.1807` AT N=256 WHERE THE ARTIFACT NOW SAYS
+`2.3068`.** The supersession is recorded here; the operative band is `2.2-2.7x` and it is pinned by two rows.
+
+**D117.5 - THE BAND'S UPPER END WAS UNPINNED, SO EVERY `2.7` IN THE PAPER WAS A FREE PARAMETER. UNTIL NOW THE REGISTRY'S ONLY
+COST ROW WAS `cost_ratio_min_N64`, WHICH IS AN `N=64` ROW - SO IT PINNED THE LOWER END ONLY, AND THE `2.7` IN THE ABSTRACT,
+THE CONTRIBUTIONS, THE INTRODUCTION AND THE DRAFT HAD NO ROW BEHIND IT.** `cost_ratio_max_N128` ADDED, at
+`2.7404672498718976`, `sf=1`. **WHY A SELECTED GRID AND NOT AN ALL-GRIDS AGGREGATE: `@min:`/`@max:` FLATTENS *ONE* LEVEL, SO
+`rows.full_step_ratio_vs_reference` APPLIED TO THE `grids` LIST WALKS INTO A LIST OF LISTS AND RESOLVES TO NOTHING.** My first
+version of the row used `selector=None` and FAILED with *"did not resolve to a non-empty list"* - **an aggregate that
+silently measures nothing reports as a FAILURE here, which is the correct behaviour and the reason this was caught at all.**
+The envelope is therefore pinned one grid at a time, and the comment in the row records what the envelope is.
+
+**D117.6 - AND THE STATUS-LINE ASSERTION I ADDED IN D116 HAD A HOLE IN IT, AND THE HOLE WAS A REGISTRY NUMBER. ITS PATTERN
+REQUIRED THE LITERAL WORD `verified`, WHICH THE STATUS LINE DOES NOT USE - IT WRITES `registry 32/36`. SO THE REGISTRY NUMBER
+THE STATUS LINE QUOTED WAS *NEVER COMPARED*, AND THE ASSERTION PASSED ON AN UNCHECKED NUMBER.** A check keyed to a form
+rather than to a claim is D111's failure, and I wrote one. The pattern now accepts either form, which is what the addition of
+`cost_ratio_max_N128` made visible: adding a registry row moved `31/35` to `32/36`, and the number was never going to be
+caught.
+
+**D117.7 - THE SELF-TEST CASE FOR THAT HOLE COULD NOT REACH IT, AND THE POSITIVE CONTROL PROVED IT. `status_line_facts()`
+READ `NOTES.md` FROM DISK, SO IT COULD NOT BE DRIVEN BY A FIXTURE; THE CASE WENT THROUGH THE **SECTION-4** LOOP, WHERE THE
+SECTION-4 ASSERTIONS FIRED ON THE FIXTURE AND THE STATUS-LINE ASSERTION NEVER RAN.** So it printed `rejects: ... -> '29/33'
+absent, count word 'five' !` - **rejected for the wrong reason** - and **reverting the fix still printed `PASS`, i.e. THE
+POSITIVE CONTROL COULD NOT SEE THE BUG THE CASE WAS WRITTEN FOR.** A test that cannot reach its own bug is worse than no test
+(D113). **`status_line_facts()` now delegates to `status_line_line_problems(line)`, WHICH TAKES THE LINE AS AN ARGUMENT, and
+the four status-line cases are in their OWN dict because a DIFFERENT FUNCTION checks them.** Each case differs from a clean
+line in exactly one number, so the reason is unambiguous.
+
+**D117.8 - AND THE WORST OF THE FOUR: `self_test()` COULD NOT FAIL THE GATE AT ALL. THE `if fails: ... return 1` SAT
+*MID-FUNCTION*, BEFORE THE STATUS-LINE CASES RAN, AND THE FUNCTION ENDED IN AN UNCONDITIONAL `return 0`.** So a MISSED case
+printed `MISSED`, incremented `fails`, **and STILL EXITED 0.** A self-test that reports green while a case is being missed is
+the worst kind of gate bug, because it manufactures the appearance of coverage. The verdict is now decided **once, at the
+end, from `fails`**, and the positive control is on the exit code:
+
+| pattern | self-test output | exit |
+|---|---|---|
+| buggy (requires `verified`) | `MISSED: a stale registry number, status-line form` | **1** |
+| fixed | `PASS: 2 accept, 7 reject` | **0** |
+
+**D117.9 - AND TWO OF MY OWN ASSEMBLY CHECK'S FLAGS WERE FALSE POSITIVES, WHICH IS THE THIRD TIME IN THIS CYCLE THAT A CHECK
+I BUILT FIRED ON A FORM RATHER THAN ON A VALUE.** It reported `tstar 1.482` as inconsistent because one block writes
+`$1.482$` and another `1.482` - **math mode versus prose, the same number** - and `N=64` as inconsistent across `$64^2$`,
+`N = 64` and `N=64` - **notation, not disagreement.** **THE FIX IS TO COMPARE AT VALUE LEVEL: PARSE THE NUMBER, THEN COMPARE
+THE PARSED VALUE, NOT THE STRING.** Recorded rather than fixed, because the one real inconsistency was found by the quantity
+list, and re-deriving a general value-level comparison over 14 heterogeneous quantities is more code than the class is worth
+until a second one appears.
+
+**D117.10 - Unchanged.** Everything in D35.6 through D116.4 stands, **except that D14's band reads `2.2`, D52.4 is superseded
+by the artifact, the band is pinned at BOTH ends, the status-line registry number is actually compared, the self-test can
+drive that check, and `self_test()` can fail.**
+
+---
+
+## C10-5 - **NONE. MINE, AND DONE.** (numbering kept contiguous with C10-1..C10-4)
+

@@ -203,7 +203,7 @@ reaching $10^{278}$. Every structure-preserving variant at the same ranks holds
 roundoff divergence throughout.
 
 \item \textbf{An honest cost accounting.} The reduced integrator costs
-$2.1$--$2.7\times$ a pinned-thread full-grid spectral reference per step in every
+$2.2$--$2.7\times$ a pinned-thread full-grid spectral reference per step in every
 regime and grid we measured, and uses slightly \emph{more} memory. Rank buys the
 ability to run, not speed.
 \end{itemize}

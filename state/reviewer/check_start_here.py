@@ -135,6 +135,29 @@ def listed_checks(sec: str) -> int:
     return n
 
 
+def status_line_line_problems(line):
+    """The problems with ONE `> Status:` line, as a list of strings. Empty list means clean.
+
+    Takes the line as an argument rather than reading NOTES.md, so the self-test can drive it with a
+    fixture. The first version read the file itself, which made it untestable: the self-test case
+    added alongside it was ACCEPTED and then rejected by a DIFFERENT (section-4) assertion, so the
+    positive control passed with the bug both present and absent. A test that cannot reach its own
+    bug is worse than no test (D113).
+    """
+    bad = []
+    m = re.search(r"\b([0-9a-f]{7,40})\b", line)
+    if m and re.search(r"\b(?:main|commit|[0-9a-f]{7,40})\b", line):
+        bad.append(f"names the commit {m.group(1)!r}, which no status line can keep current -- "
+                   f"say what is true of the PROJECT, not of one tree state")
+    claims = [("registry", r"(\d+)/(\d+)(?:\s+verified)?"), ("build defects", r"(\d+)\s+build defects"),
+              ("tests", r"(\d+)\s+tests")]
+    for what, rx in claims:
+        q = re.search(rx, line)
+        if q and not what_is_current(what, q):
+            bad.append(f"quotes {q.group(0)!r} for {what}, which the gates do not report")
+    return bad
+
+
 def status_line_facts():
     """(failures, evidence) for the board's `> Status:` line CONTENT.
 
@@ -159,17 +182,10 @@ def status_line_facts():
     if len(hits) != 1:
         return 1, f"found {len(hits)} '> Status:' lines, expected exactly 1"
     line = hits[0]
-    bad = []
-    m = re.search(r"\b([0-9a-f]{7,40})\b", line)
-    if m and re.search(r"\b(?:main|commit|[0-9a-f]{7,40})\b", line):
-        bad.append(f"names the commit {m.group(1)!r}, which no status line can keep current -- "
-                   f"say what is true of the PROJECT, not of one tree state")
-    claims = [("registry", rf"(\d+)/(\d+)\s+verified"), ("build defects", r"(\d+)\s+build defects"),
-              ("tests", r"(\d+)\s+tests")]
-    for what, rx in claims:
-        q = re.search(rx, line)
-        if q and not what_is_current(what, q):
-            bad.append(f"quotes {q.group(0)!r} for {what}, which the gates do not report")
+    # D117: the claim patterns originally required the literal word "verified", which the status
+    # line does not use -- so the registry number it quotes was NEVER COMPARED, and the assertion
+    # passed on an unchecked number. Each pattern now accepts either form.
+    bad = status_line_line_problems(line)
     if bad:
         return 1, "the '> Status:' line is STALE or uncheckable: " + "; ".join(bad)
     return 0, "1 line, no commit hash, and every gate number it quotes is current"
@@ -277,13 +293,35 @@ def self_test() -> int:
         # forbids one rather than asserting it is right. This case must live in the literal above,
         # not be added afterwards: a self-test that miscounts its own population is the same failure
         # as a gate that miscounts what it measured (D111.6).
-        "a commit hash, which no status line can keep current": (
-            "> Status: main 2d3b0a4, 239 files, registry 31/35, 10 build defects, 47 tests.\n\n"
-            "## 4. Run these five checks\n\n```\npython3 a.py\n```\n\n## 5. next\n"
-        ),
     }
-    print(f"POPULATION: {1 + len(bad_cases) + len(WORD)} hand-checked cases -- 1 must accept, "
-          f"{len(bad_cases)} must reject, and {len(WORD)} must round-trip through the number-word table")
+    # D117: status-line cases are SEPARATE, because a DIFFERENT function checks them. Driving
+    # them through the section-4 loop is what made the first version of these cases report
+    # ACCEPT-then-reject-for-the-wrong-reason: the section-4 assertions fired on the fixture,
+    # not the status-line assertion, so the positive control could not see the bug the case
+    # was written for (D113).
+    bad_status = {
+        # D117: these are SEPARATE from bad_cases because a DIFFERENT function checks them.
+        # `status_line_facts()` used to read NOTES.md itself, which made it untestable: the
+        # first version of these cases was run through the SECTION-4 loop, where the
+        # section-4 assertions fired on the fixture and the status-line assertion never ran.
+        # So the case printed "rejects: ... -> '29/33' absent, count word 'five' !" -- rejected
+        # for the WRONG reason -- and the POSITIVE CONTROL PASSED WITH THE BUG BOTH PRESENT
+        # AND ABSENT. It is now driven through `status_line_line_problems(line)`, which takes
+        # the line as an argument, and each case differs from a clean line in exactly ONE number.
+        "a stale registry number, status-line form":
+            "> Status: 8 gates green (registry 29/33, 10 build defects, 47 tests).",
+        "a commit hash, which no status line can keep current":
+            "> Status: main 2d3b0a4, 239 files, registry 32/36, 10 build defects, 47 tests.",
+        "a stale build-defect count":
+            "> Status: 8 gates green (registry 32/36, 3 build defects, 47 tests).",
+        "a stale test count":
+            "> Status: 8 gates green (registry 32/36, 10 build defects, 40 tests).",
+    }
+    # Every count here is COMPUTED from the dicts, never written by hand: a self-test
+    # that miscounts its own population is the same failure as a gate miscounting what it
+    # measured (D111.6). The `+2` are the section-4 accept and the status-line accept.
+    print(f"POPULATION: {2 + len(bad_cases) + len(bad_status) + len(WORD)} hand-checked cases -- 2 must accept, "
+          f"{len(bad_cases) + len(bad_status)} must reject, and {len(WORD)} must round-trip through the number-word table")
     fails = 0
 
     # The number-word table must be complete over its declared range. A gap in
@@ -309,14 +347,10 @@ def self_test() -> int:
     print(f"  the current-START_HERE fixture parses: 2 commands, count word "
           f"{m and m.group(1)!r}, all facts present -> must be ACCEPTED")
 
-    # A commit hash in the status line can never be current: merging is what changes main, so a
-    # hash written before the merge is wrong the instant it lands. That is D116, and the first
-    # version of this check asserted the hash was current -- i.e. it asserted something impossible.
     for name, text in bad_cases.items():
         s = section4(text)
         reasons = []
-        if "commit hash" in name and status_line_facts.__doc__ and re.search(r"\b[0-9a-f]{7,40}\b", text):
-            reasons.append("the status line names a commit, which cannot stay current")
+
         if facts[0][2] not in s:
             reasons.append(f"{facts[0][2]!r} absent")
         mm = re.search(r"^## 4\.\s*Run these (\w+) checks?\b", s, re.M)
@@ -335,10 +369,29 @@ def self_test() -> int:
             fails += 1
 
     print()
+    # D117: this `if fails: return 1` used to sit HERE -- before the status-line cases
+    # ran -- and the function ended in an unconditional `return 0`. So a MISSED status-line
+    # case printed MISSED, incremented `fails`, and STILL EXITED 0: a self-test that could not
+    # fail the gate, which is the worst kind of gate bug because it reports green. The verdict
+    # is now decided ONCE, at the end, from `fails`.
+    # status-line population, driven through the drivable function
+    good_status = "> Status: 8 gates green (registry 32/36, 10 build defects, 47 tests)."
+    gp = status_line_line_problems(good_status)
+    print(f"  {'ok  ' if not gp else 'MISSED'}  a status line whose every number is current"
+          + ("" if not gp else f" -> {gp}"))
+    if gp:
+        fails += 1
+    for name, line in bad_status.items():
+        ps = status_line_line_problems(line)
+        if ps:
+            print(f"  rejects: {name:<44} -> {ps[0]}")
+        else:
+            print(f"  MISSED: {name} was ACCEPTED but must be rejected")
+            fails += 1
     if fails:
         print(f"FAIL: {fails} case(s) wrong")
         return 1
-    print(f"PASS: 1 accept, {len(bad_cases)} reject, and the rejection reasons name the defect")
+    print(f"PASS: 2 accept, {len(bad_cases) + len(bad_status)} reject, and the rejection reasons name the defect")
     return 0
 
 
