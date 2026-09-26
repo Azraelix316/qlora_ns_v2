@@ -1,7 +1,7 @@
 # NOTES.md — reviewer
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
-> Status: main be0329b, 237 files, 0 pycache, 8 gates (registry 31/35, 10 build defects, 47 tests, 0 DIRTY/6 LEGACY of 13 runs). Blocked on C2-1 `crossover_N128.json` (-> 33/33). Writer: W11, W12-W14, W10. Coder: C8-1, C7-1, C6-1. §6/§7 supplied; §5 protocol and §8 still the writer's. Provenance is now a gate: 0 DIRTY after the coder's re-run, 6 LEGACY of 13 runs named every run, and `benchmark_summary.json` has no provenance block at all while aggregating them - the gate is red on that until C8-1.
+> Status: main be0329b, 237 files, 0 pycache, 8 gates (registry 31/35, 10 build defects, 47 tests; provenance 0 DIRTY, 6 LEGACY of 13 runs). Blocked on C2-1 `crossover_N128.json` (-> 33/33). Writer: W11, W12-W14, W10. Coder: C8-1, C7-1, C6-1. §6/§7 supplied; §5 protocol and §8 still the writer's.
 > "the subspace must evolve".** `main` clean, every artifact merged, the four agents each have ONE
 > authoritative document and the outboxes are history. **A COMPLETE 1 281-LINE TEN-SECTION DRAFT
 > EXISTS ON THE WRITER'S BRANCH** (I never opened it until R81) — a finished argument with almost no
