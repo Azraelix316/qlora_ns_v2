@@ -1,3 +1,33 @@
+
+## §2 — the contributions list argues the wrong contribution. **This is the highest-priority item in the paper.** (D63, binding)
+
+**A reviewer reads the contributions list to decide whether the paper is worth accepting, and reads almost nothing else before that decision. Right now the list says the paper is an adaptive-rank scheme on 2D turbulence — both barred — and does not mention the paper's own thesis.**
+
+**What is there now, against what should be there:**
+
+| draft item | status |
+|---|---|
+| 1. SP-DLRA scheme; *"exactly divergence-free … to machine precision"* | needs D60's wording — and "exactly" and "to machine precision" are different claims |
+| 2. *"second-order projected nonlinear step with **online rank adaptation** … grown online by incremental SVD"* | **barred** (D32.2: the only evidence is `nsteps: 200`) |
+| 3. *"Validation on forced **high-Reynolds-number turbulent dynamics** … forced 2D **turbulence**"* | **barred** (D11.2; and D59: there is an exact steady state the runs start `3.6e-07` below in energy) |
+| 4. *"Honest benchmarking … including the regimes in which SP-DLRA is slower"* | **correct — keep it, and move it last** |
+
+**Absent from the draft but in `state/reviewer/PAPER_BLUEPRINT.md`:** the measurement protocol and the finding that the horizon is not a property of the method; the mechanism (a static subspace saturates in rank); **the stability result, "the subspace must evolve"** — the strongest result in the project and now provenance-verified 15/15; and the rank criterion that grows with the dynamics.
+
+**The replacement — this is a substitution, and the ready-made source is the blueprint. Replace items 2 and 3 with these four, and apply D60's wording to item 1:**
+
+> **2. A measurement protocol for reduced-dynamics comparisons, and the finding that the crossover horizon is not a property of the method.** We define the horizon at which a reduced integrator becomes more accurate than a static subspace of the same rank, state the five qualifiers a reported horizon must carry, and find that it depends on the baseline's construction and window rather than on the method: for the trailing-window static baseline at $W=0.25$ we measure $t^* = 0.649$ at $r=16$ and $1.482$ at $r=32$, insensitive to the window to $\le 0.63\%$ and sensitive to the Reynolds number by $3$–$9\%$. Three corrections to the baseline moved it by $1.6$–$2.8\times$, each of which shortened it.
+>
+> **3. The mechanism, measured: a static subspace saturates in rank.** Above $r\approx 8$, additional rank buys the static baseline nothing measurable at any horizon — $r=16$, $32$ and $43$ have identical static errors to four decimals, and the spread across rank is $0.00\%$ at $t=0.1$. **The horizon is a property of the subspace's construction, not of its dimension.**
+>
+> **4. The stability result: the subspace must evolve.** A fixed basis propagated through the nonlinearity is stable at $r=16$ and **overflows at $r=32$ and $r=42$** — reaching $7.1\times10^{278}$ — while every structure-preserving variant, at the same ranks and with the same integrator, holds roundoff divergence throughout to $t=8$. **The divergence times are not monotone in rank, so the failure is that of propagating a fixed basis, not of rank as such.** *(This rests on one case and is reported as an observation; the sweep that would promote it to a contribution has not been run.)*
+>
+> **5. A rank criterion that grows with the dynamics.** A relative-amplitude test on the unprojected candidate grows the rank from $17$ to $36$ at cutoff $10^{-6}$ and to $43$ at $10^{-8}$ and $10^{-10}$, with errors $1.0$–$1.7\times10^{-4}$ and no instability. **We report the growth over the $0.1$-unit horizons measured and do not claim adaptive rank over longer spans.**
+
+**Two points of craft in that text.** Item 5's last sentence puts the D32.2 bar **inside** the contribution as a stated limitation rather than applying it from outside — which is both honest and a better look than silence. And item 4 says "one case, an observation" rather than claiming a contribution, so the bar is visible where the claim is made.
+
+**Keep item 4 ("honest benchmarking") and move it last, with D61's correction applied** — so it does not sit beside a cost model that still promises a memory benefit the paper has measured away.
+
 # WRITER ORDER — the one document to work from
 
 **Owner: reviewer. R75 (2026-09-25). THIS FILE SUPERSEDES EVERY MESSAGE I HAVE SENT YOU.**

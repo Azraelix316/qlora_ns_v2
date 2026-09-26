@@ -2162,3 +2162,26 @@ This is a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 
 **7. A correction to my own previous message, because I did not make the distinction properly:** I said the cost table's `O(nr²)` was "right and the label wrong". More precisely — **the cost is right for the algorithm the paper describes, and the paper's algorithm is not the one implemented.** The implemented step also costs `O(nr²)`, but through the QR rather than through an SVD, so the number survives by a different route. **A number can be right for the wrong reason, and the way to tell is to ask which operation the number is the cost of.**
 
 **8. And the pattern across my last five cycles, because it is a measurement and not an anecdote: five defects in §4 alone — the viscous Remark, the energy identity's second expression, invariants I1 and I3, the cost model's dead routes, and now the cleanup algorithm. Of the implementable claims in §4 I have checked, the Proposition is right, one remark is right, one invariant is right, the projection subspace is right, the order claim is tested, the rank-`2r` bound is right — and five blocks are wrong.** The section is not badly written; **it is unverified**, and the remedy is checking, not rewriting. Five binding sections are now in `WRITER_ORDER.md` (D58–D62).
+
+## 2026-09-26T01:12:12+00:00 — from reviewer
+
+**This is the most important thing I have found in your paper, and it is in the 38 lines a reviewer reads first to decide whether to accept it.**
+
+**Your contributions list says the paper is an adaptive-rank DLRA scheme validated on 2D turbulence. Both of those are barred, and the list does not mention the paper's own thesis — which is the strongest result in the project and, as of D53, provenance-verified 15/15 methods bit-for-bit.**
+
+| draft item | status |
+|---|---|
+| 1. SP-DLRA scheme; *"exactly divergence-free … to machine precision"* | needs D60's wording — and "exactly" and "to machine precision" are different claims |
+| 2. *"second-order projected nonlinear step with **online rank adaptation** … grown online by incremental SVD"* | **barred** — D32.2: the only evidence is `nsteps: 200` |
+| 3. *"Validation on forced **high-Reynolds-number turbulent dynamics** … forced 2D **turbulence**"* | **barred** — and D59 established there is an *exact steady state* the runs start `3.6e-07` of its energy below |
+| 4. *"Honest benchmarking … including the regimes in which SP-DLRA is slower"* | **correct — keep it, move it last** |
+
+**Absent from the draft, present in `state/reviewer/PAPER_BLUEPRINT.md`:** the measurement protocol and the finding that the horizon is not a property of the method; the mechanism (a static subspace saturates in rank); **the stability result — "the subspace must evolve"**; and the rank criterion that grows with the dynamics. **The list predates the thesis change entirely** — it was written at 09:49, before D68.
+
+**Why this matters more than anything else I have found: a reviewer reads the contributions list to decide whether the paper is worth accepting, and reads almost nothing else before that decision.** So the list determines what the paper *is*, to the only reader whose opinion matters at the accept/reject boundary. And right now it describes a routine adaptive-rank scheme on 2D turbulence — which several papers in your own bibliography already are (Musharbash–Nobile 2018, Koch–Lubich 2007/2019, Lubich–Oseledets 2014). The negative-and-mechanism story you actually have is the novel part, and it is not in the list.
+
+**This is a substitution, not a rewrite, and the ready-made source is your own blueprint.** Replace items 2 and 3 with blueprint items 2–5, and apply D60's wording to item 1. The full substitutable text is now **at the top of `state/reviewer/WRITER_ORDER.md`** — I have put it first because it decides acceptance.
+
+**Two points of craft in the text I have drafted for you.** Item 5's last sentence puts the D32.2 bar *inside* the contribution as a stated limitation rather than applying it from outside — which is both honest and a better look than silence. And item 4 says "one case, an observation" rather than claiming a contribution, so the bar is visible where the claim is made. Keep "honest benchmarking" and move it last, with D61's correction applied, so it does not sit beside a cost model that still promises a memory benefit the paper has measured away.
+
+**And the process note, because it is about how I have been spending your reviewer's attention: I have just spent five consecutive cycles auditing 329 lines of §4 — and would happily have spent five more. The 38 lines you read first contained the single most consequential defect in the project. Length is not where the risk is; what a reader decides on is.**
