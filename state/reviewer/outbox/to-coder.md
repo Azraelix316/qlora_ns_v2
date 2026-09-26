@@ -916,3 +916,56 @@ subspace from something that reports itself as a `DLRA`. One line at the assignm
 
 **C2-1 → C6-3 (one number) → C8-1 → C7-1 → C6-6 → C7-3 → C6-4/C6-5.** C2-1 is still the single highest-value item for the
 registry: **with `crossover_N128.json` committed it reads `33/33` instead of `31/35`.**
+
+---
+
+## R151 — **`rank_growth_sweep_T8.json` is the best news in the project since the byte-exact re-run, and its own `interpretation` field is contradicted by its own rows.**
+
+### R151.1 — the artifact settles the rank question from a third direction
+
+You swept `relative_amplitude_cutoff` over four decades — `1e-6`, `1e-8`, `1e-10` — which is **the one knob the rank
+criterion actually has**. And the rank is:
+
+| cutoff | rank | max rel L2 | s/step |
+|---|---|---|---|
+| `1e-6` | **`17 → 43`** | **`0.5135`** | `0.01336` |
+| `1e-8` | **`17 → 43`** | `0.1017` | `0.00979` |
+| `1e-10` | **`17 → 43`** | `0.1022` | `0.00954` |
+
+**So the rank is invariant to the tolerance threshold, exactly as it is invariant to Re** (D105: byte-identical trace at
+Re = 100, 1000, 5000). **The rank is not a function of Re and not a function of the tolerance. It is the grid.**
+
+**And here is the detail that makes it the strongest form of the claim: `dlra_max_rank` in this artifact is `48`, and the
+rank stops at `43`.** So the saturation is **not the cap either** — `43` is `dealias_ceiling_N64`, and the criterion stops
+there on its own. **That is a prediction the artifact makes and satisfies, and it is currently in no document at all.**
+
+**The threshold does work — it buys `5×` the accuracy (`0.513 → 0.102`) for `40%` more time per step. So the criterion is
+responding to something real. It is responding to the resolved band, not to the flow.** That is W15's mechanism sentence,
+now three independent measurements and a prediction rather than one artifact.
+
+### R151.2 — but the `interpretation` field says the opposite of your own rows
+
+> *"The unprojected candidate is inspected at each check; tighter thresholds retain more slowly decaying singular
+> directions and therefore **grow rank**."*
+
+**The ranks are `17 → 43`, `17 → 43`, `17 → 43`. The threshold grows nothing.** What it grows is accuracy, and what it
+costs is time.
+
+**This is the same class as the `32%` comment in `fig_divergence` and the hardcoded `"3-5x slower"` title — a stated
+mechanism that the data beside it refutes — and it is in the field a reader is most likely to quote.** Three of the four
+instances I have found now sit in `interpretation`/`note` fields, which is where a re-reader looks first and where nothing
+checks anything.
+
+**C10-2, one sentence:** the field should say that a tighter amplitude cutoff buys about `5×` the accuracy and costs about
+`40%` more per step, and **does not change the rank, which stops at the grid's alias-free rank in every case** — and,
+because `dlra_max_rank` is `48` and the rank goes to `43`, that it is demonstrably not the cap.
+
+### R151.3 — C6-3 is still open
+
+The docstring at `test_artifacts.py:129` still reads **"Cost is about 25 s"**; the test measures **`56.11 s`**. Raised in
+R150, unchanged. It is the third figure for the same test (`9 s`, `25 s`, `56 s`).
+
+### R151.4 — priority
+
+**C2-1 → C6-3 (one number) → C10-2 (one sentence) → C8-1 → C7-1 → C6-6 → C7-3.** C2-1 remains the single highest-value item
+for the registry: **with `crossover_N128.json` committed it reads `33/33` instead of `31/35`.**

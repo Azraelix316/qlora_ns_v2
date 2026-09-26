@@ -7761,3 +7761,63 @@ price; `25 s` is a number that would let someone drop it without knowing what it
 
 **D113.6 — Unchanged.** Everything in D35.6 through D112.7 stands, **except that C6-1 and C6-2 are closed, and the
 project's central claim now has a live positive control in the suite rather than one scratch run in my transcript.**
+
+---
+
+## D114 — **THE CODER'S NEW `rank_growth_sweep_T8.json` INDEPENDENTLY CONFIRMS D105's SATURATION FROM A THIRD DIRECTION — AND ITS OWN `interpretation` FIELD IS CONTRADICTED BY ITS OWN ROWS.** (2026-09-26)
+
+> **OPERATIVE (R151). C10-2 AND C6-6b BELOW. C6-3 IS **STILL** UNFIXED: THE DOCSTRING STILL SAYS "about 25 s" AGAINST A
+> MEASURED `56.11 s`.**
+
+**D114.1 — WHAT THE ARTIFACT IS, AND IT IS CLEAN. `rank_growth_sweep_T8.json`, `case: rank_growth_sweep`, `T = 8`,
+`reproducible: true`, `driver_matches_HEAD: true`, `driver_dirty: false`. IT SWEEPS THE ONE PARAMETER THE RANK CRITERION
+ACTUALLY HAS A KNOB FOR — `relative_amplitude_cutoff` — ACROSS FOUR DECADES, AND RECORDS THREE ROWS:**
+
+| `relative_amplitude_cutoff` | `rank_min → rank_max` | `max_relative_l2_vs_full` | `seconds_per_step` |
+|---|---|---|---|
+| `1e-6` | **`17 → 43`** | **`0.5135`** | `0.01336` |
+| `1e-8` | **`17 → 43`** | `0.1017` | `0.00979` |
+| `1e-10` | **`17 → 43`** | `0.1022` | `0.00954` |
+
+**D114.2 — SO THE RANK IS INVARIANT TO THE TOLERANCE THRESHOLD, AND THAT IS A THIRD INDEPENDENT LINE OF EVIDENCE FOR
+D105. D105 MEASURED THE SATURATION (`17 → 42 → 43` IN FIFTEEN STEPS, THEN AT THE CAP FOR `92.5%`–`99.2%` OF A RUN) AND
+THAT THE TRACE IS **BYTE-IDENTICAL ACROSS Re = 100, 1000 AND 5000**. THIS ADD THAT THE SAME `17 → 43` APPEARS AT EVERY
+ONE OF THREE THRESHOLDS SPANNING `1e-6` TO `1e-10`, IN A DIFFERENT DRIVER, AT A DIFFERENT HORIZON.**
+
+**THE RANK IS THEREFORE NOT A FUNCTION OF Re AND NOT A FUNCTION OF THE TOLERANCE. IT IS THE GRID: `43` IS BOTH
+`dlra_max_rank` AND `dealias_ceiling_N64` (D105.4), AND HERE `dlra_max_rank` IS `48` AND THE RANK STILL STOPS AT `43`.** THAT
+LAST DETAIL IS NEW AND IT IS THE STRONGEST FORM OF THE CLAIM: **THE ARTIFACT'S OWN RANK CEILING IS `48` AND THE RANK GOES
+TO `43`, NOT TO `48` — SO THE SATURATION IS NOT THE CAP EITHER. IT IS THE GRID'S ALIAS-FREE RANK, AND THE CRITERION
+STOPS THERE ON ITS OWN.**
+
+**D114.3 — WHICH IS WHAT MAKES W15's MECHANISM SENTENCE CORRECT RATHER THAN MERE RHETORIC, AND IT IS NOW THREE
+INDEPENDENT MEASUREMENTS RATHER THAN ONE. THE THRESHOLD *DOES* WORK — IT BUYS `5×` THE ACCURACY (`0.513 → 0.102`) AND
+COSTS `40%` MORE PER STEP — SO THE CRITERION IS RESPONDING TO SOMETHING REAL. IT IS RESPONDING TO THE *RESOLVED BAND*, NOT
+TO THE FLOW.** A PAPER CLAIM THAT SURVIVES THREE INDEPENDENT PROBES AND A PREDICTION IT MAKES (`43`, NOT `48`) IS A
+DIFFERENT KIND OF OBJECT FROM ONE THAT FITS A SINGLE ARTIFACT.
+
+**D114.4 — AND THE ARTIFACT'S OWN `interpretation` FIELD IS CONTRADICTED BY ITS OWN ROWS. IT SAYS: *"The unprojected
+candidate is inspected at each check; tighter thresholds retain more slowly decaying singular directions and therefore
+**grow rank**."* THE RANKS ARE `17 → 43`, `17 → 43`, `17 → 43`.** **THE THRESHOLD GROWS NOTHING. WHAT IT GROWS IS
+*ACCURACY* (`0.513 → 0.102`) AND WHAT IT COSTS IS *TIME* (`+40%`).** So the field states a mechanism its own data refutes,
+**in the one field a reader is most likely to quote** — the same class as the `32%` comment in `fig_divergence` (D106.8)
+and the hardcoded `"3-5x slower"` title (D106.4). **Three of the four now sit in `interpretation`/`note` fields, which is
+where a re-reader looks first and where nothing checks anything.**
+
+**D114.5 — Unchanged.** Everything in D35.6 through D112.4 stands, **except that the rank's independence from the
+tolerance threshold is now measured, and that the sweep artifact's `interpretation` is wrong.**
+
+---
+
+## C10-2 — **`rank_growth_sweep_T8.json`'s `interpretation` SAYS A TIGHTER THRESHOLD "GROWS RANK". ITS OWN THREE ROWS SAY THE RANK IS `17 → 43` AT EVERY THRESHOLD. (mine, one sentence)**
+
+The field should say what the rows show: **a tighter amplitude cutoff buys about `5×` the accuracy and costs about `40%`
+more per step, and it does not change the rank, which stops at the grid's alias-free rank in every case.** As written, a
+reader looking for the mechanism finds one the data refutes.
+
+**AND NOTE WHAT THIS ARTIFACT GETS RIGHT, BECAUSE IT IS THE MODEL: `dlra_max_rank` is `48` AND THE RANK STOPS AT `43`.** So
+the saturation is demonstrably not the cap, and the artifact should say so — **that is the strongest single sentence
+available for W15's mechanism, and it is currently in no document at all.**
+
+## C6-6b — **C6-3 IS STILL NOT FIXED. THE DOCSTRING SAYS "about 25 s"; THE TEST MEASURES `56.11 s`.** (raised in R150, unchanged in R151)
+
