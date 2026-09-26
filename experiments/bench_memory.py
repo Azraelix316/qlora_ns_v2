@@ -381,6 +381,19 @@ def main() -> None:
     noise_floor = max(deltas) if deltas else None
     noise_stats = None
     if deltas:
+        # A BOOLEAN, because that is the one form of this claim a registry row can
+        # check durably. `mem_noise_floor_mib` is pinned at 0.09765625 -- one of
+        # four single-sample values this quantity has taken (0.1328 / 0.0664 /
+        # 0.0977 / 0.0039, a factor of 34) -- while the floor is now the MAXIMUM
+        # of `samples` same-configuration differences by construction. A maximum
+        # of noisy samples moves every time it is retaken, so no point value pins
+        # it and the row has been chasing a moving target.
+        #
+        # The durable claim is not the value but the fact that the value is an
+        # estimate. Whether the row should assert THIS or a tolerance on the
+        # median is the reviewer's decision (D55c.6); both are available in the
+        # artifact, and this boolean is what the first one needs.
+        min_samples = 8
         ordered = sorted(deltas)
         median = (ordered[len(ordered) // 2] if len(ordered) % 2
                   else 0.5 * (ordered[len(ordered) // 2 - 1]
@@ -408,6 +421,14 @@ def main() -> None:
             ),
             "values_mib": ordered,
             "used_for_verdicts": "max_mib",
+            "min_samples_for_an_estimate": min_samples,
+            "noise_floor_is_estimated_from_many_samples": len(deltas) >= min_samples,
+            "estimate_threshold_note": (
+                f"true when the floor rests on at least {min_samples} "
+                "same-configuration differences. A single sample of this quantity "
+                "has been observed to move by a factor of 34, so a floor from "
+                "fewer than this is an anecdote with a unit."
+            ),
             "why_max": (
                 "the verdicts ask whether a spread over rank exceeds twice this "
                 "quantity. Taking the maximum is the conservative side: it can "

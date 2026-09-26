@@ -396,6 +396,50 @@ def test_the_rank_at_which_the_dlra_never_yields_is_the_grid_dealiasing_ceiling(
     assert ceiling[64] == 43 and ceiling[128] == 85, ceiling
 
 
+def test_the_noise_floor_says_whether_it_is_an_estimate_at_all():
+    """The floor must state whether it is an estimate, not just what it equals.
+
+    `mem_noise_floor_mib` is the last failing registry row, and it fails for a
+    structural reason rather than a numerical one: the floor is **the maximum of
+    N same-configuration differences by construction**, and a maximum of noisy
+    samples moves every time it is retaken. It has been 0.1328 / 0.0664 / 0.0977 /
+    0.0039 as a single sample and 0.3242 / 0.1289 / 0.1445 / 0.3281 / 0.3984 as a
+    max-of-92. A row pinned to a point is therefore chasing a moving target, and
+    re-pinning it each time is not a fix.
+
+    The durable claim is not the value but the fact that the value is an estimate,
+    so the artifact now carries a boolean for it. **Which claim the paper should
+    make is the reviewer's (D55c.6) — this only makes the option checkable**, and
+    the boolean is computed rather than asserted, so it can be `False`.
+
+    The threshold is 8, chosen as the smallest count at which the sample count is
+    itself worth quoting. It is recorded next to the boolean so a reader does not
+    have to guess what the `True` means.
+    """
+    data = load("peak_memory.json")
+    assert data is not None
+    stats = data.get("noise_floor_samples_mib")
+    assert stats is not None
+    threshold = stats.get("min_samples_for_an_estimate")
+    assert threshold is not None, (
+        "the artifact does not record min_samples_for_an_estimate, so the boolean "
+        "below has no stated meaning"
+    )
+    assert stats["samples"] == len(stats["values_mib"]), stats["samples"]
+    assert stats["noise_floor_is_estimated_from_many_samples"] == (
+        stats["samples"] >= threshold
+    ), (
+        f"the boolean says {stats['noise_floor_is_estimated_from_many_samples']} "
+        f"but samples={stats['samples']} against a threshold of {threshold}"
+    )
+    # The real run must clear its own threshold, or the floor the verdicts rest on
+    # is an anecdote and every verdict derived from it inherits that.
+    assert stats["noise_floor_is_estimated_from_many_samples"] is True, (
+        f"the shipped noise floor rests on {stats['samples']} samples against a "
+        f"threshold of {threshold}; the rank-variation verdicts divide by it"
+    )
+
+
 def test_the_memory_overhead_is_a_distribution_and_not_one_sample():
     """The peak-RSS overhead over the full grid must carry its own spread.
 
