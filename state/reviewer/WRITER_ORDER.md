@@ -29,7 +29,7 @@ failure, not a lack of work on your part.*
 | **2** | **§4 The measurement protocol** + **table 1** | The **five** things a reported horizon must state. Then the four baseline bugs, what each did to the number, and the fix. **This is the paper's spine.** | five = window length · refit interval · offset · in-sample check · **grid + largest rank tested** |
 | **3** | **table 1 headline row** | the result of all three fixes together | **`t*` moved down by `1.6–2.8×` and three of six ranks lost their crossover — correcting the baseline made our own method look worse** |
 | **4** | **§5 Stability: the subspace must evolve** | A fixed subspace propagated through the nonlinearity, with the **same** integrator, splitting and orthonormal basis, is stable at rank 16 and **overflows at ranks 32 and 42**. The time-dependent subspace holds. **Say "one parameter set" and mean it.** | four runs diverge: `t = 5.51, 5.74, 6.96, 7.17`; the SP-DLRA at the same ranks: divergence **`≤1.1e-13`**, trajectory error **`< 1.1`** |
-| **5** | **§6 Results** | the horizon, the mechanism, robustness, the rank criteria, the costs | **`t*` = `0.649`** (`r=16`), **`1.482`** (`r=32`); window sensitivity **`0.15–0.63%`**; Reynolds **`2.8%` / `8.6%`**; **no per-step speedup** (`1.78–2.18×` slower), **no memory saving** (`+2.5` to `+3.8 MiB` *more*) |
+| **5** | **§6 Results** | the horizon, the mechanism, robustness, the rank criteria, the costs | **`t*` = `0.649`** (`r=16`), **`1.482`** (`r=32`); window sensitivity **`0.15–0.63%`**; Reynolds **`2.8%` / `8.6%`**; **no per-step speedup** (`2.08–2.71×` slower), **no memory saving** (`+2.5` to `+3.8 MiB` *more*) |
 | **6** | **§6 mechanism sentence** | the static baseline **saturates** in rank | spread across the whole resolved range **`0.00%`** at `t=0.1`; **`r=16`, `r=32`, `r=43` have identical static errors** at every horizon |
 | **7** | **§7 Discussion and limitations** | second order is conditional on rank; rank buys lead time not speed; **and the four honest gaps** | no resolution-robust stationary state; rank criterion verified only to **`T=0.1`**; never-yields rank **bracketed between 32 and 43, not located**; **`N=128` multipliers unverified** |
 
@@ -156,7 +156,7 @@ both invariants, and agrees; `max |div u| = 1.63e-14` and the energy-balance res
 
 **One more clause for the cost discussion, free from the same artifact:** at rank 1 on `N=64` the
 reduced solver is **`3.45x` slower than the full grid** (`3.68e-3` vs `1.07e-3` s/step) — **worse than
-the headline `1.78-2.18x`, and the worst case in the project**, because all the SVD/QR overhead is paid
+the headline `2.08-2.71x`, and the worst case in the project**, because all the SVD/QR overhead is paid
 while the rank buys nothing. **The naive expectation is the opposite, and this is the measured reason
 it is wrong. Say so: the reported range is not the worst case, and here is the worst case.**
 
@@ -167,24 +167,46 @@ right; one word is wrong, and it is a word a reviewer will catch.**
 
 | | overhead vs full grid | spread over `r = 2 … 43` | noise floor | spread / noise |
 |---|---|---|---|---|
-| `N=64` | `+2.52 MiB` | `0.293 MiB` | `0.13 MiB` | `2.21×` |
-| `N=128` | `+3.79 MiB` | `0.289 MiB` | `0.13 MiB` | `2.18×` |
+| `N=64` | `+2.24 MiB` | `0.227 MiB` | `0.066 MiB` | `3.41×` |
+| `N=128` | `+4.27 MiB` | `0.684 MiB` | `0.066 MiB` | `10.29×` |
 
-**Do not write "flat in rank to within `0.3 MiB`."** The measurement *resolved* the rank variation —
-`2.2×` the run-to-run noise floor, above the `2×` threshold — so the variation is **real**, and "flat"
-asserts the opposite. **If the spread had come in at `1.5×` the floor, "flat" would have been exactly
-right; it came in at `2.2×`.** Whether an effect is flat is a question about whether the instrument
-could see it, not about its size.
+**Do not write "flat in rank."** The measurement *resolved* the rank variation, so the variation is
+**real** and "flat" asserts the opposite. **Whether an effect is flat is a question about whether the
+instrument could see it, not about its size.** *(R89/D52: these numbers moved - the noise floor halved
+to `0.066 MiB` and every ratio rose, so the variation is now comfortably resolved at `3.4x` and `10.3x`
+rather than marginal at `1.1x`. Use the table above, not the earlier one.)*
 
-**Verbatim:** *"The reduced integrator does not save memory: it costs `2.5 MiB` (`N=64`) to `3.8 MiB`
-(`N=128`) more than the full-grid step. Peak RSS varies by `0.29 MiB` across a 21× rank range at both
-grids — `2.2×` the `0.13 MiB` run-to-run noise floor of an identical configuration, so the variation is
-real though small, and about `0.7%` of a `~43 MiB` peak."*
+**Verbatim:** *"The reduced integrator does not save memory: it costs `2.2 MiB` (`N=64`) to `4.3 MiB`
+(`N=128`) more than the full-grid step. Peak RSS varies by `0.23 MiB` (`N=64`) to `0.68 MiB` (`N=128`)
+across a 21× rank range — `3.4×` and `10.3×` the `0.066 MiB` run-to-run noise floor of an identical
+configuration, so the variation is resolved rather than marginal, and is a few percent of a `~43 MiB`
+peak."*
 
 **Report the overhead, never the raw RSS** — the interpreter and BLAS baseline is `~33 MiB` and no
 method choice affects it.
 
 **One clause on the BUG port's memory, if you mention it:** its rank dependence is *far* larger than
-the projected integrator's — spread `0.58 MiB` (`4.4×` the floor) at `N=64` and `1.53 MiB` (`11.5×`) at
+the projected integrator's — spread `0.69 MiB` (`10.4×` the floor) at `N=64` and `1.99 MiB` (`29.9×`) at
 `N=128`. **At `N=128` the BUG port's rank dependence exceeds the projected integrator's entire
 overhead**, so it is nowhere near rank-flat in memory.
+
+## §4 — the cost protocol choice, which is the coder's and belongs in the paper (D52.8, binding)
+
+**The cost numbers moved in the reviewer's R89, and the reason is a protocol choice worth stating in the
+paper rather than hiding: `full_step_ratio_vs_reference` is now `2.08–2.71×`, not `1.78–2.18×`.**
+
+**Why it moved, in the coder's words, and this should be a sentence in §4:** *"this node also serves a
+language model, so its load moves with someone else's work; the protocol interleaves configurations
+because on a node this noisy the per-configuration median is unreliable while the ratio between
+interleaved configurations is not."*
+
+**That is a general fact about benchmarking on shared infrastructure, and a reviewer who reproduces this
+work on a busy cluster will meet exactly the same problem.** Stating the choice — absolute
+per-configuration timings on an idle machine, or ratios between interleaved configurations on a shared
+one — is what distinguishes a protocol from an accident. **The second is what was done, and the second
+is defensible.**
+
+**The direction is worth stating plainly too: every value moved UP, so the new range is the less
+favourable one and is the one we quote.** Reporting the smaller range because it was measured first
+would be indefensible now that we know the machine was loaded and the first run's load was not recorded
+at all.

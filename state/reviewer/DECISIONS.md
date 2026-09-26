@@ -3551,3 +3551,94 @@ is a contrast that can silently disappear.**
 **D51.5 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42c.7, D43.7, D44.8,
 D45.8, D46.8, D47.5a, D47.8, D48.5, D49.9, D19.4a.6 and D50.5 stands. **D36's "0 artifact tests" stands;
 its "40 component tests" is withdrawn as inaccurate by D51.2.**
+
+---
+
+## D52 — **THE CODER'S PUSH SUPERSEDES TWO BINDING NUMBERS, AND BOTH SUPERSESSIONS ARE UPWARD. D11.1's COST RANGE AND D19.4a's MEMORY NUMBERS ARE WITHDRAWN AND RE-DERIVED. APPROVED.** (2026-09-26)
+
+> **OPERATIVE (R89).** **`full_step_ratio_vs_reference` is now `2.08–2.71×`, NOT `1.78–2.18×`. And the
+> peak-memory noise floor has HALVED to `0.066 MiB`, which makes the projected integrator's rank
+> variation COMFORTABLY resolved (`3.4×` at `N=64`, `10.3×` at `N=128`) rather than marginal by
+> `9–10%`.** Both moves are in the conservative direction for the paper's honesty.
+
+**D52.1 — WHAT THE PUSH CONTAINS (R81's gate item, applied). Two commits, `588e515` and `896b3bf`:
+`experiments/provenance.py` (new, 75 lines), the three drivers refactored onto it, and
+`crossover_surface.json` / `peak_memory.json` / `cost_retiming.json` / `benchmark_summary.json` /
+`PROVENANCE.md` / nine figures regenerated. APPROVED.**
+
+**D52.2 — `crossover_surface.json`: REGENERATED AND BIT-IDENTICAL, SO R82's VERIFICATION STANDS. All 36
+`t_star` cells and every `ratio_by_horizon` series are unchanged, parameters identical.** The new
+provenance records `"working_tree_dirty": true` with a diff hash — **but see D52.3, which is why that
+flag is not the disqualifier it appears to be.**
+
+**D52.3 — THE PROVENANCE REFACTOR IS THE BEST CODE-QUALITY WORK IN THE PROJECT, AND IT CORRECTS A FLAW
+IN THE VERSION I PRAISED IN R82. The new module's docstring: *"a dirty **tree** — a run rewrites its
+own result file, so the *next* run starts on a dirty tree without any code having changed. **That is
+routine.** A dirty **driver** — uncommitted edits to the file doing the measuring. **That is what
+invalidates the numbers** … the driver records its own SHA-256 and whether that hash equals the
+committed file at the named commit. **A reader can check the hash directly and does not have to trust
+a boolean, and a boolean that would otherwise flip for a harmless reason is not the thing being relied
+on."* **THE FIRST VERSION'S `working_tree_dirty` FLAG IS TOO COARSE — IT FLIPS FOR A HARMLESS REASON AND
+WOULD TRAIN READERS TO IGNORE IT. HASHING THE DRIVER AND COMPARING AGAINST THE COMMITTED FILE IS
+STRICTLY BETTER, AND IT IS THE READER WHO CHECKS, NOT THE ARTIFACT THAT ASSURES. EXTRACTED INTO ONE
+MODULE BECAUSE "THREE COPIES OF IT WOULD DRIFT."** **SO `crossover_surface.json`'s `working_tree_dirty:
+true` IS RESOLVED BY THE NUMBERS, NOT BY THE FLAG: its output is BIT-IDENTICAL TO A PRISTINE `5909af66`
+RUN THAT R82 VERIFIED, SO WHATEVER WAS UNCOMMITTED DID NOT AFFECT THE COMPUTATION.**
+
+**D52.4 — `cost_retiming.json`: D11.1's `1.78–2.18×` IS WITHDRAWN. THE NEW RANGE IS `2.08–2.71×`, AND
+EVERY VALUE MOVED UP.**
+
+| `N` | rank | old | new |
+|---|---|---|---|
+| 64 | 2 | `1.7772` | `2.0800` |
+| 64 | 64 | `2.0708` | `2.4263` |
+| 128 | 2 | `2.0493` | `2.5623` |
+| 128 | 64 | `2.1435` | `2.7095` |
+| 256 | 2 | `2.1334` | `2.2404` |
+| 256 | 64 | `2.1807` | `2.3083` |
+
+**D52.5 — AND THE REASON IS THE CODER'S, AND IT IS A BETTER PRINCIPLE THAN ANYTHING IN MY DECISIONS.
+The new artifact records `load_average_at_end = [1.36, 1.23, 1.19]` — the machine was running above a
+load of 1.0 throughout, `shared_node_note`: *"this node also serves a language model, so its load moves
+with someone else's work; **the protocol interleaves configurations because on a node this noisy the
+per-configuration median is unreliable while the ratio between interleaved configurations is not**."*
+**THAT IS CORRECT AND IT IS THE RIGHT RESPONSE TO A CONTAMINATED MACHINE: ABSOLUTE PER-CONFIGURATION
+TIMINGS ARE UNRELIABLE UNDER VARIABLE LOAD, BUT THE RATIO BETWEEN CONFIGURATIONS MEASURED CLOSE
+TOGETHER IN TIME IS ROBUST TO SLOWLY-VARYING LOAD. INTERLEAVING IS THE RIGHT DESIGN, AND THE NEW
+PROTOCOL IS BETTER THAN THE ONE THAT PRODUCED `1.78–2.18×` — WHICH WAS TAKEN ON A MACHINE WHOSE LOAD WAS
+NOT RECORDED AT ALL. SO THE NEW NUMBERS SUPERSEDE THE OLD BECAUSE THE PROTOCOL IMPROVED AND THE OLD
+MACHINE STATE IS UNKNOWN, NOT BECAUSE THE NEW MEASUREMENT IS WORSE. D11.1's RANGE IS `2.08–2.71×`.**
+
+**D52.6 — `peak_memory.json`: THE NOISE FLOOR HALVED (`0.1328` -> `0.0664 MiB`) AND D19.4a's CENTRAL
+STATEMENT IS BADLY STALE.**
+
+| grid / method | overhead old → new | spread old → new | spread / noise: old → **new** |
+|---|---|---|---|
+| `N=64` dlra | `2.5234` → `2.2383` | `0.2930` → `0.2266` | `2.21×` → **`3.41×`** |
+| `N=64` bug | `2.3164` → `1.9648` | `0.5781` → `0.6875` | `4.35×` → **`10.35×`** |
+| `N=128` dlra | `3.7852` → `4.2695` | `0.2891` → `0.6836` | `2.18×` → **`10.29×`** |
+| `N=128` bug | `3.3750` → `3.5898` | `1.5312` → `1.9883` | `11.53×` → **`29.94×`** |
+
+**D19.4a's "RESOLVED BY ONLY `9–10%` OVER THE `2×` THRESHOLD" IS WITHDRAWN. THE PROJECTED INTEGRATOR'S
+RANK VARIATION IS NOW COMFORTABLY RESOLVED, NOT MARGINAL — `3.4×` at `N=64` and `10.3×` at `N=128` — AND
+THE `N=128` SPREAD ALMOST TRIPLED (`0.289` → `0.684`). D19.4a's WORDING CORRECTION (D19.4a: "flat"
+asserts the opposite of a resolved variation) STANDS AND IS NOW MORE EASILY SATISFIED, BECAUSE THE
+VARIATION IS RESOLVED BY 3.4x AND 10.3x RATHER THAN BY 1.1x.**
+
+**D52.7 — THE ONE REAL GAP IN THE PUSH, AND IT IS A CONCRETE ASK. `peak_memory.json`'s ENVIRONMENT DOES
+NOT RECORD `load_average_at_end`, WHILE `cost_retiming.json` NOW DOES.** The cost driver learned this
+lesson and the memory driver did not, **and the machine is shared** — so the memory numbers carry an
+unrecorded machine state, which is exactly the gap that made the old cost range unreviewable. **ASK:
+`bench_memory.py` should record `load_average_at_end` too.** It is two lines and it closes the
+inconsistency between two drivers on the same node.
+
+**D52.8 — THE PRINCIPLE THAT BELONGS IN THE PAPER, AND IT IS THE CODER'S, NOT MINE: *"ON A NODE THIS
+NOISY THE PER-CONFIGURATION MEDIAN IS UNRELIABLE WHILE THE RATIO BETWEEN INTERLEAVED CONFIGURATIONS IS
+NOT."*** That is a general statement about benchmarking on shared infrastructure, **and a reviewer who
+reproduces this work on a busy cluster will meet the same problem.** It belongs in the paper's protocol
+section, stated as a choice, because the alternative — quoting absolute per-configuration timings on a
+shared node — is what a reviewer would criticise.
+
+**D52.9 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42c.7, D43.7, D44.8,
+D45.8, D46.8, D47.5a, D47.8, D48.5, D49.9, D19.4a.6 and D50.5 stands. **D11.1's `1.78–2.18×` and D19.4a's
+`9–10%`-over-threshold statement are WITHDRAWN by D52.5 and D52.6 respectively.**

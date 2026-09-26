@@ -36,7 +36,7 @@ artifact.
 > or not reported at all.
 
 **Why this framing and not the obvious one.** "A fast structure-preserving DLRA" is unavailable:
-`1.78–2.18×` **slower** per step, `+2.5` to `+3.8 MiB` **more** memory, and no stationary
+`2.08–2.71×` **slower** per step, `+2.5` to `+3.8 MiB` **more** memory, and no stationary
 fluctuation state to validate against. A paper built on that would have to retract its own headline.
 
 **Why this framing is stronger, for four reasons.** (i) It is the only framing under which the
@@ -64,7 +64,7 @@ recognised genre. **ICML/NeurIPS are wrong for this** (D5).
 | **a crossover-horizon protocol** — five required qualifiers — **and the finding that the horizon is not a property of the method** (`t* = 0.649` at `r=16`, `1.482` at `r=32`; window-insensitive to `≤0.63%`, Re-sensitive by `3–9%`, but moved `1.6–2.8×` by three baseline corrections — **each of which shortened it**; **fully supported**) | a fitted `t*` law — **two resolved ranks cannot support one** |
 | **the mechanism, measured not asserted**: the static baseline **saturates in rank** — `r=16`, `32`, `43` have *identical* static errors to four decimals at every horizon, and the spread across rank is `0.00%` at `t=0.1` (**fully supported, D30.1**) | a **located** never-yields rank — it is **bracketed between 32 and 43** at `N=64`, and `r=85` is untested (D30.4) |
 | **a rank criterion that grows with the dynamics**: rank `17 → 36` at cutoff `1e-6`, `17 → 43` at `1e-8`/`1e-10`, error `1.0–1.7e-4`, stable (`rank_growth_sweep.json`) | **evidence beyond `T = 0.1` (200 steps)** — that is the initial transient, so **"adaptive rank" stays barred (D32.2)** |
-| exact divergence-freeness, `2.3e-14`–`2.0e-13` across every committed run | any per-step **time** advantage — `1.78–2.18×` **slower** |
+| exact divergence-freeness, `2.3e-14`–`2.0e-13` across every committed run | any per-step **time** advantage — `2.08–2.71×` **slower** |
 | second-order time integration, `1.98/1.95`, *conditional on sufficient rank* | any **memory** advantage — `+2.5` to `+3.8 MiB` **more**; peak RSS **varies by `0.29 MiB` across a 21× rank range at both grids, resolved at `2.2×` the `0.13 MiB` run-to-run noise floor** — so the variation is *real though small*, and **not** "flat" (D19.4a) |
 | a BUG port that is structure-preserving, verified structurally (`large_svd_calls == 0`, `svd_max_dimension ≤ 4r`) and stationary to `< 1e-12` | BUG's speed case — **`3.3–5.1×` slower**, and **its cost rank-scaling is NOT claimed** (`1.366` at `N=64` vs `1.043` at `N=128`; memory spread not reproducible — D25.6) |
 | four documented harness bugs, each fixed and recorded | a stationary fluctuation state at any `A` or `N` (D24.4: **neither** forcing admits a *resolution-robust* one) |
@@ -129,7 +129,7 @@ second place — the argument survives either order.**
 > sixty-line baseline — **every one of which made the horizon shorter, so correcting the baseline
 > made our own method look worse** — so we argue a reported horizon must carry five things: the baseline's window
 > length, refit interval, offset, an explicit check that no basis contains its evaluation time, and
-> the grid with the largest rank tested. We report the per-step cost (`1.78–2.18×` the full-grid
+> the grid with the largest rank tested. We report the per-step cost (`2.08–2.71×` the full-grid
 > step) and peak memory (`+2.5` to `+3.8 MiB` *above* it) with **no speedup claim**, and we do not
 > claim a robust stationary state, because neither forcing admits one at these parameters.
 

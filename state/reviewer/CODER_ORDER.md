@@ -73,6 +73,13 @@ differ by nearly `2×`.**
 temporal-order checks — all passing on clean `main` in 179 s (verified R88, D51.2), and 0 artifact
 tests. These would have caught four of my five errors. And the highest-value one to add is below.**
 
+**A1 — `bench_memory.py` should record `load_average_at_end`, because `bench_cost.py` now does and this
+node is shared.** Your new `cost_retiming.json` records `load_average_at_end = [1.36, 1.23, 1.19]`, and
+that is *why* its numbers can supersede the old ones — I now know the machine state. `peak_memory.json`
+records no load at all, so its numbers carry the same unrecorded-machine-state gap that made the old
+cost range unreviewable. **Two lines, and it closes an inconsistency between two drivers on one node.**
+(D52.7)
+
 **T0 — THE THESIS'S CENTRAL CONTRAST MUST BE PRESENT IN THE ARTIFACT. This is the single most valuable
 artifact test in the project, because the paper's thesis *is* a claim about this contrast and a contrast
 nobody asserts can silently disappear.** Read `state/coder/results/baselines_re5000_N64_T8.json` and
