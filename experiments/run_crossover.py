@@ -12,13 +12,16 @@ every (rank, horizon) pair, and the difference between them is the mechanism:
 
 ``relative_l2``
     the method's own mean handling, full field.  This is the comparable number.
-``relative_l2_oracle_mean``
-    the same error with the zonal mean replaced by the reference's, i.e. the
-    error a static baseline would make if its mean were handled perfectly.
+``relative_l2_fluct_over_full``
+    the FLUCTUATION part of the error -- each field's own zonal mean removed --
+    still over the full-field norm.  (D27.1: this column was called
+    ``relative_l2_oracle_mean`` and described as borrowing the reference's mean.
+    It does not, and it never did; only the name and the description were wrong,
+    so the column is renamed rather than recomputed.)
 ``relative_l2_mean_only``
     only the zonal mean's contribution to the error.
 
-If the static baseline's error is dominated by its mean, the oracle-mean column
+If the static baseline's error is dominated by its mean, the fluctuation column
 collapses relative to the full-field one; if it is dominated by a stale
 *fluctuation* subspace (R37), the oracle-mean column barely moves and the floor
 survives.  Reporting only the full-field number would hide which it is.
@@ -93,7 +96,7 @@ def decompose(method: np.ndarray, reference: np.ndarray, grid: Grid2D) -> dict:
     d_full = np.sqrt(grid.l2_sq(method - reference))
     return {
         "relative_l2": d_full / full,
-        "relative_l2_oracle_mean": d_fluct / full,
+        "relative_l2_fluct_over_full": d_fluct / full,
         "relative_l2_mean_only": d_mean / full,
         "relative_l2_fluct_normalized": d_fluct / fluct_norm,
         "mean_energy_share_of_reference": (
@@ -262,7 +265,7 @@ def crossover_horizon(
     ratios: list[float] = []
     for row in ordered:
         d = row["relative_l2"]
-        s = by_t[row["time"]]["relative_l2_oracle_mean"]
+        s = by_t[row["time"]]["relative_l2_fluct_over_full"]
         ratios.append(s / d if d > 1e-12 else math.inf)
     scale = max(r for r in ratios if math.isfinite(r)) if any(
         math.isfinite(r) for r in ratios
@@ -436,7 +439,7 @@ def main() -> None:
             ]
             dlra_rows.insert(0, {
                 "time": 0.0, "rank": rank, "relative_l2": 0.0,
-                "relative_l2_oracle_mean": 0.0, "relative_l2_mean_only": 0.0,
+                "relative_l2_fluct_over_full": 0.0, "relative_l2_mean_only": 0.0,
                 "relative_l2_fluct_normalized": 0.0,
             })
             dlra_surface[str(rank)] = dlra_rows
@@ -566,9 +569,16 @@ def main() -> None:
         },
         "error_columns": {
             "relative_l2": "the method's own mean handling, full field; the comparable number",
-            "relative_l2_oracle_mean": "error with the zonal mean replaced by the reference's, i.e. what the baseline would make with a perfect mean",
+            "relative_l2_fluct_over_full": (
+                "the FLUCTUATION error, each field's own zonal mean removed, over the "
+                "FULL-field norm of the reference. D27.1: this column used to be "
+                "called relative_l2_oracle_mean and documented as 'the zonal mean "
+                "replaced by the reference's', which is a different quantity -- no "
+                "mean is borrowed and it is not an oracle-mean error. Renamed to "
+                "what it computes; the numbers are unchanged (D28.5/D29.2)."
+            ),
             "relative_l2_mean_only": "the zonal mean's contribution alone, over the full-field norm",
-            "relative_l2_fluct_normalized": "fluctuation error over the fluctuation norm",
+            "relative_l2_fluct_normalized": "fluctuation error over the fluctuation norm, not the full norm",
         },
         "by_reynolds": by_reynolds,
         "interpretation": (
@@ -583,11 +593,14 @@ def main() -> None:
             "the advantage horizon by factors of two to four, so a t* quoted without "
             "them is not reproducible. Per-step cost is Theta(N^3) and "
             "rank-independent (D11.1, measured in cost_retiming.json). The highest "
-            "rank tested is the only one that never loses, and it is the largest "
-            "rank this grid resolves without aliasing, 2*floor(N/3)+1 -- which is "
-            "not a single grid-independent quantity but a function of N, and at "
-            "that rank the method is doing the work of the full-grid solver at "
-            "over twice its cost."
+            "rank tested is the only one that never yields, and the reason is that "
+            "its error is already at roundoff -- the dynamics are effectively "
+            "low-dimensional at these settings, not that the rank has reached the "
+            "grid. That rank is the largest one tested and it happens to coincide "
+            "with the wavenumber 2*floor(N/3)+1; the wavenumber is not a rank, it "
+            "is 43 at N=64 and 85 at N=128, and the dealiased grid carries far more "
+            "degrees of freedom than either. So a rank-43 subspace is not the "
+            "full-grid solver, and it is not exact either -- it is near-roundoff."
         ),
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
