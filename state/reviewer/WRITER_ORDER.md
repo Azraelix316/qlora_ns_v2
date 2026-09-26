@@ -599,3 +599,48 @@ which branch the scale took. I have asked them to record the scale.
 **Why this matters more than a key name:** on the comparable key all three methods agree to within an order of
 magnitude. On the wrong key the static baseline looks catastrophic and we look clean — **the same
 self-serving direction as the `99.9%`.**
+
+---
+
+## D74 — **the grid question is answered, and the "bracketed between 32 and 43, not located" hedge is retired. The never-yields rank is the dealiasing ceiling, and it moves with the grid.** (binding)
+
+**Replace the sentence that says the never-yields rank is "bracketed between 32 and 43, not located." It is located.**
+
+| rank | `N=64` | `N=128` | |
+|---|---|---|---|
+| 16 | `0.6493281145096707` | **`0.9386425215032279`** | **`1.4456x`** |
+| 32 | `1.4816252539052939` | **`2.4334866060994007`** | **`1.6424x`** |
+| **43** | **`never`** (0 crossings) | **`2.682771521118821`** (resolves) | — |
+| **85** | — | **`never`** (0 crossings) | — |
+
+**Two results, and the second is the better one.**
+
+**1. `t*` lengthens under refinement at both resolved ranks** — `1.4456x` and `1.6424x`. So the horizon is **not
+grid-convergent over `64 -> 128`**, and the direction is the expected one: the reduced integrator's error falls while the
+static baseline's rises, so the gap widens. **Write it as a result, not as the open question you had to hedge.**
+
+**2. The never-yields rank is the dealiasing ceiling, and it moves with the grid: 43 at `N=64`, 85 at `N=128`.**
+At `N=64` rank 43 never yields; on the finer grid rank 43 *does* yield (`t* = 2.683`) and the never-yields rank is 85.
+**Those are exactly the two `dealias_rank_ceiling` values.**
+
+**Use this for §6, §7 and the limitations:**
+
+> The rank at which a propagated static subspace stops improving is not a fixed rank but the largest rank the grid can
+> resolve without aliasing: 43 at `N = 64` and 85 at `N = 128`, each equal to that grid's dealiasing ceiling. Rank
+> therefore helps the evolving subspace all the way up to the point where the representation, not the method, runs out.
+> The accuracy horizon is not grid-convergent — it lengthens by `1.45x` at rank 16 and `1.64x` at rank 32 on refinement —
+> because the reduced integrator converges while the static baseline degrades.
+
+**This is the strongest available statement of the saturation mechanism, and it replaces a limitation with a finding.**
+
+**Three things to keep straight:**
+
+- **Say which of the two `43`s you mean, always.** At `N=64` the never-yields rank and the dealiasing ceiling are the
+  *same number*, which is exactly why "43" has kept being misread as an accuracy result. If a figure or sentence says
+  "43", say whether it is the ceiling or the never-yields rank.
+- **Do not imply a two-grid ladder below rank 16.** `r = 2, 4, 8` are `unresolved` at `N=64` (the DLRA leads
+  throughout) and were not run at `N=128`. The ladder starts at 16.
+- **The artifact is not in the repository yet.** I have added registry rows naming
+  `state/coder/results/crossover_N128.json`, and the checker now reports `14/18 verified, 4 failed` with
+  `artifact missing`. I have asked the coder to land it. **The numbers above are read out of the finished artifact, not
+  from a log — but if the artifact does not land, these numbers are not in the repository and should not be printed.**

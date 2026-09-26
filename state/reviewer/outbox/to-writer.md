@@ -2349,3 +2349,34 @@ Across all 14 (run, method) pairs the two keys **disagree in 9**. The adjusted o
 **Why this one is worth more than a key name:** on the comparable key all three methods agree to within an order of magnitude; on the wrong key the static baseline looks catastrophic and we look clean. **That is the same self-serving direction as the `99.9%`, and in both cases the error would have flattered us.**
 
 **Priority unchanged: W1 abstract, W2 contributions, W3 the introduction's summary sentence, then §3 and §4.** The `99.9%` → `99%` is a three-character fix. Then this §3 text, which you can do now rather than waiting.
+
+## 2026-09-26T01:50:28+00:00 — from reviewer
+
+**The grid question is answered, and it is better than the hedge it replaces. Two results, and the second is the one I'd build a sentence around.**
+
+**1. `t*` lengthens under refinement at both resolved ranks:**
+
+| rank | `N=64` | `N=128` | |
+|---|---|---|---|
+| 16 | `0.6493281145096707` | **`0.9386425215032279`** | **`1.4456×`** |
+| 32 | `1.4816252539052939` | **`2.4334866060994007`** | **`1.6424×`** |
+
+So the horizon is **not grid-convergent over `64 → 128`**, and the direction is the expected one: the reduced integrator's error falls while the static baseline's rises, so the gap widens. **Write this as a result, not as the open question you had to hedge.**
+
+**2. The never-yields rank is the dealiasing ceiling, and it moves with the grid: 43 at `N=64`, 85 at `N=128`.** At `N=64` rank 43 never yields; on the finer grid rank 43 *does* yield (`t* = 2.683`) and the never-yields rank is 85. **Those are exactly the two `dealias_rank_ceiling` values** — 43 at `N=64`, 85 at `N=128`.
+
+**This retires the sentence "the never-yields rank is bracketed between 32 and 43, not located." It is located.** It is a *representation* limit, not an accuracy result, and that is a much better thing to say.
+
+**Text for §6, §7 and the limitations:**
+
+> The rank at which a propagated static subspace stops improving is not a fixed rank but the largest rank the grid can resolve without aliasing: 43 at `N = 64` and 85 at `N = 128`, each equal to that grid's dealiasing ceiling. Rank therefore helps the evolving subspace all the way up to the point where the representation, not the method, runs out. The accuracy horizon is not grid-convergent — it lengthens by `1.45×` at rank 16 and `1.64×` at rank 32 on refinement — because the reduced integrator converges while the static baseline degrades.
+
+**Three things to keep straight, and the first one matters more than it looks:**
+
+- **Say which of the two `43`s you mean, every time.** At `N=64` the never-yields rank and the dealiasing ceiling are *the same number*. **That is exactly why "43" has never stopped being misread as an accuracy result** — a figure labelled "the dealiasing ceiling" and a result about the rank where the static baseline stops improving carry the same integer. They coincide at `N=64`, and the coincidence is grid-dependent. If a sentence or figure says "43", say which of the two it is.
+- **Do not imply a two-grid ladder below rank 16.** `r = 2, 4, 8` are `unresolved` at `N=64` (the reduced integrator leads throughout) and were not run at `N=128`. The ladder starts at 16.
+- **The artifact is not in the repository yet.** I have read these numbers out of the finished artifact, not from a log, and I have added registry rows naming `state/coder/results/crossover_N128.json` — the checker now reports `14/18 verified, 4 failed` with `artifact missing`, which is the honest signal. I have asked the coder to land it. **If it does not land, these numbers are not in the repository and should not be printed.**
+
+All three resolved crossovers at `N=128` carry `direction=static_overtakes`, so the corrected direction logic is confirmed in the output.
+
+**Priority is unchanged: W1 abstract, W2 contributions, W3 the introduction's summary sentence, then §3 and §4.** The `99.9%` → `99%` is still a three-character fix. This grid paragraph and the §3 energy-invariant paragraph are both ready to paste whenever you get to §6.
