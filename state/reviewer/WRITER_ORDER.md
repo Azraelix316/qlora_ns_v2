@@ -278,25 +278,33 @@ it is wrong. Say so: the reported range is not the worst case, and here is the w
 
 ## D3 — the memory sentence, with the right word (D19.4a/D49, binding)
 
-**There is no memory advantage, and saying so is one of the paper's honest strengths. The number is
-right; one word is wrong, and it is a word a reviewer will catch.**
+**There is no memory advantage, and saying so is one of the paper's honest strengths. The overhead is
+solid; the rank-*variation* of it is a separate measurement and it is no longer resolved at `N=128`.**
 
-| | overhead vs full grid | spread over `r = 2 … 43` | noise floor | spread / noise |
-|---|---|---|---|---|
-| `N=64` | `+2.24 MiB` | `0.227 MiB` | `0.066 MiB` | `3.41×` |
-| `N=128` | `+4.27 MiB` | `0.684 MiB` | `0.066 MiB` | `10.29×` |
+| | overhead vs full grid | spread over `r = 2 … 43` | noise floor | overhead / noise | spread / noise | spread resolved? |
+|---|---|---|---|---|---|---|
+| `N=64` | `+2.37 MiB` | `0.266 MiB` | `0.098 MiB` | `24.3×` | `2.72×` | **yes** |
+| `N=128` | `+4.21 MiB` | `0.188 MiB` | `0.098 MiB` | `43.1×` | `1.92×` | **NO** |
 
-**Do not write "flat in rank."** The measurement *resolved* the rank variation, so the variation is
-**real** and "flat" asserts the opposite. **Whether an effect is flat is a question about whether the
-instrument could see it, not about its size.** *(R89/D52: these numbers moved - the noise floor halved
-to `0.066 MiB` and every ratio rose, so the variation is now comfortably resolved at `3.4x` and `10.3x`
-rather than marginal at `1.1x`. Use the table above, not the earlier one.)*
+**Two different claims, two different strengths — do not merge them.**
 
-**Verbatim:** *"The reduced integrator does not save memory: it costs `2.2 MiB` (`N=64`) to `4.3 MiB`
-(`N=128`) more than the full-grid step. Peak RSS varies by `0.23 MiB` (`N=64`) to `0.68 MiB` (`N=128`)
-across a 21× rank range — `3.4×` and `10.3×` the `0.066 MiB` run-to-run noise floor of an identical
-configuration, so the variation is resolved rather than marginal, and is a few percent of a `~43 MiB`
-peak."*
+1. **The overhead is real and large.** Every recorded overhead is positive and `24–43×` the run-to-run noise
+   floor, at every rank. This is the load-bearing claim, and it is not in doubt.
+2. **The rank-*dependence* of that overhead is resolved only at `N=64`.** At `N=128` the spread is `1.92×` the
+   noise floor and the artifact records `rank_independence_resolved: false`.
+
+**So: do not write "flat in rank" — but the reason has changed, and the old reason is now false.**
+*(D89: on the previous run the spread was `3.4×` and `10.3×` the noise floor, so the variation was resolved
+and "flat" asserted the opposite of what was measured. The re-run on committed code moved the `N=128` spread
+to `1.92×` and the flag to `false`. The correct statement now is that rank-independence of the overhead is
+**established at `N=64` and unresolved at `N=128`** — which supports neither "flat" nor "grows with rank".)*
+
+**Verbatim:** *"The reduced integrator does not save memory: it costs `2.4 MiB` (`N=64`) to `4.2 MiB`
+(`N=128`) more than the full-grid step, which is `24–43×` the `0.098 MiB` run-to-run noise floor of an
+identical configuration and therefore resolved at every rank. Across a 21× rank range the overhead itself
+varies by `0.27 MiB` (`N=64`), which is `2.7×` the noise floor and so a real variation; at `N=128` the
+variation is `0.19 MiB`, `1.9×` the noise floor, and we do not resolve it. Both are a few percent of a
+`~43 MiB` peak."*
 
 **Report the overhead, never the raw RSS** — the interpreter and BLAS baseline is `~33 MiB` and no
 method choice affects it.
@@ -480,7 +488,7 @@ $$P_{\mathrm{in}} = 2\pi^2 F^2/\nu \qquad\text{and}\qquad P_{\mathrm{in}}(\psi_K
 
 **The sentence at `04_methods.tex:320-327`:** *"At small $r$, the per-step cost of SP-DLRA is therefore comparable to, or larger than, the full-grid reference, and we make no a priori claim of per-step speedup. **Any end-to-end benefit has to come from the memory footprint of the factors ($O(nr)$ versus $O(n)$) or from regimes in which the rank stays small over long time spans; both are measured, not assumed.**"*
 
-**Route 1, memory, is closed — and the sign is the wrong way round.** Every recorded overhead is **positive**: `+2.24 MiB` (`N=64`), `+1.96` (BUG, `N=64`), `+4.27 MiB` (`N=128`), `+3.59` (BUG, `N=128`). **The reduced integrator uses *more* memory, not less.** The $O(nr)$ versus $O(n)$ argument is about the **factors**; the state is a full $n$-field *plus* its factors *plus* the factorisation workspace, and the workspace dominates.
+**Route 1, memory, is closed — and the sign is the wrong way round.** Every recorded overhead is **positive**: `+2.37 MiB` (`N=64`), `+2.18` (BUG, `N=64`), `+4.21 MiB` (`N=128`), `+3.63` (BUG, `N=128`) — and `24–43×` the `0.098 MiB` noise floor (D89: re-measured on committed code; D52.6's `+2.24`/`+4.27` are superseded). **The reduced integrator uses *more* memory, not less.** The $O(nr)$ versus $O(n)$ argument is about the **factors**; the state is a full $n$-field *plus* its factors *plus* the factorisation workspace, and the workspace dominates.
 
 **Route 2, long time spans, is unavailable.** Our only horizon beyond the initial transient is `nsteps: 200`.
 
