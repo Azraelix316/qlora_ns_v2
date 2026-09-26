@@ -13,7 +13,7 @@ describing a paper we are no longer writing.**
 
 | # | target | the one change | numbers to use | detail |
 |---|---|---|---|---|
-| **W1** | **abstract** | **replace it whole.** 180 words now, none of them survivable. 200 words replacement supplied. | `t*` = `0.649` / `1.482`; `10^{278}`; `2.1–2.7×`; *"we identify no end-to-end speedup, and say so"* | **D13** |
+| **W1** | **abstract** | **replace it whole.** 180 words now, none of them survivable. 210 words replacement supplied. | `t*` = `0.649` / `1.482`; `10^{278}`; `2.1–2.7×`; *"we identify no end-to-end speedup, and say so"* | **D13** |
 | **W2** | **contributions list** | **replace it whole.** Argues the wrong contribution; contains two barred claims. | thesis *"the subspace must evolve"*; the horizon is a property of **how the subspace is built**, not its dimension | **D14** |
 | **W3** | **§1 intro, the summary sentence** | Clauses (ii)–(iii) + the validation sentence. Keeps clause (i). | `1.1e-13` (not `1e-14`); `2.1–2.7×`; **no** "turbulent dynamics", **no** "rank growth" | **D11** |
 | **W4** | **§3 method + invariants** | The credibility. Both invariants as equations, then the verification. **For the energy invariant use the FULL-PDE key, not the one named `forcing_aware_invariant`** — they differ by up to `663×` and the wrong one reports a 31% violation that does not exist. | `\ | ∇·u\ | ≤ 1.1e-13`; balance `dE/dt + nu‖ω‖² − ⟨ψ,ζ⟩ = 0`, advection input vanishing to roundoff, *not assumed away*; Taylor–Green `2.8e-14` / `2.3e-14` over 200 steps; balance residual `3.2e-4` | **D2**, **D8** |
@@ -113,22 +113,22 @@ Ask me if a number looks unfamiliar; every one above is traced in `CLAIMS.md`.
 | *"the per-step cost is **comparable to, and in regimes slower than**, a full-grid solver"* | **false for every measurement we have** — the minimum observed is `2.08×`, so it is *always* slower and never comparable |
 | *"which we report alongside **the benefits**"* | **what benefits?** we identify **no** end-to-end benefit: no speedup, and `+2.2`–`+4.3 MiB` *more* memory |
 
-**The replacement, 200 words, every number verified:**
+**The replacement, 210 words, every number verified:**
 
 ```latex
 \begin{abstract}
 Approximating the state to cut the cost of a Navier--Stokes solve raises a
 question usually asked backwards: not how accurately a reduced model tracks a
-trajectory, but when a reduced trajectory is worth having at all. In forced
+trajectory, but when a reduced trajectory is worth having. In forced
 two-dimensional stream-function flow, a structure-preserving projected integrator
-treats the viscous part exactly and the nonlinear part by a midpoint step.
+treats the viscous part exactly and the nonlinear part by midpoint.
 Against a static subspace of equal rank, we measure the horizon at which it
-is the more accurate --- $t^\ast = 0.649$ at rank $16$ and
+is more accurate --- $t^\ast = 0.649$ at rank $16$ and
 $1.482$ at rank $32$ --- and find it reflects how the subspace is built,
-not its dimension: above rank $\approx 8$ extra rank buys it nothing measurable,
-ranks $16$, $32$ and $43$ agreeing to four decimals. A fixed basis propagated
-through the nonlinearity overflows at ranks $32$ and $42$, reaching $10^{278}$,
-while every structure-preserving variant holds roundoff divergence; under grid
+not its dimension: from rank $16$ the static subspace stops improving altogether, with
+ranks $16$, $32$ and $43$ identical at every horizon and both Reynolds
+numbers, while ranks $2$, $4$ and $8$ differ by up to $85\%$. A fixed basis propagated
+through the nonlinearity overflows at ranks $32$ and $42$, reaching $10^{278}$; every structure-preserving variant holds roundoff divergence; under grid
 refinement the reduced error falls by a factor $2.2$ while the static baseline's
 grows by three orders of magnitude. The evidence is narrow: one
 forcing, horizons of order unity, a rank criterion we report but do not
@@ -180,10 +180,11 @@ check, and the grid and largest rank tested. Under that protocol, correcting fou
 baseline defects \emph{shortened} our own advantage and cost three of six ranks
 their crossover; we report the corrected numbers.
 
-\item \textbf{The mechanism, measured: a static subspace saturates in rank.} Above
-$r\approx 8$, additional rank buys a propagated static subspace nothing measurable
-at any horizon --- ranks $16$, $32$ and $43$ agree to four decimals --- because its
-own per-step truncation accumulates onto a saturation plateau. The advantage
+\item \textbf{The mechanism, measured: a static subspace saturates in rank.} From
+rank $16$ a propagated static subspace stops improving altogether: ranks $16$, $32$ and $43$
+agree exactly at every horizon and both Reynolds numbers, while ranks $2$, $4$ and $8$
+differ from them by up to $85\%$, because its own per-step truncation accumulates onto a
+saturation plateau. The advantage
 horizon therefore reflects how a subspace is \emph{built}, not how large it is.
 
 \item \textbf{The stability result: the subspace must evolve.} A fixed basis
