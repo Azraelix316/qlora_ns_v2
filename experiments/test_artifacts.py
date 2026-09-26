@@ -44,6 +44,134 @@ def load(name: str) -> dict:
     return json.loads(path.read_text())
 
 
+def test_the_long_run_zonal_share_is_computed_from_ALIGNED_series():
+    """The two series the share differences must be sampled at the same steps.
+
+    Found by the reviewer on 2026-09-26: `kolmogorov_re5000_N64_long.json`
+    recorded `zonal_energy_fraction: null`, because `energy_history` had 201
+    entries, `fluctuation_energy_history` had 2001, and `_zonal_fraction`'s own
+    length guard returned `None`. That is the worst shape a diagnostic can have —
+    a silent absence on the one number the paper's mechanism section leans on — and
+    the guard was right to fire, so the fix had to be upstream of it.
+
+    The fix builds a copy of the fluctuation series **under the same stride** as
+    the totals. Equal *length* would not have been enough: two series of 201
+    entries sampled at different steps difference cleanly and give a plausible,
+    wrong ratio. So what is asserted here is alignment, not size:
+
+    * the share is present at all (the original defect);
+    * the total energy in the share's components equals `energy_history` at the
+      *same index*, which is only true if the totals were not resampled;
+    * the fluctuation energy at `at_t0` equals `fluctuation_energy_history[0]`;
+    * and the two recorded series still have *different* lengths, so the test is
+      not passing because someone made them equal by truncation.
+
+    **Where the guarantee lives, stated honestly.** The fix builds a copy of the
+    fluctuation series under the same stride as the totals, and *that* is what
+    makes the ratio correct: two series of equal length sampled at different steps
+    difference cleanly and give a plausible, wrong number. **That alignment is a
+    property of the driver, not of the artifact** — the artifact records only the
+    two endpoints of the share, so it cannot demonstrate what happened at the 199
+    indices between them. So the check is split in two:
+
+    * the *driver* is checked by reading its source and requiring the sampled
+      series and the totals to be appended under **one** condition; and
+    * the *artifact* is checked only for what it can prove — the share exists, its
+      endpoints are the recorded series' endpoints, and the two recorded series
+      still differ in length.
+
+    The first version of this test asserted alignment from the artifact and
+    **passed on a deliberately one-step-misaligned share**, because it only ever
+    compared endpoints. That is the sixth check this session that was green and
+    could not fail in the way it claimed; it is kept as a worked example of why a
+    guarantee has to be checked where it is made.
+    """
+    from _paths import EXPERIMENTS
+
+    source = (EXPERIMENTS / "run_long_time.py").read_text()
+    # Locate the `if` that guards the sampling, by parsing rather than by
+    # searching. A substring window was the second attempt and it **passed on a
+    # deliberately misaligned driver**: the appends were still inside the window,
+    # just under a different `if`. Presence in a window is not membership in a
+    # block, and this is the third version of this check, the first two of which
+    # could not fail in the way they claimed.
+    import ast
+
+    tree = ast.parse(source)
+    guards = [
+        node for node in ast.walk(tree)
+        if isinstance(node, ast.If)
+        and "history_stride" in ast.unparse(node.test)
+    ]
+    assert guards, (
+        "run_long_time.py has no `if` whose test mentions history_stride, so the "
+        "stride that aligns the totals with the sampled fluctuations is gone. "
+        "The share is a ratio of two series and equal length is not alignment -- "
+        "find the new sampling condition and point this test at it."
+    )
+    # The guard must be the sampling one, not merely any mention.
+    sampling = [
+        node for node in guards
+        if ast.unparse(node.test) == "step % history_stride == 0 or step == nsteps"
+    ]
+    assert sampling, (
+        "the sampling condition changed shape; found "
+        f"{[ast.unparse(n.test) for n in guards]}. Update this test deliberately "
+        "-- and re-check that the totals and the sampled fluctuations are still "
+        "appended under it."
+    )
+    body = ast.unparse(ast.Module(body=sampling[0].body, type_ignores=[]))
+    for name in ("full_energy.append", "dlra_energy.append",
+                 "full_fluctuation_energy_sampled.append",
+                 "dlra_fluctuation_energy_sampled.append"):
+        assert name in body, (
+            f"{name} is not inside the shared sampling `if`, so the totals and "
+            "the sampled fluctuations are not guaranteed to share a stride -- "
+            "the share would be a ratio of misaligned series"
+        )
+
+    data = load("kolmogorov_re5000_N64_long.json")
+    assert data is not None
+    for method in ("full", "dlra"):
+        block_data = data[method]
+        share = block_data.get("zonal_energy_fraction")
+        assert share is not None, (
+            f"{method}: zonal_energy_fraction is null, so the one number the "
+            "mechanism section leans on is absent rather than wrong"
+        )
+        assert share.get("at_t0") is not None and share.get("at_final_step") is not None
+
+        components = block_data["zonal_energy_fraction_components"]
+        energy = block_data["energy_history"]
+        fluct = block_data["fluctuation_energy_history"]
+
+        # The totals in the ratio are the recorded totals, at the same index.
+        assert components["at_t0"]["total_energy"] == energy[0], (
+            f"{method}: the share's t0 total is not energy_history[0], so the two "
+            "series were resampled independently"
+        )
+        assert components["at_final_step"]["total_energy"] == energy[-1], (
+            f"{method}: the share's final total is not energy_history[-1]"
+        )
+        assert components["at_t0"]["fluctuation_energy"] == fluct[0], (
+            f"{method}: the share's t0 fluctuation is not fluctuation_energy_history[0]"
+        )
+        # The share itself is the ratio of those components.
+        for index in ("at_t0", "at_final_step"):
+            c = components[index]
+            assert abs((c["total_energy"] - c["fluctuation_energy"])
+                       / c["total_energy"] - share[index]) < 1e-15, (method, index)
+
+        # And the point of the exercise: the recorded series really are different
+        # lengths, so passing the assertions above is alignment and not a
+        # truncation that happened to make the guard happy.
+        assert len(fluct) != len(energy), (
+            f"{method}: the fluctuation series now has the same length as the "
+            f"totals ({len(fluct)}); if that is because one was truncated to "
+            "match, the share is no longer over the whole horizon"
+        )
+
+
 def test_every_driver_can_print_its_own_help():
     """`--help` is how a person discovers the flags, so it must not crash.
 
