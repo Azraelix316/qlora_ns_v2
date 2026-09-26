@@ -202,22 +202,21 @@ def test_the_repin_request_list_is_current_and_explains_every_row():
     before = load("repin_requests.json")
     assert before is not None, "repin_requests.json has never been generated"
 
+    # `--check`, not a regeneration. The first version re-ran the generator, which
+    # rewrote the artifact and left the working tree dirty -- and a dirty tree is
+    # how this project detects contamination, so a test that dirties it destroys
+    # the signal it is meant to preserve. This test regenerated itself into
+    # existence as a source of false "the tree is dirty".
     result = subprocess.run(
-        [sys.executable, str(EXPERIMENTS / "make_repin_requests.py")],
+        [sys.executable, str(EXPERIMENTS / "make_repin_requests.py"), "--check"],
         cwd=REPO_ROOT, capture_output=True, text=True, timeout=3600,
     )
     assert result.returncode == 0, (
-        f"the re-pin generator failed:\n{result.stdout[-1200:]}\n{result.stderr[-600:]}"
-    )
-    after = _json.loads((REPO_ROOT / "state" / "coder" / "results"
-                         / "repin_requests.json").read_text())
-
-    assert after["rows"] == before["rows"], (
         "the re-pin list is stale -- the gate's failures have changed since it was "
-        f"written.\n  was: {[r['row'] for r in before['rows']]}\n"
-        f"  now: {[r['row'] for r in after['rows']]}\n"
+        f"written.\n{result.stdout[-1500:]}\n{result.stderr[-600:]}\n"
         "Re-commit the regenerated list, and say in the outbox which rows moved."
     )
+    after = before  # --check left it untouched, so the on-disk list IS `before`
     assert not after["rows_without_a_stated_reason"], (
         "these failing rows have no stated reason, so the list is not a closed "
         f"one: {after['rows_without_a_stated_reason']}"
@@ -296,16 +295,19 @@ def test_the_scheme_card_cites_code_that_says_what_the_card_claims():
 
     from _paths import EXPERIMENTS, REPO_ROOT
 
+    # `--check` for the same reason as the re-pin test: running the generator here
+    # rewrote scheme_card.{md,json} and dirtied the tree on every suite run, so
+    # "git status is clean" stopped being a usable signal.
     result = subprocess.run(
-        [sys.executable, str(EXPERIMENTS / "make_scheme_card.py")],
+        [sys.executable, str(EXPERIMENTS / "make_scheme_card.py"), "--check"],
         cwd=REPO_ROOT, capture_output=True, text=True, timeout=600,
     )
     assert result.returncode == 0, (
-        "a scheme-card citation no longer resolves, so the card was not "
-        f"written:\n{result.stdout[-1500:]}\n{result.stderr[-600:]}\n"
+        "the scheme card is stale, or a citation no longer resolves:\n"
+        f"{result.stdout[-1500:]}\n{result.stderr[-600:]}\n"
         "Either the code moved (update the line number in "
         "experiments/make_scheme_card.py) or the behaviour changed (rewrite the "
-        "claim -- do not just repoint it)."
+        "claim -- do not just repoint it). Then run the generator without --check."
     )
     assert "all verified" in result.stdout, result.stdout[-600:]
 

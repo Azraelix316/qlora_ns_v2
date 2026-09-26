@@ -194,6 +194,12 @@ def render() -> str:
 
 
 def main() -> int:
+    # `--check` verifies without writing. A test that regenerates the artifact in
+    # place leaves the working tree dirty, and a dirty tree is how this project
+    # detects contamination -- so a test that dirties it destroys the signal it is
+    # meant to preserve. The content is compared, provenance included, because a
+    # stale card is exactly what this must catch.
+    check_only = "--check" in sys.argv
     problems = verify()
     if problems:
         print("SCHEME CARD — CITATION CHECK FAILED\n")
@@ -208,7 +214,11 @@ def main() -> int:
 
     n = sum(len(entries) for _, entries in CARD)
     RESULTS.mkdir(parents=True, exist_ok=True)
-    (RESULTS / "scheme_card.md").write_text(render())
+    markdown = render()
+    md_path = RESULTS / "scheme_card.md"
+    if check_only and not md_path.exists():
+        print("scheme_card.md is absent; run without --check to write it")
+        return 1
 
     from provenance import provenance
 
@@ -227,12 +237,39 @@ def main() -> int:
         "citations_verified": n,
         "provenance": provenance(ROOT / "experiments" / "make_scheme_card.py"),
     }
-    (RESULTS / "scheme_card.json").write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n"
-    )
+    serialised = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    json_path = RESULTS / "scheme_card.json"
+    if check_only:
+        # Compare the CONTENT, not the provenance. This first version compared the
+        # serialised JSON including its `provenance` block, and so reported STALE
+        # against a card it had just written -- because the block records the
+        # commit and the working-tree hash at generation time, and rewriting the
+        # card changes both. A check that can never be green is a check nobody
+        # reads. The question here is "is the card current with the code", and the
+        # provenance answers a different one.
+        stale = []
+        if md_path.read_text() != markdown:
+            stale.append("scheme_card.md")
+        if not json_path.exists():
+            stale.append("scheme_card.json")
+        else:
+            on_disk = json.loads(json_path.read_text())
+            for key in ("sections", "citations_verified", "case"):
+                if on_disk.get(key) != payload.get(key):
+                    stale.append(f"scheme_card.json:{key}")
+        if stale:
+            print("SCHEME CARD — STALE: " + ", ".join(stale))
+            print("  Run without --check to regenerate. The card is a deliverable the")
+            print("  writer reads, so a stale one is worse than a missing citation.")
+            return 1
+        print(f"SCHEME CARD — current: {len(CARD)} sections, {n} citations, "
+              "all verified, content matches")
+        return 0
+    md_path.write_text(markdown)
+    json_path.write_text(serialised)
     print(f"SCHEME CARD — {len(CARD)} sections, {n} citations, all verified")
-    print(f"  wrote {RESULTS/'scheme_card.md'}")
-    print(f"  wrote {RESULTS/'scheme_card.json'}")
+    print(f"  wrote {md_path}")
+    print(f"  wrote {json_path}")
     return 0
 
 
