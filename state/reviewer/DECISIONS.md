@@ -7761,4 +7761,3 @@ price; `25 s` is a number that would let someone drop it without knowing what it
 
 **D113.6 — Unchanged.** Everything in D35.6 through D112.7 stands, **except that C6-1 and C6-2 are closed, and the
 project's central claim now has a live positive control in the suite rather than one scratch run in my transcript.**
-

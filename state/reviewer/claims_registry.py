@@ -409,6 +409,43 @@ def trace_literals(text, values, lo=2, unaccounted_lo=4):
     return out
 
 
+def mismatch_detail(actual, expect, sf, numeric=True):
+    """D112.4: the text a value FAIL prints. Extracted so the self-test can drive the bands.
+
+    A FAIL that cannot be diagnosed is a FAIL that gets ignored. `artifact X != registry Y` says
+    nothing about whether X moved because the code regressed or because the run was repeated, and
+    D112.3 measured that 30 of the 32 numeric rows reject a +10% displacement -- so most failures
+    here ARE re-runs. The bands are heuristics anchored on D91.5's recorded 8.7-26.5% within-run and
+    11-173% between-run spreads; the registry carries no per-quantity noise figure and inventing one
+    would be the error this decision is about. The row's own `sf` is printed with it, so a reader
+    can overrule the band.
+    """
+    if not (numeric
+            and isinstance(actual, (int, float)) and not isinstance(actual, bool)
+            and isinstance(expect, (int, float)) and not isinstance(expect, bool)):
+        return f"artifact {actual!r} != registry {expect!r}"
+    rel = abs(float(actual) - float(expect)) / abs(float(expect)) if expect else float("inf")
+    pct = rel * 100
+    if rel == 0.0:
+        # The caller only reaches here on a FAILED comparison, so an identical pair means this
+        # function was called on something that is not a failure. Say so rather than banding a
+        # 0% difference as "plausibly a re-run", which would be the wrong words for an exact match.
+        return (f"artifact {actual!r} == registry {expect!r}  [0% apart]  IDENTICAL -- this is NOT a "
+                f"failure; if you are reading this, the comparison that called this is wrong")
+    if rel < 0.10:
+        band = ("within 10% -- PLAUSIBLY A RE-RUN. D91.5 recorded 8.7-26.5% within-run and "
+                "11-173% between-run on a chaotic quantity, so check this row's recorded noise "
+                "before calling it a regression")
+    elif rel < 1.0:
+        band = ("10-100% -- NOT NOISE on any quantity measured in this project; treat as a "
+                "regression until shown otherwise")
+    else:
+        band = ("over 100% -- the value changed by more than its own magnitude; the artifact, the "
+                "driver, or the registry row is wrong")
+    return (f"artifact {actual!r} != registry {expect!r}  "
+            f"[{pct:.4g}% apart, row pinned at sf={sf}]  {band}")
+
+
 def self_test():
     """D112 ADDED THIS. THE REASON IS THE FINDING, AND IT IS THE SAME ONE AS D111.9.
 
@@ -542,12 +579,40 @@ def self_test():
           f"{'' if ok else '  expected 1'}   a bare integer's trailing zeros are not significant")
     if not ok:
         fails += 1
+    # --- 5. the FAIL diagnostic's bands (D112.4)
+    print()
+    print("  PROPERTY 5 -- the FAIL diagnostic must CLASSIFY, not merely report a difference")
+    band_cases = [
+        (0.6493281145096707, 0.6493281145096707 * 1.05, "within 10%", "a 5% move reads as a re-run"),
+        (0.6493281145096707, 0.6493281145096707 * 1.5, "10-100%", "a 50% move reads as a regression"),
+        # the denominator is the REGISTRY value, so a 3x artifact is 200% apart -- the first
+        # version of this case had the arguments the wrong way round and read 66.7%, which is
+        # the 10-100% band. The banding is right; the fixture was wrong.
+        (0.6493281145096707 * 3.0, 0.6493281145096707, "over 100%", "a 3x artifact reads as a wrong artifact"),
+        (0.6493281145096707, 0.6493281145096707, "IDENTICAL", "an exact match must not be banded as a re-run"),
+        (0.6493281145096707, 0.6493281145096707 * 0.95, "within 10%", "the band is two-sided"),
+    ]
+    for actual, expect, want, why in band_cases:
+        detail = mismatch_detail(actual, expect, 16)
+        ok = want in detail
+        print(f"    {'ok  ' if ok else 'FAIL'}  {actual:.6g} vs {expect:.6g} -> "
+              f"{'banded' if want != '== registry' else 'unbanded':<8} {why}")
+        if not ok:
+            fails += 1
+    # a non-numeric claim must not be banded: it has no magnitude to band
+    d = mismatch_detail("never", "never", None, numeric=False)
+    ok = "band" not in d and "!=" in d
+    print(f"    {'ok  ' if ok else 'FAIL'}  a non-numeric claim prints no band"
+          f"{'' if ok else ' -- it has no magnitude to band'}")
+    if not ok:
+        fails += 1
     print()
     if fails:
         print(f"FAIL: {fails} case(s) wrong -- the registry cannot be trusted until they pass")
         return 1
-    print("PASS: no row is vacuous; the tripwire population is measured and reported;")
-    print("      resolve() raises on all three ambiguity cases; round_sig's boundaries hold.")
+    print("PASS: 5 properties. (1) no row is vacuous; (2) the tripwire population is measured and")
+    print("      reported; (3) resolve() raises on all three ambiguity cases; (4) round_sig's boundaries")
+    print("      hold; (5) the FAIL diagnostic classifies rather than merely reporting a difference.")
     print("      NOTE: a large tripwire population is REPORTED, not failed -- whether that is")
     print("      acceptable is a judgement about what the registry is for, recorded in D112.3.")
     return 0
@@ -610,9 +675,29 @@ def main():
             print(f"  OK   {cid:<26} {where}")
             print(f"       {note if want_lit else actual!r}")
         else:
-            bad.append((cid, f"artifact {actual!r} != registry {expect!r}"))
-            print(f"  FAIL {cid:<26} artifact {actual!r} != registry {expect!r}")
+            # D112.4: a FAIL that cannot be diagnosed is a FAIL that gets ignored. `artifact X !=
+            # registry Y` does not say whether X moved because the code regressed or because the run
+            # was repeated -- and D91.5 MEASURED that the cost quantity moves 8.7-26.5% within a run
+            # and 11-173% between runs of the same protocol, while D112.3 measured that 30 of these
+            # 32 numeric rows REJECT a +10% displacement. So the difference is printed, and banded
+            # against that recorded spread, so a reader can classify it without leaving the output.
+            #
+            # THE BANDS ARE HEURISTICS ANCHORED ON D91.5's RECORDED SPREADS, NOT PER-QUANTITY NOISE.
+            # The registry carries no per-quantity noise figure and inventing one would be the error
+            # this decision is about. What it does carry is each row's `sf` -- the tolerance the row
+            # itself declares -- so that is printed too, and the two together let a reader overrule
+            # the band.
+            detail = mismatch_detail(actual, expect, sf, numeric=not want_lit)
+            bad.append((cid, detail))
+            print(f"  FAIL {cid:<26} {detail}")
+            if not want_lit:
+                print(f"       {art}:{path}" + (f"[{sel}].{field}" if sel else f".{field}"))
     print(f"\n  {ok_n}/{len(REGISTRY)} verified, {len(bad)} failed")
+    if bad:
+        print("  A failure above is NOT by itself a regression: compare the percentage against that")
+        print("  quantity's recorded noise (D91.5) before acting on it. Rows pinned at many")
+        print("  significant figures are tripwires BY CONSTRUCTION -- 30 of the 32 numeric rows reject")
+        print("  a +10% displacement (D112.3) -- so most failures here are re-runs, not defects.")
 
     print("\nPART 2 — THRESHOLD claims: does the draft state the value the runs actually used?\n")
     tex, src = load_draft(root, sys.argv[2] if len(sys.argv) > 2 else None)
