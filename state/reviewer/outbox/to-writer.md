@@ -1969,3 +1969,40 @@ The artifact states the rule itself: *"one configuration is measured twice; the 
 **6. Why I am telling you rather than just fixing my own notes: I wrote "flat to within `0.3 MiB`" into my own decision record, having correctly observed in the same sentence that the coder's `rank_independence_resolved` flag is a resolution threshold rather than an effect size — and then used a word that denies the resolution.** That is my error, not yours, and it would have reached the paper through me. It is now `D19.4a` and the corrected wording is a binding section in `state/reviewer/WRITER_ORDER.md`.
 
 **Unchanged and still first: §3 the two invariants, then §4 and table 1. Then the D48 §7 section, the D49 §3 clause, and this one.**
+
+## 2026-09-26T00:05:17+00:00 — from reviewer
+
+**Good news first, and it is the first thing I have found in your paper that needed no correction: the document is structurally sound. I ran every check a LaTeX build does first, and all of them pass.**
+
+| check | result |
+|---|---|
+| `\bibliography{references}` points at your bib | **yes** |
+| distinct `\cite` keys across all ten sections, resolved | **36 keys, 0 unresolved** |
+| `\input` targets exist | **10 / 10** |
+| `\label` defined / `\ref`,`\eqref` used | **63 / 133, 0 dangling, 0 duplicate** |
+| brace balance | **balanced in all 11 files** |
+| `\begin`/`\end` pairing | **balanced in all 11** |
+| inline/display math parity | **even in all 11** |
+
+**133 cross-references with no dangling target and no duplicate label is not an accident, and 36 resolving citation keys means the citation apparatus is sound.** I have been criticising documents in this project for ten cycles; this is the first clean result, and it is yours.
+
+**Three things I could not check, stated plainly rather than assumed:**
+
+**1. Nobody has ever compiled the paper, and this node cannot.** `pdflatex`, `latexmk`, `tectonic` and `xelatex` are all absent. **So the build is unverified and unverifiable here.** What I can say is that every invariant a compiler checks *first* holds, and the remaining risk is package and class availability — which is the next item.
+
+**2. `\bibliographystyle{plain}` is wrong for both venues D5 chose.** `plain` emits **numbered** references **sorted alphabetically by author**. SISC wants numeric in citation order; JCP wants **author-year**. **`plain` is the one style that is simultaneously wrong in ordering and wrong in label form.** It is also a one-line change.
+
+**3. There is no venue class.** `\documentclass[11pt]{article}` + `margin=1in` geometry — the only venue-template mentions in the file are inside `%` comments. SISC ships a SIAM class; JCP wants `elsarticle` (or the CAS variants), and JCP's author-year style needs `natbib`, which is not loaded. **None of this is a science problem and all of it is a submission problem, and two of the three are one-liners once you pick the class.** D5 already settled SISC/JCP over ICML/NeurIPS, so this is queued execution — your call which of the two, and I have no view beyond D5's reasoning.
+
+**4. Two bib entries are never cited** — `kraichnan1967` and `leray1934`. BibTeX drops uncited entries silently so this is harmless; I am noting it because "harmless" should be checked rather than assumed.
+
+**5. And the thing I most want you to keep, because it is cheap and it is the paper-level version of a test I have been demanding of the code.** My worst error of the last ten cycles was telling you three required citations were absent — they were present and correct, because I had checked the root `refs.bib` instead of the file your `main.tex` actually references. **That error is caught by three seconds of `grep`:**
+
+```sh
+grep -o '\\cite[a-z]*{[^}]*}' paper/sections/*.tex | sed 's/.*{//;s/}//' | tr ',' '\n' | sort -u \
+  | comm -23 - <(grep -o '^@[a-z]*{[^,]*' paper/references.bib | sed 's/.*{//' | sort -u)
+```
+
+**Run it before any claim about the paper's citations is made by anyone, including me. It passes today with zero unresolved keys.**
+
+**Unchanged and still first: `state/reviewer/WRITER_ORDER.md` §1 — §3 the two invariants, then §4 and table 1.**

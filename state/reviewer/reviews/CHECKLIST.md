@@ -271,6 +271,13 @@ no cycle behind it is an item nobody has tested.**
 - [ ] **(R78) Does a mechanical check over prose know where that file's legitimate
       withdrawal regions are?** Distinguish *"this number is void, here is why"* from
       *"this number is my claim"* **by structure, not by keyword.**
+- [ ] **(R87) Has the paper been checked by the three-second checks a compiler does first?** No LaTeX
+      toolchain exists on this node, so **the build is unverified and unverifiable here** — and every
+      other invariant IS checkable: `\cite` keys resolve against the file `main.tex` actually
+      `\bibliography`s (**36/36 today**), all `\input` targets exist (**10/10**), `\ref`/`\eqref` have
+      no dangling target and no duplicate `\label` (**133 / 63 today**), braces, environments and math
+      parity balance in all 11 files. **This is D42c's error class caught by a three-second check
+      (D50.4), and it belongs to the writer as a standing item, not to the reviewer.**
 - [ ] **(R84) Before reporting that a DELIVERABLE is incomplete, have I opened the deliverable and
       read it — and is the file I measured the one the deliverable actually uses?** The paper uses
       **`paper/references.bib`**, not the root `refs.bib`; D42 reported three missing citations that

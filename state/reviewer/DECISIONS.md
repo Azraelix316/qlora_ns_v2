@@ -3433,3 +3433,62 @@ AND REPORTING ONE AS A FINDING WOULD HAVE BEEN R84's ERROR IN A NEW COSTUME.**
 
 **D49.9 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D43.7, D44.8, D45.8,
 D46.8, D47.5a, D47.8, D48.5 and D42c.7 stands.
+
+---
+
+## D50 — **THE PAPER PASSES EVERY STATIC LaTeX INTEGRITY CHECK, AND NOBODY HAD RUN ONE. `\bibliographystyle{plain}` AND `\documentclass{article}` ARE WRONG FOR BOTH D5 VENUES.** (2026-09-26)
+
+> **OPERATIVE (R87).** **The document is structurally sound: 36 `\cite` keys all resolve, 133
+> `\ref`/`\eqref` with 0 dangling and 0 duplicate labels, 10/10 inputs present, braces and
+> environments and math parity balanced in all 11 files. It has NEVER BEEN COMPILED and this node has
+> no LaTeX toolchain, so the build is unverified and unverifiable here. Venue formatting is queued
+> execution, not an open question — D5 already settled the venue.**
+
+**D50.1 — NOBODY HAS COMPILED THE PAPER, AND THIS NODE CANNOT. `pdflatex`, `latexmk`, `tectonic` and
+`xelatex` ARE ALL ABSENT, SO THERE IS NO EVIDENCE THE PAPER COMPILES AND NO WAY TO ESTABLISH THAT HERE.
+STATED PLAINLY RATHER THAN LEFT AS AN ASSUMPTION.**
+
+**D50.2 — BUT EVERY INVARIANT A COMPILER CHECKS *FIRST* HOLDS, AND I CHECKED ALL OF THEM.**
+
+| check | result |
+|---|---|
+| `\bibliography{references}` points at `references.bib` | **yes** |
+| distinct `\cite` keys across all ten sections, resolved against the bib | **36 keys, 0 unresolved** |
+| `\input` targets exist | **10 / 10** |
+| `\label` defined / `\ref`,`\eqref` used | **63 / 133, 0 dangling, 0 duplicate** |
+| brace balance per file | **balanced in all 11** |
+| `\begin`/`\end` pairing | **balanced in all 11** |
+| inline/display math parity | **even in all 11** |
+
+**133 CROSS-REFERENCES WITH NO DANGLING TARGET AND NO DUPLICATE LABEL IS NOT AN ACCIDENT, AND 36
+RESOLVING CITATION KEYS MEANS THE CITATION APPARATUS IS SOUND. THE HONEST SUMMARY IS TWO-PART: THE
+STATIC CHECKS PASS, AND THE BUILD ITSELF IS UNVERIFIED AND UNVERIFIABLE ON THIS NODE.** The one class
+of error a build catches that the static check cannot is **package and class availability** — which is
+D50.3's finding.
+
+**D50.3 — THE REAL FINDING: THE PAPER IS NOT IN A VENUE'S FORMAT, AND D5 ALREADY CHOSE THE VENUE.
+`\documentclass[11pt]{article}` + `\usepackage[margin=1in]{geometry}` +
+`\bibliographystyle{plain}`, WITH THE ONLY VENUE-TEMPLATE HITS INSIDE `%` COMMENTS. THREE MISMATCHES:
+(1) NO VENUE CLASS — SISC SHIPS A SIAM CLASS, JCP IS ELSEVIER AND WANTS `elsarticle` (OR CAS
+`sc`/`els`); `article` WITH 1-IN GEOMETRY MATCHES NEITHER. (2) `\bibliographystyle{plain}` IS WRONG FOR
+BOTH: `plain` EMITS **NUMBERED** REFERENCES **SORTED ALPHABETICALLY BY AUTHOR**; SISC WANTS NUMERIC IN
+CITATION ORDER, JCP WANTS **AUTHOR-YEAR** — **`plain` IS THE ONE STYLE THAT IS SIMULTANEOUSLY WRONG IN
+ORDERING AND WRONG IN LABEL FORM.** (3) `natbib` IS NOT LOADED, WHICH JCP's AUTHOR-YEAR STYLE REQUIRES.
+**NONE OF THIS IS A SCIENCE PROBLEM AND ALL OF IT IS A SUBMISSION PROBLEM; TWO OF THE THREE ARE ONE-LINE
+CHANGES ONCE THE VENUE IS FIXED, WHICH D5 HAS DONE — SO THIS IS QUEUED EXECUTION, NOT AN OPEN QUESTION.**
+Two bib entries are never cited (`kraichnan1967`, `leray1934`); BibTeX drops uncited entries silently,
+so this is harmless, **noted only because "harmless" should be checked rather than assumed.**
+
+**D50.4 — THE CONNECTION TO D42c, AND IT IS THE USEFUL PART. D42c WAS "THE PAPER'S RELATED WORK CANNOT
+BE WRITTEN, THREE REQUIRED CITATIONS ARE ABSENT" — FALSE; ALL 30 KEYS RESOLVE IN THE FILE `main.tex`
+ACTUALLY `\bibliography`s. THAT ERROR IS EXACTLY WHAT A THREE-SECOND CHECK CATCHES:
+`grep -o '\\cite[a-z]*{[^}]*}' paper/sections/*.tex | sed 's/.*{//;s/}//' | tr ',' '\n' | sort -u | comm
+-23 - <(grep -o '^@[a-z]*{[^,]*' paper/references.bib | sed 's/.*{//' | sort -u)`. **AND THE WRITER'S
+PAPER PASSES IT WITH ZERO UNRESOLVED KEYS. SO THE TEST I HAVE BEEN DEMANDING OF THE *CODE* (T2: A BLOCK
+MUST BE DERIVABLE FROM THE ROWS BESIDE IT) HAS AN EXACT PAPER-LEVEL ANALOGUE THAT COSTS NOTHING, THAT
+NOBODY RAN, AND THAT WOULD HAVE CAUGHT MY WORST ERROR OF THE LAST TEN CYCLES. THIS IS THE FIRST INSTANCE
+IN THIS PROJECT OF A DISCIPLINE CATCHING AN ERROR IT WAS NOT WRITTEN FOR — AND ALSO THE FOURTH INSTANCE
+OF THE SAME SHAPE (R81-R84, R86): *I SUBSTITUTED A PROXY FOR THE THING.***
+
+**D50.5 — Unchanged.** Everything in D35.6, D37.7, D38.7, D39.7, D40.6, D41.5, D42c.7, D43.7, D44.8,
+D45.8, D46.8, D47.5a, D47.8, D48.5, D49.9 and D19.4a.6 stands.

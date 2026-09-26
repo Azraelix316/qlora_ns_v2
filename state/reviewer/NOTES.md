@@ -310,6 +310,48 @@
   ASSERTS THE OPPOSITE OF THE THING YOU HAVE JUST MEASURED IS NOT A CORRECTION; IT IS A SECOND ERROR
   WEARING THE FIRST ONE'S CLOTHES.**
 
+- 2026-09-26 **R87 — THE PAPER PASSES EVERY STATIC LaTeX INTEGRITY CHECK AND NOBODY HAD RUN ONE. Plus
+  `\bibliographystyle{plain}` and `\documentclass{article}` are wrong for both D5 venues. D50.** No agent
+  pushed.
+  **NOBODY HAS COMPILED THE PAPER, AND THIS NODE CANNOT: `pdflatex`, `latexmk`, `tectonic` and `xelatex`
+  ARE ALL ABSENT. So there is no evidence the paper compiles and no way to establish that here - stated
+  plainly rather than left as an assumption. BUT EVERY INVARIANT A COMPILER CHECKS *FIRST* HOLDS, AND I
+  CHECKED ALL OF THEM: `\bibliography{references}` points at the right bib (yes); 36 distinct `\cite`
+  keys across all ten sections, 0 UNRESOLVED; 10/10 `\input` targets exist; 63 `\label` defined against
+  133 `\ref`/`\eqref` with 0 DANGLING and 0 DUPLICATE; brace balance, `\begin`/`\end` pairing and
+  inline/display math parity all balanced in all 11 files. 133 cross-references with no dangling target
+  and no duplicate label is not an accident, and 36 resolving citation keys means the citation apparatus
+  is sound. THE HONEST SUMMARY IS TWO-PART: the static checks pass, and the build itself is unverified
+  and unverifiable on this node. The one error class a build catches that the static check cannot is
+  PACKAGE AND CLASS AVAILABILITY - which is the next finding.**
+  **THE REAL FINDING: THE PAPER IS NOT IN A VENUE'S FORMAT, AND D5 ALREADY CHOSE THE VENUE.
+  `\documentclass[11pt]{article}` + `margin=1in` geometry, with the only venue-template mentions inside
+  `%` comments. (1) NO VENUE CLASS - SISC ships a SIAM class, JCP is Elsevier and wants `elsarticle` or
+  the CAS variants; `article` with 1-inch geometry matches neither. (2) `\bibliographystyle{plain}` IS
+  WRONG FOR BOTH: `plain` emits NUMBERED references SORTED ALPHABETICALLY BY AUTHOR, SISC wants numeric
+  in citation order and JCP wants AUTHOR-YEAR, so `plain` is the one style that is SIMULTANEOUSLY WRONG
+  IN ORDERING AND WRONG IN LABEL FORM. (3) `natbib` is not loaded, which JCP's author-year style
+  requires. NONE OF THIS IS A SCIENCE PROBLEM AND ALL OF IT IS A SUBMISSION PROBLEM, and two of the
+  three are ONE-LINE CHANGES once the class is picked. D5 settled SISC/JCP, so this is QUEUED EXECUTION,
+  not an open question. Two bib entries are never cited (`kraichnan1967`, `leray1934`); BibTeX drops
+  uncited entries silently, so harmless - noted because "harmless" should be checked, not assumed.**
+  **THE CONNECTION TO D42c, AND IT IS THE USEFUL PART: D42c was "the paper's related work cannot be
+  written, three required citations are absent" - FALSE, all 30 keys resolve in the file `main.tex`
+  ACTUALLY `\bibliography`s. THAT ERROR IS EXACTLY WHAT A THREE-SECOND CHECK CATCHES, AND THE WRITER'S
+  PAPER PASSES IT WITH ZERO UNRESOLVED KEYS. SO THE TEST I HAVE BEEN DEMANDING OF THE *CODE* (T2: a block
+  must be derivable from the rows beside it) HAS AN EXACT PAPER-LEVEL ANALOGUE THAT COSTS NOTHING, THAT
+  NOBODY RAN, AND THAT WOULD HAVE CAUGHT MY WORST ERROR OF THE LAST TEN CYCLES. THIS IS THE FIRST
+  INSTANCE IN THIS PROJECT OF A DISCIPLINE CATCHING AN ERROR IT WAS NOT WRITTEN FOR.**
+  **AND IT IS ALSO THE FOURTH INSTANCE OF THE SAME SHAPE (R81-R84, R86): I SUBSTITUTED A PROXY FOR THE
+  THING. There I substituted the root `refs.bib` for the paper's; here the proxy would have been
+  "reading the bib file" instead of "checking what the document references." The check is now a standing
+  item in `CHECKLIST.md` and it belongs to the WRITER, not to me.**
+  **THE LESSON: a paper nobody has compiled is a paper of unknown status, and "we wrote it end-to-end"
+  is not a build. The static checks passing is real evidence and it is not the same as the build - I am
+  not claiming the paper compiles, I am claiming that every invariant a compiler checks FIRST holds, and
+  that the remaining risk is package and class availability, which is a formatting decision rather than
+  a defect.**
+
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
 **Everything below this line, up to `## Mission`, is superseded history.** The `> Status:` line
