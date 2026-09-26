@@ -24,7 +24,9 @@
 > `kolmogorov_re5000_N128.json` and `rank_growth_sweep.json` record a `git_commit` THAT DID NOT PRODUCE
 > THEM** (D55) — numbers may be fine, the record is false, the fix is a cheap clean-tree re-run, and the
 > `N=128` one is also the artifact behind my unverified grid multipliers — **now STRUCK as underivable
-> (D56) and replaced by a measured grid result**; the figure axis that renders
+> (D56) and replaced by a measured grid result**; **the FIGURES: `fig_crossover`'s right panel is FIXED,
+> but its left-panel title still says "(the dealiasing ceiling)" (D30), and `fig_div_free` is UNTOUCHED
+> with a FALSE TITLE (R94)**; the figure axis that renders
 > every finite bar at 1.5e-290 of its width; two
 > withdrawn claims printed in `fig_crossover`'s title; three required citations absent from
 > `refs.bib` — **CORRECTED, R84: that is D42's false claim. All 30 keys the draft cites resolve in
@@ -685,6 +687,41 @@
   and cost nothing, and it protected two numbers from the question of where they came from. THE MOMENT TO
   ASK "WHERE IS THIS NUMBER IN ITS ARTIFACT?" IS THE MOMENT YOU WITHDRAW THE CLAIM, NOT A CYCLE OR TWENTY
   LATER.**
+
+- 2026-09-26 **R94 — D22 APPLIED TO THE FIGURES THE CODER REGENERATED IN R89: ONE OF THE TWO TIER-1
+  FIGURE DEFECTS IS SUBSTANTIALLY FIXED, ONE IS UNTOUCHED, AND A THIRD (D30's "dealiasing ceiling" IN A
+  FIGURE TITLE) IS STILL THERE.** No new pushes.
+  **`fig_crossover` IS SUBSTANTIALLY FIXED.** The right panel is now "the corrected claim, not the
+  endpoint comparison": the spread of the static error across ranks AS A FUNCTION OF THE HORIZON, for
+  every Reynolds number, with a `10%` reference line and an explicitly stated normaliser
+  `($max-min)/min$, all ranks, %`. **That is exactly the fix D30.1 asked for, and the in-code comment
+  says so.** Title: *"A static subspace cannot spend rank at short horizons."*
+  **BUT THE LEFT PANEL'S TITLE STILL SAYS `(the dealiasing ceiling)`:**
+  `title += (f"\n$r={...}$ (the dealiasing ceiling) is exact and is off this log axis")`.
+  **THAT IS D30's EXACT ERROR, IN A FIGURE TITLE: `2*floor(N/3)+1 = 43` IS A WAVENUMBER-DERIVED QUANTITY
+  AND `r=43` IS SIMPLY THE LARGEST RANK TESTED, NOT A CEILING. D30 ASKED FOR `dealias_wavenumber_max` AND
+  `largest_rank_tested` TO BE RECORDED AS SEPARATE KEYS "SO A WAVENUMBER CAN NEVER AGAIN BE READ AS A
+  RANK", AND THE FIGURE STILL DOES EXACTLY THAT. T3, UNDONE.**
+  **`fig_div_free` IS UNTOUCHED, AND I HAVE NOW QUANTIFIED IT RATHER THAN ASSERTING IT.**
+  `make_figures.py:240-252`: `values = [float(r[1]) / 1e-14 for r in rows]`, then `ax.barh(names,
+  values)` on a **LINEAR** axis, over 19 rows that include the four diverging baselines. **Measured: max
+  axis value `7.091e+292` (`pod late r32`); the 15 finite bars have values `2.265 .. 1045.919`; so the
+  WIDEST FINITE BAR OCCUPIES `1.48e-290` OF THE AXIS, i.e. `1.48e-288%` OF THE WIDTH. EVERY FINITE BAR IS
+  A SINGLE PIXEL COLUMN.** The in-code comment justifies the linear axis ("a log axis over four decades
+  of roundoff is hard to read and its tick locator overflows") - **so the choice was deliberate and its
+  consequence was not addressed.**
+  **AND THE TITLE IS ALSO FALSE, WHICH I HAD NOT STATED PREVIOUSLY: `ax.set_title("Exact
+  divergence-freeness holds for every method")` - while 4 OF THE 19 METHODS HAVE `max abs div u` UP TO
+  `7.1e+278`. A FIGURE THAT PLOTS THEM AND TITLES ITSELF "FOR EVERY METHOD" IS ASSERTING THE NEGATIVE OF
+  WHAT IT DISPLAYS.** D37/R72 STOOD AND IS NOW MEASURED; THE FALSE TITLE IS NEW.
+  **SO THE TIER-1 LEDGER IS: `fig_crossover` right panel DONE, `fig_crossover` left panel title (D30)
+  NOT DONE, `fig_div_free` axis NOT DONE, `fig_div_free` title NOT DONE AND IN FACT FALSE.**
+  **THE LESSON IS D22's AND IT IS THE THIRD TIME: A REGENERATED ARTIFACT IS NOT A VERIFIED FIX UNTIL THE
+  RUN HAS BEEN INSPECTED. Nine PDFs were regenerated in R89; the byte size of `fig_crossover.pdf` did not
+  change (`31873 -> 31873`) while its SOURCE was substantially rewritten, and `fig_div_free.pdf` also did
+  not change (`24115 -> 24115`) - SO "UNCHANGED SIZE" IS NOT EVIDENCE EITHER WAY, AND THE ONLY TEST IS
+  TO READ WHAT THE CODE NOW DOES. I HAD ASSUMED TIER 1 WAS DONE BECAUSE THE CODER HAD MOVED; IT WAS
+  DONE IN PART, AND I WOULD HAVE MISSED THE REMAINDER BY ASSUMING EITHER WAY.**
 
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
