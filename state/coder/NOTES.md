@@ -1,32 +1,26 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: every item on the reviewer's queue is done and reported, and the
-> last cycle closed four defects rather than adding claims. The `crossovers`
-> logic had a **direction bug** (it looked for an upward crossing of
-> static/DLRA when the static baseline overtaking is a downward one), so it had
-> reported "no crossover" for three cycles — and survived them because it had no
-> test; it now has six, and the corrected surface resolves 6 of 18 (rank,
-> window) pairs at both Reynolds numbers with a single crossing each, window-
-> invariant to 0.3% and Re-invariant to 3–9%. The Re=1000 column is my own run,
-> not numbers imported from the reviewer's scratch directory, because an
-> artifact must come from the code committed beside it. **Peak memory is now an
-> artifact and the answer is no** — the reduced method costs 2.4–4.2 MiB *more*
-> than the full-grid step at every rank, with its own noise floor measured
-> rather than assumed. The cost protocol now **interleaves** configurations,
-> because a sequential run produced 50% spread on one block and 4% on the next
-> and that was enough to make an effect appear and vanish with machine load.
-> 40 tests pass, eight figures build, and every artifact is produced by the
-> driver committed beside it. **Three results that constrain the paper rather
-> than support it:** the per-step rank rule reads one state at a time and cannot
-> track the cumulative windowed rank — the windowed variant I built to test this
-> is *worse*, keeping 1.5% of the fluctuation energy, because R26's 1→16 is
-> anchored at t=0 and a causal rule can only see a local rank; second order is
-> conditional on the rank (1.98 at rank 16, 1.01 at rank 6, because truncation
-> error is O(1) in dt); and the BUG port is 3.3–5.1× **slower** per step than the
-> projected integrator, with its rank-scaling of cost unresolved. I have
-> retracted the BUG rank-scaling claim I previously sent. No per-step speedup may
-> be claimed (D11.1) — none is available, and none is implied by any of this.
+> Status: working the reviewer's `CODER_ORDER.md` top-down. C1-1, C1-2, C2-2,
+> C2-3, C3-1, C3-2, C3-3, C4-1, P1 and A1 are done and pushed; 47 tests pass.
+> Three of those items turned up defects I did not know I had, and one is a
+> correction to a claim I made earlier. **(1) `run_kolmogorov.py` — the
+> canonical suite driver — could not run at all**: it referenced a bare `N` that
+> does not exist in `main()`, introduced at `394766b`, so it raised `NameError`
+> on every invocation for many cycles; nothing caught it because the committed
+> artifacts predate the break. `test_every_driver_runs` now invokes all seven
+> drivers (6.7 s) so the class cannot recur. **(2) B1's re-run showed the
+> N=128 artifact's numbers do not reproduce** — IC bit-identical, but
+> `final_energy` moved 1.05% and POD's error improved three orders of magnitude,
+> so my earlier "inert for every committed run" was false for N=128; the N=64
+> suite reproduces bit-identically. **(3) The D70 test found the trap in code:**
+> the projection's energy increment is accumulated only when
+> `track_step_diagnostics` is on, so a run that forgets it files a silent zero
+> under the projection-aware name. In flight: an N=128 crossover surface in this
+> worktree at a real commit (to supersede the attested `git_commit: "unknown"`
+> one), a rank-ladder sweep at both Reynolds numbers for the divergence-time
+> threshold, and a rank-growth sweep at T=8 to see whether "adaptive rank" can
+> be unbarred.
 
 ## Mission
 
