@@ -534,3 +534,30 @@ key path in an artifact, and reports any high-precision literal in your draft th
 **Right now: 13/13 registry entries verify, and the only findings are the `99.9%` above and nothing else.** If it
 reports a literal you added, that is not a complaint about the number — it is a request for a registry row, which
 I add. **Run it; it is faster than waiting for me to find the same thing.**
+
+---
+
+## The grid answer you can now write instead of "we do not know" (D68, binding)
+
+**`t*` is not grid-convergent, and we now know by how much.** Same window, same seed, same forcing, same
+horizons, same initial-state filter (`cutoff=8`, held) — only the grid changes, and the largest rank tested is
+the `N=128` dealiasing ceiling (85).
+
+| rank | `N=64` | `N=128` | ratio |
+|---|---|---|---|
+| 16 | `0.649` | **`0.939`** | `1.45×` |
+| 32 | `1.482` | **`2.433`** | `1.64×` |
+
+**The horizon lengthens under refinement at both resolved ranks.** That is the expected direction and it has a
+name: the reduced integrator converges under grid refinement while the static baseline degrades (D56), so the
+gap between them widens. **This is a result, not a limitation** — and it replaces the sentence that says the
+question is open.
+
+**Use it in §6 and in §8's limitations like this:** *"The horizon is not converged over the two grids we ran:
+it lengthens by `1.45×` at rank 16 and `1.64×` at rank 32 on refinement from `64` to `128`, because the reduced
+integrator's error falls while the static baseline's rises. We report the `N=64` value as the conservative one."*
+
+**Two things to keep straight. (1) Ranks 43 and 85 are still running — do not quote them until I confirm them
+(D22: a regenerated artifact is not verified until the run has been inspected). (2) These come from committed
+code `588e5159`, which reproduces the `N=64` values bit-for-bit, so the two grids are comparable — that was
+checked, not assumed.**
