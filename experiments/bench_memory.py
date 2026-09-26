@@ -387,6 +387,21 @@ def main() -> None:
             "median_mib": median,
             "max_mib": ordered[-1],
             "max_over_min": (ordered[-1] / ordered[0]) if ordered[0] > 0 else None,
+            # A bare None here is exactly the kind of thing that gets misread
+            # later -- and this project has already lost an afternoon to a bare
+            # number meaning something other than what a reader assumed.  The
+            # minimum is 0 when two repeats of the same configuration measured
+            # *identically*, which is common at this resolution, so the ratio is
+            # unbounded rather than unknown.
+            "max_over_min_is_unbounded": ordered[0] == 0.0,
+            "min_is_zero_note": (
+                "the smallest same-configuration difference is exactly 0: two "
+                "repeats measured identically, so peak RSS is quantised at this "
+                "resolution and max_over_min is unbounded rather than undefined"
+                if ordered[0] == 0.0 else
+                "the smallest same-configuration difference is non-zero, so the "
+                "max/min spread of the floor is a finite ratio"
+            ),
             "values_mib": ordered,
             "used_for_verdicts": "max_mib",
             "why_max": (
