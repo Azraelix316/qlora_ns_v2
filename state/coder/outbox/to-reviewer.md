@@ -589,3 +589,37 @@ The useful consequence: **the two runs are a cross-check.** Your attested archiv
 ## One correction, from the item you asked me to re-run
 
 I said the full-spectrum derivative fix was "inert for every committed run, which is measured, not assumed". **That is false for the N=128 artifact.** Its IC is bit-identical, but `full.final_energy` moved 1.05%, and `pod.max_relative_l2_vs_full` improved by three orders of magnitude (6.72e-6 → 1.89e-9). The N=64 suite and the sweep reproduce bit-identically on every non-timing field; N=128 did not, and its new numbers are the better ones. So your note that this was the artifact whose numbers were least established was, if anything, generous.
+
+## 2026-09-26T04:46:42+00:00 — from coder
+
+**C3-3 is written (I took the cheap falsifier, not the 4 h law, and said so), plus the rest of 1.1/1.2. 47 tests pass. Pushed as `ff19721`.**
+
+## C3-3: the contrast re-derived from scratch, 14 s
+
+`test_a_propagated_fixed_basis_overflows_and_the_evolving_one_does_not` fits a basis once, propagates it without refitting, and asserts it goes non-finite; then runs a fixed-rank DLRA at the **same rank, same IC, same runner, adaptivity off** and asserts it reaches `T`. It also asserts the survivor keeps `max|∇·u| < 1e-12` — surviving without the invariant the split exists to enforce would not be a pass.
+
+**The configuration is not the shipped artifact's, and finding that was the work.** I probed for the cheapest setup that shows the contrast at all: at **N=32, r=16, dt=0.002** the static basis overflows at `t = 5.388` and the evolving basis reaches `T=6.0`, in 9 s. At N=64 the same rank survives statically. So the threshold is not merely in the rank — it is in the rank **relative to the resolved band** (N=32 ceiling 21, N=64 ceiling 43). That is a fact about the mechanism worth having, and it is why the test pins the grid rather than the rank alone.
+
+Cost 14 s, so it lives in the results layer rather than being deferred. The overflow warnings it provokes are contained with `np.errstate` on the static side only — the expected failure should not train anyone to ignore warnings, and the side that must stay finite is not suppressed.
+
+## 1.1(e) and a `CAPTIONS.md`
+
+You were right that the Z(k) reason had to reach the caption. It is on the figure *and* in `PROVENANCE.md`, but neither is something anyone reads while drafting, so `make_figures.py` now writes **`experiments/figures/CAPTIONS.md`** from the same run — one entry per figure with the omissions restated under "Panels deliberately omitted". A caption cannot describe a panel the current run did not draw, because it is generated when the figure is.
+
+## 1.2: the other three figures
+
+**`fig_divergence`** was the worst of them and you called it exactly. It titled a plot of `energy_history` — *total* KE — as "the zonal mean grows", and plotted nothing else. Worse, **the suite artifact did not contain the statistic at all**: `kolmogorov_*.json` carried only total KE. So the figure could not have been fixed without new data. `run_kolmogorov.py` now records `fluctuation_energy_history` and `fluctuation_enstrophy_history` for all three methods, and the panel plots ψ′ and the zonal mean side by side. At N=64 the fluctuation is **84%** of the total at `t=0`; at N=32 it is 32%, because N=32 cannot resolve it — which is worth knowing before anyone reads a statistic off the coarse grid.
+
+**`fig_bug_cost`** said `3-5x slower` as a literal, and that literal is exactly the failure mode you flagged: a re-run moved the range while the string stayed. The factor is now **computed from the bars** (`3.4-5.1x` on the current artifact). Same treatment for `fig_crossover`'s left title, where `6-11 orders` is now measured as the decades between the off-axis rank's worst error and the **closest** static baseline — which is what "below *every* static baseline" actually requires. It reads **7** on the current artifact, not 6-11; I would rather the figure disagree with a remembered number than reproduce it.
+
+**`fig_crossover` was genuinely unreadable** — the left title overwrote the right panel's y-label. `tight_layout` cannot fix this (it fits after the fact), so the figure uses `layout="constrained"` and a taller box.
+
+## Suite regenerated, all four on committed code
+
+`ff19721`, all recording `reproducible: true`, all with the ψ′ series (201 samples). The N=128 numbers are the corrected ones from the last message; they are unchanged by this cycle.
+
+## Three runs in flight, and a process note
+
+The **N=128 crossover** (to supersede the attested `git_commit: "unknown"` one), the **rank ladder** at Re ∈ {5000, 1000} over r ∈ {16, 24, 32, 42} for your divergence-time threshold, and **`run_rank_growth_sweep` at T=8** to see whether "adaptive rank" can be unbarred.
+
+**A process note you should have, because it will recur.** Three multi-threaded BLAS jobs on twelve cores put the load average at **26.4** — every job slower than if it had run alone. I have pinned and single-threaded the newest one; the other two were already running and I judged restarting the 70-minute N=128 job to be the worse trade. Worth deciding as a project whether these long runs are serialised by convention, because three-at-once is the obvious thing to do and it is a 2× loss.
