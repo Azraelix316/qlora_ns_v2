@@ -259,3 +259,61 @@ committed artifact was restored, the driver was committed so
 `driver_matches_HEAD` could be true, and the re-run then reproduced 17.283% exactly.
 **A fingerprint that fails is doing its job; the bug was in the invocation, not
 in the driver.**
+
+## The memory "noise floor" was one sample, and three verdicts were resting on it
+
+`peak_memory.json` reported a "run-to-run noise floor" of 0.0039 MiB, and four
+verdicts in its `interpretation` rested on it at a threshold of
+`spread_over_rank > 2 x floor`. Two defects, one on top of the other.
+
+**The floor was a single sample.** `bench_memory.py` re-measured one configuration
+twice and took `max()` over a dict **keyed by configuration** — so the repeats
+overwrote each other and only the last survived, whatever the repeat count. The
+artifact read as though it carried an estimate. The *same quantity*, re-measured
+on this problem, has been observed at:
+
+| measurement | noise floor (MiB) |
+|---|---|
+| `dfd1a0b` | 0.1328 |
+| `896b3bf` | 0.0664 |
+| `dcc4a64` (what the registry row is pinned at) | 0.0977 |
+| `e59e790` (what the artifact carried) | **0.0039** |
+
+**A factor of 34**, and the value the artifact shipped was the *smallest* of the
+four — the one that makes every verdict come out resolved.
+
+**Fixed at the source, not annotated.** The repeats are now a **list** (a
+distribution stored in a dict keyed by the thing it varies over is a distribution
+of size one), the default is 8 repeats, the artifact records
+`noise_floor_samples_mib` with min/median/max and the sample values, and the
+verdicts are taken against the **maximum** — the conservative side, since a
+larger floor can only turn "varies with rank" into "not established", never the
+reverse.
+
+**What that did to the verdicts.** With 8 samples the floor is **0.324 MiB**
+(0.0781 to 0.3242, factor 4.2 within the run alone):
+
+| | spread over rank | margin vs threshold 2x | old verdict | new verdict |
+|---|---|---|---|---|
+| N=64, projected | 0.29 MiB | **0.44x** | RESOLVED | **NOT resolved** |
+| N=64, BUG | 0.52 MiB | **0.80x** | RESOLVED | **NOT resolved** |
+| N=128, projected | 0.50 MiB | **0.77x** | RESOLVED | **NOT resolved** |
+| N=128, BUG | 1.77 MiB | 2.73x | RESOLVED | RESOLVED |
+
+**So the old sentence — "the variation with rank is RESOLVED at every grid, so
+'flat in rank' would assert the opposite of the measurement" — was false.** Three
+of the four pairs are not resolved. The honest reading is the *opposite* of the
+old one and is stated in the new artifact: no variation with rank is established
+for the projected integrator at either grid, and the spread is *consistent with
+zero without demonstrating it*. That is not "flat in rank" either — and
+`test_the_memory_noise_floor_is_a_distribution_and_not_one_sample` is what keeps
+it from drifting back.
+
+The robust part of D19.4 is untouched: **the reduced integrator does not save
+memory — it costs more than the full-grid step at both grids**, and that is
+several times any of the four noise floors ever measured.
+
+The registry row `mem_noise_floor_mib` is pinned at 0.0977 MiB, one of the four
+single-sample values above, and cannot be satisfied by any correct measurement of
+this quantity. It needs re-pinning against the distribution, or replacing by a
+claim about the distribution — see the message to the reviewer.

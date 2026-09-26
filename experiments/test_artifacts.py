@@ -43,6 +43,72 @@ def load(name: str) -> dict:
     return json.loads(path.read_text())
 
 
+def test_the_memory_noise_floor_is_a_distribution_and_not_one_sample():
+    """The noise floor must have more than one sample behind it.
+
+    Found on 2026-09-26: the "run-to-run noise floor" was `max()` over a dict
+    keyed by *configuration*, so re-measuring one configuration N times kept only
+    the last measurement. The artifact reported a floor of 0.0039 MiB and the
+    verdicts rested on it -- and that one sample had been observed at 0.1328,
+    0.0664, 0.0977 and 0.0039 MiB on four re-measurements, a factor of 34. The
+    threshold is `spread > 2 x floor`, so the "the variation with rank is real"
+    verdicts in the artifact's own interpretation **flipped** across that range:
+    with 8 samples the floor is 0.324 MiB and three of the four verdicts become
+    "not established".
+
+    Two things are asserted. The first is the obvious one and would not have
+    caught it: more than one sample exists. The second is the one that matters --
+    the recorded `noise_floor_mib` is the **maximum** of the samples, so a single
+    unlucky low reading cannot make a rank-dependence look resolved.
+    """
+    data = load("peak_memory.json")
+    assert data is not None
+    stats = data.get("noise_floor_samples_mib")
+    assert stats is not None, (
+        "peak_memory.json has no noise_floor_samples_mib: the floor is a single "
+        "sample again, so the rank-variation verdicts rest on one reading"
+    )
+    assert stats["samples"] >= 4, (
+        f"the noise floor rests on {stats['samples']} sample(s); a quantity "
+        "observed to swing by a factor of 34 needs more than one"
+    )
+    values = stats["values_mib"]
+    assert len(values) == stats["samples"], (len(values), stats["samples"])
+    assert data["noise_floor_mib"] == max(values), (
+        f"the floor used for verdicts is {data['noise_floor_mib']} but the "
+        f"largest sample is {max(values)}; the verdicts must be taken against "
+        "the maximum so a low sample cannot manufacture a rank dependence"
+    )
+    assert stats["used_for_verdicts"] == "max_mib"
+
+    # And the verdicts must be consistent with the floor actually used, rather
+    # than with whatever floor was current when they were computed.
+    floor = data["noise_floor_mib"]
+    for row in data.get("rank_scaling", []):
+        spread = row.get("spread_over_rank_mib")
+        if spread is None:
+            continue
+        assert row["rank_independence_resolved"] == (spread > 2.0 * floor), (
+            f"N={row.get('N')} {row.get('method')}: spread {spread} vs floor "
+            f"{floor} (2x = {2 * floor}) is recorded as "
+            f"{row['rank_independence_resolved']}, which does not follow"
+        )
+
+    # A negative control on the control: with the floor this run measured, at
+    # least one pair must be unresolved, or the floor is too small to be
+    # informative and the distribution is not doing any work.
+    margins = [
+        r["spread_over_rank_mib"] / (2.0 * floor)
+        for r in data.get("rank_scaling", [])
+        if r.get("spread_over_rank_mib") is not None
+    ]
+    assert margins and min(margins) < 1.0, (
+        f"every margin clears the threshold (min {min(margins):.2f}); with a "
+        "floor estimated from several samples that would mean the floor is far "
+        "too small, so check that the repeats actually re-measure something"
+    )
+
+
 def test_the_zonal_share_and_the_fluctuation_share_are_exact_complements():
     """The definition is machine-readable, and the two halves are complements.
 
