@@ -1180,3 +1180,36 @@ If it would help, the cheapest way to close all six at once is for me to generat
 ## In flight
 
 Both crossover surfaces (N=128 on rank 16 now) and C8-2's four legacy re-runs — the A=0.2 pilots are done or nearly, the T=8 baselines have started, and the A=0.5 pilot that runs to T=20 is last. 48 of 50 tests pass; the two failures are the stale-surface pair that go green when the N=64 surface lands.
+
+## 2026-09-26T06:54:11+00:00 — from coder
+
+**I offered to build the `claim → measured → verdict` table, so I built it — and its first positive control caught a bug in the checker itself. Pushed as `0ff8679`.**
+
+## `experiments/check_figure_captions.py`
+
+It transcribes the six claims from the draft's results section, recomputes each from the artifacts, and reports which are unsupported. Six are, keyed on figure and topic:
+
+```
+fig:cost|peak memory   fig:cost|per Re      fig:cost|static POD
+fig:rank|r*(Re)        fig:svd|mode count   fig:tg|rank decays
+```
+
+**The claims are kept as literals on purpose.** Reading them out of the `.tex` would make the check tautological on the one thing it exists to verify — the check has to compare the draft's wording against the artifacts, so the wording has to be pinned somewhere the writer's edit cannot silently change.
+
+**It reports drift, not disagreement, and it exits 0 on the known list.** Six captions are already reported as unsupported, so a checker that exits non-zero for that is permanently red and therefore not read. The verdicts are recorded in `state/coder/results/caption_verdicts.json`; the check fires only when a verdict **appears or disappears** — which is what a re-run moving a measured value looks like. It is a test, so that cannot rot.
+
+## The positive control caught the checker
+
+I trimmed one verdict from the baseline and expected the checker to go red. **It stayed green.** The cause was mine: the messages open with a possessive — "fig:cost**'s** caption says per Re" — so splitting on whitespace produced the key `fig:cost's|per Re`, and my trim of `fig:cost|per Re` removed a key that was never there. The baseline rewrite was a no-op, so nothing drifted.
+
+Fixed by extracting the label with a pattern, and the control now behaves: trimming `fig:cost|per Re` gives **exit 1** with `+ fig:cost|per Re`, and restoring gives exit 0. I am reporting this because "a green gate that cannot go red" is the exact failure mode this project has been closing all cycle, and the first version of this checker was one — caught only because I tested it rather than trusting it.
+
+That is the **seventh** instance of the same shape this cycle, and the first one where the error was in the *checking* apparatus rather than the physics.
+
+## One thing I did not do
+
+I did not make the checker read the draft. It would be the more robust design — a claim transcribed today can go stale the way every hardcoded string has — but it would also mean the check passes whenever the draft and the artifacts agree, which is precisely not a check. If you would rather have it read the `.tex` and compare against a recorded expectation, say so; I chose the option that can fail.
+
+## In flight
+
+N=128 surface on rank 16's static baseline; the T=8 baselines are on the static POD arms, with the A=0.5 pilot to T=20 last. 49 of 51 tests pass; the two failures are the stale-surface pair that go green when the N=64 surface lands.
