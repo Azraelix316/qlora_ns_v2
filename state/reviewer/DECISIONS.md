@@ -7821,3 +7821,74 @@ available for W15's mechanism, and it is currently in no document at all.**
 
 ## C6-6b — **C6-3 IS STILL NOT FIXED. THE DOCSTRING SAYS "about 25 s"; THE TEST MEASURES `56.11 s`.** (raised in R150, unchanged in R151)
 
+---
+
+## D115 — **I TOLD THE WRITER THAT §6's LABELS ARE REFERENCED "26 TIMES FROM OTHER SECTIONS". IT IS **39**. THE NUMBER APPEARED IN **THREE** PLACES, ONE OF THEM THE INSTRUCTION THAT EXISTS TO PREVENT THE BREAKAGE, AND THE ORDER ROW'S TITLE CONTRADICTED ITS OWN BODY. QUOTED CROSS-REFERENCE COUNTS ARE COMPUTABLE, SO THEY ARE NOW MEASURED.** (2026-09-26)
+
+> **OPERATIVE (R152). W7's ROW AND D18c's TEXT CORRECTED; A DATED CORRECTION SENT TO THE WRITER;
+> `check_paper_builds.py` NOW MEASURES EVERY QUOTED COUNT.**
+
+**D115.1 — THE MEASUREMENT, AND THE ERROR'S SHAPE. INBOUND `\ref`s TO §6's LABELS, FROM THE OTHER SECTIONS:**
+
+| label | count | | label | count |
+|---|---|---|---|---|
+| `sec:results` | **9** | | `fig:svd` | 3 |
+| `sec:res-error` | 5 | | `tab:div` | 3 |
+| `sec:res-fidelity` | 5 | | `sec:res-pod` | 3 |
+| `fig:cost` | 4 | | `fig:rank` | 2 |
+| | | | `sec:res-cost` | 2 |
+| | | | `fig:tg`, `fig:error`, `sec:res-tg` | 1 each |
+| | | | **TOTAL** | **`39`, from six sections** (§7 alone: 13) |
+
+**MY "26" WAS A PARTIAL SUM: I LISTED ONLY THE `sec:` LABELS, OMITTED ALL SIX FIGURE LABELS AND `tab:div`, AND
+OVERCOUNTED `sec:results` BY ONE.** `10 + 5 + 5 + 3 + 2 + 1 = 26` is exactly the sum of the six labels I happened to name.
+
+**D115.2 — AND IT APPEARED IN THREE PLACES, ONE OF THEM THE WRONG PLACE. `WRITER_ORDER.md`'s W7 ROW, `WRITER_ORDER.md`'s OWN
+D18c TEXT (*"its labels are referenced 26 times from other sections"*), AND `NOTES.md`.** **THE D18c TEXT IS THE INSTRUCTION
+THAT EXISTS TO PREVENT A WHOLESALE PASTE FROM BREAKING THOSE REFERENCES, AND IT UNDERSTATED THE DAMAGE BY A THIRD.** All
+three now read `39`, and the per-label table is in the correction sent to the writer.
+
+**D115.3 — AND THE SAME ROW'S TITLE CONTRADICTED ITS OWN BODY. THE W7 ROW'S SECOND COLUMN READ *"§6 results — **the whole
+section**, prose only"* WHILE ITS THIRD COLUMN READ *"Paste per subsection; do **NOT** replace the section."*** **A ROW
+THAT SAYS BOTH THINGS IN THE SAME LINE IS WORSE THAN A ROW THAT SAYS ONE OF THEM, BECAUSE THE TITLE IS WHAT GETS SKIMMED.**
+It now reads *"supplied PER SUBSECTION, not as a whole-section replacement"*, and names the eight labels a wholesale
+replacement would delete: `sec:results`, `tab:div`, and six figure labels.
+
+**D115.4 — MY OWN CHECK FIRED A FALSE ALARM FIRST, AND THAT IS THE PART WORTH RECORDING. I MEASURED THAT D18c DECLARES `7`
+LABELS AGAINST THE SHIPPED §6's `15`, AND CONCLUDED THAT PASTING IT WOULD DELETE EIGHT LABELS AND BREAK **23**
+CROSS-REFERENCES. THE CHECK'S MODEL WAS WRONG, NOT THE DOCUMENT: D18c's blocks DECLARE NO LABELS AT ALL — THE SEVEN I
+COUNTED ARE IN ITS `### N. into \label{...}` HEADERS — AND ITS INSTRUCTION IS *"paste each block into the matching existing
+subsection; do not replace the section wholesale."*** **So the real answer is that pasting it as instructed is safe, and the
+real risk is D115.3: a writer who reads only the row's TITLE would do the thing the body forbids.** I had built a check,
+it fired, and the check was the thing that needed fixing — **which is the same sequence as D111.5 and D112.5, and the reason
+the population and the model both have to be printed.**
+
+**D115.5 — THE GATE, AND TWO CONFIGURATION ERRORS IT EXPOSED BEFORE IT WAS RIGHT. `check_paper_builds.py` NOW DECLARES ITS
+CROSS-REFERENCE CLAIMS EXPLICITLY AND MEASURES EACH ONE BESIDE THE ASSERTION:**
+
+```
+  ok    WRITER_ORDER.md W7 row, and D18c's own text
+        asserts 39; measured 39 inbound reference(s) to any of 06_results's 15 labels from the other sections
+  ok    D18d, for `sec:discussion` alone
+        asserts 1; measured 1 inbound reference(s) to 07_discussion's own label from the other sections
+```
+
+**A CLAIM CARRIES A SCOPE, BECAUSE A CLAIM WITHOUT ONE IS NOT A CLAIM.** D18d's sentence is about `sec:discussion` alone
+(**1** from §1); the W7 row is about **all fifteen** of §6's labels (**39**). The first version declared the D18d claim
+with the wrong scope and the gate reported *asserts 1 / measured 2* — **which was the GATE misconfigured, not the document
+wrong, and the two are indistinguishable from the output alone.** Two more configuration errors on the way: `order` already
+holds full paths, so re-prefixing them measured **nothing** and read as two failures; and the section label is `sec:name`
+with the `NN_` prefix **stripped**, so building `sec:07_discussion` measured `0` and looked like a wrong document.
+
+**D115.6 — POSITIVE-CONTROLLED IN BOTH DIRECTIONS. SETTING THE CLAIMS TO `26` AND `5` MAKES THE GATE REPORT *"THE DOCUMENT IS
+WRONG, NOT THE DRAFT"* FOR BOTH, AND RESTORING THEM RETURNS `0 wrong`.** The verdict is otherwise unchanged: **10 build
+defects, 2 claims checked, 0 wrong.** A wrong claim of this kind does not break the build — **it misleads the writer about
+how much damage a paste would do, which is worse, because nothing would catch it.**
+
+**D115.7 — Unchanged.** Everything in D35.6 through D114.5 stands, **except that three quoted counts are corrected to `39`,
+W7's title no longer contradicts its own body, and quoted cross-reference counts are measured rather than trusted.**
+
+---
+
+## C10-3 — **NONE. THIS ONE IS MINE AND IT IS DONE.** (recorded so the numbering stays contiguous with C10-1 and C10-2)
+

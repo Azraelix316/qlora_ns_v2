@@ -170,6 +170,80 @@ def run_checks(files, bibkeys, treefiles, verbose=True):
     return bad
 
 
+# D115: QUOTED CROSS-REFERENCE COUNTS ARE COMPUTABLE, SO THEY ARE CHECKED.
+# I told the writer that section 6's labels are referenced "26 times from other sections". The true
+# figure is 39, and the breakdown I gave was a PARTIAL SUM: it listed only the `sec:` labels,
+# omitted all six figure labels and `tab:div`, and overcounted `sec:results` by one. The
+# CONCLUSION (paste per subsection, never replace the section) was right and is unchanged; the
+# number was wrong by a third, in the document whose whole purpose is to be unambiguous.
+#
+# This is D104's shape: A NUMBER IN A DOCUMENT WITH NO SOURCE. Any quoted count of cross-references
+# is measurable from the draft, so it is measured here and printed beside the assertion, so a
+# reader can see which of the two is the measurement.
+XREF_CLAIMS = [
+    # (where the claim is made, the section, the count asserted, the SCOPE)
+    #   scope "all"     -- every \ref to any label the section defines
+    #   scope "section" -- only \ref to the section's own \label, which is what D18d's sentence
+    #                      is about ("`sec:discussion` is referenced once from another section").
+    # The scope field exists because the first version declared the D18d claim with scope "all"
+    # and the gate reported asserts 1 / measured 2 -- which is the GATE being misconfigured, not the
+    # document being wrong. A claim without a scope is not a claim.
+    ("WRITER_ORDER.md W7 row, and D18c's own text", "06_results", 39, "all"),
+    ("D18d, for `sec:discussion` alone", "07_discussion", 1, "section"),
+]
+
+
+def xref_claims_report(toplevel, ref, order):
+    """Measure each declared claim and print it beside the assertion. Returns (checked, wrong)."""
+    # `order` already holds full paths (e.g. paper/sections/06_results.tex), gathered by following
+    # \input transitively from paper/main.tex -- so use it directly. The first version of this
+    # re-prefixed them and measured nothing, which is the failure this gate exists to prevent.
+    files = list(order)
+    texts, labels = {}, {}
+    for f in files:
+        texts[f] = load_tree(toplevel, ref, f) or ""
+        labels[f] = set(re.findall(r"\\label\{([^}]*)\}", texts[f]))
+    checked = wrong = 0
+    print("XREF CLAIMS -- every quoted cross-reference count, measured from the draft")
+    for where, sec_name, asserted, scope in XREF_CLAIMS:
+        target = f"paper/sections/{sec_name}.tex"
+        if target not in labels:
+            print(f"  ??  {where}: {sec_name}.tex is not in the population -- a FAILURE, because a")
+            print("      number I cannot measure is a number I cannot vouch for")
+            wrong += 1
+            continue
+        if scope == "section":
+            # The section files are named `NN_name.tex` but the label is `sec:name` -- the numeric
+            # prefix is dropped. Constructing `sec:07_discussion` measures 0 and looks like a wrong
+            # document rather than a wrong key, which is the more dangerous of the two failures.
+            counted = {f"sec:{re.sub(r'^\d+_', '', sec_name)}"}
+        elif scope == "all":
+            counted = labels[target]
+        else:
+            print(f"  ??  {where}: unknown scope {scope!r} -- a FAILURE, because a claim whose")
+            print("      scope I do not understand is a claim I cannot check")
+            wrong += 1
+            continue
+        measured = 0
+        for f in files:
+            if f == target:
+                continue
+            measured += sum(1 for lab in re.findall(r"\\(?:ref|eqref)\{([^}]*)\}", texts[f])
+                            if lab in counted)
+        ok = measured == asserted
+        checked += 1
+        if not ok:
+            wrong += 1
+        print(f"  {'ok  ' if ok else 'FAIL'}  {where}")
+        what = (f"{sec_name}'s own label" if scope == "section"
+                else f"any of {sec_name}'s {len(labels[target])} labels")
+        print(f"        asserts {asserted}; measured {measured} inbound reference(s) to {what} "
+              f"from the other sections"
+              + ("" if ok else "   <-- THE DOCUMENT IS WRONG, not the draft"))
+    print(f"  {checked} claim(s) checked, {wrong} wrong")
+    return checked, wrong
+
+
 def self_test(toplevel, ref):
     """Inject one instance of each defect class; require the matching check to fire."""
     base = {}
@@ -286,7 +360,13 @@ def main():
     print(f"\n  {len(bad)} defect(s). "
           f"This is a STATIC check: it cannot prove the paper compiles (no TeX toolchain here), "
           f"only that these build-breakers are absent.")
-    return 1 if bad else 0
+
+    # D115: measure every cross-reference count the order documents assert, so a quoted number
+    # cannot drift from the draft. A wrong one of these would not break the build -- it would
+    # mislead the writer about how much damage a wholesale paste would do.
+    print()
+    _checked, xwrong = xref_claims_report(top, ref, order)
+    return 1 if (bad or xwrong) else 0
 
 
 if __name__ == "__main__":

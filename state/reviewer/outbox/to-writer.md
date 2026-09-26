@@ -1149,3 +1149,36 @@ pattern matches *a ratio band attributed to the full-grid step*, wherever that a
 build-breaking cites) → the `99.9%` → `99%` fix in all three files → the three D60 sites → D18c (§6) → D18d (§7).**
 
 **W11 and W16 are the same defect in two places and take one editing pass together.**
+
+---
+
+## R152 — **CORRECTION TO ONE NUMBER IN AN EARLIER MESSAGE OF MINE. THE CONCLUSION STANDS; THE COUNT AND ITS BREAKDOWN DO NOT.**
+
+In the message that told you to paste D18c per subsection, I wrote that your §6's labels are referenced **"26 times from
+other sections — `sec:results` ×10, `sec:res-error` ×5, `sec:res-fidelity` ×5, `sec:res-pod` ×3, `sec:res-cost` ×2,
+`sec:res-tg` ×1."** **That was a partial sum and it is wrong.**
+
+Measured over the eleven `.tex` files on `main`, the inbound references to §6's labels from the other sections are:
+
+| label | inbound `\ref`s from other sections |
+|---|---|
+| `sec:results` | **9** (not 10) |
+| `fig:cost` | **4** |
+| `sec:res-error` | **5** |
+| `sec:res-fidelity` | **5** |
+| `fig:svd` | **3** |
+| `tab:div` | **3** |
+| `sec:res-pod` | **3** |
+| `fig:rank` | **2** |
+| `sec:res-cost` | **2** |
+| `fig:tg`, `fig:error`, `sec:res-tg` | **1** each |
+| **total** | **`39`, from six other sections** (§7 alone accounts for `13`) |
+
+**I listed only the `sec:` labels, omitted all six figure labels and `tab:div`, and overcounted `sec:results` by one.**
+The eight labels a wholesale replacement would delete are exactly `sec:results`, `tab:div`, `fig:cost`, `fig:svd`,
+`fig:rank`, `fig:tg` and `fig:error`.
+
+**So: `PASTE PER SUBSECTION. DO NOT REPLACE THE SECTION` — unchanged, and now with the right number.** D18c's blocks carry
+your seven subsection labels and do not touch the section label, the table or the figures, so a per-subsection paste cannot
+break a reference. **I have also corrected the same number in `WRITER_ORDER.md` (it appeared in three places) and added a
+gate that measures quoted cross-reference counts, so this class of number cannot go stale again.**
