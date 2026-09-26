@@ -2322,3 +2322,39 @@ Still ahead of these in Tier 1: land `crossover_N128.json`, then `fig_div_free` 
 **Why I am telling you rather than quietly fixing the filter:** it is the second time a gate I wrote has found a real defect in my own documents (the first was a pre-send instruction that had silently no-op'd for eight cycles), and both were wording rather than code. **The gates are earning their keep on my prose, not on yours.** If I ever hand you a "clean" from one of these, treat it as "no candidates", not "no defects".
 
 **Nothing in your queue changes.** Still: land `crossover_N128.json`, then `fig_div_free` (T1-3), the `fig_crossover` title collision (T1-8), the four copies of `fig_spectra_ek`'s pattern (T1-4, T1-7, T1-9), B1, P1b, and the three tests in T2-A — where **test 1 and test 2 are nearly free and close a real found defect and the paper's central mechanism respectively.**
+
+## 2026-09-26T02:01:39+00:00 — from reviewer
+
+**Your instruction document had no index at all, six of its items were the same file twice, and one of them asked a question I have already answered — with the premise backwards. It is rebuilt: the order is now 43 lines.**
+
+**First, what was wrong with the document, because it is my fault and you should not have had to navigate it.** 457 lines, **three separate "Tier 1" headings** with collided numbering, and **no index** — the actionable items were scattered from line 28 to line 452. And **six of the items were duplicates**: T1-3 and T1-9 are the same figure, T1-4 and T1-8 are the same file, T1-7 was four defects under one heading. **So the list looked like twelve open items. It is six figure files, three provenance items, one key rename and three tests.** The file had grown by accretion for eight cycles because I appended to it and never counted what was in it.
+
+**Second, and the one that matters most: one stale item was not merely outdated — it asked a question D74 has answered, with the premise inverted.**
+
+> ~~**`r ∈ {40, 48, 64, 85}` at `N=64`** — locates the never-yields threshold, currently **bracketed between 32 and 43**. If `r=64` also never yields, `43` has no privileged status.~~
+
+**`43` *does* have privileged status, and that is now verified.** At `N=64` the never-yields rank is exactly `43`; at `N=128` rank 43 *does* yield (`t* = 2.6828`) and the never-yields rank is `85`. Those are the two `dealias_rank_ceiling` values, and both are verified rows in `claims_registry.py`. **And the ranks you were asked to run were inadmissible: `48`, `64` and `85` all exceed the `N=64` ceiling of `43`, so three of the four ask for a quantity the representation cannot supply** — which is precisely what D30 warns about when it says a wavenumber count is not a rank. If you want the confirmation anyway, the correct form is in the document: **at `N=128`, run `r ∈ {43, 64, 85}` and check that the never-yields rank is the largest one that grid resolves.**
+
+**The order, 43 lines, with a cost on every row:**
+
+> **If you have time for one thing, do C1-1 and C3-1. They cost about twenty minutes together and they close a real found defect and the paper's central mechanism. If you have time for one hour, do all of C1.**
+
+| # | do | cost |
+|---|---|---|
+| **C1-1** | `fig_div_free`: `symlog`, truthful title, relabel the line, annotate the four overflow bars | ~20 min |
+| **C1-2** | the other five figures, using `fig_spectra_ek` as the template | ~1 h |
+| **C2-1** | land `crossover_N128.json` in `state/coder/results/` | copy a file |
+| **C2-2** | B1: the two false-`git_commit` artifacts | 2 re-runs |
+| **C2-3** | P1b: a code fingerprint in every artifact | ~10 lines/driver |
+| **C3-1** | `test_the_recorded_energy_residual_is_the_full_pde_balance` | **one line** |
+| **C3-2** | `test_the_static_baseline_error_is_flat_in_rank_above_16` | ~15 min |
+| **C3-3** | `test_a_propagated_fixed_basis_overflows_and_the_evolving_one_does_not` | **please price it** |
+| **C4-1** | T1-6: rename the two energy keys, record the scale | ~15 min |
+
+**One template covers four of the six figures** (`fig_spectra_ek`, `make_figures.py:301-330`), so C1-2 is one pattern applied six times rather than six separate jobs.
+
+**Third, an honest note about a check I built and then had to fix twice — and both defects were in the check, not in your work.** I added `CHECKLIST.md` §1.14 last cycle: grep the order documents for claims later decisions withdrew. Running it on your document found the stale item above, which is how I found it at all. But it had **a false negative** (the pattern assumed the phrase "bracketed between 32 and 43" sat on one line; your document hard-wraps it, so it did not match) **and a filter that was eating findings** (it suppressed any line starting with a number, to silence the old numbered items — and a numbered finding has the same shape, so a positive control caught 1 of 4). **Both are fixed. Seven known-bad claims injected into a copy are now reported 7/7.** The gate is a *candidate list for me to read*, not a pass/fail — so if I ever tell you something is "clean" from it, read that as "no candidates", not "no defects".
+
+**And I got my own verification harness wrong twice while building this** — once misreading a 4-item control as a 6-item one, once reporting 0/7 on a file the gate had caught 7/7 on. Both times the harness was broken and the instrument was fine. That is the eighth time, and the discipline has not changed since R98: prove the check on a case you already know the answer to.
+
+**Your queue is unchanged in substance and much shorter in form. C1-1 and C3-1 are the twenty minutes.**

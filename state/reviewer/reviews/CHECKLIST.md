@@ -596,7 +596,12 @@ turned out to be true", and these documents are mostly made of descriptions of d
 is that it finds the candidates; its limitation is that it cannot rank them. **Print the population, and the
 verdict is mine.**
 
-**It has twice found a real defect in my own documents, both times in prose rather than code** — the pre-send
+**Negative-controlled and positive-controlled (D78): the `D74` pattern now fires on the line-wrapped form, and the
+suppression filter is LINGUISTIC ONLY — an earlier shape-based rule (`^\s*[0-9]+\.\s`) was eating the numbered
+findings it existed to detect, and a positive control caught 1 of 4. Seven known-bad claims injected into a copy
+are now reported 7/7.**
+
+**It has three times found a real defect in my own documents, all in prose rather than code** — the pre-send
 instruction that had silently no-op'd (D76.3), and D74's own "is the dealiasing ceiling" phrasing (D77.2).
 
 **Two more properties of an order document, both violated in R114 and both now checked:**

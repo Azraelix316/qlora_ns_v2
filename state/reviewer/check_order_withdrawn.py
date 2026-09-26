@@ -43,7 +43,9 @@ WITHDRAWN = [
     ("D56",   r"1\.46\s*(?:→|->)\s*1\.99|2\.45\s*(?:→|->)\s*6\.04", "the STRUCK N=128 multipliers"),
     ("D60",   r"1e-14|10\^\{-14\}",
      "the withdrawn |div u| magnitude"),
-    ("D74",   r"bracketed (?:between )?32\s*(?:and|[-–])\s*43",
+    # \s+ not " ": these documents hard-wrap, and "bracketed\n   between 32 and 43"
+    # is the very instance this gate exists to catch (D78).
+    ("D74",   r"bracketed\s+(?:between\s+)?32\s*(?:and|[-–])\s*43",
      "the withdrawn never-yields bracket"),
     ("D4",    r"no DLRA NS solver|first exactly divergence-free|"
               r"first structure-preserving low-rank|to our knowledge",
@@ -53,10 +55,18 @@ WITHDRAWN = [
 ]
 
 # A hit is only a CANDIDATE if the line is not itself telling the reader not to write it.
+# NEGATIVE-CONTROLLED (D78). An earlier version of this filter also suppressed any line beginning
+# with a number, to silence the old numbered Tier items. A positive control then caught only 1 of 4
+# injected bad claims -- because "1. The never-yields rank is bracketed..." and "2. The cost is
+# 1.78 to 2.18..." are the SAME SHAPE as the items it was suppressing. The rule was eating the
+# findings. Suppression by shape cannot work when the target format and the noise have one format,
+# so this filter is now LINGUISTIC ONLY: it suppresses a line that SAYS it is prohibiting something,
+# and nothing else. Everything else is reported and the reviewer ranks it (D77.3).
 PROHIBITION = re.compile(
     r"never write|do not write|withdrawn|struck|barred|prohibit|"
-    r"not\b[^.]{0,40}\b(?:claim|write)|hardcodes|says\b[^.]{0,60}\bwrong|"
-    r"^\s*\|?\s*(?:[0-9]+\.|-)\s|still says|described as wrong",
+    r"hardcodes|hard-codes|still says|described as wrong|"
+    r"\bnot\b[^.]{0,40}\b(?:claim|write|print)|"
+    r"\bis wrong\b|\bare wrong\b|\bfalse\b[^.]{0,20}\btitle\b",
     re.I,
 )
 
@@ -90,6 +100,11 @@ def main():
 
     # Self-test: the pattern set must be able to fire on a string known to be bad.
     probe = "the dealiasing ceiling and 1e-14 and 1.26 and 3-5x slower and 1.46->1.99"
+    # the wrapped form must fire too, or the gate is blind to hard-wrapped prose (D78)
+    wrapped = "bracketed\n   between 32 and 43"
+    if not re.search(dict((d, p) for d, p, _ in WITHDRAWN)["D74"], wrapped, re.I):
+        print("SELF-TEST FAILED: the D74 pattern does not fire on the line-wrapped form")
+        return 2
     fired = sum(1 for _, pat, _ in WITHDRAWN if re.search(pat, probe, re.I))
     if fired < 5:
         print(f"SELF-TEST FAILED: only {fired} of {len(WITHDRAWN)} patterns fire on a known-bad string")
