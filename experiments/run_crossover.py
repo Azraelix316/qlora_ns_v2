@@ -574,17 +574,31 @@ def main() -> None:
                     dlra_rows, static_rows, DECLARED_CROSSOVER_COLUMN,
                     log_interp=False,
                 )
-                star["t_star_from_rows"] = derived["t_star"]
-                star["bracket_from_rows"] = derived["bracket"]
+                # The block's value IS the rows' value.  The first attempt at this
+                # fix only *compared* the two, and the comparison came back False
+                # in every case -- because a comparison does not change anything.
+                # `t_star_legacy` keeps the old independent computation so the
+                # discrepancy stays visible and measurable instead of being
+                # quietly overwritten.
+                star["t_star_legacy"] = star["t_star"]
+                star["bracket_legacy"] = star["bracket"]
+                star["t_star"] = derived["t_star"]
+                star["bracket"] = derived["bracket"]
                 star["t_star_linear_interpolation"] = linear["t_star"]
                 star["bracket_linear_interpolation"] = linear["bracket"]
                 star["column"] = DECLARED_CROSSOVER_COLUMN
-                star["agrees_with_rows"] = (
-                    star["t_star"] is not None
-                    and derived["t_star"] is not None
-                    and abs(star["t_star"] - derived["t_star"])
+                star["interpolation"] = "log"
+                star["agrees_with_legacy"] = (
+                    star["t_star_legacy"] is not None
+                    and star["t_star"] is not None
+                    and abs(star["t_star_legacy"] - star["t_star"])
                     <= CROSSOVER_AGREEMENT_TOLERANCE
-                    * max(abs(derived["t_star"]), 1e-30)
+                    * max(abs(star["t_star"]), 1e-30)
+                )
+                star["legacy_relative_offset"] = (
+                    (star["t_star_legacy"] - star["t_star"]) / star["t_star"]
+                    if star["t_star_legacy"] is not None and star["t_star"]
+                    else None
                 )
                 star.update({"rank": rank, "window": window})
                 crossovers.append(star)
@@ -656,7 +670,16 @@ def main() -> None:
                 "keyed by f'W{window:g}_r{rank}', e.g. 'W0.25_r16' for a window "
                 "of 0.25 and rank 16"
             ),
-            "crossovers": "one entry per (rank, window) pair, each carrying its own rank and window",
+            "crossovers": (
+                "one entry per (rank, window) pair. `t_star` and `bracket` are "
+                "computed from the `dlra` and `static_moving_window` rows under "
+                f"the declared column {DECLARED_CROSSOVER_COLUMN!r} with log "
+                "interpolation (D22.5). `t_star_legacy` is an earlier, independent "
+                "implementation of the same crossing, kept so the discrepancy "
+                "between the two stays measurable: it sat 6-9% BELOW the rows on "
+                "every resolved case of the N=64 surface, which is why the block "
+                "no longer computes its own value."
+            ),
         },
         "initial_state": {
             "energy": grid.ke(initial),

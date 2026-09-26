@@ -306,11 +306,47 @@ def run_dmd(
     }
 
 
+def json_safe(value, counter: dict | None = None):
+    """Replace every non-finite float with ``None``, counting the replacements.
+
+    This driver writes with ``allow_nan=False``, which is the right discipline:
+    ``Infinity`` is not valid JSON, and a reader's parser should not have to cope
+    with it.  But the consequence was that **one diverged method destroyed every
+    other method's numbers**: a method that goes non-finite produces an infinite
+    ``relative_l2``, the encoder refuses, and the whole Re=1000 rank ladder --
+    sixteen configurations, hours of compute -- was lost at the write.
+
+    A divergence is a *result*, so the guard sanitises rather than aborts, and
+    the count of what it replaced is recorded in the artifact.  A reader can then
+    tell "this field is null because the run diverged here" from "this field was
+    never computed", which are different facts.
+    """
+    if isinstance(value, float):
+        if value != value or value in (float("inf"), float("-inf")):
+            if counter is not None:
+                counter["non_finite_values_replaced"] = (
+                    counter.get("non_finite_values_replaced", 0) + 1
+                )
+            return None
+        return value
+    if isinstance(value, dict):
+        return {k: json_safe(v, counter) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_safe(v, counter) for v in value]
+    return value
+
+
 def divergence_series(
     times: list[float], states: list[np.ndarray], reference_times: list[float],
     reference_states: list[np.ndarray],
 ) -> list[dict]:
-    """Pointwise L2 against the reference -- reported last, as divergence."""
+    """Pointwise L2 against the reference -- reported last, as divergence.
+
+    The reference norm is guarded, because a state that has gone non-finite makes
+    the ratio infinite or NaN and the caller has to survive that: this is the
+    series a *diverged* method produces, and it is the evidence for the
+    divergence rather than an accident of it.
+    """
     out = []
     ref = dict(zip(reference_times, reference_states))
     for t, s in zip(times, states):
@@ -319,7 +355,11 @@ def divergence_series(
         if not candidates:
             continue
         rt = max(candidates)
-        out.append({"time": t, "relative_l2": relative_l2(s, ref[rt])})
+        value = relative_l2(s, ref[rt])
+        out.append({
+            "time": t,
+            "relative_l2": value if np.isfinite(value) else None,
+        })
     return out
 
 
@@ -966,6 +1006,20 @@ def main() -> None:
         ),
     }
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    # Sanitise before writing, and say how much was replaced.  `allow_nan=False`
+    # stays, because valid JSON matters; what changed is that a non-finite value
+    # from a diverged method no longer costs the whole run.
+    counter: dict = {}
+    output = json_safe(output, counter)
+    output["json_sanitisation"] = {
+        **counter,
+        "note": (
+            "non-finite floats were replaced by null so the artifact is valid "
+            "JSON. Every replacement is in a field of a method that went "
+            "non-finite, so null there means 'the run diverged before this was "
+            "computable', not 'this was never measured'."
+        ),
+    }
     output_path.write_text(
         json.dumps(output, indent=2, sort_keys=True, allow_nan=False) + "\n"
     )
