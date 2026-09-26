@@ -1167,6 +1167,60 @@ but that criterion is a resolution threshold, not an effect size.** So the defen
 **"flat to within `0.3 MiB`"**, not "rank-independent" — and the effect is `~0.7%` of a `~43 MiB`
 peak in any case. **BUG's `5.76×` is comfortably resolved and _is_ an effect worth claiming.**
 
+---
+
+## D19.4a — **D19.4's REPLACEMENT WORD IS ALSO WRONG, AND THE ERROR IS D36's OWN: "flat" IS A RESOLVABILITY CLAIM AND THE MEASUREMENT RESOLVED IT.** (2026-09-26) — **SUPERSEDES D19.4's WORDING.**
+
+> **OPERATIVE (R86).** `peak_memory.json` says `rank_independence_resolved: true` at BOTH grids, with the
+> driver's own definition: *"true means the spread over rank exceeds twice the run-to-run noise floor
+> of an identical configuration, i.e. **the variation with rank is real** rather than allocator noise."*
+> **Measured: `N=64` spread `0.2930 MiB` = `2.21×` the `0.1328 MiB` floor; `N=128` spread `0.2891 MiB`
+> = `2.18×`. BOTH RESOLVED.**
+
+**D19.4a.1 — THE DEFECT, AND IT IS D36's OWN RULE APPLIED TO AN ADJECTIVE. D19.4 CORRECTLY OBSERVED
+THAT `rank_independence_resolved` IS *"A RESOLUTION THRESHOLD, NOT AN EFFECT SIZE"* — WHICH IS EXACTLY
+D36 (*"a criterion's name names a fraction, not a quantity"*) — **AND THEN REPLACED ONE WRONG WORD WITH
+ANOTHER.** `"flat to within 0.3 MiB"` IS **NOT** A SMALLER OR SAFER VERSION OF "RANK-INDEPENDENT"; IT
+IS THE **OPPOSITE CLAIM**. "Flat" says the variation was **NOT resolved.** It **WAS**, at `2.2×` the
+noise floor, just barely — and *just barely* is still *resolved*. **A CLAIM MAY NOT BE BOTH "I checked
+and the effect is real" AND "the effect is flat."**
+
+**D19.4a.2 — THE NUMBER WAS RIGHT; THE ADJECTIVE WAS WRONG. `0.29 MiB` and "to within `0.3 MiB`" agree.
+What is wrong is calling a resolved `0.29 MiB` variation flat. THE HONEST PHRASING IS: "peak RSS varies
+by `0.29 MiB` across a 21x rank range (`r = 2 ... 43`) at both grids - `2.2x` the `0.13 MiB` run-to-run
+noise floor, so the variation is real though small - against a `2.52 MiB` (`N=64`) / `3.79 MiB`
+(`N=128`) overhead that is itself 19-29x the noise floor."** D19.4's scale statement survives and should
+be kept: the effect is `~0.7%` of a `~43 MiB` peak.
+
+**D19.4a.3 — "FLAT" IS AVAILABLE ONLY BELOW THE RESOLUTION, AND THE MEASUREMENT CROSSED IT. This is the
+whole lesson in one line: if the spread had been `1.5x` the noise floor the driver would have said
+`rank_independence_resolved: false` and "flat" would have been exactly the right word. **It came in at
+`2.21x`, so the word that was correct at `1.5x` is wrong at `2.21x`.** A size word cannot be chosen
+before the resolvability test is run, because whether the effect is *flat* is not a question about its
+size — it is a question about whether the instrument could see it.
+
+**D19.4a.4 — WHAT SURVIVES UNCHANGED, AND IT IS MOST OF D19.4. (1) The coder's `rank_independence_resolved:
+true` is correct on their criterion and their noise-floor discipline is exemplary — they measured it by
+**repeating one configuration** and stated the rule (*"a spread over rank is only meaningful if it
+exceeds it"*) in the artifact itself. (2) The `2.52`/`3.79 MiB` overhead is `19-29x` the noise floor, so
+quoting it to `0.01 MiB` is defensible — **my worry that the precision was unsupported was wrong, and I
+checked it rather than asserting it. (3) D19.5 (report overhead, never raw RSS) stands.
+
+**D19.4a.5 — AND A NEW FACT THE EXTRACTION SURFACED, WHICH D19.4 DID NOT RECORD: the BUG port's peak
+memory is **strongly** rank-dependent, and by much more than the projected integrator's. Spread over
+rank: `0.578 MiB` (`4.35x` the floor) at `N=64` and **`1.531 MiB` (`11.53x`)** at `N=128`, against
+`0.293`/`0.289` for the projected integrator. **So the BUG port is nowhere near rank-flat in memory,
+and at `N=128` its rank dependence is larger than the projected integrator's entire overhead.** Worth
+one clause wherever the BUG port's memory is mentioned, and it is the same honesty move as D19.4's
+"BUG's `5.76x` is comfortably resolved and _is_ an effect worth claiming."
+
+**D19.4a.6 — THE GENERAL FORM, AND IT IS THE FOURTH VARIANT OF ONE FAILURE THIS PROJECT. R81: never read
+the output the agents produce. R82: generalised from one artifact to a class. R84: inferred a document's
+state from a file it does not use. **R86: corrected the wrong noun and left the wrong adjective.** All four
+are *"I found the error and stopped at the first wrong word."* **The discipline: when a claim is wrong,
+ask what the corrected claim asserts, not which word was wrong — and a replacement that asserts the
+opposite of the thing you just measured is not a correction.**
+
 **D19.5 — Report the overhead, never the raw RSS.** The interpreter and BLAS baseline is
 `~33 MiB` and no method choice affects it. Coder's artifact `interpretation` says this and it
 is **D16.4's caveat, earned from one reviewer's error and adopted by the other agent without
