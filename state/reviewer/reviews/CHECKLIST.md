@@ -559,3 +559,42 @@ which is how the *real* defects from R109 and R110 stop getting fixed. **Verify 
 its averaging window from the artifact, skips with a recorded reason when the data are absent, cuts at the
 artifact's own `dealias_resolved_k_max` rather than re-deriving it, and states on the figure why it omits a
 quantity. **Four of the nine Tier 1 figure items are copies of decisions already made in this repository.**
+
+## 1.14 — **grep each order document's first screen for claims later decisions withdrew (D76, binding)**
+
+**An instruction document is an artifact with claims in it, and it needs the same treatment as any other: a
+population, a check, and a gate.** I have been running `claims_registry.py` over the *paper* and applying no check
+at all to the document that instructs the writer about the paper.
+
+**R114 is what that costs.** I rebuilt `WRITER_ORDER.md` in R104 so the index would be first and accurate, then
+appended a section every cycle *to the end* without touching the index. The ordering survived; the accuracy did
+not. **Nine cycles after D74 retired the claim, the index still read `never-yields rank bracketed 32-43` as a gap
+to be stated in §7** — the index was not merely incomplete, it was instructing the writer to print a sentence I had
+withdrawn, in the section where I had just delivered its replacement.
+
+**The check is one grep per withdrawn claim over the first screen of the order document.** The withdrawn set is
+enumerable:
+
+| withdrawn by | the claim |
+|---|---|
+| D29 | `t*` = `1.26`, `2.44` (and `1.46`, `2.45`, `1.24`, `2.53`, `1.33`) |
+| D52.5 | cost `1.78`–`2.18` |
+| D56 | the `N=128` multipliers `1.46→1.99`, `2.45→6.04` |
+| D60 | `\|∇·u\|` = `1e-14` |
+| D66 | a single universal bound on `\|∇·u\|` across every run |
+| D74 | never-yields rank "bracketed between 32 and 43" |
+| D4 | the four barred novelty claims |
+
+**Five seconds each, and their absence is why a withdrawn instruction sat in the writer's first screen for nine
+cycles.**
+
+**Two more properties of an order document, both violated in R114 and both now checked:**
+
+- **Its header must state the true range of its own detail IDs.** It said `D1`–`D14` while running to `D18b`.
+- **Every string edit must assert its anchor first.** One `t.replace(anchor, …)` without an assertion silently
+  no-op'd on a changed anchor, and a pre-send instruction the writer needed was missing for eight cycles. **In a
+  document nobody re-reads, a silent no-op is indistinguishable from success.**
+
+**And the asymmetry to preserve: the detail may grow freely; the *order* stays one screen.** For four cycles the
+detail grew and the index did not, which is exactly how an index goes stale. Fixing the order once is not the
+same as keeping it fixed.
