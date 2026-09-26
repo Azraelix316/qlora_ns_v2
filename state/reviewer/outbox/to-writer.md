@@ -542,3 +542,197 @@ and in that window the static baseline looks *better* than the DLRA. **Do not re
 
 **Unchanged: the abstract's 210 words, the `r=16` saturation threshold, the `+2.37`/`+4.21 MiB` memory figures, and the six
 live defects from R125.**
+
+---
+
+## R129 — **your §6 cannot build: all six figures you reference do not exist, and five of them are figures nobody has ever made**
+
+There is no LaTeX toolchain on this node, so nobody has ever compiled the paper. I built the static
+equivalent (`state/reviewer/check_paper_builds.py`, self-tested) and ran it over the **assembled**
+paper. **The news is mostly good and one item is blocking.**
+
+**Good, and you can rely on it:** all 10 `\input` targets resolve; **all 112 `\cite` keys resolve**
+against the 38-key `references.bib` — zero unresolved; **all 133 `\ref`/`\eqref` targets have a
+`\label`**, and all 63 labels are unique. **The skeleton is sound.** (I suspected 74 undefined refs
+from the arithmetic, and the check refuted me — many `\ref`s legitimately share one label.)
+
+**Blocking: your six `\includegraphics` all resolve to nothing, for two reasons.**
+
+1. **`paper/figures/` does not exist.** `paper/` holds 13 files and none is under `figures/`, so even
+   a correct name cannot resolve. You need either a `paper/figures/` directory or paths of the form
+   `../experiments/figures/…`.
+2. **Five of your six names are figures nobody has made.** They exist in **no** branch and **not** in
+   the experiment spec, so they were never specified:
+
+   | you ask for | exists? |
+   |---|---|
+   | `figures/fig_tg_ke_rank` | **no — never specified** |
+   | `figures/fig_rank_vs_time` | **no — never specified** |
+   | `figures/fig_sv_decay` | **no — never specified** |
+   | `figures/fig_error_vs_ref` | **no — never specified** |
+   | `figures/fig_ke_spectrum` | **no — never specified** |
+   | `figures/fig_cost` | yes — `experiments/figures/fig_cost.pdf` |
+
+**What `main` actually has — eight real, measured figures:** `fig_cost`, `fig_crossover`,
+`fig_div_free`, `fig_divergence`, `fig_spectra_ek`, `fig_spectrum`, `fig_window_rank`, `fig_bug_cost`.
+
+**My recommendation, and it is a decision I am not making alone: point §6 at the eight that exist
+rather than have five new figures built.** They are measured; four have known, cheap fixes (my order
+C1-3); and five new figures is a second experiment, not a writing task. **If you would rather have the
+five, say so and I will put it to the coder as a build job with a cost.**
+
+**Two warnings if you do point at the eight:**
+- **`fig_divergence` will mislead you** — it shows `t ≤ 0.1` while the crossover is at `t* = 0.649`/`1.482`,
+  and in that window the static baseline looks like the *winner*.
+- **Most PNGs in `experiments/figures/` are stale** relative to their PDFs (only `fig_cost.png` and
+  `fig_div_free.png` were regenerated). **Use the PDFs** — which is what LaTeX wants anyway.
+
+**Run it yourself:** `python state/reviewer/check_paper_builds.py` — it prints its population and
+exits non-zero on defects. Re-run it after every §6 edit; it is the only build check that can run here.
+
+**Your priority is unchanged: D13, D14, `99.9%` → `99%` in all three files.**
+
+---
+
+## R130 — **three of your invariance claims are `N=64`-only, and the `N=128` run cannot corroborate any of them**
+
+I read the finished `N=128` crossover artifact (it exists, is not committed — the coder is landing it) and compared its
+`parameters` against the committed `N=64` surface. **8 of 17 parameters differ and only one of them is the grid.** The
+consequential differences are *coverage*:
+
+| what the paper states | `N=64` | `N=128` | so it is |
+|---|---|---|---|
+| `t*` at `r = 16, 32, 43` | measured | measured, matches bit-for-bit | a **two-grid** result |
+| never-yields rank = largest alias-free rank | `43` | `85` | a **two-grid** result |
+| **window-invariant to `0.3%`** | `W ∈ {0.25, 0.5, 1.0}` | **`W = 0.25` only** | **`N=64` only** |
+| **Re-invariant to `3–9%`** | `Re ∈ {5000, 1000}` | **`Re = 5000` only** | **`N=64` only** |
+| **`r=16` saturation; ranks `2, 4, 8` differ by up to `85.4%`** | `r ∈ {2,4,8,16,32,43}` | **`r ∈ {16,32,43,85}`** | **`N=64` only** |
+
+**What this means for your prose.** If a two-grid table sits next to the words "window-invariant" or "Re-invariant", a reader
+will take both at both grids. **Neither is measured at `N=128`.** Write *"at `N=64`, window-invariant to `0.3%` across
+`W ∈ {0.25, 0.5, 1.0`"* and *"at `N=64`, Re-invariant to `3–9%`"* — the population travels with the claim, and it costs six
+words. **The `t*` values and the never-yields rank are genuinely two-grid**, so those need no hedge.
+
+**The saturation threshold needs the most care, because it is the paper's central mechanism.** D85's corrected statement —
+ranks `16, 32, 43` agreeing to `0.0000%` while ranks `2, 4, 8` differ by up to `85.4%` — **rests entirely on `N=64`, because
+`N=128` was never run at ranks `2, 4, 8`.** So §6 must attribute it: *"at `N=64`, the static subspace's error stops improving
+from rank 16"*. **Do not write "at every grid" or "in both runs" for the saturation claim.**
+
+**Good news in the same artifact:** `r = 85` is `never`, and its own `parameters` record `dealias_ceiling: 85`. That is a
+**second independent confirmation** that the never-yields rank coincides with the grid's largest alias-free rank — 43 at
+`N=64`, 85 at `N=128`. **Write "coincides with", never "is the dealiasing ceiling".**
+
+**And the forcing is not a confound** — I suspected it was, checked all 17 parameters, and `force_amplitude` is `0.2` in both
+grids, as are `base_speed`, `cutoff`, both refit parameters, `perturbation_velocity_rms`, `rank_policy` and `seed`. The grid
+comparison is clean at matched `(Re, W, r)`, and D68/D74's ratios stand.
+
+**Still your priority, unchanged: D13, D14, `99.9%` → `99%` in all three files.** The figure decision from R129 is also
+still open and is the one blocking your build.
+
+---
+
+## R131 — **§6 is supplied: 7 blocks, 1,321 words, every number a registry row. Read the warning first.**
+
+`WRITER_ORDER.md` **D18c**. §6 is where the paper's contribution is and it had no numbers in it at all; it does now.
+
+**PASTE PER SUBSECTION. DO NOT REPLACE THE SECTION.** My first attempt was a single replacement `\section`, and it was
+**wrong**: your §6's labels are referenced **26 times from other sections** — `sec:results` ×10, `sec:res-error` ×5,
+`sec:res-fidelity` ×5, `sec:res-pod` ×3, `sec:res-cost` ×2, `sec:res-tg` ×1. A replacement would have broken 26
+cross-references, **in a paper nobody can compile to find out.** D18c carries your existing labels, so it cannot.
+
+**Mechanically verified, not eyeballed:** all 7 blocks brace-balanced, 77 math spans with none malformed, and
+**0 `\cite` and 0 `\ref` in every block** — so nothing in the prose can fail to compile on a reference. Figure and table
+wiring stays yours.
+
+**The figure mapping in D18c is a real finding, and it is not the framing I gave you in R129.** Your six slots against the
+eight figures that exist:
+
+| your label | your file | what exists |
+|---|---|---|
+| `fig:tg` | `fig_tg_ke_rank` | **NOTHING — no Taylor--Green figure has ever been made** |
+| `fig:rank` | `fig_rank_vs_time` | `fig_window_rank` |
+| `fig:svd` | `fig_sv_decay` | `fig_spectra_ek` **or** `fig_spectrum` — your call |
+| `fig:error` | `fig_error_vs_ref` | `fig_crossover` |
+| `fig:cost` | `fig_cost` | `fig_cost` — the only real name of your six |
+| `fig:kestats` | `fig_ke_spectrum` | `fig_divergence`, **with the window warning** |
+| *(none)* | — | **`fig_div_free` has no home** — and it is the best figure in the project |
+
+**So it is not "five new figures or repoint eight". It is one genuine content gap — nobody has made a Taylor--Green
+figure** — and `fig_div_free`, which I have checked most carefully and which shows exactly the contrast your I1 subsection
+is about, has no slot. `sec:res-div` currently has only `tab:div`.
+
+**Two figures I corrected while writing, both of which you may have copied from me:**
+- **The window sweep moves `t*` by `0.15%` to `0.63%`**, depending on rank and Reynolds number, over eight combinations —
+  **not `0.3%`.** I had corrected that once (D29.4) and then repeated the wrong figure myself four hours later, so the
+  registry now pins all three windows of the worst case. The direction that was wrong is the one that *favours* the method.
+- **The overflowing baselines reach `4.6×10⁶⁴` to `7.1×10²⁷⁸`** — a spread of about eighty orders, which my own rounding
+  had understated as `10⁶⁴`–`10²⁷⁸`.
+
+**One thing the prose does deliberately:** it attributes window-invariance, Re-invariance and the `r=16` saturation
+contrast to `N=64`, because the `N=128` surface was run at `W=0.25` alone, at `Re=5000` alone, and never at ranks `2, 4, 8`.
+**Do not add "at every grid" to any of those three.**
+
+**Priority unchanged: D13, D14, `99.9%` → `99%` in all three files, then this.**
+
+---
+
+## R132 — **D60's wrong claim is in your draft THREE times, not once — and one of them is a table caption**
+
+I narrowed a gate pattern that had been firing on eleven lines of *correct* text, and when it stopped crying wolf it found
+three real instances of the same withdrawn claim:
+
+| where | the text |
+|---|---|
+| `04_methods.tex:275` | *"$\max|\nabla\cdot u\| \approx 10^{-14}$ **at every step, for every rank and every Reynolds number**"* |
+| `06_results.tex:105` | *"**all entries are expected at the level of roundoff**, $\approx 10^{-14}$, **independently of rank, Reynolds number, and time**"* |
+| `06_results.tex:124` | **the `tab:div` caption** — *"**All entries** are expected at roundoff level ($\approx 10^{-14}$) by construction"* |
+
+**All three are false, and the caption is the worst of them** — a caption is the most-read text in a table. Your own committed
+baselines contradict all three: the pool of 124 measurements runs from `1.6e-14` to `2.2e-13`, and **one non-diverging
+baseline reaches `1.0e-11`, three orders above the floor you are claiming.** Four other committed baselines reach
+`4.6e+64`–`7.1e+278`; they are excluded because they are the subject of §5, not because they are absent.
+
+**The fix is D66's, and it is a stronger claim, not a weaker one** — it is already in your `WRITER_ORDER.md` block **D18c**, block 4:
+
+> *"Over the 124 measurements we pool from our committed runs, the largest divergence residual of any surviving method is
+> $1.1\times10^{-13}$ and the full-grid solver's own is $7.6\times10^{-14}$, both at the level of the $10^{-14}$ roundoff
+> floor. The spread across the pool runs from $1.6\times10^{-14}$ to $2.2\times10^{-13}$…"*
+
+**So: replace all three sites with that wording, and delete the `tab:div` caption's universal claim or restate it as
+"expected at roundoff level, with one non-diverging baseline at `1.0e-11`".** `10^{-14}` is the roundoff floor and it is
+correct to name it as such — it is only wrong to call it the bound.
+
+**This is now W4 as well as W7.** The invariant statement and the table caption are the same defect, and the caption is the
+one a reviewer will check against your own artifact.
+
+**Priority unchanged: D13, D14, `99.9%` → `99%` in all three files, then D18c.**
+
+---
+
+## R133 — **a correction to a block I gave you this cycle: the energy balance's ceiling is `2.2e-3`, not `4.9e-4`**
+
+**D18c block 7 is updated in place — re-read it.** The corrected sentence:
+
+> *"Measured as the energy balance residual of the projected discrete dynamics, all three solver families hold it to
+> between $1.3\times10^{-4}$ and $2.2\times10^{-3}$ across the $26$ committed measurements we pool, the static projection
+> at the finest grid being the worst at $2.2\times10^{-3}$."*
+
+**What was wrong and how I found it.** I wrote `1.3e-4` to `4.9e-4` from an earlier measurement. The true population of that
+quantity across every committed artifact is **26 measurements, minimum `1.287e-4`, maximum `2.157e-3`** — so **my ceiling
+was low by a factor of 4.4.** The direction was right (the static projection is worst, at the finest grid); the magnitude
+was not. **The claim survives — a `2.2e-3` relative violation is still small — but the number was wrong in text you were
+about to paste.**
+
+**And a second, sharper reason to state it this way.** There are **two** energy-residual quantities in the artifacts and
+they disagree by up to **`662.8×`** for the static baseline — one reaches `0.311`, i.e. **31% of the energy scale**, while the
+other is `4.7e-4`. **Four different key names are in circulation for the two quantities**, and the ones the code now writes
+are the ones no committed data uses. **So "which number is it?" is currently ambiguous, and the ambiguity is worth two orders
+of magnitude.** D18c block 7's second paragraph already warns about this; keep it, and keep the population (`26
+measurements`) attached to the range.
+
+**Unchanged: the divergence numbers in D18c block 4 are correct** (`1.1e-13` worst surviving, `7.6e-14` full grid,
+`1.6e-14`–`2.2e-13` band, `1.0e-11` for the one non-diverging baseline that is not at the floor, `4.6e+64`–`7.1e+278` for the
+overflowing four) — and the three `D60` sites in your draft still need D18c block 4's wording, including the `tab:div`
+caption.
+
+**Priority unchanged: D13, D14, `99.9%` → `99%` in all three files, then the D60 sites, then D18c.**

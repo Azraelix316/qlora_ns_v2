@@ -44,17 +44,26 @@ judgement or new information.**
   `N=64` (`2.7×` the floor) and **not** at `N=128` (`1.9×`), so never write "flat in rank" —
   and do not write "grows with rank" either: neither is supported at `N=128`.)*
 
-## 4. Run these three checks before you trust anything
+## 4. Run these four checks before you trust anything
 
 ```
 python3 state/reviewer/claims_registry.py        # every load-bearing number vs an artifact key path
 python3 state/reviewer/check_order_withdrawn.py  # candidates: claims later decisions withdrew
-python3 -m pytest experiments/test_engine.py -q  # 40 tests, ~180 s (pin OMP/OPENBLAS/MKL=1)
+python3 state/reviewer/check_paper_builds.py     # can the paper build? (the only build check that runs here)
+python3 -m pytest experiments/ -q                # 44 tests, ~180 s (pin OMP/OPENBLAS/MKL=1)
 ```
 
-**`claims_registry.py` currently reports one finding — the draft's `99.9%` where the runs used `99%` —
-and `14/18` verified, the four failures being an artifact that has not landed.** `check_order_withdrawn.py`
-is a **candidate list, not a pass/fail**: a "clean" from it means *no candidates*, not *no defects*.
+**`claims_registry.py` reports `20/24` verified** and **one finding: the draft's `99.9%` where the
+runs used `99%`.** The four failures are all `crossover_N128.json`, which **already exists and verifies
+— with it present the registry reads `24/24`**; it was never committed, and the coder is landing it
+(D93). **It needs no re-run.**
+**`check_paper_builds.py` reports `6` defects: every figure `§6` includes is missing, five of them
+never having been specified — there is no LaTeX toolchain on this node, so this static check is the
+only build check that can run.** `check_order_withdrawn.py` is a **candidate list, not a pass/fail**:
+a "clean" from it means *no candidates*, not *no defects*.
+
+**Every one of these four prints the population it measured over. A result without a population above
+it is not a result (D87, and CHECKLIST §1.15).**
 
 ## 5. The five documents, and which one you want
 

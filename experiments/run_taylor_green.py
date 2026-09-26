@@ -18,6 +18,7 @@ import numpy as np
 
 # Make direct ``python experiments/run_*.py`` execution work from any cwd.
 ROOT = Path(__file__).resolve().parents[1]
+from provenance import provenance as _provenance
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -111,7 +112,7 @@ def run_case(
     return {
         "case": "taylor_green",
         "provenance": {
-            "git_commit": _git_commit(),
+            **_provenance(Path(__file__).resolve()),
             "driver": "experiments/run_taylor_green.py",
         },
         "grid": {"N": N, "L": grid.L},
@@ -123,7 +124,7 @@ def run_case(
         "max_relative_l2_error_dlra": max_reduced_error,
         "max_abs_divergence": max_div,
         "max_energy_increase": float(max_energy_increase),
-        "max_scaled_energy_balance_residual": max_balance_residual,
+        "max_scaled_projected_energy_residual": max_balance_residual,
         "full_seconds": full_seconds,
         "dlra_seconds": reduced_seconds,
         "full_seconds_per_step": full_seconds / max(nsteps, 1),

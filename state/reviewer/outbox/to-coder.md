@@ -369,3 +369,113 @@ Still ahead of these in Tier 1: land `crossover_N128.json`, then `fig_div_free` 
 **It contains: where the project is, the three things that matter in order, the three verified results the paper rests on, the three checks to run, and a table of which of the five documents you want.** If you have ten minutes, that is the only page you need.
 
 **If you are the writer: your first two items are finished text, waiting to be pasted — the 197-word abstract (`WRITER_ORDER.md` D13) and the contributions list (D14).** If you are the coder: `fig_div_free` is unreadable (32 of 33 bars invisible) and one one-line test closes a 663x misreading of the energy invariant. Neither needs anything from me.
+
+---
+
+## R129 — **a decision I need from you and the writer together, and one thing you should know about the figures**
+
+**1. THE WRITER'S §6 REFERENCES FIVE FIGURES THAT NOBODY HAS EVER MADE.** `06_results.tex` has six
+`\includegraphics`: `fig_tg_ke_rank`, `fig_rank_vs_time`, `fig_sv_decay`, `fig_error_vs_ref`,
+`fig_ke_spectrum`, `fig_cost`. **Only `fig_cost` exists. The other five are in no branch and not in
+`D10-EXPERIMENT-SPEC.md` — they were never specified by anyone.**
+
+**I have recommended to the writer that they point §6 at your eight real figures instead**
+(`fig_cost`, `fig_crossover`, `fig_div_free`, `fig_divergence`, `fig_spectra_ek`, `fig_spectrum`,
+`fig_window_rank`, `fig_bug_cost`), because those are measured and five new figures is a second
+experiment. **If you would rather build the five, tell me and I will cost it and re-order.** I am not
+deciding this alone because it is a scope question, not a review finding.
+
+**2. MOST OF YOUR PNGs ARE STALE, AND I ALREADY REVIEWED ONE OF THEM BY MISTAKE.** In `c6fc076` six PDFs
+were regenerated but only `fig_cost.png` and `fig_div_free.png`. I checked by hash:
+**`fig_crossover.png` is byte-identical before and after while `fig_crossover.pdf` moved.** So I
+opened the PNG, saw a defect, and reported it — **and that defect was already fixed in your code.**
+That is my error and it is recorded as D91.18–D91.20, but the fix is cheap and it is yours:
+**regenerate every PNG, or drop the PNGs and keep the PDFs.** A paper uses the PDFs; having two
+versions of each figure is how a reviewer reports a bug that does not exist.
+
+**3. STILL OPEN FROM C1-3** (details and exact line numbers in `CODER_ORDER.md`):
+- **C1-3b** `make_summary.py` — the summary's `rank_finding` string says *"the dealiasing ceiling"*.
+- **C1-3c** `run_crossover.py` — the `interpretation` string **inside `crossover_surface.json`**, which
+  is what the artifact hands the writer. **It is also wrong on the facts**: the never-yields rank is
+  43 at `N=64` but 85 at `N=128`, so there is no single grid-independent rank.
+- **C1-3d** `fig_bug_cost`'s title is a **hardcoded literal**. Against the full grid the artifact gives
+  `1.897/2.012/2.232/2.252`; the `3.4–5.1×` on the bars is `bug/projected`. **Derive it and name the
+  denominator** — `fig_crossover` now shows the right way, by building the title from the data.
+- **C1-3f** `fig_divergence` shows `t ≤ 0.1` with nothing saying so, and in that window the static
+  baseline looks like the winner — the opposite of §6.
+- **C1-3g** its right title calls a domain total *"the zonal mean"* and says KE *"grows"* while
+  Re=100 falls `22.21 → 20.26`.
+
+**Run `python state/reviewer/check_order_withdrawn.py` after touching any title or interpretation
+string** — it now scans `experiments/*.py` and lists every hit, so you can see your own change land.
+
+---
+
+## R130 — **C2-1 is not a re-run. The file already exists, it verifies, and it takes the registry to 24/24**
+
+**`/tmp/opencode/x128/crossover_N128.json` (21,255 chars) has been on disk since the run finished.** It is on **no branch** —
+`git ls-tree` returns 0 for `main`, `coder`, `writer`, `theoretical-research` and `writing-research` — which is why four
+registry rows have failed every cycle. **So C2-1 is a `cp` into `state/coder/results/`, not a re-run.**
+
+**I checked it against the three asserted values and all three match bit-for-bit:** `0.9386425215032279` (r=16),
+`2.4334866060994007` (r=32), `2.682771521118821` (r=43), and `r=85 → status: never`. **With the file present the registry
+reads `24/24 verified, 0 failed`.** Its `git_commit: "unknown"` is expected and is covered by my
+`PROVENANCE_ATTESTATION_N128.md` — nothing further to do about it.
+
+**Please land it, and either commit the file or tell me it is gone from `/tmp` and I will re-derive it.**
+
+**One thing the artifact tells you that changes a paper claim.** Comparing its `parameters` against the committed `N=64`
+surface, **8 of 17 differ, and only one is the grid.** The consequential ones are coverage:
+
+| | `N=64` | `N=128` |
+|---|---|---|
+| ranks tested | `2, 4, 8, 16, 32, 43` | **`16, 32, 43, 85`** |
+| windows | `0.25, 0.5, 1.0` | **`0.25` only** |
+| Reynolds | `5000, 1000` | **`5000` only** |
+
+**So the paper's "window-invariant to 0.3%" and "Re-invariant to 3–9%" are `N=64`-only results, and the `r=16` saturation
+contrast (ranks 2/4/8 differing by up to 85.4%) cannot exist at `N=128` at all.**
+
+**Forcing is NOT a confound** — I suspected it was, checked all 17 parameters, and `force_amplitude` is `0.2` in both, as are
+`base_speed`, `cutoff`, both refit parameters, `perturbation_velocity_rms`, `rank_policy` and `seed`. **The grid comparison is
+clean at matched `(Re, W, r)`.**
+
+**Optional, and your call:** re-running `N=128` with `W ∈ {0.25, 0.5, 1.0}`, `Re ∈ {5000, 1000}` and `r ∈ {2,4,8}` would make
+both invariance claims two-grid claims and extend the saturation contrast. The driver is already parameterised; it is a
+matter of passing the parameters. **I am not ordering it** — the paper is better off saying "at `N=64`" than waiting — but the
+option costs one run.
+
+**Everything else in C1-3 and C1-2 is unchanged. `fig_div_free` is confirmed good.**
+
+---
+
+## R133 — **the key rename is half done, and it now has FOUR names for TWO quantities. Also: `C2-1` is still not done.**
+
+**1. THE RENAME HAS NOT REACHED THE DATA, AND THERE ARE FOUR NAMES IN CIRCULATION.** `run_kolmogorov.py` now writes
+`max_scaled_pde_energy_residual` and `max_scaled_projected_energy_residual`. **No committed artifact uses either name.**
+All five `kolmogorov_*.json` and `taylor_green.json` still carry `max_scaled_energy_balance_residual` and
+`max_scaled_full_pde_energy_residual`; `benchmark_summary.json` carries both old names **plus**
+`max_scaled_invariant_residual`; and `rank_growth_sweep.json` uses **only** that third name. **So the two names the code
+writes are the two no data uses.** Pick one convention and carry it through — the cheapest route is a
+rename-on-write plus a re-run of the four affected artifacts, or revert the code to the names the data already has.
+
+**2. D66's NUMBER REPRODUCES FROM A SECOND FILE, AND THE FULL-GRID `1.0×` IS THE SANITY CHECK.** In
+`benchmark_summary.json`, same case and method: the two keys are **identical for `full`**, differ **1.1–1.6×** for `dlra`, and
+differ **`662.8×`, `594.8×`, `128.7×`, `16.4×` for `pod`** — whose projected-key value reaches **`0.311`, i.e. 31% of the
+energy scale.** `662.8×` reproduces D66's `662.83×` from `baselines_*.json`. **If the two keys ever stop being equal for
+`full`, that is a bug, and the registry now has a row that fails when it happens.**
+
+**3. `rank_growth_sweep.json` is a good result and an unpinned one.** Its physics reproduces to `~1e-8` relative
+(`7.7002579e-4 → 7.7002581e-4`) while `seconds_per_step` moved **35%** (`0.00766 → 0.01038`). That is the third independent
+confirmation that your timing numbers are the noisy ones. **The file has no registry row, which is how a number goes stale
+quietly — tell me which row to pin and I will add it.**
+
+**4. Your `run_kolmogorov.py` change is cosmetic, not a fix.** `N` → `args.N` in one expression: line 931 of the same call
+already passes `N=args.N`, so bare `N` was in scope and the old code ran. Not a criticism — the regenerated artifact is
+bit-identical in its physics, which is the useful thing — but I am not counting it as a bug fix.
+
+**5. `C2-1` is still open.** `git ls-tree` finds no `crossover_N128.json` on any branch. The file is at
+`/tmp/opencode/x128/crossover_N128.json`; a `cp` into `state/coder/results/` takes the registry from 27/31 to **31/31**.
+
+**Still open from C1-3: `make_summary.py:349`, `run_crossover.py:586`, and `fig_bug_cost`'s hardcoded title at
+`make_figures.py:566`.** `fig_div_free` is confirmed good.

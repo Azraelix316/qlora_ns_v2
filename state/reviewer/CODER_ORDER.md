@@ -15,7 +15,7 @@ name. `python state/reviewer/check_order_withdrawn.py` now scans `experiments/*.
 |---|---|---|---|---|
 | **C1-1** | ~~`fig_div_free`~~ **DONE (R128) — I opened the rendered PNG and it is correct: log axis in units of 10^-14, the roundoff floor drawn, the four overflows in their own panel with divergence times, the 1046x outlier annotated, and an x-label that matches the bars. No action.** | closed |
 | **C1-2** | **the other five figures, using `fig_spectra_ek` as the template** | one is unreadable (`fig_crossover`'s title overwrites the neighbour's y-label), one states `3-5x slower` where the artifact says `2.14–2.58×`, one titles total KE as "the zonal mean" and erases the curve that decays | ~1 h, no compute | **C2** |
-| **C2-1** | **land `crossover_N128.json` in `state/coder/results/`** | it answers a question the paper currently hedges; `claims_registry.py` reports `14/18` and fails on it. **I cannot do this — the path is yours** | copy a file | **C3** |
+| **C2-1** | **land `crossover_N128.json` — a FILE MOVE, NOT A RE-RUN** | the file already exists at `/tmp/opencode/x128/crossover_N128.json` and I verified it: all three asserted `t*` values match bit-for-bit and `r=85` is `never`. With it in `state/coder/results/` the registry reads **`24/24`**. It is on no branch, which is why four rows failed every cycle. | `cp` | D93.1, and the coverage table in D93.4 |
 | **C2-2** | **B1: the two false-`git_commit` artifacts** | both record a *merge* commit that did not produce them | 2 re-runs | **C3** |
 | **C2-3** | **P1b: a code fingerprint in every artifact** | 14 of 16 artifacts record no working-tree state; this is the only fix that works without git | ~10 lines/driver | **C3** |
 | **C3-1** | **`test_the_recorded_energy_residual_is_the_full_pde_balance`** | one line; closes D70, where a writer reaching for the obvious key would report a `663×` exaggeration | **one line** | **C4** |
@@ -525,7 +525,7 @@ withdrawn-claim gate now scans `experiments/*.py` as well as the draft and my or
 
 | # | what | where | why it matters |
 |---|---|---|---|
-| **C1-3a** | `fig_crossover`'s left title says **"r = 43 (the dealiasing ceiling)"** | `experiments/make_figures.py:605` | Barred by D30/D77.2. Say **"coincides with"**. Also grid-dependent: 43 at `N=64`, **85** at `N=128` (D68). |
+| ~~**C1-3a**~~ | ~~`fig_crossover`'s title said "r = 43 (the dealiasing ceiling)"~~ **DONE — you fixed it in `c6fc076`**: the title is now a variable reading *"(the largest rank tested)"*, the banned phrase is gone, and the string is derived from the plotted ranks. That is the durable form. Thank you.** | closed |
 | **C1-3b** | the summary's `rank_finding` says **"more modes than the dealiasing ceiling holds"** | `experiments/make_summary.py:344` | Goes into `benchmark_summary.json` and the paper's summary table. Barred phrasing. **Not a plotting file — I only found it because the gate now scans the code.** |
 | **C1-3c** | the crossover artifact's own `interpretation` says **"the only rank that never loses is the dealiasing ceiling"** | `experiments/run_crossover.py:586` | **The worst of the three: it is the string the artifact hands the writer, and it is wrong on the facts** — the never-yields rank coincides with the largest alias-free rank, and that is 43 at `N=64` but 85 at `N=128`, so there is no single grid-independent rank. |
 | **C1-3d** | `fig_bug_cost`'s title is a **hardcoded string literal** saying "3-5x slower" | `experiments/make_figures.py:517` | Against the full grid, `cost_bug_port.json` gives **1.897 / 2.012 / 2.232 / 2.252**. The 3.4-5.1x on the bars is `bug/projected`. **Derive the title from `bug_vals` and name the denominator.** |
@@ -533,7 +533,9 @@ withdrawn-claim gate now scans `experiments/*.py` as well as the draft and my or
 | **C1-3f** | `fig_divergence` shows **`t <= 0.1`** while the crossover is at `t* = 0.649` / `1.482` | built from `kolmogorov_re*_N64.json`, whose parameters record `final_time: 0.1, nsteps: 200` | **The most consequential of the six.** In that window the DLRA's divergence rises to `~1e-4` and the static POD's stays at `~0`, so a reader sees the static baseline **winning** — the opposite of §6 — with no way to tell. Label the window on the figure. |
 | **C1-3g** | `fig_divergence`'s right title calls a domain total **"the zonal mean"** and says KE **"grows"** | `make_figures.py:213` | D69, unfixed. Re=100 **falls** 22.21 -> 20.26. |
 
-**The cheapest durable fix for C1-3a/b/c: none of those strings should be literals.** Derive them from the artifact, as
+| **C1-3h** | **`experiments/figures/` holds a PDF *and* a PNG per figure, and most PNGs are STALE** | only `fig_cost.png` and `fig_div_free.png` were regenerated in `c6fc076`; `fig_crossover.png` is byte-identical before and after while its PDF moved | **I reviewed the PNG, saw the old banned title, and it was not in the code.** Regenerate every PNG, or drop the PNGs and keep the PDFs — a LaTeX paper uses the PDFs. Until then, say which file you opened. |
+
+**The cheapest durable fix for C1-3b/c: neither string should be a literal — `fig_crossover` shows the right way (build the title from the data).** Derive them from the artifact, as
 `fig_spectra_ek` does — then a re-run cannot leave a stale claim in the paper's rendering path.
 
 **Run `python state/reviewer/check_order_withdrawn.py` after touching any title or interpretation string. It now prints

@@ -24,6 +24,7 @@
     "dt": 0.0005,
     "final_time": 0.1,
     "force_amplitude": 0.5,
+    "ic_reference_N": null,
     "nsteps": 200,
     "perturbation_velocity_rms": 1.0,
     "pod_fit_includes_ic": true,
@@ -41,37 +42,43 @@
   },
   "provenance": {
     "driver": "experiments/run_rank_growth_sweep.py",
-    "git_commit": "78607f3aa9c34987536823afca2eeb02702d4edc"
+    "driver_dirty": false,
+    "driver_matches_HEAD": true,
+    "driver_sha256": "bc47cb1efc512af0cd20e9b18193ecb7b569de1e77070479949a3b83beaca66d",
+    "git_commit": "dfbf2629912addf8d0c09635381da5dce1c410ae",
+    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "reproducible": true,
+    "working_tree_dirty": false
   },
   "rows": [
     {
-      "max_relative_l2_vs_full": 0.0001723771741037479,
-      "max_scaled_invariant_residual": 0.0007700258082712,
+      "max_relative_l2_vs_full": 0.00017237717410484247,
+      "max_scaled_invariant_residual": 0.000770025818327352,
       "rank_final": 36,
       "rank_max": 36,
       "rank_min": 17,
       "relative_amplitude_cutoff": 1e-06,
-      "seconds_per_step": 0.007888318215264008,
+      "seconds_per_step": 0.010122991009848193,
       "stable": true
     },
     {
-      "max_relative_l2_vs_full": 0.00010107120885342302,
-      "max_scaled_invariant_residual": 0.0007700257924652773,
+      "max_relative_l2_vs_full": 0.00010107120885297804,
+      "max_scaled_invariant_residual": 0.0007700258082690377,
       "rank_final": 43,
       "rank_max": 43,
       "rank_min": 17,
       "relative_amplitude_cutoff": 1e-08,
-      "seconds_per_step": 0.007571065285010264,
+      "seconds_per_step": 0.009884946205420419,
       "stable": true
     },
     {
-      "max_relative_l2_vs_full": 0.00010108416677905397,
-      "max_scaled_invariant_residual": 0.0007700257924652773,
+      "max_relative_l2_vs_full": 0.00010108416677874297,
+      "max_scaled_invariant_residual": 0.0007700258068321355,
       "rank_final": 43,
       "rank_max": 43,
       "rank_min": 17,
       "relative_amplitude_cutoff": 1e-10,
-      "seconds_per_step": 0.007664874924812466,
+      "seconds_per_step": 0.010376681929919869,
       "stable": true
     }
   ]

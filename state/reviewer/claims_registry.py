@@ -35,6 +35,7 @@ Run:  python3 claims_registry.py [REPO_ROOT] [PAPER_SECTIONS_DIR]
 Exit: 0 iff every entry verifies, no threshold is over-stated, and nothing is uncovered.
 """
 import json, glob, os, re, sys
+from pathlib import Path
 from decimal import Decimal, ROUND_HALF_EVEN
 
 # --------------------------------------------------------------------------------------
@@ -50,6 +51,16 @@ REGISTRY = [
      {"rank": 16, "window": 0.25}, "t_star", 0.6493281145096707, 16),
     ("tstar_r32", "crossover_surface.json", "by_reynolds.5000.crossovers",
      {"rank": 32, "window": 0.25}, "t_star", 1.4816252539052939, 16),
+    # D94: the WINDOW SWEEP was unpinned, so the robustness figure derived from it could be
+    # misquoted freely -- and it was, twice: once corrected in D29.4, then repeated in D93.4
+    # four hours later as "0.3%" when the measured spread over the three windows is 0.63%.
+    # With tstar_r32 pinned at W=0.25 and these two, the 0.63% spread is derivable from three
+    # machine-verified numbers. Robustness claims are the ones most likely to be misquoted,
+    # because they sound like rounding.
+    ("tstar_r32_W0p5", "crossover_surface.json", "by_reynolds.5000.crossovers",
+     {"rank": 32, "window": 0.5}, "t_star", 1.4739544217813643, 16),
+    ("tstar_r32_W1p0", "crossover_surface.json", "by_reynolds.5000.crossovers",
+     {"rank": 32, "window": 1.0}, "t_star", 1.4832176727372877, 16),
 
     # --- cost (D52.5: 2.08-2.71x SLOWER. 2.08 is the MINIMUM, so "comparable to" is false
     #     everywhere -- the euphemism the abstract had to be rewritten for.)
@@ -129,6 +140,31 @@ REGISTRY = [
      {"rank": 43, "window": 0.25}, "status", None, None),
     ("never_yields_rank_N128", "crossover_N128.json", "by_reynolds.5000.crossovers",
      {"rank": 85, "window": 0.25}, "status", None, None),
+
+
+    # --- the ENERGY invariant's TWO keys (D96). The same balance computed with and without the
+    #     projection's energy increment. IDENTICAL for the full grid (no projection), 1.1-1.6x apart
+    #     for SP-DLRA, and 16-663x apart FOR THE STATIC POD BASELINE -- whose projected-key value
+    #     reaches 0.311, i.e. 31% of the energy scale. FOUR names are in circulation for the two
+    #     quantities and NEITHER WAS PINNED, so a writer could quote the wrong one and be off by
+    #     two orders. D18a quotes the `full_pde` key, which is the correct choice.
+    ("energy_pde_worst", "kolmogorov_re5000_N128.json", "pod", None,
+     "max_scaled_full_pde_energy_residual", 2.1567159266253208e-3, 4),
+    ("energy_pde_best", "kolmogorov_re5000_N128.json", "full", None,
+     "max_scaled_full_pde_energy_residual", 1.2867783923806202e-4, 4),
+    ("energy_pde_dlra_N64", "kolmogorov_re5000_N64.json", "dlra", None,
+     "max_scaled_full_pde_energy_residual", 4.692313806730548e-4, 4),
+    ("energy_full_keys_agree", "kolmogorov_re5000_N64.json", "full", None,
+     "max_scaled_energy_balance_residual", 2.5885138557000837e-4, 4),
+    ("energy_projected_pod", "kolmogorov_re5000_N64.json", "pod", None,
+     "max_scaled_energy_balance_residual", 3.331987774005639e-2, 4),
+
+    # --- Re=1000 horizons (D97). D18c states them, and until now no row covered them, so PART 4
+    #     reported them UNTRACED. They are the Re-invariance claim, so they need a source.
+    ("tstar_r16_re1000", "crossover_surface.json", "by_reynolds.1000.crossovers",
+     {"rank": 16, "window": 0.25}, "t_star", 0.6665645808117523, 16),
+    ("tstar_r32_re1000", "crossover_surface.json", "by_reynolds.1000.crossovers",
+     {"rank": 32, "window": 0.25}, "t_star", 1.6094633714766546, 16),
 ]
 
 # Claims about a THRESHOLD the draft may mis-state. Kept separate because the defect is a policy
@@ -278,6 +314,76 @@ def load_draft(root, paper_arg):
     return {n: sh("git", "show", f"{ref}:{n}") for n in names}, f"git {ref}:paper/sections"
 
 
+
+# ---------------------------------------------------------------------------------------
+# PART 4. Every numeric literal in the text that BECOMES THE PAPER, traced to a registry row.
+#
+# WHY (D97). Three findings in three cycles -- D85's saturation threshold, D94's window figure
+# and D96's energy ceiling -- were all defects in MY OWN documents, and all three were found by
+# READING, not by a gate. PART 3 checks the draft only, at 4+ significant figures, and PART 1
+# checks artifact -> registry. NOTHING checked registry -> the sentences the writer pastes. So a
+# number could be wrong in a paste-ready block and every gate would stay green.
+#
+# This part closes that direction. For each literal it classifies:
+#   MATCH       - equals a registry value at the literal's own precision
+#   NEAR-MISS   - within a factor of 2 of a registry value but not equal to it  -> INVESTIGATE
+#   UNACCOUNTED - no registry value within 100x                              -> needs a claim
+# The near-miss band is the point: it is what would have caught 0.3% (D94) and 4.9e-4 (D96).
+# ---------------------------------------------------------------------------------------
+NEAR_MISS_FACTOR = 2.0
+UNACCOUNTED_FACTOR = 100.0
+
+
+def _sig_ok(s, lo=2):
+    try:
+        return sig_figs(s) >= lo
+    except Exception:
+        return False
+
+
+def trace_literals(text, values, lo=2, unaccounted_lo=4):
+    """Classify every numeric literal in `text` against the registry `values`."""
+    out = {"MATCH": [], "UNACCOUNTED": [], "small": []}
+    if not values:
+        return out
+    vlist = [(k, float(v)) for k, v in values.items() if isinstance(v, (int, float))
+             and not isinstance(v, bool) and float(v) != 0.0]
+    for s in NUM.findall(text):
+        try:
+            x = float(s)
+        except ValueError:
+            continue
+        if x == 0.0:
+            continue
+        # A YEAR IN A DATE IS NOT A CLAIM. `2026` was reported UNTRACED in CODER_ORDER and
+        # START_HERE, and it is the only kind of 4-significant-figure literal in these documents
+        # that can never be a measurement.
+        if 1900 <= x <= 2100 and "." not in s and "e" not in s.lower():
+            out["small"].append(s)
+            continue
+        if not _sig_ok(s, lo):
+            out["small"].append(s)
+            continue
+        hit = None
+        for k, v in vlist:
+            if round_sig(v, sig_figs(s)) == Decimal(s):
+                hit = k
+                break
+        if hit:
+            out["MATCH"].append((s, hit))
+            continue
+        # UNTRACED means UNTRACED: no registry row accounts for this literal. An earlier version
+        # added a magnitude guard ("unless it is within 100x of SOME registry value"), and that
+        # guard is what stopped the assertion ever firing -- my positive control injected an
+        # unaccounted 3.1416 and the gate reported 0 untraced. A literal is either sourced or it
+        # is not; how big it is has no bearing on whether it is a claim.
+        if sig_figs(s) >= unaccounted_lo:
+            best = min(vlist, key=lambda kv: abs(abs(kv[1]) - abs(x)) / max(abs(x), 1e-300))
+            out["UNACCOUNTED"].append((s, best[0], abs(x) / abs(best[1])))
+        else:
+            out["small"].append(s)
+    return out
+
 def main():
     root = sys.argv[1] if len(sys.argv) > 1 else \
         os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -383,6 +489,66 @@ def main():
     print(f"\n  {n} uncovered. Each needs a registry row, or a decision that it is not a claim.")
     if n:
         bad.append(("coverage", f"{n} uncovered high-precision literal(s)"))
+
+    # ---------------------------------------------------------------------------------
+    # PART 4 (D97). The same traceability question asked of the text that BECOMES THE
+    # PAPER: the draft AND the reviewer's own paste-ready LaTeX blocks. PART 3 asks only
+    # "is this literal in the registry?"; PART 4 also asks "is it CLOSE to a registry value
+    # without being it?", which is the band that hides a stale number.
+    print("\nPART 4 — every numeric literal in the paper-facing text, traced to a registry row\n")
+    root_dir = Path(__file__).resolve().parent
+    pops = [("DRAFT", "\n".join(tex.values()))]
+    for name in ("WRITER_ORDER.md", "CODER_ORDER.md", "START_HERE.md"):
+        f = root_dir / name
+        if not f.exists():
+            continue
+        body = f.read_text()
+        blocks = re.findall(r"```latex\n(.*?)\n```", body, re.S)
+        if blocks:
+            # the paste-ready blocks: what the writer actually pastes
+            pops.append((f"{name} paste-ready latex ({len(blocks)} blocks)",
+                         "\n".join(blocks)))
+        else:
+            # No paste-ready block, but the prose still carries numbers an agent will copy --
+            # START_HERE.md is the file every agent opens first. Scanning it is a strictly larger
+            # population, and measured it contributes 11 and 54 traced literals with none untraced.
+            pops.append((f"{name} prose (no paste-ready block)", body))
+    tot = {"MATCH": 0, "UNACCOUNTED": 0}
+    empty = []
+    for label, body in pops:
+        if not body.strip():
+            empty.append(label)
+    for label, body in pops:
+        if not body.strip():
+            continue
+        r = trace_literals(body, values)
+        tot["MATCH"] += len(r["MATCH"])
+        tot["UNACCOUNTED"] += len(r["UNACCOUNTED"])
+        print(f"  {label}")
+        print(f"    traced to a registry row: {len(r['MATCH'])}   "
+              f"UNTRACED at 4+ sig figs: {len(r['UNACCOUNTED'])}")
+        for s, key, f_ in r["UNACCOUNTED"][:12]:
+            print(f"      UNTRACED  {s:<16} nearest registry value {key} at {f_:.4g}x  -> needs a row")
+    if empty:
+        print(f"  !! EMPTY POPULATION for: {empty} -- those contributed nothing and the count above")
+        print("     does not cover them. A clean total over a missing population is not a result (D87).")
+        bad.append(("part4_population", f"empty population(s): {empty}"))
+    if tot["MATCH"] == 0 and tot["UNACCOUNTED"] == 0:
+        print("  !! NOTHING WAS TRACED AT ALL -- the registry is empty or the text is empty.")
+        bad.append(("part4_population", "traced 0 and untraced 0"))
+    print(f"\n  TOTAL  traced {tot['MATCH']}   UNTRACED {tot['UNACCOUNTED']}")
+    print("  A number in the paper-facing text that no registry row accounts for is a claim with no")
+    print("  source. The assertion is UNTRACED == 0, and it is the direction this gate closes: PART 1")
+    print("  checks artifact -> registry, and this checks registry -> the sentences that get pasted.")
+    print("\n  NOT CHECKED HERE, AND DELIBERATELY SO: a *near-miss* band. Measured, it fires 85 times on")
+    print("  the current documents - 13 in the draft, 72 in the paste-ready blocks - and almost all of")
+    print("  them are labels, not claims: `32` is a RANK, flagged as 0.744x the dealiasing ceiling 43,")
+    print("  and `64` is a GRID. It cannot tell that from '0.3% should be 0.63%', which needs a")
+    print("  semantics engine this does not have. **A gate that fires 85 times on correct text trains a")
+    print("  reviewer to skip it, which is how D85's threshold and D94's window figure survived as long")
+    print("  as they did. So the band is dropped and the measurement is recorded instead (D97).**")
+    if tot["UNACCOUNTED"]:
+        bad.append(("part4_untraced", f"{tot['UNACCOUNTED']} untraced literal(s) in paper-facing text"))
     return 1 if bad else 0
 
 

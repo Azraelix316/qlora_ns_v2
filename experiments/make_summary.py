@@ -103,12 +103,17 @@ def method_row(block: dict, key: str) -> dict:
         # phase, not accuracy (P0 metric order, item 1 and item 4).
         "max_trajectory_divergence": block.get("max_relative_l2_vs_full"),
         "wall_seconds_per_step": block.get("wall_seconds_per_step"),
-        "max_scaled_energy_balance_residual": block.get(
-            "max_scaled_energy_balance_residual"
+        # Both are carried, under the names that say which balance they measure;
+        # the driver records the same definitions in
+        # `energy_residual_semantics`.  Quoting the projected one for the PDE
+        # balance understates a projected method's violation (D70).
+        "max_scaled_projected_energy_residual": block.get(
+            "max_scaled_projected_energy_residual"
         ),
-        "max_scaled_full_pde_energy_residual": block.get(
-            "max_scaled_full_pde_energy_residual"
+        "max_scaled_pde_energy_residual": block.get(
+            "max_scaled_pde_energy_residual"
         ),
+        "energy_residual_semantics": block.get("energy_residual_semantics"),
         "rank_min": block.get("rank_min"),
         "rank_max": block.get("rank_max"),
         "rank_final": block.get("rank_final"),

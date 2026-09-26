@@ -37,13 +37,27 @@ import sys
 from pathlib import Path
 
 # (decision that withdrew it, pattern, what it is)
+# A 4th element, `window`, makes a pattern match across `window` consecutive lines instead of
+# one. It exists for D60, whose defect SPANS TWO LINES: the paper writes
+#   "$\max|\grad\cdot u| = O(\varepsilon_{\mathrm{mach}}) \approx 10^{-14}$ at"
+#   "every step, for every rank and every Reynolds number"
+# so the number and the universal quantifier that makes it a defect are not on the same line.
 WITHDRAWN = [
     ("D29",   r"\b1\.26\b|\b2\.44\b|\b1\.46\b|\b2\.45\b|\b1\.24\b|\b2\.53\b|\b1\.33\b",
      "the pre-D29 t* values"),
     ("D52.5", r"1\.78|2\.18", "the superseded cost range"),
     ("D56",   r"1\.46\s*(?:→|->)\s*1\.99|2\.45\s*(?:→|->)\s*6\.04", "the STRUCK N=128 multipliers"),
-    ("D60",   r"1e-14|10\^\{-14\}",
-     "the withdrawn |div u| magnitude"),
+    # D60.1: the DEFECT is a UNIVERSAL QUANTIFIER over a roundoff number, not the number.
+    # "at the level of the 10^-14 roundoff floor" is CORRECT and says so; "~1e-14 at every
+    # step, for every rank and every Reynolds number" is the claim D60 withdrew, because the
+    # measured spread over finite methods is 462x. So require BOTH the number AND a
+    # universal quantifier, within a 2-line window (D95). The old bare-number pattern had
+    # produced 11 false positives and was matching the wrong quantity.
+    # `any` is DELIBERATELY NOT in the quantifier list (D95): "the largest residual of ANY
+    # surviving method is 1.1e-13" is D66's CORRECT population statement, and including `any`
+    # flagged it. D60's actual defect used "every" and "all".
+    ("D60",   r"(?=.*(?:1e-14|10\^\{-14\}))(?=.*\b(?:every|all|always|universal|global)\b)",
+     "a universal bound on |div u| stated as the 1e-14 roundoff level", 2),
     # \s+ not " ": these documents hard-wrap, and "bracketed\n   between 32 and 43"
     # is the very instance this gate exists to catch (D78).
     ("D74",   r"bracketed\s+(?:between\s+)?32\s*(?:and|[-–])\s*43",
@@ -119,12 +133,18 @@ def scan(path):
     for a, b in latex:
         in_latex.update(range(a, b))
     found = []
-    for decision, pattern, what in WITHDRAWN:
-        rx = re.compile(pattern, re.I)
+    for row in WITHDRAWN:
+        decision, pattern, what = row[0], row[1], row[2]
+        window = row[3] if len(row) > 3 else 1
+        # re.S ONLY for a multi-line window: `.` must cross the newline for a lookahead to see
+        # the number on one line and the quantifier on the next. Without it the pattern silently
+        # failed on the very instance it exists to catch (D95).
+        rx = re.compile(pattern, re.I | (re.S if window > 1 else 0))
         for i, line in enumerate(lines):
             if i >= cut and i not in in_latex:
                 continue                      # order region, or paste-ready text
-            if rx.search(line) and not PROHIBITION.search(line):
+            probe = "\n".join(lines[i:i + window])
+            if rx.search(probe) and not PROHIBITION.search(probe):
                 kind = "PASTE-READY TEXT" if i in in_latex else "order"
                 found.append((decision, what, i + 1, kind, line.strip()[:100]))
     return len(lines), cut, len(latex), found
@@ -191,13 +211,17 @@ def main():
             return 2
 
     # Self-test: the pattern set must be able to fire on a string known to be bad.
-    probe = "the dealiasing ceiling and 1e-14 and 1.26 and 3-5x slower and 1.46->1.99"
+    # The probe must satisfy D60's CONJUNCTION (a roundoff number AND a universal quantifier),
+    # because that conjunction is the defect. A probe carrying only the number would make the
+    # self-test fail for the right reason at the wrong time.
+    probe = ("the dealiasing ceiling and 1e-14 for every rank and every Reynolds number "
+             "and 1.26 and 3-5x slower and 1.46->1.99")
     # the wrapped form must fire too, or the gate is blind to hard-wrapped prose (D78)
     wrapped = "bracketed\n   between 32 and 43"
-    if not re.search(dict((d, p) for d, p, _ in WITHDRAWN)["D74"], wrapped, re.I):
+    if not re.search(dict((r[0], r[1]) for r in WITHDRAWN)["D74"], wrapped, re.I):
         print("SELF-TEST FAILED: the D74 pattern does not fire on the line-wrapped form")
         return 2
-    fired = sum(1 for _, pat, _ in WITHDRAWN if re.search(pat, probe, re.I))
+    fired = sum(1 for r in WITHDRAWN if re.search(r[1], probe, re.I))
     if fired < 5:
         print(f"SELF-TEST FAILED: only {fired} of {len(WITHDRAWN)} patterns fire on a known-bad string")
         return 2
@@ -205,7 +229,8 @@ def main():
 
     # CHECKLIST 1.15.4: every pattern must fire on a known instance of the thing it withdraws.
     # A pattern that has never been observed to fire is a pattern that has not been shown to work.
-    for decision, pat, what in WITHDRAWN:
+    for row in WITHDRAWN:
+        decision, pat = row[0], row[1]
         inst = {
             "D67":   r"$r_{\mathrm{POD}}$ resolving 99.9\% of the energy",
             "D32.2": "The rank is adapted online by incremental singular value decomposition.",
@@ -219,9 +244,15 @@ def main():
             return 2
     print(f"SELF-TEST PASS: every draft-targeted pattern fires on a known instance of its claim")
 
+    # POPULATION FIRST, in the same form as the other two gates (D87 / CHECKLIST 1.15). A verdict
+    # with no population above it is not a result.
+    docs_meta = [scan(d) for d in docs]
+    print(f"  POPULATION: {len(docs)} order document(s), "
+          f"{sum(m[0] for m in docs_meta)} lines, "
+          f"{sum(m[2] for m in docs_meta)} paste-ready latex block(s)")
+
     total = 0
-    for d in docs:
-        n, cut, nlatex, found = scan(d)
+    for d, (n, cut, nlatex, found) in zip(docs, docs_meta):
         print(f"\n{d.name}: {n} lines, order region = lines 1-{cut}, "
               f"paste-ready latex blocks = {nlatex}")
         for decision, what, line, kind, text in found:
@@ -250,10 +281,13 @@ def main():
         print("  !! EMPTY POPULATION - the figure code was not found (D87).")
         total += 1
     fighits = 0
-    for decision, pat, what in WITHDRAWN:
-        pp = re.compile(pat, re.I)
+    for row in WITHDRAWN:
+        decision, pat, what = row[0], row[1], row[2]
+        window = row[3] if len(row) > 3 else 1
+        pp = re.compile(pat, re.I | (re.S if window > 1 else 0))
+        fidx = {loc: k for k, (loc, _) in enumerate(fig)}
         for loc, line in fig:
-            if pp.search(line):
+            if pp.search("\n".join(l for _, l in fig[fidx[loc]:fidx[loc] + window])):
                 fighits += 1
                 print(f"  CANDIDATE [{decision}] {what}  {loc} (FIGURE TITLE/CODE): "
                       f"{line.strip()[:100]}")
@@ -262,14 +296,18 @@ def main():
     total += fighits
 
     hits = 0
-    for decision, pat, what in WITHDRAWN:
-        p = re.compile(pat, re.I)
+    idx = {loc: k for k, (loc, _) in enumerate(rendered)}   # so a window can look ahead
+    for row in WITHDRAWN:
+        decision, pat, what = row[0], row[1], row[2]
+        window = row[3] if len(row) > 3 else 1
+        p = re.compile(pat, re.I | (re.S if window > 1 else 0))
         for loc, line in rendered:
-            if p.search(line) and not PROHIBITION.search(line):
+            probe = "\n".join(l for _, l in rendered[idx[loc]:idx[loc] + window])
+            if p.search(probe) and not PROHIBITION.search(probe):
                 hits += 1
                 print(f"  CANDIDATE [{decision}] {what}  {loc} (RENDERED TEXT): "
                       f"{line.strip()[:100]}")
-    ncom = sum(1 for d, pat, _ in WITHDRAWN for loc, l in commented if re.search(pat, l, re.I))
+    ncom = sum(1 for r in WITHDRAWN for loc, l in commented if re.search(r[1], l, re.I))
     print(f"  {hits} candidate(s) in RENDERED draft text; {ncom} further match(es) in LaTeX "
           f"COMMENTS (not rendered, listed for the record only)")
     if not hits:
@@ -282,4 +320,16 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # A CRASH MUST NOT LOOK LIKE A PASS. An unhandled exception propagated out of main() and the
+    # interpreter still exited 0, so a gate that had stopped running entirely reported success
+    # (D95). Anything unexpected is now a non-zero exit with the reason.
+    try:
+        sys.exit(main())
+    except SystemExit:
+        raise
+    except Exception as exc:                      # noqa: BLE001 - deliberate catch-all
+        print(f"  !! THE GATE CRASHED: {type(exc).__name__}: {exc}")
+        print("     THIS IS NOT A CLEAN RESULT. A gate that did not run reports nothing.")
+        import traceback
+        traceback.print_exc()
+        sys.exit(3)

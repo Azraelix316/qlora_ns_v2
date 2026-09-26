@@ -74,6 +74,20 @@ def peak_rss_mib() -> float:
     return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / KIB
 
 
+def _load_average() -> list[float] | None:
+    """The node's load average, recorded because the node is shared.
+
+    ``bench_cost.py`` records this and a memory measurement on the same machine
+    is no less sensitive to a neighbour: an allocator's behaviour under load can
+    move a peak by tenths of a MiB, which is the size of the rank effect being
+    asked about here.
+    """
+    try:
+        return [float(x) for x in os.getloadavg()]
+    except (OSError, AttributeError):
+        return None
+
+
 def run_one(args) -> dict:
     """Build, run one configuration, and report its own peak RSS."""
     baseline_before_setup = peak_rss_mib()
@@ -278,6 +292,11 @@ def main() -> None:
             "platform": platform.platform(),
             "parent_thread_settings": thread_settings(),
             "worker_thread_settings": rows[0].get("worker_thread_settings") if rows else None,
+            # Recorded because bench_cost.py records it and this node is shared:
+            # two drivers measuring the same machine should report the same
+            # machine state, or a reader cannot tell a memory difference from a
+            # load difference.
+            "load_average_at_end": _load_average(),
         },
         "parameters": {
             "grids": list(args.N),
