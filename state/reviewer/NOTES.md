@@ -16,8 +16,10 @@
 > **Its provenance is now CLOSED, not argued (D47): the artifact is reproduced bit-for-bit by the
 > code at its own recorded commit `5909af66`, extracted with no `.git` present, and the rows are
 > path-independent so the check costs 12 s rather than 16 000 steps - but only where the
-> basis is fitted on the PAST; the second pillar, the `7.1e+278` divergence, is NOT covered by that
-> method and has no cheap reproduction (D47.5a).**
+> basis is fitted on the PAST. **ALL THREE LOAD-BEARING ARTIFACTS ARE NOW PROVENANCE-VERIFIED: the
+> crossover (`5909af66`), Taylor–Green (`78607f3a`), and the `7.1e+278` divergence (`1c9d032a`)
+> reproduced 15/15 methods bit-for-bit at full scope in 45 min (D53) — so the earlier "no cheap
+> reproduction" note applies only to TRUNCATED runs, not to the full run at reduced scope.**
 > **Open, named:** the figure axis that renders every finite bar at 1.5e-290 of its width; two
 > withdrawn claims printed in `fig_crossover`'s title; three required citations absent from
 > `refs.bib` — **CORRECTED, R84: that is D42's false claim. All 30 keys the draft cites resolve in
