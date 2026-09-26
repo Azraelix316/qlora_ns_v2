@@ -216,7 +216,7 @@ a wavenumber can never again be read as a rank.
 
 1. **~~Locate the never-yields threshold.~~ ANSWERED BY D74 — do not run this.**
    The premise was *"if `r=64` also never yields, `43` has no privileged status."* **It does not: at `N=64` the
-   never-yields rank is exactly `43`, and at `N=128` rank 43 *does* yield (`t* = 2.6828`) while the never-yields
+   never-yields rank is exactly `43`, and at `N=128` **rank 43 is NO LONGER MEASURED** - the re-scope dropped it, so D74's `t* = 2.6828` has no artifact behind it and must not be claimed (D118) - while the never-yields
    rank is `85`.** `43` and `85` are the two `dealias_rank_ceiling` values, so `43` has precisely the privileged
    status the item doubted. Both facts are verified rows in `claims_registry.py`
    (`never_yields_rank_N64`, `never_yields_rank_N128`).

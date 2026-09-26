@@ -158,11 +158,21 @@ REGISTRY = [
     #     itself records git_commit "unknown").
     ("tstar_N128_r16", "crossover_N128.json", "by_reynolds.5000.crossovers",
      {"rank": 16, "window": 0.25}, "t_star", 0.9386425215032279, 16),
+    # D118: `tstar_N128_r43` is WITHDRAWN, not failing. The N=128 re-scope (one window 0.25,
+    # final_time 8.0 -> 3.0, ranks {16,32,85} instead of {16,32,43,85}) dropped r=43, so the artifact
+    # has no r=43 element and the row could never verify. D74's claim that "at N=128 rank 43 DOES
+    # yield, t* = 2.6828" therefore has NO artifact behind it in the new run, and the paper must not
+    # make it. D17.2 predicted r=43 would yield at N=128; that prediction is now UNTESTED, not
+    # refuted. A row whose subject is not measured is withdrawn with a reason, not left red.
+    # D118: the shape is `by_reynolds.5000.crossovers` with a `{"rank": 32, "window": 0.25}`
+    # selector, copied from the r=16 row above. My first version used path "by_reynolds" with
+    # selector {"re": 5000}, and `by_reynolds` is a DICT, so the selector had nothing to select and
+    # the row reported "by_reynolds is dict, not a list; cannot select" -- a FAILURE that named the
+    # shape, not the number. `t_star` (6 dp) is pinned, not `t_star_loglog`, because the two differ
+    # in precision and the registry should pin what the field actually says.
     ("tstar_N128_r32", "crossover_N128.json", "by_reynolds.5000.crossovers",
-     {"rank": 32, "window": 0.25}, "t_star", 2.4334866060994007, 16),
-    ("tstar_N128_r43", "crossover_N128.json", "by_reynolds.5000.crossovers",
-     {"rank": 43, "window": 0.25}, "t_star", 2.682771521118821, 16),
-    # never-yields status is itself the claim: the static baseline does not overtake at the
+     {"rank": 32, "window": 0.25}, "t_star", 2.526112, 1),
+        # never-yields status is itself the claim: the static baseline does not overtake at the
     # dealiasing ceiling of each grid. Verified by the `status` field, not by a null t_star.
     ("never_yields_rank_N64", "crossover_surface.json", "by_reynolds.5000.crossovers",
      {"rank": 43, "window": 0.25}, "status", None, None),

@@ -191,6 +191,23 @@ def status_line_facts():
     return 0, "1 line, no commit hash, and every gate number it quotes is current"
 
 
+def run_gate(script, pattern):
+    """Run one of my own gates and return the first regex match, or None. Never guesses."""
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+    r = subprocess.run([sys.executable, str(HERE / script)], cwd=REPO, capture_output=True,
+                       text=True, env=env)
+    return re.search(pattern, r.stdout or "")
+
+
+def run_gate_pytest():
+    """The test count, or None. Never guesses."""
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+    r = subprocess.run([sys.executable, "-m", "pytest", "experiments/", "-q", "--collect-only"],
+                       cwd=REPO, capture_output=True, text=True, env=env)
+    m = re.search(r"(\d+) tests collected", r.stdout or "")
+    return m.group(1) if m else None
+
+
 def what_is_current(what, q):
     """True if the numbers the status line quotes match what the gate reports right now."""
     import subprocess
@@ -299,24 +316,38 @@ def self_test() -> int:
     # ACCEPT-then-reject-for-the-wrong-reason: the section-4 assertions fired on the fixture,
     # not the status-line assertion, so the positive control could not see the bug the case
     # was written for (D113).
+    # Each case perturbs EXACTLY ONE number of the derived clean line, so the reason printed is
+    # unambiguously the number under test. A case that differs in two places reports whichever the
+    # checker happens to test first, which is how three of these went wrong in the first place.
+    # Built FROM THE LIVE GATES, never written by hand. The first version hardcoded "32/36", so when
+    # D118 withdrew a registry row the count became 32/35 and every fixture went stale at once -- and
+    # three rejection cases then reported the WRONG reason, tripping on the registry before reaching
+    # the number each was written to test. A fixture that must be edited when a count changes is a
+    # fixture that will silently stop testing what it says it tests.
+    _reg = run_gate("claims_registry.py", r"(\d+)/(\d+) verified")
+    _bld = run_gate("check_paper_builds.py", r"(\d+) defect\(s\)")
+    _tst = run_gate_pytest()
+    if not (_reg and _bld and _tst):
+        print("  BROKEN FIXTURE: could not read the live gate numbers, so the status-line cases are")
+        print("                  SKIPPED rather than reported as passing -- an unreadable population is")
+        print("                  a failure (D87), not a clean result.")
+        return 1
+    good_status = (f"> Status: 8 gates green (registry {_reg.group(1)}/{_reg.group(2)}, "
+                   f"{_bld.group(1)} build defects, {_tst} tests).")
+    print(f"  the clean status line is derived from the live gates: {good_status}")
+    _bad_reg = re.sub(r"registry \d+/\d+", "registry 29/33", good_status)
+    _bad_bld = re.sub(r"\d+ build defects", "3 build defects", good_status)
+    _bad_tst = re.sub(r"\d+ tests", "40 tests", good_status)
+    _bad_hash = "> Status: " + good_status.split("> Status: ", 1)[1].split(" ", 1)[0] \
+        + " 2d3b0a4, 239 files, " + good_status.split(", ", 1)[1]
     bad_status = {
-        # D117: these are SEPARATE from bad_cases because a DIFFERENT function checks them.
-        # `status_line_facts()` used to read NOTES.md itself, which made it untestable: the
-        # first version of these cases was run through the SECTION-4 loop, where the
-        # section-4 assertions fired on the fixture and the status-line assertion never ran.
-        # So the case printed "rejects: ... -> '29/33' absent, count word 'five' !" -- rejected
-        # for the WRONG reason -- and the POSITIVE CONTROL PASSED WITH THE BUG BOTH PRESENT
-        # AND ABSENT. It is now driven through `status_line_line_problems(line)`, which takes
-        # the line as an argument, and each case differs from a clean line in exactly ONE number.
-        "a stale registry number, status-line form":
-            "> Status: 8 gates green (registry 29/33, 10 build defects, 47 tests).",
-        "a commit hash, which no status line can keep current":
-            "> Status: main 2d3b0a4, 239 files, registry 32/36, 10 build defects, 47 tests.",
-        "a stale build-defect count":
-            "> Status: 8 gates green (registry 32/36, 3 build defects, 47 tests).",
-        "a stale test count":
-            "> Status: 8 gates green (registry 32/36, 10 build defects, 40 tests).",
+        "a stale registry number, status-line form": _bad_reg,
+        "a commit hash, which no status line can keep current": _bad_hash,
+        "a stale build-defect count": _bad_bld,
+        "a stale test count": _bad_tst,
     }
+    for _nm, _ln in bad_status.items():
+        assert _ln != good_status, f"case {_nm!r} is identical to the clean line, so it cannot reject"
     # Every count here is COMPUTED from the dicts, never written by hand: a self-test
     # that miscounts its own population is the same failure as a gate miscounting what it
     # measured (D111.6). The `+2` are the section-4 accept and the status-line accept.
@@ -375,7 +406,6 @@ def self_test() -> int:
     # fail the gate, which is the worst kind of gate bug because it reports green. The verdict
     # is now decided ONCE, at the end, from `fails`.
     # status-line population, driven through the drivable function
-    good_status = "> Status: 8 gates green (registry 32/36, 10 build defects, 47 tests)."
     gp = status_line_line_problems(good_status)
     print(f"  {'ok  ' if not gp else 'MISSED'}  a status line whose every number is current"
           + ("" if not gp else f" -> {gp}"))

@@ -33,7 +33,7 @@ judgement or new information.**
 
 - **The horizon.** `t* = 0.6493281145096707` at rank 16, `1.4816252539052939` at rank 32
   (`N=64`); reproduced bit-for-bit from the artifact's own recorded commit. **Not grid-convergent:** at
-  `N=128` it becomes `0.9386` and `2.4335` — `1.4456×` and `1.6424×`.
+  `N=128` it becomes `0.9386` and `2.5261` — `1.4456×` and `1.7050×`.
 - **The thesis, "the subspace must evolve."** A propagated fixed basis overflows at ranks 32 and 42
   (`t = 5.513`…`7.1715`); every structure-preserving variant at the same ranks holds roundoff
   divergence. **The never-yields rank coincides with the grid's largest alias-free rank — 43 at
@@ -57,7 +57,7 @@ python3 state/reviewer/check_provenance.py      # can every shipped run say whet
 python3 -m pytest experiments/ -q                # 47 tests, ~240 s (pin OMP/OPENBLAS/MKL=1)
 ```
 
-**`claims_registry.py` reports `32/36` verified.** The **4** failures are the `crossover_N128.json` rows, and that file
+**`claims_registry.py` reports `32/35` verified.** The **4** failures are the `crossover_N128.json` rows, and that file
 **already exists and verifies — with it present the registry reads `33/33`**; it is not committed yet and the coder is
 landing it (C2-1). **It needs no re-run.**
 

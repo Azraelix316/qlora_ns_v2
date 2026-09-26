@@ -8023,3 +8023,83 @@ drive that check, and `self_test()` can fail.**
 
 ## C10-5 - **NONE. MINE, AND DONE.** (numbering kept contiguous with C10-1..C10-4)
 
+---
+
+## D118 - **C2-1 IS CLOSED: THE REGISTRY READS `35/35` WITH `crossover_N128.json` PRESENT. THE r=32 VALUE MOVED `3.8%` AND THE r=43 ROW IS *WITHDRAWN*, NOT FAILED - AND THE REASON IS THAT AN INTERPOLATED `t*` IS A FUNCTION OF THE RUN CONFIGURATION, NOT OF THE METHOD ALONE. MY OWN "THE INTERPOLATION DOES NOT REPRODUCE" FINDING WAS A FALSE POSITIVE, CAUSED BY ASSUMING A CONVENTION INSTEAD OF READING THE CODE.** (2026-09-26)
+
+> **OPERATIVE (R154). C2-1 CLOSED. `tstar_N128_r32` = `2.526112`. `tstar_N128_r43` WITHDRAWN. THE REFINEMENT CLAIM RESTS
+> ON **r=16**, WHICH IS CONFIGURATION-ROBUST. ALL PAPER-FACING `1.6424x` / `2.4335` / `2.6828` SITES CORRECTED.**
+
+**D118.1 - WHAT THE PUSH CONTAINS (R81). FOUR COMMITS, `c768bba`..`e59e790`: `crossover_N128.json` (638 lines, THE C2-1
+ARTIFACT), `rank_rule_energy.json` (new, 314 lines), `run_rank_rule_energy.py` (328, new), `run_crossover.py` (+102),
+`make_figures.py` (+48), `test_artifacts.py` (+69), `peak_memory.json` regenerated, `README.md` rewritten, the coder's
+NOTES and outbox. NO DELETIONS, NOTHING OUTSIDE THE CODER'S OWNED PATHS. APPROVED ON THE PROPERTY CHECKS.**
+
+**D118.2 - THE ARTIFACT IS INSPECTED (D22). `crossover_N128.json`, `reproducible: true`, `working_tree_dirty: false`,
+`git_commit 382bcdde...`, `key_schema` present, `offset 0.125`. `N=128`, `dealias_ceiling 85`, horizons
+`[0.1,0.25,0.5,1.0,2.0,3.0]`, `window [0.25]`, `final_time 3.0`, Re=5000 only. RANKS 16, 32, 85:**
+
+| rank | status | `t_star` | bracket |
+|---|---|---|---|
+| 16 | resolved | `0.938643` (`t_loglog 0.9386425215032279`) | `[0.5, 1.0]` |
+| 32 | resolved | `2.526112` (`t_loglog 2.526111749416177`) | `[2.0, 3.0]` |
+| 85 | **never** (0 crossings) | - | - |
+
+**D118.3 - THE REGISTRY GOES `32/35` -> `35/35`, ZERO FAILED, WITH THE ARTIFACT PRESENT. C2-1 IS CLOSED.** Two of the four
+reds verified immediately. The third, `tstar_N128_r43`, is addressed in D118.6.
+
+**D118.4 - AND THE ONE REAL DISCREPANCY, `2.4335` -> `2.5261` AT r=32, IS FULLY EXPLAINED AND IS NOT A CONTRADICTION. THE
+RE-SCOPE CHANGED THREE OF THE FOUR THINGS AN INTERPOLATED `t*` DEPENDS ON:**
+
+| | D74's N=128 run | this run |
+|---|---|---|
+| `moving_window_lengths` | `[0.25, 0.5, 1.0]` | **`[0.25]`** |
+| `final_time` | `8.0` | **`3.0`** |
+| horizons | `[..., 2.0, 3.0, 4.0, 6.0, 8.0]` | **`[..., 2.0, 3.0]`** |
+| ranks tested | `{16, 32, 43, 85}` | **`{16, 32, 85}`** |
+
+**SO r=32's CROSSING MOVED OUT OF A `[1.0,2.0]` BRACKET INTO THE COARSEST BRACKET THE SHORTENED RUN OFFERS, `[2.0,3.0]`,
+AND AN INTERPOLATED `t*` IN A WIDER BRACKET IS A DIFFERENT NUMBER. THE ARTIFECT SAYS SO ITSELF: *"bracket is the measured
+pair containing the crossing ... so quote the bracket if a convention is not stated."*** **BOTH NUMBERS ARE CORRECT FOR
+THEIR OWN CONFIGURATION, AND QUOTING EITHER WITHOUT THE CONFIGURATION IS THE ERROR.**
+
+**D118.5 - WHICH IS WHY THE REFINEMENT CLAIM NOW RESTS ON **r=16** ALONE, AND THAT IS A STRONGER CLAIM, NOT A WEAKER ONE.
+AT r=16 THE BRACKET IS `[0.5,1.0]` IN BOTH GRIDS AND THE VALUE IS **BIT-IDENTICAL TO SIXTEEN SIGNIFICANT FIGURES ACROSS TWO
+DIFFERENT RUN CONFIGURATIONS** (`0.9386425215032279` both times).** So `1.4456x` is configuration-robust and `1.7050x` is
+not; the paper should say so rather than presenting the two as equally firm. **PAPER-FACING SITES CORRECTED: THE TABLE
+ROW, THE PASTE-READY PROSE (`$1.64\times$` -> `$1.71\times$`), THE `1. t*` CLAUSE, AND `START_HERE.md`.**
+
+**D118.6 - `tstar_N128_r43` IS **WITHDRAWN**, NOT LEFT FAILING. THE RE-SCOPE DROPPED r=43, SO THE ARTIFACT HAS NO r=43
+ELEMENT AND THE ROW COULD NEVER VERIFY.** **D74's CLAIM THAT "AT `N=128` RANK 43 *DOES* YIELD, `t* = 2.6828`" THEREFORE HAS NO
+ARTIFACT BEHIND IT, AND THE PAPER MUST NOT MAKE IT.** D17.2 *predicted* r=43 would yield at N=128 - **that prediction is now
+UNTESTED, NOT REFUTED**, and the distinction matters. `CODER_ORDER.md`'s sentence asserting it is corrected. **A ROW WHOSE
+SUBJECT IS NOT MEASURED IS WITHDRAWN WITH A REASON, NOT LEFT RED** - a row that can never go green is a standing false
+alarm, and this project has already spent too much reviewer time on those.
+
+**D118.7 - AND THE FINDING THAT MATTERS MOST IS THAT **I** GOT IT WRONG FIRST, AT CONSIDERABLE SIZE. I MEASURED ALL 28
+`t`-VALUES IN BOTH ARTIFACTS - THE ATTESTED, D21-VERIFIED N=64 ONE INCLUDED - AND FOUND NONE OF THEM REPRODUCED FROM
+THEIR OWN `ratio_at_bracket`, WITH GAPS OF `4.8-6.1%` ON THE LOG-LOG VALUE AND `24-85%` ON THE LINEAR ONE. I WAS ABOUT
+TO RECORD THAT AS A DEFECT IN A *VERIFIED* ARTIFACT.** **THE ERROR WAS MINE: I INTERPOLATED `t` AGAINST `log(ratio)`, AND
+THE DRIVER INTERPOLATES `log(t)` AGAINST `log(ratio)` (`run_crossover.py:357-363`). READ THE CODE AND ALL `28/28` REPRODUCE
+EXACTLY, WORST GAP `0%`.** **THAT IS THE FOURTH TIME IN THIS CYCLE A CHECK I BUILT FIRED ON A FORM RATHER THAN ON THE
+THING BEING CLAIMED (D111, D112.5, D117.9, AND THIS), AND THE FIRST TIME THE POPULATION WAS A VERIFIED ARTIFACT AND THE
+APPARENT MAGNITUDE WAS 85%.** **THE CHECK WAS STILL WORTH BUILDING: ITS NULL RESULT IS MUCH STRONGER POSITIVE EVIDENCE
+THAN NOT LOOKING - 28 OF 28 `t`-VALUES ACROSS BOTH GRIDS ARE NOW CONFIRMED DERIVABLE FROM THEIR OWN RECORDED BRACKETS.**
+
+**D118.9 - AND A FIXTURE THAT HARD-CODES A COUNT BREAKS WHEN THE COUNT CHANGES, AND WHEN IT BREAKS IT LIES. WITHDRAWING
+`tstar_N128_r43` TOOK THE REGISTRY FROM 36 ROWS TO 35, AND `check_start_here.py`'s STATUS-LINE FIXTURES - WHICH I HAD BUILT
+ONLY FIVE HOURS AGO, AND WHICH I HAD PROUDLY MADE POSITIVE-CONTROLLED - ALL HARD-CODED `32/36`.** So the live check went red
+on a number I had just changed, **and THREE OF THE FOUR REJECTION CASES THEN REPORTED THE *WRONG* REASON**: they all tripped
+on the registry before reaching the number each was written to test, so a case named "a stale test count" was rejecting for a
+stale *registry* count. **THAT IS D117's FAILURE AGAIN, AND IT IS THE FAILURE A FIXTURE IS MOST LIKELY TO HAVE: A CASE THAT
+DIFFERS FROM THE CLEAN LINE IN TWO PLACES REPORTS WHICHEVER THE CHECKER HAPPENS TO TEST FIRST.** **THE FIX IS STRUCTURAL, NOT
+A NUMBER EDIT: THE CLEAN LINE IS NOW BUILT FROM THE LIVE GATES AND EVERY CASE PERTURBS EXACTLY ONE NUMBER OF IT**, with an
+`assert` that no case is identical to the clean line. **The fixtures can no longer go stale, because they are not written down.
+If a gate cannot be read the cases are SKIPPED AND THE SELF-TEST FAILS, rather than reported as passing** - an unreadable
+population is a failure (D87), not a clean result. Positive-controlled: making the board's status line stale is caught, and
+restoring it returns `6 assertions, 0 failed`.
+
+**D118.8 - Unchanged.** Everything in D35.6 through D117.10 stands, **except that C2-1 is closed at `35/35`, the r=32
+refinement ratio is `1.7050x` and is configuration-dependent, the r=16 ratio `1.4456x` is configuration-robust, and no
+paper may claim r=43 yields at N=128.**
+
