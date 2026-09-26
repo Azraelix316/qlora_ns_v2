@@ -137,8 +137,7 @@ ranks $16$, $32$ and $43$ identical at every horizon and both Reynolds
 numbers, while ranks $2$, $4$ and $8$ differ by up to $85\%$. A fixed basis propagated
 through the nonlinearity overflows at ranks $32$ and $42$, reaching $10^{278}$; every structure-preserving variant holds roundoff divergence; under grid
 refinement the reduced error falls by a factor $2.2$, and stably so, but the
-horizon itself is not grid-convergent: it grows by factors of $1.45$ and $1.64$
-from a $64^2$ to a $128^2$ grid at ranks $16$ and $32$. The evidence is narrow: one
+horizon itself is not grid-convergent: it grows by factors of $1.45$ and $1.71$ from a $64^2$ to a $128^2$ grid at ranks $16$ and $32$. The evidence is narrow: one
 forcing, horizons of order unity, a rank criterion we report but do not
 extrapolate, and a per-step cost $2.2$--$2.7\times$ the full grid --- at least
 $1.4\times$ even at the pessimistic end of the measurement's own recorded noise
@@ -687,9 +686,8 @@ At `N=64` rank 43 never yields; on the finer grid rank 43 *does* yield (`t* = 2.
 
 ```latex
 The rank at which a propagated static subspace stops improving is not a fixed
-rank but the largest rank the grid can resolve without aliasing: 43 at
-$N = 64$ and 85 at $N = 128$, each equal to that grid's largest
-alias-free rank. Rank therefore helps the evolving subspace all the way up
+rank but a rank we set from the grid: 43 at
+$N = 64$ and 85 at $N = 128$, each equal to $2\lfloor N/3\rfloor+1$, the number of wavenumbers the grid's $2/3$ dealiasing rule leaves in a single column. That is a rank *budget* matched to the grid, not a rank the grid imposes, and we make no claim that the dynamics would use more (D120). Rank therefore helps the evolving subspace all the way up
 to the point where the representation, not the method, runs out. The accuracy
 horizon is not grid-convergent — it lengthens by $1.45\times$ at rank 16 and
 $1.71\times$ at rank 32 on refinement — because the reduced integrator
@@ -793,14 +791,9 @@ surface was run at $W=0.25$ alone and at $\mathrm{Re}=5000$ alone, so neither is
 corroborated at the second grid.
 
 Refining the grid is the one thing that does move the horizon. At $N=128$ and
-$\mathrm{Re}=5000$ we measure $t^\ast = 0.939$ at $r=16$, $2.433$ at $r=32$ and
-$2.683$ at $r=43$, factors of $1.45$ and $1.64$ above the $N=64$ values at the
-corresponding ranks. The horizon is therefore not grid-convergent over this range and
+$\mathrm{Re}=5000$ we measure $t^\ast = 0.939$ at $r=16$ and $2.526$ at $r=32$, factors of $1.45$ and $1.71$ above the $N=64$ values at the corresponding ranks. The $r=16$ figure is the one to read: its crossing bracket is $[0.5,1.0]$ at both grids and its value is unchanged to every digit we report under two different run configurations, whereas the $r=32$ crossing moves with the horizon grid and its interpolated value with it. The horizon is therefore not grid-convergent over this range and
 we do not extrapolate it. What does carry across the refinement is the rank at which
-the crossing stops existing: $43$ at $N=64$ and $85$ at $N=128$. Each coincides with
-the largest rank that grid retains without aliasing at our cutoff, so the rank at
-which a propagated static subspace stops improving is set by the grid before it is set
-by the dynamics. These are the largest ranks we ran at each grid, not limits, and we
+the crossing stops existing: $43$ at $N=64$ and $85$ at $N=128$. Each equals $2\lfloor N/3\rfloor+1$ for that grid --- the wavenumbers its $2/3$ rule leaves in one column --- which is the rank budget we set. So the rank at which a propagated static subspace stops improving is where our budget runs out, and we have not separated that from where the dynamics stops improving (D120). These are the largest ranks we ran at each grid, not limits, and we
 report them as such.
 
 The horizon is not a claim about rank in general, and the clearest evidence is that
@@ -921,8 +914,7 @@ subspace to the current state, not by spending more rank on a fixed one, and a
 comparison at equal rank is a comparison of update rules.
 
 This also fixes the rank at which the comparison ends. The rank at which a propagated
-static subspace stops improving coincides with the largest rank each grid retains
-without aliasing, which is $43$ at $N=64$ and $85$ at $N=128$. We read that as a
+static subspace stops improving equals the rank budget we set from each grid, $2\lfloor N/3\rfloor+1$, which is $43$ at $N=64$ and $85$ at $N=128$. We read that as a
 statement about the grid rather than about the dynamics: past that rank the static
 baseline is not approximating a low-rank state, it is storing the grid. It is also why
 we report the horizon as not grid-convergent rather than as a quantity to extrapolate.
@@ -988,8 +980,7 @@ we say so.
 
 ```latex
 Three limits bound the claim, and we state them as results rather than as caveats.
-The horizon is not grid-convergent over the range we measure, rising by factors of
-$1.45$ and $1.64$ from $N=64$ to $N=128$, so it should be read as a property of a
+The horizon is not grid-convergent over the range we measure, rising by factors of $1.45$ and $1.71$ from $N=64$ to $N=128$, so it should be read as a property of a
 grid-and-solver pair rather than of the problem. The invariances in Reynolds number and
 window length are measured at $N=64$: the $N=128$ surface was run at one window length
 and one Reynolds number, so neither invariance is corroborated at the second grid. And
@@ -1138,8 +1129,7 @@ performs — that the criterion does not over-allocate — which is a real prope
 
 ```latex
 The rank behaves as a saturation, not as a diagnostic of the flow. Over the
-forced runs the retained rank reaches the grid's largest alias-free rank within
-fifteen steps and then does not move: it is at that value for the remaining
+forced runs the retained rank reaches the rank budget within fifteen steps and then does not move: it is at that value for the remaining
 $92\%$ of a $200$-step run and $99\%$ of a $2000$-step run. The rank trace is
 also the same at all three Reynolds numbers, so the retained rank does not
 distinguish them, and we do not read a quasi-stationary rank as a function of
@@ -1157,8 +1147,7 @@ the sense in which the comparison below is a comparison of update rules.
 
 ```latex
 \caption{Retained rank $r(t)$ for forced Kolmogorov flow at
-$\mathrm{Re} \in \{100, 1000, 5000\}$ (L2). The rank reaches the grid's
-alias-free ceiling within fifteen steps and stays there; the three curves
+$\mathrm{Re} \in \{100, 1000, 5000\}$ (L2). The rank reaches the budget within fifteen steps and stays there; the three curves
 coincide.}
 ```
 
@@ -1169,8 +1158,7 @@ The tolerance-based decay rule is exercised only where a state genuinely loses
 modes. In the Taylor--Green decay the state is a single Fourier mode from the
 outset, so its numerical rank is one and the criterion must hold it there
 rather than spend rank on a spectrum that is not present; the run does. Under
-sustained forcing the rank instead rises, and it does so to the grid's
-alias-free ceiling, which bounds what the decay rule can be tested against
+sustained forcing the rank instead rises, and it does so to the budget, which bounds what the decay rule can be tested against
 here.
 ```
 
@@ -1184,8 +1172,7 @@ saturation at the grid's alias-free ceiling we measure and report"*.
 
 ```latex
 Second, a theory of rank growth in forced turbulence. The measurement here is
-that the retained rank does \emph{not} grow with Reynolds number: it reaches
-the grid's alias-free ceiling within fifteen steps at every $\mathrm{Re}$ we
+that the retained rank does \emph{not} grow with Reynolds number: it reaches the budget within fifteen steps at every $\mathrm{Re}$ we
 ran, and stays there, while the share of the energy in the zonal mode falls
 from $20\%$ to $18\%$ across the same runs. Why a criterion driven by a
 tolerance should report the resolved band rather than the flow, and what would
@@ -1234,8 +1221,7 @@ initialisation**, and the operative differences are rank efficiency *and* refitt
 and (iii) the subspace is rebuilt as the dynamics develop, which is what
 separates it from a basis fixed at initialisation: such a basis overflows at
 ranks $32$ and $42$ where the rebuilt one does not, and its error stops
-improving once its rank reaches $16$. The rebuilt subspace reaches the grid's
-largest alias-free rank within fifteen steps and stays there, which is the
+improving once its rank reaches $16$. The rebuilt subspace reaches the rank budget within fifteen steps and stays there, which is the
 sense in which it is reporting the resolved band rather than the flow.
 ```
 

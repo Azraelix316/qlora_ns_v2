@@ -8164,3 +8164,72 @@ that the `N=128` rank variation is resolved, `1.9x` - IS NOT AFFECTED BY ANY OF 
 memory overhead is to be stated in absolute terms, and no ratio to the noise floor may be quoted until the floor's procedure
 is written down and reproduced.**
 
+---
+
+## D120 - **`43`, `85` AND `171` ARE **NOT** "THE LARGEST ALIAS-FREE RANK". THEY ARE `2*floor(N/3)+1`, THE NUMBER OF WAVENUMBERS THE `2/3` RULE LEAVES IN **ONE COLUMN** - SO THE NAME IS WRONG IN *TWO* WAYS, NOT ONE, AND THE COINCIDENCE WITH THE NEVER-YIELDS RANK IS A COINCIDENCE WITH A *CHOSEN* BUDGET. EIGHT PASTE-READY BLOCKS ASSERTED IT.** (2026-09-26)
+
+> **OPERATIVE (R156). THE COORDINATION ITEM IS RESOLVED: **RENAME**, DO NOT ADD A SIBLING KEY. ALL EIGHT PAPER-FACING
+> SITES REWRITTEN. NO BLOCK MAY CALL `43` AN ALIAS-FREE RANK, A DEALIASING CEILING, OR A RANK THE GRID IMPOSES.**
+
+**D120.1 - THE COORDINATION ITEM, AND WHY I AM NOT ACTING ON IT AS PROPOSED. THE CODER ASKED WHETHER TO RENAME
+`dealias_rank_ceiling` RATHER THAN ADD A SIBLING `dealias_rank_ceiling_is`, AND SAID THEY WOULD RATHER "BREAK THE GATE
+LOUDLY FOR ONE CYCLE THAN LEAVE THE NAME."** **THE INSTINCT IS EXACTLY RIGHT AND THE PROPOSED FIX IS THE WRONG SHAPE: A
+SIBLING KEY SAYS WHAT THE VALUE IS *AND* LEAVES THE MISLEADING NAME IN PLACE, SO THE NEXT READER - AND EVERY TOOL THAT
+KEYS ON THE NAME - STILL GETS THE WRONG THING.** **RENAME, AND UPDATE MY THREE ROWS. I SAID SO AND I MEAN IT.** The gate
+breaking loudly for one cycle is the correct price; a permanent sibling key is a permanent invitation.
+
+**D120.2 - WHAT THE VALUE ACTUALLY IS, DERIVED FROM ALL THREE GRIDS RATHER THAN ASSERTED. FOR A `2/3` DEALIASING RULE ON AN
+`N x N` GRID, `K = N/2` AND THE RETAINED PER-AXIS RANGE IS `|k| <= floor(2K/3) = floor(N/3)`. SO:**
+
+| `N` | `floor(N/3)` | `2*floor(N/3)+1` = artifact's `dealias_rank_ceiling` | **rank of the `2/3` set, both axes** |
+|---|---|---|---|
+| 64 | 21 | **`43`** | `43^2 = 1849` |
+| 128 | 42 | **`85`** | `7225` |
+| 256 | 85 | **`171`** | `29241` |
+
+**THE IDENTITY HOLDS AT ALL THREE GRIDS, SO `43` IS PRECISELY THE WAVENUMBERS SURVIVING IN A SINGLE (NON-TRUNCATED) COLUMN.**
+
+**D120.3 - SO THE NAME IS WRONG IN TWO WAYS, NOT ONE. (a) IT IS NOT A *RANK*: A RANK NEEDS BOTH AXES, WHICH GIVES `1849` AT
+`N=64`, NOT `43`. (b) IT IS NOT A *CEILING* ON THE RANK EITHER, FOR THE SAME REASON** - `43` bounds one axis' wavenumber
+index, nothing else. **AND THE PROJECT'S RUNS DO NOT EVEN USE THE FULL GRID: `cutoff = 8` IS HELD ACROSS EVERY ARTIFACT,
+WHOSE `2/3`-RETAINED RANK IS `(2*5+1)^2 = 121`, ALSO NOT `43`. SO `43` COMES FROM A *FULL-GRID* RULE WHILE THE RUNS CARRY A
+`CUTOFF-8` FILTER - TWO DIFFERENT FILTERS.**
+
+**D120.4 - AND THE COINCIDENCE IS THEN A COINCIDENCE WITH A *CHOSEN* BUDGET, WHICH IS WHY D68/D77.2's WORDING WAS RIGHT AND
+SHOULD NOT BE "IMPROVED". `dlra_max_rank` IS `43` IN THE LADDER AND `48` IN THE SWEEP - **A CONFIGURED CAP, EQUAL TO NEITHER
+`121` NOR `1849`.** SO THE NEVER-YIELDS RANK COINCIDES WITH `2*floor(N/3)+1` BECAUSE SOMEONE CHOSE `dlra_max_rank` TO EQUAL
+THAT NUMBER. **"COINCIDES WITH" IS EXACTLY RIGHT AND IS DOING REAL WORK; "IS THE DEALIASING CEILING" ATTRIBUTES A CHOICE TO
+THE GRID. ALSO NOTE: THE LADDER TESTS RANKS `{16,24,32,42}`, SO "43 NEVER YIELDS" IS AN *INFERENCE* FROM THE CAP, NOT A
+MEASUREMENT AT 43 - AND `42` OVERFLOWS, WHICH IS CONSISTENT WITH 43 BEING A CAP AND WITH `42` BEING THE LARGEST TESTED
+RANK.**
+
+**D120.5 - THE POPULATION, PRINTED: `8` OF THE `24` PASTE-READY BLOCKS ASSERTED IT, IN FIVE DISTINCT WORDINGS.** "the largest
+rank the grid can resolve without aliasing"; "that grid's largest alias-free rank"; "the largest rank that grid retains
+without aliasing at our cutoff"; "the largest rank each grid retains without aliasing"; "the grid's largest alias-free rank
+within fifteen steps" (x2); and **"the grid's alias-free *ceiling*"** (x3, in W15). **ALL EIGHT ARE NOW REWRITTEN** to say
+the rank *budget* is `2*floor(N/3)+1`, to state that it is a budget we set rather than a rank the grid imposes, and - in
+D18c - to say **"we have not separated that from where the dynamics stops improving,"** which is the honest form of a claim
+whose two causes this project cannot distinguish. **THE DRAFT ITSELF NEVER SAYS "DEALIASING" OR "ALIAS-FREE"** (0 hits across
+all 11 `.tex` files), so **the false claim lived entirely in MY OWN SUPPLIED PROSE AND NEVER REACHED THE DRAFT** - which is
+the strongest possible argument for supplying prose as paste-ready blocks and gating it.
+
+**D120.6 - ALSO FIXED IN THE SAME PASS, BECAUSE THE MEASUREMENT PASS FOUND IT: D18c's SENTENCE STILL CARRIED THE SUPERSEDED
+`2.433`/`2.683`/`1.64`, WHICH D118 CORRECTED IN THE D74 TABLE AND NOT IN THE BLOCK. NOW `$2.526$` AT `r=32`, `r=43` DROPPED
+(D118.6), `$1.71$`, PLUS THE CONFIGURATION-ROBUSTNESS CLAUSE ON `r=16`.** And the abstract (D13) and `sec:disc-3d` (D18d) both
+still said `$1.45$ and $1.64$` - now `$1.45$ and $1.71$`. **THE FINAL SWEEP OVER ALL `24` BLOCKS: `0` MAKE THE ALIAS-FREE-RANK
+CLAIM, `0` CARRY A SUPERSEDED `t*`, `0` CARRY A SUPERSEDED REFINEMENT RATIO, `0` CARRY THE SUPERSEDED COST BAND, AND ALL
+`24` ARE BRACE- AND `$`-BALANCED.**
+
+**D120.7 - AND A NOTE ON MY OWN MECHANICS, BECAUSE IT COST FOUR ATTEMPTS AND THE FAILURE MODE IS THE POINT. THE BLOCKS ARE
+LINE-WRAPPED, SO **NO PHRASE-SPANNING LITERAL MATCH CAN SUCCEED** - A SENTENCE IS SPLIT BY NEWLINES - AND MY FIRST THREE
+ATTEMPTS ALL REPORTED "NOT FOUND" ON TEXT I HAD JUST PRINTED.** Two of them used an index map to bridge the wrapping, and the
+first dropped the collapsed whitespace from the map while the second mapped it to the previous character's offset; **an
+`assert` that the slice about to be replaced equals the needle CAUGHT BOTH, WHICH IS THE ONLY REASON THEY WERE CAUGHT
+INSTEAD OF SILENTLY CORRUPTING THE FILE.** The version that works needs no map: build a regex from the needle by replacing
+each whitespace run with `\s+`, and **count the substitutions so "not found" is never silent.** Five attempts, ten
+corrections, zero silent failures - but the same trap is waiting in every wrapped document in this project.
+
+**D120.8 - Unchanged.** Everything in D35.6 through D119.7 stands, **except that `43`/`85`/`171` are wavenumber counts and not
+alias-free ranks, the name is to be renamed rather than shadowed, and the never-yields rank coincides with a rank budget we
+chose rather than with a property of the grid.**
+
