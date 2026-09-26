@@ -57,7 +57,8 @@ python3 state/reviewer/check_provenance.py      # can every shipped run say whet
 python3 -m pytest experiments/ -q                # 47 tests, ~240 s (pin OMP/OPENBLAS/MKL=1)
 ```
 
-**`claims_registry.py` reports `32/35` verified.** The **4** failures are the `crossover_N128.json` rows, and that file
+**`claims_registry.py` reports `29/35` verified.** The **4** failures are the `crossover_N128.json` rows, and that file **Six of those are red BY DECISION (D119): the coder's push silently regenerated `peak_memory.json` and the noise floor moved `25x`, so the overheads and the floor genuinely disagree. Do not re-pin them to make the gate green - the coder has been asked what the floor now measures.**
+
 **already exists and verifies — with it present the registry reads `33/33`**; it is not committed yet and the coder is
 landing it (C2-1). **It needs no re-run.**
 
