@@ -2684,3 +2684,69 @@ a threshold at all.
 The remaining submission items are all arithmetic or prose in files I do not own:
 the seven numbers above, `r*(Re)` ×4, and the `mem_noise_floor_mib` row's *form*
 (no point value can pin a maximum of 92 samples).
+
+## 2026-09-26T16:03:09+00:00 — from coder
+
+**The last failing registry row now has both candidate forms in the artifact, so applying it is a choice rather than a design task. Pushed as `51bf121`. 65 of 65 tests pass.**
+
+## `mem_noise_floor_mib` fails structurally, and both fixes are now checkable
+
+The floor is **the maximum of 92 same-configuration differences by
+construction**, and a maximum of noisy samples moves every time it is retaken. It
+has been 0.1328 / 0.0664 / 0.0977 / 0.0039 as a single sample, and
+0.3242 / 0.1289 / 0.1445 / 0.3281 / 0.3984 / 0.4180 as a max-of-92. **Re-pinning it
+is not a fix**, and it has now been chased twice.
+
+So the artifact carries both forms, and **which to make the claim about is your
+call (D55c.6)** — I have made the options checkable rather than choosing:
+
+**Option A — assert the estimate, not the value.** New in
+`peak_memory.json`:
+
+```
+noise_floor_samples_mib.noise_floor_is_estimated_from_many_samples   (boolean)
+noise_floor_samples_mib.min_samples_for_an_estimate                 (8)
+```
+
+A registry row can check this durably because **it does not move when the samples
+are retaken.** The threshold sits beside the boolean so `True` has a stated
+meaning rather than being a bare flag, and the boolean is *computed* as
+`samples >= 8` — so it can be `False`, and a 4-sample smoke run reports `False`.
+
+**Option B — the median with a stated tolerance.**
+`noise_floor_samples_mib.median_mib` = **0.1289 MiB** in the current run
+(min 0.0, max 0.4180, 92 samples).
+
+**I would still take A, and here is the reason it is not a preference.** The
+rank-variation verdicts are taken against the maximum *on purpose* — the error can
+only fall on the side of not claiming a rank dependence. A median row would
+understate the resolution those verdicts actually use, which is the same class of
+error as D67's 99.9%: a true number that is not the one the claim is about. If you
+take B, the row and the verdict criterion should say so together, or the two will
+quietly disagree.
+
+`test_the_noise_floor_says_whether_it_is_an_estimate_at_all` asserts the boolean
+agrees with the sample count and the recorded threshold, **and that the shipped run
+clears its own threshold** — because the floor the verdicts divide by being an
+anecdote would make every verdict derived from it one.
+
+## The staleness check earned its place within an hour of being written
+
+When `peak_memory.json` was re-run, `test_the_repin_request_list_is_current_and_explains_every_row`
+**failed**, correctly: the re-pin list still held the old measured value. It is
+generated from the gate, so a changed artifact changes the list, and the test
+notices. That is the whole argument for generating it rather than maintaining it,
+demonstrated rather than asserted — and it is the second time today a check I wrote
+caught something real rather than confirming something I believed.
+
+## State
+
+**65 of 65 tests. `check_provenance.py` PASS. `check_paper_builds.py` 0 defects.
+`claims_registry.py` 34 OK / 1 FAIL — and that one is now a choice between two
+available forms rather than an unsolvable row. Working tree clean at `51bf121`.**
+
+Nothing further is outstanding on my side. The submission items that remain are
+arithmetic and prose in files I do not own: the seven stale crossover numbers
+(`0.649`, `1.482`, `1.45`, `1.71` in the abstract; `0.939`, `2.526`, `1.609` in
+`WRITER_ORDER.md`), and `r*(Re)` at four sites in `07_discussion.tex` against your
+withdrawal instruction.
