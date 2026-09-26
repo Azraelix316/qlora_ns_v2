@@ -23,6 +23,7 @@ regression test on what was actually shipped.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -41,6 +42,63 @@ def load(name: str) -> dict:
     if not path.exists():
         pytest.skip(f"{name} is not present; nothing to assert against")
     return json.loads(path.read_text())
+
+
+def test_every_included_figure_resolves_against_the_main_document():
+    """The figures live where LaTeX will look for them.
+
+    `check_paper_builds.py` resolves `\\includegraphics` against the file that
+    contains it, so `{figures/fig_cost}` inside `paper/sections/06_results.tex`
+    is looked for at `paper/sections/figures/`. LaTeX does not do that: it
+    resolves graphics against the directory of the **main document** plus
+    `\\graphicspath`, and `\\input` does not move that directory. The draft has
+    no `\\graphicspath` and no standalone section documents, so the correct
+    location is `paper/figures/` -- which is where they are generated.
+
+    Rather than assert that, the test *runs* both models over the real draft and
+    requires the main-document one to resolve every target. If the writer ever
+    adds `\\graphicspath`, or a section becomes a standalone document, this test
+    is what notices that the two models have stopped disagreeing -- because
+    disagreeing is the only reason the question was ever in dispute.
+
+    Read from `origin/agent/writer` deliberately: the reviewer's copy of the
+    draft is the one that gets compiled, and a check that described a draft
+    nobody else had would be a result with no provenance in the shared state.
+    """
+    import subprocess
+    import sys
+
+    from _paths import EXPERIMENTS, REPO_ROOT
+
+    result = subprocess.run(
+        [sys.executable, str(EXPERIMENTS / "check_includegraph_paths.py")],
+        cwd=REPO_ROOT, capture_output=True, text=True, timeout=600,
+    )
+    out = result.stdout
+    assert "resolved against the MAIN DOCUMENT" in out, out[-800:]
+    line = [
+        ln for ln in out.splitlines() if "resolved against the MAIN DOCUMENT" in ln
+    ][0]
+    # Parse both counts and compare them.  The first version of this assertion
+    # was `"/6)" in resolved`, which also matches "5/6" -- so it passed with a
+    # figure deliberately deleted.  Third time this session that a check was
+    # written too loosely to fail; all three were found by trying to break them
+    # rather than by reading them.
+    got, total = re.search(r"(\d+)/(\d+)", line).groups()
+    got, total = int(got), int(total)
+    assert total > 0, out[-800:]
+    assert got == total, (
+        f"only {got} of {total} \\includegraphics targets resolve against the main "
+        "document's directory, so a figure is not where the build will look for "
+        f"it:\n{out[-1200:]}"
+    )
+    # And the premise of the whole question: the two models must still differ.
+    # If they ever agree, the checker's model became right by accident and the
+    # reason for the disagreement is gone -- which is worth knowing, not ignoring.
+    assert "\\graphicspath    : NOT SET" in out, (
+        "the draft now sets \\graphicspath, so the resolution question has to be "
+        f"re-asked with it in the search list:\n{out[-1200:]}"
+    )
 
 
 def test_the_memory_noise_floor_is_a_distribution_and_not_one_sample():
