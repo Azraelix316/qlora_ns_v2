@@ -219,9 +219,15 @@ def main():
             return 2
     print(f"SELF-TEST PASS: every draft-targeted pattern fires on a known instance of its claim")
 
+    # POPULATION FIRST, in the same form as the other two gates (D87 / CHECKLIST 1.15). A verdict
+    # with no population above it is not a result.
+    docs_meta = [scan(d) for d in docs]
+    print(f"  POPULATION: {len(docs)} order document(s), "
+          f"{sum(m[0] for m in docs_meta)} lines, "
+          f"{sum(m[2] for m in docs_meta)} paste-ready latex block(s)")
+
     total = 0
-    for d in docs:
-        n, cut, nlatex, found = scan(d)
+    for d, (n, cut, nlatex, found) in zip(docs, docs_meta):
         print(f"\n{d.name}: {n} lines, order region = lines 1-{cut}, "
               f"paste-ready latex blocks = {nlatex}")
         for decision, what, line, kind, text in found:

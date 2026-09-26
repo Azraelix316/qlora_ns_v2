@@ -651,3 +651,35 @@ default, and **fails loudly on an empty one**. Verified both ways: with the writ
 **10 files / 52,351 chars and CATCHES the `99.9%` over-statement**; with `DRAFT_REF=origin/agent/coder`
 it prints `POPULATION: 0 file(s)` and exits 1. `check_order_withdrawn.py` already printed per-file line
 counts and was **not** affected.
+
+---
+
+## 1.16 — **run a build check on the assembled paper, and treat "it compiles" as unverified until someone compiles it (D92, binding)**
+
+**WHY.** There is **no LaTeX toolchain on this node** — `pdflatex`, `xelatex`, `lualatex`, `latexmk`,
+`tectonic`, `pandoc`, `tex`, `bibtex` and `biber` are all absent, and there is no distribution under
+`/usr/share/texlive`, `/usr/local/texlive`, `/opt/texlive` or `~/.TinyTeX`. **The paper has therefore
+never been compiled, by anyone.** Every "the draft is ready" was a guess. D92's static check over the
+assembled paper then found the one thing that guess concealed: **all six `\includegraphics` in the
+results section resolve to nothing, and five of them name figures nobody has ever made.**
+
+**THE RULE.**
+
+1. **Check the ASSEMBLED paper — `main.tex` plus every `\input` target — not the paste-ready blocks.**
+   A block that is internally consistent can still be dropped into a document that does not build.
+2. **Every `\input`, `\cite`, `\ref`/`\eqref` and `\includegraphics` must resolve, and every figure
+   the paper includes must exist in the tree under the path the paper uses.** A figure that exists in
+   `experiments/figures/` does not resolve from `paper/` unless the path says so.
+3. **A figure referenced by the paper but never specified by anyone is a scope decision, not a
+   writing task.** It goes to both the writer and the coder, with a recommendation — not silently
+   into either one's queue.
+4. **A new checker ships with a self-test that injects one instance of each defect class and requires
+   the matching check to fire.** D92's first self-test was itself broken and would have reported
+   `PASS` for a checker that detected nothing.
+5. **Counting references against definitions is a category error.** A `\ref` is a *reference*, not a
+   *definition*; many references legitimately share one label. D92 nearly reported "74 undefined
+   references" from `137 - 63`, and the check refuted it.
+
+**NOW.** `state/reviewer/check_paper_builds.py` — prints its population, refuses to report on an empty
+one, and `--self-test` fires on all six injected defect classes. Current result: `inputs=10 cites=112
+refs=133 labels=63 graphics=6`, **skeleton clean, 6 figure defects.**
