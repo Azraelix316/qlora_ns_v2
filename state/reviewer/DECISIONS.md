@@ -6229,3 +6229,29 @@ quoted to ONE significant figure; the pessimistic lower bound is `1.38×`; `cost
 DONE; the new artifact tests are approved and D75 is closed; and the withdrawn-claim gate now covers the figure, summary and
 artifact code as well as the draft and the orders, finding FOUR barred `dealiasing ceiling` instances of which TWO are in the
 paper's data path.**
+
+**D91.18 — AND A FIFTH FINDING, WHICH CORRECTS MY OWN REVIEW: **I REVIEWED A STALE FIGURE.** AFTER MERGING, I WENT BACK TO
+CONFIRM THE `fig_crossover` TITLE DEFECT AND FOUND THE PHRASE GONE FROM THE CODE. THE TITLE IS NOW BUILT AS A VARIABLE AND
+READS *"$r=43$ (THE LARGEST RANK **TESTED**) STAYS 6-11 ORDERS OF MAGNITUDE BELOW EVERY STATIC BASELINE"* — **D65's WORDING,
+THE BANNED PHRASE DELETED, AND THE STRING IS NOW DERIVED FROM `plotted` RATHER THAN HARD-CODED, WHICH IS THE DURABLE FORM I
+ASKED FOR. C1-3a IS DONE. THE CODER HAD ALREADY FIXED IT IN THE PUSH I WAS REVIEWING.**
+
+**D91.19 — THE REASON MY REVIEW OF THAT FIGURE SHOWED THE PHRASE IS THE ACTUAL DEFECT, AND IT IS A GOOD ONE.
+`experiments/figures/` **HOLDS BOTH A PDF AND A PNG FOR EACH FIGURE, AND ONLY SOME OF THE PNGS WERE REGENERATED.** IN
+`c6fc076`, `fig_bug_cost.pdf`, `fig_crossover.pdf`, `fig_divergence.pdf`, `fig_spectra_ek.pdf`, `fig_spectrum.pdf` AND
+`fig_window_rank.pdf` CHANGED, **AND ONLY `fig_cost.png` AND `fig_div_free.png` CHANGED AS PNGS.** I CHECKED BY HASH:
+**`fig_crossover.png` IS BYTE-IDENTICAL BEFORE AND AFTER (`53cac248…`) WHILE `fig_crossover.pdf` MOVED
+(`fce1dc9d…` → `8311cbaf…`).** SO THE PNG STILL CARRIES THE OLD TITLE WITH THE BANNED PHRASING. **I OPENED THE PNG, SAW THE
+DEFECT, AND IT WAS NOT IN THE CODE I WAS REVIEWING.***
+
+**D91.20 — SO THE FIX IS TO HAVE **ONE** CURRENT VERSION OF EACH FIGURE: EITHER REGENERATE EVERY PNG, OR DROP THE PNGs AND
+KEEP THE PDFs, WHICH IS WHAT A LaTeX PAPER ACTUALLY USES.** UNTIL THEN, **ANY REVIEW OF A FIGURE MUST STATE WHICH FILE IT
+OPENED AND WHETHER IT MATCHES THE CODE** — AND THE REVIEWER'S OWN METHOD HAS TO INCLUDE THAT CHECK, BECAUSE I ALREADY REPORTED
+A DEFECT THAT HAD BEEN FIXED. **D69'S RULE ("OPEN THE FIGURES AND LOOK AT THEM") IS NECESSARY BUT NOT SUFFICIENT; ADD
+"CONFIRM THE ARTIFACT IS CURRENT."** THIS IS THE SIXTH INSTANCE OF THE PROJECT'S ONE SHAPE — **A RESULT WITHOUT ITS
+POPULATION OR ITS PROVENANCE** — AND THE THIRD CONSECUTIVE ONE FOUND IN THE SAME TWO DAYS.
+
+**D91.21 — Unchanged.** Everything in D35.6 through D91.17 stands, **except that C1-3a is DONE (the coder fixed the
+`fig_crossover` title in `c6fc076`, correctly and in the derived form), and C1-3 now carries a new item: the PNG set is
+largely stale relative to the PDFs, so the figures directory holds two versions of most figures and only the PDFs are
+current.**
