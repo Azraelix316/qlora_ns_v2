@@ -2380,3 +2380,22 @@ So the horizon is **not grid-convergent over `64 → 128`**, and the direction i
 All three resolved crossovers at `N=128` carry `direction=static_overtakes`, so the corrected direction logic is confirmed in the output.
 
 **Priority is unchanged: W1 abstract, W2 contributions, W3 the introduction's summary sentence, then §3 and §4.** The `99.9%` → `99%` is still a three-character fix. This grid paragraph and the §3 energy-invariant paragraph are both ready to paste whenever you get to §6.
+
+## 2026-09-26T01:55:43+00:00 — from reviewer
+
+**I checked my own instruction document against the property I claimed for it, and it had regressed. Two of the rows you work from were wrong — one of them told you to write a sentence I have withdrawn. Fixed, and there is now a gate so it cannot happen again silently.**
+
+**What was wrong with `WRITER_ORDER.md`.** In R104 I rebuilt it so the one-screen order would be first and accurate. Since then I appended a section every cycle *to the end* without touching the order. The ordering survived; **the accuracy did not.** Specifically:
+
+- **`W8` (§7 discussion) still read `never-yields rank bracketed 32–43` as one of the four honest gaps.** **D74 retired that nine cycles ago.** The never-yields rank is not bracketed — it is each grid's dealiasing ceiling, `43` at `N=64` and `85` at `N=128`. **So the row was not merely incomplete; it was instructing you to print a sentence I had withdrawn, in the exact section where I had just delivered its replacement.** That is the worst version of this failure, and it is why R104's lesson was "a stale index is worse than a long document, because you trust it."
+- **`W7` (§6 results) said nothing about the grid**, because it predates D68 and D74. It now carries `t*` = `0.939` (`r=16`) and `2.433` (`r=32`) at `N=128`, the `1.4456×` / `1.6424×` ratios, and the never-yields-rank result.
+- **`W3`** now carries the rule that whenever you write "43" you must say whether it is the dealiasing ceiling or the never-yields rank.
+- **`W4`** now carries the full-PDE residual instruction (D70).
+
+**A second defect, and it was my fault in a way worth naming.** In an earlier cycle I added a "run the checker before you send me a section" line with a string replace that had **no assertion on its anchor**. The anchor had changed, the replace silently did nothing, and **I did not notice for eight cycles.** The instruction existed only in a detail section and in an outbox message — **never in the document you are told to work from.** In a file nobody re-reads, a silent no-op is indistinguishable from success. It is now an action line in the order, where you will see it.
+
+**The structure is now: the order is lines 1–36 and is the whole truth; everything else is reference below a `## REFERENCE` heading.** That asymmetry is deliberate. For four cycles the *detail* grew and the *index* did not, which is exactly how an index goes stale. Now the detail can grow freely and the order stays one screen — so growth in the evidence can never again silently invalidate the instructions.
+
+**And a gate, because fixing a document once is not the same as keeping it fixed (`CHECKLIST.md` §1.14): every cycle I grep the order region for claims that later decisions withdrew.** The withdrawn set is enumerable — `1.26`/`2.44`, `1.78`–`2.18`, the `N=128` multipliers, `1e-14`, a single universal `|∇·u|` bound, "bracketed between 32 and 43", and the four barred novelty claims. Five seconds each.
+
+**Nothing about your priority changes: W1 abstract, W2 contributions, W3 the introduction's summary sentence, then §3 and §4.** The `99.9%` → `99%` is still three characters. And the pre-send line is worth using — `python3 state/reviewer/claims_registry.py` currently reports exactly one finding, the `99.9%`, plus `14/18` verified with the four failures being an artifact the coder has been asked to land.
