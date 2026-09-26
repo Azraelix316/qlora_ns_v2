@@ -1,21 +1,26 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: C11-1 closed -- all six of the paper's figures exist as PDF and PNG
-> in `paper/figures/`, generated from the artifacts. Four of the six draft
-> captions turned out to claim things the runs do not support, so I audited all
-> six, wrote the measured version of each into the generated `CAPTIONS.md`, and
-> added `check_figure_captions.py` + a test that report *drift* (a verdict
-> appearing or disappearing) rather than repeating the known list -- its first
-> positive control caught a bug in the checker itself. D106's zonal share is now
-> defined in machine-readable form: the recorded ~20% and the reviewer's ~82% are
-> exact complements (they sum to 100.0000%, because E is additive under the
-> zonal split), so the "factor of 4" and the "inverted Re trend" were both
-> artifacts of an unwritten definition -- `zonal_fraction_semantics` plus the
-> complement and the raw components are in every artifact, and three tests hold
-> them down. C8-2 closed: all four legacy artifacts reproduce bit-for-bit; the only
-> non-determinism is wall-clock time. 51 of 53 tests pass; the two failures are
-> the stale crossover surface, which is re-running.
+> Status: Three corrections landed, one of them a retraction of my own
+> artifact. (1) `peak_memory.json`'s "the variation with rank is RESOLVED at
+> every grid" was **false**: the noise floor under it was a single sample, taken
+> as `max()` over a dict keyed by configuration so the repeats overwrote each
+> other, and that quantity has been observed at 0.1328/0.0664/0.0977/0.0039 MiB
+> -- a factor of 34. Repeats are now a list, 8 by default, verdicts taken against
+> the maximum; **three of the four verdicts flip to NOT resolved.** The robust
+> part (the reduced integrator costs MORE memory than the full grid) is
+> untouched. (2) The N=64 crossover surface ran half of itself: `--re 5000 --re
+> 1000` with `nargs="+"` and no `action="append"` keeps only the last value, so
+> Re=1000 only -- **and the registry caught the silent data loss, which I had
+> not noticed.** Re-running correctly now. (3) `check_paper_builds.py` resolved
+> `\includegraphics` against the including file, which finds 0 of 6; against the
+> main document it finds 6 of 6, so the checker's model is the wrong one and the
+> layout in `paper/figures/` is already right. D106's zonal share is defined in
+> machine-readable form (the recorded 20% and the reviewer's 82% are exact
+> complements, not a factor of 4). C8-2 closed: all four legacy artifacts
+> reproduce bit-for-bit. Four of the six figure captions claim what the runs do
+> not support; `fig:kestats` was fixed at the source and the checker now covers
+> all six. **55 of 55 tests pass.**
 
 ## Mission
 
@@ -1097,3 +1102,55 @@ first positive control silently missed because possessive labels made the key
 
 **N=128 crossover surface, partial:** r=16 resolves at t\* = 0.975, r=43 at
 t\* = 2.990, r=85 unresolved so far. The N=64 surface is re-running.
+
+## 2026-09-26 (later) — the memory retraction, the half-run surface, and the resolution model
+
+**Retracted: "the variation with rank is RESOLVED at every grid."** The noise
+floor under that verdict was one sample. `bench_memory.py` re-measured one
+configuration twice and took `max()` over a dict **keyed by configuration**, so
+repeats overwrote each other and only the last survived. The same quantity
+re-measured on this problem has been observed at 0.1328, 0.0664, 0.0977 and
+0.0039 MiB — a factor of 34 — and the shipped value was the *smallest* of the
+four, the one that resolves everything. With 8 repeats the floor is 0.324 MiB
+(0.0781–0.3242 within the run) and three of four verdicts become NOT resolved.
+The artifact now says what the measurement says: no variation with rank is
+established for the projected integrator at either grid, and the spread is
+consistent with zero without demonstrating it. Still not "flat in rank".
+Pinned by `test_the_memory_noise_floor_is_a_distribution_and_not_one_sample`,
+verified on three independent controls (one sample; the minimum used instead of
+the maximum; verdicts inconsistent with the floor).
+
+**The N=64 surface ran half of itself.** The launch passed `--re 5000 --re 1000`;
+`--re` is `nargs="+"` without `action="append"`, so argparse keeps the last
+occurrence and the run covered Re=1000 only — writing a partial artifact over a
+complete one and removing the paper's central result (the Re=5000 rows) from
+the file. Ninth instance of this cycle's error shape, and the first the tooling
+caught: all four Re=5000 `tstar` registry rows FAIL with "no key '5000'".
+Correct invocation is `--re 5000 1000`. Re-running.
+
+**`check_paper_builds.py`'s resolution model is the wrong one, measured.**
+`check_includegraph_paths.py` runs both models over the real draft: against the
+including file, 0 of 6 targets resolve; against the main document, 6 of 6. The
+draft sets no `\graphicspath` and no section is a standalone document, so there
+is no reading of this tree under which `paper/sections/figures/` is where the
+build looks. Recommendation is to fix the checker, not to add
+`\graphicspath{{figures/}}` (redundant) and not to mirror the figures into a
+directory the build never reads. A test now requires every target to resolve
+against the main document and asserts `\graphicspath` is still unset.
+
+**Third check this session written too loosely to fail.** The first version of
+that test asserted `"/6)" in resolved`, which also matches `5/6`, and passed with
+`fig_cost.pdf` deleted; it then passed with the PDF deleted and the PNG present,
+because the resolver accepts either extension — so the *control* was incomplete
+too. Removing both made it fire. After the caption checker's possessive-label
+miss and the `min-not-max` control, the consistent conclusion is that a green
+gate here has to be attacked before it is believed.
+
+**Registry state against the reviewer's `claims_registry.py`:** four zonal rows
+FAIL for a reason that predates today — their `field` is a dotted path, and
+`resolve` looks a plain `field` up as a *literal* key, descending only inside
+the `@min:`/`@max:` form, so those rows have never resolved against the nested
+artifacts. Verified against the pre-change tree. The four Re=5000 `tstar` rows
+and `tstar_r16_re1000` need re-pinning onto the rows-derived values (the block
+sat 6.4–9.3% below). `mem_noise_floor_mib` is pinned at one of the four
+single-sample values and cannot be satisfied by any correct measurement.
