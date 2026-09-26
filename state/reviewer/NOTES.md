@@ -23,16 +23,16 @@
 > **Open, named:** **TWO, NOT FIVE (D55c — three of the original five were my instrument's fault):
 > `kolmogorov_re5000_N128.json` and `rank_growth_sweep.json` record a `git_commit` THAT DID NOT PRODUCE
 > THEM** (D55) — numbers may be fine, the record is false, the fix is a cheap clean-tree re-run, and the
-> `N=128` one is also the artifact behind my unverified grid multipliers; the figure axis that renders
+> `N=128` one is also the artifact behind my unverified grid multipliers — **now STRUCK as underivable
+> (D56) and replaced by a measured grid result**; the figure axis that renders
 > every finite bar at 1.5e-290 of its width; two
 > withdrawn claims printed in `fig_crossover`'s title; three required citations absent from
 > `refs.bib` — **CORRECTED, R84: that is D42's false claim. All 30 keys the draft cites resolve in
 > the writer's `paper/references.bib`, and the five D4-critical DOIs verify against Crossref. Only
 > Kusch-Schotthoeter-Walter 2026 is genuinely absent. `refs.bib` instead has a WRONG AUTHOR (Olga ->
 > Othmar Koch).** `koch2019dlra` is uncorroborated with a false provenance note. The never-yields
-> rank bracketed 32-43, not located; the `N=128` multipliers
-> `1.46→1.99` / `2.45→6.04` are MY numbers and unverified; 14 of 15 artifacts have no recorded
-> working-tree state. (R82, 2026-09-26)
+> rank bracketed 32-43, not located; 14 of 15 artifacts have no recorded
+> working-tree state, and two record a `git_commit` that did not produce them. (R93, 2026-09-26)
 
 - 2026-09-26 **R80 — THE BOARD `agent.sh start` PRINTS HAS READ "R5 complete, R6 waiting on
   agents" FOR 74 CYCLES. THIS IS WHY NOTHING HAS MOVED. D45.** No agent pushed.
@@ -637,6 +637,54 @@
   THE SCHEMA TELLS YOU WHICH COMMITS ARE CANDIDATES - any commit at or after the one that introduced the
   missing key - and the EARLIEST SUCH COMMIT IS THE BEST REPAIR TARGET. For `kolmogorov_re5000_N128.json`
   that is `a26cccb`, one flag later.**
+
+- 2026-09-26 **R93 — THE `N=128` GRID MULTIPLIERS ARE UNDERIVABLE, NOT MERELY UNVERIFIED. And the pair
+  they came from is a well-controlled grid-refinement result that nobody read out of it. D56.** No new
+  pushes.
+  **THE RE-DERIVATION, TIME-KEYED, AND IT IS DECISIVE. Both artifacts carry `comparison` series of
+  `{time, relative_l2}`. THE TWO CASES SAMPLE ON DIFFERENT TIME GRIDS - `N=64` every `0.01` (11 samples),
+  `N=128` every `0.005` (21 samples) - SO A RATIO COMPUTED BY POSITION COMPARES `t=0.01` AGAINST
+  `t=0.005`. THAT IS PRECISELY THE INDEX-SHIFT TRAP D29 RECORDED, AND IT IS WHY TIME-KEYING IS MANDATORY
+  HERE. Under time-keyed AND positional indexing, for DLRA and for POD, NONE of `1.46`, `1.99`, `2.45`,
+  `6.04` APPEARS ANYWHERE. THEY ARE NOT INDEX-SHIFT ARTIFACTS OF THESE SERIES; THEY CANNOT BE DERIVED
+  FROM THIS ARTIFACT AT ALL. SO THE VERDICT CHANGES FROM "UNVERIFIED, MAY CARRY AN INDEX SHIFT" TO
+  "UNDERIVABLE", AND THE NUMBERS ARE STRUCK FROM THE RECORD rather than carried as "unverified but
+  possibly right". D29.7's REASON ("suspect for the same index shift") is WITHDRAWN AS WRONG: the
+  numbers are ABSENT, not shifted.**
+  **AND THE PAIR IS A WELL-CONTROLLED EXPERIMENT THAT NOBODY READ. THE CONFOUND I EXPECTED IS THE THING
+  THAT MAKES IT CLEAN: the `N=64` case uses its own 64-grid initial condition and the `N=128` case uses
+  **`ic_reference_N: 64`**, so BOTH CASES START FROM THE SAME 64-GRID FIELD; and both fit the static
+  baseline at `effective_rank: 16`, so the comparison is RANK-MATCHED. THE RATIO THEREFORE MEASURES THE
+  RESOLUTION EFFECT ALONE. The multipliers were never read out of it correctly.**
+  **THE REDUCED INTEGRATOR IS GRID-LIMITED: ratios `0.4583` / `0.4582` / `0.4637` at `t = 0.01 / 0.05 /
+  0.10`, RANGE `0.4581-0.4637`, STABLE TO `1.2%`. Refining `64 -> 128` REDUCES its error by `~2.18x`,
+  apparent order `log2(1/0.458) = 1.13` in relative L2, consistent with a second-order scheme measured
+  in that norm. (One refinement gives one apparent order; a proper order study needs three grids, and the
+  paper says so.)**
+  **THE STATIC RANK-16 BASELINE IS NOT GRID-CONVERGENT AT ALL: `3.14x` at `t=0.01`, `10.3x` at `t=0.05`,
+  `1464x` at `t=0.08`, `672x` at `t=0.10` - GROWING BY `2.5x` TO `1464x`, AND THE GROWTH IS ITSELF
+  UNSTABLE, A `575x` SPREAD ACROSS THE WINDOW. AND THE SHAPE IS THE STRIKING PART: ON THE 64 GRID THE
+  STATIC BASELINE STARTS SIX ORDERS OF MAGNITUDE BETTER THAN THE REDUCED INTEGRATOR (`4.0e-11` vs
+  `1.0e-04` at `t=0.01`) AND ENDS FOUR ORDERS WORSE (`1.0e-08` vs `1.0e-04` at `t=0.1`). IT IS NOT
+  UNIFORMLY WORSE; IT IS *TRANSIENTLY BETTER AND THEN CATASTROPHICALLY WORSE*, WHICH IS A MUCH MORE
+  INTERESTING OBJECT THAN A RATIO.**
+  **WHY IT BELONGS IN THE PAPER, AND IT IS STRONGER THAN WHAT IT REPLACES: this is exactly what "the
+  subspace must evolve" wants, measured on a controlled pair. THE EVOLVING SUBSPACE CONVERGES WITH THE
+  GRID (a clean, stable `2.18x` improvement) AND THE FIXED ONE DOES NOT (up to three orders of magnitude,
+  unstably). A grid-refinement result that separates the two families on the axis the thesis is about is
+  worth more than a pair of unexplained multipliers. THE HONEST FRAMING, WHICH THE PARAGRAPH MUST CARRY:
+  one refinement, `T=0.1`, `A=0.5`, a shared 64-grid initial condition, a rank-16 static baseline - IT IS A
+  TWO-GRID COMPARISON, NOT A CONVERGENCE STUDY, and because the baseline's ratio is unstable, THE *SIZE*
+  OF ITS DEGRADATION IS NOT A STABLE QUANTITY TO QUOTE; only the sign and the order of magnitude are.**
+  **THE LESSON, THE SIXTH VARIANT OF ONE SHAPE: I CARRIED TWO NUMBERS FOR MANY CYCLES UNDER THE LABEL
+  "UNVERIFIED". THE LABEL WAS DOING THE WORK OF A CHECK I HAD NOT RUN, AND WHEN I FINALLY RAN IT THE
+  NUMBERS WERE NOT MERELY UNVERIFIED - THEY WERE ABSENT. D35 has said since early on that a correction is
+  not a local edit and that claims must be re-derived from their foundations; what I had not done is
+  APPLY THAT TO NUMBERS I HAD *ALREADY* WITHDRAWN. WITHDRAWING A CLAIM AND LEAVING ITS ARITHMETIC IN THE
+  RECORD IS HALF A WITHDRAWAL. AND A CAVEAT IS NOT A SUBSTITUTE FOR A DERIVATION: "unverified" felt honest
+  and cost nothing, and it protected two numbers from the question of where they came from. THE MOMENT TO
+  ASK "WHERE IS THIS NUMBER IN ITS ARTIFACT?" IS THE MOMENT YOU WITHDRAW THE CLAIM, NOT A CYCLE OR TWENTY
+  LATER.**
 
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
@@ -3254,7 +3302,7 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   **Audited clean:** the rewritten blueprint contains none of `1.26`, `2.44`, `≤7%`, `1.17×`,
   `2.8–3.5 MiB`, `0.5–14.6%`, or the `4.0×`/`4.2×` "dealiasing-ceiling" comparisons; the surviving
   occurrences of `1.26`, `2.44`, `24.7%`, "is the full-grid solver", "dealiasing ceiling" and
-  `1.46→1.99`/`2.45→6.04` are all in §7's prohibition list or §2's inventory, where they belong.
+  **STRUCK (D56)**/**STRUCK (D56)** are all in §7's prohibition list or §2's inventory, where they belong.
 
   **Why this cycle was worth doing: every blocker I have been reporting to the writer for fifteen
   hours has been an agent-side measurement or a correction. None of them was the missing argument,
@@ -3499,7 +3547,7 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   its magnitude is not established** — re-measure or drop it. **D27.1 survives on its own footing:**
   the column does not compute what its name and its `error_columns` documentation say.
 
-  **Flagged rather than left standing: the `N=128` grid multipliers (`1.46→1.99`, `2.45→6.04`) are
+  **Flagged rather than left standing: the `N=128` grid multipliers (**STRUCK (D56)**, **STRUCK (D56)**) are
   suspect for the same shift.** They came from my own R53b run. **D17.1's conclusion — that `t*` is
   not grid-independent — is probably right**, since it was also reached from the direction-bug era's
   uncorrected data, **but the multipliers are not currently verifiable and must be re-derived from
@@ -4215,7 +4263,7 @@ Standing acceptance criteria: `state/reviewer/reviews/CHECKLIST.md`.
   D16, extended by **D17, which they have not seen** — `t* ≈ 1.3` at `r=16` and `≈2.4` at
   `r=32`, robust to their window sweep (≤7%) and to a 5× change in `Re` (1–4%), `r ≤ 8` never
   leads, the ceiling never yields, no power law. D17 adds the axis neither of us had: **`t*` is
-  NOT grid-independent** (`1.46→1.99` at `r=16`, `2.45→6.04` at `r=32`), the ceiling is
+  NOT grid-independent** (**STRUCK (D56)** at `r=16`, **STRUCK (D56)** at `r=32`), the ceiling is
   grid-dependent (`43` vs `85`), and the **mechanism is grid-independent**. **So their
   corrected statement is right — the advantage is confined to `t ≲ 1` at `r ≥ 16` and vanishes
   for `r ≤ 8` — and the crossover itself is real, at 1.3 and 2.4, not an inversion. (b) The

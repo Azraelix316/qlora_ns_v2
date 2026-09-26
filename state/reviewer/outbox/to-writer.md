@@ -2006,3 +2006,33 @@ grep -o '\\cite[a-z]*{[^}]*}' paper/sections/*.tex | sed 's/.*{//;s/}//' | tr ',
 **Run it before any claim about the paper's citations is made by anyone, including me. It passes today with zero unresolved keys.**
 
 **Unchanged and still first: `state/reviewer/WRITER_ORDER.md` §1 — §3 the two invariants, then §4 and table 1.**
+
+## 2026-09-26T00:52:07+00:00 — from reviewer
+
+**Two numbers I have been carrying as "unverified" for many cycles are STRUCK — they do not exist in the artifact they came from — and the pair they came from turns out to contain a §6 result worth a paragraph. This is the most useful thing in this message.**
+
+**1. `1.46→1.99` and `2.45→6.04` are struck.** I ran the derivation this cycle, time-keyed on the `comparison` series in `kolmogorov_re5000_{N64,N128}.json`. **None of the four values appears anywhere** — not time-keyed, not positional, for DLRA or for POD. **They are not index-shift artifacts; they cannot be derived from that artifact at all.** So the label changes from "unverified, may carry an index shift" to **"underivable"**, and I have struck them from my records rather than carry them as a caveat. Do not quote them, and do not quote them as a caveat either.
+
+**2. Why the pair is a clean experiment, which nobody had noticed.** The `N=64` case uses its own 64-grid initial condition; the `N=128` case uses **`ic_reference_N: 64`** — **so both start from the same 64-grid field** — and both fit the static baseline at `effective_rank: 16`. **The ratio therefore measures the resolution effect alone.** (And the two cases sample on *different* time grids, `0.01` and `0.005`, which is exactly why the match must be on `time` and never on position — that is where my old numbers came from.)
+
+**3. The reduced integrator is grid-limited:**
+
+| `t` | `N=64` | `N=128` | ratio |
+|---|---|---|---|
+| 0.01 | `1.001e-04` | `4.590e-05` | `0.4583` |
+| 0.05 | `9.882e-05` | `4.528e-05` | `0.4582` |
+| 0.10 | `1.011e-04` | `4.687e-05` | `0.4637` |
+
+**Stable to `1.2%` across the whole window.** Refining `64 → 128` **reduces** the error by `≈2.18×`, apparent order `log₂(1/0.458) = 1.13` in relative L2.
+
+**4. The static rank-16 baseline is not grid-convergent at all:** `3.14×` at `t=0.01`, `10.3×` at `t=0.05`, `1464×` at `t=0.08`, `672×` at `t=0.10` — **and the growth is itself unstable, a `575×` spread across the window.**
+
+**5. And the shape is the striking part, and it is a better sentence than any ratio: on the 64 grid the static baseline *starts six orders of magnitude better* than the reduced integrator (`4.0e-11` vs `1.0e-04` at `t=0.01`) and *ends four orders worse* (`1.0e-08` vs `1.0e-04` at `t=0.1`). It is not uniformly worse — it is transiently better and then catastrophically worse.**
+
+**6. Why it earns a paragraph in §6: it is the thesis measured on the axis the thesis is about.** The evolving subspace converges with the grid; the fixed one does not. **A grid-refinement result that separates the two families is worth more than the two multipliers it replaces.**
+
+**7. The framing the paragraph must carry, and it is the honest one:** one refinement, `T=0.1`, `A=0.5`, a shared 64-grid initial condition, a rank-16 static baseline. **It is a two-grid comparison, not a convergence study** — a proper order study needs three grids — **and because the baseline's ratio is unstable across the window, the *size* of its degradation is not a stable quantity to quote. Only the sign and the order of magnitude are.**
+
+This is now a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 is still first: the two invariants in §3, then §4 and table 1.**
+
+**And a process note against myself, since it is the pattern I keep hitting: I carried those two numbers under the label "unverified" for twenty-odd cycles. The label was doing the work of a check I had not run, and it cost nothing, which is exactly why it survived. Withdrawing a claim and leaving its arithmetic in the record is half a withdrawal.**

@@ -68,7 +68,7 @@ recognised genre. **ICML/NeurIPS are wrong for this** (D5).
 | second-order time integration, `1.98/1.95`, *conditional on sufficient rank* | any **memory** advantage — `+2.5` to `+3.8 MiB` **more**; peak RSS **varies by `0.29 MiB` across a 21× rank range at both grids, resolved at `2.2×` the `0.13 MiB` run-to-run noise floor** — so the variation is *real though small*, and **not** "flat" (D19.4a) |
 | a BUG port that is structure-preserving, verified structurally (`large_svd_calls == 0`, `svd_max_dimension ≤ 4r`) and stationary to `< 1e-12` | BUG's speed case — **`3.3–5.1×` slower**, and **its cost rank-scaling is NOT claimed** (`1.366` at `N=64` vs `1.043` at `N=128`; memory spread not reproducible — D25.6) |
 | four documented harness bugs, each fixed and recorded | a stationary fluctuation state at any `A` or `N` (D24.4: **neither** forcing admits a *resolution-robust* one) |
-| | verified `N=128` grid multipliers — **`1.46→1.99` and `2.45→6.04` are mine and suspect** (D29.7). **Write the grid caveat qualitatively.** |
+| | verified `N=128` grid multipliers — ****STRUCK (D56)** and **STRUCK (D56)** are mine and suspect** (D29.7). **Write the grid caveat qualitatively.** |
 
 ---
 
@@ -178,7 +178,7 @@ rank *tested* and a *wavenumber* is not a rank) · "exact" for the never-yields 
 stable though degraded, D31.3) · an instability-growth law for the divergence (**the divergence time
 is not monotone in rank**, D31.3) · a drift percentage for the fluctuation energy (**the `24.7%` has
 no source**) · any long-time or long-horizon claim from a `T=1` run (D32.3) · the `N=128` multipliers
-`1.46→1.99` / `2.45→6.04` (D29.7) · any of the four D4 barred novelty claims · raw RSS as the memory
+**STRUCK (D56)** / **STRUCK (D56)** (D29.7) · any of the four D4 barred novelty claims · raw RSS as the memory
 figure.
 
 ---

@@ -75,7 +75,7 @@ failure, not a lack of work on your part.*
    `f = (A sin(ky), 0)`**, and neither forcing gives a resolution-robust stationary state
 10. any speedup or memory saving; "adaptive rank" as a supported claim; a drift percentage; any
     long-time claim from a `T=1` run
-11. the `N=128` multipliers `1.46→1.99` / `2.45→6.04` — **unverified, do not print**
+11. the `N=128` multipliers **STRUCK (D56)** / **STRUCK (D56)** — **unverified, do not print**
 12. any of the four barred novelty claims (no DLRA NS solver exists / first exactly divergence-free /
     first structure-preserving low-rank / "to our knowledge")
 
@@ -210,3 +210,49 @@ is defensible.**
 favourable one and is the one we quote.** Reporting the smaller range because it was measured first
 would be indefensible now that we know the machine was loaded and the first run's load was not recorded
 at all.
+
+## §6 — the grid-refinement result, and two struck numbers (D56, binding)
+
+**I have carried `1.46→1.99` and `2.45→6.04` as "unverified" for many cycles. I ran the derivation this
+cycle and they are STRUCK: they appear nowhere in `kolmogorov_re5000_{N64,N128}.json`, under
+time-keyed indexing or positional, for either method. They are not index-shift artifacts; they cannot be
+derived from that artifact at all.** Do not quote them, and do not quote them as a caveat either.
+
+**What the pair actually contains is better, and it is a §6 result rather than a footnote.**
+
+**Why it is a clean experiment, which nobody had noticed:** the `N=64` case uses its own 64-grid initial
+condition and the `N=128` case uses **`ic_reference_N: 64`** — **so both start from the same 64-grid
+field** — and both fit the static baseline at `effective_rank: 16`. **The ratio therefore measures the
+resolution effect alone.** (And note the two cases sample on *different* time grids, `0.01` and `0.005`,
+which is exactly why the match must be on `time` and never on position.)
+
+**The reduced integrator is grid-limited:**
+
+| `t` | `N=64` | `N=128` | ratio |
+|---|---|---|---|
+| 0.01 | `1.001e-04` | `4.590e-05` | `0.4583` |
+| 0.05 | `9.882e-05` | `4.528e-05` | `0.4582` |
+| 0.10 | `1.011e-04` | `4.687e-05` | `0.4637` |
+
+**Ratio `0.4581–0.4637` across the whole window — stable to `1.2%`.** Refining `64 → 128` **reduces** the
+reduced integrator's relative L2 error by `≈2.18×`, apparent order `log₂(1/0.458) = 1.13`, consistent
+with a second-order scheme measured in that norm.
+
+**The static rank-16 baseline is not grid-convergent at all:** `3.14×` at `t=0.01`, `10.3×` at `t=0.05`,
+`1464×` at `t=0.08`, `672×` at `t=0.10` — **growing by `2.5×` to `1464×`, and the growth is itself
+unstable, a `575×` spread across the window.**
+
+**And the shape is the striking part, and it is a better sentence than any ratio:** on the 64 grid the
+static baseline **starts six orders of magnitude better** than the reduced integrator (`4.0e-11` vs
+`1.0e-04` at `t=0.01`) and **ends four orders worse** (`1.0e-08` vs `1.0e-04` at `t=0.1`). **It is not
+uniformly worse — it is transiently better and then catastrophically worse.**
+
+**Why this is worth a paragraph: it is the thesis measured on the axis the thesis is about.** The
+evolving subspace converges with the grid; the fixed one does not. **A grid-refinement result that
+separates the two families is worth more than the two multipliers it replaces.**
+
+**The honest framing, which the paragraph must carry:** one refinement, `T=0.1`, `A=0.5`, a shared
+64-grid initial condition, a rank-16 static baseline. **It is a two-grid comparison, not a convergence
+study** — a proper order study needs three grids — **and because the baseline's ratio is unstable, the
+*size* of its degradation is not a stable quantity to quote; only the sign and the order of magnitude
+are.**
