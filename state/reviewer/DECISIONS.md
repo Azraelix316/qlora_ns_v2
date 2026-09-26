@@ -8086,6 +8086,19 @@ THING BEING CLAIMED (D111, D112.5, D117.9, AND THIS), AND THE FIRST TIME THE POP
 APPARENT MAGNITUDE WAS 85%.** **THE CHECK WAS STILL WORTH BUILDING: ITS NULL RESULT IS MUCH STRONGER POSITIVE EVIDENCE
 THAN NOT LOOKING - 28 OF 28 `t`-VALUES ACROSS BOTH GRIDS ARE NOW CONFIRMED DERIVABLE FROM THEIR OWN RECORDED BRACKETS.**
 
+**D118.9 - AND A FIXTURE THAT HARD-CODES A COUNT BREAKS WHEN THE COUNT CHANGES, AND WHEN IT BREAKS IT LIES. WITHDRAWING
+`tstar_N128_r43` TOOK THE REGISTRY FROM 36 ROWS TO 35, AND `check_start_here.py`'s STATUS-LINE FIXTURES - WHICH I HAD BUILT
+ONLY FIVE HOURS AGO, AND WHICH I HAD PROUDLY MADE POSITIVE-CONTROLLED - ALL HARD-CODED `32/36`.** So the live check went red
+on a number I had just changed, **and THREE OF THE FOUR REJECTION CASES THEN REPORTED THE *WRONG* REASON**: they all tripped
+on the registry before reaching the number each was written to test, so a case named "a stale test count" was rejecting for a
+stale *registry* count. **THAT IS D117's FAILURE AGAIN, AND IT IS THE FAILURE A FIXTURE IS MOST LIKELY TO HAVE: A CASE THAT
+DIFFERS FROM THE CLEAN LINE IN TWO PLACES REPORTS WHICHEVER THE CHECKER HAPPENS TO TEST FIRST.** **THE FIX IS STRUCTURAL, NOT
+A NUMBER EDIT: THE CLEAN LINE IS NOW BUILT FROM THE LIVE GATES AND EVERY CASE PERTURBS EXACTLY ONE NUMBER OF IT**, with an
+`assert` that no case is identical to the clean line. **The fixtures can no longer go stale, because they are not written down.
+If a gate cannot be read the cases are SKIPPED AND THE SELF-TEST FAILS, rather than reported as passing** - an unreadable
+population is a failure (D87), not a clean result. Positive-controlled: making the board's status line stale is caught, and
+restoring it returns `6 assertions, 0 failed`.
+
 **D118.8 - Unchanged.** Everything in D35.6 through D117.10 stands, **except that C2-1 is closed at `35/35`, the r=32
 refinement ratio is `1.7050x` and is configuration-dependent, the r=16 ratio `1.4456x` is configuration-robust, and no
 paper may claim r=43 yields at N=128.**

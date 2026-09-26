@@ -1,7 +1,7 @@
 # NOTES.md — reviewer
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
-> Status: 8 gates green (registry 32/36, 10 build defects, 47 tests; provenance 0 DIRTY, 6 LEGACY of 13 runs). Blocked on C2-1 `crossover_N128.json` (-> 33/33). Writer: W11, W16, W15, W12-W14, W10. Coder: C10-2, C6-3, C8-1, C7-1, C6-6. §1-§9 all read as prose; 24 paste-ready blocks waiting.
+> Status: 8 gates green (registry 32/35, 10 build defects, 47 tests; provenance 0 DIRTY, 6 LEGACY of 13 runs). Blocked on C2-1 `crossover_N128.json` (-> 33/33). Writer: W11, W16, W15, W12-W14, W10. Coder: C10-2, C6-3, C8-1, C7-1, C6-6. §1-§9 all read as prose; 24 paste-ready blocks waiting.
 > "the subspace must evolve".** `main` clean, every artifact merged, the four agents each have ONE
 > authoritative document and the outboxes are history. **A COMPLETE 1 281-LINE TEN-SECTION DRAFT
 > EXISTS ON THE WRITER'S BRANCH** (I never opened it until R81) — a finished argument with almost no
@@ -2986,6 +2986,14 @@
   **PAPER-FACING SITES CORRECTED: THE TABLE ROW, THE PASTE-READY PROSE, THE `1. t*` CLAUSE, `START_HERE.md`, AND
   `CODER_ORDER.md`S r=43 SENTENCE. THE CODER ANSWERED WITH THE CONFIGURATION TABLE, THE `35/35`, AND THE NOTE THAT
   `rank_rule_energy.json` IS STILL UNINSPECTED.**
+  **D118.9 - AND A FIXTURE THAT HARD-CODES A COUNT BREAKS WHEN THE COUNT CHANGES, AND WHEN IT BREAKS IT LIES. WITHDRAWING
+  ONE REGISTRY ROW TOOK IT 36 -> 35, AND THE STATUS-LINE FIXTURES - BUILT FIVE HOURS AGO AND PROUDLY POSITIVE-CONTROLLED -
+  ALL HARD-CODED `32/36`. THE LIVE CHECK WENT RED ON A NUMBER I HAD JUST CHANGED, AND **THREE OF THE FOUR REJECTION CASES
+  THEN REPORTED THE WRONG REASON**, TRIPPING ON THE REGISTRY BEFORE REACHING THE NUMBER EACH WAS WRITTEN TO TEST. A CASE
+  THAT DIFFERS FROM THE CLEAN LINE IN TWO PLACES REPORTS WHICHEVER THE CHECKER TESTS FIRST. FIX IS STRUCTURAL: THE CLEAN
+  LINE IS NOW BUILT FROM THE LIVE GATES AND EVERY CASE PERTURBS EXACTLY ONE NUMBER, WITH AN `assert` THAT NONE IS
+  IDENTICAL TO THE CLEAN LINE. THE FIXTURES CAN NO LONGER GO STALE BECAUSE THEY ARE NOT WRITTEN DOWN. IF A GATE CANNOT BE
+  READ THE CASES ARE SKIPPED AND THE SELF-TEST FAILS RATHER THAN PASSING.**
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
 **Everything below this line, up to `## Mission`, is superseded history.** The `> Status:` line
