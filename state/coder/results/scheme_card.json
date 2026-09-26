@@ -9,16 +9,40 @@
     "driver_matches_HEAD_at_write": true,
     "driver_sha256": "dbbf15c85320f4ae625222a37c3a6583f671b840a044ad34ba46411ba82b8935",
     "driver_sha256_at_write": "dbbf15c85320f4ae625222a37c3a6583f671b840a044ad34ba46411ba82b8935",
-    "git_commit": "e471d5d581aff63621803611251f0ad3dcb9113a",
-    "git_commit_at_write": "e471d5d581aff63621803611251f0ad3dcb9113a",
-    "git_commit_how": "git log -1 --before=1790430475",
+    "environment": {
+      "numpy": "2.5.3",
+      "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
+      "processor": "x86_64",
+      "python": "3.12.3",
+      "thread_settings": {
+        "MKL_NUM_THREADS": null,
+        "NUMEXPR_NUM_THREADS": null,
+        "OMP_NUM_THREADS": null,
+        "OPENBLAS_NUM_THREADS": null,
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+    "git_commit_at_write": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+    "git_commit_how": "git log -1 --before=1790430726",
     "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
     "sources_files_at_launch": 32,
-    "sources_fingerprint_at_launch": "9efcdf80ef7e83922e9ba180a6a543e1ec029428d4d25bf80604d444ab5bc5a3",
+    "sources_fingerprint_at_launch": "1ae129ff26e49e278062e1e406ca7b80f58e325dea05683c1d58144b1ecfb533",
     "tree_moved_during_run": false,
-    "working_tree_dirty": false,
-    "working_tree_dirty_paths": []
+    "working_tree_diff_sha256": "bd68734ac92a736d8ea821c04475999de0eafda929d2dfc3a08922342a9f527a",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "experiments/bench_memory.py",
+      "experiments/check_driver_flags.py",
+      "experiments/test_artifacts.py",
+      "state/coder/results/kolmogorov_re1000_N64.json",
+      "state/coder/results/kolmogorov_re100_N64.json",
+      "state/coder/results/kolmogorov_re5000_N128.json",
+      "state/coder/results/kolmogorov_re5000_N64.json",
+      "state/coder/results/scheme_card.json",
+      "state/coder/results/taylor_green.json"
+    ]
   },
   "sections": [
     {

@@ -276,7 +276,11 @@ def main() -> None:
             "Four registry rows are pinned to that single sample and cannot be "
             "satisfied by any correct measurement: across three independent "
             "measurements the projected integrator's N=64 overhead moved by "
-            "+136%. 5 keeps the driver's cost near 5x, which is minutes."
+            "+136%%. 5 keeps the driver's cost near 5x, which is minutes."
+            # The %% is not a typo. argparse %-interpolates help strings, so a
+            # bare '%' in one raises ValueError and the driver cannot print its
+            # own --help at all -- which is how this was found, by
+            # check_driver_flags.py, after it had been broken.
         ),
     )
     parser.add_argument("--dt", type=float, default=None)

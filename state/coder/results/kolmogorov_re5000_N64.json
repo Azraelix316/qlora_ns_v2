@@ -885,10 +885,10 @@
       "status": "projected_discrete_balance_with_projection_work"
     },
     "initial_energy": 22.20670331293339,
-    "initialization_seconds": 0.00041924393735826015,
+    "initialization_seconds": 0.0005717161111533642,
     "linear_algebra_calls": 841,
-    "linear_algebra_seconds": 0.2970114622730762,
-    "linear_algebra_seconds_per_step": 0.0014850573113653809,
+    "linear_algebra_seconds": 0.41194886807352304,
+    "linear_algebra_seconds_per_step": 0.0020597443403676152,
     "max_abs_divergence": 2.6645352591003757e-14,
     "max_cfl": 0.014747385514922155,
     "max_energy_increase": 0.002445655599142782,
@@ -897,7 +897,7 @@
     "max_relative_l2_vs_full": 0.00010108416677874297,
     "max_scaled_pde_energy_residual": 0.00046923135768045965,
     "max_scaled_projected_energy_residual": 0.0007700258068321355,
-    "offline_plus_online_seconds": 1.3515086369588971,
+    "offline_plus_online_seconds": 1.9004937859717757,
     "projection_energy_history": [
       -4.213816602316456e-07,
       -5.109879275266849e-07,
@@ -2056,8 +2056,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 1.3510893930215389,
-    "wall_seconds_per_step": 0.006755446965107694,
+    "wall_seconds": 1.8999220698606223,
+    "wall_seconds_per_step": 0.009499610349303111,
     "zonal_energy_fraction": {
       "at_final_step": 0.18397748201028016,
       "at_t0": 0.16207103178372204
@@ -3707,8 +3707,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 0.9033733189571649,
-    "wall_seconds_per_step": 0.004516866594785824,
+    "wall_seconds": 1.053053631912917,
+    "wall_seconds_per_step": 0.005265268159564585,
     "zonal_energy_fraction": {
       "at_final_step": 0.18397942647862772,
       "at_t0": 0.16207103178372245
@@ -4274,7 +4274,7 @@
     "final_energy": 22.671553356880874,
     "final_enstrophy": 1333.7371073126726,
     "final_relative_l2_vs_full": 9.927879871812374e-09,
-    "fit_seconds": 0.003616055939346552,
+    "fit_seconds": 0.004977621138095856,
     "fluctuation_energy_history": [
       18.607639994491258,
       18.607172283405802,
@@ -4696,7 +4696,7 @@
     "max_relative_l2_vs_full": 9.927879871812374e-09,
     "max_scaled_pde_energy_residual": 0.00025882197697179064,
     "max_scaled_projected_energy_residual": 0.033448867445314806,
-    "offline_plus_online_seconds": 1.0227109240368009,
+    "offline_plus_online_seconds": 1.4178026360459626,
     "projection_energy_history": [
       -8.189470485575612e-05,
       -8.188690760491113e-05,
@@ -5855,8 +5855,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 1.0190948680974543,
-    "wall_seconds_per_step": 0.005095474340487271,
+    "wall_seconds": 1.4128250149078667,
+    "wall_seconds_per_step": 0.007064125074539334,
     "zonal_energy_fraction": {
       "at_final_step": 0.1839794261830451,
       "at_t0": 0.1620710317837223
@@ -5917,13 +5917,26 @@
     "driver_matches_HEAD_at_write": true,
     "driver_sha256": "db48a5a6f86eafaa91a6a0fa5167f00b647e2740e36eb431455954035dc43f50",
     "driver_sha256_at_write": "db48a5a6f86eafaa91a6a0fa5167f00b647e2740e36eb431455954035dc43f50",
-    "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
-    "git_commit_at_write": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
-    "git_commit_how": "git log -1 --before=1790411850",
+    "environment": {
+      "numpy": "2.5.3",
+      "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
+      "processor": "x86_64",
+      "python": "3.12.3",
+      "thread_settings": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": null,
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    "git_commit": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+    "git_commit_at_write": "c6d96ea8fc2c06e577850dada184556b3e3fcbb7",
+    "git_commit_how": "git log -1 --before=1790430645",
     "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "sources_files_at_launch": 30,
-    "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+    "sources_files_at_launch": 32,
+    "sources_fingerprint_at_launch": "e6ddf4bede78ffc0b2637ecb18b818cfaee82cbd887dc1bc45140b0839a6b787",
     "tree_moved_during_run": false,
     "working_tree_dirty": false,
     "working_tree_dirty_paths": []
