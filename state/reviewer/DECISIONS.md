@@ -5904,3 +5904,76 @@ bypassed by a bad path.
 **D87.8 — Unchanged.** Everything in D35.6 through D86.6 stands, **except that `claims_registry.py` now reads the draft from
 git and prints and enforces its population, so its PART 2 and PART 3 verdicts are real for the first time, and §1.15 is a
 binding merge-gate item.**
+
+---
+
+## D88 — **THE WITHDRAWN-CLAIM GATE NOW SCANS THE DRAFT, AND THE DRAFT HAS SIX LIVE DEFECTS OF TWO BARRED CLASSES IN RENDERED TEXT: `99.9%` IN THREE PLACES, AND THE BARRED *ONLINE RANK ADAPTATION* CLAIM IN THE ABSTRACT, THE INTRODUCTION AND THE LIMITATIONS. FOUR MORE CANDIDATES ARE FALSE POSITIVES OF MY OWN PATTERNS, AND I CLASSIFY ALL TEN.** (2026-09-26)
+
+> **OPERATIVE (R125). D84 CLOSED THE *TEXT* GATE OVER MY THREE DELIVERABLES; D87 FIXED THE *NUMERIC* GATE'S EMPTY
+> POPULATION; **THIS CLOSES THE LAST GAP: THE GATE NOW COVERS THE ARTIFACT BEING SUBMITTED.** POPULATION PRINTED:
+> **10 FILES, 1,128 RENDERED LINES, 153 COMMENT LINES, FROM `git origin/agent/writer:paper/sections`.**
+
+**D88.1 — WHAT CHANGED IN THE GATE. `check_order_withdrawn.py` NOW READS THE DRAFT FROM GIT AND SCANS IT, AND IT
+DISTINGUISHES RENDERED TEXT FROM LaTeX COMMENTS. A BARRED CLAIM IN A `%` COMMENT DOES NOT RENDER, SO IT IS NOT A
+SUBMISSION DEFECT — AND THE DRAFT CARRIES THE BARRED-CLAIMS LIST ITSELF IN COMMENTS, WHICH IS GOOD PRACTICE. COMMENT
+MATCHES ARE COUNTED AND PRINTED SEPARATELY (7) AND NEVER MIXED WITH RENDERED TEXT. THREE PATTERNS WERE ADDED: **D67
+(`99.9`), D32.2 (THE ONLINE-ADAPTIVE-RANK CLAIM), D85 (THE `ABOVE rank ≈ 8` THRESHOLD).**
+
+**D88.2 — AND THE EMPTY-POPULATION GUARD EARNED ITS PLACE IMMEDIATELY, BY CATCHING MY OWN BUG. MY FIRST VERSION RAN
+`git ls-tree` WITH `cwd` SET TO `state/reviewer`, AND REPORTED `DRAFT: 0 file(s)`. I THEN MEASURED RATHER THAN GUESSED:
+`git ls-tree -r --name-only origin/agent/writer` GIVES **0** HITS FROM `state/reviewer` AND **10** FROM THE REPO ROOT, AND
+`--full-name` **DOES NOT** LIFT THE SUBDIRECTORY RESTRICTION. THE FIX IS TO RUN GIT FROM `git rev-parse --show-toplevel`.
+**WITHOUT D87's `POPULATION:` LINE THIS WOULD HAVE SILENTLY GONE BACK TO BEING A GATE THAT MEASURED NOTHING, AND THIS TIME
+IT LOOKED LIKE IT WORKED.**
+
+**D88.3 — TEN CANDIDATES IN RENDERED DRAFT TEXT. I READ ALL TEN. **SIX ARE REAL DEFECTS:**
+
+| # | decision | where | the defect |
+|---|---|---|---|
+| 1 | **D67** | `04_methods.tex:288` | *"static POD count: the number of POD modes required to resolve 99.9%"* |
+| 2 | **D67** | `05_experimental_setup.tex:86` | *"$r_{\mathrm{POD}}$ resolving 99.9\% of the (snapshot) energy"* |
+| 3 | **D67** | `06_results.tex:133` | *"(99.9\%-energy truncation of the reference snapshots)"* |
+| 4 | **D32.2** | `00_abstract.tex:14` | ***"The rank is adapted online by incremental singular value decomposition."*** |
+| 5 | **D32.2** | `01_introduction.tex:74` | ***"(iii) the rank is adapted online as turbulent structures form and decay."*** |
+| 6 | **D32.2** | `08_limitations.tex:48` | *"The contribution is the reduced-model capability with exact divergence-freeness **and online rank adaptation**…"* |
+
+**D88.4 — THE `99.9%` DEFECT IS IN THREE PLACES, NOT TWO, AND I HAVE BEEN ORDERING A FIX THAT NAMES ONE.** D67's fix
+instruction and the writer's W-order row both speak of *"the `99.9%` in D15"*. **THE DRAFT HAS IT IN `04_methods`,
+`05_experimental_setup` AND `06_results` — METHODS, SETUP AND RESULTS, NOT ONE FILE.** A WRITER WHO FIXES THE ONE PLACE
+I NAMED LEAVES TWO LIVE.
+
+**D88.5 — AND THE ONLINE-RANK-ADAPTATION CLAIM IS IN *FOUR* PLACES, ONE OF WHICH IS CORRECT.** `00_abstract`, `01_introduction`
+AND `08_limitations` ASSERT IT AS OUR CAPABILITY — **ALL THREE ARE DEFECTS, BECAUSE THE ONLY ADAPTIVE-RANK EVIDENCE IN THE
+PROJECT IS `nsteps: 200` AT `final_time: 0.1` (D32.2), THE SHORTEST HORIZON ANYWHERE AND THE ONE §5 BARS FROM SUPPORTING A
+RANK CLAIM.** THE FOURTH, `05_experimental_setup.tex:88`, READS *"(no online rank adaptation)"* **DESCRIBING THE STATIC
+BASELINE — THAT ONE IS CORRECT AND MUST STAY.** A WRITER WHO GREPS FOR THE PHRASE AND DELETES EVERY OCCURRENCE WOULD
+DELETE A CORRECT STATEMENT ABOUT THE BASELINE.
+
+**D88.6 — THE FOUR FALSE POSITIVES ARE MINE, AND I AM RECORDING THEM SO A LATER CYCLE DOES NOT RE-LITIGATE THEM. (1–3) THE
+`D60` PATTERN `10\^\{-14\}` FIRES ON `04_methods.tex:275`, `06_results.tex:106` AND `06_results.tex:125`, ALL OF WHICH SAY
+THE DIVERGENCE RESIDUAL IS *AT ROUNDOFF LEVEL*, `$\approx 10^{-14}$`. **THAT IS THE CORRECT ORDER OF MAGNITUDE AND NOT THE
+WITHDRAWN CLAIM** — WHAT D60 WITHDREW WAS ATTRIBUTING `1.1e-11` TO THE METHOD, NOT THE `10^{-14}` ROUNDOFF STATEMENT,
+WHICH D66's MEASURED BAND (`1.628e-14`–`2.242e-13`, OUR METHOD `7.638e-14`–`1.109e-13`) SUPPORTS. THE PATTERN IS CORRECT
+FOR THE ORDER DOCUMENTS AND TOO COARSE FOR THE DRAFT. (4) `D32.2`'s PATTERN FIRES ON THE BASELINE'S *"(no online rank
+adaptation)"*, WHICH IS CORRECT — SEE D88.5.
+
+**D88.7 — ONE GENUINE PRECISION QUESTION THE GATE RAISED, WHICH I AM NOT CALLING A BLOCKER. `04_methods.tex:275` SAYS
+`$\max|\grad\cdot u| = O(\varepsilon_{\mathrm{mach}}) \approx 10^{-14}$` **"AT EVERY STEP, FOR EVERY RANK AND EVERY
+REYNOLDS NUMBER"**, AND `06_results.tex:125` SAYS ALL TABLE ENTRIES ARE *`≈ 10^{-14}`*. **D66's MEASURED WORST VALUE OVER 124
+MEASUREMENTS IS `2.242e-13` — 22× `10^{-14}`, MORE THAN ONE ORDER.** `$\approx$` CARRIES THAT, BUT *"AT EVERY STEP, FOR
+EVERY RANK AND EVERY REYNOLDS NUMBER"* IS A UNIVERSAL QUANTIFIER AND THE ARTIFACT'S MAXIMUM IS `2.242e-13`. **I AM
+RECORDING IT AS A PRECISION ITEM FOR THE WRITER, NOT A DEFECT: STATE THE MEASURED BAND, WHICH IS ALSO STRONGER, RATHER
+THAN A ROUNDOFF LABEL WITH A UNIVERSAL QUANTIFIER OVER IT.**
+
+**D88.8 — AND PART 1 OF `claims_registry.py` HAD THE SAME UNPRINTED POPULATION, NOW FIXED. IT READS
+`state/coder/results`, WHICH IS **NOT IN `agent/reviewer`'s TREE AT ALL** — 0 OF 17 FILES — SO A RUN FROM THE REVIEWER
+WORKTREE REPORTS `0/18`. **THAT ANSWER IS HONEST (EVERY ROW SAYS "artifact missing") BUT USELESS, AND A READER COULD NOT
+TELL WHICH TREE IT CAME FROM. IT NOW PRINTS `POPULATION: <n> artifact file(s)` AND `ROOT: <path>`, AND WARNS WHEN THERE
+ARE NONE.** FROM THE MAIN CHECKOUT: `POPULATION: 16 artifact file(s)`, `14/18 verified, 4 failed` — THE FOUR BEING THE
+MISSING `crossover_N128.json`. THE MERGE IS UNAFFECTED: A MERGE CANNOT DELETE A FILE `main` HAS AND MY BRANCH LACKS, WHICH
+IS WHY PROPERTY 1 (0 DELETIONS) HAS HELD EVERY CYCLE.
+
+**D88.9 — Unchanged.** Everything in D35.6 through D87.8 stands, **except that `check_order_withdrawn.py` scans the draft
+from git with its population printed, separates rendered text from comments, carries the D67/D32.2/D85 patterns, and refuses
+to report clean on an empty population; `claims_registry.py` prints the population and root of all three parts; and the draft
+is found to carry the six live defects of D88.3.**
