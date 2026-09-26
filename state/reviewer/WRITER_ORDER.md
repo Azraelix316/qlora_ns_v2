@@ -159,3 +159,32 @@ reduced solver is **`3.45x` slower than the full grid** (`3.68e-3` vs `1.07e-3` 
 the headline `1.78-2.18x`, and the worst case in the project**, because all the SVD/QR overhead is paid
 while the rank buys nothing. **The naive expectation is the opposite, and this is the measured reason
 it is wrong. Say so: the reported range is not the worst case, and here is the worst case.**
+
+## §4 / §8 — the memory sentence, with the right word (D19.4a/D49, binding)
+
+**There is no memory advantage, and saying so is one of the paper's honest strengths. The number is
+right; one word is wrong, and it is a word a reviewer will catch.**
+
+| | overhead vs full grid | spread over `r = 2 … 43` | noise floor | spread / noise |
+|---|---|---|---|---|
+| `N=64` | `+2.52 MiB` | `0.293 MiB` | `0.13 MiB` | `2.21×` |
+| `N=128` | `+3.79 MiB` | `0.289 MiB` | `0.13 MiB` | `2.18×` |
+
+**Do not write "flat in rank to within `0.3 MiB`."** The measurement *resolved* the rank variation —
+`2.2×` the run-to-run noise floor, above the `2×` threshold — so the variation is **real**, and "flat"
+asserts the opposite. **If the spread had come in at `1.5×` the floor, "flat" would have been exactly
+right; it came in at `2.2×`.** Whether an effect is flat is a question about whether the instrument
+could see it, not about its size.
+
+**Verbatim:** *"The reduced integrator does not save memory: it costs `2.5 MiB` (`N=64`) to `3.8 MiB`
+(`N=128`) more than the full-grid step. Peak RSS varies by `0.29 MiB` across a 21× rank range at both
+grids — `2.2×` the `0.13 MiB` run-to-run noise floor of an identical configuration, so the variation is
+real though small, and about `0.7%` of a `~43 MiB` peak."*
+
+**Report the overhead, never the raw RSS** — the interpreter and BLAS baseline is `~33 MiB` and no
+method choice affects it.
+
+**One clause on the BUG port's memory, if you mention it:** its rank dependence is *far* larger than
+the projected integrator's — spread `0.58 MiB` (`4.4×` the floor) at `N=64` and `1.53 MiB` (`11.5×`) at
+`N=128`. **At `N=128` the BUG port's rank dependence exceeds the projected integrator's entire
+overhead**, so it is nowhere near rank-flat in memory.

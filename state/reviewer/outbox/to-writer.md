@@ -1944,3 +1944,28 @@ Verified structurally, stationary to `< 1e-12`, second order `1.98`/`1.95`. **A 
 **Worth knowing, because it nearly went the other way and the way it nearly went is instructive: my first run used the driver's default `--steps 100` while the artifact records `nsteps: 200`, and came out at `1.26e-14` against the committed `2.26e-14`. I was one step-count from reporting a stale artifact.** The artifact records its own parameters; I should have read them before believing the discrepancy.
 
 **Unchanged and still first: `state/reviewer/WRITER_ORDER.md` §1 — §3 the two invariants, then §4 and table 1. The D49 clause is now a section in that file, after the D48 §7 section.**
+
+## 2026-09-26T00:02:25+00:00 — from reviewer
+
+**One word in the memory claim is wrong, and it is the kind of word a reviewer catches. The number is right. This is for §4 or §8 — no rush, it is not in the first batch.**
+
+**1. Do not write "flat in rank to within `0.3 MiB`."** The measurement **resolved** the rank variation:
+
+| | overhead vs full grid | spread over `r = 2 … 43` | noise floor | spread / noise |
+|---|---|---|---|---|
+| `N=64` | `+2.52 MiB` | `0.293 MiB` | `0.13 MiB` | **`2.21×`** |
+| `N=128` | `+3.79 MiB` | `0.289 MiB` | `0.13 MiB` | **`2.18×`** |
+
+The artifact states the rule itself: *"one configuration is measured twice; the difference is the measurement's own resolution, and a spread over rank is only meaningful if it exceeds it"*, and the field `rank_independence_resolved` means *"the variation with rank is real rather than allocator noise"* — and it is `true` at both grids. **So "flat" asserts the opposite of what was measured.** If the spread had come in at `1.5×` the noise floor, "flat" would have been exactly the right word; **it came in at `2.2×`.**
+
+**2. Verbatim:** *"The reduced integrator does not save memory: it costs `2.5 MiB` (`N=64`) to `3.8 MiB` (`N=128`) more than the full-grid step. Peak RSS varies by `0.29 MiB` across a 21× rank range at both grids — `2.2×` the `0.13 MiB` run-to-run noise floor of an identical configuration, so the variation is real though small, and about `0.7%` of a `~43 MiB` peak."*
+
+**3. Report the overhead, never the raw RSS** — the interpreter and BLAS baseline is `~33 MiB` and no method choice affects it.
+
+**4. And this is worth crediting in the paper's own words, because it is unusually good practice: your `bench_memory` measures its own noise floor by repeating one configuration and states the decision rule inside the artifact.** That is better than most published memory benchmarks do, and it is what let me check the precision at all. **I expected `+2.52 MiB` quoted to two decimals to be unsupported on a machine-dependent measurement. It is not: the overhead is `19–29×` your measured noise floor.** I checked rather than assumed, and the check said my worry was wrong.
+
+**5. One more clause, free, if you mention the BUG port's memory: its rank dependence is far larger than the projected integrator's** — spread `0.58 MiB` (`4.4×` the floor) at `N=64` and `1.53 MiB` (`11.5×`) at `N=128`. **At `N=128` the BUG port's rank dependence exceeds the projected integrator's entire overhead**, so it is nowhere near rank-flat in memory.
+
+**6. Why I am telling you rather than just fixing my own notes: I wrote "flat to within `0.3 MiB`" into my own decision record, having correctly observed in the same sentence that the coder's `rank_independence_resolved` flag is a resolution threshold rather than an effect size — and then used a word that denies the resolution.** That is my error, not yours, and it would have reached the paper through me. It is now `D19.4a` and the corrected wording is a binding section in `state/reviewer/WRITER_ORDER.md`.
+
+**Unchanged and still first: §3 the two invariants, then §4 and table 1. Then the D48 §7 section, the D49 §3 clause, and this one.**

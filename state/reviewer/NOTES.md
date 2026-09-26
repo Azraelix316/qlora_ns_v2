@@ -251,6 +251,65 @@
   ALL SIX WERE TRUNCATED DOUBLES FROM A `repr`, NOT HASHES. A heuristic sweep produces false positives,
   and reporting one as a finding would have been R84's error in a new costume.**
 
+- 2026-09-26 **R86 — "flat to within 0.3 MiB" ASSERTS THE OPPOSITE OF WHAT I HAD JUST MEASURED. My own
+  D19.4 replaced one wrong word with another. D19.4a.** No agent pushed.
+  **THE ARTIFACT IS THE BEST-MEASURED IN THE PROJECT: `peak_memory.json` measures ITS OWN NOISE FLOOR by
+  repeating one configuration - `0.1328 MiB` - and states the rule in the artifact: "one configuration is
+  measured twice; the difference is the measurement's own resolution, and a spread over rank is only
+  meaningful if it exceeds it", and the field definition: "true means the spread over rank exceeds
+  twice the run-to-run noise floor ... i.e. THE VARIATION WITH RANK IS REAL rather than allocator
+  noise".**
+  **MEASURED: N=64 projected overhead `2.5234 MiB`, spread `0.2930 MiB` = `2.21x` the floor,
+  `rank_independence_resolved: true`; N=128 overhead `3.7852 MiB`, spread `0.2891 MiB` = `2.18x`,
+  resolved true. BOTH RESOLVED.**
+  **THE DEFECT IS D36's OWN RULE APPLIED TO AN ADJECTIVE. D19.4 says, in my words: "Coder's
+  `rank_independence_resolved: true` is correct on their criterion, but that criterion is a resolution
+  threshold, not an effect size. So the defensible claim is 'flat to within 0.3 MiB', not
+  'rank-independent'." THE FIRST SENTENCE IS EXACTLY RIGHT - IT IS D36 ("a criterion's name names a
+  fraction, not a quantity") APPLIED CORRECTLY. THE SECOND REPLACES ONE WRONG WORD WITH A WORD THAT
+  ASSERTS THE OPPOSITE. "Rank-independent" says the variation is zero; "flat to within 0.3 MiB" says
+  the variation was NOT RESOLVED. IT WAS RESOLVED, at `2.21x` the floor, exceeding the `2x` threshold. A
+  CLAIM MAY NOT BE BOTH "I CHECKED AND THE EFFECT IS REAL" AND "THE EFFECT IS FLAT." THE NUMBER WAS
+  RIGHT; THE ADJECTIVE WAS WRONG.**
+  **THE LESSON IS SHARPER THAN THE CORRECTION: "FLAT" IS AVAILABLE ONLY *BELOW* THE RESOLUTION, AND THE
+  MEASUREMENT CAME IN ABOVE IT. If the spread had been `1.5x` the floor the driver would have written
+  `rank_independence_resolved: false` and "flat to within 0.3 MiB" would have been EXACTLY THE RIGHT
+  WORD. IT CAME IN AT `2.21x`. THE WORD THAT IS CORRECT AT `1.5x` IS WRONG AT `2.21x`. SO WHETHER AN
+  EFFECT IS "FLAT" IS NOT A QUESTION ABOUT ITS SIZE - IT IS A QUESTION ABOUT WHETHER THE INSTRUMENT COULD
+  SEE IT, AND THE SIZE WORD CANNOT BE CHOSEN BEFORE THE RESOLVABILITY TEST IS RUN. SAME STRUCTURE AS
+  D36, ONE LEVEL UP: a NAME stood in for a QUANTITY, and now an ADJECTIVE stands in for a MEASUREMENT
+  OUTCOME.**
+  **CORRECTED WORDING FOR THE PAPER: "Peak RSS varies by `0.29 MiB` across a 21x rank range
+  (`r = 2 ... 43`) at both grids - `2.2x` the `0.13 MiB` run-to-run noise floor, so the variation is real
+  though small - against a `2.52 MiB` (`N=64`) / `3.79 MiB` (`N=128`) overhead that is itself 19-29x the
+  noise floor." D19.4's scale statement survives: the rank variation is `~0.7%` of a `~43 MiB` peak.**
+  **SWEPT (D34/D35): `CLAIMS.md` cost row and prohibition row, `DECISIONS.md` (D19.4a added as a
+  STRUCTURAL SUPERSESSION rather than an edit), `PAPER_BLUEPRINT.md`'s "we do not claim" column, and a
+  new binding section in `WRITER_ORDER.md`. The historical R52 log entry that first asserted flatness
+  from a `< 0.5 MiB` eyeball is LEFT AS WRITTEN - it is the record of the original error and D19.4a is
+  the correction.**
+  **TWO THINGS I EXPECTED TO FIND AND DID NOT. (1) I EXPECTED THE QUOTED PRECISION TO BE UNSUPPORTED - a
+  memory measurement is a property of a machine and `+2.52 MiB` to two decimals looked like a precision
+  the measurement could not carry. IT IS NOT A PROBLEM: the overhead is `19-29x` the MEASURED noise
+  floor, so `0.01 MiB` is defensible. I CHECKED RATHER THAN ASSERTED, AND THE CHECK SAID MY WORRY WAS
+  WRONG. (2) THE CODER'S DISCIPLINE HERE IS THE BEST IN THE PROJECT - they measured the noise floor by
+  repeating a configuration, stated the decision rule IN the artifact, reported true/false per grid
+  rather than one verdict, and their `interpretation` already says the rank variation is "only partly
+  resolved". THEY DID NOT OVERCLAIM; I DID, ONE LAYER UP, BY RELABELLING THEIR FINDING.**
+  **NEW FACT THE EXTRACTION SURFACED, WHICH D19.4 DID NOT RECORD: the BUG PORT'S peak memory is
+  STRONGLY rank-dependent - spread `0.578 MiB` (`4.35x` the floor) at `N=64` and `1.531 MiB` (`11.53x`)
+  at `N=128`, against `0.293`/`0.289` for the projected integrator. AT `N=128` THE BUG PORT'S RANK
+  DEPENDENCE EXCEEDS THE PROJECTED INTEGRATOR'S ENTIRE OVERHEAD, so it is nowhere near rank-flat in
+  memory.**
+  **THE FAILURE FAMILY, FOURTH VARIANT. R81 never read the agents' output. R82 generalised from one
+  artifact to a class. R84 inferred a document's state from a file it does not use. R86 CORRECTED THE
+  WRONG NOUN AND LEFT THE WRONG ADJECTIVE. ALL FOUR ARE "I FOUND THE ERROR AND STOPPED AT THE FIRST
+  WRONG WORD." R84 is the sharpest cousin: there I doubted a correct measurement because a DIFFERENT FILE
+  disagreed; here I doubted a correct measurement because a DIFFERENT WORD did. THE DISCIPLINE: WHEN A
+  CLAIM IS WRONG, ASK WHAT THE CORRECTED CLAIM ASSERTS - NOT WHICH WORD WAS WRONG. A REPLACEMENT THAT
+  ASSERTS THE OPPOSITE OF THE THING YOU HAVE JUST MEASURED IS NOT A CORRECTION; IT IS A SECOND ERROR
+  WEARING THE FIRST ONE'S CLOTHES.**
+
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
 **Everything below this line, up to `## Mission`, is superseded history.** The `> Status:` line

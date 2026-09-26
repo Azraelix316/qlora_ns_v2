@@ -356,7 +356,7 @@ The trade with the horizon, now at both measured Reynolds numbers:
 | 16 | **1.88×** | **`t* = 0.649`** (D29.4) |
 | 32 | **1.90×** | **`t* = 1.482`** (D29.4) |
 | 43 | **1.94–2.07×** | **never yields — error `1e-13`–`1e-8`, 6–11 orders below the static baseline. `r=43` is the largest rank TESTED, not a ceiling (D30.2)** |
-| any | — | **and no memory advantage: `+2.5 MiB` (N=64) to `+3.8 MiB` (N=128`) _more_ than the full-grid step, flat in rank to within 0.3 MiB** |
+| any | — | **and no memory advantage: `+2.5 MiB` (N=64) to `+3.8 MiB` (N=128`) _more_ than the full-grid step; peak RSS varies by `0.29 MiB` across a 21x rank range (`r = 2 ... 43`) at both grids - `2.2x` the `0.13 MiB` run-to-run noise floor, so **the variation is real though small** - against a `2.52 MiB` (`N=64`) / `3.79 MiB` (`N=128`) overhead that is itself 19-29x the noise floor** |
 
 **The trade: the lead grows linearly in rank and the cost is nearly rank-independent, so rank
 buys *lead time* rather than speed.** Going from `r=8` to `r=32` costs **~2% more per step**
@@ -534,7 +534,7 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | "a window-accumulating rank rule would fix the criterion" | **D18.1** — implemented and measured: it is **worse** (`1.5%` vs `27.5%` of fluctuation energy) |
 | "the window collapses because it fills with the method's own states" | **D18.3** — **refuted**: seeding with reference states gave `1.3%` vs `1.5%`. Record as refuted; do not tell it to a reader |
 | any memory or footprint advantage | **D16.4, D19.1** — the reduced method costs `+2.5` to `+3.8 MiB` **more** than the full grid; two independent measurements agree |
-| "peak memory is rank-independent" for the projected integrator | **D19.4** — resolved by only `9–10%` over the noise threshold; say **"flat to within 0.3 MiB"** |
+| "peak memory is rank-independent" for the projected integrator | **D19.4/D19.4a** — the rank variation **is resolved** (just, by `9-10%` over the `2x` threshold: `0.293`/`0.289` against `0.266`), so say **"varies by `0.29 MiB`, resolved at `2.2x` the noise floor"** — **NOT "flat"**, which asserts the opposite |
 | "the BUG port costs more memory as well as more time" | **D19.3** — BUG's overhead is **smaller** (`+2.32` vs `+2.52`); it trades memory for time |
 | quoting raw RSS as the memory figure | the ~34 MiB interpreter baseline dominates; report the **overhead over the full grid** |
 | quoting `crossover_surface.json`'s `crossovers` block | its reason string is **false** for `r = 2, 4, 16`; read the `dlra` / `static_moving_window` rows instead |
