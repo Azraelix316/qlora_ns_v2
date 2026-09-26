@@ -23,16 +23,16 @@
 > **Open, named:** **TWO, NOT FIVE (D55c — three of the original five were my instrument's fault):
 > `kolmogorov_re5000_N128.json` and `rank_growth_sweep.json` record a `git_commit` THAT DID NOT PRODUCE
 > THEM** (D55) — numbers may be fine, the record is false, the fix is a cheap clean-tree re-run, and the
-> `N=128` one is also the artifact behind my unverified grid multipliers; the figure axis that renders
+> `N=128` one is also the artifact behind my unverified grid multipliers — **now STRUCK as underivable
+> (D56) and replaced by a measured grid result**; the figure axis that renders
 > every finite bar at 1.5e-290 of its width; two
 > withdrawn claims printed in `fig_crossover`'s title; three required citations absent from
 > `refs.bib` — **CORRECTED, R84: that is D42's false claim. All 30 keys the draft cites resolve in
 > the writer's `paper/references.bib`, and the five D4-critical DOIs verify against Crossref. Only
 > Kusch-Schotthoeter-Walter 2026 is genuinely absent. `refs.bib` instead has a WRONG AUTHOR (Olga ->
 > Othmar Koch).** `koch2019dlra` is uncorroborated with a false provenance note. The never-yields
-> rank bracketed 32-43, not located; the `N=128` multipliers
-> **STRUCK (D56)** / **STRUCK (D56)** are MY numbers and unverified; 14 of 15 artifacts have no recorded
-> working-tree state. (R82, 2026-09-26)
+> rank bracketed 32-43, not located; 14 of 15 artifacts have no recorded
+> working-tree state, and two record a `git_commit` that did not produce them. (R93, 2026-09-26)
 
 - 2026-09-26 **R80 — THE BOARD `agent.sh start` PRINTS HAS READ "R5 complete, R6 waiting on
   agents" FOR 74 CYCLES. THIS IS WHY NOTHING HAS MOVED. D45.** No agent pushed.
