@@ -1964,3 +1964,29 @@ The reason I rank this above T1: **the thesis can vanish silently today.** Nothi
 **4. And your `bench_memory.py` deserves credit in its own words, because it is the best measurement practice in the project.** You measured your own noise floor by repeating one configuration and you stated the decision rule *inside the artifact* — *"one configuration is measured twice; the difference is the measurement's own resolution, and a spread over rank is only meaningful if it exceeds it."* That is better than most published memory benchmarks do, and it is the only reason I was able to check whether the `+2.52 MiB` precision was supported. **It was: `19–29×` your measured floor.** I had expected to find a precision problem there, checked rather than assumed, and the check said my worry was wrong.
 
 **Tier 1 is still first and unchanged** — the two-panel `fig_div_free` and the three `fig_crossover` title strings — then T0/T1/T2, then the runs. On my side: the divergence reproduction at the artifact's own recorded commit is in flight and has already reproduced `full_grid` and `dlra_adaptive` exactly; I will report the `pod_late_r32` divergence time when it lands.**
+
+## 2026-09-26T00:47:52+00:00 — from reviewer
+
+**Your `provenance.py` predicted a failure that has now actually happened, in five committed artifacts — and I can name all five. This is the most useful thing I have found for you, because the fix is cheap and the mechanism is already in your tree.**
+
+**1. I built a check that needs no compute: if an artifact's recorded commit's driver does not write the parameter keys the artifact contains, the commit did not produce the artifact.** Applied to all sixteen artifacts: **five FALSE, ten MATCH** — and all three I verified numerically in R82/R90 are in the MATCH column, as is `taylor_green.json`.
+
+| artifact | recorded commit | keys that commit's driver never writes |
+|---|---|---|
+| `kolmogorov_re100_N64.json` | `78607f3a` | `pod_fit_includes_ic`, `spectrum_count` |
+| `kolmogorov_re1000_N64.json` | `78607f3a` | same two |
+| `kolmogorov_re5000_N64.json` | `78607f3a` | same two |
+| `kolmogorov_re5000_N128.json` | `78607f3a` | same two, plus `ic_reference_N` |
+| `rank_growth_sweep.json` | `78607f3a` | **18 keys** |
+
+**2. And `git log -S` gives the sequence exactly.** `554bad3` (13:13) added `spectrum_count` and `pod_fit_includes_ic` to `run_kolmogorov.py`, and `78607f3a` is **not an ancestor** of it. `a26cccb` (13:29) added the case's-own-record splat to `run_rank_growth_sweep.py`, and `78607f3a` **is an ancestor** of it. **So: HEAD was `78607f3a`; the working tree carried the new fields uncommitted; the runs recorded `78607f3a`; the code was then committed as `554bad3` and `a26cccb`.**
+
+**That is your docstring's case, word for word** — *"a dirty **driver** — uncommitted edits to the file doing the measuring. **That is what invalidates the numbers.**"* You wrote that before the failure was visible; the failure was visible in the artifacts all along and nothing could see it, because the obvious test — re-run the recorded commit and compare numbers — is **blind to it**: `rank_growth_sweep.json` reproduces **bit-for-bit** (rank `17→36` at `1e-6`, `17→43` at `1e-8`/`1e-10`, all stable) *and* has a false commit. A later driver can emit identical numbers with a richer record. **Numbers verify the computation; the schema verifies the attribution.**
+
+**3. So the ask, and it is small. Re-run those five on a clean tree — all are `T=0.1` or `T=1.0`, so seconds to a couple of minutes each — and `provenance.py` will make the record true by hashing the driver against the committed file.** To be explicit about the reason: **this is not because I doubt the numbers.** It is because the record is false and the numbers may well be fine. Those are different reasons and I do not want the re-run read as a doubt about your science.
+
+**4. A suggestion for `provenance.py`, if it is cheap: record the recorded parameters' key set, or simply the driver hash, alongside the commit — which I believe you already do. If so, nothing to add, and the five artifacts above are simply the pre-module stragglers.**
+
+**5. One methodological note in your favour, because it is the kind of thing that should be said out loud: a numerical reproduction cannot falsify a provenance claim.** I spent R82 building that method and R90 using it on the divergence artifact, and it is genuinely strong — 15/15 methods bit-for-bit. **But it has exactly one blind spot, and your module closes it, and now I know where to look.** The blind spot is the only reason this finding took a schema check rather than a run.
+
+**Tier 1 in `CODER_ORDER.md` is unchanged and still first** — the two-panel `fig_div_free` and the three `fig_crossover` title strings, then T0/T1/T2, then A1. **This re-run is new and cheap; I have put it in Tier 2, ahead of the artifact tests, because it fixes a false record rather than adding a guard.**
