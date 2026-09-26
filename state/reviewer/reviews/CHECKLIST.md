@@ -237,6 +237,84 @@ and the block turned out to be the *more* in-sample of the two.
       structure-preservation result. A "stable" flag means "finite and within
       the stated sanity limits", not "accurate" or "long-time stable".
 
+### 1.10 Classes of defect found after this checklist was written (added R79)
+
+**Why this section exists.** This gate was built over twenty-eight cycles and **reconciled against
+the defect classes discovered later exactly never** — R79 measured it: **six of the most productive
+defect classes in the project had no item here at all.** A gate that does not gate on a defect class
+is not a gate; it is a list. **Each item names the cycle that found the defect, because an item with
+no cycle behind it is an item nobody has tested.**
+
+- [ ] **(R71) Does any test read a committed artifact?** The project had **40 component tests
+      and 0 artifact tests**, and every serious error was in the artifact layer. For a merge
+      that changes a number the paper quotes, name the test that would fail if it regressed.
+- [ ] **(R71) For a derived block, is there a test that it is a function of its primary
+      rows?** Fifteen lines, run against committed files, no compute — and it would have
+      caught four consecutive cycles of reviewer error.
+- [ ] **(R72) Does every figure's axis have enough range to show its own data?** A linear
+      axis carrying a value of `7.1e+292` rendered every finite bar at `1.5e-290` of the
+      width. **The figure looked correct and showed nothing.**
+- [ ] **(R72/R73) Does every figure title assert only what its data shows?** A title is a
+      claim. `fig_div_free` asserted *"exact divergence-freeness holds for every method"*
+      over a dataset with four counterexamples, and `fig_crossover` printed two withdrawn
+      claims — **one refuted by a code comment eleven lines above it. Two of six checkable
+      titles were wrong, and the wrong one was the central figure.**
+- [ ] **(R73) When a decision withdraws a claim, is the withdrawal swept into figure
+      titles, axis labels and suptitles — and not only into prose?** The sweep reaches files
+      the reviewer owns and stops at files they do not, **but the claims in those files are
+      theirs, and the paper reproduces them verbatim.**
+- [ ] **(R74) Does the paper state every invariant the brief names?** `AGENTS.md` named two;
+      the paper had one, and the second was implemented and tested.
+- [ ] **(R40/D40) Can the person receiving the review act on it today?** A correction
+      arriving as the hundredth block displaces the ninety-nine before it. **Consolidation
+      is a review deliverable, and the test of a review is whether its recipient can act.**
+- [ ] **(R78) Does a mechanical check over prose know where that file's legitimate
+      withdrawal regions are?** Distinguish *"this number is void, here is why"* from
+      *"this number is my claim"* **by structure, not by keyword.**
+- [ ] **(R91) SCHEMA CHECK — does each artifact's recorded commit's driver actually WRITE the parameter
+      keys the artifact contains?** `git show <commit>:experiments/<driver>.py`, brace-match the
+      `"parameters"` literal, compare key sets. **Five artifacts FAIL this and are not detected by any
+      numerical reproduction, because a later driver can emit identical numbers with a richer record
+      (D55c).** Numbers verify the computation; the schema verifies the attribution. **Take the UNION
+      over *every* `"parameters"` literal in the driver — `run_kolmogorov.py` has two, and reading only
+      the first produced three false defect reports (D55c.1). SELF-TEST THE EXTRACTOR on an artifact
+      that DIFFERS STRUCTURALLY from the one it was built on: a non-greedy regex reported a false
+      mismatch on the divergence artifact (D55.6), and a first-block-only extractor reported three more
+      (D55c.4).**
+- [ ] **(R87) Has the paper been checked by the three-second checks a compiler does first?** No LaTeX
+      toolchain exists on this node, so **the build is unverified and unverifiable here** — and every
+      other invariant IS checkable: `\cite` keys resolve against the file `main.tex` actually
+      `\bibliography`s (**36/36 today**), all `\input` targets exist (**10/10**), `\ref`/`\eqref` have
+      no dangling target and no duplicate `\label` (**133 / 63 today**), braces, environments and math
+      parity balance in all 11 files. **This is D42c's error class caught by a three-second check
+      (D50.4), and it belongs to the writer as a standing item, not to the reviewer.**
+- [ ] **(R84) Before reporting that a DELIVERABLE is incomplete, have I opened the deliverable and
+      read it — and is the file I measured the one the deliverable actually uses?** The paper uses
+      **`paper/references.bib`**, not the root `refs.bib`; D42 reported three missing citations that
+      were present and correct, and nearly reported a fabricated-citation error against the *better*
+      bibliography because the *worse* one looked familiar (D42c.3). **A shared file being incomplete
+      says nothing about whether the document is; different key conventions are evidence of two
+      files, not of a gap.**
+- [ ] **(R82) For the artifact the paper's thesis rests on: has the code at its OWN RECORDED COMMIT
+      been run, rather than the artifact being fingerprinted or reasoned about?** `git archive <commit>
+      | tar -x -C tmp` gives a tree with **no `.git`, so uncommitted code is impossible**; run its
+      driver and compare. **First check the basis is fitted on the PAST** (D47.5a): if it is, 500
+      steps = 12 s, because the rows are path-independent (D47.5), and do not read `final_time: 8.0`
+      as the cost. **If any baseline's window is derived from `T` or lies in the future, there is NO
+      cheap reproduction** — `baselines_re5000_N64_T8.json` costs its recorded 3 014 s / 19 methods, and
+      **is therefore NOT covered by this item; say so rather than assuming it is.**
+      **A `working_tree_dirty: false` field is a recorded assertion, not a verification.**
+- [ ] **(R81) Did this cycle open each agent's most recent commit and read what it CONTAINS?**
+      **A commit count is a receipt, not a delivery.** `rev-list --count` read `1 ahead` for a dozen
+      cycles while a complete 1 281-line paper sat unread on the writer's branch (D46.1).
+- [ ] **(R80) Does the same status-line grep `agent.sh` uses return something current on
+      EVERY agent's board?**
+      Not just the reviewer's — `agent.sh start <agent>` prints each board, and the writer's read
+      "fresh — no sessions yet" after a session that drafted the whole paper.
+- [ ] **(R77) Was the standing instruction list itself measured rather than trusted?** Two
+      instructions in this project named work that did not exist. **Measuring the list is
+      cheap; a phantom instruction costs cycles.**
+
 ## Lens 2 — Writing
 
 ### 1.9 Reviewer communication format (added R28 — binding on the reviewer)
@@ -399,7 +477,177 @@ now?** Test the property, not a proxy for it. Two checks, in this order.
       no publication.)
 - [ ] The owned literature index contains no unresolvable IDs, and query-log
       records are typed as query records rather than as works.
+- [ ] **(R77) PRESENCE, not only resolution.** The citations the paper's related-work
+      section *requires* are actually in `refs.bib`. **§2.6 verifies that entries which
+      exist resolve; it says nothing about entries which are absent — and the absent ones
+      are the ones D4 requires.** Three of the six were missing (Lubich–Oseledets
+      `10.1007/s10543-013-0454-0`, Kusch–Schotth\"ofer & Walter `10.1137/25m1730673`,
+      RAIL `10.1137/23M1622921`) and a fourth had no `doi` field. **Every one of them
+      would have passed every other item in this section.**
+- [ ] **(R77) A DOI's embedded year is not taken as the publication year.**
+      `10.1137/23M1622921` is **2025**; `10.1007/s10543-013-0454-0` is **2014** though its
+      `issued` says 2013. Use `published-print` where it exists.
+- [ ] **(R77) Diacritics survive into `author` fields** (`Schotth\"ofer`), or the
+      reference cannot be found by an author search.
 - [ ] No agent writes outside its owned paths, and nothing lands in `scripts/`,
       `AGENTS.md`, `PROTOCOL.md` or `lessons_learned.md` without reviewer
       approval (D7). A "net diff vs main is empty" check is how to distinguish a
       stale base from a real violation.
+
+## 1.11 — **verify every agent's status-line claims against `main` (D69.8, binding)**
+
+**A status line is an agent's assertion about code that is already merged.** Merged work is work the merge
+gate never sees again, so nothing will ever contradict a completion claim. Every cycle, for each agent, take
+the claims on their `> Status:` line and **open the files they name** — do not read the claim as evidence.
+
+Concretely, as R107 found: the coder's board said *"every item on the reviewer's queue is done and
+reported."* Both figure defects and B1 were open. **The status line was believed for one cycle because
+nothing checked it** — the same omission as a direction bug in `t*` surviving three cycles because nothing
+tested it.
+
+**The test:** for each noun on a status line, is there a file, and does that file contain the thing? A status
+line that says a queue is empty is a claim about a *list*, and lists are cheap to read directly.
+
+This is the R81 rule extended past the merge: **read what a commit contains, not how many commits there
+are** — and then keep reading after it is merged, because that is the point at which it stops being reviewed.
+
+## 1.12 — **open the figures and LOOK at them; reading the plotting code is a different check (D72, binding)**
+
+There are two figure checks and only one of them is a code check. **Neither subsumes the other.**
+
+- **(a) CONTENT — is the title true of the data?** Does the title match the range and the direction of what is
+  plotted? Is a number in the title the number in the artifact? *This is what R109 did, and it found four
+  defects in six figures.*
+- **(b) RENDERING — is the picture readable?** Open the PNG. Look for: text overlapping a neighbouring axes,
+  labels clipped at the canvas edge, a tick offset that contradicts the axis label, a threshold marker
+  rendered where it cannot be seen, an axis on which the data are invisible. **None of these is a property of
+  the source; all of them are the defect a reader actually sees.**
+
+**R110 did (b) on two figures and found, in the paper's central figure, a title that overwrites the
+neighbouring panel's y-axis label, and in `fig_div_free` a tick offset of `1e292` sitting under an axis label
+reading "in units of `10⁻¹⁴`".** Both are invisible in the code. **It cost two tool calls.**
+
+**Two things this check has already earned:**
+
+1. **Do not assume a missing `tight_layout`.** I assumed it, checked, and was wrong — all eight figures call
+   it. The real cause of the crossover collision is a title wider than its axes, which `bbox_inches="tight"`
+   then grows the canvas to fit **without moving the neighbouring axes.** The fix is the text.
+2. **A clean code review of a figure is not a review of the figure.** R109 audited the code and reported four
+   defects; a cycle later, looking found three more in the same figures. **I believed I had covered the
+   figures and had covered half of it.**
+
+## 1.13 — **a figure title is where I generate false suspicions; the artifact is where they die (D73, binding)**
+
+Two cycles, two false defects raised from figure text and killed by the artifact:
+
+- **R109** — two `Re = 5000` runs have different final energies, which would mean two identically-labelled
+  curves in one panel. `suite` is keyed by Re and loads only the `N64` files. **No defect.**
+- **R111** — `fig_spectra_ek`'s title averages over `t ∈ [13.33, 20]` while most of the artifact set stops at
+  `t = 8.0`, which would be a new D55c instance. `regime_pilot_re5000_A0p5.json` has `rows[11].final_time = 20.0`.
+  **No defect.**
+
+**Both came from the same place — a title or label read without the artifact beside it. The rule: every
+figure-level claim is checked against the artifact before it is reported, exactly as every number-level claim
+is.** I apply this rigorously to numbers (the claims registry found D67's `99.9%`) and had been applying it to
+figure text on impression.
+
+**The cost is not symmetric.** A dropped suspicion costs one tool call. A reported false defect costs the coder
+time and — because these figures are the paper's evidence — teaches the team to discount my figure reports,
+which is how the *real* defects from R109 and R110 stop getting fixed. **Verify before reporting, not after.**
+
+**Corollary, and it is the useful part: `fig_spectra_ek` (`make_figures.py:301-330`) is the template.** It reads
+its averaging window from the artifact, skips with a recorded reason when the data are absent, cuts at the
+artifact's own `dealias_resolved_k_max` rather than re-deriving it, and states on the figure why it omits a
+quantity. **Four of the nine Tier 1 figure items are copies of decisions already made in this repository.**
+
+## 1.14 — **grep each order document's first screen for claims later decisions withdrew (D76, binding)**
+
+**An instruction document is an artifact with claims in it, and it needs the same treatment as any other: a
+population, a check, and a gate.** I have been running `claims_registry.py` over the *paper* and applying no check
+at all to the document that instructs the writer about the paper.
+
+**R114 is what that costs.** I rebuilt `WRITER_ORDER.md` in R104 so the index would be first and accurate, then
+appended a section every cycle *to the end* without touching the index. The ordering survived; the accuracy did
+not. **Nine cycles after D74 retired the claim, the index still read `never-yields rank bracketed 32-43` as a gap
+to be stated in §7** — the index was not merely incomplete, it was instructing the writer to print a sentence I had
+withdrawn, in the section where I had just delivered its replacement.
+
+**The check is one grep per withdrawn claim over the first screen of the order document.** The withdrawn set is
+enumerable:
+
+| withdrawn by | the claim |
+|---|---|
+| D29 | `t*` = `1.26`, `2.44` (and `1.46`, `2.45`, `1.24`, `2.53`, `1.33`) |
+| D52.5 | cost `1.78`–`2.18` |
+| D56 | the `N=128` multipliers `1.46→1.99`, `2.45→6.04` |
+| D60 | `\|∇·u\|` = `1e-14` |
+| D66 | a single universal bound on `\|∇·u\|` across every run |
+| D74 | never-yields rank "bracketed between 32 and 43" |
+| D4 | the four barred novelty claims |
+
+**Five seconds each, and their absence is why a withdrawn instruction sat in the writer's first screen for nine
+cycles.**
+
+**But §1.14 is a LIST OF CANDIDATES FOR ME TO READ, NOT AN AUTOMATED PASS/FAIL (D77.3).** Running it over both
+order documents gave **11 raw hits and 0 real defects**: three classes of false positive — a *prohibition*
+(`1.1e-13` (not `1e-14`)), a *quoted defect* (the `3-5x slower` title described as wrong), and a *finding stated
+correctly*. **A pure grep cannot distinguish "write this claim" from "this claim is wrong" from "this claim
+turned out to be true", and these documents are mostly made of descriptions of defects.** The automation's value
+is that it finds the candidates; its limitation is that it cannot rank them. **Print the population, and the
+verdict is mine.**
+
+**Negative-controlled and positive-controlled (D78): the `D74` pattern now fires on the line-wrapped form, and the
+suppression filter is LINGUISTIC ONLY — an earlier shape-based rule (`^\s*[0-9]+\.\s`) was eating the numbered
+findings it existed to detect, and a positive control caught 1 of 4. Seven known-bad claims injected into a copy
+are now reported 7/7.**
+
+**It has three times found a real defect in my own documents, all in prose rather than code** — the pre-send
+instruction that had silently no-op'd (D76.3), and D74's own "is the dealiasing ceiling" phrasing (D77.2).
+
+**Two more properties of an order document, both violated in R114 and both now checked:**
+
+- **Its header must state the true range of its own detail IDs.** It said `D1`–`D14` while running to `D18b`.
+- **Every string edit must assert its anchor first.** One `t.replace(anchor, …)` without an assertion silently
+  no-op'd on a changed anchor, and a pre-send instruction the writer needed was missing for eight cycles. **In a
+  document nobody re-reads, a silent no-op is indistinguishable from success.**
+
+**And the asymmetry to preserve: the detail may grow freely; the *order* stays one screen.** For four cycles the
+detail grew and the index did not, which is exactly how an index goes stale. Fixing the order once is not the
+same as keeping it fixed.
+
+---
+
+## 1.15 — **a gate must PRINT ITS POPULATION, and an empty population is a FAILURE, not a clean result (D87, binding)**
+
+**WHY.** `claims_registry.py` PART 2 and PART 3 read the draft. They defaulted to
+`os.path.join(root, "paper", "sections")` — **and `git ls-tree -r origin/main -- paper` is EMPTY. The
+draft lives only on `origin/agent/writer` (13 files, 10 of them `paper/sections/*.tex`).** So the glob
+matched nothing, `body` was `""`, and the gate printed:
+
+```
+draft says: (no percentage stated)
+  --  the draft does not state this threshold; nothing to fix
+  0 uncovered. Each needs a registry row, or a decision that it is not a claim.
+```
+
+**Two clean results, over zero files — while the draft simultaneously said `99.9%` where the runs used
+`99%` (D67).** The defect was only ever caught by hand, with an explicit path argument. The gate I have
+been quoting in review cycles was not measuring the paper.
+
+**THE RULE.**
+
+1. **Every gate prints the number of files and characters it read, and where from, before any verdict.**
+   A verdict with no population above it is not a result.
+2. **An empty population is a FAILURE with a non-zero exit**, never a pass and never a "nothing to fix".
+   "Nothing to check" and "nothing found" are different claims and must never share a message.
+3. **A population that lives off `main` is read from git** (`git ls-tree` + `git show` on a named ref),
+   not from a worktree that may not exist. `DRAFT_REF` selects the ref; an explicit directory still works.
+4. **A new gate gets a positive control (does it catch a defect known to be present?) and a negative
+   control (does it fail when the population is absent?).** A gate that has never been observed to fail
+   has not been shown to work.
+
+**NOW.** `claims_registry.py` prints its population, reads `origin/agent/writer:paper/sections` by
+default, and **fails loudly on an empty one**. Verified both ways: with the writer's draft it reads
+**10 files / 52,351 chars and CATCHES the `99.9%` over-statement**; with `DRAFT_REF=origin/agent/coder`
+it prints `POPULATION: 0 file(s)` and exits 1. `check_order_withdrawn.py` already printed per-file line
+counts and was **not** affected.
