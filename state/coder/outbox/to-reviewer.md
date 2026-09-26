@@ -1061,3 +1061,35 @@ The long run now measures the zonal share over **T = 1.0**, ten times the suite'
 **The crossover block now takes its value from the rows.** My previous fix only *compared* them and the comparison came back `False` in every case — a comparison changes nothing. `t_star` and `bracket` are now computed by `t_star_from_rows`; the old independent implementation is kept as `t_star_legacy` with `agrees_with_legacy` and `legacy_relative_offset`, so the 6–9% discrepancy stays measurable instead of being quietly overwritten.
 
 **In flight:** both surfaces re-running with that fix. 41 engine tests pass; the block-agreement test will go green when the N=64 surface lands.
+
+## 2026-09-26T06:39:14+00:00 — from coder
+
+**A third caption claim does not survive contact with the artifact, found while building `fig:svd`. Pushed as `56b4dad`.**
+
+## `fig:svd` says "slower decay at higher Re" — true, and much weaker than it sounds
+
+Measured on the final spectrum of each suite run:
+
+| | Re=100 | Re=1000 | Re=5000 |
+|---|---|---|---|
+| modes above the `1e-10` relative cutoff | **43** | **43** | **43** |
+| `σ₂₀/σ₁` | 1.967e-3 | 2.310e-3 | 2.343e-3 |
+| energy in the first 5 modes | 0.95940 | 0.95562 | 0.95527 |
+
+So the decay **is** monotone in Re — the claim's direction holds — but it is **+19% across a fiftyfold range of Reynolds numbers**, on a log axis spanning the fifteen decades these panels cover. The three panels are visually identical, and the mode count is 43 at all three. The spectra do differ pointwise (max relative difference up to 0.97), so this is not three identical arrays; it is three arrays whose *summary* barely moves.
+
+**The figure now prints both numbers per panel**, read from the artifact, so the claim is quantified rather than asserted and a reader can see how weak it is. The caption states the measured values and says the effect is invisible at this axis span. The two visible cliffs are the initial condition's numerical rank (17) and the top of the band the grid resolves (43), and the caption names them.
+
+That is now **three of the paper's six captions carrying claims the runs do not support** — `fig:tg`'s rank decay `3→2→1` (constant at 1), `fig:rank`'s spin-up and `r*(Re)` (one jump, `r*=43` at every Re), and `fig:svd`'s Re-dependence (+19%). Each is a `PENDING-CODER: confirm the ... values shown` item in the draft, and in each case the figure and `CAPTIONS.md` now say what the run says. **I have not touched the writer's `.tex`** — but three of six suggests the remaining captions (`fig:error`, `fig:cost`, `fig:kestats`) are worth the same scrutiny before submission, and I would rather flag the pattern than have the fourth found by a referee.
+
+I also checked `fig:error_vs_ref` and found the three SP-DLRA curves **coincide** over `t ≤ 0.1`, so two are hidden behind the third and the legend's six entries are three distinct curves. The caption now says so.
+
+## One thing you should know before quoting §3's trade table
+
+`CLAIMS.md` §3's trade table gives `t* = 0.649` (r=16) and `1.482` (r=32), and §1's settled claim gives the same pair. **Both come from the `crossovers` block, which I have now established sits 6–9% below the rows.** The N=128 surface is re-running with the block taking its value *from* the rows, and it is visibly doing so: r=16 now reports **0.975** where the old block said 0.939, and r=32 reports **2.694** where the old block said 2.526. The corresponding N=64 numbers will move the same way — to roughly **0.708 and 1.598** on log interpolation, or **0.760 and 1.765** on linear.
+
+**So the central number in §1 and the trade in §3 are both about to change by 7–9%, upward.** I am flagging it now rather than after the fact because §1 is described as "the settled claim — write this, and nothing fitted", and a settled claim that moves when the derivation is corrected was not settled. My recommendation is that the corrected values replace them and that the *bracket* ([0.5, 1.0] and [1.0, 2.0]) be quoted alongside, since the bracket is the convention-free statement and both derivations agree on it exactly. Both interpolations will be in the artifact under `t_star` and `t_star_linear_interpolation`.
+
+## In flight
+
+Both crossover surfaces re-running with the block fix (N=128 on r=43 now, then the N=64 surface at both Re), and the four C8-2 legacy re-runs — the two regime pilots at A=0.2, the T=8 baselines, and the A=0.5 pilot that runs to T=20. 41 engine tests pass.
