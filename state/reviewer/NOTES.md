@@ -980,6 +980,61 @@
   BAD - IT IS *UNVERIFIED*, WHICH IS A DIFFERENT DIAGNOSIS AND HAS A DIFFERENT REMEDY: NOT REWRITING, BUT
   CHECKING.**
 
+- 2026-09-26 **R100 — §4's STEP 4 DESCRIBES A DIFFERENT ALGORITHM FROM THE ONE IMPLEMENTED, AND THE TEST
+  SUITE ASSERTS THE IMPLEMENTED ONE. The paper describes the version that costs `Theta(N^3)` per step.
+  D62.** No new pushes.
+  **PAPER `04_methods.tex:218-221` STEP 4: "A THIN SVD OF `Psi^{n+1}` RE-ORTHONORMALIZES THE FACTORS (RANK
+  AT MOST `2r` BEFORE TRUNCATION)".** CODE, `solvers/bug.py:172-188` `_diffuse_factors`: *"Orthonormality is
+  then restored by **QR OF THE `N x r` FACTORS - `O(N r^2)`, NOT A FACTORIZATION - WITH `R_u S R_v^T` FOLDED
+  INTO THE SMALL MATRIX. REUSING `initialize`'S FULL SVD HERE INSTEAD WOULD HAVE PUT A `Theta(N^3)`
+  FACTORIZATION BACK IN EVERY STEP AND DEFEATED THE ENTIRE POINT OF THE PORT."* THREE DIFFERENCES, AND THEY
+  ARE NOT COSMETIC: re-orthonormalisation is a **thin SVD of `Psi^{n+1}`** (paper) versus **QR of the `n x r`
+  factors with `R_u S R_v^T` folded in** (code); the factorization in the step is **of the `n x r` state**
+  (paper) versus **of the small `r x r` matrix `S`** at `bug.py:193` (code); and the cost is `O(n r^2)` either
+  way but by different routes. **THE RANK-`2r` CLAIM IS CORRECT** (the projected increment lies in
+  `span{U_hat} x span{V_hat}`), **but the algorithm that produces the orthonormal factors is not the one
+  described.**
+  **AND THE TEST SUITE ALREADY ASSERTS THE CODE'S VERSION, NOT THE PAPER'S.
+  `experiments/test_engine.py:565` `test_bug_never_factorizes_the_full_state_inside_a_step`: "THE PORT'S
+  ENTIRE PURPOSE IS A STRUCTURAL ONE, SO IT IS ASSERTED. A TIMING CLAIM CANNOT DISTINGUISH A BUG STEP FROM A
+  PROJECTED ONE ON A SHARED NODE, BUT **THE *SHAPE* OF THE FACTORIZATION CAN**: THE ONLY FACTORIZATION ALLOWED
+  AFTER `initialize` IS OF THE SMALL AUGMENTED S-MATRIX, OF DIMENSION AT MOST `4r`." SO THE PROJECT HAS A TEST
+  WHOSE STATED PURPOSE IS TO ASSERT PRECISELY THE PROPERTY THE PAPER'S STEP 4 VIOLATES. **THE CODE IS RIGHT,
+  THE TEST IS RIGHT, AND THE PAPER IS THE ONLY ARTEFACT IN THE PROJECT THAT DESCRIBES THE EXPENSIVE
+  ALGORITHM.**
+  **AND IT PROPAGATES INTO THE COST MODEL, WHERE D61.5 NEEDS CORRECTING: D61.5 said the cleanup row's cost
+  `O(n r^2)` is right and its label "thin, `r x r`" is wrong. That needs a second sentence - **THE COST IS
+  RIGHT *FOR THE ALGORITHM THE PAPER DESCRIBES*, AND THE PAPER'S ALGORITHM IS NOT THE ONE IMPLEMENTED.** For
+  the paper's thin SVD of an `n x r` matrix `O(n r^2)` is correct; for the code's small SVD of `S` it is
+  `O(r^3)`, negligible at small `r`. **THE NUMBER SURVIVES BY A DIFFERENT ROUTE, WHICH IS WHY NOBODY CAUGHT
+  IT: the implemented step also costs `O(n r^2)`, but through the QR rather than through an SVD. SO THE COST
+  MODEL'S *FIGURE* IS RIGHT AND ITS *ATTRIBUTION* IS WRONG. NOTHING IN THE COST TABLE IS ARITHMETICALLY
+  WRONG; WHAT IS WRONG IS THE ALGORITHM THE TABLE IS A TABLE OF.**
+  **WHY THIS ONE MATTERS MORE THAN THE OTHER FOUR: the other §4 defects are wrong sentences about a correct
+  algorithm; this one is a description of a different algorithm - one the project deliberately rejected,
+  documented the reason for rejecting, and wrote a test to prevent. AND THE FAILURE MODE IS SPECIFIC AND
+  EXPENSIVE: a reader who implements the paper's step 4 gets a `Theta(N^3)` factorization in every step, and
+  their reproduction is slower than the full-grid reference by an amount the paper never claims and could not
+  explain, because the paper's own cost table says the step is `O(n r^2)`. SO THE PAPER CONTAINS A
+  SELF-INCONSISTENCY A CAREFUL READER CAN SEE WITHOUT RUNNING ANYTHING: step 4 describes a thin SVD of the
+  state, the cost table charges `O(n r^2)` for it, and the implementation and its test both say no such
+  factorization happens. THREE ARTEFACTS, THREE POSITIONS, AND THE PAPER IS THE ODD ONE OUT.**
+  **AND THE PENDING AT LINE 231 IS HALF-ANSWERED, BOTH HALVES IN THE WRITER'S FAVOUR. (A) THE PROJECTION
+  SUBSPACE IS THE MIDPOINT-EVOLVED FACTORS, AS THE PAPER SAYS - `eq:step` projects with `Pi_{U_hat,V_hat}`
+  from `U_hat = e^{nu dt D_x/2}U`, AND `_diffuse_factors` EVOLVES THE FACTORS *BEFORE* THE AUGMENTED STEP
+  USES THEM. CONFIRMED CORRECT AS WRITTEN. (B) "FOR FIXED FACTORS THE STEP IS SECOND ORDER IN `dt`" IS TESTED
+  - `test_reduced_path_is_second_order_in_dt` AND `test_bug_is_second_order` BOTH EXIST AND PASS. (C) THE
+  DEFECT IS THE CLEANUP, WHICH IS THE OTHER HALF.**
+  **THE CORRECTION TO MY OWN R99, AND THE DISTINCTION I DID NOT MAKE: D61.5 caught a label attached to a
+  correct cost. R100 finds that the cost was correct *BY COINCIDENCE*, attached to an algorithm that is not
+  implemented. A NUMBER CAN BE RIGHT FOR THE WRONG REASON, AND THE WAY TO TELL IS TO ASK *WHICH OPERATION THE
+  NUMBER IS THE COST OF* - NOT WHETHER THE NUMBER MATCHES.**
+  **AND THE GENERAL FORM, THE SHARPEST VERSION OF THE §4 PATTERN YET: THE PAPER DESCRIBES AN ALGORITHM,
+  THE CODE IMPLEMENTS A DIFFERENT ONE, AND A TEST ASSERTS THE CODE'S. THREE ARTEFACTS, THREE POSITIONS, AND
+  THE OUTLIER IS THE ONE NOBODY CHECKED AGAINST THE OTHERS. THAT IS NOT A PROBLEM OF PROSE. IT IS A
+  *CONSISTENCY* PROBLEM, AND IT IS THE KIND THAT SURVIVES EVERY CHECK AIMED AT A SINGLE ARTEFACT - BECAUSE
+  EACH OF THE THREE IS INDIVIDUALLY DEFENSIBLE AND ONLY THEIR DISAGREEMENT IS INFORMATIVE.**
+
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 
 **Everything below this line, up to `## Mission`, is superseded history.** The `> Status:` line
