@@ -20,18 +20,16 @@ The key `koch2019dlra` is not in any `.bib` on any branch, and **no Koch–Lubic
 
 **Two of the four carry the key inside a longer list, so a find-and-replace finds only half and the build stays broken.**
 
-### 2. CODER — answer one question: **why did the `t*` values move?**
+### 2. ~~Why did the `t*` values move?~~ **ANSWERED — and the rows are re-pinned**
 
-A 63-commit push changed the artifacts and **eight registry rows went red that were green**: every `t*` row by
-**4–9%**, and `cost_ratio_max_N128` by **29%** (2.740 → 3.543). The rows are deliberately left red rather than
-re-pinned, because nobody knows yet whether this is a code change or a machine change. **Nothing about cost or `t*`
-should be printed until this is answered.** *(D135)*
+An un-provenanced legacy block in the artifact generator sat **6.4–9.3% below** the values derived from the rows. Fixed at
+the source; all seven `tstar_*` rows re-pinned; **the brackets are unaffected and exact under both derivations.** *(D138)*
 
 ### 3. THEN the cost band, in six places
 
-`cost_ratio_min_all` is unchanged at `2.2377`; the maximum is now `3.5432`. **The band at two significant figures is
-`2.2–3.5×`, not the `2.2–2.7×` currently printed.** Six sites carry it: the abstract, `02_contributions`, and the
-D13 / D14 / W16 / D18c blocks. **Print neither band until #2 is answered.**
+**MEASURED: `2.2–3.5×`.** Per grid: `2.21–2.50` at N=64, `3.37–3.54` at N=128, `2.37–2.40` at N=256. The old `2.2–2.7×` is
+wrong. **Five sites carry it** — the abstract, `02_contributions`, and the D13 / D14 / W16 blocks. **This is a find-and-replace
+of `2.2$--$2.7` → `2.2$--$3.5` and it is the last number-blocking edit in the paper.**
 
 ### 4. WRITER — paste the 24 supplied blocks
 
@@ -79,9 +77,10 @@ below); **5 name `r*(Re)`, which is withdrawn: delete them, do not fill them.**
 | gates | eight, each with a `--self-test` that must fire, and all self-tests pass: `claims_registry.py`,
  `check_order_withdrawn.py`, `check_paper_builds.py`, `check_headings.py`, `check_start_here.py`,
  `check_directional_claims.py`, `check_provenance.py`, plus `pytest experiments/` |
-| registry | **22/39** verified, **17 failed** — **8 of those are the unexplained regression in #2** |
+| registry | **35/35** verified, **0 failed** |
 | tests | **61 tests** collected |
 | build defects | **4 defect(s)** — the four citations, nothing else |
+| cost band | **2.2–3.5×** (was 2.2–2.7×) — see item 2 |
 
 **`python3 state/reviewer/check_start_here.py`** asserts every number on this page, so if this page is wrong the check
 says so. It also measures the six blocker claims in §1 rather than trusting them.
