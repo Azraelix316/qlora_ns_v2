@@ -80,6 +80,21 @@ records no load at all, so its numbers carry the same unrecorded-machine-state g
 cost range unreviewable. **Two lines, and it closes an inconsistency between two drivers on one node.**
 (D52.7)
 
+**P1 — GENERATE `experiments/figures/PROVENANCE.md` FROM WHAT `make_figures.py` JUST LOADED, instead of
+maintaining it as a parallel list.** (D57, R95) It is stale in two independent ways *today*:
+`crossover_surface.json` is attributed to `5909af66` when the artifact records `588e5159`, and the file
+says *"figures generated at commit `1eb04326`"* when they were generated at `588e515` — **and the file was
+itself modified inside `588e515` without its generation line being updated, so the file describing the
+figures was edited by the very commit whose number it failed to record.** It also repeats
+`78607f3a` for `kolmogorov_re5000_N128.json`, **the commit D55c proved did not produce that artifact** —
+and `fig_div_free` loads that artifact, so the false commit has reached a human-facing document.
+
+**The fix is about ten lines:** the script already loads all eleven inputs and already has
+`experiments/provenance.py` to call. Emit each artifact's own `provenance` block, and record `HEAD` at
+figure-generation time rather than by hand. **There is then no second copy to drift, and the generation
+commit cannot lag the generation.** It also composes with the `fig_div_free` fix: if the script writes its
+own provenance, each panel's source artifact becomes verifiable by the same mechanism.
+
 **B1 — TWO COMMITTED ARTIFACTS RECORD A `git_commit` THAT DID NOT PRODUCE THEM. Re-run them on a clean
 tree; both are `T=0.1`, so seconds each.** (D55c, R92 — **corrected down from five; three of the
 original five were my instrument's fault**)
