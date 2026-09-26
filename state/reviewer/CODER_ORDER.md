@@ -329,3 +329,40 @@ used only by `fig_div_free` (`:226`). No such defect.**
 
 **The method, which is worth applying to anything else that plots: for each panel, compare the title and the axis
 label against the range and the direction of the data actually plotted.** Nothing here needed a new tool.
+
+### T1-8. `fig_crossover`'s left title overwrites the right panel's y-axis label (D72.2) — **new, and it is a rendering defect, not a code one**
+
+**I rendered the figure and looked at it. The left title's second line — *"`r = 43` (the dealiasing ceiling) is
+exact and is off this log axis"* — is far wider than the left axes, runs out of its own panel, and lands on top of
+the right panel's rotated y-axis label. The two are superimposed and the right panel's y-label is unreadable.
+The right panel's own title is also pushed to the right edge and clipped.**
+
+**It is not a missing `tight_layout` — I assumed that, checked, and was wrong: all eight figures call it
+(`fig_crossover` at `make_figures.py:561`).** The cause is that `tight_layout()` assumes the title fits, and
+`savefig(..., bbox_inches="tight")` then **grows the canvas to include the overflowing text without moving the
+neighbouring axes.**
+
+**Fix the text, not the layout call:** shorten to something that fits — *"`r = 43` (the largest rank tested) is
+exact and off this axis"* — or move the note to a figure-level caption, or make it a `suptitle` spanning the
+figure. `constrained_layout` would also help, but the title is simply too long.
+
+**The good news, which is worth keeping:** the figure's *content* supports the paper's thesis and it is visible
+in the picture. At `t = 0.1` the DLRA (solid) curves span `3e-2`–`3e-1`, **a factor of 10 across ranks**, while
+the static (dashed) curves span `9e-2`–`1.2e-1`, **a factor of 1.3**; and the right panel shows the static spread
+is **exactly 0%** at `t = 0.1` and `t = 0.25`, rising to `83%` by `t ≈ 2`. That is D30.1's mechanism. **The figure
+just cannot be read in its current form.**
+
+### T1-9. `fig_div_free`'s tick offset contradicts its own axis label (D72.5) — **adds to T1-3**
+
+Beyond the `symlog` fix: the axis reads `0…7` with a tick offset of **`1e292`** while the label reads
+**"in units of `10⁻¹⁴`"**. A reader cannot tell whether the worst bar is `7.1e278` or `7.1e292`. With `symlog`
+and `linthresh=1` the offset text becomes meaningful, but then the label should say **what the linear region
+is**, not "in units of `10⁻¹⁴`" with an offset that contradicts it.
+
+Also: **the `target 10⁻¹⁴` line is drawn at `x = 1.0`, which on an axis running to `7e292` is
+indistinguishable from the origin** — in the render the annotation sits flush against the left spine. And **the
+single visible bar is `pod late r32`**, the worst violator, directly under a title claiming the opposite.
+
+**And the new standing check (CHECKLIST §1.12): every cycle, open the figures and LOOK at them.** Content
+(R109) and rendering (R110) are both required — neither subsumes the other, and R110 found three defects in two
+figures that the content audit could not see.

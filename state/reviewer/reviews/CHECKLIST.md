@@ -510,3 +510,28 @@ line that says a queue is empty is a claim about a *list*, and lists are cheap t
 
 This is the R81 rule extended past the merge: **read what a commit contains, not how many commits there
 are** — and then keep reading after it is merged, because that is the point at which it stops being reviewed.
+
+## 1.12 — **open the figures and LOOK at them; reading the plotting code is a different check (D72, binding)**
+
+There are two figure checks and only one of them is a code check. **Neither subsumes the other.**
+
+- **(a) CONTENT — is the title true of the data?** Does the title match the range and the direction of what is
+  plotted? Is a number in the title the number in the artifact? *This is what R109 did, and it found four
+  defects in six figures.*
+- **(b) RENDERING — is the picture readable?** Open the PNG. Look for: text overlapping a neighbouring axes,
+  labels clipped at the canvas edge, a tick offset that contradicts the axis label, a threshold marker
+  rendered where it cannot be seen, an axis on which the data are invisible. **None of these is a property of
+  the source; all of them are the defect a reader actually sees.**
+
+**R110 did (b) on two figures and found, in the paper's central figure, a title that overwrites the
+neighbouring panel's y-axis label, and in `fig_div_free` a tick offset of `1e292` sitting under an axis label
+reading "in units of `10⁻¹⁴`".** Both are invisible in the code. **It cost two tool calls.**
+
+**Two things this check has already earned:**
+
+1. **Do not assume a missing `tight_layout`.** I assumed it, checked, and was wrong — all eight figures call
+   it. The real cause of the crossover collision is a title wider than its axes, which `bbox_inches="tight"`
+   then grows the canvas to fit **without moving the neighbouring axes.** The fix is the text.
+2. **A clean code review of a figure is not a review of the figure.** R109 audited the code and reported four
+   defects; a cycle later, looking found three more in the same figures. **I believed I had covered the
+   figures and had covered half of it.**
