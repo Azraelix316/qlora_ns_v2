@@ -418,3 +418,26 @@ All three resolved crossovers at `N=128` carry `direction=static_overtakes`, so 
 **And a process note, because it is the same failure three times over and you should know the pattern.** While fixing this I ran a blanket `197` → `200` substitution over `DECISIONS.md` and it **corrupted text I had written minutes earlier in the same file.** I also raised two alarms that turned out to be my own misreading of a `grep` — I nearly reported a citation key as destroyed, and I nearly reported a `\cite` as unresolvable. Checked properly, the paper's citations are **0 unresolved out of 36**, and the key was untouched because `\b197\b` cannot match inside `temam1977navier`. **D98's population error, D111's figure title, and now these two: a confident alarm that turns out to be a misread. I record each one because the record is the only thing that makes the pattern visible.**
 
 **One thing only you can tell me:** if the 200-word abstract reads worse than the longer one — I cut 62 words to fit a cap I have not confirmed — say so and I will restore the longer version and flag the length instead. The cap depends on the venue, and I do not know which one you are targeting.
+
+## 2026-09-26T02:13:41+00:00 — from reviewer
+
+**I applied last cycle's executability check to *all* my deliverables instead of just the two I happened to check, and found the same defect in two more — plus something worse inside one of them.**
+
+**1. Two more of your replacement texts were prose, not LaTeX.** After fixing the abstract and the contributions list, I asked the same question of the rest. **D18a (the §3 energy-invariant paragraph) and D18b (the grid paragraph) were both Markdown blockquotes**, from which you would have had to reconstruct LaTeX. Both are headed as text to use — D18a literally says *"Use this text for §3"*. **So three of the four things I told you to paste could not be pasted, and I only caught the first one by accident because I happened to be fixing the abstract at the time.** All four are now fenced LaTeX: **0 `\cite`, 0 `\ref`, balanced braces, no nested math.**
+
+**2. The part that matters more. D18b's text still contained the phrase "that grid's dealiasing ceiling."** I barred that wording two cycles ago — it is a wavenumber count, not a rank result, and calling it a ceiling in a sentence about *accuracy* is exactly the misreading I have been trying to prevent. **I fixed it in the index, in the coder's document, and in the message I sent you — and it never reached the text you would actually paste.** That is the worst place for it to survive, because you paste it verbatim and a warning becomes the paper. It now reads **"each equal to that grid's largest alias-free rank."**
+
+**The general rule I have apparently not learned: a fix propagates to where I edited, not to where the text lives. The index is a pointer; the fenced block is the deliverable — and I edited the pointer.**
+
+**3. So your three paste-ready texts, all verified:**
+
+| what | where | size |
+|---|---|---|
+| the abstract | `WRITER_ORDER.md` **D13** | exactly 200 words |
+| the contributions list | **D14** | 5 items, 308 words |
+| the §3 energy invariant | **D18a** | replaces 2 of the 6 `PENDING-THEORETICAL-RESEARCH` markers |
+| the grid paragraph | **D18b** | retires the "bracketed between 32 and 43" hedge |
+
+**4. And the checker now covers the place it was blind.** `state/reviewer/check_order_withdrawn.py` scanned only the first 36 lines — the order — so a withdrawn phrase inside a paste-ready block near line 670 was invisible to it. **It now scans every fenced LaTeX block and labels such a hit `PASTE-READY TEXT` as highest priority.** I positive-controlled it by injecting two withdrawn claims into a copy of D18b: both caught, both labelled. Run it before you paste anything.
+
+**Priority is unchanged: D13 and D14 first, then the `99.9%` → `99%` fix.** All four texts now need nothing from me.
