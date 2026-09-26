@@ -62,6 +62,17 @@ REGISTRY = [
     ("tstar_r32_W1p0", "crossover_surface.json", "by_reynolds.5000.crossovers",
      {"rank": 32, "window": 1.0}, "t_star", 1.4832176727372877, 16),
 
+    # --- D104: the grid-refinement claim. The `2.2` in the abstract is SOUND and these two rows
+    #     are what make it checkable: the reduced integrator's own max-over-run relative L2 error
+    #     against the full grid, at the two resolutions. Time-keyed per-t ratios re-derive to
+    #     2.181-2.183 across five shared time keys -- a spread of 0.09% -- so `2.2` is stable.
+    #     sf=2, not 6: this is a chaotic quantity and a re-run moves it. D91.5's rule -- pin what
+    #     the measurement can reproduce, and let the RATIO be the claim rather than the digits.
+    ("grid64_dlra_max_l2", "kolmogorov_re5000_N64.json", "dlra", None,
+     "max_relative_l2_vs_full", 0.00010108416677874297, 2),
+    ("grid128_dlra_max_l2", "kolmogorov_re5000_N128.json", "dlra", None,
+     "max_relative_l2_vs_full", 4.6067480921986504e-05, 2),
+
     # --- cost (D52.5: 2.08-2.71x SLOWER. 2.08 is the MINIMUM, so "comparable to" is false
     #     everywhere -- the euphemism the abstract had to be rewritten for.)
     # D91: this row asserted 16 SIGNIFICANT FIGURES on a quantity whose own recorded within-run

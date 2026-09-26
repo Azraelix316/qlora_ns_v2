@@ -6998,3 +6998,109 @@ blocker. The six figures are still missing (C1-1/C1-2), and there is still no La
 
 **D103.8 — Unchanged.** Everything in D35.6 through D102.8 stands, **except that the paper is now integrated into `main`
 and both paper-facing gates read `main` by default.**
+
+---
+
+## D104 — **I PUT A CONTRADICTED CLAIM IN THE ABSTRACT. "THE STATIC BASELINE'S [ERROR] GROWS BY THREE ORDERS OF MAGNITUDE" IS CONTRADICTED BY THE ONLY TWO ARTIFACTS THAT COULD SUPPORT IT: OF 36 ERROR-LIKE QUANTITIES THEY SHARE, **NONE** GROWS BY MORE THAN `10×`, AND THE BASELINE'S OWN ERROR **IMPROVES** BY `5.2×`. MY OWN DECISION LOG (D56) HAD ALREADY RECORDED THAT QUANTITY AS UNSTABLE.** (2026-09-26)
+
+> **OPERATIVE (R141). D13's ABSTRACT BLOCK IS CORRECTED IN PLACE. W11 IS THE WRITER'S FIRST TASK. NEW GATE:
+> `check_directional_claims.py`. REGISTRY 29/33 → 31/35.**
+
+**D104.1 — THE SENTENCE, AS IT STANDS IN `paper/sections/00_abstract.tex` AND AS I WROTE IT IN `WRITER_ORDER.md`
+D13:**
+
+> *"…under grid refinement the reduced error falls by a factor $2.2$ while the static baseline's grows by three orders
+> of magnitude."*
+
+**THE DRAFT'S ABSTRACT IS A VERBATIM PASTE OF MY BLOCK. THIS IS MY ERROR, NOT THE WRITER'S, AND THE CORRECTION IS IN
+MY OWN ORDER DOCUMENT FIRST.**
+
+**D104.2 — THE `2.2` HALF IS SOUND, AND I NOW KNOW WHY IT IS SOUND. THE TWO GRID ARTIFACTS CARRY A `comparison` SERIES
+OF `{time, relative_l2}` SAMPLED ON DIFFERENT TIME GRIDS, SO A RATIO MUST BE TIME-KEYED (D56.1). TIME-KEYED OVER THE
+SHARED KEYS:**
+
+| `t` | DLRA `N=64` | DLRA `N=128` | ratio | POD `N=64` | POD `N=128` | ratio |
+|---|---|---|---|---|---|---|
+| 0.00 | `1.534e-15` | `1.392e-15` | `1.102` | `3.548e-17` | `1.427e-17` | `2.487` |
+| 0.01 | `1.001e-04` | `4.590e-05` | **`2.182`** | `3.936e-11` | `1.269e-10` | `0.310` |
+| 0.02 | `9.952e-05` | `4.562e-05` | **`2.181`** | `7.783e-11` | `2.398e-10` | `0.325` |
+| 0.03 | `9.910e-05` | `4.543e-05` | **`2.182`** | `1.157e-10` | `3.313e-10` | `0.349` |
+| 0.04 | `9.887e-05` | `4.531e-05` | **`2.182`** | `1.532e-10` | `4.028e-10` | `0.380` |
+| 0.05 | `9.883e-05` | `4.527e-05` | **`2.183`** | `1.905e-10` | `1.893e-09` | `0.101` |
+
+**EXCLUDING `t = 0`, WHERE BOTH ARE AT ROUNDOFF AND THE RATIO IS MEANINGLESS, THE DLRA RATIO IS `2.181`–`2.183`: A SPREAD
+OF `0.09%`. D56's "≈`2.18×`, STABLY TO `1.2%`" IS CONFIRMED AND IS BETTER THAN RECORDED. `2.2` STANDS.**
+
+**D104.3 — THE OTHER HALF IS CONTRADICTED, NOT MERELY UNSOURCED. POPULATION: ALL 36 ERROR-LIKE QUANTITIES THE TWO
+`kolmogorov_re5000_{N64,N128}.json` ARTIFACTS SHARE, EACH RATIOED `N=64 → N=128`:**
+
+> **ZERO OF THE 36 GROW BY MORE THAN `10×`. THE LARGEST GROWTH IS `1.64×` (`pod.comparison[1..4]`, all `≈1.6`).**
+
+**AND THE BASELINE'S OWN HEADLINE ERROR MOVES THE OTHER WAY:**
+
+```
+  pod.max_relative_l2_vs_full   N64 = 9.9279e-09   N128 = 1.8930e-09   -> IMPROVES by 5.245x
+  dlra.max_relative_l2_vs_full  N64 = 1.0108e-04   N128 = 4.6067e-05   -> IMPROVES by 2.194x
+```
+
+**SO THE STATIC BASELINE'S ERROR FALLS UNDER REFINEMENT. IT DOES NOT "GROW BY THREE ORDERS OF MAGNITUDE".**
+
+**D104.4 — AND I ALREADY KNEW THE QUANTITY WAS UNSTABLE. D56'S OWN VERDICT, WHICH I WROTE:**
+
+> *"the static rank-16 baseline **DEGRADES by `2.5×` to `1464×`, unstably**"*
+
+**SO THE THREE ANSWERS ARE: `2.5×`–`1464×` unstably (D56, from the `comparison` series); `3.2×`–`9.9×` degrading
+(time-keyed, `t ≥ 0.01`); `5.2×` IMPROVING (max-over-run). A QUANTITY WITH THREE ANSWERS DEPENDING ON THE QUANTITY AND
+THE INDEXING IS NOT A STABLY MEASURABLE CONTRAST — AND I PROMOTED THE LEAST DEFENSIBLE END OF THAT RANGE TO A POINT
+VALUE IN THE ABSTRACT. A REFEREE WHO ASKS HOW IT WAS MEASURED GETS AN ANSWER THAT SAYS `unstably`, IN MY OWN LOG.**
+
+**D104.5 — AND THE PROTOCOL MAKES THE CLAIM UNUSABLE REGARDLESS, WHICH NOBODY STATED. BOTH ARTIFACTS RECORD
+`final_time = 0.1` AND `nsteps = 200` — THE SHORT RUN. THE PAPER'S HORIZONS OF INTEREST ARE `t^\ast = 0.649` TO `1.482`.
+SO THIS PAIR IS MEASURED ENTIRELY *BEFORE* THE CROSSOVER, WHICH IS EXACTLY WHERE THE STATIC BASELINE IS *SUPPOSED* TO WIN.
+THEY ALSO RAN DIFFERENT PROTOCOLS: `dlra` ADAPTS (`min 2`, `max 43`, `check_every 5`, recorded `rank_min 17`,
+`rank_max 43`) AGAINST A FIXED `pod_rank = 16`, SO THE ABSTRACT'S "**AGAINST A STATIC SUBSPACE OF EQUAL RANK**" IS
+VIOLATED BY THE VERY ARTIFACTS THE SENTENCE CITES. A GRID COMPARISON AT `t < t^\ast` CANNOT BE EVIDENCE FOR THE METHOD'S
+ADVANTAGE, AND `NOTES.md` HAS RECORDED THE COROLLARY TWICE ALREADY: "the static POD is 2–4 orders of magnitude MORE
+accurate than the DLRA" AT THESE GRIDS.**
+
+**D104.6 — THE SECOND DEFECT IN THE SAME SENTENCE-PAIR, WHICH NOBODY CAUGHT. THE COST BAND READS `$2.1$–`$2.7\times$`.
+D52.5 RE-DERIVED THE MINIMUM FROM `2.08` TO `2.237746367620425`, SO AT THE ONE SIGNIFICANT FIGURE D52.5 SETS, THE BAND
+IS `2.2`–`2.7`, AND `2.1` IS STALE BY ONE INCREMENT ON THE LEADING DIGIT. AND D91.5's PESSIMISTIC LOWER BOUND OF
+`1.38×` — "EVEN AT THE PESSIMISTIC END OF THE MEASUREMENT'S OWN RECORDED NOISE" — WAS ABSENT, WHICH OVERSTATES THE
+PRECISION OF THE SLOWER-NOT-CHEAPER CLAIM IN THE SENTENCE THAT MATTERS MOST.**
+
+**D104.7 — WHY NO GATE CAUGHT EITHER, AND IT IS THE SAME FAILURE FOR THE SIXTH TIME. `claims_registry.py` PART 4
+TRACED `2.2` — CORRECTLY, BECAUSE `2.2` IS TRUE. THE FALSE HALF IS THE PHRASE "**THREE ORDERS OF MAGNITUDE**", WHICH
+CONTAINS NO DIGIT. A MAGNITUDE CLAIM WRITTEN IN WORDS IS INVISIBLE TO A LITERAL TRACER.** The tool measured something
+real; the thing that broke was outside what it measures. D60, D66, D77, D83, D84, D95, D97 — same family.
+
+**D104.8 — THE FIX, AND IT IS IN MY OWN DOCUMENT. D13's ABSTRACT BLOCK IS CORRECTED IN PLACE. THE FALSE CLAUSE IS
+REPLACED BY THE GRID RESULT THAT IS ACTUALLY TRUE AND IS A LIMITATION, WHICH IS WHERE IT BELONGS:**
+
+> *"…under grid refinement the reduced error falls by a factor $2.2$, and stably so, but the horizon itself is not
+> grid-convergent: it grows by factors of $1.45$ and $1.64$ from a $64^2$ to a $128^2$ grid at ranks $16$ and $32$."*
+
+**`1.45` AND `1.64` ARE D74's MEASURED `t^\ast` RATIOS (`0.9386/0.6493` AND `2.4335/1.4816`), AND THEY ARE THE OPPOSITE
+SIGN TO THE CLAIM THEY REPLACE — `t^\ast` GETS WORSE, NOT BETTER. THE COST BAND IS CORRECTED TO `$2.2$–`$2.7\times$`
+WITH D91.5's `1.4×` FLOOR RESTORED.**
+
+**D104.9 — THE GATE, AND ITS POPULATION IS WHY IT IS SHIPPABLE. `check_directional_claims.py` MATCHES ONLY A
+**COMPARATIVE** — A CONTRAST WORD (`while`/`whereas`/`but`) WITHIN 120 CHARACTERS OF A MAGNITUDE PHRASE — IN
+**PAPER-FACING TEXT ONLY** (THE DRAFT, PLUS THE PASTE-READY `latex` BLOCKS IN MY ORDER DOCS, WHICH IS WHERE I AUTHOR
+PAPER PROSE).** Scoped to those 26 sources there are **4 magnitude phrases and exactly 1 comparative** — the abstract's
+sentence. Over the paper *plus my decision log* the pattern fires on **19**, of which **18 are my own record quoting the
+claim in order to withdraw it, or a correct scaling argument** — which is why the scope excludes the log: **a decision
+log must be able to quote a withdrawn claim; that is what a log is for.** A gate firing on 81 sites (every magnitude
+phrase) is the noise band D97 measured at 85 false positives and deliberately did not ship. **Self-test: 5 must-pass
+clean, 2 must-fire fire** — and the first must-fire case is the defect **verbatim, including the LaTeX line break that
+defeated the first version of the check**, which scanned line-by-line and reported **0** on a document that contains the
+defect. **A check that reports clean on a document I know contains the defect has measured nothing.**
+
+**D104.10 — AND TWO REGISTRY ROWS SO THE SURVIVING HALF IS TRACEABLE: `grid64_dlra_max_l2` AND `grid128_dlra_max_l2`,
+BOTH VERIFYING, AT `sf = 2` NOT `6`** — this is a chaotic quantity, a re-run moves it, and D91.5's rule is to pin what
+the measurement can reproduce and let the *ratio* be the claim rather than the digits. **REGISTRY: `29/33` → `31/35`;
+THE 4 FAILURES ARE STILL THE `crossover_N128.json` ROWS (C2-1).**
+
+**D104.11 — Unchanged.** Everything in D35.6 through D103.8 stands, **except that the abstract's grid-refinement clause
+and cost band are corrected, the `2.2` is now pinned by two registry rows, and `check_directional_claims.py` is a
+seventh gate.**

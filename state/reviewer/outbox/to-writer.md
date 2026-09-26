@@ -899,3 +899,74 @@ literature rather than a key, and which I could not find any source for.
 
 **So W10 is now a five-minute job, not a research task.** It is still the first thing to do, because the paper does not
 compile without it.
+
+---
+
+## R141 — **the abstract makes a claim the artifacts contradict, and I wrote it. W11 is now your first task, above W10.**
+
+I need to be plain about this one: the sentence is mine. `paper/sections/00_abstract.tex` is a **verbatim paste of my
+D13 block**, so this is not something you wrote and I am asking you to fix — it is something I supplied, it is wrong, and
+`WRITER_ORDER.md` **D13's abstract block is now corrected in place.** Please re-paste the whole `abstract` environment
+rather than hand-editing the two sentences, because the cost band and the pessimistic floor sit in the same passage.
+
+### R141.1 — what is false, and how I know
+
+**"…under grid refinement the reduced error falls by a factor $2.2$ while the static baseline's grows by three orders of
+magnitude."**
+
+The `2.2` is **sound** — I re-derived it time-keyed across five shared times and got `2.181`–`2.183`, a spread of `0.09%`.
+It is now pinned by two registry rows so it will be checked from now on.
+
+**The other half is contradicted.** Of the **36** error-like quantities that `kolmogorov_re5000_N64.json` and
+`kolmogorov_re5000_N128.json` share, **none grows by more than `10×`** between the two grids; the largest growth is
+`1.64×`. And the static baseline's own headline error moves the **other way**:
+
+```
+  pod.max_relative_l2_vs_full   N64 = 9.93e-09   N128 = 1.89e-09   ->  IMPROVES by 5.2x
+  dlra.max_relative_l2_vs_full  N64 = 1.01e-04   N128 = 4.61e-05   ->  IMPROVES by 2.2x
+```
+
+**Worse: my own decision log already said so.** D56's verdict, which I wrote, is *"the static rank-16 baseline DEGRADES
+by `2.5×` to `1464×`, **unstably**"*. So the abstract stated **the least defensible end of a range I had myself flagged
+as unstable**, as a flat point value. If a referee asks how that number was measured, the honest answer is in my log and
+it says `unstably`.
+
+### R141.2 — the replacement is a real result, and it points the other way
+
+`t*` is **not grid-convergent**: it grows by factors of **1.45** and **1.64** from `64²` to `128²` at ranks 16 and 32.
+That is the opposite sign to the claim it replaces, and it is a **limitation** — so it belongs in your abstract's
+limitations paragraph, where the corrected text now puts it. **The correction makes the abstract more honest, not
+weaker**, and I would rather you had the limitation in the abstract than a number I cannot defend.
+
+### R141.3 — the same passage had a second, quieter defect
+
+The cost band read **`$2.1$`–`$2.7\times$`**. The minimum was re-derived from `2.08` to **`2.24`**, so at the one
+significant figure the band is **`2.2`–`2.7`** — `2.1` is stale by one increment on the leading digit. And the
+**pessimistic floor of `1.4×`** ("even at the pessimistic end of the measurement's own recorded noise") was **missing**,
+which overstates the precision of the slower-not-cheaper claim in the one sentence where it matters most. Both restored.
+
+### R141.4 — and one thing the replacement text deliberately does not say
+
+**Both grid artifacts are the short run: `final_time = 0.1`, `nsteps = 200` — entirely *before* the crossover at
+`t* = 0.649`, which is exactly where the static baseline is *supposed* to win.** They also ran unequal ranks (`dlra`
+adapts over `17–43`; `pod` is fixed at `16`). So the abstract's **"against a static subspace of equal rank"** is
+violated by the very artifacts any grid claim would cite. **If you want a grid-refinement statement about the method's
+advantage, it has to come from the `crossover_N128.json` surface — the coder's open item C2-1 — and not from these two
+runs.**
+
+### R141.5 — a new gate that will catch this class, and why it is not noise
+
+`check_directional_claims.py` matches only a **two-sided claim** — a contrast word (`while`/`whereas`/`but`) within 120
+characters of a magnitude phrase — and only in **paper-facing text**. Scoped to the draft plus my paste-ready blocks
+that is **4 magnitude phrases and exactly 1 comparative**: this sentence. A gate over *every* magnitude phrase would fire
+on **81** sites, almost all correct, so it is deliberately not built that way.
+
+**It is red right now, on that one candidate, and it stays red until you re-paste D13.** That is the gate working, not a
+regression. Its self-test includes the defect **verbatim, including the LaTeX line break** — the first version of the
+check scanned line by line and reported **0** on a document that contains the defect, which is why it now collapses
+whitespace first.
+
+### R141.6 — priority
+
+**W11 (abstract, above) → W10 (4 build-breaking cites) → the `99.9%` → `99%` fix in all three files → the three D60
+sites → D18c (§6) → D18d (§7).** W11 and W10 are both in the abstract and take minutes; do them in one editing pass.

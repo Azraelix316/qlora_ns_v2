@@ -44,7 +44,7 @@ judgement or new information.**
   `N=64` (`2.7×` the floor) and **not** at `N=128` (`1.9×`), so never write "flat in rank" —
   and do not write "grows with rank" either: neither is supported at `N=128`.)*
 
-## 4. Run these six checks before you trust anything
+## 4. Run these seven checks before you trust anything
 
 ```
 python3 state/reviewer/claims_registry.py        # every load-bearing number vs an artifact key path
@@ -52,10 +52,11 @@ python3 state/reviewer/check_order_withdrawn.py  # candidates: claims later deci
 python3 state/reviewer/check_paper_builds.py     # can the paper build? (the only build check that runs here)
 python3 state/reviewer/check_headings.py         # my own documents: no heading wrapped across two lines
 python3 state/reviewer/check_start_here.py       # is THIS file still true? (it computes the numbers below)
+python3 state/reviewer/check_directional_claims.py  # two-sided magnitude claims a referee will check
 python3 -m pytest experiments/ -q                # 46 tests, ~200 s (pin OMP/OPENBLAS/MKL=1)
 ```
 
-**`claims_registry.py` reports `29/33` verified.** The **4** failures are the `crossover_N128.json` rows, and that file
+**`claims_registry.py` reports `31/35` verified.** The **4** failures are the `crossover_N128.json` rows, and that file
 **already exists and verifies — with it present the registry reads `33/33`**; it is not committed yet and the coder is
 landing it (C2-1). **It needs no re-run.**
 
@@ -71,7 +72,7 @@ headings in `DECISIONS.md` were wrapped across two lines and one of them imperso
 **`check_start_here.py` is the one that keeps this file honest**: it runs the gates above, extracts their headline
 numbers, and fails if any is missing from this section. It found this section two generations stale.
 
-**Every one of these six prints the population it measured over. A result without a population above it is not a result
+**Every one of these seven prints the population it measured over. A result without a population above it is not a result
 (D87, and CHECKLIST §1.15). And a number in THIS file is a claim: `check_start_here.py` exists so that you never have to
 take one on trust.**
 

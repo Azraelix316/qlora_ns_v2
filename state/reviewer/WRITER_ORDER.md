@@ -22,6 +22,7 @@ describing a paper we are no longer writing.**
 | **W7** | **§6 results — the whole section, prose only** | **7 blocks supplied: D18c**, 1,321 words, every number a registry row. **§6 is where the contribution is and it has no numbers in it. Paste per subsection; do NOT replace the section — its labels are referenced 26 times from elsewhere.** Also in D18c: the figure mapping, and one real gap (no Taylor--Green figure exists). | `WRITER_ORDER.md` **D18c** |
 | **W8** | **§7 discussion — the whole section, prose only** | **4 blocks supplied: D18d**, 1,063 words. **The shipped §7 is written in the conditional (\"is expected to\", \"if the runs confirm\") because it was drafted before the runs existed, its first subsection is built on the **barred** online-adaptive-rank claim, and it carries 3 `PENDING-CODER` markers. D18d states the case for the method *despite* it being slower and using more memory, which is the acceptance argument.** | `WRITER_ORDER.md` **D18d** |
 | **W9** | **§8 conclusion** | Short. Do not introduce anything not already above. | — | — |
+| **W11** | **the abstract's grid-refinement claim is CONTRADICTED** | **FIRST TASK, above W10 — and it is my error: D13's block is corrected in place. "the static baseline's grows by three orders of magnitude" is false (0 of 36 error quantities grow >10x; its error IMPROVES 5.2x, and D56 called that quantity "unstably"). Cost band `2.1`→`2.2`, pessimistic floor `1.4x` restored. The `2.2` is sound and now pinned.** | *W11* (D104) |
 | **W10** | **`koch2019dlra`: 4 build-breaking cites** | **BUILD BLOCKER — the key is in no `.bib` on any branch. 3 sites are mechanical (`→ koch2007`); 1 supports a "survey by Koch and Lubich" clause with no verifiable source. Cause: the paper cites `paper/references.bib` (38 keys) while the shared `refs.bib` has 42–51 — they share THREE.** | *W10* (D102) |
 
 **Then, only once the above is done:** §2 related work, and the one missing citation (`CITATIONS.md` §1).
@@ -130,11 +131,13 @@ not its dimension: from rank $16$ the static subspace stops improving altogether
 ranks $16$, $32$ and $43$ identical at every horizon and both Reynolds
 numbers, while ranks $2$, $4$ and $8$ differ by up to $85\%$. A fixed basis propagated
 through the nonlinearity overflows at ranks $32$ and $42$, reaching $10^{278}$; every structure-preserving variant holds roundoff divergence; under grid
-refinement the reduced error falls by a factor $2.2$ while the static baseline's
-grows by three orders of magnitude. The evidence is narrow: one
+refinement the reduced error falls by a factor $2.2$, and stably so, but the
+horizon itself is not grid-convergent: it grows by factors of $1.45$ and $1.64$
+from a $64^2$ to a $128^2$ grid at ranks $16$ and $32$. The evidence is narrow: one
 forcing, horizons of order unity, a rank criterion we report but do not
-extrapolate, and a per-step cost $2.1$--$2.7\times$ the full grid with no memory
-saving. We identify no end-to-end speedup, and say so.
+extrapolate, and a per-step cost $2.2$--$2.7\times$ the full grid --- at least
+$1.4\times$ even at the pessimistic end of the measurement's own recorded noise
+--- with no memory saving. We identify no end-to-end speedup, and say so.
 \end{abstract}
 ```
 
@@ -1030,3 +1033,41 @@ Othmar and Lubich, Christian`, `SIAM J. Matrix Anal. Appl.`, `29(2):434–454`, 
 Crossref note dated 2026-09-25. **I verified that DOI at `api.crossref.org` and it is that record.** The stale `Koch,
 Olga` I was chasing is in root `refs.bib` under the key `koch2007dlra`, which **nobody cites** — it is a dead duplicate,
 not a problem in your file.
+
+---
+
+## W11 — **THE ABSTRACT MAKES A CLAIM THAT THE ARTIFACTS CONTRADICT, AND I WROTE IT. THIS IS NOW YOUR FIRST TASK, ABOVE W10.** (a **correctness** blocker — and unlike a build error, this one survives to print)
+
+`WRITER_ORDER.md` **D13's abstract block is corrected in place.** Re-paste the whole `abstract` environment; do not
+hand-edit the two sentences, because the cost band and the pessimistic bound are in the same passage.
+
+### W11.1 — what was wrong, in the order it matters
+
+1. **"…while the static baseline's grows by three orders of magnitude" is false.** Of the **36** error-like quantities
+   the two grid artifacts share, **none grows by more than `10×`** between `N=64` and `N=128`; the largest growth is
+   `1.64×`. The static baseline's own `max_relative_l2_vs_full` **improves**, `9.93e-09 → 1.89e-09`, a factor `5.2`.
+   My own decision log (D56) already recorded that quantity as ranging `2.5×` to `1464×` **"unstably"** — so the
+   abstract stated the least defensible end of a range I had flagged as unreliable.
+2. **The replacement is a real result and the opposite sign:** `t^\ast` is **not grid-convergent**, growing by `1.45×`
+   and `1.64×` from `64²` to `128²`. That is a limitation, and your abstract's limitations paragraph is where it belongs
+   — so the correction makes the abstract *more* honest, not less impressive.
+3. **The cost band was stale: `$2.1$–`$2.7\times$` should be `$2.2$–`$2.7\times$`** (the minimum was re-derived from
+   `2.08` to `2.24`), **and the pessimistic floor `1.4×` was missing** — which matters most in the one sentence where
+   "slower, not cheaper" is being claimed.
+4. **The `2.2` itself is sound** — I re-derived it time-keyed across five shared times and got `2.181`–`2.183`, a spread
+   of `0.09%`. It is now pinned by two registry rows, so it will be checked from now on.
+
+### W11.2 — and one thing to know that is not in the replacement text
+
+**Both grid artifacts are the short run: `final_time = 0.1`, `nsteps = 200`, which is entirely *before* the crossover at
+`t^\ast = 0.649`.** That is exactly where the static baseline is *supposed* to win, and they ran unequal ranks
+(`dlra` adapts over `17–43`; `pod` is fixed at `16`). **So the sentence "against a static subspace of equal rank" is
+violated by the very artifacts any grid claim would cite.** If you want a grid-refinement statement about the *method's
+advantage*, it has to come from the `crossover_N128.json` surface — which is the coder's open item C2-1 — and not from
+these two runs.
+
+### W11.3 — priority
+
+**W11 (this, abstract) → W10 (4 build-breaking cites) → D13/D14 re-paste check → the `99.9%` → `99%` fix in all three
+files → the three D60 sites → D18c (§6) → D18d (§7).** W11 and W10 are both in the abstract's neighbourhood and both take
+minutes; doing them together is one editing pass.
