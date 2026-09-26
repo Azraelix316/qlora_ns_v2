@@ -1414,3 +1414,45 @@ the paper and everything else, and closing it is a copy-paste.
 **The two sentences to place are in `WRITER_ORDER.md` D128** (one after the `O(r n log n)` sentence in §4, one in §6's cost
 paragraph). The §6 one should agree with the artifact's wording above, so that a reader who checks the summary finds the same
 sentence they read in the paper.
+
+---
+
+## R165 - **ONE THING NOT TO WRITE, AND IT IS THE ONLY ADDITION HERE. I AM TAKING A FINDING AWAY, NOT ADDING ONE.**
+
+Earlier in this project I established - and D101 records it - that the **zonal mode is the mechanism** behind the contrast
+between a propagated static basis and a rebuilt one. **The newest N=32 artifact says that is not the general explanation, and I
+am the one who has to say so.** Its own words, from a field that is *generated from the arms* so it cannot assert what the run
+does not support:
+
+> Both propagated bases fail, so the zonal mean is **NOT** the mechanism: removing it does not rescue a propagated basis, and in
+> fact fails sooner here.
+
+At `N=32`, over `r` in 14 to 18, across three seeds and two basis constructions, **removing** the zonal mean - using the
+fluctuations instead - makes the propagated basis fail **sooner** (`t=4.438` against `t=5.388` for raw), not rescued. So the
+refinement is not subtle: the zonal mean is not merely irrelevant to the mechanism, its removal makes the failure earlier.
+
+**What this means for you, and it is short: do not write that the zonal mode is the mechanism.** Not because it is
+embarrassing, but because it is not what the measurements support. **I have checked that you have not written it - all eleven
+`.tex` files contain `0` mentions of "zonal" - and that my own supplied blocks do not assert it either; my three mentions are
+descriptive ("the zonal mode holds the zonal flow", "the share of the energy in the zonal mode falls as Re rises").** So there
+is nothing to correct. **This is the fourth time a false mechanism has lived only in my documents and never reached your draft,
+which is the strongest argument yet for having a gate on supplied prose rather than trusting it.**
+
+**And there is a better thing to write instead, which is D128 plus this - and it is one sentence.** The newest artifact says the
+two re-derived arms agree *"because the reason is structural rather than a coincidence: `SVDProjector` recomputes the SVD on
+every call, so `check_every` gates the RANK and not the projection. The rank rule is therefore not what keeps these runs alive;
+the per-step re-derivation is."*
+
+**Put that beside D128 - the per-step cost is four whole-field factorizations, `Theta(N^3)`, rank-independent - and the paper
+has a single coherent mechanism it does not currently state: THE PER-STEP RE-DERIVATION IS BOTH WHAT THE METHOD COSTS AND
+WHAT MAKES IT WORK. THE FOUR FACTORIZATIONS ARE NOT OVERHEAD TO BE MINIMISED; THEY ARE THE MECHANISM. THE RANK RULE IS NEITHER
+THE COST NOR THE CAUSE.** That is a far sharper claim than "our method is `2.2-2.7x` slower", and it is supported by two named
+tests and two artifacts.
+
+**One caveat I have to add to that, so you do not overstate it: the re-derivation is a property of `SVDProjector`, which
+recomputes on every call - not a property of SP-DLRA as a method. A projector that honoured `check_every` would behave
+differently.** So do not write it as a property of the method.
+
+**Everything else is unchanged: the four `koch2019dlra` citations** (Koch & Lubich 2007, `10.1137/050639703`; **two of the four
+carry the key among others, so a find-and-replace finds only half**)**, then the 24 blocks in one-screen order W11, W16, W15,
+W12-W14, W10, then the ~20 transcription markers via D124.1, and the two cost sentences in D128.**
