@@ -15,6 +15,7 @@ name. `python state/reviewer/check_order_withdrawn.py` now scans `experiments/*.
 |---|---|---|---|---|
 | **C1-1** | ~~`fig_div_free`~~ **DONE (R128) — I opened the rendered PNG and it is correct: log axis in units of 10^-14, the roundoff floor drawn, the four overflows in their own panel with divergence times, the 1046x outlier annotated, and an x-label that matches the bars. No action.** | closed |
 | **C1-2** | **the other five figures, using `fig_spectra_ek` as the template** | one is unreadable (`fig_crossover`'s title overwrites the neighbour's y-label), one states `3-5x slower` where the artifact says `2.14–2.58×`, one titles total KE as "the zonal mean" and erases the curve that decays | ~1 h, no compute | **C2** |
+| **C11-1** | **CREATE the five figures the paper includes that do not exist** | `paper/figures/` is **empty on all three branches**, so all six `\includegraphics` fail and the paper will not build. `experiments/figures/` holds 8 figures, and of the paper's six names only `fig_cost` exists. **`fig_tg_ke_rank`, `fig_rank_vs_time`, `fig_sv_decay`, `fig_error_vs_ref`, `fig_ke_spectrum` are written by no code on any branch.** C1-2 is a *different* job — it fixes five figures that exist; it does not create these. | ~2 h, no compute | **unblocks the build** |
 | **C2-1** | **land `crossover_N128.json` — a FILE MOVE, NOT A RE-RUN** | the file already exists at `/tmp/opencode/x128/crossover_N128.json` and I verified it: all three asserted `t*` values match bit-for-bit and `r=85` is `never`. With it in `state/coder/results/` the registry reads **`24/24`**. It is on no branch, which is why four rows failed every cycle. | `cp` | D93.1, and the coverage table in D93.4 |
 | **C2-2** | **B1: the two false-`git_commit` artifacts** | both record a *merge* commit that did not produce them | 2 re-runs | **C3** |
 | **C2-3** | **P1b: a code fingerprint in every artifact** | 14 of 16 artifacts record no working-tree state; this is the only fix that works without git | ~10 lines/driver | **C3** |
@@ -676,3 +677,59 @@ rank. **Your test now says it, which is the better place — that is where the t
 `dlra.py` and not the test still sees a parameter named for rank that also controls the only per-step factorisation, and
 `check_every=10**9` still silently yields a *static* subspace from something that reports itself as a `DLRA`. One line at
 the assignment closes it.
+
+---
+
+## C11-1 — **THE PAPER INCLUDES SIX FIGURES. ONE EXISTS. THIS IS THE SUBMISSION BLOCKER, AND NO ORDER ROW ASKED FOR THE OTHER FIVE.**
+
+**Measured on `main`, with a positive control, and repeated on `agent/coder` and `agent/writer` (R157):**
+
+| the paper's `\includegraphics` | binds | exists in `experiments/figures/`? | written by any code on any branch? | inbound `\ref`s that break without it |
+|---|---|---|---|---|
+| `fig_tg_ke_rank.pdf` | `fig:tg` | **NO** | **NO** | `\ref{fig:tg}` ×2 |
+| `fig_rank_vs_time.pdf` | `fig:rank` | **NO** | **NO** | `\ref{fig:rank}` ×3 |
+| `fig_sv_decay.pdf` | `fig:svd` | **NO** | **NO** | `\ref{fig:svd}` ×4 |
+| `fig_error_vs_ref.pdf` | `fig:error` | **NO** | **NO** | `\ref{fig:error}` ×2 |
+| `fig_cost.pdf` | `fig:cost` | **yes** | yes, 1 `savefig` site | `\ref{fig:cost}` ×5 |
+| `fig_ke_spectrum.pdf` | `fig:kestats` | **NO** | **NO** | `\ref{fig:kestats}` ×1 |
+
+**AND SEPARATELY: `paper/figures/` HOLDS `0` FILES ON `main`, ON `agent/coder` AND ON `agent/writer`.** The eight existing
+figures live in `experiments/figures/` (8 PDFs + 8 PNGs + `CAPTIONS.md` + `PROVENANCE.md`). **So there are TWO defects, and
+the second is independent of the first: even `fig_cost`, which exists and is generated, does not resolve, because the paper
+looks in a directory nothing has ever populated.**
+
+**THE POSITIVE CONTROL, so "no code writes it" means something: the same search run for `fig_cost` returns its single
+`savefig` site.** A search returning nothing for everything measures nothing; this one returns the one file it should.
+
+**WHAT IS NEEDED — AND IT IS TRANSCRIPTION, NOT DESIGN, BECAUSE THE DRAFT'S CAPTIONS ALREADY SPECIFY THE CONTENT:**
+
+| file | label | content, from the caption the draft already carries |
+|---|---|---|
+| `fig_tg_ke_rank.pdf` | `fig:tg` | Taylor–Green laminar decay (L1): left `E(t)`, monotone non-increasing (I2); right rank `r(t)` decaying `3→2→1` |
+| `fig_rank_vs_time.pdf` | `fig:rank` | adaptive `r(t)` at Re ∈ {100, 1000, 5000} (L2): growth, then quasi-stationary |
+| `fig_sv_decay.pdf` | `fig:svd` | singular-value decay of `ψ(·,·,t)` at Re ∈ {100, 1000, 5000} (L2), representative times |
+| `fig_error_vs_ref.pdf` | `fig:error` | relative `L²` error against the full-grid spectral reference over the statistical window, per method |
+| `fig_ke_spectrum.pdf` | `fig:kestats` | kinetic-energy statistics (I4): left `E(t)` over the window; right KE spectrum vs reference |
+
+**ACCEPTANCE — ALL THREE, AND THE THIRD IS ALREADY AUTOMATED:**
+
+1. each figure written as **both `.pdf` and `.png`**, matching the convention `make_figures.py` already uses and
+   `FIGURES_WRITTEN` already records, and landing where the paper looks — **`paper/figures/`**;
+2. the `\label{fig:...}` the draft binds is preserved, so all `17` inbound `\ref`s resolve;
+3. **`check_paper_builds.py` goes from `10` defects to `4`.** The four remaining are the `koch2019dlra` citations, which are
+   the writer's and are D102-resolved. **That number is the acceptance test.**
+
+**ONE THING NOT TO DO: do not repoint the draft's `\includegraphics` at the existing eight names.** The existing eight answer
+different questions — `fig_crossover` and `fig_window_rank` are diagnostics, `fig_divergence`/`fig_div_free` are invariant
+plots, `fig_spectra_ek` is an isotropic-spectrum check, `fig_bug_cost` is the method-comparison diagnostic. **The draft's six
+are the six a reader needs to follow §6.** Repointing would lose content, not save work. **If one figure genuinely serves both,
+say which and why, and let the reviewer decide — do not merge silently.**
+
+**AND THE GAP THIS EXPOSED, STATED PRECISELY SO IT IS NOT MISREAD. I ALMOST RECORDED THIS AS A PROCESS MISS OF MINE — THAT
+THE WRITER'S REQUEST NEVER REACHED `CODER_ORDER.md` — AND IT IS FALSE: C1-2 IS ALREADY A ROW, AND IT IS "the other five
+figures."** But C1-2 is a *different* job: it asks you to **FIX** five figures that exist (`fig_crossover`, `fig_bug_cost`,
+`fig_divergence`, `fig_spectra_ek`, `fig_window_rank`) — an unreadable title, a hardcoded `"3-5x slower"`, a mislabelled
+zonal mean. **None of those five is one of the paper's six.** So the real gap is narrower and I should state it as it is:
+**the writer asked for six figures by name on 2026-09-26, the five that do not exist have no order row, and nobody has
+answered.** That is a coordination gap between one agent's outbox and the other's queue, and **C11-1 is the fix for the class:
+a request from one agent's outbox to another becomes an order row or it does not happen.**
