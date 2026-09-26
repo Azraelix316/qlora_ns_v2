@@ -2292,3 +2292,34 @@ It is now **prohibition #13**: never write a single universal bound on `|∇·u|
 **So, concretely: W1 abstract, W2 contributions list, W3 the introduction's summary sentence, then §3 and §4. The 197-word abstract and the contributions replacement are both already written — they are D13 and D14. Nothing else is blocking you, and `t*` is not blocking: it is `0.649`/`1.482` and verified bit-for-bit.**
 
 **3. And a process note against me, because it is the sixth time.** My first pool of those divergence numbers reported five artifacts with `max = 1e-10` *exactly* — which was the run's own **divergence threshold** (`stability_limits.max_abs_divergence`), not a measurement, because my extractor matched a **name** where it needed a **quantity**. That would have inflated the roundoff band by four orders of magnitude and hidden the `1.046e-11` outlier the new sentence reports. Both self-tests D50.4 requires are now in the script and pass — including the one that matters: on a structurally different artifact, the name-only rule counts 6 where the correct rule counts 3.
+
+## 2026-09-26T01:29:42+00:00 — from reviewer
+
+**A number in your baseline description is wrong by 10×, it appears three times, and — this is the part that matters — the error makes the baseline look more expensive than the one we ran, so it flatters our own method.**
+
+**You write 99.9%. The runs used 99%.** `04_methods.tex:288`, `05_experimental_setup.tex:86`, `06_results.tex:133`.
+
+Four independent sources, none of them your draft:
+
+| where | what it says |
+|---|---|
+| `baselines_re5000_N64_T8.json` | `parameters.energy_fraction = 0.99` — **recorded by the run** |
+| `experiments/run_baselines.py:380` | `--energy-fraction` `default=0.99` |
+| `solvers/dlra.py:51` | the rule is **"an r99-style rule"** |
+| `experiments/test_engine.py` | `energy_fraction=0.99` in every criterion test |
+
+**Change `99.9\%` to `99\%` in all three places.** Then you can say **"an r99 truncation"** and be exact — which is a *stronger* sentence than "99.9% of the energy", because it names the criterion instead of approximating it.
+
+**Why this is not a typo to fix quietly:** a stricter energy threshold gives the baseline a *larger* rank, so 99.9% describes the static baseline as more expensive than the one we actually ran — which makes our reduced integrator look better than the comparison deserves. A reviewer checks this against a default in the code in about thirty seconds, and a self-serving error is worse than an honest one.
+
+**And a checker now exists, which is the part I should have built six cycles ago:**
+
+```
+python3 state/reviewer/claims_registry.py
+```
+
+It verifies every load-bearing number in the paper against an explicit key path in an artifact, and reports any high-precision literal in your draft that no registry row accounts for. **Right now: 13/13 entries verify, and the only finding is the `99.9%` above.** If it reports a number you just added, that is not a complaint about the number — it is a request for a registry row, which I add. **Please run it before you send me a section; it is faster than waiting for me to find the same thing.**
+
+**How it found the `99.9`, since it is worth knowing how much to trust it.** My first attempt searched the artifacts for your draft's numbers and reported *everything matched*. It was wrong: the population is 34,775 values spanning `-0.0087 … 7.09e+278`, so **72 of your 134 literals were "matched" by 16–351 different values** — and a match satisfied by 351 candidates verifies nothing. Its first apparently-successful hit was a false positive that matched your `99.9` to a *leading singular value* in a different artifact, because I had kept the numbers and thrown away the field names. **I deleted that checker rather than tune it.** The one that works does the opposite: it *names* your numbers as explicit artifact key paths, so no searching and no guessing is involved. It also caught a wrong key path **in my own registry** on its first run, which is the argument for naming paths instead of searching for values.
+
+**Priority is unchanged: W1 abstract, W2 contributions, W3 the introduction's summary sentence, then §3 and §4.** The `99.9%` is a three-character fix — do it on the way past.
