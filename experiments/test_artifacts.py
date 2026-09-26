@@ -43,6 +43,107 @@ def load(name: str) -> dict:
     return json.loads(path.read_text())
 
 
+def test_the_zonal_share_and_the_fluctuation_share_are_exact_complements():
+    """The definition is machine-readable, and the two halves are complements.
+
+    On 2026-09-26 the reviewer recomputed the pair of series D106 is derived from,
+    formed ``fluctuation / total`` -- the *fluctuation* share, ~82% -- and read
+    the recorded ~20% as a different quantity that was "a factor of 4 apart with
+    the Re trend inverted". Both halves of that are consequences of the ratio not
+    being stated: the recorded number is the *complement*, and because the energy
+    is additive under the zonal split the two sum to 1 exactly, so the Re trend
+    is the same trend seen from the other side rather than an opposite one.
+
+    Three things are asserted, in increasing order of how much they would have
+    caught:
+
+    1. the artifact *states* the formula, the numerator, the denominator and the
+       index, so it can be read without inferring a ratio from key names;
+    2. the stored share equals the ratio recomputed from the stored component
+       energies, so the definition and the number cannot disagree;
+    3. the two shares sum to 1, which is what makes (2) non-coincidental.
+    """
+    import sys
+
+    from _paths import EXPERIMENTS
+    sys.path.insert(0, str(EXPERIMENTS))
+    from run_kolmogorov import zonal_fraction_semantics
+
+    semantics = zonal_fraction_semantics()
+    # (1) the definition, not a description of it.
+    assert "(energy_history - fluctuation_energy_history) / energy_history" in (
+        semantics["formula_zonal"]
+    ), semantics["formula_zonal"]
+    assert "fluctuation_energy_history / energy_history" in (
+        semantics["formula_fluctuation"]
+    ), semantics["formula_fluctuation"]
+    for key in ("energy_history", "fluctuation_energy_history", "index",
+                "the_two_are_exact_complements", "how_to_miscompute_it"):
+        assert key in semantics, f"the definition omits {key!r}"
+
+    for name in ("kolmogorov_re100_N64.json", "kolmogorov_re1000_N64.json",
+                 "kolmogorov_re5000_N64.json", "kolmogorov_re5000_N128.json"):
+        data = load(name)
+        assert data is not None, name
+        for method in ("full", "dlra"):
+            block = data[method]
+            assert "zonal_fraction_semantics" in block, (
+                f"{name}:{method} has no zonal_fraction_semantics, so the share's "
+                "definition lives only in a decision record"
+            )
+            stored = block["zonal_fraction_semantics"]["formula_zonal"]
+            assert stored == semantics["formula_zonal"], (name, method, stored)
+            for index in ("at_t0", "at_final_step"):
+                zonal = block["zonal_energy_fraction"][index]
+                fluct = block["zonal_energy_fraction_fluctuation"][index]
+                comp = block["zonal_energy_fraction_components"][index]
+                # (2) the number equals the ratio of the recorded components.
+                assert abs((comp["total_energy"] - comp["fluctuation_energy"])
+                           / comp["total_energy"] - zonal) < 1e-15, (name, method, index)
+                assert abs(comp["fluctuation_energy"] / comp["total_energy"]
+                           - fluct) < 1e-15, (name, method, index)
+                # (3) and the two are exact complements, which is the identity
+                # that makes the reviewer's ~82% the same measurement.
+                assert abs(zonal + fluct - 1.0) < 1e-15, (
+                    f"{name}:{method}:{index}: zonal {zonal} + fluctuation {fluct} "
+                    f"= {zonal + fluct}, not 1"
+                )
+
+
+def test_the_energy_is_additive_under_the_zonal_split():
+    """The complement identity is structural, not a coincidence of one run.
+
+    E(psi) = E(zonal) + E(psi') holds because the Parseval inner product of
+    grad(psi_zonal) with grad(psi') vanishes -- the zonal mode occupies only kx=0
+    and psi' occupies only kx!=0.  If this ever stopped holding, the complement
+    claim in ``zonal_fraction_semantics`` would become false and the
+    documentation would be lying, so it is measured rather than asserted in
+    prose.  A random field is used because a single-Fourier-mode field would
+    satisfy it trivially.
+    """
+    import sys
+
+    import numpy as np
+
+    from _paths import EXPERIMENTS, REPO_ROOT
+    sys.path.insert(0, str(EXPERIMENTS))
+    sys.path.insert(0, str(REPO_ROOT))
+    from solvers.spectral import Grid2D, fluctuations, zonal_mean
+
+    rng = np.random.default_rng(20260926)
+    for N in (16, 32, 64):
+        grid = Grid2D(N)
+        k = np.fft.fftfreq(N)
+        psi = np.fft.ifft2(
+            rng.normal(size=(N, N))
+            * np.exp(-(k[:, None] ** 2 + k[None, :] ** 2) / 4.0)
+        ).real
+        total = grid.ke(psi)
+        zonal = grid.ke(zonal_mean(psi))
+        fluct = grid.ke(fluctuations(psi))
+        assert abs(zonal + fluct - total) <= 4e-16 * total, (N, zonal + fluct, total)
+
+
 def test_the_static_baseline_error_is_flat_in_rank_above_16():
     """The mechanism the paper's central claim rests on, asserted on the artifact.
 

@@ -22,7 +22,8 @@ if str(ROOT) not in sys.path:
 
 from experiments.run_kolmogorov import (
     _energy_residual,
-    _zonal_fraction,
+    _share_block,
+    zonal_fraction_semantics,
     _stability_assessment,
     _git_commit,
     initial_state_fingerprint,
@@ -279,17 +280,20 @@ def run_case(
             "max_scaled_projected_energy_residual": full_residual,
             "fluctuation_energy_history": full_fluctuation_energy,
             "fluctuation_enstrophy_history": full_fluctuation_enstrophy,
-            "zonal_energy_fraction": _zonal_fraction(
-                full_energy, full_fluctuation_energy_sampled
+            **_share_block(
+                full_energy, full_fluctuation_energy_sampled, "zonal_energy_fraction"
             ),
-            "zonal_enstrophy_fraction": _zonal_fraction(
-                full_enstrophy, full_fluctuation_enstrophy_sampled
+            **_share_block(
+                full_enstrophy, full_fluctuation_enstrophy_sampled,
+                "zonal_enstrophy_fraction",
             ),
+            "zonal_fraction_semantics": zonal_fraction_semantics(),
             "zonal_fraction_definition": (
                 "zonal/total at t=0 and at the final step, from the psi' series. "
                 "The fluctuation dominates at these settings, so the total is NOT "
                 "zonal-dominated; this run measures the share over the whole "
-                "horizon rather than at one instant."
+                "horizon rather than at one instant. For the formula, the index, "
+                "and the exact-complement identity, read zonal_fraction_semantics."
             ),
             "singular_value_steps": sorted(full_spectrum),
             "singular_values": [full_spectrum[s] for s in sorted(full_spectrum)],
@@ -316,12 +320,14 @@ def run_case(
             "max_scaled_pde_energy_residual": dlra_full_pde_residual,
             "fluctuation_energy_history": dlra_fluctuation_energy,
             "fluctuation_enstrophy_history": dlra_fluctuation_enstrophy,
-            "zonal_energy_fraction": _zonal_fraction(
-                dlra_energy, dlra_fluctuation_energy_sampled
+            **_share_block(
+                dlra_energy, dlra_fluctuation_energy_sampled, "zonal_energy_fraction"
             ),
-            "zonal_enstrophy_fraction": _zonal_fraction(
-                dlra_enstrophy, dlra_fluctuation_enstrophy_sampled
+            **_share_block(
+                dlra_enstrophy, dlra_fluctuation_enstrophy_sampled,
+                "zonal_enstrophy_fraction",
             ),
+            "zonal_fraction_semantics": zonal_fraction_semantics(),
             "max_scaled_projected_energy_residual": dlra_residual,
             "rank_history": [int(x) for x in dlra.rank_history],
             "rank_min": int(min(dlra.rank_history)),
