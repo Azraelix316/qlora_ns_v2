@@ -7283,3 +7283,70 @@ has no zonal measurement.
 
 **D106.10 — Unchanged.** Everything in D35.6 through D105.8 stands, **except that the C1-3d and C1-3g figure defects are
 closed, D101's mechanism now has a number attached, and `fig_crossover`'s title and one code comment are newly wrong.**
+
+---
+
+## D107 — **MY OWN BOARD'S `> Status:` LINE HAD ACCRETED TO **33,003 CHARACTERES — 5,513 WORDS ON ONE LINE** — ALL OF IT HISTORY ALREADY PRESENT IN THE 165 DATED `## Log` ENTRIES DIRECTLY BELOW IT. FIXED, AND `check_headings.py` NOW ENFORCES THE ONE-LINE PROPERTY.** (2026-09-26)
+
+> **OPERATIVE (R144). THE STATUS LINE IS 394 CHARACTERS. THE CHECK HAS 2 MUST-PASS AND 2 MUST-FIRE CASES FOR IT.**
+
+**D107.1 — THE MEASUREMENT.**
+
+```
+  line 4 of NOTES.md: 33,003 characters, 5,513 words, on ONE line
+  total NOTES.md lines: 10,329, of which 165 are dated '- 2026-...' Log entries
+```
+
+**`AGENTS.md` DESCRIBES THIS FIELD AS *"THE ONE-LINE CURRENT STATE"*. MINE WAS NOT ONE LINE. IT WAS A PARAGRAPH-PER-CYCLE
+DIARY THAT BEGAN AT R118 AND HAD BEEN APPENDED-TO, NOT REPLACED, EVERY CYCLE SINCE.**
+
+**D107.2 — WHY, AND IT IS THE INSTRUCTION, NOT A SLIP.** `AGENTS.md` RULE 8 ASKS FOR **TWO** ACTIONS: *"UPDATE THE
+`> Status:` LINE **AND** APPEND A DATED `## Log` ENTRY."** I DID THE SECOND ONE APPROXIMATELY 143 TIMES AND THE FIRST ONE
+**AS AN APPENDMENT** — SO EVERY CYCLE'S SUMMARY WAS BOTH APPENDED TO THE STATUS LINE *AND* WRITTEN INTO THE LOG BELOW IT.
+**THE CONTENT IS THEREFORE DOUBLED, AND THE HALF THAT IS DOUBLED IS THE HALF `AGENTS.md` DESCRIBES AS ONE LINE.**
+
+**D107.3 — AND THE COST IS PRECISELY THE FAILURE THE PROJECT KEEPS PAYING, IN MY OWN BOARD. AN AGENT WHO OPENS
+`NOTES.MD` READS 5,513 WORDS BEFORE REACHING THE LOG — AND EVERY WORD OF IT IS HISTORY THAT IS TWICE-STORED AND
+PRECEDES THE ONE THING THEY NEED, WHICH IS WHAT TO DO NEXT.** This is the same shape as the other D-series findings one
+level up: **a field that has stopped carrying its stated quantity.** `START_HERE.md` §4 is the entry point and it is 31
+lines; `NOTES.md`'s status line had become 5,513 words and was the worst-read surface in the reviewer's own directory.
+
+**D107.4 — THE FIX IS A REPLACEMENT, NOT A DELETION. THE STATUS LINE IS NOW 394 CHARACTERS:**
+
+> `> Status: main f123a99, 236 files, 0 pycache, 7 gates green (registry 31/35, 10 build defects, 47 tests). Blocked on
+> C2-1 crossover_N128.json (would make the registry 33/33). Writer: W11 (my false abstract claim), W12-W14 (§5), W10
+> (4 build-breaking cites). Coder: C7-1 (figure title vs its own axis), C6-1 (test docstring). §6/§7 supplied as
+> D18c/D18d; §5 protocol and §8 still the writer's.`
+
+**NOTHING WAS LOST: ALL 165 DATED LOG ENTRIES ARE UNTOUCHED, AND EVERY CYCLE SINCE R118 IS ALREADY IN THEM. THE STATUS LINE
+WAS A THIRD COPY OF THE SAME 143 SUMMARIES, AND THE ONE THAT WAS HARDEST TO READ.**
+
+**D107.5 — THE CHECK, AND WHY IT IS STRUCTURAL RATHER THAN TEXTUAL (D95). `check_headings.py` GAINS ONE PROPERTY: THERE IS
+EXACTLY ONE `> Status:` LINE AND IT IS AT MOST 400 CHARACTERS.** It reads the `> Status:` **prefix** and counts characters.
+**It cannot fire because a status says something the check disagrees with — only because it has stopped being a status.**
+That is the difference between this and a gate that greps for forbidden phrases, which trains a reader to skip it.
+**Self-test: 2 must-pass (a genuine one-liner; one liner among other content) and 2 must-fire — THE FIRST MUST-FIRE CASE IS
+THE REAL DEFECT, A 34,000-CHARACTER STATUS LINE, AND THE SECOND IS TWO STATUS LINES.** The check reported
+`0 wrapped heading(s), 0 impersonating, 1 status-line failure(s)` and named the field, its length, its word count and the cap.
+
+**D107.6 — AND A BUG THE EXTENSION ITSELF INTRODUCED, WHICH I CAUGHT BEFORE BELIEVING IT. I FOLDED THE STATUS-LINE FAILURE
+INTO THE WRAPPED-HEADING COUNTER, SO THE CHECK REPORTED *"1 wrapped heading(s)"* WHEN THE TRUE COUNT WAS `0` AND THE `1`
+WAS THE STATUS FAILURE.** A scan of the check's own eight documents found **no** wrapped headings at all, which is what
+exposed it. **That is the seventh instance of this family** (D60, D66, D77, D83, D84, D95, D97, D104): *the counter
+miscounts, and the population printed above it is the only thing that reveals it.* The printed population is not
+decoration; it is the instrument.
+
+**D107.7 — AND THE OTHER GATE EARNED ITS PLACE THIS CYCLE, UNPROMPTED. `check_start_here.py`, INSTALLED IN R139, FIRED ON
+THE MERGE THAT LANDED THE CODER'S 47th TEST:**
+
+```
+  FAIL  pytest --collect-only  tests in the suite: needs '47 tests'  -- ABSENT from section 4
+        evidence: collected only, NOT run: '47 tests collected'
+```
+
+**ONE CYCLE AFTER BEING INSTALLED, IT CAUGHT THE EXACT FAILURE MODE IT WAS BUILT FOR — A NUMBER IN MY ENTRY POINT THAT
+HAD FALLEN BEHIND THE PROJECT — AND IT REPORTED THE EVIDENCE BESIDE THE FAILURE. `START_HERE.md` IS CORRECTED TO `47 tests,
+~240 s`.** Two gates, installed in consecutive cycles, have now each caught a real defect that no amount of reading had.
+
+**D107.8 — Unchanged.** Everything in D35.6 through D106.10 stands, **except that the board's status line is one line, the
+one-line property is enforced, and the wrapped-heading count is reported separately from it.**

@@ -53,7 +53,7 @@ python3 state/reviewer/check_paper_builds.py     # can the paper build? (the onl
 python3 state/reviewer/check_headings.py         # my own documents: no heading wrapped across two lines
 python3 state/reviewer/check_start_here.py       # is THIS file still true? (it computes the numbers below)
 python3 state/reviewer/check_directional_claims.py  # two-sided magnitude claims a referee will check
-python3 -m pytest experiments/ -q                # 46 tests, ~200 s (pin OMP/OPENBLAS/MKL=1)
+python3 -m pytest experiments/ -q                # 47 tests, ~240 s (pin OMP/OPENBLAS/MKL=1)
 ```
 
 **`claims_registry.py` reports `31/35` verified.** The **4** failures are the `crossover_N128.json` rows, and that file
