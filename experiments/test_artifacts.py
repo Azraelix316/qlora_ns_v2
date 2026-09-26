@@ -172,6 +172,65 @@ def test_the_long_run_zonal_share_is_computed_from_ALIGNED_series():
         )
 
 
+def test_the_repin_request_list_is_current_and_explains_every_row():
+    """The re-pin list is generated from the gate, so it cannot be stale.
+
+    Twelve `claims_registry.py` rows needed numbers changed in a file this agent
+    does not own, and every one of them is a sixteen-significant-figure value
+    destined for hand-transcription. Prose in an outbox message plus a
+    hand-edited registry is where a digit is lost quietly.
+
+    So the list is generated, and the part that makes it worth having is *how*:
+    `make_repin_requests.py` runs the reviewer's registry against the current
+    artifacts and the current draft, and reports what the gate reports. A row that
+    stops failing leaves the list; a row that starts failing joins it. A
+    hand-maintained list of things to re-pin would be stale the moment the gate
+    moved, and a stale list that claims to be complete is worse than no list.
+
+    Two properties are asserted here rather than the values:
+
+    * regenerating the list changes nothing -- which is the staleness check; and
+    * every row in it carries a stated reason, so an unexplained failure is
+      visible instead of being quietly absent.
+    """
+    import json as _json
+    import subprocess
+    import sys
+
+    from _paths import EXPERIMENTS, REPO_ROOT
+
+    before = load("repin_requests.json")
+    assert before is not None, "repin_requests.json has never been generated"
+
+    result = subprocess.run(
+        [sys.executable, str(EXPERIMENTS / "make_repin_requests.py")],
+        cwd=REPO_ROOT, capture_output=True, text=True, timeout=3600,
+    )
+    assert result.returncode == 0, (
+        f"the re-pin generator failed:\n{result.stdout[-1200:]}\n{result.stderr[-600:]}"
+    )
+    after = _json.loads((REPO_ROOT / "state" / "coder" / "results"
+                         / "repin_requests.json").read_text())
+
+    assert after["rows"] == before["rows"], (
+        "the re-pin list is stale -- the gate's failures have changed since it was "
+        f"written.\n  was: {[r['row'] for r in before['rows']]}\n"
+        f"  now: {[r['row'] for r in after['rows']]}\n"
+        "Re-commit the regenerated list, and say in the outbox which rows moved."
+    )
+    assert not after["rows_without_a_stated_reason"], (
+        "these failing rows have no stated reason, so the list is not a closed "
+        f"one: {after['rows_without_a_stated_reason']}"
+    )
+    for row in after["rows"]:
+        assert row.get("reason"), row["row"]
+        assert "measured" in row and "registry_holds" in row, row
+    # The list must name where it came from, or "generated from the gate" is a
+    # claim with nothing behind it.
+    assert after["generated_from"]["registry_ref"], after["generated_from"]
+    assert after["generated_from"]["draft_ref"], after["generated_from"]
+
+
 def test_every_driver_can_print_its_own_help():
     """`--help` is how a person discovers the flags, so it must not crash.
 
