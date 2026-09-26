@@ -330,17 +330,27 @@ def main() -> None:
     # dependence that is allocator noise, and the conservative side of that
     # error is the larger floor.
     repeats = [r for r in rows if r["repeat"] > 0]
-    noise = {}
+    # A LIST, keyed by repeat.  This was a dict keyed by configuration, which
+    # silently kept only the last repeat: the noise floor was one sample no
+    # matter how many were measured, and it reported `samples: 1` while looking
+    # like an estimate.  A distribution stored in a dict keyed by the thing it
+    # varies with is a distribution of size one, which is how the 34x swing
+    # survived four re-measurements unnoticed.
+    noise = []
     for r in repeats:
         base = by_key.get((r["method"], r["N"], r["rank"]))
         if base is not None:
-            noise[f"N{r['N']}_{r['method']}_r{r['rank']}"] = abs(
-                r["peak_rss_mib"] - base["peak_rss_mib"]
-            )
-    noise_floor = max(noise.values()) if noise else None
+            noise.append({
+                "config": f"N{r['N']}_{r['method']}_r{r['rank']}",
+                "N": r["N"], "method": r["method"], "rank": r["rank"],
+                "repeat": r["repeat"],
+                "delta_mib": abs(r["peak_rss_mib"] - base["peak_rss_mib"]),
+            })
+    deltas = [n["delta_mib"] for n in noise]
+    noise_floor = max(deltas) if deltas else None
     noise_stats = None
-    if noise:
-        ordered = sorted(noise.values())
+    if deltas:
+        ordered = sorted(deltas)
         median = (ordered[len(ordered) // 2] if len(ordered) % 2
                   else 0.5 * (ordered[len(ordered) // 2 - 1]
                               + ordered[len(ordered) // 2]))
