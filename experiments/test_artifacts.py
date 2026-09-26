@@ -316,6 +316,96 @@ def test_a_diverged_method_cannot_destroy_the_whole_artifact():
     assert safe["methods"]["diverged"]["max_abs_divergence"] == 7.09e278
 
 
+def test_a_committed_artifact_reproduces_bit_for_bit(tmp_path):
+    """The reproducibility claim, enforced rather than asserted (C8-3).
+
+    The project's strongest selling point is that a re-run reproduces every
+    recorded series *byte-identically* -- not to a tolerance, not on the scalars
+    that matter, on everything except the timings. That is the kind of statement
+    reviewers ask for and rarely get, and it is currently only a sentence.
+
+    So it is a test. One suite configuration is re-run into a temporary file and
+    compared field by field against the committed artifact, with **bit-identity**
+    required (``==`` on the floats, not ``isclose``): a tolerance would let a
+    drift of any size pass as long as it stayed small, which is exactly the
+    failure the claim is meant to exclude. Only timing fields and the provenance
+    block are excluded, and the exclusion list is written out rather than
+    pattern-matched, so a new timing field has to be added deliberately.
+
+    Cost is about 30 s at T=0.1, which is the shortest horizon the project runs
+    and the one every artifact in the suite shares.
+    """
+    import subprocess
+    import sys
+
+    from _paths import CANONICAL_ARGS, REPO_ROOT, EXPERIMENTS  # noqa: F401
+
+    committed = load("kolmogorov_re5000_N64.json")
+    assert committed is not None, "the canonical Re=5000 N=64 run is absent"
+
+    out = tmp_path / "repro.json"
+    result = subprocess.run(
+        [sys.executable, str(EXPERIMENTS / "run_kolmogorov.py"),
+         *CANONICAL_ARGS, "--output", str(out)],
+        cwd=REPO_ROOT, capture_output=True, text=True, timeout=1800,
+    )
+    assert result.returncode == 0, (
+        f"the re-run failed:\n{result.stdout[-800:]}\n{result.stderr[-800:]}"
+    )
+    fresh = json.loads(out.read_text())
+
+    # Excluded deliberately, not by pattern: a new timing field must be added
+    # here on purpose rather than swept up by a substring match.
+    timing = {
+        "wall_seconds", "wall_seconds_per_step", "seconds_per_step",
+        "initialization_seconds", "fit_seconds", "offline_plus_online_seconds",
+        "linear_algebra_seconds", "linear_algebra_seconds_per_step",
+        "peak_rss_mib", "provenance", "generated",
+    }
+
+    differences, compared = [], 0
+
+    def walk(a, b, path):
+        nonlocal compared
+        if path.split(".")[-1] in timing:
+            return
+        if isinstance(a, dict):
+            for key in a:
+                if key not in b:
+                    differences.append(f"{path}.{key}: absent from the re-run")
+                    continue
+                walk(a[key], b[key], f"{path}.{key}")
+        elif isinstance(a, list):
+            if len(a) != len(b):
+                differences.append(
+                    f"{path}: length {len(a)} vs {len(b)}"
+                )
+                return
+            for i, (x, y) in enumerate(zip(a, b)):
+                walk(x, y, f"{path}[{i}]")
+        else:
+            compared += 1
+            # Bit-identity, deliberately: `==` and not `isclose`.
+            if a != b:
+                differences.append(
+                    f"{path}: committed {a!r} vs re-run {b!r}"
+                )
+
+    walk(committed, fresh, "")
+    assert compared > 500, (
+        f"only {compared} fields were compared, which is too few for the "
+        f"comparison to mean anything"
+    )
+    assert not differences, (
+        f"{len(differences)} of {compared} fields differ between the committed "
+        f"artifact and a re-run of the same configuration on committed code. "
+        f"Bit-identity is the claim; a difference breaks it:\n  "
+        + "\n  ".join(differences[:12])
+        + (f"\n  ... and {len(differences) - 12} more" if len(differences) > 12
+           else "")
+    )
+
+
 def test_every_driver_runs(tmp_path):
     """Each driver must actually execute, at a size that costs nothing.
 
