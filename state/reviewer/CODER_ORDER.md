@@ -69,7 +69,24 @@ differ by nearly `2×`.**
 
 ## 2. Tier 2 — fifteen lines, no compute, and they close a five-cycle failure of mine
 
-**I have 40 component tests and 0 artifact tests. These two would have caught four of my five errors.**
+**I have 40 **verification** tests — negative controls, brute-force cross-checks, exact-solution and
+temporal-order checks — all passing on clean `main` in 179 s (verified R88, D51.2), and 0 artifact
+tests. These would have caught four of my five errors. And the highest-value one to add is below.**
+
+**T0 — THE THESIS'S CENTRAL CONTRAST MUST BE PRESENT IN THE ARTIFACT. This is the single most valuable
+artifact test in the project, because the paper's thesis *is* a claim about this contrast and a contrast
+nobody asserts can silently disappear.** Read `state/coder/results/baselines_re5000_N64_T8.json` and
+assert:
+
+- every `pod_early_r*` / `pod_late_r*` with `rank >= 32` has `diverged is True` and
+  `covers_requested_window is False`;
+- **every** `dlra_*` method has `diverged is False` and `final_time_reached == 8.0`;
+- `set(diverged_methods) == {m for m in methods if methods[m]["diverged"]}`.
+
+No compute — it reads the committed artifact. **It cannot be a fast unit test** (the earliest recorded
+divergence is step 11 026, `pod_late_r32` at `t=5.513`), **which is exactly why it must be an artifact
+test.** Please also record `diverged_at_step` and `diverged_at_time` in the assertion message, so a
+failure says *when* the contrast broke rather than only that it did.
 
 **T1 — the committed `crossovers` block is derivable from the committed rows.** For every `re` and
 every entry, `crossover_horizon(br["dlra"][str(rank)], br["static_moving_window"][f"W{w:g}_r{rank}"])`
