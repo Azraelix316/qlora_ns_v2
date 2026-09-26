@@ -21,6 +21,7 @@ import numpy as np
 
 # Make direct ``python experiments/run_*.py`` execution work from any cwd.
 ROOT = Path(__file__).resolve().parents[1]
+from provenance import provenance as _provenance
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -216,11 +217,48 @@ def _energy_residual(
     residual = terms.residual_from_derivative(derivative)
     # A projection changes the numerical state by an explicit amount.  For a
     # reduced run, subtract that measured control work before judging the
-    # discrete balance; the unmodified residual is retained separately as a
+    # discrete balance; the unmodified residual is retained separately as the
     # full-PDE diagnostic.
     residual -= projection_energy_increment / dt
     scale = max(1.0, abs(terms.dissipation), abs(terms.forcing_input))
     return abs(residual) / scale
+
+
+def energy_residual_semantics() -> dict:
+    """What the two energy-residual keys mean, recorded in every artifact.
+
+    They differ only in whether the projection's energy increment is included,
+    and for a *projected* method that difference is large -- a writer who takes
+    the projection-aware number for the PDE balance understates the violation by
+    the size of the projection's work, which is a factor of hundreds here.  So
+    the artifact says which is which, and says the scale, rather than relying on
+    a reader guessing from the key name.
+    """
+    return {
+        "max_scaled_projected_energy_residual": (
+            "the kinetic-energy balance residual of the *projected* discrete "
+            "dynamics: the projection's measured energy increment is subtracted "
+            "first, so this is the balance the reduced integrator actually "
+            "satisfies. For a full-grid run it coincides with the PDE residual, "
+            "because there is no projection."
+        ),
+        "max_scaled_pde_energy_residual": (
+            "the same balance with NO projection term: how far the numerical "
+            "state departs from the full PDE's own energy balance. A projected "
+            "method violates this by construction, and the violation is the "
+            "price of the projection, not an integration error."
+        ),
+        "scale": (
+            "each is divided by max(1, |dissipation|, |forcing input|) evaluated "
+            "at the step, so it is a relative residual and the scale varies "
+            "during a run"
+        ),
+        "which_to_quote": (
+            "quote max_scaled_projected_energy_residual for 'does the reduced "
+            "solver conserve energy', and max_scaled_pde_energy_residual for "
+            "how much the projection costs. Do not quote one for the other."
+        ),
+    }
 
 
 def _stability_assessment(
@@ -344,8 +382,9 @@ def _run_full(
             "max_scaled_residual": finite_or_none(max_residual),
         },
         "max_abs_divergence": finite_or_none(max_div),
-        "max_scaled_full_pde_energy_residual": finite_or_none(max_residual),
-        "max_scaled_energy_balance_residual": finite_or_none(max_residual),
+        "max_scaled_pde_energy_residual": finite_or_none(max_residual),
+        "max_scaled_projected_energy_residual": finite_or_none(max_residual),
+        "energy_residual_semantics": energy_residual_semantics(),
         "max_energy_increase": finite_or_none(max_energy_increase),
         "stable": stability["stable"],
         "unstable_step": stability["unstable_step"],
@@ -472,8 +511,9 @@ def _run_projected(
         "max_relative_l2_vs_full": max_error,
         "final_relative_l2_vs_full": final_error,
         "max_abs_divergence": finite_or_none(max_div),
-        "max_scaled_full_pde_energy_residual": finite_or_none(max_full_pde_residual),
-        "max_scaled_energy_balance_residual": finite_or_none(max_residual),
+        "max_scaled_pde_energy_residual": finite_or_none(max_full_pde_residual),
+        "max_scaled_projected_energy_residual": finite_or_none(max_residual),
+        "energy_residual_semantics": energy_residual_semantics(),
         "max_energy_increase": finite_or_none(max_energy_increase),
         "stable": stability["stable"],
         "unstable_step": stability["unstable_step"],
@@ -555,7 +595,7 @@ def run_case(
         return {
             "case": "kolmogorov",
             "provenance": {
-                "git_commit": _git_commit(),
+            **_provenance(Path(__file__).resolve()),
                 "driver": "experiments/run_kolmogorov.py",
             },
             "grid": {"N": N, "L": grid.L},
@@ -747,8 +787,9 @@ def run_case(
             "max_scaled_residual": finite_or_none(dlra_max_residual),
         },
         "max_abs_divergence": finite_or_none(dlra_max_div),
-        "max_scaled_full_pde_energy_residual": finite_or_none(dlra_max_full_pde_residual),
-        "max_scaled_energy_balance_residual": finite_or_none(dlra_max_residual),
+        "max_scaled_pde_energy_residual": finite_or_none(dlra_max_full_pde_residual),
+        "max_scaled_projected_energy_residual": finite_or_none(dlra_max_residual),
+        "energy_residual_semantics": energy_residual_semantics(),
         "max_energy_increase": finite_or_none(dlra_max_energy_increase),
         "stable": dlra_stability["stable"],
         "unstable_step": dlra_stability["unstable_step"],
@@ -780,7 +821,7 @@ def run_case(
     return {
         "case": "kolmogorov",
         "provenance": {
-            "git_commit": _git_commit(),
+            **_provenance(Path(__file__).resolve()),
             "driver": "experiments/run_kolmogorov.py",
         },
         "grid": {"N": N, "L": grid.L},

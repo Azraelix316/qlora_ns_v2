@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+from provenance import provenance as _provenance
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -52,7 +53,7 @@ def main() -> None:
                 "rank_final": dlra["rank_final"],
                 "max_relative_l2_vs_full": dlra["max_relative_l2_vs_full"],
                 "max_scaled_invariant_residual": dlra[
-                    "max_scaled_energy_balance_residual"
+                    "max_scaled_projected_energy_residual"
                 ],
                 "seconds_per_step": dlra["wall_seconds_per_step"],
             }
@@ -60,7 +61,7 @@ def main() -> None:
     output = {
         "case": "rank_growth_sweep",
         "provenance": {
-            "git_commit": _git_commit(),
+            **_provenance(Path(__file__).resolve()),
             "driver": "experiments/run_rank_growth_sweep.py",
         },
         "parameters": {

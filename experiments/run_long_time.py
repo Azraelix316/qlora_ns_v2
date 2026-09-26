@@ -16,6 +16,7 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
+from provenance import provenance as _provenance
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -193,7 +194,7 @@ def run_case(
     return {
         "case": "kolmogorov_long_time",
         "provenance": {
-            "git_commit": _git_commit(),
+            **_provenance(Path(__file__).resolve()),
             "driver": "experiments/run_long_time.py",
         },
         "grid": {"N": N, "L": grid.L},
@@ -241,8 +242,8 @@ def run_case(
                 "max_scaled_residual": full_residual,
             },
             "max_abs_divergence": full_div,
-            "max_scaled_full_pde_energy_residual": full_residual,
-            "max_scaled_energy_balance_residual": full_residual,
+            "max_scaled_pde_energy_residual": full_residual,
+            "max_scaled_projected_energy_residual": full_residual,
             "singular_value_steps": sorted(full_spectrum),
             "singular_values": [full_spectrum[s] for s in sorted(full_spectrum)],
         },
@@ -265,8 +266,8 @@ def run_case(
                 "max_scaled_residual": dlra_residual,
             },
             "max_abs_divergence": dlra_div,
-            "max_scaled_full_pde_energy_residual": dlra_full_pde_residual,
-            "max_scaled_energy_balance_residual": dlra_residual,
+            "max_scaled_pde_energy_residual": dlra_full_pde_residual,
+            "max_scaled_projected_energy_residual": dlra_residual,
             "rank_history": [int(x) for x in dlra.rank_history],
             "rank_min": int(min(dlra.rank_history)),
             "rank_max": int(max(dlra.rank_history)),

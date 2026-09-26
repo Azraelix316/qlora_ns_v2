@@ -38,6 +38,7 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
+from provenance import provenance as _provenance
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -168,7 +169,7 @@ def run_reference(
         "checkpoints": checkpoints,
         "max_abs_divergence": max_div,
         "max_cfl": max_cfl,
-        "max_scaled_energy_balance_residual": max_residual,
+        "max_scaled_projected_energy_residual": max_residual,
     }
 
 
@@ -210,7 +211,7 @@ def run_projected(
         "times": times,
         "states": states,
         "max_abs_divergence": max_div,
-        "max_scaled_energy_balance_residual": max_residual,
+        "max_scaled_projected_energy_residual": max_residual,
         "projection_energy_total": projection_energy,
         "wall_seconds": time.perf_counter() - start,
         "diverged_at_step": diverged_at_step,
@@ -327,7 +328,7 @@ def run_projected_moving(
         "times": times,
         "states": states,
         "max_abs_divergence": max_div,
-        "max_scaled_energy_balance_residual": None,
+        "max_scaled_projected_energy_residual": None,
         "projection_energy_total": projection_energy,
         "wall_seconds": time.perf_counter() - start,
         "diverged_at_step": diverged_at_step,
@@ -578,7 +579,7 @@ def main() -> None:
                 grid, new_model(grid, args.re, args.force_amplitude), initial, dt,
                 args.T, sample_every, pod.project, ref["checkpoints"],
             )
-            run["max_scaled_energy_balance_residual"] = None
+            run["max_scaled_projected_energy_residual"] = None
             record(
                 f"pod_{label}_r{rank}",
                 run,
@@ -762,7 +763,7 @@ def main() -> None:
     output = {
         "case": "baselines",
         "provenance": {
-            "git_commit": _git_commit(),
+            **_provenance(Path(__file__).resolve()),
             "driver": "experiments/run_baselines.py",
         },
         "parameters": {
