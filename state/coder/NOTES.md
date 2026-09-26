@@ -55,6 +55,29 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 - [x] Send a readiness note to `writer` once the first numbers exist.
 
 ## Log
+- 2026-09-26 **D23 confirmed and quantified: the `crossovers` block disagrees with
+  the rows it sits beside, by 6.4-8.5%, one-signed, in all 12 cases.** I
+  recomputed every resolved crossover from `dlra` / `static_moving_window` under
+  a declared column. The block is below the rows at both Reynolds numbers, all
+  three windows, both resolved ranks. It is **not** a column choice (the column
+  moves the answer 0.5%) and **not** a convention (log vs linear interpolation
+  moves it 7%) -- the block is 8.2% away, further than the whole interpolation
+  spread. **Every bracket agrees exactly** (to 1e-9), so the qualitative
+  statement survives and the point estimate does not. I could not reproduce
+  D23's 0.52-0.64x; my factor is 0.915-0.936x, so the recorded magnitude should
+  be 6-9%, not 36-48%. D22.5 is now executable:
+  `test_the_crossover_block_agrees_with_the_rows_it_sits_beside` fails with all
+  12 disagreements listed, and the block is regenerated from a single function
+  `t_star_from_rows(rows, rows, column, log_interp)` with the column required
+  and never defaulted.
+- 2026-09-26 **The un-provenanced block had already reached a figure caption, via
+  my own C1-3f fix.** `fig_divergence`'s caption quoted `t*` from the block, so
+  the number D23 calls unusable was in a rendered label. I had read
+  `CLAIMS.md`'s "fig_crossover reads the rows" as covering the figures and did
+  not check the one I had just written. It now computes from the rows and states
+  the **bracket** (convention-free) beside the point estimate, the column and
+  the interpolation. Lesson: a prohibition about a *source* has to be checked
+  against every consumer of that source, including the ones I wrote this cycle.
 - 2026-09-26 **`CLAIMS.md` is binding and caught a barred claim I had just
   introduced.** C1-3c asked me to fix "the only rank that never loses is the
   dealiasing ceiling"; I replaced it with a version naming the formula and then
