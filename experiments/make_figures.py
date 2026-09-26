@@ -948,6 +948,28 @@ def main() -> None:
             fontsize=6.5, y=1.02,
         )
         fig.tight_layout()
+        CAPTIONS["fig_cost"] = (
+            "Cost against the full-grid spectral reference: full-step time, "
+            "median of "
+            f"{grids[0]['repeats']} repeats over {grids[0]['steps_per_repeat']} "
+            "steps under one interleaved protocol, with the thread settings "
+            "named above the panel. **Three things this figure does NOT contain, "
+            "which the draft's caption currently claims it does.** (1) *Peak "
+            "memory* is in a different artifact from a different driver "
+            "(`peak_memory.json`, `bench_memory.py`), measured for the "
+            "full-grid, projected and BUG integrators at N=64 and N=128 only. "
+            "(2) *The static POD baseline has no cost row here at all*: this "
+            "driver times `full_grid_reference` and `projected_dlra`, and POD's "
+            "memory was never measured, so the third method in the caption's "
+            "list does not appear in this figure. (3) *It is not per Reynolds "
+            "number* -- this protocol varies N, and Re is not one of its "
+            "parameters. Per-Re wall times do exist in the suite artifacts, but "
+            "they are single un-interleaved runs and are **not comparable with "
+            "these**: the suite's dlra/full ratio is 33.6x at Re=100, 5.03x at "
+            "Re=1000 and 1.90x at Re=5000, against 2.2-2.7x here. Quoting the "
+            "two families side by side would be comparing measurement "
+            "protocols, not methods."
+        )
         FIGURES_WRITTEN.add("fig_cost")
         fig.savefig(args.output_dir / "fig_cost.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_cost.png", bbox_inches="tight")

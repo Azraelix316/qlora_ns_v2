@@ -7258,7 +7258,43 @@
   },
   "provenance": {
     "driver": "experiments/run_regime_pilot.py",
-    "git_commit": "1968c46224861c1f8b1f70df8457b8dfb6e516d6"
+    "driver_dirty": false,
+    "driver_matches_HEAD": true,
+    "driver_sha256": "ed620285fb26ea4fcad8328696f0a9d8f52907fe4021a7e70d97638baeb9f39b",
+    "git_commit": "6a75e26f2da82b06bcefdcd577245da1ff9881b1",
+    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "reproducible": true,
+    "working_tree_diff_sha256": "3f6694eb6e8ed9b9dc56623a2e3f1ec5b39d949c1481d62ee7bbef3583e1d140",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "experiments/figures/CAPTIONS.md",
+      "experiments/figures/PROVENANCE.md",
+      "experiments/figures/fig_bug_cost.pdf",
+      "experiments/figures/fig_cost.pdf",
+      "experiments/figures/fig_div_free.pdf",
+      "experiments/figures/fig_divergence.pdf",
+      "experiments/figures/fig_error_vs_ref.pdf",
+      "experiments/figures/fig_ke_spectrum.pdf",
+      "experiments/figures/fig_rank_vs_time.pdf",
+      "experiments/figures/fig_spectra_ek.pdf",
+      "experiments/figures/fig_spectrum.pdf",
+      "experiments/figures/fig_sv_decay.pdf",
+      "experiments/figures/fig_tg_ke_rank.pdf",
+      "experiments/figures/fig_window_rank.pdf",
+      "experiments/make_figures.py",
+      "paper/figures/fig_bug_cost.pdf",
+      "paper/figures/fig_cost.pdf",
+      "paper/figures/fig_div_free.pdf",
+      "paper/figures/fig_divergence.pdf",
+      "paper/figures/fig_error_vs_ref.pdf",
+      "paper/figures/fig_ke_spectrum.pdf",
+      "paper/figures/fig_rank_vs_time.pdf",
+      "paper/figures/fig_spectra_ek.pdf",
+      "paper/figures/fig_spectrum.pdf",
+      "paper/figures/fig_sv_decay.pdf",
+      "paper/figures/fig_tg_ke_rank.pdf",
+      "paper/figures/fig_window_rank.pdf"
+    ]
   },
   "qualifying_horizons": [],
   "rank_quantities": {
@@ -7302,7 +7338,7 @@
         }
       },
       "samples": 51,
-      "wall_seconds": 17.496477122884244,
+      "wall_seconds": 18.057285043876618,
       "zonal_share_of_total_energy_at_end": 0.19436134685060888
     },
     {
@@ -7340,7 +7376,7 @@
         }
       },
       "samples": 101,
-      "wall_seconds": 34.06093276105821,
+      "wall_seconds": 36.36598007217981,
       "zonal_share_of_total_energy_at_end": 0.22338205161569952
     },
     {
@@ -7378,7 +7414,7 @@
         }
       },
       "samples": 201,
-      "wall_seconds": 65.63097931607626,
+      "wall_seconds": 68.70208559883758,
       "zonal_share_of_total_energy_at_end": 0.2946893425394793
     },
     {
@@ -7422,7 +7458,7 @@
         }
       },
       "samples": 401,
-      "wall_seconds": 130.56323959399015,
+      "wall_seconds": 154.48908138507977,
       "zonal_share_of_total_energy_at_end": 0.5218913124575163
     },
     {
@@ -7468,7 +7504,7 @@
         }
       },
       "samples": 801,
-      "wall_seconds": 259.9210331989452,
+      "wall_seconds": 273.44174490100704,
       "zonal_share_of_total_energy_at_end": 0.7425005048722252
     }
   ],
