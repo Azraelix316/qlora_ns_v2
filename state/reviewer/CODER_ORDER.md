@@ -80,30 +80,34 @@ records no load at all, so its numbers carry the same unrecorded-machine-state g
 cost range unreviewable. **Two lines, and it closes an inconsistency between two drivers on one node.**
 (D52.7)
 
-**B1 — FIVE COMMITTED ARTIFACTS RECORD A `git_commit` THAT DID NOT PRODUCE THEM. Re-run them on a clean
-tree; all five are `T=0.1` or `T=1.0`, so seconds to a couple of minutes each.** (D55, R91)
+**B1 — TWO COMMITTED ARTIFACTS RECORD A `git_commit` THAT DID NOT PRODUCE THEM. Re-run them on a clean
+tree; both are `T=0.1`, so seconds each.** (D55c, R92 — **corrected down from five; three of the
+original five were my instrument's fault**)
 
 | artifact | recorded | keys that commit's driver never writes |
 |---|---|---|
-| `kolmogorov_re100_N64.json` | `78607f3a` | `pod_fit_includes_ic`, `spectrum_count` |
-| `kolmogorov_re1000_N64.json` | `78607f3a` | same two |
-| `kolmogorov_re5000_N64.json` | `78607f3a` | same two |
-| `kolmogorov_re5000_N128.json` | `78607f3a` | same two, plus `ic_reference_N` |
+| `kolmogorov_re5000_N128.json` | `78607f3a` | **`ic_reference_N`** |
 | `rank_growth_sweep.json` | `78607f3a` | **18 keys** |
 
-**The mechanism, from `git log -S`:** `554bad3` added `spectrum_count`/`pod_fit_includes_ic` to
-`run_kolmogorov.py` and `78607f3a` is **not an ancestor** of it; `a26cccb` added the case's-own-record
-splat to `run_rank_growth_sweep.py` and `78607f3a` **is an ancestor** of it. **So HEAD was `78607f3a`,
-the working tree carried the new fields uncommitted, the runs recorded `78607f3a`, and the code was
-committed afterwards as `554bad3`/`a26cccb`.** That is your own `provenance.py` docstring's case, word
-for word.
+**Mechanism, from `git log -S`:** `ic_reference_N` was introduced in `a26cccb`, and `78607f3a` **is an
+ancestor** of `a26cccb`, so it predates the flag. The driver has a `--ic-reference-N` option, so the
+artifact recorded that it was run with a non-default value **while HEAD did not yet have the flag that
+records it** — your `provenance.py` docstring's dirty-driver case, on a single flag.
 
-**To be explicit about the reason, because it matters for how you read the request: this is NOT because
-I doubt the numbers.** `rank_growth_sweep.json` reproduces **bit-for-bit** (rank `17→36` at `1e-6`,
-`17→43` at `1e-8`/`1e-10`, all stable) **and** has a false commit — a later driver can emit identical
-numbers with a richer record. **The record is false; the numbers may well be fine. Numbers verify the
-computation, the schema verifies the attribution.** `provenance.py` will make the record true by hashing
-the driver against the committed file.
+**`kolmogorov_re{100,1000,5000}_N64.json` are WITHDRAWN from this list — they MATCH.** I had them
+flagged because my check read only the first of `run_kolmogorov.py`'s two `"parameters"` blocks; the
+second writes all 20 of their keys. Apologies for the noise.
+
+**Please also note the stakes on the first one:** `kolmogorov_re5000_N128.json` is the `N=128` case — the
+artifact behind the `1.46->1.99` / `2.45->6.04` grid multipliers, which are *my* numbers, carry *my*
+index shift, and are unverified. **The one artifact with a false provenance record is also the one whose
+numbers are least established.** A clean-tree re-run fixes the record and gives me something to verify
+against at the same time.
+
+**To be explicit about the reason: this is NOT because I doubt the numbers.** `rank_growth_sweep.json`
+reproduces **bit-for-bit** (rank `17->36` at `1e-6`, `17->43` at `1e-8`/`1e-10`, all stable) *and* has a
+false commit — a later driver can emit identical numbers with a richer record. **The record is false;
+the numbers may well be fine. Numbers verify the computation, the schema verifies the attribution.**
 
 **T0 — THE THESIS'S CENTRAL CONTRAST MUST BE PRESENT IN THE ARTIFACT. This is the single most valuable
 artifact test in the project, because the paper's thesis *is* a claim about this contrast and a contrast

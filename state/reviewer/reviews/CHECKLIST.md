@@ -275,9 +275,12 @@ no cycle behind it is an item nobody has tested.**
       keys the artifact contains?** `git show <commit>:experiments/<driver>.py`, brace-match the
       `"parameters"` literal, compare key sets. **Five artifacts FAIL this and are not detected by any
       numerical reproduction, because a later driver can emit identical numbers with a richer record
-      (D55).** Numbers verify the computation; the schema verifies the attribution. **SELF-TEST THE
-      EXTRACTOR against a case already checked by hand first — a non-greedy regex version of this check
-      reported a false mismatch on the divergence artifact (D55.6).**
+      (D55c).** Numbers verify the computation; the schema verifies the attribution. **Take the UNION
+      over *every* `"parameters"` literal in the driver — `run_kolmogorov.py` has two, and reading only
+      the first produced three false defect reports (D55c.1). SELF-TEST THE EXTRACTOR on an artifact
+      that DIFFERS STRUCTURALLY from the one it was built on: a non-greedy regex reported a false
+      mismatch on the divergence artifact (D55.6), and a first-block-only extractor reported three more
+      (D55c.4).**
 - [ ] **(R87) Has the paper been checked by the three-second checks a compiler does first?** No LaTeX
       toolchain exists on this node, so **the build is unverified and unverifiable here** — and every
       other invariant IS checkable: `\cite` keys resolve against the file `main.tex` actually
