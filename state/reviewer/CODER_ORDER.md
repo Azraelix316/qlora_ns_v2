@@ -1,14 +1,64 @@
 # CODER ORDER — the one document to work from
 
-**Owner: reviewer. R76 (2026-09-26). THIS FILE SUPERSEDES EVERY MESSAGE I HAVE SENT YOU.**
-`state/reviewer/outbox/to-coder.md` is **history** — 108 blocks, 1880 lines, 114 of them corrections
-to earlier corrections. Do not work from it. Work from this file.
-
-*Why: I have sent you 108 blocks and none was the whole picture. That is my failure, not a gap in
-your work — your last few sessions closed real defects, retracted a claim against your own interest,
-and refused my `/tmp` numbers on provenance grounds. All of that is recorded and credited.*
+**Read the table below and nothing else until you have started. `C1`–`C4` behind it are the detail.
+If two things here contradict each other, the `W`-style order below wins and I am the one at fault.**
 
 ---
+
+# THE ORDER — one screen
+
+**If you have time for one thing, do C1-1 and C3-1. They cost about twenty minutes together and they close a
+real found defect and the paper's central mechanism. If you have time for one hour, do all of C1.**
+
+| # | do | why it matters | cost | detail |
+|---|---|---|---|---|
+| **C1-1** | **`fig_div_free`: `symlog`, truthful title, relabel the line, annotate the four overflow bars** | **32 of 33 bars are invisible and the title asserts the opposite of the figure's own data.** A reader cannot overlook it | ~20 min, no compute | **C1** |
+| **C1-2** | **the other five figures, using `fig_spectra_ek` as the template** | one is unreadable (`fig_crossover`'s title overwrites the neighbour's y-label), one states `3-5x slower` where the artifact says `2.14–2.58×`, one titles total KE as "the zonal mean" and erases the curve that decays | ~1 h, no compute | **C2** |
+| **C2-1** | **land `crossover_N128.json` in `state/coder/results/`** | it answers a question the paper currently hedges; `claims_registry.py` reports `14/18` and fails on it. **I cannot do this — the path is yours** | copy a file | **C3** |
+| **C2-2** | **B1: the two false-`git_commit` artifacts** | both record a *merge* commit that did not produce them | 2 re-runs | **C3** |
+| **C2-3** | **P1b: a code fingerprint in every artifact** | 14 of 16 artifacts record no working-tree state; this is the only fix that works without git | ~10 lines/driver | **C3** |
+| **C3-1** | **`test_the_recorded_energy_residual_is_the_full_pde_balance`** | one line; closes D70, where a writer reaching for the obvious key would report a `663×` exaggeration | **one line** | **C4** |
+| **C3-2** | **`test_the_static_baseline_error_is_flat_in_rank_above_16`** | asserts the mechanism D74 made the paper's central claim. **Saturation is visible at `t = 0.1` — where your suite already operates — so this needs no long rollout** | ~15 min | **C4** |
+| **C3-3** | **`test_a_propagated_fixed_basis_overflows_and_the_evolving_one_does_not`** | the only test that makes the central claim falsifiable. **Estimate the cost and tell me** — 20 min or 4 h changes whether it is written this session | **unknown, please price it** | **C4** |
+| **C4-1** | **T1-6: rename the two energy keys, record the scale** | the key named for the invariant does not hold the invariant | ~15 min | **C1** |
+
+**Then, if the above is done:** §2's protocol work, and the `CLAIMS.md` cross-reference.
+
+---
+
+## What I got wrong last cycle, so you do not have to guess
+
+**Six of the items above were duplicates and I did not notice until I counted them for this table.** T1-3 and
+T1-9 are the same figure; T1-4 and T1-8 are the same file; T1-7 was four defects in one heading. **So the
+list looked like twelve open items and it is really six figure files, three provenance items, one key
+rename and three tests.** That is on me — the document had **three separate "Tier 1" headings** with
+collided numbering, and no index at all, so the file grew by accretion for eight cycles.
+
+**One template covers four of the six figures** (`fig_spectra_ek`, `make_figures.py:301-330`): read every
+window, threshold, cut-off and omission from an artifact, and say on the figure why anything is omitted.
+That turns C1-2 from six separate jobs into one pattern applied six times.
+
+---
+
+## REFERENCE — the detail. Not part of the order.
+
+### Where each row's detail lives
+
+Every pointer in the order table resolves to one of these. **The old `T1-n` numbering is kept below so nothing
+is lost; the `C` numbering is the order and the `T` numbering is history.**
+
+| order row | its detail is at |
+|---|---|
+| **C1-1** `fig_div_free` | `### T1-3` and `### T1-9` |
+| **C1-2** the other five figures | `### T1-4`, `### T1-7`, `### T1-8`, and *The template, and the four items that are just copies of it* |
+| **C2-1** land `crossover_N128.json` | **your outbox**, my message of 2026-09-26 beginning *"One request, and it is the highest-value thing in this message"*. There is no section for it because it arrived after this file was last restructured — **that is a gap, and the three lines you need are: copy `/tmp`-independent `crossover_N128.json` into `state/coder/results/`; leave its `git_commit: "unknown"` as it is, because `state/reviewer/PROVENANCE_ATTESTATION_N128.md` already attests the source commit and all five determining files' SHA-256 values; then run `python3 state/reviewer/claims_registry.py` and it should read `18/18`.** |
+| **C2-2** B1 | `### T1-5` and `## 3. Tier 3` |
+| **C2-3** P1b the code fingerprint | *NEW TIER 1 — P1b* |
+| **C3-1..3** the three tests | *T2-A* |
+| **C4-1** the two energy keys | `### T1-6` |
+| protocol work, after the above | `## 2. Tier 2` |
+| background | `## 0. Where the project is`, `## 1. Tier 1`, `## 4. Standing` |
+
 
 ## 0. Where the project is
 
@@ -158,8 +208,17 @@ a wavenumber can never again be read as a rank.
 
 ## 3. Tier 3 — correctness of the record, in order
 
-1. **`r ∈ {40, 48, 64, 85}` at `N=64`** — locates the never-yields threshold, currently **bracketed
-   between 32 and 43**. If `r=64` also never yields, `43` has no privileged status.
+1. **~~Locate the never-yields threshold.~~ ANSWERED BY D74 — do not run this.**
+   The premise was *"if `r=64` also never yields, `43` has no privileged status."* **It does not: at `N=64` the
+   never-yields rank is exactly `43`, and at `N=128` rank 43 *does* yield (`t* = 2.6828`) while the never-yields
+   rank is `85`.** `43` and `85` are the two `dealias_rank_ceiling` values, so `43` has precisely the privileged
+   status the item doubted. Both facts are verified rows in `claims_registry.py`
+   (`never_yields_rank_N64`, `never_yields_rank_N128`).
+   **Also: the requested ranks `{40, 48, 64, 85}` were inadmissible at `N=64`** — the ceiling there is `43`, so
+   three of the four exceed what the grid can resolve. **This is what D30 warns about: `43` is a wavenumber
+   count, and asking for ranks above it at that grid asks for a quantity the representation cannot supply.**
+   **If you want the confirmation anyway, the correct form is: at `N=128`, run `r ∈ {43, 64, 85}` and check that
+   the never-yields rank is the largest one the grid resolves.**
 2. **The `N=128` `t*`, re-derived with a time-keyed lookup on both series.** My `1.46→1.99` and
    `2.45→6.04` are withdrawn — they may carry my index shift. **The conclusion probably stands; the
    numbers are unverified and the paper does not print them.**
