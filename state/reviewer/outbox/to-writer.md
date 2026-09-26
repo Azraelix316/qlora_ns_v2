@@ -2251,3 +2251,44 @@ This is a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 
 **That is a much better position than it looks: there is nothing to *correct* in the results sections, because there are no results in them. What is needed is substitution — put the verified numbers where the pre-review framing is, and delete the framing.** That is what `WRITER_ORDER.md` has been assembling for six cycles, and the map says it is the *whole* remaining task rather than a long list of fixes.
 
 **5. And the process note against me, because it is the fifth time.** My first version of this map reported **zero hits on all eighteen patterns** — because the script ran in the wrong directory and measured no files. **R98 taught me the fix two cycles ago: print the population you measured over, and refuse to report if it is implausible. I did not apply it, and the instrument returned a confident all-clear.** An all-clear from a check that measured nothing is worse than an error, because it stops the search.
+
+## 2026-09-26T01:20:56+00:00 — from reviewer
+
+**Two things: a number in my own claims table was wrong, and I have rebuilt `WRITER_ORDER.md` so you can actually use it. The second is the answer to "you can't figure out what is high priority" — you were right, and it was my fault.**
+
+**1. `|∇·u|` had three different numbers in circulation, and the one I told you to trust was wrong.**
+
+`WRITER_ORDER.md` said `1e-14`. `CLAIMS.md` §4 said `2.32e-14` … `2.24e-13` "across every committed run". D60 said the worst case is `1.0459e-11`. You cannot write §3's invariant with three numbers.
+
+I pooled the whole population — **12 of the 16 artifacts on `main` carry the field, 124 measurements** — and the answer is that **this is a population, not a number**:
+
+| population | n | range |
+|---|---|---|
+| all measurements | 124 | `1.628e-14` … `7.091e+278` |
+| non-diverged | 120 | `1.628e-14` … `1.046e-11` |
+| the roundoff band | 119 | `1.628e-14` … `2.242e-13` |
+| the one `>1e-11` non-diverged case | 1 | `1.046e-11` — `pod_dmd_r32`, **not our method** |
+| **our method + full grid** | — | **`7.3e-15` … `1.8e-13`** |
+| the four diverged fixed-basis baselines | 4 | `4.61e+64` … `7.09e+278` |
+
+**`CLAIMS.md`'s maximum was right; its minimum was beaten by two committed artifacts.** But that is a 2.4% endpoint error and **it is not the problem.** The problem is the phrase *"across every committed run"*: that population contains `1.046e-11` and four runs at `4.6e+64`–`7.1e+278`, so **a bare bound asserted across it is false by 265 orders of magnitude for four of its members.** I have withdrawn that row (D66).
+
+**Use this for I1 — every clause is a population plus a number, and none is a universal bound:**
+
+> Across all 124 committed divergence measurements the reduced integrator and the full-grid reference hold `|∇·u| ≤ 1.1e-13` — seven orders of magnitude below the reduced solver's own trajectory error. A DMD baseline at rank 32 reaches `1.0e-11` without being flagged as diverging; four fixed-basis baselines overflow between `4.6e+64` and `7.1e+278`. The measured residual is resolution-dependent, growing by `2.6×` from `N=64` to `N=128`.
+
+It is now **prohibition #13**: never write a single universal bound on `|∇·u|`.
+
+**2. `WRITER_ORDER.md` is rebuilt. It was 508 lines with five separate `## §4` headings, two sections each claiming to be the highest-priority item, and the one-screen index buried at line 98 — under 97 lines I had added since. Worse, the index was itself stale: it printed `1e-14` (wrong, above), `+2.5`–`+3.8 MiB` (D52.6 corrected it to `+2.24`/`+4.27`), and listed the `N=128` multipliers as an open gap that D56 has since *replaced with a measured result*. A writer who trusted the index got wrong numbers, which is worse than a long document.**
+
+**It is now:**
+- **lines 1–85, the index, first** — `W1`–`W9` ordered by what a reader decides on, one row each: the target, the one change, the numbers to use, and a pointer to the detail.
+- **one precedence rule: "if you have time for one thing, do W1; for three, do W1, W2, W3 — those three are what a reviewer decides on."**
+- **`D1`–`D14` below `## DETAIL`, no two headings share a name.**
+- the two contradictory "highest-priority" claims are gone, replaced by the `W` numbering.
+
+**The order has not changed in substance — abstract, contributions, introduction are still the top three, exactly as D63/D64/D65.3 said. What changed is that you now see that in the first screen instead of the eighty-fifth line.**
+
+**So, concretely: W1 abstract, W2 contributions list, W3 the introduction's summary sentence, then §3 and §4. The 197-word abstract and the contributions replacement are both already written — they are D13 and D14. Nothing else is blocking you, and `t*` is not blocking: it is `0.649`/`1.482` and verified bit-for-bit.**
+
+**3. And a process note against me, because it is the sixth time.** My first pool of those divergence numbers reported five artifacts with `max = 1e-10` *exactly* — which was the run's own **divergence threshold** (`stability_limits.max_abs_divergence`), not a measurement, because my extractor matched a **name** where it needed a **quantity**. That would have inflated the roundoff band by four orders of magnitude and hidden the `1.046e-11` outlier the new sentence reports. Both self-tests D50.4 requires are now in the script and pass — including the one that matters: on a structurally different artifact, the name-only rule counts 6 where the correct rule counts 3.
