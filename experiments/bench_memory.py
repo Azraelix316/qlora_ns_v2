@@ -527,10 +527,24 @@ def main() -> None:
             "ranks": list(args.ranks),
             "methods": list(args.methods),
             "steps": args.steps,
+            "noise_repeats": args.noise_repeats,
+            "overhead_repeats": args.overhead_repeats,
+            "repeats_note": (
+                "EVERY configuration is measured `overhead_repeats` times, so "
+                "the noise floor is estimated from "
+                "`noise_floor_samples_mib.samples` same-configuration "
+                "differences rather than one, and each overhead is a "
+                "distribution. Both were single-sample until 2026-09-26, which "
+                "is why four registry rows pinned to a single-sample overhead "
+                "could not be satisfied by any correct measurement: the "
+                "projected integrator's N=64 overhead was measured at 0.098, "
+                "0.230 and 0.231 MiB across three runs, a factor of 1.36 apart."
+            ),
             "noise_floor": (
-                "one configuration is measured twice; the difference is the "
-                "measurement's own resolution, and a spread over rank is only "
-                "meaningful if it exceeds it"
+                "the largest of the same-configuration differences between a "
+                "repeat and the first measurement; the resolution against which "
+                "a spread over rank is judged, taken at its MAXIMUM so the error "
+                "can only fall on the side of not claiming a rank dependence"
             ),
             "process_isolation": (
                 "one fresh subprocess per configuration, because peak RSS is a "
