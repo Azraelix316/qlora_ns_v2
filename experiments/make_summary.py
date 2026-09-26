@@ -24,6 +24,68 @@ if str(ROOT) not in sys.path:
 RESULTS = ROOT / "state" / "coder" / "results"
 
 
+def _rank_finding(regime_data: dict) -> str:
+    """The rank-rule finding, built from the artifact's own window_rank_table.
+
+    Written as a function because the sentence goes into
+    ``benchmark_summary.json`` and from there into the paper's summary table, and
+    a literal there is a claim that no re-run can correct.  The numbers -- the
+    growth of r99, and the point at which the amplitude rule's request stops
+    being a property of the dynamics -- are read out of the table here.
+
+    The phrase "the dealiasing ceiling" is deliberately absent: that is a
+    wavenumber, ``2*floor(N/3)+1``, which is 43 at N=64 and 85 at N=128.  It is
+    not a rank, there is no grid-independent rank of that name, and D30/D77.2 bar
+    the phrasing.
+    """
+    table = regime_data.get("window_rank_table") or []
+    if not table:
+        return (
+            "no window_rank_table in the regime pilot, so no rank finding is "
+            "available from this artifact"
+        )
+    windows = sorted(r["window_end"] for r in table)
+    by_end = {r["window_end"]: r for r in table}
+    r99 = [by_end[w]["r99"] for w in windows]
+    amp = [by_end[w]["amp_1e-6"] for w in windows]
+    grids = sorted(
+        {
+            int(p["parameters"]["N"])
+            for p in (regime_data, )
+            if p.get("parameters", {}).get("N")
+        }
+    )
+    N = grids[0] if grids else None
+    ceiling = 2 * (N // 3) + 1 if N else None
+    # The first window at which the amplitude rule's request reaches the top of
+    # the resolved band: past that point its answer is set by the grid.
+    pinned = next(
+        (w for w, a in zip(windows, amp) if ceiling is not None and a >= ceiling),
+        None,
+    )
+    parts = [
+        "window_rank_table gives the modes needed to represent the fluctuations "
+        f"over [0, W]: r99 grows {r99[0]} -> {max(r99)} over the first "
+        f"{windows[-1]:g} time units"
+    ]
+    if pinned is not None and ceiling is not None:
+        parts.append(
+            f"while the amplitude rule's request passes the top of the band that "
+            f"N={N} resolves without aliasing ({ceiling} = 2*floor(N/3)+1) by "
+            f"W = {pinned:g} -- a request larger than the grid can represent is not "
+            f"a measurement of the dynamics, so its rank trace is the grid's"
+        )
+    else:
+        parts.append(
+            f"while the amplitude rule's request stays within the {ceiling} modes "
+            f"N={N} resolves without aliasing at every measured window"
+        )
+    parts.append(
+        "(the two are different quantities; see rank_quantities in the artifact)"
+    )
+    return ", ".join(parts) + "."
+
+
 def static_error_spread(
     static_rows_by_rank: dict, ranks: list, window: float
 ) -> list[dict]:
@@ -342,13 +404,11 @@ def main() -> None:
                 }
                 for key, val in regime_data.get("windowed_spectra", {}).items()
             },
-            "rank_finding": (
-                "window_rank_table gives the modes needed to represent the "
-                "fluctuations over [0, W]: r99 grows 1 -> 16 over the first "
-                "eight time units, while the amplitude rule requests more modes "
-                "than the dealiasing ceiling holds from t=2 onward, so its rank "
-                "trace is the grid's and not the dynamics'"
-            ),
+            # Built from the table rather than asserted, and deliberately free of
+            # the phrase "the dealiasing ceiling", which is a wavenumber
+            # (2*floor(N/3)+1) and not a rank: 43 at N=64 and 85 at N=128, so
+            # naming it as a rank is wrong on the facts and is barred phrasing.
+            "rank_finding": _rank_finding(regime_data),
         }
 
     crossover = None

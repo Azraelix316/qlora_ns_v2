@@ -54,6 +54,7 @@ def load(path: Path) -> dict | None:
 # and PROVENANCE.md is a provenance file, not something anyone reads while
 # drafting.
 CAPTIONS: dict[str, str] = {}
+FIGURES_WRITTEN: set[str] = set()
 
 
 def git_commit() -> str:
@@ -156,6 +157,28 @@ def provenance(
             cap_lines += [f"- **{figure}** -- {reason}", ""]
     (out / "CAPTIONS.md").write_text("\n".join(cap_lines) + "\n")
 
+    # Delete any figure file this run did not write.  A figure block that is
+    # skipped -- because its artifact is missing -- used to leave the *previous*
+    # run's file on disk with nothing to say so, and a stale PNG is worse than an
+    # absent one: it looks current, renders fine, and carries whatever claim the
+    # code used to make.  That is not hypothetical.  It is how a withdrawn title
+    # stayed in a rendered image after it was gone from the source, and how I
+    # reviewed a figure whose bytes had not changed.
+    expected = {f"{name}{ext}" for name in FIGURES_WRITTEN
+                for ext in (".png", ".pdf")}
+    stale = sorted(
+        path.name for path in out.glob("fig_*")
+        if path.suffix in {".png", ".pdf"} and path.name not in expected
+    )
+    for path in sorted(out.glob("fig_*")):
+        if path.suffix in {".png", ".pdf"} and path.name not in expected:
+            path.unlink()
+    if stale:
+        print(
+            f"removed {len(stale)} stale figure file(s) this run did not write: "
+            + ", ".join(stale)
+        )
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -228,10 +251,12 @@ def main() -> None:
             r"Two different rank quantities against window length. Left: the modes "
             r"needed to represent a whole window of the trajectory, which grows and "
             r"is grid-independent. Right: what the per-step amplitude rule requests, "
-            r"which tracks the grid and saturates at the dealiasing ceiling "
-            r"$2\lfloor N/3\rfloor+1$. Conflating these is what made adaptive rank "
+            r"which tracks the grid and saturates at the top of the band the grid "
+            r"resolves without aliasing, $2\lfloor N/3\rfloor+1$ modes. Conflating "
+            r"these is what made adaptive rank "
             r"look like a grid artifact."
         )
+        FIGURES_WRITTEN.add("fig_window_rank")
         fig.savefig(args.output_dir / "fig_window_rank.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_window_rank.png", bbox_inches="tight")
         plt.close(fig)
@@ -263,6 +288,7 @@ def main() -> None:
         CAPTIONS["fig_spectrum"] = (
             'Singular-value spectrum of the **full-grid** state, at $t=0$ and at the end of the run, for every resolved mode. The initial condition is exactly rank 17; the developed state is not low rank at all, which is the regime the reduced methods are being asked to approximate.'
         )
+        FIGURES_WRITTEN.add("fig_spectrum")
         fig.savefig(args.output_dir / "fig_spectrum.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_spectrum.png", bbox_inches="tight")
         plt.close(fig)
@@ -282,9 +308,37 @@ def main() -> None:
             ax.plot([r["time"] for r in rows], [r["relative_l2"] for r in rows],
                     color=colors["pod"], linestyle="--",
                     alpha=0.9 if re == 5000 else 0.4, label=f"static POD Re={re}")
+        # The window this figure covers, and what it therefore cannot show, has
+        # to be on the figure.  The suite runs to t = 0.1 while the crossover --
+        # the measurement the paper's argument actually turns on -- sits at
+        # t* ~ 0.65 and 1.48.  Inside t <= 0.1 the static baseline's offline
+        # window is a *prefix* of the evaluated trajectory and its divergence
+        # stays near zero while the DLRA's rises, so an unlabelled reader sees the
+        # static baseline winning: the opposite of the paper's conclusion, with
+        # nothing on the figure to say the window is the reason.
+        window = max(
+            (r["parameters"].get("final_time")
+             or r["parameters"]["dt"] * (len(r["full"]["energy_history"]) - 1))
+            for r in suite.values()
+        )
+        t_star = None
+        crossover = load(R / "crossover_surface.json")
+        if crossover:
+            resolved = [
+                c["t_star"]
+                for case in crossover["by_reynolds"].values()
+                for c in case["crossovers"] if c["t_star"] is not None
+            ]
+            t_star = (min(resolved), max(resolved)) if resolved else None
+        caveat = (
+            f"window $t\\leq{window:g}$ only"
+            + (f"; the crossover is at $t^*\\in[{t_star[0]:.2f},{t_star[1]:.2f}]$"
+               if t_star else "")
+        )
         ax.set_xlabel("time")
         ax.set_ylabel(r"relative $L^2$")
-        ax.set_title("Trajectory divergence, not error")
+        ax.set_title("Trajectory divergence over the suite window,\n" + caveat,
+                     fontsize=9)
         ax.legend(fontsize=6.5, ncol=2)
         ax = axes[1]
         # Two series, and the second one was previously missing.  The paper's
@@ -321,15 +375,30 @@ def main() -> None:
         ax.set_xlabel("time")
         ax.set_ylabel(r"$E$")
         ax.set_title(
-            r"KE split as fluctuation $\psi'$ and zonal mean,"
-            "\nthe statistic the paper reports is the first",
+            r"KE split: fluctuation $\psi'$ (the reported statistic)"
+            "\nand zonal mean, which carries no method difference",
             fontsize=9,
         )
         ax.legend(fontsize=6.5)
         fig.tight_layout()
         CAPTIONS["fig_divergence"] = (
-            r"Left: relative $L^2$ against the full grid. Once two trajectories decorrelate this measures phase, not accuracy. Right: kinetic energy split as the fluctuation $\psi'=\psi-\overline{\psi}_x$ and the zonal mean; the fluctuation is the series the paper's statistics are computed on, and it is the one that carries the method-to-method difference."
+            rf"**Left: relative $L^2$ against the full grid, over the suite window "
+            rf"$t\leq{window:g}$ only.** Once two trajectories decorrelate this "
+            rf"measures phase, not accuracy. **This window does not show the "
+            rf"paper's conclusion and must not be read as if it did**: inside "
+            rf"$t\leq{window:g}$ the static baseline's offline fitting window is a "
+            rf"*prefix* of the evaluated trajectory, so it is the more accurate "
+            rf"method here"
+            + (rf", and the ordering reverses at the crossover, "
+               rf"$t^*\in[{t_star[0]:.2f},{t_star[1]:.2f}]$ (Fig. "
+               rf"\ref{{fig:crossover}})" if t_star else ", and the ordering "
+               "reverses only at longer horizons")
+            + rf". Right: kinetic energy split as the fluctuation "
+            rf"$\psi'=\psi-\overline{{\psi}}_x$ and the zonal mean; the "
+            rf"fluctuation is the series the paper's statistics are computed on, "
+            rf"and it is the one that carries the method-to-method difference."
         )
+        FIGURES_WRITTEN.add("fig_divergence")
         fig.savefig(args.output_dir / "fig_divergence.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_divergence.png", bbox_inches="tight")
         plt.close(fig)
@@ -459,6 +528,7 @@ def main() -> None:
             r"fixed-subspace runs that overflowed are shown separately with their "
             r"divergence times, because their final recorded value is meaningless."
         )
+        FIGURES_WRITTEN.add("fig_div_free")
         fig.savefig(args.output_dir / "fig_div_free.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_div_free.png", bbox_inches="tight")
         plt.close(fig)
@@ -505,6 +575,7 @@ def main() -> None:
             fontsize=6.5, y=1.02,
         )
         fig.tight_layout()
+        FIGURES_WRITTEN.add("fig_cost")
         fig.savefig(args.output_dir / "fig_cost.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_cost.png", bbox_inches="tight")
         plt.close(fig)
@@ -606,6 +677,7 @@ def main() -> None:
                 f"averaging window is {100*d_z:.0f}%."
             )
         )
+        FIGURES_WRITTEN.add("fig_spectra_ek")
         fig.savefig(args.output_dir / "fig_spectra_ek.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_spectra_ek.png", bbox_inches="tight")
         plt.close(fig)
@@ -661,13 +733,16 @@ def main() -> None:
             ax.set_xticks(x)
             ax.set_xticklabels(groups, fontsize=7)
             ax.set_ylabel("full-step time / full grid")
-            # The factor is computed from the bars above, not typed in.  A title
-            # carrying its own literal is a title that can silently contradict the
-            # artifact it sits on, and this one did once: a re-run moved the
-            # range while the string stayed where it was.
+            # The factor is computed from the bars above, not typed in, and the
+            # denominator is named because there are two and they differ by
+            # roughly a factor of two: BUG is ~2x the full grid but ~3.4-5.1x the
+            # *projected integrator*, whose linear-algebra share is small.  A
+            # reader who does not know which is which cannot use the number.
             ax.set_title(
                 "BUG removes every full-size factorization\n"
-                f"and is still {min(ratios):.1f}-{max(ratios):.1f}x slower",
+                f"and is still {min(ratios):.1f}-{max(ratios):.1f}x slower than "
+                f"the projected\nintegrator "
+                f"({min(bug_vals):.2f}-{max(bug_vals):.2f}x the full grid)",
                 fontsize=9,
             )
             ax.legend(fontsize=7, loc="upper left")
@@ -680,6 +755,7 @@ def main() -> None:
                 "slower, because its K/L/S right-hand sides are full-grid field "
                 "evaluations."
             )
+            FIGURES_WRITTEN.add("fig_bug_cost")
             fig.savefig(args.output_dir / "fig_bug_cost.pdf", bbox_inches="tight")
             fig.savefig(args.output_dir / "fig_bug_cost.png", bbox_inches="tight")
             plt.close(fig)
@@ -839,6 +915,7 @@ def main() -> None:
         CAPTIONS["fig_crossover"] = (
             'Left: error against horizon by rank, for the evolving basis (solid) and an oracle trailing-window static baseline (dashed). Right: the spread of the static error across ranks as a function of horizon, for every Reynolds number measured, with the 10% level marked. The spread is the mechanism: a static subspace stops improving with rank, while the evolving one does not.'
         )
+        FIGURES_WRITTEN.add("fig_crossover")
         fig.savefig(args.output_dir / "fig_crossover.pdf", bbox_inches="tight")
         fig.savefig(args.output_dir / "fig_crossover.png", bbox_inches="tight")
         plt.close(fig)

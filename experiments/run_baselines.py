@@ -389,7 +389,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--dlra-max-rank", type=int, default=0,
-        help="largest retained rank; 0 selects the grid's dealiasing ceiling",
+        help="largest retained rank; 0 selects the largest alias-free rank "
+             "for this grid, 2*floor(N/3)+1",
     )
     parser.add_argument("--dlra-check-every", type=int, default=5)
     parser.add_argument("--force-amplitude", type=float, default=0.5)
