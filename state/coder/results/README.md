@@ -378,3 +378,48 @@ still runs happily and still produces a wrong artifact. Every argument list in
 these runs is transcribed from the artifact's own recorded `parameters` block
 for that reason, and written out in full rather than assembled from a shared
 block — the shared block is what produced the duplicated `--dt`.
+
+## Registry rows that need re-pinning, with the values (2026-09-26)
+
+Run against the reviewer's `claims_registry.py` with the writer's draft from
+`origin/agent/writer`: **23 rows OK, 16 FAIL.** Every failure is accounted for,
+and none of them is a number that moved for a reason we do not know.
+
+**Seven `tstar_*` rows — the block fix, 3.9% to 9.3%.** The rows-derived `t*` is
+above the value quoted from the un-provenanced crossover block, consistently and
+in one direction. These are the values to pin, at full precision:
+
+| row | value | was | change |
+|---|---|---|---|
+| `tstar_r16` | `0.7076762337623602` | 0.6493281145096707 | +8.99% |
+| `tstar_r32` | `1.5981858222903682` | 1.4816252539052939 | +7.87% |
+| `tstar_r32_W0p5` | `1.5899768518577335` | 1.4739544217813643 | +7.87% |
+| `tstar_r32_W1p0` | `1.5995931156857837` | 1.4832176727372877 | +7.85% |
+| `tstar_r16_re1000` | `0.7283236032445684` | 0.6665645808117523 | +9.27% |
+| `tstar_r32_re1000` | `1.7200204892865198` | 1.6094633714766546 | +6.87% |
+| `tstar_N128_r16` | `0.9754557646562387` | 0.9386425215032279 | +3.92% |
+
+Brackets are unaffected and exact under both derivations: `[0.5, 1.0]` for r=16,
+`[1.0, 2.0]` for r=32. The legacy block sat 6.4–8.5% below the rows in all 18
+resolved cases across both Reynolds numbers, so the direction and the size are
+both systematic rather than scatter.
+
+**Four `zonal_share_energy_*` rows — a bug in `resolve`, predating today.** The
+rows use `field="zonal_energy_fraction.at_final_step"`, and `resolve` looks a
+plain `field` up as a **literal key**; it only descends on `.` inside the
+`@min:`/`@max:` form. The artifacts have always been nested, so these rows have
+never resolved against any version of the data. Verified against the pre-change
+artifacts, so it is not from the zonal-share work. Either descend on `.`
+generally, or point the rows at the new sibling keys
+(`zonal_energy_fraction_fluctuation`, `zonal_energy_fraction_components`) —
+which would also let a row check the value *and* its definition.
+
+**Five `mem_*` rows — the rows are pinned to a quantity that is not reproducible.**
+`mem_noise_floor_mib` is pinned at 0.0977 MiB, one of four single-sample values
+that quantity has taken (0.1328 / 0.0664 / 0.0977 / 0.0039 — a factor of 34), and
+no correct measurement of it can be 0.0977: it is now the **maximum of eight
+re-measurements** by construction. The four `mem_overhead_*` rows are 1.3–5.5%
+out, which the gate itself calls "plausibly a re-run" — and it is: across three
+independent measurements the overhead of the projected integrator at N=64 moved by
+**+136%**. These rows need a stated tolerance or a distribution, not a point
+pinned to `sf=8`.
