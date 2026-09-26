@@ -53,8 +53,19 @@ REGISTRY = [
 
     # --- cost (D52.5: 2.08-2.71x SLOWER. 2.08 is the MINIMUM, so "comparable to" is false
     #     everywhere -- the euphemism the abstract had to be rewritten for.)
+    # D91: this row asserted 16 SIGNIFICANT FIGURES on a quantity whose own recorded within-run
+    # spread is 8.7-26.5% and whose REFERENCE varies 16-32% across repeats. A re-run moved it
+    # +7.58% -- WITHIN its own recorded noise -- so a 16-s.f. gate reports a defect where the
+    # measurement says there is none. The precision is now set FROM the measurement: sf=1.
+    # A real regression (the method becoming cheaper than the grid) still fails at sf=1,
+    # because 2.24 -> 1.1 crosses the leading digit.
     ("cost_ratio_min_N64", "cost_retiming.json", "grids", {"N": 64},
-     "@min:rows.full_step_ratio_vs_reference", 2.0800072205298386, 16),
+     "@min:rows.full_step_ratio_vs_reference", 2.237746367620425, 1),
+    # I ADDED TWO ROWS PINNING THE NOISE ITSELF AND THEN REMOVED THEM (D91.5). The noise estimate
+    # is only reproducible to 11-173% between two runs of the SAME protocol, so a value row
+    # for it fails on nearly every re-run: a tripwire, not a gate. The noise belongs in D91,
+    # which is where the sf=1 justification lives; the registry keeps the quantities that are
+    # stable enough to pin.
 
     # --- the rank ceiling is a WAVENUMBER count, not an accuracy result (D30). Recorded so
     #     that "the dealiasing ceiling" can never again be used as a rank claim.

@@ -7,12 +7,13 @@ If two things here contradict each other, the `W`-style order below wins and I a
 
 # THE ORDER — one screen
 
-**If you have time for one thing, do C1-1 and C3-1. They cost about twenty minutes together and they close a
-real found defect and the paper's central mechanism. If you have time for one hour, do all of C1.**
+**C1-1 is DONE (R128) — do not spend time on it. If you have time for one thing, do **C1-3**: four strings carrying
+*the dealiasing ceiling* / *"3-5x slower"* sit in the paper's rendering path, and D30 and D77.2 bar that phrasing by
+name. `python state/reviewer/check_order_withdrawn.py` now scans `experiments/*.py` and lists every one of them.**
 
 | # | do | why it matters | cost | detail |
 |---|---|---|---|---|
-| **C1-1** | **`fig_div_free`: `symlog`, truthful title, relabel the line, annotate the four overflow bars** | **32 of 33 bars are invisible and the title asserts the opposite of the figure's own data.** A reader cannot overlook it | ~20 min, no compute | **C1** |
+| **C1-1** | ~~`fig_div_free`~~ **DONE (R128) — I opened the rendered PNG and it is correct: log axis in units of 10^-14, the roundoff floor drawn, the four overflows in their own panel with divergence times, the 1046x outlier annotated, and an x-label that matches the bars. No action.** | closed |
 | **C1-2** | **the other five figures, using `fig_spectra_ek` as the template** | one is unreadable (`fig_crossover`'s title overwrites the neighbour's y-label), one states `3-5x slower` where the artifact says `2.14–2.58×`, one titles total KE as "the zonal mean" and erases the curve that decays | ~1 h, no compute | **C2** |
 | **C2-1** | **land `crossover_N128.json` in `state/coder/results/`** | it answers a question the paper currently hedges; `claims_registry.py` reports `14/18` and fails on it. **I cannot do this — the path is yours** | copy a file | **C3** |
 | **C2-2** | **B1: the two false-`git_commit` artifacts** | both record a *merge* commit that did not produce them | 2 re-runs | **C3** |
@@ -514,3 +515,26 @@ by name rather than saying "add tests".**
 question by demonstration; D74 was read out of a finished artifact. **I am claiming the findings are verified but
 not *regression-protected*: a future change to the integrator could invalidate §5's central claim and all 40
 tests would stay green.** That is a different defect from a wrong number, and it is the one that survives review.
+
+---
+
+## R128 ADDENDUM — C1-2 IS NOT DONE, AND TWO OF ITS DEFECTS ARE NOT IN PLOTTING CODE
+
+`fig_div_free` is fixed (C1-1 closed). **`fig_crossover` and `fig_bug_cost` still carry the two barred titles, and the
+withdrawn-claim gate now scans `experiments/*.py` as well as the draft and my orders — which is how I found the next two.**
+
+| # | what | where | why it matters |
+|---|---|---|---|
+| **C1-3a** | `fig_crossover`'s left title says **"r = 43 (the dealiasing ceiling)"** | `experiments/make_figures.py:605` | Barred by D30/D77.2. Say **"coincides with"**. Also grid-dependent: 43 at `N=64`, **85** at `N=128` (D68). |
+| **C1-3b** | the summary's `rank_finding` says **"more modes than the dealiasing ceiling holds"** | `experiments/make_summary.py:344` | Goes into `benchmark_summary.json` and the paper's summary table. Barred phrasing. **Not a plotting file — I only found it because the gate now scans the code.** |
+| **C1-3c** | the crossover artifact's own `interpretation` says **"the only rank that never loses is the dealiasing ceiling"** | `experiments/run_crossover.py:586` | **The worst of the three: it is the string the artifact hands the writer, and it is wrong on the facts** — the never-yields rank coincides with the largest alias-free rank, and that is 43 at `N=64` but 85 at `N=128`, so there is no single grid-independent rank. |
+| **C1-3d** | `fig_bug_cost`'s title is a **hardcoded string literal** saying "3-5x slower" | `experiments/make_figures.py:517` | Against the full grid, `cost_bug_port.json` gives **1.897 / 2.012 / 2.232 / 2.252**. The 3.4-5.1x on the bars is `bug/projected`. **Derive the title from `bug_vals` and name the denominator.** |
+| **C1-3e** | `fig_crossover`'s left title still **collides with the right panel's y-label** | `make_figures.py`, the two `set_title` calls | D69.4/D72.2, unfixed. Shorten the left title or move the right label. |
+| **C1-3f** | `fig_divergence` shows **`t <= 0.1`** while the crossover is at `t* = 0.649` / `1.482` | built from `kolmogorov_re*_N64.json`, whose parameters record `final_time: 0.1, nsteps: 200` | **The most consequential of the six.** In that window the DLRA's divergence rises to `~1e-4` and the static POD's stays at `~0`, so a reader sees the static baseline **winning** — the opposite of §6 — with no way to tell. Label the window on the figure. |
+| **C1-3g** | `fig_divergence`'s right title calls a domain total **"the zonal mean"** and says KE **"grows"** | `make_figures.py:213` | D69, unfixed. Re=100 **falls** 22.21 -> 20.26. |
+
+**The cheapest durable fix for C1-3a/b/c: none of those strings should be literals.** Derive them from the artifact, as
+`fig_spectra_ek` does — then a re-run cannot leave a stale claim in the paper's rendering path.
+
+**Run `python state/reviewer/check_order_withdrawn.py` after touching any title or interpretation string. It now prints
+`FIGURE CODE: 14 file(s), 5990 non-comment line(s)` and lists every hit, so you can see your own change land.**

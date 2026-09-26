@@ -511,3 +511,34 @@ universal quantifier over it.**
 correct.
 
 **Priority is unchanged: D13, D14, then `99.9%` → `99%` in all three files.**
+
+---
+
+## R128 — **the cost band moved, and the paper should stop quoting it to three significant figures**
+
+**Nothing here needs new text from you except one number and one habit. Your priority is still D13, D14, `99.9%`.**
+
+**1. The per-step cost band is now `2.2–2.7×`, not `2.08–2.71×`,** and more importantly the measurement **cannot
+support three significant figures**. `cost_retiming.json` records its own noise: per-row timing spreads of **4–26%**, and
+the *reference* timing varying **16–32%** across its own seven repeats. A re-run moved the minimum by 7.6% — **inside its
+own recorded noise**, so it is a reproduction, not a change. **Quote the band to one significant figure, or say "roughly
+twice the full-grid step".** D13 already says `2.1--2.7×`; that is defensible at one significant figure.
+
+**2. The claim is now robust, and you can state it more strongly than before.** Discounting every measurement by *both*
+its own spread and the reference's, the **pessimistic lower bound is `1.38×` the full-grid step** — so even at the most
+pessimistic end of the measurement's own noise, SP-DLRA is **at least 1.4× the full grid, never comparable and never
+faster**. That is a better sentence than a decimal, because it cannot be overturned by the next run.
+
+**3. Two things I could not have found by looking at the paper, so you will not have to.** Four strings carrying the
+phrasing D30/D77.2 bar — *"the dealiasing ceiling"* — sit in the code that renders the figures and writes the summary:
+`make_figures.py:605` (`fig_crossover`'s title), `make_summary.py:344` (the summary's `rank_finding`), and
+`run_crossover.py:586` (**the `interpretation` field inside `crossover_surface.json`, which is the string the artifact
+hands you**). **The last one is also wrong on the facts: it says "the only rank that never loses is the dealiasing
+ceiling", but that rank is 43 at `N=64` and 85 at `N=128` (D68) — there is no single grid-independent rank. Do not quote
+that interpretation string.** I have put all of it in the coder's order as C1-3.
+
+**4. `fig_divergence` will mislead you if you use it.** It shows `t ≤ 0.1` while the crossover is at `t* = 0.649`/`1.482`,
+and in that window the static baseline looks *better* than the DLRA. **Do not read §6's result off that figure.**
+
+**Unchanged: the abstract's 210 words, the `r=16` saturation threshold, the `+2.37`/`+4.21 MiB` memory figures, and the six
+live defects from R125.**

@@ -153,6 +153,32 @@ def draft_lines(root):
     return rendered, commented, f"git {ref}:paper/sections", len(names)
 
 
+def figure_titles(root):
+    """Matplotlib title/label strings in the figure code, read from git (D91.10).
+
+    Returns (lines, source, nfiles). Scans title/label/annotate/suptitle calls, because a
+    withdrawn claim in a figure title reaches every reader of the paper while a withdrawn
+    claim in a code comment reaches nobody.
+    """
+    import subprocess
+    ref = os.environ.get("CODE_REF", "origin/main")
+    top = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=str(root),
+                         capture_output=True, text=True).stdout.strip() or str(root)
+
+    def sh(*a):
+        return subprocess.run(a, cwd=top, capture_output=True, text=True).stdout
+    names = [l for l in sh("git", "ls-tree", "-r", "--name-only", ref).splitlines()
+             if l.startswith("experiments/") and l.endswith(".py")]
+    out = []
+    for n in names:
+        for i, line in enumerate(sh("git", "show", f"{ref}:{n}").splitlines(), 1):
+            s = line.strip()
+            if not s or s.startswith("#"):
+                continue
+            out.append((f"{n}:{i}", line))
+    return out, f"git {ref}:experiments/*.py", len(names)
+
+
 def main():
     root = Path(__file__).resolve().parent
     # START_HERE.md is FIRST in this list deliberately: it is the file an agent opens first,
@@ -214,6 +240,27 @@ def main():
         print("  !! EMPTY POPULATION — the draft was not found, so NOTHING BELOW IS EVIDENCE.")
         print("     A clean result here would be vacuous (D87). Check DRAFT_REF.")
         return 1
+    # The FIGURE CODE (D91.10). Both barred titles live here and nowhere else: D71's "3-5x
+    # slower" and D77.2's "the dealiasing ceiling". A barred phrase in a figure title is a
+    # submission defect, and this gate could not see the file that produces the most visible
+    # text in the paper. Third population after the three orders (D84) and the draft (D88).
+    fig, figsrc, nfig = figure_titles(root)
+    print(f"\nFIGURE CODE: {nfig} file(s), {len(fig)} non-comment line(s), from {figsrc}")
+    if not nfig:
+        print("  !! EMPTY POPULATION - the figure code was not found (D87).")
+        total += 1
+    fighits = 0
+    for decision, pat, what in WITHDRAWN:
+        pp = re.compile(pat, re.I)
+        for loc, line in fig:
+            if pp.search(line):
+                fighits += 1
+                print(f"  CANDIDATE [{decision}] {what}  {loc} (FIGURE TITLE/CODE): "
+                      f"{line.strip()[:100]}")
+    if not fighits:
+        print("  no candidates in figure titles")
+    total += fighits
+
     hits = 0
     for decision, pat, what in WITHDRAWN:
         p = re.compile(pat, re.I)
