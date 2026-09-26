@@ -7104,3 +7104,73 @@ THE 4 FAILURES ARE STILL THE `crossover_N128.json` ROWS (C2-1).**
 **D104.11 — Unchanged.** Everything in D35.6 through D103.8 stands, **except that the abstract's grid-refinement clause
 and cost band are corrected, the `2.2` is now pinned by two registry rows, and `check_directional_claims.py` is a
 seventh gate.**
+
+---
+
+## D105 — **THE ADAPTIVE RANK REACHES THE GRID'S ALIAS-FREE RANK AT STEP 15 AND THEN SITS AT THE CAP FOR `92.5%` OF THE RUN — AND THE TRACE IS **BYTE-IDENTICAL** AT Re = 100, 1000 AND 5000. SO THE RETAINED RANK CARRIES NO REYNOLDS-NUMBER INFORMATION, AND FOR MOST OF ANY RUN THE RANK IS SET BY THE CAP RATHER THAN BY THE TOLERANCE.** (2026-09-26)
+
+> **OPERATIVE (R142). THIS IS WHY D100's WITHDRAWN `r*(Re)` CLAIM WAS RIGHT TO WITHDRAW, AND IT SUPPLIES A STRONGER
+> MECHANISM IN ITS PLACE. IT ALSO FIXES §5, WHICH HAS THREE `[PENDING-CODER]` PLACEHOLDERS AND TWO FALSE CLAIMS.**
+
+**D105.1 — THE MEASUREMENT. THE `rank_history` OF EVERY FORCED-RUN ARTIFACT, SHA-1 OVER THE WHOLE LIST:**
+
+| artifact | `len` | sha1 | transitions `(step, rank)` |
+|---|---|---|---|
+| `kolmogorov_re100_N64.json` | 201 | **`a317f44b850b`** | `(0,17) (5,42) (15,43)` |
+| `kolmogorov_re1000_N64.json` | 201 | **`a317f44b850b`** | `(0,17) (5,42) (15,43)` |
+| `kolmogorov_re5000_N64.json` | 201 | **`a317f44b850b`** | `(0,17) (5,42) (15,43)` |
+| `kolmogorov_re5000_N64_long.json` | 2001 | `19c22a0c2976` | `(0,17) (5,42) (15,43)` |
+| `kolmogorov_re5000_N128.json` | 201 | `b21b973bf7be` | `(0,17) (5,40) (10,44) (15,45) (20,46) (25,47)` |
+
+**THE FIRST THREE ARE BYTE-IDENTICAL. Re = 100, 1000 AND 5000 PRODUCE THE SAME RANK TRACE, ELEMENT FOR ELEMENT.** The
+2000-step long run has the **same three transitions** and then holds the cap for its remaining 1985 steps. `N = 128`
+differs, climbing toward its own ceiling.
+
+**D105.2 — AND THE SHAPE. THE ENTIRE `N = 64` TRACE IS THREE TRANSITIONS: `17` AT STEP 0, `42` AT STEP 5, `43` AT STEP
+15. SAMPLED EVERY 20 STEPS: `[17, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43]`.** So:
+
+- **`92.5%` OF THE RUN IS SPENT AT THE CAP** (and `99.2%` of the 2000-step run).
+- `43` IS `dlra_max_rank` **AND** `dealias_ceiling_N64` — **THE GRID'S LARGEST ALIAS-FREE RANK.**
+
+**D105.3 — CONSEQUENCE ONE, AND IT IS A WITHDRAWAL I SHOULD HAVE MADE EARLIER. THE RETAINED RANK CARRIES NO
+REYNOLDS-NUMBER INFORMATION.** A weakly forced `Re = 100` flow and a `Re = 5000` turbulent one produce the same rank at
+every step. **So no claim of the form "`r^*(Re)` increases with Reynolds number" can be supported by these runs** — which
+is what §7 originally asserted and what D100 withdrew for a different reason (D32.2's horizon bar). **The withdrawal was
+right; this is the mechanism behind it, and it is a stronger reason than the horizon.**
+
+**D105.4 — CONSEQUENCE TWO, AND IT REFINES WHAT THE RANK CRITERION IS. AFTER STEP 15 THE RANK IS NOT "GOVERNED ONLINE BY
+THE RESIDUAL INDICATOR"; IT IS AT `dlra_max_rank`.** For `92.5%` of any run the tolerance is not what sets the rank — the
+cap is. **This is the same boundary D68/D77.2 recorded from the other side** (the never-yields rank coincides with the
+alias-free rank) **and the same boundary D101 found in the overflow direction** (a propagated basis fails in rank
+relative to the resolved band, and what protects the reduced model is that it ranks on the zonal-mean-removed field).
+**All three are one fact: `43` AT `N = 64` IS THE GRID, NOT A PROPERTY OF THE FLOW.**
+
+**D105.5 — SO THE PAPER'S STRONGEST AND MOST DEFENSIBLE MECHANISM IS ABOUT THE RANK, AND IT IS NOT THE ONE D101's TEST
+DOCUMENTED. THE HONEST STATEMENT IS: *THE REDUCED INTEGRATOR'S ADVANTAGE IS THAT IT SPENDS ITS RANK ON THE DYNAMICS AND
+RUNS AT THE GRID'S FULL RESOLVED BAND, WHEREAS A BASIS FIXED AT INITIALISATION SPENDS RANK ON MODES THE FLOW HAS ALREADY
+LEFT — WHICH IS WHY ITS ERROR STOPS IMPROVING AT RANK 16 WHILE OURS KEEPS IMPROVING, AND WHY A PROPAGATED BASIS FAILS
+ONLY ONCE ITS RANK APPROACHES THE RESOLVED BAND.* THAT IS `43` CLAIMS IN ONE SENTENCE, EVERY CLAIM WITH AN ARTIFACT, AND
+IT IS TRUE AT BOTH GRIDS.**
+
+**D105.6 — CONSEQUENCE THREE, AND IT DOES NOT RETIRE D32.2. THE LONG RUN EXTENDS TO `final_time = 1.0` AND 2000 STEPS,
+SO IT LOOKS LIKE THE HORIZON EVIDENCE D32.2 ASKS FOR. IT IS NOT: THE RANK IS AT THE CAP FOR `99.2%` OF IT, SO THE EXTRA
+HORIZON ADDS INFORMATION ABOUT CAP SATURATION AND NONE ABOUT RANK ADAPTATION. D32.2's BAR STANDS, AND NOW FOR A STATED
+REASON RATHER THAN A MISSING ONE.**
+
+**D105.7 — NO REGISTRY ROW, AND THE REASON IS THE POINT. THE CLAIM IS A PROPERTY ACROSS FOUR ARTIFACTS
+(BYTE-IDENTICAL TRACES) AND THE REGISTRY'S ROWS ARE `(artifact, path, selector, field, value)`.** A row cannot say "these
+two artifacts agree", and D91.5's rule is not to build a check that fires for reasons its author cannot state. So this
+lives in D105 and in the claims table, and the check that would guard it is a *cross-artifact* equality assertion — which
+is C7 work, not something to smuggle into a value registry.
+
+**D105.8 — §5, WHICH HAS THREE `[PENDING-CODER]` PLACEHOLDERS FOR THE THREE MOST BASIC REPRODUCIBILITY FACTS IN THE
+PAPER, PLUS TWO CLAIMS THAT ARE FALSE. ALL FIVE ARE FIXED IN W12–W14 BELOW, AND EVERY VALUE IS FROM AN ARTIFACT:**
+
+| placeholder | the value | source |
+|---|---|---|
+| `N = [PENDING-CODER]` | `64`, and `128` at `Re = 5000` | `grid.N` in all five artifacts |
+| `Δt = [PENDING-CODER]` | `5\times 10^{-4}` at `N=64`; `2.5\times 10^{-4}` at `N=128` | `parameters.dt` |
+| initial condition | Kolmogorov equilibrium at base speed `0.5`, plus a perturbation of velocity RMS `1.0` built from modes below cutoff `8`, seed `20260925` | `parameters.base_speed`, `.perturbation_velocity_rms`, `.cutoff`, `.seed` |
+
+**AND `Δt` HALVES WITH `N`, WHICH IS THE CFL STATEMENT THE PLACEHOLDER WAS SUPPOSED TO CARRY: THE ARTIFACTS RECORD
+`dlra.max_cfl` OF `0.0147` AT `N=64` AND `0.0155` AT `N=128`, SO THE CFL IS HELD AND NOT JUST THE STEP.**

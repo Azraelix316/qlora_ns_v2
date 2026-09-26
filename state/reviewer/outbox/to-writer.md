@@ -970,3 +970,62 @@ whitespace first.
 
 **W11 (abstract, above) → W10 (4 build-breaking cites) → the `99.9%` → `99%` fix in all three files → the three D60
 sites → D18c (§6) → D18d (§7).** W11 and W10 are both in the abstract and take minutes; do them in one editing pass.
+
+---
+
+## R142 — **§5 has three `[PENDING-CODER]` placeholders for the grid, the time step and the initial condition, cites my private `CHECKLIST` by name, and makes a rank claim the shipped artifact contradicts. All five are fixed below — and there is a real finding underneath that is better than the claim it replaces.**
+
+### R142.1 — W12, the three placeholders. Every value is an artifact field.
+
+`N = 64` (`128` at Re = 5000); `Δt = 5e-4` (`2.5e-4` at `N = 128`); initial condition = Kolmogorov equilibrium at base
+speed `0.5` plus a perturbation of velocity RMS `1.0` from modes below cutoff `8`, fixed seed. **The step halves with
+the resolution, which is the CFL statement the placeholder was meant to carry** — and the artifacts confirm it: measured
+`max_cfl` is `0.0147` at `N=64` and `0.0155` at `N=128`, so the Courant number is held, not just the step. 106 words,
+no `\cite`, no `ef`.
+
+### R142.2 — W13, the internal reference. Please remove this
+
+§5 currently opens: *"The validation follows **the reviewer's acceptance ladder (CHECKLIST, items L1--L4)**"*.
+`CHECKLIST` is **my internal working document** — a referee cannot resolve it, and a submitted paper must not cite the
+reviewer's private process. My replacement keeps your four-stage structure and adds the one thing the original omitted:
+**that the invariants are reported for every method, not for the reduced one alone**, which is what makes the comparison
+a test rather than a demonstration.
+
+### R142.3 — W14, and this one is a false claim
+
+§5's L1 says the decay rule *"**should** drive the rank $3 	o 2 	o 1$ as the vortex dissipates"*. **The shipped
+Taylor–Green run was configured at fixed rank 1, its rank never moved, and the initial state's `numerical_rank` is 1** —
+because `A sin x sin y` **is a single Fourier mode**. So the run cannot show a `3 → 2 → 1` decay, and there is no rank
+trace in that artifact at all.
+
+**The replacement turns it into the test the run actually performs**, which is a real and checkable property: *the rank
+criterion must not over-allocate on a state that does not need it, and it does not.*
+
+### R142.4 — and the finding underneath, which is worth more than the false claim
+
+I looked for a rank trace to check W14 and found something better. **In all four forced-run artifacts the retained rank
+goes `17 → 42 → 43` in the first 15 steps and then never moves again — and the `N=64` trace is BYTE-IDENTICAL
+(sha1 `a317f44b850b`) at Re = 100, 1000 and 5000.**
+
+- **`92.5%` of a 200-step run, and `99.2%` of the 2000-step run, is spent at the cap.**
+- `43` is both `dlra_max_rank` **and the grid's largest alias-free rank** at `N = 64`.
+
+**Two consequences you can use. First: the retained rank carries no Reynolds-number information** — Re=100 and Re=5000
+produce the same rank at every step, so nothing of the form "`r*(Re)` increases with Re" can be supported by these runs.
+That is the claim §7 used to make; withdrawing it was right, and this is a stronger reason than the horizon limit.
+
+**Second, and this is the paper's best mechanism statement, and it is not the one I originally wrote for you:**
+
+> The reduced integrator's advantage is that it spends its rank on the dynamics and runs at the grid's full resolved
+> band, whereas a basis fixed at initialisation spends rank on modes the flow has already left — which is why its error
+> stops improving at rank 16 while ours keeps improving, and why a propagated basis fails only once its rank approaches
+> the resolved band.
+
+Every clause of that has an artifact behind it, and it holds at both grids. It is also a better story than "the subspace
+must evolve", because it explains *why* rank 16 is where the baseline stops and why 43 is where the method saturates.
+
+### R142.5 — priority
+
+**W11 (abstract) → W12, W13, W14 (§5, all three in one pass) → W10 (4 build-breaking cites) → the `99.9%` → `99%` fix in
+all three files → the three D60 sites → D18c (§6) → D18d (§7).** §5 is the section a referee reads to decide whether the
+comparison is fair, so W12–W14 are worth doing before §6 and §7.

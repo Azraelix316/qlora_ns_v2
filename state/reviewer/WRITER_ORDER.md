@@ -22,6 +22,9 @@ describing a paper we are no longer writing.**
 | **W7** | **§6 results — the whole section, prose only** | **7 blocks supplied: D18c**, 1,321 words, every number a registry row. **§6 is where the contribution is and it has no numbers in it. Paste per subsection; do NOT replace the section — its labels are referenced 26 times from elsewhere.** Also in D18c: the figure mapping, and one real gap (no Taylor--Green figure exists). | `WRITER_ORDER.md` **D18c** |
 | **W8** | **§7 discussion — the whole section, prose only** | **4 blocks supplied: D18d**, 1,063 words. **The shipped §7 is written in the conditional (\"is expected to\", \"if the runs confirm\") because it was drafted before the runs existed, its first subsection is built on the **barred** online-adaptive-rank claim, and it carries 3 `PENDING-CODER` markers. D18d states the case for the method *despite* it being slower and using more memory, which is the acceptance argument.** | `WRITER_ORDER.md` **D18d** |
 | **W9** | **§8 conclusion** | Short. Do not introduce anything not already above. | — | — |
+| **W12** | **§5's three `[PENDING-CODER]` placeholders** | **Grid `N`, time step `Δt` and the initial condition are the most basic reproducibility facts in the paper and all three are unfilled. Supplied, with the artifact field each value comes from, plus the CFL statement the placeholder was meant to carry.** | *W12* (D105.8) |
+| **W13** | **§5 cites my internal `CHECKLIST` by name** | *"the reviewer's acceptance ladder (CHECKLIST, items L1--L4)"* — a referee cannot resolve it. Replacement keeps the four-stage structure and adds that the invariants are reported for EVERY method.** | *W13* |
+| **W14** | **§5's L1 rank claim is false** | **Says the decay rule "should drive the rank 3 → 2 → 1"; the shipped run is configured at FIXED rank 1, never moves, and the TG state's numerical rank is 1 because it is a single Fourier mode. Replaced with the test the run actually performs.** | *W14* |
 | **W11** | **the abstract's grid-refinement claim is CONTRADICTED** | **FIRST TASK, above W10 — and it is my error: D13's block is corrected in place. "the static baseline's grows by three orders of magnitude" is false (0 of 36 error quantities grow >10x; its error IMPROVES 5.2x, and D56 called that quantity "unstably"). Cost band `2.1`→`2.2`, pessimistic floor `1.4x` restored. The `2.2` is sound and now pinned.** | *W11* (D104) |
 | **W10** | **`koch2019dlra`: 4 build-breaking cites** | **BUILD BLOCKER — the key is in no `.bib` on any branch. 3 sites are mechanical (`→ koch2007`); 1 supports a "survey by Koch and Lubich" clause with no verifiable source. Cause: the paper cites `paper/references.bib` (38 keys) while the shared `refs.bib` has 42–51 — they share THREE.** | *W10* (D102) |
 
@@ -1071,3 +1074,56 @@ these two runs.
 **W11 (this, abstract) → W10 (4 build-breaking cites) → D13/D14 re-paste check → the `99.9%` → `99%` fix in all three
 files → the three D60 sites → D18c (§6) → D18d (§7).** W11 and W10 are both in the abstract's neighbourhood and both take
 minutes; doing them together is one editing pass.
+
+---
+
+## W12 — **§5 HAS THREE `[PENDING-CODER]` PLACEHOLDERS FOR GRID RESOLUTION, TIME STEP AND INITIAL CONDITION. HERE THEY ARE, WITH THE PROVENANCE. THIS IS THE MOST BASIC REPRODUCIBILITY INFORMATION IN THE PAPER AND IT IS UNFILLED.** (paste into `\label{sec:forced}`, replacing the three placeholders)
+
+```latex
+on grid resolution $N = 64$, and $N = 128$ at $\mathrm{Re} = 5000$, with time
+step $\Delta t = 5\times 10^{-4}$ and $2.5\times 10^{-4}$ respectively --- the
+step halves with the resolution, which holds the Courant number fixed rather
+than the step alone, and the measured Courant numbers of the two runs differ by
+under $6\%$. The initial condition is the Kolmogorov equilibrium at base speed
+$0.5$ perturbed by a field of velocity RMS $1.0$ built from the modes below
+cutoff $8$, from a fixed seed. Runs are integrated to $t = 0.1$, and the
+$\mathrm{Re} = 5000$ case is also run to $t = 1.0$ at ten times the step count.
+```
+
+**Every value in that block is a field of a shipped artifact**, and the Courant numbers it cites
+(`0.0147` at `N=64`, `0.0155` at `N=128`) are `dlra.max_cfl` in the two runs. **No new claim, no `\cite`, no `\ref`.**
+
+## W13 — **§5 SAYS *"THE VALIDATION FOLLOWS THE REVIEWER'S ACCEPTANCE LADDER (CHECKLIST, ITEMS L1--L4)"*. `CHECKLIST` IS MY INTERNAL WORKING DOCUMENT. A SUBMITTED PAPER CANNOT CITE IT AND A REFEREE CANNOT RESOLVE IT.** (replace the first three lines of the section)
+
+```latex
+The validation is staged so that each step tests one thing. We first verify the
+scheme on a laminar flow with a known solution, then run the forced turbulent
+problem at three Reynolds numbers, and we compare against two references
+throughout: a full-grid spectral solution of the same problem, which supplies
+the error and the energy statistics, and a static proper orthogonal
+decomposition baseline built from the reference run, which isolates what the
+reduced representation buys at equal rank. We report the reduced method against
+both at every Reynolds number, and we report the invariants in Section
+\ref{sec:invariants} for every method rather than for the reduced one alone.
+```
+
+**That sentence removes the internal reference, keeps the four-stage structure, and adds the one thing the original
+omitted: that the invariants are reported for EVERY method, which is what makes the comparison a test rather than a
+demonstration.**
+
+## W14 — **§5's L1 SAYS THE DECAY RULE *"SHOULD DRIVE THE RANK $3 \to 2 \to 1$"*. THE SHIPPED TAYLOR--GREEN RUN WAS CONFIGURED AT FIXED RANK 1, ITS RANK NEVER MOVED, AND THE INITIAL STATE'S NUMERICAL RANK IS 1 BECAUSE $A\sin x\sin y$ IS A SINGLE FOURIER MODE.** (replace the two sentences)
+
+```latex
+This test verifies (i) the discrete energy monotonicity (I2, unforced) and
+(ii) the exact divergence-free property (I1). It also fixes what the rank
+criterion must \emph{not} do. The Taylor--Green stream function is a single
+Fourier mode, so the state has numerical rank one from the outset, and the
+criterion must recognise that rather than spend rank on a spectrum that is not
+there: the run holds rank one throughout, as it should. Establishing how the
+criterion behaves as a state \emph{gains} breadth is a question about the forced
+runs, and we take it up there.
+```
+
+**`initial_state.numerical_rank` IS `1` AND `parameters.rank` IS `1` IN `taylor_green.json`, AND
+`dlra_rank_min`/`rank_max`/`rank_final` ARE ALL `1`.** The replacement turns a false claim into the test the run actually
+performs — that the criterion does not over-allocate — which is a real property and is checkable from the artifact.
