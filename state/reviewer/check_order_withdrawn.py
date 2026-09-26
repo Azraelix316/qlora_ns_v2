@@ -119,7 +119,9 @@ def scan(path):
 
 def main():
     root = Path(__file__).resolve().parent
-    docs = [root / "WRITER_ORDER.md", root / "CODER_ORDER.md"]
+    # START_HERE.md is FIRST in this list deliberately: it is the file an agent opens first,
+    # so a withdrawn claim there is the most likely one to be believed (D84).
+    docs = [root / "START_HERE.md", root / "WRITER_ORDER.md", root / "CODER_ORDER.md"]
 
     for d in docs:
         if not d.exists():

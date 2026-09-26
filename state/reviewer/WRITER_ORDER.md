@@ -530,7 +530,8 @@ $$P_{\mathrm{in}} = 2\pi^2 F^2/\nu \qquad\text{and}\qquad P_{\mathrm{in}}(\psi_K
 
 **Suggested replacement for clauses (ii)–(iii) and the validation sentence:**
 
-> *"(ii) the velocity is represented by a stream function, so divergence-freeness holds identically in exact arithmetic, with a measured residual no larger than $1.1\times10^{-11}$ — seven orders of magnitude below the reduced solver's own error; and (iii) the subspace is refitted as the dynamics develop, which we show is necessary: a fixed basis propagated through the nonlinearity overflows at ranks $32$ and $42$ where the refitted one does not. We validate the method on forced two-dimensional flow at Reynolds numbers $100$, $1000$ and $5000$ against a full-grid spectral reference and a static POD baseline, and we benchmark cost honestly: the reduced integrator is $2.1$–$2.7\times$ the full-grid step in every regime we measured, with no compensating memory benefit."*
+> *"(ii) the velocity is represented by a stream function, so divergence-freeness holds identically in exact arithmetic, with a measured residual no larger than $1.1\times10^{-13}$ for the reduced integrator and the
+> full-grid reference, and no larger than $1.1\times10^{-11}$ over every method we ran — seven orders of magnitude below the reduced solver's own error; and (iii) the subspace is refitted as the dynamics develop, which we show is necessary: a fixed basis propagated through the nonlinearity overflows at ranks $32$ and $42$ where the refitted one does not. We validate the method on forced two-dimensional flow at Reynolds numbers $100$, $1000$ and $5000$ against a full-grid spectral reference and a static POD baseline, and we benchmark cost honestly: the reduced integrator is $2.1$–$2.7\times$ the full-grid step in every regime we measured, with no compensating memory benefit."*
 
 ## D12 — Two of my corrections are two edits, not one (D65.4)
 
