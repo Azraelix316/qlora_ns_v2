@@ -394,10 +394,14 @@ def main() -> None:
         # out of this run's own rows; the previous version of this string was a
         # literal whose arithmetic had gone stale (it claimed 1.5x and 6x the
         # noise floor against measured 2.7x and 1.9x).
-        "interpretation": _memory_interpretation(
-            artifact.get("rank_scaling", []), artifact["noise_floor_mib"]
-        ),
+        "interpretation": "",   # filled in below, once `artifact` exists
     }
+    # D19.4: the interpretation is computed from the rows this run produced, not
+    # written as a literal.  It has to be assigned after the dict is built,
+    # because it reads the dict.
+    artifact["interpretation"] = _memory_interpretation(
+        artifact.get("rank_scaling", []), artifact["noise_floor_mib"]
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n")
     print(f"wrote {args.output}")

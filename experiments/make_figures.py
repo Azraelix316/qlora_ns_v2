@@ -29,6 +29,9 @@ from pathlib import Path
 
 import numpy as np
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from run_crossover import t_star_from_rows  # noqa: E402
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -324,15 +327,34 @@ def main() -> None:
         t_star = None
         crossover = load(R / "crossover_surface.json")
         if crossover:
-            resolved = [
-                c["t_star"]
-                for case in crossover["by_reynolds"].values()
-                for c in case["crossovers"] if c["t_star"] is not None
-            ]
-            t_star = (min(resolved), max(resolved)) if resolved else None
+            # From the ROWS, never from the artifact's `crossovers` block (D22.5,
+            # D23): measured on the committed surface that block sits 7-16% below
+            # every rows-based value, and quoting it here would put an unverifiable
+            # number into a figure label.  Both the brackets and the point
+            # estimates are reported, because the bracket is the convention-free
+            # statement and the point estimate is not.
+            brackets, points = [], []
+            for case in crossover["by_reynolds"].values():
+                windows = crossover["parameters"].get("moving_window_lengths") or [0.25]
+                for rank in crossover["parameters"]["ranks"]:
+                    rows_dlra = case["dlra"].get(str(rank))
+                    rows_static = case["static_moving_window"].get(
+                        f"W{windows[0]:g}_r{rank}"
+                    )
+                    if not rows_dlra or not rows_static:
+                        continue
+                    got = t_star_from_rows(
+                        rows_dlra, rows_static, "relative_l2", log_interp=True
+                    )
+                    if got["t_star"] is not None:
+                        brackets.append(tuple(got["bracket"]))
+                        points.append(got["t_star"])
+            if points:
+                t_star = (min(points), max(points), brackets)
         caveat = (
             f"window $t\\leq{window:g}$ only"
-            + (f"; the crossover is at $t^*\\in[{t_star[0]:.2f},{t_star[1]:.2f}]$"
+            + (f"; the crossover is bracketed in $t\\in"
+               f"[{min(b[0] for b in t_star[2]):g},{max(b[1] for b in t_star[2]):g}]$"
                if t_star else "")
         )
         ax.set_xlabel("time")
@@ -389,10 +411,14 @@ def main() -> None:
             rf"$t\leq{window:g}$ the static baseline's offline fitting window is a "
             rf"*prefix* of the evaluated trajectory, so it is the more accurate "
             rf"method here"
-            + (rf", and the ordering reverses at the crossover, "
-               rf"$t^*\in[{t_star[0]:.2f},{t_star[1]:.2f}]$ (Fig. "
-               rf"\ref{{fig:crossover}})" if t_star else ", and the ordering "
-               "reverses only at longer horizons")
+            + (rf", and the ordering reverses at the crossover, bracketed in "
+               rf"$t\in[{min(b[0] for b in t_star[2]):g},"
+               rf"{max(b[1] for b in t_star[2]):g}]$ from the rows (point "
+               rf"estimates {t_star[0]:.2f}-{t_star[1]:.2f} on "
+               rf"$t^*=\\mathrm{{static}}/\\mathrm{{DLRA}}$ with log "
+               rf"interpolation, Fig. \\ref{{fig:crossover}})"
+               if t_star else ", and the ordering reverses only at longer "
+               "horizons")
             + rf". Right: kinetic energy split as the fluctuation "
             rf"$\psi'=\psi-\overline{{\psi}}_x$ and the zonal mean; the "
             rf"fluctuation is the series the paper's statistics are computed on, "

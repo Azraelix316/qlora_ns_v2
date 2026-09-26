@@ -219,6 +219,80 @@ def moving_window_schedule(
     return schedule, starved
 
 
+# The one error column a crossover is quoted on.  Named, never defaulted:
+# D22.5's whole point is that a crossover with no declared column is a number
+# with no reproducible relationship to the rows beside it.  `relative_l2` is the
+# method's own mean handling over the full field, which is the comparable one.
+DECLARED_CROSSOVER_COLUMN = "relative_l2"
+
+# How far the derived block may sit from the rows' value before the artifact
+# records a disagreement.  2% is far below the 7-16% the committed surface
+# actually showed, so this is a threshold that would have caught it.
+CROSSOVER_AGREEMENT_TOLERANCE = 0.02
+
+
+def t_star_from_rows(
+    dlra_rows: list[dict], static_rows: list[dict], column: str,
+    log_interp: bool = True,
+) -> dict:
+    r"""The advantage horizon computed **from the rows**, under a declared column.
+
+    D22.5/D23: the ``crossovers`` block in the artifact is not a usable source
+    for this number.  Measured on the committed surface, its ``t_star`` sits
+    **7-16% below** every value the rows give, on both error columns and both
+    interpolations, so it is not a convention difference and it is not a column
+    difference.  Its *bracket* does agree with the rows, which is why the
+    qualitative statement survives and the point estimate does not.
+
+    So every consumer -- the artifact's own block, the summary, the figure
+    labels, the tests -- goes through this one function, and the block is
+    asserted against it rather than trusted.  Two interpolation conventions are
+    offered because they differ by ~7% here and a reader has to be told which
+    one produced a number; the **bracket** is the convention-free statement.
+
+    ``column`` is required and never defaulted.  Naming the column is the whole
+    point of D22.5: a crossover with no declared column is a number with no
+    reproducible relationship to the data beside it.
+    """
+    dlra = {round(float(r["time"]), 9): r for r in dlra_rows}
+    static = {round(float(r["time"]), 9): r for r in static_rows}
+    times = sorted(set(dlra) & set(static))
+    if len(times) < 2:
+        return {"t_star": None, "bracket": None, "crossings": 0,
+                "reason": "fewer than two common evaluation times"}
+    ratios = []
+    for t in times:
+        d = float(dlra[t][column])
+        s = float(static[t][column])
+        ratios.append(s / d if d > 0 else float("inf"))
+    for i in range(1, len(times)):
+        # A downward crossing of static/DLRA through 1: the static baseline is
+        # ahead while the ratio exceeds 1 and behind once it falls below.
+        if ratios[i - 1] > 1.0 >= ratios[i]:
+            t0, t1 = times[i - 1], times[i]
+            if log_interp:
+                l0 = math.log(max(ratios[i - 1], 1e-300))
+                l1 = math.log(max(ratios[i], 1e-300))
+                frac = (0.0 - l0) / (l1 - l0) if l1 != l0 else 0.0
+            else:
+                frac = (
+                    (ratios[i - 1] - 1.0) / (ratios[i - 1] - ratios[i])
+                    if ratios[i - 1] != ratios[i] else 0.0
+                )
+            return {
+                "t_star": t0 + frac * (t1 - t0),
+                "bracket": [t0, t1],
+                "crossings": 1,
+                "column": column,
+                "interpolation": "log" if log_interp else "linear",
+            }
+    return {
+        "t_star": None, "bracket": None, "crossings": 0, "column": column,
+        "interpolation": "log" if log_interp else "linear",
+        "reason": "no downward crossing of static/dlra through 1 on this column",
+    }
+
+
 def crossover_horizon(
     dlra_rows: list[dict], static_rows: list[dict]
 ) -> dict:
@@ -484,6 +558,34 @@ def main() -> None:
                 key = f"W{window:g}_r{rank}"
                 static_surface[key] = static_rows
                 star = crossover_horizon(dlra_rows, static_rows)
+                # D22.5/D23: the derived block is now ASSERTED against the rows
+                # rather than being an independent computation, because measured
+                # on the committed surface it sat 7-16% below every rows-based
+                # value on both error columns and both interpolations.  The block
+                # carries the rows' value under a declared column, plus both
+                # conventions and both brackets, so it cannot silently disagree
+                # with the data beside it -- and a disagreement is now visible as
+                # a difference between two fields rather than as a wrong number.
+                derived = t_star_from_rows(
+                    dlra_rows, static_rows, DECLARED_CROSSOVER_COLUMN,
+                    log_interp=True,
+                )
+                linear = t_star_from_rows(
+                    dlra_rows, static_rows, DECLARED_CROSSOVER_COLUMN,
+                    log_interp=False,
+                )
+                star["t_star_from_rows"] = derived["t_star"]
+                star["bracket_from_rows"] = derived["bracket"]
+                star["t_star_linear_interpolation"] = linear["t_star"]
+                star["bracket_linear_interpolation"] = linear["bracket"]
+                star["column"] = DECLARED_CROSSOVER_COLUMN
+                star["agrees_with_rows"] = (
+                    star["t_star"] is not None
+                    and derived["t_star"] is not None
+                    and abs(star["t_star"] - derived["t_star"])
+                    <= CROSSOVER_AGREEMENT_TOLERANCE
+                    * max(abs(derived["t_star"]), 1e-30)
+                )
                 star.update({"rank": rank, "window": window})
                 crossovers.append(star)
                 diagnostics[key] = {
