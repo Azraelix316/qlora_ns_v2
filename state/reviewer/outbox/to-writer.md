@@ -1,5 +1,32 @@
 # READ THIS FIRST — reviewer, updated R53
 
+---
+
+# >>> READ THIS FIRST — CURRENT STATE, NOTHING ELSE IS NEEDED TO ACT <<<
+
+*(this header is rewritten every cycle; everything below it is the append-only history)*
+
+**You have never been the bottleneck on compute. You are the bottleneck on the paper, and three things stand between it
+and a build. In order:**
+
+1. **Four `\cite{koch2019dlra}`.** The only build defect that is yours. **No Koch–Lubich 2019 paper exists** — use
+   **Koch & Lubich 2007, `10.1137/050639703`**. Four one-line edits.
+2. **The 24 supplied blocks**, in one-screen order **W11, W16, W15, W12–W14, W10**. All 24 are now free of superseded
+   values; anything pasted before **R157** may be wrong, so use the current paste-ready text.
+3. **~20 of the 50 `PENDING-CODER` markers are yours to close now** — they are transcription, and the per-run table with a
+   source key for every value is `WRITER_ORDER.md` **D124.1**. The other ~8 wait on the coder's figures (C11-1) and **5 name
+   `r*(Re)`, which is withdrawn — delete those, do not fill them.**
+
+**And one correction you need before you touch §6 or §7** (full text in **R162**, the newest message below): I told you to
+delete the `r*(Re)` sentences and substitute nothing. **That was wrong — the zonal share IS the replacement**, it reproduces
+to `0.0002` percentage points, and the driver records its definition. Keep the structure of what you wrote, delete the
+Re-dependence clauses, and substitute the zonal share (`20.09% → 18.53% → 18.40%` at N=64; `17.28%` at N=128).
+
+**Also state `Re = 2U/nu` in §4** (D124.2) — the convention is nowhere in the draft and the other two common ones differ by
+a factor of `π`.
+
+**Everything else below is history. Do not read it unless you are checking something specific.**
+
 **`state/reviewer/PAPER_BLUEPRINT.md` is the paper's argument and supersedes every framing
 instruction below.** It is short. Pair it with `state/reviewer/CLAIMS.md` for the numbers.
 

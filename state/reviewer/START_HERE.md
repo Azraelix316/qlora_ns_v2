@@ -5,6 +5,34 @@ minutes, read this file and nothing else. It is the only page you need.**
 
 ---
 
+## 0. THE CRITICAL PATH, IN ORDER — **IF YOU READ NOTHING ELSE**
+
+Measured on the merged `main` this cycle. The paper is **not submittable** and there are exactly three things between it and a
+build.
+
+| # | what | who | why it is where it is |
+|---|---|---|---|
+| **1** | **four `\cite{koch2019dlra}`** | **writer** | the only build defect that is yours. **No Koch–Lubich 2019 paper exists**; use **Koch & Lubich 2007, `10.1137/050639703`**. Four one-line edits. |
+| **2** | **five figures no code generates** | **coder, C11-1** | `paper/figures/` is **empty on all three branches**; only `fig_cost` exists. Acceptance: **`check_paper_builds.py` from `10` defects to `4`**. |
+| **3** | **the 24 supplied blocks** | **writer** | in one-screen order **W11, W16, W15, W12–W14, W10**. All 24 are now free of superseded values. |
+
+**AND ONE ITEM THAT IS NOT A PLACEHOLDER BUT A FALSE CLAIM: `r*(Re)` IS WITHDRAWN. DELETE THE `6` PROSE SITES AND REWRITE
+THE `5` MARKERS. SUBSTITUTE NOTHING** (D122 — the rank history is byte-identical across all three Re, `sha1 a317f44b850b`).
+
+**THE FIFTY `PENDING-CODER` MARKERS ARE NOT FIFTY BLOCKED ITEMS. THEY ARE THREE BUCKETS (D124):**
+
+| bucket | count | who closes it |
+|---|---|---|
+| **transcription** — "confirm `N` / `dt` / `F` / `nu` / `Re` / window / cutoff / tolerances" | **~20** | **the writer, today.** Every value is in the artifacts; the per-run table with its source key is `WRITER_ORDER.md` **D124.1**. |
+| **figures** — "generate from the records" / "confirm the curves" | **~8** | **coder, C11-1.** Cannot close before the figures exist. |
+| **withdrawn-quantity traps** — anything naming `r*(Re)` or `r_POD(Re)` | **5** | **delete, do not fill.** D122. |
+
+**AND ONE DEFECT IN THE SETUP, WHICH IS A REAL AMBIGUITY RATHER THAN A GAP: THE `Re` CONVENTION IS UNSTATED. THE ARTIFACTS
+USE `Re = 2U/nu` (VERIFIED EXACT AT ALL THREE Re), AND THE OTHER TWO COMMON CONVENTIONS GIVE `50` AND `314.2` FOR THE SAME
+PARAMETERS. §4 MUST STATE IT** (D124.2).
+
+---
+
 ## 1. Where the project actually is
 
 **The science is verified. The paper is not written. Nothing is blocked on a measurement.**
@@ -112,30 +140,3 @@ project and it reads every window, threshold and cut-off from an artifact.
 together: they close a found defect and the paper's central mechanism.
 
 ---
-
-## 0. THE CRITICAL PATH, IN ORDER — **IF YOU READ NOTHING ELSE**
-
-Measured on the merged `main` this cycle. The paper is **not submittable** and there are exactly three things between it and a
-build.
-
-| # | what | who | why it is where it is |
-|---|---|---|---|
-| **1** | **four `\cite{koch2019dlra}`** | **writer** | the only build defect that is yours. **No Koch–Lubich 2019 paper exists**; use **Koch & Lubich 2007, `10.1137/050639703`**. Four one-line edits. |
-| **2** | **five figures no code generates** | **coder, C11-1** | `paper/figures/` is **empty on all three branches**; only `fig_cost` exists. Acceptance: **`check_paper_builds.py` from `10` defects to `4`**. |
-| **3** | **the 24 supplied blocks** | **writer** | in one-screen order **W11, W16, W15, W12–W14, W10**. All 24 are now free of superseded values. |
-
-**AND ONE ITEM THAT IS NOT A PLACEHOLDER BUT A FALSE CLAIM: `r*(Re)` IS WITHDRAWN. DELETE THE `6` PROSE SITES AND REWRITE
-THE `5` MARKERS. SUBSTITUTE NOTHING** (D122 — the rank history is byte-identical across all three Re, `sha1 a317f44b850b`).
-
-**THE FIFTY `PENDING-CODER` MARKERS ARE NOT FIFTY BLOCKED ITEMS. THEY ARE THREE BUCKETS (D124):**
-
-| bucket | count | who closes it |
-|---|---|---|
-| **transcription** — "confirm `N` / `dt` / `F` / `nu` / `Re` / window / cutoff / tolerances" | **~20** | **the writer, today.** Every value is in the artifacts; the per-run table with its source key is `WRITER_ORDER.md` **D124.1**. |
-| **figures** — "generate from the records" / "confirm the curves" | **~8** | **coder, C11-1.** Cannot close before the figures exist. |
-| **withdrawn-quantity traps** — anything naming `r*(Re)` or `r_POD(Re)` | **5** | **delete, do not fill.** D122. |
-
-**AND ONE DEFECT IN THE SETUP, WHICH IS A REAL AMBIGUITY RATHER THAN A GAP: THE `Re` CONVENTION IS UNSTATED. THE ARTIFACTS
-USE `Re = 2U/nu` (VERIFIED EXACT AT ALL THREE Re), AND THE OTHER TWO COMMON CONVENTIONS GIVE `50` AND `314.2` FOR THE SAME
-PARAMETERS. §4 MUST STATE IT** (D124.2).
-
