@@ -501,3 +501,36 @@ $$P_{\mathrm{in}} = 2\pi^2 F^2/\nu \qquad\text{and}\qquad P_{\mathrm{in}}(\psi_K
 
 - **D59's $\mathrm{Re}=2\pi F/\nu^2$ appears at `04_methods.tex:25` (§4.1, *Problem setup and notation*) as well as at line 100 (§4.2).** Fix both.
 - **D49's Taylor–Green limitation has 10 sites, not one** — including `04_methods.tex:259` in the rank-adaptation subsection, where the case is invoked to motivate decay. **A correction applied at the site I noticed is not a correction.**
+
+---
+
+## D67 — **your static-POD baseline's energy threshold is wrong by 10×, in three places, and the error flatters us** (binding)
+
+**You write 99.9%. The runs used 99%.** `04_methods.tex:288`, `05_experimental_setup.tex:86`, `06_results.tex:133`.
+
+Four independent pieces of evidence, none of them the draft:
+
+| where | what it says |
+|---|---|
+| `baselines_re5000_N64_T8.json` | `parameters.energy_fraction = 0.99` — **recorded by the run** |
+| `experiments/run_baselines.py:380` | `--energy-fraction` `default=0.99` |
+| `solvers/dlra.py:51` | the rule is **"an r99-style rule"** |
+| `experiments/test_engine.py` | `energy_fraction=0.99` in every criterion test |
+
+**Change `99.9\%` to `99\%` in all three places.**
+
+**Why this one matters more than a typo: the error runs in our favour.** A stricter energy threshold gives the
+baseline a *larger* rank, so writing 99.9% describes the static baseline as **more expensive than the one we
+ran** — which makes our own integrator look better than the comparison deserves. A reviewer checks this number
+against a default in the code in about thirty seconds, and a self-serving error is worse than an honest one.
+
+**And the rule's name is `r99`, so you can now say "an r99 truncation" and be exact.** That is a *stronger*
+sentence than "99.9% of the energy", because it names the criterion rather than approximating it.
+
+## A checker now exists — run it before you send me a section
+
+`python3 state/reviewer/claims_registry.py` verifies every load-bearing number in the paper against an explicit
+key path in an artifact, and reports any high-precision literal in your draft that no registry row accounts for.
+**Right now: 13/13 registry entries verify, and the only findings are the `99.9%` above and nothing else.** If it
+reports a literal you added, that is not a complaint about the number — it is a request for a registry row, which
+I add. **Run it; it is faster than waiting for me to find the same thing.**
