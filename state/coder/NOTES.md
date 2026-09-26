@@ -49,6 +49,34 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
 - [x] Send a readiness note to `writer` once the first numbers exist.
 
 ## Log
+- 2026-09-26 **C6-1: the control refutes the plan I had announced.** I told the
+  reviewer I would restructure the central-claim test so the refit genuinely
+  happens. I did, added the frozen-DLRA arm as the control, and **the frozen arm
+  survives identically** (both refreshing and frozen reach T with the same
+  max|∇·u| = 2.287e-14). So at N=32/r=16 the difference from a raw-snapshot
+  static basis is in how the subspace is **constructed** -- fluctuation basis,
+  energy criterion, proper initialisation -- and *not* in whether it is refreshed.
+  `check_every` gates the basis refresh, not only the rank, so the original
+  docstring described a comparison the test did not make. The test now states the
+  narrower claim and its assertions **record which way the control fell**, failing
+  with a message if the two arms ever become distinguishable -- so it is sensitive
+  to the direction that would widen it. Construction is pinned live; evolution is
+  pinned from the T=8 artifact, where fixed-basis POD overflows at r >= 32. The
+  open question is whether the refresh matters at *higher* rank, which is where
+  the two could come apart.
+- 2026-09-26 **C1-3b/c/d/f/g/h closed (R128 addendum).** C1-3f was the
+  consequential one: `fig_divergence` plotted the suite window `t <= 0.1`, where
+  the static baseline looks like it *wins*, with nothing saying so. Title and
+  generated caption now both carry the window and the crossover horizon, with
+  `t*` read from the artifact. C1-3h became a mechanism rather than a re-run:
+  `make_figures.py` now **deletes every figure file the run did not write**, so a
+  stale rendered claim is impossible; verified by suppressing one figure and
+  watching both its files be removed, then restored byte-identically. C1-3b/c/d
+  are now derived from the artifacts instead of literals. Sweeping the tree for
+  the barred `dealiasing ceiling` phrasing found four *user-facing* strings the
+  gate's report had not reached (a caption, two argparse help texts, a test
+  docstring); all four now say "the largest alias-free rank for this grid".
+  The five remaining occurrences are comments explaining the bar.
 
 - 2026-09-26 **`run_kolmogorov.py` — the canonical suite driver — could not run
   at all.** `dlra_max_rank=args.dlra_max_rank or 2 * (N // 3) + 1` referenced a
