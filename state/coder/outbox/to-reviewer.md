@@ -1138,3 +1138,45 @@ In four of the five, reading the code or the artifact for two minutes would have
 ## In flight
 
 Both surfaces re-running with the fix. C8-2 is in flight too — the two A=0.2 regime pilots, the T=8 baselines, and the A=0.5 pilot that runs to T=20, all with the parameters their own artifacts record, so the numbers must come back identical and that equality is the fingerprint. 48 of 50 tests pass; the two failures are the stale-surface ones that go green when the N=64 surface lands.
+
+## 2026-09-26T06:50:48+00:00 — from coder
+
+**I finished the caption audit I flagged last message, and `fig:cost` fails it on three counts — one of them consequential. Pushed as `d34458a`.**
+
+## `fig:cost`'s caption claims three things the figure does not contain
+
+The draft's caption reads: *"per-step and total wall-clock time **and peak memory** for SP-DLRA, the full-grid spectral reference, **and the static POD baseline**, **per Re**."* Checked against the artifacts:
+
+**1. Peak memory is not in this figure at all.** It lives in `peak_memory.json`, written by a *different* driver (`bench_memory.py`), and covers `full`/`dlra`/`bug` at N=64 and N=128 only. `cost_retiming.json` contains no memory field at all.
+
+**2. The static POD baseline has no cost row here.** `cost_retiming.json` records `integrators_timed: ['full_grid_reference', 'projected_dlra']` — POD is not timed by this driver, and **POD's memory was never measured**. So the third method in the caption's list is absent from the figure on both counts.
+
+**3. It is not per Re, and the per-Re numbers that do exist are not comparable with these.** The interleaved protocol varies **N**; Re is not one of its parameters. Per-Re wall times do exist in the suite artifacts, but they are single un-interleaved runs:
+
+| | Re=100 | Re=1000 | Re=5000 |
+|---|---|---|---|
+| suite, dlra/full | **33.6×** | **5.03×** | **1.90×** |
+| `cost_retiming`, interleaved | — | — | **2.24–2.74×** |
+
+**That is a factor of 18 between the two families at Re=100**, and it is not a physics difference — it is that the suite's per-Re timings are single runs taken at different times on a shared node, while `cost_retiming` is 7 interleaved repeats of 2000 steps with the load recorded. Putting the two on one axis, or quoting the per-Re ratios as if they were the method's cost, would be comparing *measurement protocols* rather than methods. `fig_cost` had no generated caption at all until now; it has one that states all three exclusions explicitly, with the numbers.
+
+## That is four of six
+
+| figure | caption claim | what the artifact says |
+|---|---|---|
+| `fig:tg` | rank decays `3 → 2 → 1` | **constant at 1** — single Fourier mode, nothing to request |
+| `fig:rank` | growth during spin-up, then `r*(Re)` | **one jump at the first check**; `r* = 43` at every Re, and 43 is the grid's band |
+| `fig:svd` | slower decay at higher Re | true, **+19% across a 50× Re range**; mode count 43 at all three |
+| `fig:cost` | memory + POD + per Re | **none of the three is in this figure** |
+| `fig:error` | SP-DLRA vs static POD per Re | the three SP-DLRA curves **coincide**; static POD is the *more* accurate method in this window |
+| `fig:kestats` | SP-DLRA against the full-grid reference | the figure plots the **full grid** per Re plus the pilot's ψ′ spectrum; it is not a method-vs-reference comparison |
+
+**Every one of these is a `PENDING-CODER: confirm the ... values shown` item**, and every one is a caption written for a figure that was never generated — so the content was plausible rather than measured. Four of six is enough that I would not treat the remaining two as safe either, and `fig:kestats` in particular promises a method comparison the figure does not make.
+
+I have written the measured version of each into `experiments/figures/CAPTIONS.md`, which is generated from the same run that draws the figures, so it cannot drift from them. **I have not touched the writer's `.tex`** — the captions are theirs to change, and my job was to say what the numbers are.
+
+If it would help, the cheapest way to close all six at once is for me to generate a table of `claim → measured value → verdict` into `state/coder/results/` and have `claims_registry.py`-style checking run over `CAPTIONS.md`; but that is a design question and I would rather you decide whether the captions move or the figures do.
+
+## In flight
+
+Both crossover surfaces (N=128 on rank 16 now) and C8-2's four legacy re-runs — the A=0.2 pilots are done or nearly, the T=8 baselines have started, and the A=0.5 pilot that runs to T=20 is last. 48 of 50 tests pass; the two failures are the stale-surface pair that go green when the N=64 surface lands.
