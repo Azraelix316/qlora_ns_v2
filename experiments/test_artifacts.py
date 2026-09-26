@@ -44,6 +44,68 @@ def load(name: str) -> dict:
     return json.loads(path.read_text())
 
 
+def test_the_scheme_card_cites_code_that_says_what_the_card_claims():
+    """Every `file:line` in the scheme card resolves, and the card is regenerated.
+
+    `paper/sections/04_methods.tex` and `05_experimental_setup.tex` carry open
+    `PENDING-CODER` markers for the de-aliasing policy, the rank rule and its
+    tolerances, the step order and the projection subspace. None of that was
+    written down anywhere a writer could read it — it was in the source, and in the
+    artifacts as `parameters` *values* without *meanings*. A writer reading the
+    source for it is a writer who can get it wrong, which is how `fig:tg`'s caption
+    came to promise a rank decay a single Fourier mode cannot produce.
+
+    So the facts are in `scheme_card.md`, and every one carries a citation that is
+    **verified by reading the line**. The generator refuses to write the card if
+    any citation fails, because a card that silently cites the wrong line is worse
+    than no card: a writer cannot tell which parts to trust.
+
+    This test re-runs the generator rather than reading the committed markdown, so
+    the committed card cannot be stale relative to the code without this failing.
+    """
+    import subprocess
+    import sys
+
+    from _paths import EXPERIMENTS, REPO_ROOT
+
+    result = subprocess.run(
+        [sys.executable, str(EXPERIMENTS / "make_scheme_card.py")],
+        cwd=REPO_ROOT, capture_output=True, text=True, timeout=600,
+    )
+    assert result.returncode == 0, (
+        "a scheme-card citation no longer resolves, so the card was not "
+        f"written:\n{result.stdout[-1500:]}\n{result.stderr[-600:]}\n"
+        "Either the code moved (update the line number in "
+        "experiments/make_scheme_card.py) or the behaviour changed (rewrite the "
+        "claim -- do not just repoint it)."
+    )
+    assert "all verified" in result.stdout, result.stdout[-600:]
+
+    card = load("scheme_card.json")
+    assert card is not None, "scheme_card.json is missing"
+    facts = [f for section in card["sections"] for f in section["facts"]]
+    assert len(facts) >= 20, (
+        f"only {len(facts)} scheme facts; the card is meant to cover the open "
+        "method and setup markers, and this is too few to be doing that"
+    )
+    # Every fact must name a file that exists and carry the text it expects, so a
+    # reader (or a gate) can re-verify without running anything.
+    for fact in facts:
+        rel, _, line = fact["citation"].rpartition(":")
+        path = REPO_ROOT / rel
+        assert path.exists(), f"{fact['citation']} does not exist"
+        lines = path.read_text().splitlines()
+        assert 1 <= int(line) <= len(lines), fact["citation"]
+        assert fact["expect"] in lines[int(line) - 1], (
+            f"{fact['citation']} does not contain {fact['expect']!r}: "
+            f"{lines[int(line) - 1].strip()[:80]!r}"
+        )
+    # And the card must record its own provenance, like every other artifact here.
+    assert card.get("provenance", {}).get("captured_at") == "launch", (
+        "the scheme card carries no launch-time provenance"
+    )
+
+
 def test_the_rank_at_which_the_dlra_never_yields_is_the_grid_dealiasing_ceiling():
     """The never-yields rank equals the de-aliasing ceiling, at every grid measured.
 
@@ -239,10 +301,20 @@ def test_provenance_is_captured_at_launch_and_can_actually_fail():
     try:
         import hashlib
         import subprocess
+        # Only the commits that touched THIS file, not an arbitrary window of
+        # recent history.  A `--max-count=40` window was the first version and it
+        # stopped finding anything once this branch passed forty commits without a
+        # change to the driver -- so the control silently stopped running and the
+        # test failed for the wrong reason.  `git log -- <path>` is both faster
+        # and correct, and it cannot go stale as the history grows.
         older = subprocess.run(
-            ["git", "rev-list", "--max-count=40", "HEAD"],
+            ["git", "log", "--format=%H", "--", rel],
             cwd=str(EXPERIMENTS.parent), capture_output=True, text=True,
         ).stdout.split()
+        assert len(older) > 1, (
+            f"{rel} has no history beyond its current state, so there is no "
+            "earlier version to check the provenance verdict against"
+        )
         stale = None
         for commit in older:
             blob = subprocess.run(
