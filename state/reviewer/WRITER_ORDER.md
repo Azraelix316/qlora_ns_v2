@@ -617,14 +617,20 @@ full-PDE commitment is `4.69e-4`, the same order as every other method. The 663�
 **Use this text for §3** (it replaces 2 of the 6 `PENDING-THEORETICAL-RESEARCH` markers — you are not waiting on
 that agent, the code already answers this):
 
-> Under forcing, the energy balance acquires a source term, and the quantity that must vanish is
-> $\mathrm{d}E/\mathrm{d}t + \nu\|\omega\|_2^2 - \langle\psi,\zeta\rangle + \langle\psi,\mathrm{adv}\rangle$
-> rather than monotone decay. A projected method does not commit the full-PDE step, so we report two residuals:
-> the balance as the full-PDE residual, which is **comparable across methods**, and the balance after subtracting
-> the measured projection work. **We compare methods on the first.** All three solver families hold it to
-> `1.3e-4`–`4.9e-4` over 200 steps, with the static projection worst and only at `N=128` (`2.2e-3`). The two
-> differ by up to `663×` for the static projection, which is a statement about how much work its projection does,
-> not about the accuracy of its trajectory.
+```latex
+Under forcing, the energy balance acquires a source term, and the quantity
+that must vanish is $\mathrm{d}E/\mathrm{d}t + \nu\|\omega\|_2^2 -
+\langle\psi,\zeta\rangle + \langle\psi,\mathrm{adv}\rangle$ rather than
+monotone decay. A projected method does not commit the full-PDE step, so we
+report two residuals: the balance as the full-PDE residual, which is
+\emph{comparable across methods}, and the balance after subtracting the
+measured projection work. \emph{We compare methods on the first.} All three
+solver families hold it to $1.3\times10^{-4}$–$4.9\times10^{-4}$ over 200 steps,
+with the static projection worst and only at $N=128$ ($2.2\times10^{-3}$).
+The two differ by up to $663\times$ for the static projection, which
+is a statement about how much work its projection does, not about the accuracy
+of its trajectory.
+```
 
 **One thing I cannot sign off, so do not write it yet:** the code's scale is
 `max(1.0, |dissipation|, |forcing_input|)`, which has a **floor of 1**. **While dissipation and forcing are below 1
@@ -660,11 +666,16 @@ At `N=64` rank 43 never yields; on the finer grid rank 43 *does* yield (`t* = 2.
 
 **Use this for §6, §7 and the limitations:**
 
-> The rank at which a propagated static subspace stops improving is not a fixed rank but the largest rank the grid can
-> resolve without aliasing: 43 at `N = 64` and 85 at `N = 128`, each equal to that grid's dealiasing ceiling. Rank
-> therefore helps the evolving subspace all the way up to the point where the representation, not the method, runs out.
-> The accuracy horizon is not grid-convergent — it lengthens by `1.45x` at rank 16 and `1.64x` at rank 32 on refinement —
-> because the reduced integrator converges while the static baseline degrades.
+```latex
+The rank at which a propagated static subspace stops improving is not a fixed
+rank but the largest rank the grid can resolve without aliasing: 43 at
+$N = 64$ and 85 at $N = 128$, each equal to that grid's largest
+alias-free rank. Rank therefore helps the evolving subspace all the way up
+to the point where the representation, not the method, runs out. The accuracy
+horizon is not grid-convergent — it lengthens by $1.45\times$ at rank 16 and
+$1.64\times$ at rank 32 on refinement — because the reduced integrator
+converges while the static baseline degrades.
+```
 
 **This is the strongest available statement of the saturation mechanism, and it replaces a limitation with a finding.**
 

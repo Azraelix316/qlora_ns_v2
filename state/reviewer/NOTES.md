@@ -1,7 +1,7 @@
 # NOTES.md — reviewer
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
-> Status: main at 947d38e, 215 files, clean, 40 tests green. R118: FOUND WHY NOTHING IS EXECUTING. Not the review, not the instructions, not the channel — NO AGENT SESSION HAS STARTED IN ~2h, the writer in 16h, theoretical-research never. Verified from the dated `## Log` entries each agent's NOTES.md is required to append: coder 1.9h, writing-research 9.2h, writer 16.3h, theoretical-research 34.6h. The writer's draft is byte-identical to 24h ago (52 PENDING-CODER markers, 99.9% still in three files). Each candidate explanation was checked, not assumed: the channel works (D79), both order docs are one screen (R114/R116) with every pointer resolving, last message 18 lines. The deliverable that follows is `state/reviewer/START_HERE.md` — the whole project on one screen, which NONE of the four agents had. NOT claiming the project is ready to submit: 52 unwritten result placeholders, 6 PENDING-THEORETICAL-RESEARCH, no built PDF, and four agents that have not run (D80). R119: the writers top two items were NOT paste-ready - the abstract is 262 words not the 197 D64 claims (a 32pct error in three places, and 262 exceeds a 250-word venue cap), and D14s replacement was a Markdown blockquote rather than LaTeX. Both fixed: abstract now EXACTLY 200 words with every traceable number intact, D14 now a 35-line paste-ready itemize. Both mechanically verified (no cite/ref, braces balanced, dollar-even). Process record D82: my own blanket 197->200 substitution corrupted D81s own text and I walked back two false alarms from misread greps. D81, D82.
+> Status: main at 947d38e, 215 files, clean, 40 tests green. R118: FOUND WHY NOTHING IS EXECUTING. Not the review, not the instructions, not the channel — NO AGENT SESSION HAS STARTED IN ~2h, the writer in 16h, theoretical-research never. Verified from the dated `## Log` entries each agent's NOTES.md is required to append: coder 1.9h, writing-research 9.2h, writer 16.3h, theoretical-research 34.6h. The writer's draft is byte-identical to 24h ago (52 PENDING-CODER markers, 99.9% still in three files). Each candidate explanation was checked, not assumed: the channel works (D79), both order docs are one screen (R114/R116) with every pointer resolving, last message 18 lines. The deliverable that follows is `state/reviewer/START_HERE.md` — the whole project on one screen, which NONE of the four agents had. NOT claiming the project is ready to submit: 52 unwritten result placeholders, 6 PENDING-THEORETICAL-RESEARCH, no built PDF, and four agents that have not run (D80). R119: the writers top two items were NOT paste-ready - the abstract is 262 words not the 197 D64 claims (a 32pct error in three places, and 262 exceeds a 250-word venue cap), and D14s replacement was a Markdown blockquote rather than LaTeX. Both fixed: abstract now EXACTLY 200 words with every traceable number intact, D14 now a 35-line paste-ready itemize. Both mechanically verified (no cite/ref, braces balanced, dollar-even). Process record D82: my own blanket 197->200 substitution corrupted D81s own text and I walked back two false alarms from misread greps. D81, D82. R120: applied R119s executability check to ALL deliverables, not just D13/D14. D18a and D18b were ALSO prose blockquotes - the D14 defect in two more places I had described as paste this. Converting them revealed the important part: D18bs text still contained the noun D77.2 barred (dealiasing ceiling), because D77s fix reached the index and the outbox but NOT the paste-ready text - the one place the phrase would have entered the paper. All four blocks now clean LaTeX, 0 cite/ref, braces balanced, no nested math. Gate extended to scan every fenced latex block, positive-controlled with 2 injected claims (both caught, labelled PASTE-READY TEXT) (D83).
 > "the subspace must evolve".** `main` clean, every artifact merged, the four agents each have ONE
 > authoritative document and the outboxes are history. **A COMPLETE 1 281-LINE TEN-SECTION DRAFT
 > EXISTS ON THE WRITER'S BRANCH** (I never opened it until R81) — a finished argument with almost no
@@ -1957,6 +1957,38 @@
   IN ONE CYCLE. THE DISCIPLINE IS THE SAME EVERY TIME AND I KEEP NOT INSTANT IT: MATCH THE QUANTITY, NOT THE NAME; CARRY
   THE POPULATION; AND WHEN A MECHANICAL EDIT CAN TOUCH SOMETHING LOAD-BEARING, SCOPE IT TO THE IDENTIFIER RATHER THAN THE
   STRING.**
+
+- 2026-09-26 **R120 — R119's LESSON APPLIED TO THE OTHER DELIVERABLES: D18a AND D18b WERE ALSO PROSE BLOCKQUOTES - THE SAME
+  DEFECT AS D14, IN TWO MORE PLACES I HAD DESCRIBED AS "PASTE THIS". AND THE BARRED PHRASE "DEALIASING CEILING" WAS STILL
+  LIVE INSIDE D18b's TEXT, BECAUSE D77's FIX REACHED THE INDEX AND THE OUTBOX BUT NOT THE ARTIFACT THE WRITER PASTS. D83.**
+  No new pushes. **THE CHECK, APPLIED TO EVERY DELIVERABLE RATHER THAN THE TWO I HAPPENED TO CHECK. R119 VERIFIED D13 AND
+  D14 FOR EXECUTABILITY. I THEN ASKED THE SAME QUESTION OF THE REST: D15/D16/D17 ARE INSTRUCTIONS (CORRECT - THERE IS
+  NOTHING TO PASTE), BUT D18a AND D18b ARE PROSE BLOCKQUOTES - THE D14 DEFECT, IN TWO MORE PLACES. BOTH ARE DESCRIBED IN
+  THEIR OWN HEADINGS AS TEXT TO USE: D18a SAYS "Use this text for §3" AND D18b SAYS "the grid question is answered". SO I
+  HAD TOLD THE WRITER TO PASTE TWO THINGS THAT COULD NOT BE PASTED, AND I ONLY CAUGHT D14 BY ACCIDENT, BECAUSE I WAS FIXING
+  THE ABSTRACT AT THE TIME.**
+  **AND THE CONVERSION REVEALED A DEFECT THAT MATTERS MORE THAN THE CONVERSION. D18b's TEXT STILL CONTAINED THE PHRASE
+  "THAT GRID'S DEALIASING CEILING" - THE EXACT NOUN D77.2 BARED. D77.2 REPLACED "THE NEVER-YIELDS RANK **IS** THE DEALIASING
+  CEILING" WITH "COINCIDES WITH THE GRID'S LARGEST ALIAS-FREE RANK" IN `WRITER_ORDER.md` W7, IN `CODER_ORDER.md`, AND IN
+  THE OUTBOX MESSAGE - AND IT DID NOT REACH D18b's PASTE-READY TEXT, WHICH IS THE ONE PLACE THE PHRASE WOULD HAVE ENTERED
+  THE PAPER. NOW FIXED. **THE GENERAL FORM, AND IT IS THE FOURTH VARIANT OF THE SAME FAILURE: A FIX PROPAGATES TO WHERE I
+  EDITED, NOT TO WHERE THE TEXT LIVES. THE INDEX IS A POINTER; THE FENCED BLOCK IS THE DELIVERABLE, AND I EDITED THE
+  POINTER.****
+  **THREE CONVERSION ARTIFACTS FOUND AND FIXED, ALL FROM A BLUNT RULE. MY BACKTICK-TO-`\texttt{}` CONVERSION PRODUCED
+  `\texttt{1.45x}` AND `\texttt{N = 64}` - TYPEWRITER FONT WHERE MATH BELONGS - AND, WORSE, NESTED MATH:
+  `\texttt{663$\times$}`, A `\times` INSIDE A MACRO ARGUMENT. ALL NOW PROPER MATH: `$1.45\times$`, `$N = 64$`,
+  `$663\times$`, AND SCIENTIFIC NOTATION CONVERTED PROPERLY (`\texttt{1.3e-4}` -> `$1.3\times10^{-4}$`). NO `\texttt` AND
+  NO NESTED `$` REMAIN ANYWHERE IN THE FILE.**
+  **ALL FOUR TEXT-BEARING SECTIONS ARE NOW PASTE-READY AND MECHANICALLY VERIFIED: D13, D14, D18a, D18b - EVERY ONE A FENCED
+  LATEX BLOCK, 0 `\cite` AND 0 `\ref`/`\label` (SO NONE CAN FAIL ON A MISSING KEY), BALANCED BRACES, EVEN `$`, AND 0
+  MALFORMED MATH SPANS.**
+  **AND THE GATE IS CLOSED OVER THE GAP THIS FOUND. `check_order_withdrawn.py` SCANNED ONLY THE ORDER REGION - LINES 1-36 OF
+  `WRITER_ORDER.md` - SO A WITHDRAWN PHRASE INSIDE A PASTE-READY BLOCK AT LINE ~670 WAS INVISIBLE TO IT. THAT IS THE MOST
+  DANGEROUS PLACE FOR ONE TO SIT, BECAUSE THE WRITER PASTES IT VERBATIM AND IT STOPS BEING A WARNING AND BECOMES THE
+  PAPER. THE GATE NOW ALSO SCANS EVERY FENCED LATEX BLOCK ANYWHERE IN THE DOCUMENT AND LABELS SUCH A HIT `PASTE-READY
+  TEXT` WITH A HIGHEST-PRIORITY MARKER. POSITIVE-CONTROLLED: TWO WITHDRAWN CLAIMS INJECTED INSIDE D18b's BLOCK ARE BOTH
+  CAUGHT AND BOTH LABELLED `PASTE-READY TEXT`. ON THE REAL DOCUMENTS IT REPORTS 4 PASTE-READY BLOCKS FOR THE WRITER, 0 FOR
+  THE CODER, AND 2 CANDIDATES, BOTH IN THE ORDER REGION AND BOTH KNOWN FALSE POSITIVES.**
 
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 

@@ -73,6 +73,27 @@ PROHIBITION = re.compile(
 ORDER_END = re.compile(r"^## (?:REFERENCE|DETAIL)")
 
 
+def fenced_latex_regions(lines):
+    """Line ranges of every ```latex ... ``` block, ANYWHERE in the file.
+
+    A withdrawn phrase inside paste-ready text is MORE dangerous than one in the index,
+    because the writer pastes it verbatim and it stops being a warning and becomes the
+    paper. The order-region scan alone cannot see it: D18b sat at line ~670, well below
+    the fold, carrying the exact "dealiasing ceiling" phrasing D77.2 had barred (D83).
+    """
+    regions, i = [], 0
+    while i < len(lines):
+        if lines[i].strip().startswith("```latex"):
+            j = i + 1
+            while j < len(lines) and not lines[j].strip().startswith("```"):
+                j += 1
+            regions.append((i, min(j + 1, len(lines))))
+            i = j + 1
+        else:
+            i += 1
+    return regions
+
+
 def scan(path):
     lines = Path(path).read_text().splitlines()
     cut = len(lines)
@@ -80,13 +101,20 @@ def scan(path):
         if ORDER_END.match(line):
             cut = i
             break
+    latex = fenced_latex_regions(lines)
+    in_latex = set()
+    for a, b in latex:
+        in_latex.update(range(a, b))
     found = []
     for decision, pattern, what in WITHDRAWN:
         rx = re.compile(pattern, re.I)
-        for i, line in enumerate(lines[:cut]):
+        for i, line in enumerate(lines):
+            if i >= cut and i not in in_latex:
+                continue                      # order region, or paste-ready text
             if rx.search(line) and not PROHIBITION.search(line):
-                found.append((decision, what, i + 1, line.strip()[:100]))
-    return len(lines), cut, found
+                kind = "PASTE-READY TEXT" if i in in_latex else "order"
+                found.append((decision, what, i + 1, kind, line.strip()[:100]))
+    return len(lines), cut, len(latex), found
 
 
 def main():
@@ -113,11 +141,13 @@ def main():
 
     total = 0
     for d in docs:
-        n, cut, found = scan(d)
-        print(f"\n{d.name}: {n} lines, order region = lines 1-{cut}")
-        for decision, what, line, text in found:
+        n, cut, nlatex, found = scan(d)
+        print(f"\n{d.name}: {n} lines, order region = lines 1-{cut}, "
+              f"paste-ready latex blocks = {nlatex}")
+        for decision, what, line, kind, text in found:
             total += 1
-            print(f"  CANDIDATE [{decision}] {what}  line {line}: {text}")
+            flag = "  <-- PASTE-READY, HIGHEST PRIORITY" if kind == "PASTE-READY TEXT" else ""
+            print(f"  CANDIDATE [{decision}] {what}  line {line} ({kind}): {text}{flag}")
         if not found:
             print("  no candidates")
     print(f"\n{total} CANDIDATE(S). Exit 1 means candidates exist, NOT that a defect does.")
