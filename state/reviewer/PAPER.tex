@@ -1,0 +1,1423 @@
+% ==========================================================================% GENERATED FILE -- DO NOT EDIT.  A verbatim view of paper/ on origin/main.% Regenerate:  python state/reviewer/assemble_tex.py% Compile from the repository root:%     pdflatex -output-directory=/tmp state/reviewer/PAPER.tex%     (bibtex needs \bibliography{references} reachable; see check_tex() below)% The paper lives in paper/ and is owned by the writer. Edit there, not here.% ==========================================================================% ============================================================================
+% Structure-Preserving Dynamical Low-Rank Approximation of the
+% Incompressible Navier--Stokes Equations in High-Reynolds-Number Turbulence
+%
+% Venue-neutral scaffold. The venue is not yet decided (reviewer decision D5:
+% working direction is a scientific-computing / ML-adjacent venue). To target
+% a specific venue, replace \documentclass and adjust the preamble to the
+% venue's template; the section structure is intended to survive that swap.
+% ============================================================================
+% TODO(venue): swap documentclass for the venue template, e.g.
+%   \documentclass[review]{icml2027}   or   \documentclass{neurips_2027}
+%   or a journal class (SISC / JCP).
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+
+% Notation shortcuts used across sections
+\newcommand{\dd}{\,\mathrm{d}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\T}{\mathbb{T}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
+\newcommand{\grad}{\nabla}
+\newcommand{\ddt}{\partial_t}
+\newcommand{\dlra}{SP-DLRA}
+
+% Placeholder convention: [PENDING-<owner>: detail] marks every value or
+% statement that must be filled from verified project data before submission.
+% % [PENDING-CODER]      -> numbers / figures / scheme confirmations
+% % [PENDING-THEORETICAL-RESEARCH] -> forcing-aware invariant, rank theory
+% % [FLAG-<owner>]        -> open question for another agent (see README.md)
+
+\title{Structure-Preserving Dynamical Low-Rank Approximation of the
+Incompressible Navier--Stokes Equations in High-Reynolds-Number Turbulence}
+
+\author{
+  [Authors to be added]\\
+  [Affiliations to be added]
+}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+% ===== paper/sections/00_abstract.tex =====
+\begin{abstract}
+Approximating the state to cut the cost of a Navier--Stokes solve raises a
+question usually asked backwards: not how accurately a reduced model tracks a
+trajectory, but when a reduced trajectory is worth having. In forced
+two-dimensional stream-function flow, a structure-preserving projected integrator
+treats the viscous part exactly and the nonlinear part by midpoint.
+Against a static subspace of equal rank, we measure the horizon at which it
+is more accurate --- $t^\ast = 0.649$ at rank $16$ and
+$1.482$ at rank $32$ --- and find it reflects how the subspace is built,
+not its dimension: from rank $16$ the static subspace stops improving altogether, with
+ranks $16$, $32$ and $43$ identical at every horizon and both Reynolds
+numbers, while ranks $2$, $4$ and $8$ differ by up to $85\%$. A fixed basis propagated
+through the nonlinearity overflows at ranks $32$ and $42$, reaching $10^{278}$; every structure-preserving variant holds roundoff divergence; under grid
+refinement the reduced error falls by a factor $2.2$, and stably so, but the
+horizon itself is not grid-convergent: it grows by factors of $1.45$ and $1.71$ from a $64^2$ to a $128^2$ grid at ranks $16$ and $32$. The evidence is narrow: one
+forcing, horizons of order unity, a rank criterion we report but do not
+extrapolate, and a per-step cost $2.2$--$2.7\times$ the full grid --- at least
+$1.4\times$ even at the pessimistic end of the measurement's own recorded noise
+--- with no memory saving. We identify no end-to-end speedup, and say so.
+\end{abstract}
+
+% ===== paper/sections/01_introduction.tex =====
+% Introduction
+
+\section{Introduction}
+\label{sec:intro}
+
+The incompressible Navier--Stokes (NS) equations govern fluid motion across
+scales, from geophysical flows to industrial aerodynamics. At high Reynolds
+numbers their dynamics are turbulent: energy cascades across a broad range of
+scales and the flow field must be resolved on a fine grid for every time step
+of a long simulation \cite{batchelor1969,orszag1971}. Even in two
+dimensions, where the problem is comparatively tractable, the cost of a
+full-resolution simulation grows steeply with the Reynolds number
+\cite{vinograd2026}. Reduced representations offer a way out when the
+\emph{dynamically active} degrees of freedom --- the directions in which the
+solution actually moves --- are few.
+
+Two families of methods are central here. \emph{Proper orthogonal
+decomposition} (POD) constructs a fixed orthonormal basis of dominant
+spatial modes from data and truncates the dynamics onto it
+\cite{sirovich1987,lumley1967}. POD-based reduced order models (ROMs) for the
+incompressible NS equations are mature: POD--Galerkin projections
+\cite{loorenzi2016,hijazi2020,girfoglio2022pod}, stabilized and
+hyper-reduced variants \cite{siena2024,star2021,klein2023}, and
+closure-based extensions \cite{prakash2024}. Their limitation is
+staticity: the basis is built offline on a training set and cannot follow the
+dynamics when the relevant modes change over time --- exactly what happens in
+sustained turbulent forcing, where new structures continually appear
+\cite{vinograd2026}.
+
+\emph{Dynamical low-rank approximation} (DLRA) makes the representation
+dynamic: the solution is kept in factored form $X(t) \approx U(t)\,S(t)\,V(t)^\top$
+with a small rank $r(t)$, and the factors are advanced in time so that the
+basis \emph{follows} the dynamics \cite{koch2007}. Projector-splitting
+and structure-preserving variants integrate the linear part of the dynamics
+exactly, which makes DLRA both accurate and efficient for stiff problems
+\cite{einkemmer2023,ceruti2024,einkemmer2024review}. Rank adaptation ---
+growing the rank when the residual demands it --- is standard via incremental
+singular value decomposition \cite{haasdonk2012}.
+
+The incompressible constraint changes the picture. The divergence-free
+condition $\nabla \cdot u = 0$ is a hard geometric constraint of the
+dynamics: any reduced method that violates it, even slightly, can corrupt
+long-time invariants such as the energy balance. Existing low-rank approaches
+to NS-type problems fall short in different ways. POD--Galerkin ROMs enforce
+divergence only in a variational sense of the underlying discretization and
+use static bases \cite{loorenzi2016,hijazi2020,star2021}. Reduced models in
+the stream function--vorticity formulation are divergence-free by
+construction, but to date they are offline or hybrid and have been validated
+only at low to moderate Reynolds number: the POD--Galerkin model of Girfoglio
+et al.~\cite{girfoglio2022pod} is built offline on a fixed training set, and
+the hybrid model of Zhang et al.~\cite{zhang2024} combines
+neural-network-corrected POD modes with DMD-based sampling for a parametric
+problem; neither is rank-adaptive. Low-rank solvers for NS with uncertain or
+stochastic parameters target a different problem and are not adaptive in time
+\cite{lee2017,elman2019low,olshanskii2024}. The one dynamical low-rank method
+applied to the incompressible equations that we are aware of is the
+dynamically orthogonal (DO) approximation of Musharbash and
+Nobile~\cite{musharbash2018} for stochastic problems with random boundary
+conditions, with an error analysis by Musharbash, Nobile and
+Zhou~\cite{musharbash2015}; it is a first cousin of DLRA --- a method of the
+same family of tangent-projected, factorisation-based, on-the-fly low-rank
+reduction --- but it uses a different projection and targets a stochastic
+problem, not the deterministic turbulent dynamics studied here. A low-rank
+projector-splitting method for weakly compressible
+flow~\cite{einkemmer2018} recovers the incompressible limit as a low-rank
+regime of a weakly compressible system, where the divergence constraint is not
+enforced.
+
+\paragraph{This work.}
+We develop a \emph{structure-preserving} dynamical low-rank method for the
+\emph{incompressible} NS equations in which (i) the viscous part is
+integrated exactly, preserving the rank; (ii) the velocity is represented by a
+stream function, so divergence-freeness holds identically in exact
+arithmetic, with a measured residual no larger than $1.1\times10^{-13}$ for
+the reduced integrator and the full-grid reference, and no larger than
+$1.1\times10^{-11}$ over every method we ran --- seven orders of magnitude
+below the reduced solver's own error; and (iii) the subspace is rebuilt as the dynamics develop, which is what
+separates it from a basis fixed at initialisation: such a basis overflows at
+ranks $32$ and $42$ where the rebuilt one does not, and its error stops
+improving once its rank reaches $16$. The rebuilt subspace reaches the rank budget within fifteen steps and stays there, which is the
+sense in which it is reporting the resolved band rather than the flow. We validate the method on forced two-dimensional flow at
+Reynolds numbers $100$, $1000$ and $5000$ against a full-grid spectral
+reference and a static POD baseline, and we benchmark cost honestly: the
+reduced integrator is $2.2$--$2.7\times$ the full-grid step in every regime
+we measured --- at least $1.4\times$ even at the pessimistic end of the
+measurement's own recorded noise --- with no compensating memory benefit.
+
+% [FLAG-D4 / REVIEWER: Short form of the BINDING R5d claim wording (see
+% state/reviewer/reviews/2026-09-25-R5d-prior-art-map-and-final-claim.md,
+% Section 2); the full form is stated in Section~\ref{sec:positioning}.
+% GATED on D10-V6 implemented + V1/V2/V5/V7 closed before submission; the
+% final sentence describes the validation target, not achieved results.
+% Barred: "no DLRA NS solver exists" (refuted by musharbash2018); "first
+% exactly divergence-free NS solver" (refuted by girfoglio2022pod and the
+% classical stream-function formulation); any gap phrased as a failure to
+% preserve divergence-freeness; "first structure-preserving low-rank for
+% conservative PDEs" (refuted by RAIL, DOI 10.1137/23M1622921); "to our
+% knowledge" on arXiv evidence alone. DO-NS is a "first cousin" of DLRA,
+% never a competitor. CHECKLIST 2.1's "DLRA (Osepko et al.)" could not be
+% located on arXiv (0 author hits, 2026-09-25) - flagged below and in
+% README.md.]
+% [FLAG-WRITING-RESEARCH: confirm Osepko et al. citation, if it exists]
+Our novelty claim is deliberately narrow and is stated in full in
+Section~\ref{sec:positioning}.  In short: for the incompressible
+Navier--Stokes equations, the existing dynamical low-rank work we are aware
+of is the dynamically orthogonal approximation of Musharbash and
+Nobile~\cite{musharbash2018} for stochastic problems with random boundary
+conditions, and the existing reduced models in the stream
+function--vorticity formulation are offline and hybrid
+\cite{girfoglio2022pod,zhang2024}; we are not aware of a structure-preserving,
+exactly divergence-free, factorisation-based low-rank integrator for the
+deterministic incompressible Navier--Stokes equations, or of any dynamical
+low-rank method for that setting validated in a resolved
+high-Reynolds-number forced-turbulent regime.  We provide one: we apply the
+established robust basis-update-and-Galerkin machinery to the stream
+function--vorticity formulation, in which divergence-freeness holds exactly
+by representation, and validate it against a full-grid spectral reference at
+Reynolds numbers $\mathrm{Re} \in \{100, 1000, 5000\}$ with adaptive rank.
+
+\paragraph{Paper organization.}
+Section~\ref{sec:contributions} states our contributions.
+Section~\ref{sec:related} reviews related work. Section~\ref{sec:methods}
+develops the method: the stream-function formulation and energy identity
+(4.1--4.2), the structure-preserving split and exact viscous lemma
+(4.3), the projected nonlinear step (4.4), rank adaptation (4.5), the
+invariants (4.6), and cost (4.7). Section~\ref{sec:setup} describes the
+experimental setup and validation ladder; Section~\ref{sec:results} reports
+results; Sections~\ref{sec:discussion}--\ref{sec:limitations} discuss
+interpretation and limitations; Section~\ref{sec:conclusion} concludes.
+
+% ===== paper/sections/02_contributions.tex =====
+% Contributions
+
+\section{Contributions}
+\label{sec:contributions}
+
+Our contributions are:
+
+\begin{itemize}
+\item \textbf{A structure-preserving reduced integrator for two-dimensional
+incompressible Navier--Stokes in stream-function form.} The viscous part is
+integrated exactly along a separable exponential flow that preserves the low-rank
+ansatz, so divergence-freeness holds identically in exact arithmetic; the measured
+residual is no larger than $1.1\times 10^{-13}$, seven orders of magnitude below
+the reduced solver's own trajectory error, and grows by a factor $2.6$ from a
+$64^2$ to a $128^2$ grid. The nonlinear part is advanced by a second-order
+projected step, and the cleanup is a QR factorisation of the $n\times r$ factors
+rather than a re-factorisation of the full state.
+
+\item \textbf{A measurement protocol for reduced-dynamics comparisons, and the
+finding that the accuracy horizon is not a property of the method.} A reported
+horizon must state its window length, refit interval, schedule offset, in-sample
+check, and the grid and largest rank tested. Under that protocol, correcting four
+baseline defects \emph{shortened} our own advantage and cost three of six ranks
+their crossover; we report the corrected numbers.
+
+\item \textbf{The mechanism, measured: a static subspace's advantage stops at a rank budget, not at a rank the dynamics
+chooses.} From rank $16$ a propagated static subspace stops improving altogether: ranks $16$, $32$ and $43$
+agree exactly at every horizon and both Reynolds numbers, while ranks $2$, $4$ and $8$
+differ from them by up to $85\%$. The stopping rank is $2\lfloor N/3\rfloor+1$ --- the rank budget we set from
+the grid --- so we cannot say whether the subspace would have continued to improve above it. The
+advantage horizon therefore reflects how a subspace is \emph{built}, not how large it is.
+
+\item \textbf{The stability result: the subspace must evolve.} A fixed basis
+propagated through the nonlinearity, with the same integrator, splitting and
+orthonormal basis, is stable at rank $16$ and overflows at ranks $32$ and $42$,
+reaching $10^{278}$. Every structure-preserving variant at the same ranks holds
+roundoff divergence throughout.
+
+\item \textbf{An honest cost accounting.} The reduced integrator costs
+$2.2$--$2.7\times$ a pinned-thread full-grid spectral reference per step in every
+regime and grid we measured, and uses slightly \emph{more} memory. Rank buys the
+ability to run, not speed.
+\end{itemize}
+
+% ===== paper/sections/03_related_work.tex =====
+% Related work
+
+\section{Related Work}
+\label{sec:related}
+
+We organize the related work into three threads: dynamical low-rank methods
+and projector splitting; reduced order models for the incompressible NS
+equations; and low-rank approaches that are closest in setting to ours.
+
+\subsection{Dynamical low-rank approximation and projector splitting}
+\label{sec:related:dlra}
+
+DLRA approximates a high-dimensional trajectory by a low-rank matrix whose
+factors evolve in time; the original formulation is due to Koch and
+Lubich~\cite{koch2007}, with early numerical experiments on reaction--diffusion
+PDEs by Nonnenmacher and Lubich~\cite{nonnenmacher2008}. The key practical idea
+for stiff dynamics is
+the \emph{projector split}: integrate the linear part exactly with the frozen
+factors, then update the factors for the nonlinear part
+\cite{lubich2014}. Rank adaptation via incremental SVD (the row-action
+technique) makes the rank grow only when needed \cite{haasdonk2012}.
+Stability of robust projector-splitting schemes has been analyzed for
+hyperbolic problems \cite{kusch2023stability}; robustness and conservation
+properties have been established for kinetic equations \cite{einkemmer2023},
+and second-order variants such as the midpoint-based low-rank BUG integrator
+improve accuracy at comparable cost \cite{ceruti2024}. Reduced augmentation
+implicit low-rank (RAIL) integrators extend the machinery to advection--
+diffusion and Fokker--Planck models \cite{rail2025}, and a macro-micro
+decomposition for consistent, conservative model order reduction of hyperbolic
+shallow-water moment equations has been studied against both DLRA and
+POD--Galerkin \cite{koellermeier2024}. A recent review places these methods in
+the context of time-dependent kinetic simulation \cite{einkemmer2024review}.
+The structure-preserving (SP) variant used here --- exploiting that the linear
+operator's exponential acts on the two factor families independently --- has
+recently been applied to stochastic Vlasov--Poisson dynamics \cite{cui2026}
+and to parametric elastic guided-wave propagation \cite{goutaudier2026}. None
+of the DLRA works surveyed in this subsection targets the incompressible
+Navier--Stokes equations or the divergence-free constraint; the closest
+dynamical work in that setting is the dynamically orthogonal approximation,
+discussed in Section~\ref{sec:related:ns}.
+
+\subsection{Reduced order models for the incompressible NS equations}
+\label{sec:related:rom}
+
+The POD--Galerkin literature is extensive. Classical POD--Galerkin models for
+finite-volume discretizations \cite{loorenzi2016} and data-driven
+POD--Galerkin models for turbulent flows \cite{hijazi2020} enforce
+divergence in the variational sense of the underlying discretization;
+stabilized POD ROMs for convection-dominated flows \cite{siena2024},
+collocated `discretize-then-project' models \cite{star2021}, and
+hyper-reduced / temporally localized models \cite{klein2023} address
+stability and efficiency. Closure-based approaches
+\cite{prakash2024} and domain-decomposition ROMs \cite{prusak2023} target
+parametric and large-scale settings, and data-driven parametrizations combine
+POD with neural components \cite{kim2023,kochkov2021}. The closest in formulation are the reduced models in the stream
+function--vorticity formulation, in which the reduced velocity is
+divergence-free by construction: the POD--Galerkin model of Girfoglio
+et al.~\cite{girfoglio2022pod} is built offline on a fixed training set and
+validated on canonical flows at low to moderate Reynolds number, while the
+hybrid model of Zhang et al.~\cite{zhang2024} combines neural-network-
+corrected POD modes with DMD-based sampling for a parametric problem. Neither
+is rank-adaptive, and neither has been validated in a resolved
+high-Reynolds-number turbulent regime.
+
+\subsection{Dynamical and low-rank methods for the incompressible Navier--Stokes equations}
+\label{sec:related:ns}
+
+The dynamical low-rank work we are aware of for the incompressible NS
+equations is the dual dynamically orthogonal (DO) approximation of Musharbash
+and Nobile~\cite{musharbash2018} for stochastic problems with random boundary
+conditions, with an error analysis by Musharbash, Nobile and
+Zhou~\cite{musharbash2015}. DO-NS is a first cousin of DLRA --- a method of
+the same family of tangent-projected, factorisation-based, on-the-fly
+low-rank reduction --- but a different method: it uses a different projection
+and targets a stochastic problem with random boundary data, not the
+deterministic forced-turbulent dynamics studied here. It is not a competitor
+in this setting; the gap between DO-NS and the present work is stated in
+Section~\ref{sec:positioning}. Other low-rank methods for NS-type problems
+are further from the present setting: solvers for the NS equations with
+uncertain viscosity \cite{lee2017} and for the stochastic unsteady problem
+\cite{elman2019low} exploit low-rank structure in the \emph{parameter or
+random} direction of steady or mildly unsteady problems and are not adaptive
+in time, and ROMs that approximate branches of NS solutions
+\cite{olshanskii2024} target bifurcation structure rather than turbulent
+dynamics. A low-rank projector-splitting method for weakly compressible
+flow~\cite{einkemmer2018} recovers the incompressible limit as a low-rank
+regime of a weakly compressible system, where the divergence constraint is
+not enforced.
+
+\subsection{Positioning and comparison}
+\label{sec:positioning}
+
+Table~\ref{tab:related} compares the closest prior work along the axes
+that matter for our claim: whether the method is dynamical (online rank
+adaptation), whether it is exactly divergence-free by construction, and
+whether it has been validated on high-Reynolds-number turbulent dynamics.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Method & Dynamical & Exactly & High-Re \\
+       & (rank) & divergence-free & turbulence \\
+\midrule
+POD--Galerkin, stream-function--vorticity \cite{girfoglio2022pod} & $\times$ & $\checkmark$ & $\times$ \\
+Data-driven POD--Galerkin \cite{hijazi2020} & $\times$ & variational & partial \\
+POD--Galerkin, finite volume \cite{loorenzi2016} & $\times$ & variational & partial (RANS) \\
+Stabilized POD ROM \cite{siena2024} & $\times$ & $\times$ & $\times$ \\
+Collocated DTP POD--Galerkin \cite{star2021} & $\times$ & $\times$ & $\times$ \\
+Hyper-reduction + temporal localization \cite{klein2023} & partial & $\times$ & $\times$ \\
+Closure-based projection ROM \cite{prakash2024} & $\times$ & $\times$ & $\times$ \\
+Domain-decomposition POD--Galerkin \cite{prusak2023} & $\times$ & $\times$ & $\times$ \\
+POD + neural parametrization \cite{kim2023,kochkov2021} & $\times$ & $\times$ & $\times$ \\
+Low-rank NS, uncertain viscosity \cite{lee2017} & $\times$ & $\times$ & $\times$ \\
+Low-rank stochastic unsteady NS \cite{elman2019low} & $\times$ & $\times$ & $\times$ \\
+ROM of solution branches \cite{olshanskii2024} & $\times$ & $\times$ & $\times$ \\
+Low-rank weakly compressible flow \cite{einkemmer2018} & $\checkmark$ & $\times$ & $\times$ \\
+Dynamically orthogonal NS (stochastic) \cite{musharbash2018} & $\checkmark$ & n/a & $\times$ \\
+Hybrid POD/DMD ROM, stream--vorticity \cite{zhang2024} & $\times$ & $\checkmark$ & $\times$ \\
+RAIL integrators (adv.--diff., Fokker--Planck) \cite{rail2025} & $\checkmark$ & n/a & n/a \\
+Robust/conservative DLRA (kinetic) \cite{einkemmer2023} & $\checkmark$ & n/a & n/a \\
+Low-rank midpoint BUG integrator (kinetic) \cite{ceruti2024} & $\checkmark$ & n/a & n/a \\
+SP-DLRA, stochastic Vlasov--Poisson \cite{cui2026} & $\checkmark$ & n/a & n/a \\
+SP-DLRA, elastic guided waves \cite{goutaudier2026} & $\checkmark$ & n/a & n/a \\
+Review (kinetic low-rank methods) \cite{einkemmer2024review} & review & n/a & n/a \\
+\midrule
+% [FLAG-D4 / REVIEWER: High-Re cell is "target", not a checkmark, per D10:
+% the claim is gated on D10-V6 implemented + V1/V2/V5/V7 closed. Do not
+% change to $checkmark until the validation ladder is complete.]
+\textbf{This work (SP-DLRA for incompressible NS)} & $\checkmark$ & $\checkmark$ & target \\
+\bottomrule
+\end{tabular}
+\caption{Comparison of the closest prior work. ``Dynamical'': online rank
+adaptation; ``Exactly divergence-free'': the discrete velocity satisfies
+$\nabla\cdot u = 0$ to machine precision by construction (not only in a
+variational sense); ``High-Re turbulence'': validated on forced,
+high-Reynolds-number turbulent dynamics. Entries marked ``partial'',
+``variational'', ``n/a'', or ``target'' are qualified in the text; for the
+dynamically orthogonal NS method the by-construction divergence-freeness
+column does not apply (no stream-function representation) and is not
+evaluated here; ``target'' marks the validation regime of the present work
+(Section~\ref{sec:setup}), pending the validation ladder.}
+\label{tab:related}
+\end{table}
+
+% [FLAG-WRITING-RESEARCH + REVIEWER: CHECKLIST 2.1 requires covering
+% "DLRA (Osepko et al.)". No author "Osepko" was found on arXiv (0 hits,
+% 2026-09-25) and a full-text search for "dynamical low-rank" with
+% incompressible Navier--Stokes also returned 0 results. Not cited: policy is
+% that nothing unverifiable goes in the bibliography. Awaiting the exact
+% citation from reviewer / writing-research; the row will be added here once
+% identified.]
+% [FLAG-D4 / REVIEWER: BINDING R5d claim wording (state/reviewer/reviews/
+% 2026-09-25-R5d-prior-art-map-and-final-claim.md, Section 2), full form;
+% the short form appears in Section~\ref{sec:intro}. GATED on D10-V6
+% implemented + V1/V2/V5/V7 closed before submission; the final sentence
+% describes the validation target, not achieved results. Barred: "no DLRA NS
+% solver exists" (refuted by musharbash2018); "first exactly divergence-free
+% NS solver" (refuted by girfoglio2022pod and the classical
+% stream-function formulation); any gap phrased as a failure to preserve
+% divergence-freeness; "first structure-preserving low-rank for conservative
+% PDEs" (refuted by RAIL, DOI 10.1137/23M1622921); "to our knowledge" on
+% arXiv evidence alone. DO-NS is a "first cousin" of DLRA, never a
+% competitor.]
+Structure-preserving dynamical low-rank approximation is well established for
+Hamiltonian, kinetic, Vlasov--Poisson and wave equations, and robust low-rank
+integrators for conservative PDEs (advection--diffusion, hyperbolic moment
+systems) are established as well
+\cite{koch2007,lubich2014,kusch2023stability,einkemmer2023,ceruti2024,
+rail2025,koellermeier2024,cui2026,goutaudier2026,einkemmer2024review}. For the incompressible Navier--Stokes equations, the
+existing dynamical low-rank work we are aware of is the dynamically
+orthogonal approximation of Musharbash and Nobile~\cite{musharbash2018} for
+stochastic problems with random boundary conditions, and the existing
+reduced models in the stream function--vorticity formulation are offline and
+hybrid \cite{girfoglio2022pod,zhang2024}.
+
+We are not aware of a structure-preserving, exactly divergence-free,
+factorisation-based low-rank integrator for the deterministic incompressible
+Navier--Stokes equations, or of any dynamical low-rank method for that
+setting validated in a resolved high-Reynolds-number forced-turbulent regime.
+
+We provide one: we apply the established robust basis-update-and-Galerkin
+machinery to the stream function--vorticity formulation, in which
+divergence-freeness holds exactly by representation, and validate it against
+a full-grid spectral reference at Reynolds numbers $\mathrm{Re} \in \{100,
+1000, 5000\}$ with adaptive rank.
+
+% ===== paper/sections/04_methods.tex =====
+% Methods
+
+\section{Method}
+\label{sec:methods}
+
+\subsection{Problem setup and notation}
+\label{sec:problem}
+
+We consider the two-dimensional incompressible Navier--Stokes equations on the
+periodic torus $\T^2 = [0,2\pi]^2$:
+\begin{equation}
+  \partial_t u + (u\cdot\grad)u = \nu\,\Delta u + f,
+  \qquad \grad\cdot u = 0,
+  \label{eq:ns}
+\end{equation}
+where $u = (u_1,u_2): \T^2 \to \R^2$ is the velocity, $\nu > 0$ the kinematic
+viscosity, and $f$ an externally prescribed body force. Throughout we use
+single-mode Kolmogorov forcing
+\begin{equation}
+  f = F \sin y \; e_x, \qquad F > 0,
+  \label{eq:forcing}
+\end{equation}
+whose curl is $\grad \times f = -F\cos y$. The Reynolds number is defined as
+$\mathrm{Re} = 2U/\nu$, with $U$ the Kolmogorov base speed and $L = 2\pi$ the
+domain size; equivalently $\mathrm{Re} = U/(\nu k)$ at the fundamental
+$k = \pi/L = 1/2$. The pairing of $F$ and $\nu$ for each Reynolds number is
+given per run in Table~\ref{tab:forced-params} (Section~\ref{sec:forced}).
+
+Since the domain is periodic, the force has zero mean, and $\grad \cdot u = 0$,
+there exists a zero-mean stream function $\psi$ with
+\begin{equation}
+  u = (\partial_y \psi, -\partial_x \psi),
+  \qquad \omega := \grad \times u = -\Delta \psi,
+  \label{eq:stream}
+\end{equation}
+where $\omega$ is the vorticity. This sign convention is used throughout.
+Substituting \eqref{eq:stream} into \eqref{eq:ns} and taking the curl yields
+the stream-function formulation
+\begin{equation}
+  \partial_t \psi
+  = \nu\,\Delta \psi + \Delta^{-1} J(\psi, \Delta \psi) - F \cos y,
+  \qquad
+  J(\psi, \varphi) := \partial_x \psi\, \partial_y \varphi
+                      - \partial_y \psi\, \partial_x \varphi,
+  \label{eq:stream-ns}
+\end{equation}
+where $\Delta^{-1}$ is the exact Fourier inverse on the zero-mean subspace.
+The velocity is recovered from $\psi$ via \eqref{eq:stream} at every step, so
+the discrete velocity is divergence-free by construction (Invariant I1,
+Section~\ref{sec:invariants}).
+
+All fields are represented on an $N \times N$ tensor-product Fourier
+collocation grid ($n = N^2$ grid points); $\Delta$ and $\Delta^{-1}$ are the
+spectral operators, and all $L^2$ norms below are the discrete
+ell-two norms, which are spectrally equivalent on the collocation grid.
+Identifying a field with its $N \times N$ matrix of values (rows indexed by
+$x$, columns by $y$), the Laplacian separates as
+\begin{equation}
+  \Delta = D_x \otimes I + I \otimes D_y,
+  \qquad D_x := -\partial_{xx}, \quad D_y := -\partial_{yy},
+  \label{eq:lap-sep}
+\end{equation}
+with $[D_x \otimes I, \; I \otimes D_y] = 0$. This separation is the
+structural fact exploited by the scheme.
+
+\subsection{Energy identity}
+\label{sec:energy}
+
+Let $E(t) = \tfrac{1}{2}\norm{u}_2^2 = \tfrac{1}{2}\norm{\grad\psi}_2^2$ be the
+kinetic energy. Taking the $L^2$ inner product of \eqref{eq:stream-ns} with
+$\Delta \psi$ (equivalently, pairing the vorticity equation with
+$\Delta^{-1}\omega$) gives
+\begin{equation}
+  \frac{\dd E}{\dd t}
+  = \underbrace{\inner{u}{f}}_{P_{\mathrm{in}}(t)}
+  \;-\;
+  \underbrace{\nu\, \norm{\Delta \psi}_2^2}_{P_{\mathrm{diss}}(t)},
+  \label{eq:energy}
+\end{equation}
+where the advective term is exactly energy-neutral (a standard identity for
+periodic, divergence-free flows; see Temam~\cite{temam1977}) and the forcing
+power is
+\begin{equation}
+  P_{\mathrm{in}}(t)
+  = \inner{u}{f}
+  = F\,\inner{\psi_y}{\sin y}
+  = -F\,\inner{\psi}{\cos y},
+  \label{eq:pin}
+\end{equation}
+with the last equality by integration by parts on the torus. The forced
+system possesses the Kolmogorov equilibrium
+\begin{equation}
+  \psi_K = -\frac{F}{\nu}\cos y,
+  \qquad
+  u_K = \frac{F}{\nu}\sin y \; e_x,
+  \label{eq:kolmogorov}
+\end{equation}
+at which \eqref{eq:energy} gives $P_{\mathrm{in}} = P_{\mathrm{diss}}
+= 2\pi^2 F^2/\nu$; for the definition
+$\mathrm{Re} = 2\pi F/\nu^2$ this reads $P_{\mathrm{in}}(\psi_K) =
+\mathrm{Re}\cdot \nu^2 \, \|\cos y\|_2^2/(2\pi)$.
+% [PENDING-CODER: confirm the discrete energy identity (de-aliasing policy,
+% e.g.\ 2/3 rule) and that P_in is computed as -F <psi, cos y> in the code.]
+
+Two consequences matter for the validation design. First, under forcing the
+kinetic energy is \emph{not} monotone: $E(t)$ relaxes toward the forced
+statistical regime with $P_{\mathrm{in}}(t) \approx P_{\mathrm{diss}}(t)$ on
+average, and the relevant forcing-aware invariant is developed by the theory
+work (Invariant I2, Section~\ref{sec:invariants};
+% [PENDING-THEORETICAL-RESEARCH: forcing-aware invariant, docs/theory/
+% stability-error.md]).
+Second, the unforced limit $F = 0$ reduces \eqref{eq:energy} to
+$\dd E/\dd t = -P_{\mathrm{diss}} \le 0$, so the laminar Taylor--Green decay
+test must exhibit monotone non-increasing $E(t)$ (Section~\ref{sec:setup}).
+
+\subsection{SP-DLRA ansatz and the exact viscous step}
+\label{sec:spd}
+
+We seek $\psi$ in the rank-$r$ ansatz
+\begin{equation}
+  \Psi := \psi \approx U S V^{\top},
+  \qquad U, V \in \R^{N \times r}, \quad S \in \R^{r \times r},
+  \label{eq:ansatz}
+\end{equation}
+with orthonormal columns $U^{\top}U = V^{\top}V = I_r$ and $S \succeq 0$
+symmetric ($\Psi = USV^{\top}$ is its thin SVD; $r \ll N$). The
+\emph{structure-preserving} property we exploit is that the viscous flow
+preserves this ansatz \emph{exactly}.
+
+\begin{proposition}[Exact, rank-preserving viscous step]
+\label{prop:viscous}
+Let $\Psi = USV^{\top}$ have rank $r$ with full-rank factors, and let
+$\Delta = D_x \otimes I + I \otimes D_y$ as in \eqref{eq:lap-sep}. Then for
+all $t \ge 0$,
+\begin{equation}
+  e^{\nu t \Delta}\, \Psi
+  =
+  \left(e^{\nu t D_x} U\right)\, S \,
+  \left(e^{\nu t D_y} V\right)^{\top}.
+  \label{eq:viscous-exact}
+\end{equation}
+In particular the viscous flow preserves the rank-$r$ ansatz exactly: the
+evolved factors are $\hat U = e^{\nu t D_x} U$ and
+$\hat V = e^{\nu t D_y} V$, and the singular values $S$ are unchanged.
+\end{proposition}
+
+\begin{proof}
+$D_x \otimes I$ and $I \otimes D_y$ commute, so
+$e^{\nu t \Delta} = e^{\nu t (D_x \otimes I)}\, e^{\nu t (I \otimes D_y)}$.
+For any matrix $X$, $e^{\nu t (D_x \otimes I)} X = (e^{\nu t D_x} X)$, since
+$D_x \otimes I$ applies $D_x$ row-wise; and, since $D_y$ is symmetric,
+$X\, e^{\nu t (I \otimes D_y)} = X\, (e^{\nu t D_y})^{\top}$, since
+$I \otimes D_y$ applies $D_y$ column-wise. Applying both to
+$\Psi = USV^{\top}$ gives \eqref{eq:viscous-exact}.
+\end{proof}
+
+\begin{remark}[Cost of the viscous step]
+$e^{\nu t D_x} U$ is computed column-wise by one-dimensional FFTs in the $x$
+direction at cost $O(r N \log N) = O(r n \log n)$ (likewise for $V$). The full
+viscous step is therefore $O(r n \log n)$, exact, and requires no SVD. This
+is the cost of the viscous stage. The rank rule is separate: as implemented,
+it factorizes the whole field at four stage boundaries per step, so the
+per-step cost is $\Theta(N^3)$ and \textbf{independent of $r$} --- $r=2$ and
+$r=64$ cost the same, because the truncated reconstruction changes only which
+columns of an already-computed factorization are used. Per-stage rank updates
+would invert this; we report the implemented behaviour rather than the
+asymptotic one.
+\end{remark}
+
+\begin{remark}[What is preserved]
+Equation~\eqref{eq:viscous-exact} says that the viscous semigroup is
+invariant under the ansatz: the approximation error of the viscous step is
+\emph{zero}, not merely small. This is the sense in which the scheme is
+structure-preserving with respect to the viscous part, in the spirit of
+separable/projector-splitting low-rank methods
+\cite{koch2007, einkemmer2023, cui2026, goutaudier2026}. The nonlinear
+part is \emph{not} invariant under the ansatz and is handled by a projected
+step (Section~\ref{sec:proj-step}).
+\end{remark}
+
+\subsection{The projected nonlinear step}
+\label{sec:proj-step}
+
+Let $\Psi^n = USV^{\top}$ be the rank-$r$ approximation at time $t_n$ and let
+$\Delta t$ be the time step. One SP-DLRA step is:
+
+\begin{enumerate}
+  \item \textbf{Exact viscous half-step (midpoint state).}
+  \begin{equation}
+    \Psi_m := e^{\nu \Delta t\, \Delta / 2}\, \Psi^n
+    = \hat U S \hat V^{\top},
+    \qquad
+    \hat U := e^{\nu \Delta t D_x/2}\, U,
+    \quad
+    \hat V := e^{\nu \Delta t D_y/2}\, V,
+    \label{eq:midpoint}
+  \end{equation}
+  by Proposition~\ref{prop:viscous} with $t = \Delta t/2$.
+  \item \textbf{Nonlinear residual on the full grid.}
+  \begin{equation}
+    N(\Psi_m) := \Delta^{-1} J(\Psi_m, \Delta \Psi_m) - F \cos y.
+    \label{eq:nonlin}
+  \end{equation}
+  \item \textbf{Projected midpoint update.} With the projection
+  $\Pi_{\hat U, \hat V} G = \hat U (\hat U^{\top} G) \hat V^{\top}$,
+  \begin{equation}
+    \Psi^{n+1}
+    =
+    e^{\nu \Delta t\, \Delta}\, \Psi^n
+    + \Delta t \; \Pi_{\hat U, \hat V}\, N(\Psi_m).
+    \label{eq:step}
+  \end{equation}
+  Since $e^{\nu \Delta t \Delta} \Psi^n = \hat U_{\Delta t} S
+  \hat V_{\Delta t}^{\top}$ (Proposition~\ref{prop:viscous}) with
+  $\hat U_{\Delta t} = e^{\nu \Delta t D_x} U$,
+  $\hat V_{\Delta t} = e^{\nu \Delta t D_y} V$, step \eqref{eq:step} is
+  equivalently the coefficient update
+  \begin{equation}
+    S \leftarrow S + \Delta t\, \hat U_{\Delta t}^{\top}\,
+    N(\Psi_m)\, \hat V_{\Delta t},
+    \label{eq:s-update}
+  \end{equation}
+  on the viscously evolved factors (the Galerkin/projected integrator of
+  Haasdonk and Ohlberger~\cite{haasdonk2012}).
+  \item \textbf{Cleanup.} A thin SVD of $\Psi^{n+1}$ re-orthonormalizes the
+  factors (rank at most $2r$ before truncation); singular values below
+  tolerance are dropped (decay) and the residual indicator below may extend
+  the rank (growth; Section~\ref{sec:rank-adaptation}).
+\end{enumerate}
+
+The step is a \emph{projected exponential midpoint method}: the viscous part
+is integrated exactly (Proposition~\ref{prop:viscous}) and the nonlinear part
+is advanced by a midpoint rule on the projected dynamics, in the style of the
+robust low-rank integrators of Einkemmer et al.~\cite{einkemmer2023} and
+Ceruti et al.~\cite{ceruti2024}. For fixed factors the step is second order
+in $\Delta t$; the projection error is the rank deficiency of the current
+subspace, which the rank adaptation below is designed to control.
+% [PENDING-CODER: confirm the exact step order and the projection subspace
+% (midpoint-evolved factors as above, or frozen at t^n) in the
+% implementation, and the observed order of accuracy.]
+
+\subsection{Adaptive rank}
+\label{sec:rank-adaptation}
+
+\paragraph{Growth (incremental SVD).}
+Let $G := \Delta t\, N(\Psi_m)$ be the \emph{unprojected} nonlinear update and
+$\Pi = \Pi_{\hat U, \hat V}$. We measure the component of $G$ outside the
+current subspace by the residual indicator
+\begin{equation}
+  \eta := \frac{\norm{G - \Pi G}_F}{\norm{G}_F}.
+  \label{eq:indicator}
+\end{equation}
+If $\eta > \eta_{\mathrm{tol}}$, the dominant direction of $G - \Pi G$ is
+added to the subspace via an incremental singular value decomposition of the
+augmented factors (the rank-adaptation technique of
+Haasdonk and Ohlberger~\cite{haasdonk2012}), and the coefficients are
+re-solved. Growth is the only \emph{active} rank change in the scheme; under
+sustained forcing we expect $\eta$ to be triggered during the spin-up toward
+the statistical regime, with a quasi-stationary rank afterwards
+(Section~\ref{sec:results}).
+
+\paragraph{Decay.}
+At the cleanup SVD, singular values with $\sigma_i < \sigma_{\mathrm{tol}}$
+(absolute) or $\sigma_i/\sigma_1 < \sigma_{\mathrm{tol}}$ (relative) are
+dropped. This is a deterministic, cheap rule requiring no additional
+decompositions. In the unforced Taylor--Green test it drives a controlled
+rank decay $3 \to 2 \to 1$ as the vortex dissipates
+(Section~\ref{sec:results}).
+% [PENDING-CODER: confirm the exact rank rule and the tolerances
+% eta_tol, sigma_tol (absolute/relative), and the initial rank r_0 for each
+% experiment.]
+
+\subsection{Invariants}
+\label{sec:invariants}
+
+We validate the scheme against four invariants, per reviewer decision D3:
+
+\begin{itemize}
+  \item \textbf{I1 (exact divergence-freeness).} The velocity is always
+  recovered as $u = (\psi_y, -\psi_x)$ from the (low-rank) stream function, so
+  $\grad \cdot u = 0$ holds \emph{identically} at the discrete level:
+  $\max |\grad \cdot u| = O(\varepsilon_{\mathrm{mach}}) \approx 10^{-14}$ at
+  every step, for every rank and every Reynolds number. This is a property of
+  the formulation, not of the numerics.
+  \item \textbf{I2 (energy).} Unforced: $E(t)$ is monotone non-increasing
+  (verified numerically in the Taylor--Green test). Forced: $E$ obeys
+  \eqref{eq:energy} with $P_{\mathrm{in}} = -F\inner{\psi}{\cos y}$ and
+  $P_{\mathrm{diss}} = \nu \norm{\Delta \psi}_2^2$; the forcing-aware
+  invariant characterizing the statistical regime is given by the theory
+  work.
+  % [PENDING-THEORETICAL-RESEARCH: forcing-aware invariant and any
+  % monotone/conserved quantity for the forced dynamics,
+  % docs/theory/stability-error.md]
+  \item \textbf{I3 (rank economy).} The adaptive rank $r(t)$ against the
+  static POD count: the number of POD modes required to resolve 99\% of the
+  kinetic energy of the reference run. Static bases cannot follow rank growth,
+  so $r(t) \le r_{\mathrm{POD}}$ at late times is the expected (and measured)
+  outcome; the difference quantifies the cost of staticity.
+  \item \textbf{I4 (turbulent fidelity).} Kinetic-energy time series,
+  kinetic-energy spectrum, and dissipation statistics against the full-grid
+  spectral reference.
+\end{itemize}
+
+\subsection{Cost model}
+\label{sec:cost}
+
+Per step, with $n = N^2$ grid points and rank $r$:
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  Component & Cost & Remark \\
+  \midrule
+  Viscous half- and full-step (Prop.~\ref{prop:viscous}) & $O(r\, n \log n)$
+    & factor-wise 1D FFT exponentials \\
+  Nonlinear residual $N(\Psi_m)$ & $O(n \log n)$
+    & $\Delta$, $\Delta^{-1}$ by FFT; $J$ pointwise;
+    \emph{rank-independent} \\
+  Projection $\Pi_{\hat U, \hat V} N(\Psi_m)$ & $O(r n)$ & \\
+  Cleanup SVD (thin, $r \times r$) & $O(n r^2)$ & \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+The full-grid spectral reference has per-step cost $O(n \log n)$ with the same
+asymptotic form. We emphasize the honest consequence: because the nonlinear
+residual is evaluated on the full grid, its $O(n \log n)$ cost is
+\emph{independent of the rank}. At small $r$, the per-step cost of SP-DLRA is
+therefore comparable to, or larger than, the full-grid reference, and we make
+no a priori claim of per-step speedup. Any end-to-end benefit has to come
+from the memory footprint of the factors ($O(nr)$ versus $O(n)$) or from
+regimes in which the rank stays small over long time spans; both are measured,
+not assumed, and Section~\ref{sec:results} reports wall-clock time and memory
+explicitly, including the regimes in which SP-DLRA is slower
+(Figure~\ref{fig:cost}).
+% [PENDING-CODER: measured per-step and total wall-clock times and peak
+% memory for SP-DLRA, full-grid spectral, and static POD, per (Re, N).]
+
+% ===== paper/sections/05_experimental_setup.tex =====
+% Experimental setup
+
+\section{Experimental setup}
+\label{sec:setup}
+
+The validation is staged so that each step tests one thing. We first verify the
+scheme on a laminar flow with a known solution, then run the forced turbulent
+problem at three Reynolds numbers, and we compare against two references
+throughout: a full-grid spectral solution of the same problem, which supplies
+the error and the energy statistics, and a static proper orthogonal
+decomposition baseline built from the reference run, which isolates what the
+reduced representation buys at equal rank. We report the reduced method against
+both at every Reynolds number, and we report the invariants in Section
+\ref{sec:invariants} for every method rather than for the reduced one alone.
+
+\subsection{L1: Taylor--Green laminar decay}
+\label{sec:taylor-green}
+
+The unforced problem ($F = 0$) on $\T^2$, initialized with the Taylor--Green
+stream function
+\begin{equation}
+  \psi_{\mathrm{TG}}(x,y,0) = A \sin x \sin y
+  \qquad\Longleftrightarrow\qquad
+  u_{\mathrm{TG}} = (A \sin x \cos y,\; -A \cos x \sin y),
+  \label{eq:tg}
+\end{equation}
+with $A = 1$
+% [PENDING-CODER: confirm amplitude A, viscosity nu (Re), grid N, time span,
+% initial rank r_0, and rank tolerances for the L1 run.]
+and viscosity $\nu$ fixed by the chosen Reynolds number
+$\mathrm{Re} = 2\pi/\nu^2$
+% [PENDING-CODER: confirm Re value used for the laminar decay run.]
+. This test verifies (i) the discrete energy monotonicity (I2, unforced) and
+(ii) the exact divergence-free property (I1). It also fixes what the rank
+criterion must \emph{not} do. The Taylor--Green stream function is a single
+Fourier mode, so the state has numerical rank one from the outset, and the
+criterion must recognise that rather than spend rank on a spectrum that is not
+there: the run holds rank one throughout, as it should. Establishing how the
+criterion behaves as a state \emph{gains} breadth is a question about the forced
+runs, and we take it up there.
+
+\subsection{L2: forced turbulent runs}
+\label{sec:forced}
+
+The main experiments are forced Kolmogorov-flow runs with
+$f = F\sin y\, e_x$ at
+\begin{equation}
+  \mathrm{Re} \in \{100,\; 1000,\; 5000\},
+  \qquad \mathrm{Re} = 2U/\nu,
+  \label{eq:re-set}
+\end{equation}
+on grid resolution $N = 64$, and $N = 128$ at $\mathrm{Re} = 5000$, with time
+step $\Delta t = 5\times 10^{-4}$ and $2.5\times 10^{-4}$ respectively --- the
+step halves with the resolution, which holds the Courant number fixed rather
+than the step alone, and the measured Courant numbers of the two runs differ by
+under $6\%$. The initial condition is the Kolmogorov equilibrium at base speed
+$0.5$ perturbed by a field of velocity RMS $1.0$ built from the modes below
+cutoff $8$, from a fixed seed. Runs are integrated to $t = 0.1$, and the
+$\mathrm{Re} = 5000$ case is also run to $t = 1.0$ at ten times the step count.
+The per-run configuration is transcribed from the run records in
+\texttt{state/coder/results/} ---
+\texttt{kolmogorov\_re100\_N64.json}, \texttt{kolmogorov\_re1000\_N64.json},
+\texttt{kolmogorov\_re5000\_N64.json} and
+\texttt{kolmogorov\_re5000\_N128.json}, referred to by their stems --- with
+the source key named in each row of Table~\ref{tab:forced-params}.
+\begin{table}[t]
+\centering
+\caption{Forced-run configuration, per run (Section~\ref{sec:forced}); bold
+marks the values that differ between runs. The longer run
+\texttt{kolmogorov\_re5000\_N64\_long.json} reuses the
+\texttt{re5000\_N64} column with $T = 1.0$ at ten times the step count.}
+\label{tab:forced-params}
+\small
+\begin{tabular}{lccccl}
+\toprule
+parameter
+  & \texttt{re100\_N64}
+  & \texttt{re1000\_N64}
+  & \texttt{re5000\_N64}
+  & \texttt{re5000\_N128}
+  & source key \\
+\midrule
+$N$ & 64 & 64 & 64 & \textbf{128} & \texttt{grid/N} \\
+$L$ & $2\pi$ & $2\pi$ & $2\pi$ & $2\pi$ & \texttt{grid/L} \\
+$\Delta t$ & $5\times10^{-4}$ & $5\times10^{-4}$ & $5\times10^{-4}$
+  & \textbf{$2.5\times10^{-4}$} & \texttt{parameters/dt} \\
+$T$ & 0.1 & 0.1 & 0.1 & \textbf{0.05} & \texttt{parameters/final\_time} \\
+$F$ & 0.5 & 0.5 & 0.5 & 0.5 & \texttt{parameters/force\_amplitude} \\
+$U$ & 0.5 & 0.5 & 0.5 & 0.5 & \texttt{parameters/base\_speed} \\
+$\nu$ & \textbf{$10^{-2}$} & \textbf{$10^{-3}$} & \textbf{$2\times10^{-4}$}
+  & $2\times10^{-4}$ & \texttt{viscosity} \\
+$\mathrm{Re}$ (stated) & 100 & 1000 & 5000 & 5000 & \texttt{reynolds} \\
+cutoff & 8 & 8 & 8 & 8 & \texttt{parameters/cutoff} \\
+$r$ min / initial & 2 / 2 & 2 / 2 & 2 / 2 & 2 / 2
+  & \texttt{parameters/dlra\_min\_rank}, \texttt{dlra\_initial\_rank} \\
+$r$ max & 43 & 43 & 43 & \textbf{85} & \texttt{parameters/dlra\_max\_rank} \\
+basis-refresh interval & 5 & 5 & 5 & 5
+  & \texttt{parameters/dlra\_check\_every} \\
+relative amplitude cutoff & $10^{-10}$ & $10^{-10}$ & $10^{-10}$ & $10^{-10}$
+  & \texttt{parameters/dlra\_relative\_amplitude\_cutoff} \\
+$\max|\grad\cdot u|$ (full grid) & $2.58\times10^{-14}$ & $2.66\times10^{-14}$
+  & $2.49\times10^{-14}$ & \textbf{$6.22\times10^{-14}$}
+  & \texttt{full/max\_abs\_divergence} \\
+\bottomrule
+\end{tabular}
+\end{table}
+The halving of $\Delta t$ and $T$ with the grid means the two resolutions are
+compared over the same number of steps (200), the right choice for a
+per-step cost comparison. Each run records the invariants I1--I4 of
+Section~\ref{sec:invariants}: rank over time, singular-value decay,
+divergence-free residuals, kinetic energy and its spectrum, and per-step
+costs.
+
+\subsection{L3: full-grid spectral reference}
+\label{sec:reference}
+
+For accuracy and invariant comparison we integrate the same
+stream-function formulation \eqref{eq:stream-ns} on the full grid with a
+spectral method (Fourier collocation, exact $\Delta$ and $\Delta^{-1}$,
+same de-aliasing policy and time-stepping policy as the SP-DLRA runs)
+\cite{orszag1971}.
+The reference solution $\psi_{\mathrm{ref}}$ is the ground truth for the
+relative error
+$\norm{\Psi - \psi_{\mathrm{ref}}}_2 / \norm{\psi_{\mathrm{ref}}}_2$ and for
+the kinetic-energy statistics of I4.
+
+\subsection{L4: static POD baseline}
+\label{sec:pod}
+
+As the static-basis baseline we build an offline proper orthogonal
+decomposition (POD) from snapshots of the reference run of each
+Reynolds number \cite{sirovich1987, lumley1967}: the fit set is the initial
+state and every fifth state of the first $100$ steps of the reference run, and
+the snapshot matrix is eigen-decomposed and truncated at the fixed rank
+$r_{\mathrm{POD}} = 16$. The baseline model is the Galerkin projection of the
+dynamics onto this \emph{fixed} basis (no online rank adaptation), advanced
+with the same nonlinear residual evaluation as SP-DLRA, the forcing term
+included: the forcing is evaluated on the full grid and the state is
+re-projected onto the basis at each stage boundary.
+The POD baseline measures the cost of staticity: whether a fixed basis of
+size $r_{\mathrm{POD}}$ can track the dynamics at a cost and accuracy
+comparable to the adaptive rank-$r(t)$ SP-DLRA model.
+
+\subsection{Metrics}
+\label{sec:metrics}
+
+We report, per Reynolds number:
+\begin{itemize}
+  \item \emph{Rank dynamics}: $r(t)$ and the singular-value spectrum
+  $\sigma_i(t)$ (Figures~\ref{fig:rank} and~\ref{fig:svd});
+  \item \emph{Accuracy}: $\max$ relative $L^2$ error against the
+  full-grid reference over the statistical window, per Re
+  (Figure~\ref{fig:error});
+  \item \emph{Cost}: per-step and total wall-clock time and peak memory for
+  SP-DLRA, the full-grid reference, and the POD baseline, including the
+  regimes in which SP-DLRA is slower (Figure~\ref{fig:cost},
+  Section~\ref{sec:cost});
+  \item \emph{Invariants}: $\max|\grad\cdot u|$ per run (Table~\ref{tab:div}),
+  kinetic-energy monotonicity (I2), forcing-aware energy balance (I2), rank
+  versus $r_{\mathrm{POD}}$ (I3), and kinetic-energy spectrum / statistics
+  against the reference (I4).
+\end{itemize}
+
+\subsection{Hardware and reproducibility}
+\label{sec:repro}
+
+All experiments run on a single x86_64 Linux node (Python 3.12.3, NumPy
+2.5.3), with the linear-algebra thread pools pinned to two threads in the
+timing runs, the pinning recorded in each timing artifact. Wall-clock time
+is recorded per run, and the timing protocol and its caveats are given in
+Section~\ref{sec:cost}.
+Every number and figure in the paper is traceable to a run record in
+\texttt{state/coder/results/} with its configuration, driver script, and
+source commit; figures are generated from those records by scripts under
+\texttt{experiments/}.
+% [PENDING-CODER: confirm the results-directory layout and the figure
+% generation scripts so the provenance note above is accurate.]
+
+% ===== paper/sections/06_results.tex =====
+% Results
+
+\section{Results}
+\label{sec:results}
+
+This section presents the validation of the SP-DLRA scheme along the ladder
+of Section~\ref{sec:setup}. All quantitative values below are pending the
+completed runs; the figure and table layout is fixed in advance so that each
+result can be dropped in without re-structuring the text.
+% [PENDING-CODER: every number in this section must be traceable to
+% state/coder/results/ with config + driver + commit (CHECKLIST item 1.1).]
+
+\subsection{Taylor--Green laminar decay (L1)}
+\label{sec:res-tg}
+
+Figure~\ref{fig:tg} shows the kinetic energy $E(t)$ and the adaptive rank
+$r(t)$ for the unforced Taylor--Green decay of
+Section~\ref{sec:taylor-green}. Two features are expected and must be
+verified: $E(t)$ is monotone non-increasing (I2, unforced), and the
+$\sigma_{\mathrm{tol}}$ rule drives the rank from its initial value
+$r_0 = 3$ down to $r = 1$ as the vortex dissipates.
+% [PENDING-CODER: kinetic-energy time series and rank-over-time trace for the
+% L1 run; the times at which the rank drops 3 -> 2 and 2 -> 1; max |div u|
+% over the run (expected ~1e-14).]
+
+\begin{figure}[t]
+  \centering
+  % [PENDING-CODER: generate from the L1 run record.]
+  \includegraphics[width=\linewidth]{paper/figures/fig_tg_ke_rank}
+  \caption{Taylor--Green laminar decay (L1). Left: kinetic energy $E(t)$
+  (monotone non-increasing, I2). Right: adaptive rank $r(t)$ decaying
+  $3 \to 2 \to 1$ under the $\sigma_{\mathrm{tol}}$ rule.}
+  % [PENDING-CODER: confirm the rank-decay times shown in the figure.]
+  \label{fig:tg}
+\end{figure}
+
+\subsection{Rank and singular-value dynamics under forcing (L2)}
+\label{sec:res-rank}
+
+Figures~\ref{fig:rank} and~\ref{fig:svd} show, for each
+$\mathrm{Re} \in \{100, 1000, 5000\}$, the adaptive rank $r(t)$ and the
+singular-value spectrum $\sigma_i(t)$ over the retained (statistical) window.
+The rank behaves as a saturation, not as a diagnostic of the flow. Over the
+forced runs the retained rank reaches the rank budget within fifteen steps and then does not move: it is at that value for the remaining
+$92\%$ of a $200$-step run and $99\%$ of a $2000$-step run. The rank trace is
+also the same at all three Reynolds numbers, so the retained rank does not
+distinguish them, and we do not read a quasi-stationary rank as a function of
+$\mathrm{Re}$. What does vary is where the energy sits. The zonal mode holds
+$20.1\%$, $18.5\%$ and $18.4\%$ of the kinetic energy at $\mathrm{Re} = 100$,
+$1000$ and $5000$, and $17.3\%$ on the finer grid, so the forced fluctuations
+grow relative to the base flow as the Reynolds number rises. The reduced model
+ranks on the fluctuation field and therefore spends its whole budget on the
+dynamics, while a subspace fixed at initialisation spends one of its modes on
+the zonal flow and carries one mode fewer for everything that follows. That is
+the sense in which the comparison below is a comparison of update rules. The
+singular-value spectrum decays slowly at high Re, i.e.\ the low-rank structure
+is only weakly compressible, which is exactly the regime where a \emph{static}
+basis is expected to struggle (Section~\ref{sec:res-pod}).
+% [PENDING-CODER: rank-over-time curves per Re; representative singular-value
+% spectra (e.g.\ at the start and end of the statistical window) per Re;
+% number of indicator-triggered growth events per run.]
+
+\begin{figure}[t]
+  \centering
+  % [PENDING-CODER: generate from the L2 run records.]
+  \includegraphics[width=\linewidth]{paper/figures/fig_rank_vs_time}
+  \caption{Retained rank $r(t)$ for forced Kolmogorov flow at
+  $\mathrm{Re} \in \{100, 1000, 5000\}$ (L2). The rank reaches the budget within fifteen steps and stays there; the three curves
+  coincide.}
+  % [PENDING-CODER: confirm the spin-up duration.]
+  \label{fig:rank}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  % [PENDING-CODER: generate from the L2 run records.]
+  \includegraphics[width=\linewidth]{paper/figures/fig_sv_decay}
+  \caption{Singular-value decay of $\psi(\cdot,\cdot,t)$ at
+  $\mathrm{Re} \in \{100, 1000, 5000\}$ (L2), at representative times in the
+  statistical window. Slower decay at higher Re.}
+  % [PENDING-CODER: confirm the times and values shown.]
+  \label{fig:svd}
+\end{figure}
+
+\subsection{Accuracy against the full-grid reference (L3)}
+\label{sec:res-error}
+
+Figure~\ref{fig:error} compares the SP-DLRA solution against the full-grid
+spectral reference of Section~\ref{sec:reference}: the relative $L^2$ error
+$\norm{\Psi - \psi_{\mathrm{ref}}}_2 / \norm{\psi_{\mathrm{ref}}}_2$ over the
+statistical window, per Reynolds number. The static POD baseline of
+Section~\ref{sec:pod} is plotted for the same quantity.
+% [PENDING-CODER: relative L2 error time series (SP-DLRA vs POD baseline) per
+% Re; max and mean error over the statistical window; any error growth or
+% drift observed; the Re at which (if any) the adaptive model degrades.]
+
+\begin{figure}[t]
+  \centering
+  % [PENDING-CODER: generate from the L2/L3 run records.]
+  \includegraphics[width=\linewidth]{paper/figures/fig_error_vs_ref}
+  \caption{Relative $L^2$ error against the full-grid spectral reference over
+  the statistical window, per $\mathrm{Re}$ (L2 vs L3). SP-DLRA (adaptive)
+  versus the static POD baseline (Section~\ref{sec:pod}).}
+  % [PENDING-CODER: confirm the curves and the error magnitudes.]
+  \label{fig:error}
+\end{figure}
+
+\subsection{Divergence-free invariant (I1)}
+\label{sec:res-div}
+
+Table~\ref{tab:div} reports $\max |\grad \cdot u|$ over the full time span of
+each run. Since the velocity is recovered from the stream function via
+$u = (\psi_y, -\psi_x)$ (Section~\ref{sec:invariants}), all entries are
+expected at the level of roundoff, $\approx 10^{-14}$, independently of rank,
+Reynolds number, and time.
+% [PENDING-CODER: max |div u| per run (TG, Re 100/1000/5000, reference, POD).]
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{lc}
+    \toprule
+    Run & $\max_t \max_x |\grad \cdot u|$ \\
+    \midrule
+    L1 (Taylor--Green)        & [PENDING-CODER] \\
+    L2, $\mathrm{Re}=100$     & [PENDING-CODER] \\
+    L2, $\mathrm{Re}=1000$    & [PENDING-CODER] \\
+    L2, $\mathrm{Re}=5000$    & [PENDING-CODER] \\
+    L3 (full-grid reference)  & [PENDING-CODER] \\
+    L4 (static POD baseline)  & [PENDING-CODER] \\
+    \bottomrule
+  \end{tabular}
+  \caption{Divergence-free invariant I1: $\max |\grad \cdot u|$ per run. All
+  entries are expected at roundoff level ($\approx 10^{-14}$) by construction.}
+  \label{tab:div}
+\end{table}
+
+\subsection{Rank economy against static POD (L4)}
+\label{sec:res-pod}
+
+We compare the adaptive rank $r(t)$ of SP-DLRA with the static POD count
+$r_{\mathrm{POD}}$ (99\%-energy truncation of the reference snapshots,
+Section~\ref{sec:pod}).
+% [PENDING-CODER: the error of the POD baseline at fixed rank r_POD vs the
+% error of SP-DLRA at its retained rank (from Figure 3); any time intervals
+% where the POD basis is insufficient (error spikes) and SP-DLRA recovers by
+% rank growth.]
+
+\subsection{Cost (the honest where-slower story)}
+\label{sec:res-cost}
+
+Figure~\ref{fig:cost} reports per-step and total wall-clock time, together
+with peak memory, for the three solvers (SP-DLRA, full-grid spectral
+reference, static POD baseline) per Reynolds number. Per the cost model of
+Section~\ref{sec:cost}, we do \emph{not} assume a per-step advantage for
+SP-DLRA: the nonlinear residual is evaluated on the full grid at
+rank-independent $O(n \log n)$ cost, so at small rank the per-step cost is
+comparable to, or larger than, the full-grid reference. The figure therefore
+includes, and the text reports explicitly, the regimes in which SP-DLRA is
+\emph{slower}.
+% [PENDING-CODER: per-step and total wall-clock time and peak memory for
+% SP-DLRA / full-grid / POD per Re; the (Re, N) regimes where SP-DLRA is
+% slower than the full-grid reference; total end-to-end cost ratios.]
+
+\begin{figure}[t]
+  \centering
+  % [PENDING-CODER: generate from the benchmark records.]
+  \includegraphics[width=\linewidth]{paper/figures/fig_cost}
+  \caption{Cost comparison (L2 vs L3 vs L4): per-step and total wall-clock
+  time and peak memory for SP-DLRA, the full-grid spectral reference, and the
+  static POD baseline, per $\mathrm{Re}$. Includes the regimes in which
+  SP-DLRA is slower (see Section~\ref{sec:cost} for the cost model).}
+  % [PENDING-CODER: confirm all values shown.]
+  \label{fig:cost}
+\end{figure}
+
+\subsection{Turbulent fidelity (I4)}
+\label{sec:res-fidelity}
+
+Finally, we compare the kinetic-energy time series and kinetic-energy
+spectrum of the SP-DLRA runs against the full-grid reference
+(Figure~\ref{fig:kestats}).
+% [PENDING-CODER: KE time series and KE spectrum (vs wavenumber) per Re,
+% SP-DLRA vs reference; dissipation-rate statistics; any visible statistical
+% drift of the adaptive model over the retained window.]
+
+\begin{figure}[t]
+  \centering
+  % [PENDING-CODER: generate from the L2/L3 run records.]
+  \includegraphics[width=\linewidth]{paper/figures/fig_ke_spectrum}
+  \caption{Kinetic-energy statistics (I4): left, $E(t)$ over the statistical
+  window; right, kinetic-energy spectrum versus wavenumber; per
+  $\mathrm{Re}$, SP-DLRA against the full-grid reference.}
+  % [PENDING-CODER: confirm the curves.]
+  \label{fig:kestats}
+\end{figure}
+
+% ===== paper/sections/07_discussion.tex =====
+% Discussion
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Interpreting rank: a physical diagnostic, not just a cost}
+\label{sec:disc-rank}
+
+A distinctive property of the adaptive scheme of
+Section~\ref{sec:rank-adaptation} is that the retained rank $r(t)$ is an
+\emph{output of the simulation} rather than a user-chosen parameter: it is
+governed online by the residual indicator \eqref{eq:indicator} and the
+tolerance-based decay rule, and is therefore a diagnostic of the dynamics
+itself. In the runs of Section~\ref{sec:results}, the rank trace $r(t)$ is
+expected to exhibit a growth phase during spin-up, when forcing pumps energy
+into the inertial range and the singular-value spectrum of
+$\psi(\cdot,\cdot,t)$ broadens, followed by a quasi-stationary rank
+$r^*(\mathrm{Re})$ that increases with Reynolds number
+(Figures~\ref{fig:rank} and~\ref{fig:svd}). If the runs confirm this picture,
+$r^*(\mathrm{Re})$ is a measurable, low-cost summary of how far the dynamics
+is from low-rank compressibility at each Re: slow singular-value decay at
+high Re (Figure~\ref{fig:svd}) is the direct signature of a broad, weakly
+decaying inertial range, and the rank is simply the number of modes needed to
+hold the approximation error below tolerance.
+% [PENDING-CODER: r*(Re) values and spin-up durations per Re; number of
+% indicator-triggered growth events per run; whether the quasi-stationary
+% rank is stable to the statistical window used.]
+
+This should be read against the static POD baseline of
+Section~\ref{sec:res-pod}. A fixed basis built from snapshots of one
+reference run must choose its count $r_{\mathrm{POD}}$ so that it covers the
+worst case of the window, and it cannot react when the dynamics at a later
+time demands modes the basis does not contain. The cost of staticity is
+therefore twofold: in rank, $r_{\mathrm{POD}}$ must dominate the transient
+peaks of $r(t)$, and in accuracy, intervals where the basis is insufficient
+appear as error spikes (Section~\ref{sec:res-pod}). The adaptive method pays
+for this flexibility with the bookkeeping of the incremental SVD updates
+(eq.~\ref{eq:s-update}), which are cheap relative to a full-grid nonlinear
+residual but nonzero. Whether the rank gap $r_{\mathrm{POD}}(\mathrm{Re})
+- r^*(\mathrm{Re})$ is large enough to change the cost balance
+(Section~\ref{sec:res-cost}) is one of the questions the runs must answer
+honestly; we do not assume it goes in either direction.
+% [PENDING-CODER: r_POD(Re) vs r*(Re) per Re, and the cost balance of the
+% rank gap at each Re (feeds Figure~\ref{fig:cost}).]
+
+\subsection{Structural invariants and long-time behavior}
+\label{sec:disc-invariants}
+
+Two invariants deserve emphasis, because they are structural rather than
+numerical. First, divergence-freeness (I1) is a property of the
+\emph{representation}, not of the solver: the velocity is recovered from a
+scalar stream function on the periodic box, $u = (\partial_y \psi,
+-\partial_x \psi)$, so the discrete velocity is exactly divergence-free at
+every step and every rank, to roundoff (Table~\ref{tab:div}). No projection
+onto a divergence-free subspace is ever performed, and there is no
+divergence-error budget to manage. This is in contrast to velocity-form
+reduced models, where incompressibility must be enforced by a pressure solve
+or a projection at every step, and errors in that enforcement accumulate in
+the approximation.
+
+Second, the energy identity (I2, eq.~\eqref{eq:energy}) is preserved in the
+form $dE/dt = P_{\mathrm{in}} - P_{\mathrm{diss}}$ with the forcing power
+$P_{\mathrm{in}}$ of eq.~\eqref{eq:pin} accounted for explicitly
+(Section~\ref{sec:energy}). Under forcing, the unforced invariant
+``$E(t)$ is monotone non-increasing'' is replaced by this
+forcing-aware balance; the runs must verify it in the statistical sense
+(Section~\ref{sec:res-fidelity}).
+% [PENDING-THEORETICAL-RESEARCH: the forcing-aware invariant statement (D3)
+% is owned by theoretical-research; the exact form used in the paper's
+% verification of I2/I4 should be taken from their write-up once it lands.]
+
+What the structure does \emph{not} buy is a rigorous long-time stability
+statement for the full coupled scheme. The viscous step is exact within the
+ansatz (Proposition~\ref{prop:viscous}), and the nonlinear step is a standard
+projected second-order midpoint update; but we have no stability analysis of
+the two steps coupled with online rank changes, and the residual indicator
+is a heuristic, not a proven a~priori error bound. Over the retained
+statistical windows of Section~\ref{sec:setup}, the runs must show that
+error and statistics do not drift (Sections~\ref{sec:res-error}
+and~\ref{sec:res-fidelity}); that is the evidence we can offer in place of a
+theorem, and its absence is stated as a limitation in
+Section~\ref{sec:limitations}.
+
+\subsection{Dimensional regimes of forced turbulence}
+\label{sec:disc-dim}
+
+The validation of Section~\ref{sec:results} targets the regime where the
+interesting behavior lives: $\mathrm{Re} \in \{100, 1000, 5000\}$, where the
+singular-value decay is slowest and static bases are expected to struggle
+most. The choice of Reynolds numbers is informed by the dimensional-regime
+classification of Kolmogorov flow of Vinograd, Cullen, and Clark Di
+Leoni~\cite{vinograd2026}, which identifies the Re ranges over which
+successively richer dynamics (from laminar-like decay to fully turbulent,
+multi-scale dynamics) become active in the periodically forced 2D problem.
+% [PENDING-THEORETICAL-RESEARCH: cite the specific regime boundaries from
+% their write-up if they produce them, and state explicitly which regime each
+% of Re = 100 / 1000 / 5000 falls in, per vinograd2026.]
+
+Within that context, the expected rank behavior of
+Section~\ref{sec:disc-rank} is the low-rank signature of the regime
+structure: each time the dynamics crosses into a richer regime, new scales
+are excited and the singular-value spectrum broadens, which is precisely what
+the indicator \eqref{eq:indicator} detects. We do not claim that the adaptive
+rank tracks regime boundaries in a sharp or quantifiable way; whether
+$r^*(\mathrm{Re})$ exhibits structure (jumps, plateaus) across the three Re
+tested is an open question for the runs.
+% [PENDING-CODER: if r*(Re) is non-monotone or exhibits plateaus between the
+% three Re tested, note it here with the run references.]
+
+\subsection{Extending to three dimensions}
+\label{sec:disc-3d}
+
+The viscous part of the scheme extends to three dimensions without
+modification: on the periodic box, $\Delta$ acts componentwise and remains
+separable in Fourier space, so the exact rank-preserving viscous flow of
+Proposition~\ref{prop:viscous} (eq.~\eqref{eq:viscous-exact}) carries over
+verbatim for a vector field $\psi$ in place of the scalar. The obstruction
+is elsewhere. In three dimensions there is no scalar stream function whose
+curl gives a divergence-free velocity with the same one-to-one
+correspondence; one must introduce a vector potential and a gauge, or
+equivalently solve for a Helmholtz potential, and the incompressibility
+constraint is then carried by a divergence-free condition on that potential
+rather than by representation. In addition, the vorticity dynamics acquires
+the vortex-stretching term, which has no two-dimensional counterpart and
+changes the structure of the nonlinearity \eqref{eq:nonlin} that the
+projected midpoint step is designed for. We make no claim for a
+three-dimensional formulation in this work; it is identified as the natural
+next extension in Section~\ref{sec:conclusion}, together with the open
+question of how the gauge choice interacts with the low-rank ansatz.
+
+% ===== paper/sections/08_limitations.tex =====
+% Limitations
+
+\section{Limitations}
+\label{sec:limitations}
+
+We state the limitations of the present work explicitly, since several of
+them are deliberate scope choices rather than oversights.
+
+\begin{itemize}
+  \item \textbf{Two dimensions, periodic box, single forcing mode.}
+  All validation is for the 2D incompressible Navier--Stokes equations on
+  the periodic box $\T^2$ with the single-mode forcing of
+  eq.~\eqref{eq:forcing} (Section~\ref{sec:problem}). Free-slip walls,
+  boundary layers, and multi-mode or spatially heterogeneous forcing are
+  outside the scope of this work; the stream-function representation and the
+  exact viscous step both rely on the periodic setting and do not carry over
+  to bounded domains without additional treatment.
+
+  \item \textbf{Reynolds numbers up to 5000.} The turbulent-validation
+  ladder of Section~\ref{sec:setup} stops at $\mathrm{Re} = 5000$. Whether
+  the adaptive rank and the accuracy of Section~\ref{sec:res-error} hold
+  above that Re is untested; the cost model of Section~\ref{sec:cost}
+  suggests the per-step picture should be stable (the nonlinear residual
+  remains $O(n \log n)$ and rank-independent), but this is an expectation,
+  not a result.
+  % [PENDING-CODER: if the runs at Re = 5000 already show degradation,
+  % state it here and in Section~\ref{sec:res-error} instead of as a
+  % forward-looking limitation.]
+
+  \item \textbf{Rank decay is only fully exercised in the laminar run.}
+  The tolerance-based decay rule is exercised only where a state genuinely loses
+  modes. In the Taylor--Green decay the state is a single Fourier mode from the
+  outset, so its numerical rank is one and the criterion must hold it there
+  rather than spend rank on a spectrum that is not present; the run does. Under
+  sustained forcing the rank instead rises, and it does so to the budget, which bounds what the decay rule can be tested against
+  here.
+
+  \item \textbf{No per-step speedup claim.} Because the nonlinear residual
+  is evaluated on the full grid at rank-independent $O(n \log n)$ cost
+  (Section~\ref{sec:cost}), SP-DLRA is not expected to beat the full-grid
+  spectral reference per step at small rank, and the cost section reports
+  the regimes where it is \emph{slower} (Figure~\ref{fig:cost}). The
+  contribution is the reduced-model capability with exact
+  divergence-freeness and a rank criterion that is measured, and whose
+  saturation at the grid's alias-free ceiling we report as a finding,
+  validated in a high-Reynolds-number turbulent regime; a wall-clock
+  advantage is
+  neither claimed nor assumed.
+
+  \item \textbf{No stability analysis of the full coupled scheme.} The
+  viscous step is exact within the ansatz and the nonlinear step is a
+  standard projected midpoint update, but the scheme with online rank
+  changes has no stability or error analysis in this work. The residual
+  indicator \eqref{eq:indicator} is a heuristic error control, not a proven
+  a~priori bound; long-time behavior over the retained windows is supported
+  by the runs themselves (Sections~\ref{sec:res-error}
+  and~\ref{sec:res-fidelity}), not by a theorem.
+
+  \item \textbf{Forcing-aware invariant not yet formalized for the reduced
+  model.} The unforced energy monotonicity (I2) is replaced under forcing by
+  the forcing-aware balance of eq.~\eqref{eq:energy}; the precise
+  reduced-model statement that the runs are checked against is being
+  defined by the theoretical-research line of work (decision D3) and is not
+  yet finalized. We therefore report the energy balance of
+  Section~\ref{sec:res-fidelity} as an empirical check pending that
+  statement.
+  % [PENDING-THEORETICAL-RESEARCH: replace this paragraph with the final
+  % forcing-aware invariant statement once it lands.]
+
+  \item \textbf{No statistical-convergence study.} The retained statistical
+  windows of Section~\ref{sec:setup} are fixed in advance; we do not study
+  how the statistics (kinetic-energy spectrum, dissipation rate) converge as
+  the window length grows, nor do we run longer than the retained windows.
+  The rank is already at its ceiling for $99\%$ of the longer run, so what
+  longer runs leave open is the statistical quantities, not the rank (V2 in
+  the project's validation ladder).
+\end{itemize}
+
+% ===== paper/sections/09_conclusion.tex =====
+% Conclusion
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+We have presented a structure-preserving dynamical low-rank method for the
+2D incompressible Navier--Stokes equations in stream-function form, and a
+validation ladder that targets the regime where the interesting behavior
+lives: forced, high-Reynolds-number turbulent dynamics at
+$\mathrm{Re} \in \{100, 1000, 5000\}$. The scheme combines (i) an exact,
+rank-preserving viscous step along the separable exponential flow of
+Proposition~\ref{prop:viscous}, (ii) a second-order projected midpoint step
+for the nonlinear part (eq.~\eqref{eq:step}), and (iii) a rank criterion
+whose saturation at the grid's alias-free ceiling we measure and report
+(Section~\ref{sec:rank-adaptation}). Divergence-freeness is exact by
+representation, at every rank and every step (I1,
+Table~\ref{tab:div}); the energy balance of eq.~\eqref{eq:energy} is
+accounted for explicitly under forcing (I2).
+
+The validation of Section~\ref{sec:results} is structured so that each
+claim is checkable against the runs: the invariants I1--I4, the accuracy
+against the full-grid spectral reference (Section~\ref{sec:res-error}), the
+rank economy against the static POD baseline (Section~\ref{sec:res-pod}),
+and the honest cost picture, including the regimes in which SP-DLRA is
+slower than the full-grid reference (Section~\ref{sec:res-cost}).
+% [PENDING-CODER: the headline numbers of the conclusion -- relative L2 error
+% over the statistical window per Re, and the per-step and total cost ratios
+% vs the full-grid reference and the POD baseline -- go here once the runs
+% land; every number traceable to state/coder/results/ (CHECKLIST 1.1).]
+
+Several directions follow directly from the open items identified in
+Section~\ref{sec:limitations}. First, a three-dimensional formulation: the
+exact viscous step carries over because $\Delta$ remains separable on the
+periodic box, but the incompressibility constraint must then be carried by a
+vector potential and gauge, and the nonlinear step must be redesigned around
+the vortex-stretching term (Section~\ref{sec:disc-3d}). Second, a theory of
+rank growth in forced turbulence. The measurement here is
+that the retained rank does \emph{not} grow with Reynolds number: it reaches the budget within fifteen steps at every $\mathrm{Re}$ we
+ran, and stays there, while the share of the energy in the zonal mode falls
+from $20\%$ to $18\%$ across the same runs. Why a criterion driven by a
+tolerance should report the resolved band rather than the flow, and what would
+make it report the flow instead, is the question we think this leaves open.
+% [PENDING-THEORETICAL-RESEARCH: if theoretical-research addresses why a
+% tolerance-driven rank criterion reports the resolved band rather than the
+% flow, cite it in Section 07 (sec:disc-rank) when finalizing this paragraph.]
+Third, the forcing-aware invariant of the reduced model (Section~\ref{sec:limitations})
+and a statistical-convergence study of the retained windows (V2). And fourth,
+replacing the projected midpoint step with a robust (BUG-family) integrator,
+as in the low-rank integrators of Ceruti et al.~\cite{ceruti2024}, which
+offer better stability properties for stiff low-rank dynamics; we regard this
+as a drop-in extension of the nonlinear step (eq.~\ref{eq:step}) and have
+planned it as the next engine iteration.
+
+\bibliographystyle{plain}
+\bibliography{paper/references}
+
+\end{document}

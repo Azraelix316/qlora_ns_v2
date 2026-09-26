@@ -4,43 +4,26 @@
 
 ---
 
-## 1. TO MAKE THE PAPER SUBMITTABLE: FIVE THINGS, IN THIS ORDER
+## 1. TO MAKE THE PAPER SUBMITTABLE: THREE THINGS LEFT
 
-### 1. WRITER — four citations, four edits. **This is the only build defect that is yours.**
+**`check_paper_builds.py` REPORTS **0** DEFECTS.** The four phantom citations and the abstract's sign error are fixed.
+The paper is **8,227 words** across ten sections with **6** `PENDING-CODER` markers left, all in §6.
 
-The key `koch2019dlra` is not in any `.bib` on any branch, and **no Koch–Lubich 2019 paper exists.** Use
-**Koch & Lubich 2007, DOI `10.1137/050639703`**.
+### 1. WRITER — the 24 supplied blocks, in one-screen order
 
-| file | line | form |
-|---|---|---|
-| `paper/sections/01_introduction.tex` | 33 | `\cite{koch2019dlra}` alone |
-| `paper/sections/03_related_work.tex` | 17 | `\cite{koch2019dlra}` alone |
-| `paper/sections/03_related_work.tex` | **171** | **among 11 keys** |
-| `paper/sections/04_methods.tex` | **169** | **among 4 keys** |
+**W11, W16, W15, W12–W14, W10.** All 24 are free of superseded values. Text pasted before **R157** may be wrong.
 
-**Two of the four carry the key inside a longer list, so a find-and-replace finds only half and the build stays broken.**
+### 2. WRITER — six markers, all in §6
 
-### 2. ~~Why did the `t*` values move?~~ **ANSWERED — and the rows are re-pinned**
+Measured: §0–§5 and §7–§9 have **zero** markers. §6 has **6**. Five of the original 51 were `r*(Re)` traps
+(deleted, not filled). The rest were transcription and are now closed. **What remains is in `06_results.tex` only.**
 
-An un-provenanced legacy block in the artifact generator sat **6.4–9.3% below** the values derived from the rows. Fixed at
-the source; all seven `tstar_*` rows re-pinned; **the brackets are unaffected and exact under both derivations.** *(D138)*
+### 3. CODER or WRITER — the cost band, in five sites
 
-### 3. THEN the cost band, in six places
-
-**MEASURED: `2.2–3.5×`.** Per grid: `2.21–2.50` at N=64, `3.37–3.54` at N=128, `2.37–2.40` at N=256. The old `2.2–2.7×` is
-wrong. **Five sites carry it** — the abstract, `02_contributions`, and the D13 / D14 / W16 blocks. **This is a find-and-replace
-of `2.2$--$2.7` → `2.2$--$3.5` and it is the last number-blocking edit in the paper.**
-
-### 4. WRITER — paste the 24 supplied blocks
-
-One-screen order: **W11, W16, W15, W12–W14, W10.** All 24 are free of superseded values. Text pasted before
-**R157** may be wrong — use the current paste-ready text in `WRITER_ORDER.md`.
-
-### 5. WRITER — close ~20 of the 51 `PENDING-CODER` markers, today, alone
-
-They say "confirm `N` / `dt` / `F` / `nu` / `Re` / window / cutoff / tolerances". **Every value is already in the
-artifacts**, with a source key for each, in `WRITER_ORDER.md` **D124.1**. The other ~8 wait on figures (done — see
-below); **5 name `r*(Re)`, which is withdrawn: delete them, do not fill them.**
+**MEASURED: `2.2–3.5×`.** Per grid: `2.21–2.50` at N=64, `3.37–3.54` at N=128, `2.37–2.40` at N=256. The
+`2.2–2.7×` still in the abstract and `02_contributions` is **wrong** — it predates the corrected measurement.
+**This is a find-and-replace of `2.2$--$2.7` → `2.2$--$3.5` across five sites, and it is the last
+number-blocking edit in the paper.**
 
 ---
 
@@ -79,8 +62,8 @@ below); **5 name `r*(Re)`, which is withdrawn: delete them, do not fill them.**
  `check_directional_claims.py`, `check_provenance.py`, plus `pytest experiments/` |
 | registry | **35/35** verified, **0 failed** |
 | tests | **62 tests** collected |
-| build defects | **4 defect(s)** — the four citations, nothing else |
-| cost band | **2.2–3.5×** (was 2.2–2.7×) — see item 2 |
+| build defects | **0 defect(s)** — the paper has no build-breaking defect left |
+| cost band | **2.2–3.5×** (was 2.2–2.7×) — see item 3 |
 
 **`python3 state/reviewer/check_start_here.py`** asserts every number on this page, so if this page is wrong the check
 says so. It also measures the six blocker claims in §1 rather than trusting them.

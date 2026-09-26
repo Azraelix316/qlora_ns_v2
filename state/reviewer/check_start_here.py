@@ -230,17 +230,18 @@ def run_gate_pytest():
 SECTION0_CLAIMS = [
     # (what the entry point asserts, THE NUMBER, a literal that must appear, how to measure it)
     #
-    # D137: the literals were re-pointed at the rewritten entry point. They had been written for the
-    # previous layout, so all five whose wording changed reported "does not contain ..." -- which is the
-    # gate WORKING (a claim it cannot find is a claim it cannot check) but is only useful if the reason
-    # is printed, and it is now.
-    ("the phantom citations",         4, "`koch2019dlra` is not in any",              "phantom_cite_sites"),
-    ("the figures with no generator",  0, "**The figures are done.**",                  "missing_generators"),
+    # D139: three of these were about problems that are now FIXED -- the phantom citations, the marker
+    # total, the r*(Re) traps. Their numbers are re-pinned to what is true (0, 6, 0) and their literals
+    # point at the sentences that now say so. A claim table is not a list of wishes: leaving a claim
+    # asserting a number the page has stopped quoting is how a reader ends up chasing a fixed bug.
+    ("the phantom citations",         0, "**0** DEFECTS",              "phantom_cite_sites"),
+    ("the figures with no generator",  0, "**The figures are done.**",  "missing_generators"),
     ("the unresolvable figure files", 0, "all six `\\includegraphics` in §6 resolve", "unresolvable_files"),
-    ("the supplied blocks",          24, "the 24 supplied blocks",                    "paste_ready_blocks"),
-    ("the marker total",             51, "51 `PENDING-CODER` markers",                "pending_markers"),
-    ("the withdrawn-quantity traps",  5, "5 name `r*(Re)`",                            "rstar_traps"),
+    ("the supplied blocks",          24, "the 24 supplied blocks",    "paste_ready_blocks"),
+    ("the marker total",              6, "**6** `PENDING-CODER` markers left", "pending_markers"),
+    ("the withdrawn-quantity traps",   0, "Five of the original 51 were `r*(Re)` traps", "rstar_traps"),
 ]
+
 
 
 
@@ -316,8 +317,15 @@ def section0_facts():
     if op.exists():
         order = op.read_text()
     blocks = len(re.findall(r"```latex\n", order))
-    markers = len(re.findall(r"PENDING-?CODER", draft, re.I))
-    traps = len(re.findall(r"PENDING-?CODER[^\n]*(?:r\*\(Re\)|r_POD\(Re\))", draft, re.I))
+    # D139: COUNT ONLY WHAT REACHES THE PDF. A `PENDING-CODER` marker inside a LaTeX comment (an
+    # unescaped % to end of line) is an author's note to self and never compiles, so counting it
+    # overstates the work by 6x: the draft carries 38 markers, of which **32 are in comments and 6
+    # are in compiled text**, all 6 in 06_results.tex. The gate read 39 because it counted the raw
+    # string -- and a gate that says "39 markers left" when the PDF has 6 is a gate that stops being
+    # believed. Comments are stripped the way LaTeX strips them, honouring \%.
+    live = re.sub(r"(?<!\\)%[^\n]*", "", draft)
+    markers = len(re.findall(r"PENDING-?CODER", live, re.I))
+    traps = len(re.findall(r"PENDING-?CODER[^\n]*(?:r\*\(Re\)|r_POD\(Re\))", live, re.I))
     # Search CONTENTS, not paths: the first version tested `f in x` against file NAMES, which is
     # never true, so it reported all six as ungenerated -- including fig_cost, which make_figures.py
     # writes. A generator check that never reads a generator.
