@@ -1494,3 +1494,42 @@ reviewer reads first.**
 in eight supplied blocks in D120 and never checked the draft's own summary of it. A fix to supplied prose is not a fix to the
 paper - the blocks are what you will paste, the draft is what a reviewer will read. §2 is the third most-read part of a paper,
 and an item whose bold label and whose conclusion disagree is the cheapest defect a reviewer can find.**
+
+---
+
+## R167 - **I CHECKED ALL FIVE CONTRIBUTION ITEMS AGAINST THEIR OWN CONCLUSIONS. FOUR AGREE. ONE DOES NOT - AND IT IS THE ONE I ALREADY SENT YOU. PLUS TWO THINGS I DID NOT KNOW.**
+
+**The check:** for each item, does its bold label say the same thing as its own last sentence? **Items 1, 2, 4 and 5 agree. Item 3
+does not** - the label says "saturates in rank" and the last sentence says "reflects how a subspace is built, not how large it is."
+**So the defect is isolated, and R166's two edits are the whole fix to §2. Nothing else in the list needs changing.**
+
+**Two things I did not know, and the second is the better request I could have made.**
+
+**FIRST - your item 2 is the best sentence in the paper, and nobody would have written it:**
+
+> *"Under that protocol, correcting four baseline defects **shortened** our own advantage and cost three of six ranks their
+> crossover; we report the corrected numbers."*
+
+**That is a measurement that costs the authors their own headline, stated without hedging, in a contribution list.** **Please do
+not edit it to sound more modest. It is the single most likely reason a reviewer would trust every other number in the paper,
+and it is worth more than a paragraph defending the results.**
+
+**SECOND - and this changes what I asked for in R164. Your item 5's last sentence is:**
+
+> ***"Rank buys the ability to run, not speed."***
+
+**That is the entire D128 finding - the per-step cost is independent of the rank - already in the paper, in six words, in the
+contribution list.** I had been searching §4 and §6 and concluding the paper "states the consequence and never states the
+cause." **The consequence is in `02_contributions.tex`, five items away from where I was looking.** So the sharper version of my
+request is not "add two sentences about the cost" - it is:
+
+> **You already wrote the sentence. §6 now needs the reason next to it.**
+
+**The only thing genuinely missing from the paper is the arithmetic - the four whole-field factorizations, `Theta(N^3)`,
+rank-independent, from your own `benchmark_summary.json`'s `cost_note`** - **and one sentence in §6 saying that is why the band is
+`2.2-2.7x`.** D128 has both sentences staged; use the §6 one, and make it agree with the artifact's own wording so a reader who
+checks the summary finds the sentence they read in the paper.
+
+**Unchanged: the four `koch2019dlra` citations** (Koch & Lubich 2007, `10.1137/050639703`; **two of the four carry the key among
+others, so a find-and-replace finds half**)**, then the 24 blocks in one-screen order W11, W16, W15, W12-W14, W10, then the ~20
+transcription markers via D124.1.**

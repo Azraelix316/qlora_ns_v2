@@ -8844,3 +8844,44 @@ the most carefully written.
 **D130.7 - Unchanged.** Everything in D35.6 through D129.7 stands, **except that `02_contributions.tex` item 3 asserts a
 dynamic saturation the evidence does not support, and its bold label must be reworded.**
 
+---
+
+## D131 - **D130's RULE APPLIED TO ALL FIVE CONTRIBUTION ITEMS: **FOUR AGREE WITH THEIR OWN CONCLUSIONS AND EXACTLY ONE DOES NOT** - ITEM 3, ALREADY D130. AND ITEM 5'S LAST SENTENCE IS *"RANK BUYS THE ABILITY TO RUN, NOT SPEED"*, WHICH IS D128's FINDING **ALREADY IN THE PAPER, IN SIX WORDS** - SO D128's SHARPEST PHRASING IS THE WRITER'S, NOT MINE.** (2026-09-26)
+
+> **OPERATIVE (R167). THE CONTRIBUTION LIST IS INTERNALLY CONSISTENT EXCEPT AT ITEM 3. NO NEW CORRECTION IS NEEDED;
+> D130's TWO EDITS ARE THE WHOLE FIX.**
+
+**D131.1 - THE CHECK, RUN ON THE POPULATION. FIVE ITEMS, EACH'S BOLD LABEL AGAINST ITS OWN CONCLUDING SENTENCE:**
+
+| item | label says | its last sentence says | agree? |
+|---|---|---|---|
+| 1 | a structure-preserving integrator, stream-function form, second-order projected step | describes exactly that, incl. the `n x r` QR rather than a full re-factorisation | **yes** |
+| 2 | a measurement protocol, and the horizon is not a property of the method | *"correcting four baseline defects **shortened** our own advantage and cost three of six ranks their crossover; we report the corrected numbers"* | **yes, and it is the strongest item** |
+| 3 | **"a static subspace saturates in rank"** | **"reflects how a subspace is built, not how large it is"** | **NO - D130** |
+| 4 | the stability result: the subspace must evolve | every structure-preserving variant at the same ranks holds roundoff divergence | **yes** |
+| 5 | an honest cost accounting | **"Rank buys the ability to run, not speed."** | **yes** |
+
+**SO THE DEFECT IS ISOLATED. FOUR OF FIVE CONTRIBUTION ITEMS ARE INTERNALLY CONSISTENT, AND THE ONE THAT IS NOT IS THE ONE D130
+ALREADY NAMED. NO FURTHER CORRECTION IS NEEDED, AND D130's TWO EDITS ARE THE ENTIRE FIX TO §2.**
+
+**D131.2 - AND ITEM 2 IS WORTH RECORDING AS THE BEST SENTENCE IN THE PAPER, BECAUSE IT IS THE ONE NOBODY WOULD WRITE. *"UNDER
+THAT PROTOCOL, CORRECTING FOUR BASELINE DEFECTS **SHORTENED** OUR OWN ADVANTAGE AND COST THREE OF SIX RANKS THEIR CROSSOVER; WE
+REPORT THE CORRECTED NUMBERS."*** **THAT IS A MEASUREMENT THAT COSTS THE AUTHORS THEIR OWN HEADLINE, STATED WITHOUT HEDGING, IN A
+CONTRIBUTION LIST. IT IS WHAT D11.1 AND D52.5 LOOK LIKE WHEN THEY ARE DONE PROPERLY, AND IT IS THE SINGLE MOST LIKELY REASON A
+REVIEWER WOULD TRUST THE REST OF THE NUMBERS.** **IT SHOULD NOT BE EDITED TO SOUND MORE MODEST.**
+
+**D131.3 - AND THE REFINEMENT TO D128, WHICH IS THE POINT OF RUNNING THE CHECK. **ITEM 5'S LAST SENTENCE IS *"RANK BUYS THE
+ABILITY TO RUN, NOT SPEED."* THAT IS D128's FINDING - THE PER-STEP COST IS INDEPENDENT OF THE RANK - ALREADY IN THE PAPER, IN SIX
+WORDS, IN THE CONTRIBUTION LIST.**** D128 MEASURED `4` HITS FOR "RANK-INDEPENDENT" ACROSS THE DRAFT AND CONCLUDED THAT *"THE
+DRAFT KNOWS THE RANK-INDEPENDENCE AND NEVER STATES THE `Theta(N^3)` THAT CAUSES IT"* - **AND THAT WAS CORRECT, BUT THE CONsequence
+IS IN `02_contributions.tex`, NOT IN `04_methods.tex` OR `06_results.tex`, WHERE I HAD BEEN LOOKING.**
+
+**SO D128's SHARPEST PHRASING IS THE WRITER'S, AND IT IS ALREADY ON THE PAGE.** WHAT IS MISSING IS ONLY THE **CAUSE** - THE FOUR
+WHOLE-FIELD FACTORIZATIONS - **AND THE SENTENCE THAT EXPLAINS WHY THE COST IS 2.2-2.7x.** **THE PAPER CURRENTLY ASSERTS THE
+RELATIONSHIP AND NOT THE ARITHMETIC, IN THE SAME LIST, `5` ITEMS APART FROM WHERE THE ARITHMETIC BELONGS.** This is a better-
+shaped request to the writer than D128's, because it says: *you already wrote the sentence; §6 needs the reason next to it.*
+
+**D131.4 - Unchanged.** Everything in D35.6 through D130.7 stands, **except that the contribution list is internally consistent
+except at item 3, item 2 is the strongest sentence in the paper and must not be softened, and D128's consequence is already in
+`02_contributions.tex` item 5 rather than in the sections I had been searching.**
+
