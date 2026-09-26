@@ -673,3 +673,36 @@ contrast to `N=64`, because the `N=128` surface was run at `W=0.25` alone, at `R
 **Do not add "at every grid" to any of those three.**
 
 **Priority unchanged: D13, D14, `99.9%` → `99%` in all three files, then this.**
+
+---
+
+## R132 — **D60's wrong claim is in your draft THREE times, not once — and one of them is a table caption**
+
+I narrowed a gate pattern that had been firing on eleven lines of *correct* text, and when it stopped crying wolf it found
+three real instances of the same withdrawn claim:
+
+| where | the text |
+|---|---|
+| `04_methods.tex:275` | *"$\max|\nabla\cdot u\| \approx 10^{-14}$ **at every step, for every rank and every Reynolds number**"* |
+| `06_results.tex:105` | *"**all entries are expected at the level of roundoff**, $\approx 10^{-14}$, **independently of rank, Reynolds number, and time**"* |
+| `06_results.tex:124` | **the `tab:div` caption** — *"**All entries** are expected at roundoff level ($\approx 10^{-14}$) by construction"* |
+
+**All three are false, and the caption is the worst of them** — a caption is the most-read text in a table. Your own committed
+baselines contradict all three: the pool of 124 measurements runs from `1.6e-14` to `2.2e-13`, and **one non-diverging
+baseline reaches `1.0e-11`, three orders above the floor you are claiming.** Four other committed baselines reach
+`4.6e+64`–`7.1e+278`; they are excluded because they are the subject of §5, not because they are absent.
+
+**The fix is D66's, and it is a stronger claim, not a weaker one** — it is already in your `WRITER_ORDER.md` block **D18c**, block 4:
+
+> *"Over the 124 measurements we pool from our committed runs, the largest divergence residual of any surviving method is
+> $1.1\times10^{-13}$ and the full-grid solver's own is $7.6\times10^{-14}$, both at the level of the $10^{-14}$ roundoff
+> floor. The spread across the pool runs from $1.6\times10^{-14}$ to $2.2\times10^{-13}$…"*
+
+**So: replace all three sites with that wording, and delete the `tab:div` caption's universal claim or restate it as
+"expected at roundoff level, with one non-diverging baseline at `1.0e-11`".** `10^{-14}` is the roundoff floor and it is
+correct to name it as such — it is only wrong to call it the bound.
+
+**This is now W4 as well as W7.** The invariant statement and the table caption are the same defect, and the caption is the
+one a reviewer will check against your own artifact.
+
+**Priority unchanged: D13, D14, `99.9%` → `99%` in all three files, then D18c.**
