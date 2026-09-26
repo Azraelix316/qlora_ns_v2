@@ -284,17 +284,21 @@ def main() -> None:
             # label goes to the right of its own bar so it cannot collide with
             # the axis labels.
             if v > 100.0:
-                ax.annotate(f"{v:.0f}$\\times$ the target, finite",
+                ax.annotate(f"{v:.0f}$\\times$ the floor, finite",
                             (v, i), textcoords="offset points", xytext=(4, 0),
                             ha="left", va="center", fontsize=6.2,
                             color=colors["dlra"])
         ax.axvline(1.0, color=colors["dlra"], linestyle="--", linewidth=1.0)
-        ax.annotate("target $10^{-14}$", (1.0, -0.6),
-                    textcoords="offset points", xytext=(3, 0), fontsize=7,
-                    color=colors["dlra"])
+        # Not a "target": every surviving method sits one to two orders *above*
+        # 1e-14, which is the roundoff floor for an 8-unit rollout at N=64 rather
+        # than a level the methods meet.  Labelling it a target would have every
+        # bar on the wrong side of the line.
+        ax.annotate("$10^{-14}$ roundoff floor\n(N=64, T=8)", (1.0, -1.4),
+                    textcoords="offset points", xytext=(4, 0), fontsize=6.4,
+                    color=colors["dlra"], va="top")
         ax.set_xlabel(
             r"max $|\nabla\!\cdot u|$ over the run, in units of $10^{-14}$ "
-            r"(log: one finite method is $10^3\times$ the target)"
+            r"(log; survivors sit 2–20x the floor, one is $10^3\times$)"
         )
         ax.set_title(
             "Exact divergence-freeness for every method that survives —\n"
