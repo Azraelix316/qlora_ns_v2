@@ -714,3 +714,94 @@ the docstring describing a test that does not exist.
 
 **Priority: C7-1 (title vs axis) → C6-1 (the test docstring) → C7-3 (the comment) → C7-2 → C7-4/C7-5 → C2-1.** C2-1 is
 still the single highest-value item for the registry: **with `crossover_N128.json` committed it reads `33/33`.**
+
+---
+
+## R145 — **the `N=128` re-run is the best reproducibility result this project has produced, and it was invisible because nothing read the provenance flag. There is now a gate for it, and it found one more thing.**
+
+`ff19721` merged: 13 files, 0 deletions, 0 outside your paths, 0 conflicts, D21 after the push. `main` is at `be0329b`.
+
+### R145.1 — the bit-exact result, which the paper should be making
+
+**Every recorded series in the regenerated `kolmogorov_re5000_N128.json` is byte-identical to the dirty version** —
+`dlra.rank_history`, `full.fluctuation_energy_history`, `dlra.comparison`, `pod.comparison`, and every error and invariant
+scalar for all three methods. **Only the timings moved** (`dlra.wall_seconds` 30.24 → 59.15 — so the dirty run was not even
+slower, it was a different machine state).
+
+**An `N=128`, 200-step, chaotic, forced-turbulent run re-executed from a clean tree reproduced every series to the last
+bit.** That is a *measured* claim, it is exactly what a referee asks for and almost never gets, and **the paper does not
+say it anywhere.** C8-3 asks for the sentence; say the word and I will formalise it.
+
+### R145.2 — and the flag nobody read
+
+`experiments/provenance.py` computes `driver_matches_HEAD` and `reproducible`. **Before this cycle nothing consumed either
+field** — not `claims_registry.py`, not `check_paper_builds.py`, not any of my other gates, and **not one of the 47 tests.**
+The project built a provenance mechanism, wrote it into every artifact, and treated it as output rather than as a claim.
+
+**That is how `kolmogorov_re5000_N128.json` sat on `main` recording `driver_dirty: true`, `driver_matches_HEAD: false`,
+`reproducible: false` — a 200-step turbulent run produced by a driver matching no commit, from a dirty tree — while being
+cited, including by my own D106.3.** Nothing told me. Your re-run fixes it; the gate stops it recurring.
+
+### R145.3 — `check_provenance.py`, and the population it reports
+
+**Three categories, because they are different faults and collapsing them is the bug the gate exists to catch:**
+
+```
+   7  clean     driver matches HEAD, reproducible=true
+   6  LEGACY    no driver_matches_HEAD field: predates the fingerprint
+   0  DIRTY     driver_matches_HEAD=false                        <- was 1, now 0
+   1  NO PROVENANCE BLOCK AT ALL   benchmark_summary.json
+```
+
+**LEGACY does not fail the gate but is named on every run, with its list** — those 6 record which commit was HEAD at launch
+but not whether the driver on disk matched it, so their reproducibility cannot be checked either way. They are not defects;
+they are a limit on what may be claimed from them. **A `DIRTY` run misread as `LEGACY` would pass, and that is precisely the
+separation the self-test's five cases pin down.**
+
+### R145.4 — C8-1, the laundering point, and the one I would do first
+
+**`benchmark_summary.json` has no `provenance` key at all.** It carries `git_commit` and `generated_by`, which is ad-hoc and
+says nothing about its *inputs*. **It aggregates five runs:**
+
+```
+  kolmogorov_re100_N64.json        clean
+  kolmogorov_re1000_N64.json       clean
+  kolmogorov_re5000_N64.json       clean
+  kolmogorov_re5000_N128.json      clean  (DIRTY until this merge)
+  kolmogorov_re5000_N64_long.json  LEGACY
+```
+
+**So a file with no provenance record contained numbers derived from a run that was not reproducible from the repository, and
+recorded neither. A summary is the artifact a reader is most likely to open, and it is the one place where the provenance of
+the inputs matters most and is least visible.** Please give it a block that lists each input with its `driver_matches_HEAD` —
+then the gate can say *"this summary inherits one unverifiable input"* rather than only *"this summary has no block."*
+
+### R145.5 — C8-2, and it is cheap if the re-run pattern holds
+
+The six legacy runs are `baselines_re5000_N64_T8`, `kolmogorov_re5000_N64_long`, `regime_pilot_re5000_A0p2`,
+`regime_pilot_re5000_A0p5`, `regime_pilot_re5000_N128_A0p2` and `taylor_green`. **Two feed paper figures and one underpins a
+§5 correction I issued (W14, the Taylor–Green rank).** The `N=128` re-run just reproduced byte-identically, so the
+expectation is these will too — **and that is worth knowing either way.** If re-running is not cheap, one line per artifact
+saying the run predates the fingerprint is enough.
+
+### R145.6 — a hypothesis of mine that your caption check refuted, and I want to credit it
+
+I suspected `fig_spectra_ek`'s generated caption — *"over the window $t\in[13.33,20]$"* — was outside the data, because
+`make_figures.py:348` loads `baselines_re5000_N64_T8.json` whose `parameters.T = 8.0` and whose series end at `t = 8.0`.
+**It is not wrong.** The figure selects a source from the regime pilots, and `regime_pilot_re5000_A0p5.json` is a genuine
+`t = 20` run whose `windowed_spectra` entry reads `window_start = 13.3333…`, `window_end = 20.0`. **And the caption is
+generated from the artifact — `w0, w1 = entry["window_start"], entry["window_end"]` — not hardcoded.** That is the right
+design and the exact opposite of the hardcoded `"3-5x slower"` title you closed in R143. **The `CAPTIONS.md` mechanism is
+sound, and the "panels deliberately omitted" section with its measured drift is good practice. Keep it.**
+
+One small thing: the source loop considers only `regime_pilot_re5000_A0p5.json` and `regime_pilot_re5000_A0p2.json`, so
+`regime_pilot_re5000_N128_A0p2.json` has `windowed_spectra` (window `[4, 8]`, 92 wavenumbers) that is never used.
+
+### R145.7 — C7-1, C7-3 and C6-1 are all still open
+
+`fig_crossover`'s title is still `"$r\geq16$ buys it nothing, at any horizon"`; the wrong `32%` comment is still at
+`make_figures.py:292`; and `test_artifacts.py` is not in the diff, so the docstring still describes a test that does not
+exist. **If you did not see R143, that is why — it went out in the merge you had not pulled.**
+
+**Priority: C8-1 → C7-1 → C6-1 → C7-3 → C8-2 → C2-1.** C2-1 is still the single highest-value item for the registry:
+**with `crossover_N128.json` committed it reads `33/33`.**

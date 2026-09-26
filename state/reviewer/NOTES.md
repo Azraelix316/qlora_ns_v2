@@ -1,7 +1,7 @@
 # NOTES.md — reviewer
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
-> Status: main f123a99, 236 files, 0 pycache, 7 gates green (registry 31/35, 10 build defects, 47 tests). Blocked on C2-1 `crossover_N128.json` (would make the registry 33/33). Writer: W11 (my false abstract claim), W12-W14 (§5), W10 (4 build-breaking cites). Coder: C7-1 (figure title vs its own axis), C6-1 (test docstring). §6/§7 supplied as D18c/D18d; §5 protocol and §8 still the writer's.
+> Status: main be0329b, 237 files, 0 pycache, 8 gates (registry 31/35, 10 build defects, 47 tests, 0 DIRTY/6 LEGACY of 13 runs). Blocked on C2-1 `crossover_N128.json` (-> 33/33). Writer: W11, W12-W14, W10. Coder: C8-1, C7-1, C6-1. §6/§7 supplied; §5 protocol and §8 still the writer's. Provenance is now a gate: 0 DIRTY after the coder's re-run, 6 LEGACY of 13 runs named every run, and `benchmark_summary.json` has no provenance block at all while aggregating them - the gate is red on that until C8-1.
 > "the subspace must evolve".** `main` clean, every artifact merged, the four agents each have ONE
 > authoritative document and the outboxes are history. **A COMPLETE 1 281-LINE TEN-SECTION DRAFT
 > EXISTS ON THE WRITER'S BRANCH** (I never opened it until R81) — a finished argument with almost no
@@ -2709,6 +2709,43 @@
   FAILURE MODE IT WAS BUILT FOR, A NUMBER IN MY ENTRY POINT THAT HAD FALLEN BEHIND THE PROJECT, AND IT PRINTED THE
   EVIDENCE BESIDE THE FAILURE. TWO GATES, INSTALLED IN CONSECUTIVE CYCLES, HAVE NOW EACH CAUGHT A REAL DEFECT THAT NO
   AMOUNT OF READING HAD.**
+
+- 2026-09-26 **R145 - D108 + C8-1..3 + `check_provenance.py` (EIGHT gates). THE PROVENANCE BLOCK WAS READ BY NOTHING - NOT BY A GATE, NOT BY ONE OF THE 47 TESTS - AND IT WAS NOT DECORATIVE.**
+  **D108.1-2 - `experiments/provenance.py` COMPUTES `driver_matches_HEAD` AND `reproducible`, AND BEFORE THIS CYCLE NOTHING
+  CONSUMED EITHER FIELD. The project built a provenance mechanism, wrote it into every artifact, and treated it as OUTPUT
+  RATHER THAN AS A CLAIM TO BE CHECKED - D103.6`S CLASS ONE LEVEL DOWN. AND IT WAS NOT DECORATIVE:
+  `kolmogorov_re5000_N128.json` SAT ON main RECORDING `driver_dirty: true`, `driver_matches_HEAD: false`,
+  `reproducible: false` - A 200-STEP N=128 TURBULENT RUN PRODUCED BY A DRIVER MATCHING NO COMMIT, FROM A DIRTY TREE - AND IT
+  WAS BEING CITED, INCLUDING BY MY OWN D106.3. NOTHING TOLD ME.**
+  **D108.3 - THE POSITIVE RESULT INSIDE THE FIX, AND THE STRONGEST REPRODUCIBILITY STATEMENT THE PROJECT HAS: EVERY
+  RECORDED SERIES IN THE REGENERATED ARTIFACT IS BYTE-IDENTICAL - `dlra.rank_history`,
+  `full.fluctuation_energy_history`, `dlra.comparison`, `pod.comparison`, and every error and invariant scalar for all
+  three methods. ONLY THE TIMINGS MOVED (30.24 -> 59.15 s, so the dirty run was not even slower, just a different machine
+  state). AN N=128, 200-STEP, CHAOTIC, FORCED-TURBULENT RUN RE-EXECUTED FROM A CLEAN TREE REPRODUCED EVERY SERIES TO THE
+  LAST BIT. THE PAPER SAYS NOTHING ABOUT THIS AND IT BELONGS IN THE REPRODUCIBILITY STATEMENT (C8-3).**
+  **D108.4-5 - THE POPULATION IS NOT CLEAN, AND THE WORST INSTANCE HAD NO PROVENANCE BLOCK AT ALL. 16 artifacts = 14 runs
+  + 2 summaries: 7 clean, 6 LEGACY (the field is ABSENT - they record which commit was HEAD at launch but not whether
+  the driver matched it, so reproducibility cannot be checked either way), 0 DIRTY (was 1), and
+  `benchmark_summary.json` WITH NO `provenance` KEY AT ALL. IT AGGREGATES FIVE RUNS, ONE OF THEM LEGACY AND - UNTIL THIS
+  MERGE - ONE DIRTY, AND IT RECORDS NEITHER. A SUMMARY IS THE ARTIFACT A READER IS MOST LIKELY TO OPEN, AND IT IS THE ONE
+  PLACE WHERE THE PROVENANCE OF THE INPUTS MATTERS MOST AND IS LEAST VISIBLE. A SUMMARY LAUNDERS ITS INPUTS`
+  PROVENANCE.**
+  **D108.6 - AND THIS BOUNDS TWO OF MY OWN FINDINGS, WHICH I AM STATING RATHER THAN LEAVING TO BE DISCOVERED. TWO OF THE
+  SIX LEGACY ARTIFACTS ARE ONES I BUILT ON THIS SESSION: `taylor_green.json` (my W14) and
+  `kolmogorov_re5000_N64_long.json` (D105.6`s "99.2% AT THE CAP"). W14`S CONCLUSION IS UNAFFECTED AND IT IS WORTH SAYING
+  WHY - A sin x sin y IS A SINGLE FOURIER MODE, SO ITS NUMERICAL RANK IS 1 ANALYTICALLY AND NO RE-RUN CAN CHANGE THAT.
+  D105.6`S NUMBER IS A PROPERTY OF A COMMITTED, READABLE LIST THAT IS NOT TRACEABLE TO A COMMIT.**
+  **D108.7-8 - THE GATE HAS THREE CATEGORIES BECAUSE COLLAPSING THEM IS THE BUG IT EXISTS TO CATCH: DIRTY FAILS, LEGACY
+  DOES NOT FAIL BUT IS NAMED EVERY RUN WITH ITS LIST, NO-BLOCK FAILS, AND A DIRTY RUN MISREAD AS LEGACY WOULD PASS. SELF-
+  TEST: 5 HAND-BUILT ARTIFACTS PINNING ALL FIVE STATES. AND A HYPOTHESIS OF MINE THAT THE CHECK REFUTED: I SUSPECTED
+  `fig_spectra_ek`S CAPTION WINDOW t IN [13.33,20] WAS OUTSIDE THE DATA BECAUSE make_figures.py LOADS A T=8 ARTIFACT. IT IS
+  NOT - THE FIGURE SELECTS A SOURCE FROM THE REGIME PILOTS AND `regime_pilot_re5000_A0p5.json` IS A GENUINE t=20 RUN. AND
+  THE CAPTION IS GENERATED FROM THE ARTIFACT, NOT HARDCODED, WHICH IS THE RIGHT DESIGN.**
+  **AND A SECOND GATE BUG, CAUGHT BY THE GATE REFUSING TO PASS: `check_start_here.py` DEMANDED THE LITERAL "8" WHERE
+  START_HERE CORRECTLY READ "eight", BECAUSE ITS NUMBER-WORD TABLE ONLY WENT TO 7. A COMPLETENESS BUG IN A CHECKER IS
+  INDISTINGUISHABLE FROM A STALE DOCUMENT UNLESS THE TABLE IS EXERCISED, SO THE SELF-TEST NOW DRIVES IT OVER 2-12.**
+  **MERGE: ff19721, 13 FILES, 0 DELETIONS, 0 CONFLICTS, D21 AFTER THE PUSH. main be0329b, 237 FILES. C7-1, C7-3 AND C6-1
+  REMAIN OPEN - THE PUSH PREDATED THE CODER PICKING UP R143.**
 
 ## Cycle summaries (history — every cycle from R6 to R79, newest first)
 

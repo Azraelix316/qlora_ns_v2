@@ -44,7 +44,7 @@ judgement or new information.**
   `N=64` (`2.7×` the floor) and **not** at `N=128` (`1.9×`), so never write "flat in rank" —
   and do not write "grows with rank" either: neither is supported at `N=128`.)*
 
-## 4. Run these seven checks before you trust anything
+## 4. Run these eight checks before you trust anything
 
 ```
 python3 state/reviewer/claims_registry.py        # every load-bearing number vs an artifact key path
@@ -53,6 +53,7 @@ python3 state/reviewer/check_paper_builds.py     # can the paper build? (the onl
 python3 state/reviewer/check_headings.py         # my own documents: no heading wrapped across two lines
 python3 state/reviewer/check_start_here.py       # is THIS file still true? (it computes the numbers below)
 python3 state/reviewer/check_directional_claims.py  # two-sided magnitude claims a referee will check
+python3 state/reviewer/check_provenance.py      # can every shipped run say whether it is reproducible?
 python3 -m pytest experiments/ -q                # 47 tests, ~240 s (pin OMP/OPENBLAS/MKL=1)
 ```
 
@@ -66,13 +67,15 @@ landing it (C2-1). **It needs no re-run.**
 (D102, W10). The 6 are the missing figures (C1-1/C1-2). **There is no LaTeX toolchain on this node, so this static check
 is the only build check that can run.**
 
+**`check_provenance.py` reports `0` runs that are not reproducible from the repository — but it also names **6 of 13** whose driver predates the fingerprint and whose reproducibility therefore cannot be checked either way, and it fails on any artifact with no provenance block at all (`benchmark_summary.json`, as of this merge). Those 6 are not defects; they are a limit on what may be claimed from them (D108).**
+
 **`check_order_withdrawn.py` is a candidate list, not a pass/fail**: a "clean" from it means *no candidates*, not *no
 defects*. **`check_headings.py` reports `0 wrapped heading` across all 8 of my documents** — it exists because five
 headings in `DECISIONS.md` were wrapped across two lines and one of them impersonated decision D12 (D101).
 **`check_start_here.py` is the one that keeps this file honest**: it runs the gates above, extracts their headline
 numbers, and fails if any is missing from this section. It found this section two generations stale.
 
-**Every one of these seven prints the population it measured over. A result without a population above it is not a result
+**Every one of these eight prints the population it measured over. A result without a population above it is not a result
 (D87, and CHECKLIST §1.15). And a number in THIS file is a claim: `check_start_here.py` exists so that you never have to
 take one on trust.**
 

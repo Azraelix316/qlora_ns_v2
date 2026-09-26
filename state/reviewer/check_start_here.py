@@ -44,7 +44,14 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 PY = sys.executable
 
-WORD = {2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven"}
+WORD = {2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven",
+        8: "eight", 9: "nine", 10: "ten", 11: "eleven", 12: "twelve"}
+"""Number-word table for the section-4 heading. It was originally {2..7} and
+omitted 8, so when the eighth gate was added the check demanded the literal
+'8' where the document correctly read 'eight' -- the gate failed on a correct
+document because of a gap in its own table. A completeness bug in a checker is
+indistinguishable from a stale document unless the table is exercised, so the
+self-test now drives the table over its whole range rather than one value."""
 
 
 def _run(args: list[str], cwd: Path) -> str:
@@ -198,9 +205,21 @@ def self_test() -> int:
         "count word disagrees with the commands": good.replace("these two checks", "these four checks"),
         "number deleted entirely": good.replace("`29/33` and ", ""),
     }
-    print(f"POPULATION: {1 + len(bad_cases)} hand-checked cases -- 1 must accept, "
-          f"{len(bad_cases)} must reject")
+    print(f"POPULATION: {1 + len(bad_cases) + len(WORD)} hand-checked cases -- 1 must accept, "
+          f"{len(bad_cases)} must reject, and {len(WORD)} must round-trip through the number-word table")
     fails = 0
+
+    # The number-word table must be complete over its declared range. A gap in
+    # it makes this check demand a digit where a document correctly reads a
+    # word, which is a gate failing a correct site -- the failure mode D95 exists
+    # to prevent, arriving through the checker rather than the pattern.
+    for n, word in sorted(WORD.items()):
+        got = WORD.get(n, str(n))
+        if got != word:
+            print(f"  BROKEN TABLE: {n} -> {got!r}, expected {word!r}")
+            fails += 1
+    print(f"  the number-word table round-trips over {sorted(WORD)}: "
+          f"{'ok' if not fails else 'BROKEN'}")
 
     sec = section4(good)
     if not sec or "29/33" not in sec or listed_checks(sec) != 2:

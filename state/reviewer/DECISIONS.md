@@ -7350,3 +7350,117 @@ HAD FALLEN BEHIND THE PROJECT — AND IT REPORTED THE EVIDENCE BESIDE THE FAILUR
 
 **D107.8 — Unchanged.** Everything in D35.6 through D106.10 stands, **except that the board's status line is one line, the
 one-line property is enforced, and the wrapped-heading count is reported separately from it.**
+
+---
+
+## D108 — **THE PROVENANCE BLOCK WAS READ BY NOTHING. NOT BY A GATE, NOT BY A TEST. AND IT WAS NOT DECORATIVE: `kolmogorov_re5000_N128.json` SAT ON `main` RECORDING `driver_dirty: true` AND `reproducible: false`, AND `benchmark_summary.json` — WHICH HAS NO PROVENANCE BLOCK AT ALL — AGGREGATED IT.** (2026-09-26)
+
+> **OPERATIVE (R145). MERGED `ff19721` (13 FILES, 0 DELETIONS, 0 CONFLICTS, D21). NEW GATE:
+> `check_provenance.py`, EIGHT GATES TOTAL. `DIRTY` IS NOW 0.**
+
+**D108.1 — THE STRUCTURAL FINDING: THE FLAG WAS WRITTEN AND NEVER READ.** `experiments/provenance.py` computes
+
+```python
+out["driver_matches_HEAD"] = ...     # is the driver on disk byte-identical to the driver at that commit?
+out["reproducible"] = out.get("driver_matches_HEAD") is True
+```
+
+**and before this cycle NOTHING CONSUMED EITHER FIELD.** Not `claims_registry.py`, not `check_paper_builds.py`, not
+`check_order_withdrawn.py`, not `check_start_here.py`, not `check_headings.py`, not `check_directional_claims.py`, and not
+one of the 47 tests. **The project built a provenance mechanism, wrote it into every artifact, and then treated it as
+output rather than as a claim to be checked.** This is D103.6's exact class — *a field that has stopped carrying its stated
+quantity* — one level down, and it is the same failure as D66/D77/D85/D94/D96: **a result whose provenance is not checked is
+indistinguishable from a result whose provenance is clean.**
+
+**D108.2 — AND IT WAS NOT DECORATIVE. THE POPULATION, AT `origin/main` BEFORE THIS MERGE: 16 ARTIFACTS, AND ONE OF THEM
+WAS SELF-REPORTING AS NOT REPRODUCIBLE.**
+
+```
+  kolmogorov_re5000_N128.json:  driver_dirty = true   driver_matches_HEAD = false   reproducible = false
+                               git_commit = 727fb8da...   working_tree_diff_sha256 = 7eaa7c04...
+```
+
+**A 200-STEP `N=128` TURBULENT RUN, PRODUCED BY A DRIVER THAT MATCHES NO COMMIT, FROM A DIRTY WORKING TREE — AND IT WAS BEING
+CITED, INCLUDING BY MY OWN D106.3's `N = 128` ROW.** D106 is not retracted: I verified that the `17.2832%` zonal share is
+byte-identical between the dirty and clean versions (D108.3), so the number stands. **But I cited it from a file that said
+it was not reproducible, and nothing told me.**
+
+**D108.3 — THE POSITIVE RESULT INSIDE THE FIX, AND IT IS THE STRONGEST REPRODUCIBILITY STATEMENT THE PROJECT HAS. THE
+CODER RE-RAN IT FROM A CLEAN TREE. EVERY RECORDED SERIES IS **BYTE-IDENTICAL**:**
+
+| series | identical? |
+|---|---|
+| `dlra.rank_history` | **yes** |
+| `full.fluctuation_energy_history` | **yes** |
+| `dlra.comparison` | **yes** |
+| `pod.comparison` | **yes** |
+| `dlra.max_relative_l2_vs_full`, `final_energy`, `max_scaled_pde_energy_residual` (all three methods) | **yes** |
+
+**ONLY THE TIMINGS MOVED** (`dlra.wall_seconds` `30.24 → 59.15`, i.e. the dirty run was not even slower — it was a
+different machine state). **AN `N=128`, 200-STEP, CHAOTIC, FORCED-TURBULENT RUN RE-EXECUTED FROM A CLEAN TREE REPRODUCED
+EVERY SERIES TO THE LAST BIT.** That is a far stronger claim than "reproducible: true", it is measured rather than asserted,
+**and the paper does not currently say it anywhere. It belongs in the reproducibility statement.**
+
+**D108.4 — THE POPULATION AFTER THE FIX, AND IT IS NOT CLEAN. 16 ARTIFACTS = 14 RUNS + 2 SUMMARIES:**
+
+| category | n | artifacts |
+|---|---|---|
+| **clean** (`driver_matches_HEAD is true`) | **7** | `crossover_surface`, `kolmogorov_re100`, `kolmogorov_re1000`, `kolmogorov_re5000_N64`, `kolmogorov_re5000_N128`, `peak_memory`, `rank_growth_sweep` |
+| **LEGACY** (the field is ABSENT) | **6** | `baselines_re5000_N64_T8`, `kolmogorov_re5000_N64_long`, `regime_pilot_re5000_A0p2`, `regime_pilot_re5000_A0p5`, `regime_pilot_re5000_N128_A0p2`, `taylor_green` |
+| **DIRTY** | **0** | — (was 1; fixed by this merge) |
+| **NO PROVENANCE BLOCK** | **1** | **`benchmark_summary.json`** |
+
+**SO 6 OF 13 RUNS ARE LEGACY: THEY RECORD WHICH COMMIT WAS HEAD AT LAUNCH BUT NOT WHETHER THE DRIVER ON DISK MATCHED IT.
+THEIR REPRODUCIBILITY CANNOT BE CHECKED EITHER WAY. THEY ARE NOT DEFECTIVE — THEY PREDATE THE MECHANISM — BUT THEY ARE
+NOT VERIFIED, AND `6 of 13` IS A NUMBER THE PAPER SHOULD NOT LEAVE UNSTATED.**
+
+**D108.5 — THE WORST INSTANCE, AND IT IS THE ONE THAT HAD NO PROVENANCE BLOCK AT ALL: A SUMMARY LAUNDERS THE PROVENANCE OF
+ITS INPUTS. `benchmark_summary.json` HAS NO `provenance` KEY.** It carries `git_commit` and `generated_by` instead, which
+is ad-hoc and says nothing about its *inputs*. **IT AGGREGATES FIVE RUNS:**
+
+```
+  kolmogorov_re100_N64.json          clean
+  kolmogorov_re1000_N64.json         clean
+  kolmogorov_re5000_N64.json         clean
+  kolmogorov_re5000_N128.json        clean  (DIRTY until this merge)
+  kolmogorov_re5000_N64_long.json    LEGACY
+```
+
+**SO A FILE WITH NO PROVENANCE RECORD CONTAINED NUMBERS DERIVED FROM A RUN THAT WAS NOT REPRODUCIBLE FROM THE REPOSITORY,
+AND RECORDED NEITHER.** **A SUMMARY IS THE ARTIFACT A READER IS MOST LIKELY TO CONSULT, AND IT IS THE ONE PLACE WHERE THE
+PROVENANCE OF THE INPUTS MATTERS MOST AND IS LEAST VISIBLE.**
+
+**D108.6 — AND THIS BOUNDS TWO OF MY OWN FINDINGS, WHICH I AM STATING RATHER THAN LEAVING TO BE DISCOVERED. TWO OF THE SIX
+LEGACY ARTIFACTS ARE ones I have built on THIS SESSION:**
+
+- **`taylor_green.json` IS THE EVIDENCE FOR W14** (the §5 correction that the Taylor–Green rank is `1` and never moves).
+  **W14's CONCLUSION IS UNAFFECTED, AND IT IS WORTH SAYING WHY: `A\sin x\sin y` IS A SINGLE FOURIER MODE, SO ITS NUMERICAL
+  RANK IS `1` ANALYTICALLY. NO RE-RUN CAN CHANGE THAT, AND THE ARTIFACT CONFIRMS IT RATHER THAN ESTABLISHING IT.**
+- **`kolmogorov_re5000_N64_long.json` IS THE EVIDENCE FOR D105.6** ("`99.2%` OF THE 2000-STEP RUN IS AT THE CAP"). **THAT
+  NUMBER IS A PROPERTY OF A RECORDED LIST IN A FILE WHOSE DRIVER CANNOT BE FINGERPRINTED. THE LIST IS COMMITTED AND
+  READABLE, SO THE NUMBER IS CHECKABLE — BUT IT IS NOT TRACEABLE TO A COMMIT.**
+
+**D108.7 — THE GATE, AND WHY IT HAS THREE CATEGORIES RATHER THAN TWO. `check_provenance.py` READS THE ARTIFACTS OUT OF
+`git` (SO IT MEASURES THE MERGED STATE, NOT THE WORKING TREE), CLASSIFIES EACH, AND PRINTS THE POPULATION BEFORE ANY
+VERDICT.** `DIRTY` **FAILS**: a run produced by code in no commit is not evidence. `LEGACY` **DOES NOT FAIL BUT IS NAMED,
+EVERY RUN, WITH ITS LIST** — because the failure mode here is not a defect, it is a limit on what may be claimed, and a limit
+that is only written down once is a limit that gets forgotten. **NO PROVENANCE BLOCK FAILS.** The two must not be collapsed:
+**a `DIRTY` run misread as `LEGACY` would pass, and that is precisely the defect this gate exists to catch.** Self-test:
+**5 hand-built artifacts covering all five states**, including `DIRTY` vs `LEGACY`, which is the pair that matters.
+
+**D108.8 — A HYPOTHESIS I TESTED AND THE CHECK REFUTED, RECORDED BECAUSE BEING WRONG IS THE POINT. I SUSPECTED THAT
+`fig_spectra_ek`'S GENERATED CAPTION — *"TIME-AVERAGED FLUCTUATION SPECTRA OVER THE WINDOW $t\in[13.33,20]$"* — WAS OUTSIDE
+THE DATA, BECAUSE `make_figures.py:348` LOADS `baselines_re5000_N64_T8.json`, WHOSE `parameters.T = 8.0` AND WHOSE SERIES
+END AT `t = 8.0`.** **IT IS NOT WRONG. THE FIGURE SELECTS A SOURCE FROM THE REGIME PILOTS, AND
+`regime_pilot_re5000_A0p5.json` IS A GENUINE `t = 20` RUN WHOSE `windowed_spectra` ENTRY READS
+`window_start = 13.3333..., window_end = 20.0`.** **AND THE CAPTION IS GENERATED FROM THE ARTIFACT — `w0, w1 = entry
+["window_start"], entry["window_end"]` — NOT HARDCODED.** That is the right design and the exact opposite of the hardcoded
+`"3-5x slower"` figure title closed in R143. **The generated-caption mechanism is sound; keep it.**
+
+**D108.9 — C7-1, C7-3 AND C6-1 ARE ALL STILL OPEN.** `fig_crossover`'s title is still `"$r\geq16$ buys it nothing, at any
+horizon"`, unscoped in grid and still contradicting its own all-ranks axis; the wrong `32%` comment is still at
+`make_figures.py:292`; and `test_artifacts.py` is not in the diff at all, so the docstring still describes a test that does
+not exist. **C8-1..C8-3 BELOW ARE NEW AND SMALLER.**
+
+**D108.10 — Unchanged.** Everything in D35.6 through D107.8 stands, **except that provenance is now a gate, `DIRTY` is 0,
+and 6 of 13 runs are named as unverifiable.**

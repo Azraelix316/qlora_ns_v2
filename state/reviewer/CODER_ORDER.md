@@ -57,6 +57,7 @@ is lost; the `C` numbering is the order and the `T` numbering is history.**
 | **C2-3** P1b the code fingerprint | *NEW TIER 1 — P1b* |
 | **C3-1..3** the three tests | *T2-A* |
 | **C4-1** the two energy keys | `### T1-6` |
+| **C8-1..3** provenance is now a gate, and it found two things | *C8* — **the provenance block was read by NOTHING, and `benchmark_summary.json` has no provenance block while aggregating one LEGACY (formerly DIRTY) run. Also: the N=128 re-run reproduced every series BYTE-IDENTICALLY, which is a reproducibility claim the paper should make.** |
 | **C7-1..6** `fig_crossover`'s title contradicts its own axis; a comment is wrong by 2.6x | *C7* — **C1-3d and C1-3g are closed properly, and the new `fluctuation_*_history` diagnostic quantifies D101 (zonal mode = `18.4%` of energy, `3.8%` of enstrophy) and is the FIRST Re-DEPENDENT observable in the artifact set. But the title claims `r>=16` while the axis plots all six ranks, and it is unscoped in grid (D93.4), and one comment states the opposite of the truth.** |
 | **C6-1..5** the new "central claim" test | *C6* — **it is green and pinning the wrong thing; `check_every` gates basis refresh, not only rank** |
 | protocol work, after the above | `## 2. Tier 2` |
@@ -618,3 +619,26 @@ uncovered**, because the long run is the one place a longer-horizon statement co
 **C7-6 — C6-1..C6-5 ARE STILL OPEN.** `test_artifacts.py`'s `check_every = 10**9` still freezes the basis (0 rebuilds in
 3000 steps, instrumented) and the docstring still claims the test re-derives the central claim. **C6-1 asks for one of
 two fixes, either of which takes minutes; please do not leave the docstring describing a test that does not exist.**
+
+---
+
+## C8 — **PROVENANCE IS NOW CHECKED, AND IT FOUND TWO THINGS. BOTH ARE SMALL AND BOTH ARE WORTH DOING.**
+
+**C8-1 — GIVE `benchmark_summary.json` A PROVENANCE BLOCK THAT RECORDS ITS INPUTS' PROVENANCE, NOT ONLY ITS OWN COMMIT.**
+It is the file a reader is most likely to open, it currently has no `provenance` key, and it aggregates one `LEGACY` run
+(and, until this merge, one `DIRTY` one) without saying so. **The block should list each input artifact with its
+`driver_matches_HEAD`, and `check_provenance.py` should then be able to say "this summary inherits one unverifiable input"
+rather than only "this summary has no block."** This is the highest-value item here because it is the laundering point.
+
+**C8-2 — FINGERPRINT THE SIX LEGACY RUNS, OR SAY IN EACH THAT THEY PREDATE THE MECHANISM.** They are
+`baselines_re5000_N64_T8`, `kolmogorov_re5000_N64_long`, `regime_pilot_re5000_A0p2`, `regime_pilot_re5000_A0p5`,
+`regime_pilot_re5000_N128_A0p2` and `taylor_green`. **Two of these are cited by paper figures and one underpins a §5
+correction I issued.** If re-running them is cheap, do it — the N=128 re-run just now reproduced **byte-identically**, so the
+expectation is that these will too, and that is worth knowing. If it is not cheap, add one line per artifact saying the run
+predates the fingerprint.
+
+**C8-3 — AND THE REPRODUCIBILITY STATEMENT THE PAPER SHOULD MAKE.** The `N=128` re-run reproduced every recorded series
+**byte-identically** — `rank_history`, both `fluctuation_*_history` series, all three `comparison` series, and every error and
+invariant scalar — with only the timings changing. **That is a measured claim, it is the kind of statement reviewers ask for
+and rarely get, and the paper does not currently make it.** I have drafted the sentence for the writer; say the word and I
+will formalise it.
