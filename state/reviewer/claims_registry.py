@@ -50,6 +50,16 @@ REGISTRY = [
      {"rank": 16, "window": 0.25}, "t_star", 0.6493281145096707, 16),
     ("tstar_r32", "crossover_surface.json", "by_reynolds.5000.crossovers",
      {"rank": 32, "window": 0.25}, "t_star", 1.4816252539052939, 16),
+    # D94: the WINDOW SWEEP was unpinned, so the robustness figure derived from it could be
+    # misquoted freely -- and it was, twice: once corrected in D29.4, then repeated in D93.4
+    # four hours later as "0.3%" when the measured spread over the three windows is 0.63%.
+    # With tstar_r32 pinned at W=0.25 and these two, the 0.63% spread is derivable from three
+    # machine-verified numbers. Robustness claims are the ones most likely to be misquoted,
+    # because they sound like rounding.
+    ("tstar_r32_W0p5", "crossover_surface.json", "by_reynolds.5000.crossovers",
+     {"rank": 32, "window": 0.5}, "t_star", 1.4739544217813643, 16),
+    ("tstar_r32_W1p0", "crossover_surface.json", "by_reynolds.5000.crossovers",
+     {"rank": 32, "window": 1.0}, "t_star", 1.4832176727372877, 16),
 
     # --- cost (D52.5: 2.08-2.71x SLOWER. 2.08 is the MINIMUM, so "comparable to" is false
     #     everywhere -- the euphemism the abstract had to be rewritten for.)

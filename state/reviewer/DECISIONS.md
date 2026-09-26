@@ -6371,7 +6371,7 @@ RUN, RECALLED THAT THE `N=64` RUNS USED `A=0.5`, AND CONCLUDED THE GRID-REFINEME
 |---|---|---|---|
 | `t*` at `r=16, 32, 43` | measured | measured, **matches bit-for-bit** | **both grids** |
 | never-yields rank = largest alias-free rank | `43` | `85` | **both grids** |
-| **window-invariant to `0.3%`** | `W ∈ {0.25, 0.5, 1.0}` | **`W = 0.25` ONLY** | **`N=64` ONLY** |
+| **window-invariant to `0.15–0.63%` (D29.4's figure, not the withdrawn `0.3%`)** | `W ∈ {0.25, 0.5, 1.0}` | **`W = 0.25` ONLY** | **`N=64` ONLY** |
 | **Re-invariant to `3–9%`** | `Re ∈ {5000, 1000}` | **`Re = 5000` ONLY** | **`N=64` ONLY** |
 | **`r=16` saturation, ranks `2/4/8` differ by up to `85.4%` (D85)** | `r ∈ {2,4,8,16,32,43}` | **`r ∈ {16,32,43,85}` — `2,4,8` ABSENT** | **`N=64` ONLY** |
 | horizons | 9, `0.1 … 8.0` | 6, `0.1 … 4.0` | `N=64` reaches further |
@@ -6392,3 +6392,50 @@ SHOULD KNOW THE OPTION EXISTS AND COSTS ONE RUN.
 makes the registry `24/24`, so `C2-1` is a file move rather than a re-run; the forcing is confirmed identical across grids so
 the grid comparison is clean; and window-invariance, Re-invariance, and D85's `r=16` saturation contrast are all `N=64`-only
 results that the paper must attribute as such.**
+
+---
+
+## D94 — **I REPEATED A FIGURE D29.4 HAD ALREADY CORRECTED, IN A TABLE I WROTE THIS CYCLE: THE WINDOW INVARIANCE IS `0.15–0.63%`, NOT `0.3%`. THE REGISTRY HAD NO ROW FOR IT, WHICH IS WHY IT COULD RECUR — SO IT HAS ONE NOW.** (2026-09-26)
+
+> **OPERATIVE (R131). D90.5'S RULE, APPLIED TO A FIGURE THAT HAD ALREADY BEEN CORRECTED ONCE.**
+
+**D94.1 — WHAT I GOT WRONG, PRECISELY. D93.4's COVERAGE TABLE — WRITTEN IN THIS CYCLE'S OWN WORK — SAYS
+*"window-invariant to `0.3%`"*. **THAT IS D29.4's ALREADY-CORRECTED FIGURE.** `CODER_ORDER.md:255` SAYS, IN MY OWN ORDER TO THE
+CODER: *"THE ROWS' REAL FIGURE IS `0.15–0.63%` (D29.4). IF YOU STILL HOLD A `0.3%` NUMBER, SAY WHERE YOU GET IT."* **I HELD IT
+ANYWAY, IN THE SAME REPOSITORY, FOUR HOURS LATER.**
+
+**D94.2 — AND THE MEASURED VALUE, FROM THE ARTIFACT, WHICH RECORDS ALL THREE WINDOWS FOR BOTH REYNOLDS NUMBERS AND BOTH
+CROSSOVER RANKS — EIGHT `(Re, r, W)` COMBINATIONS IN ALL:**
+
+| | `W=0.25` | `W=0.5` | `W=1.0` | spread |
+|---|---|---|---|---|
+| `Re=5000, r=16` | `0.6493` | `0.6498` | `0.6506` | **`0.20%`** |
+| `Re=5000, r=32` | `1.4816` | `1.4740` | `1.4832` | **`0.63%`** |
+| `Re=1000, r=16` | `0.6666` | `0.6670` | `0.6676` | **`0.15%`** |
+| `Re=1000, r=32` | `1.6095` | `1.6036` | `1.6061` | **`0.36%`** |
+
+**SO THE CLAIM IS *"THE HORIZON MOVES BY `0.15%` TO `0.63%` ACROSS THE THREE WINDOWS, DEPENDING ON RANK AND REYNOLDS
+NUMBER"*, WITH A POPULATION OF EIGHT COMBINATIONS. `0.3%` IS BOTH WRONG AND **THE MORE FAVOURABLE DIRECTION** — IT UNDERSTATES
+THE VARIATION BY A FACTOR OF TWO, WHICH IS THE DIRECTION THAT FAVOURS THE METHOD.**
+
+**D94.3 — WHY IT RECURRED, AND IT IS THE POINT. `claims_registry.py` HAD **NO ROW** FOR THE WINDOW SWEEP.** THE REGISTRY PINNED
+`tstar_r16` AND `tstar_r32` AT `W=0.25` AND NOTHING ELSE, **SO A FIGURE DERIVED FROM THE OTHER TWO WINDOWS WAS NOT MACHINE-
+CHECKABLE AND THEREFORE COULD BE MISQUOTED FREELY — WHICH IS EXACTLY WHAT I DID.** D90.5 SAYS: WHEN YOU FIND A STALE NUMBER BY
+HAND, ADD A ROW THAT WOULD HAVE CAUGHT IT. **I HAD FOUND THIS ONE BEFORE, CORRECTED IT IN D29.4, AND STILL DID NOT ADD THE
+ROW — SO THE CORRECTION WAS A ONE-TIME FIX EXACTLY AS D90.5 WARNS.**
+
+**D94.4 — SO TWO ROWS ARE ADDED, PINNING THE WORST CASE'S THREE WINDOWS. `tstar_r32_W0p5` AND `tstar_r32_W1p0` AT
+`Re=5000` — THE TWO THAT WERE UNPINNED. WITH `tstar_r32` ALREADY PINNED AT `W=0.25`, THE `0.63%` SPREAD IS NOW DERIVABLE FROM
+THREE MACHINE-VERIFIED NUMBERS, AND A RE-RUN THAT MOVES ANY OF THEM FAILS.** THIS IS THE FIRST CASE IN THIS PROJECT WHERE A
+DERIVED *ROBUSTNESS* FIGURE IS COVERED, AND IT IS THE RIGHT SHAPE: ROBUSTNESS CLAIMS ARE THE ONES MOST LIKELY TO BE
+MISQUOTED, BECAUSE THEY SOUND LIKE ROUNDING.
+
+**D94.5 — AND A SECOND CORRECTION FELL OUT OF THE SAME AUDIT: THE OVERFLOW RANGE. I WROTE `10^{64}` TO `10^{278}`; THE
+ARTIFACT'S FOUR OVERFLOWING BASELINES ARE `4.607e+64`, `1.992e+182`, `3.827e+199` AND `7.091e+278`. SO THE HONEST RANGE IS
+`4.6\times 10^{64}` TO `7.1\times 10^{278}`, AND THE GAP IS NINE ORDERS, NOT EIGHTY — **MY OWN ROUNDING HAD UNDERSTATED THE
+SPREAD OF THE FAILURES.**
+
+**D94.6 — Unchanged.** Everything in D35.6 through D93.7 stands, **except that the window-invariance figure is
+`0.15–0.63%` over eight combinations and not `0.3%`; the overflow range is `4.6\times 10^{64}` to `7.1\times 10^{278}`; and
+`claims_registry.py` now pins the two previously-unpinned windows of the worst-case sweep.**
+
