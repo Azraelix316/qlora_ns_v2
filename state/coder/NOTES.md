@@ -1,23 +1,21 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: C11-1 closed -- all six of the paper's figures now exist as PDF and
-> PNG in `paper/figures/`, generated from the artifacts, with two of the draft's
-> captions corrected against measurement (`fig:tg`'s rank decay `3->2->1` cannot
-> happen on a single Fourier mode and is in fact constant at 1; `fig:rank` has no
-> spin-up growth and no `r*(Re)`, since `r* = 43` at every Re). Also this cycle:
-> C7-4/C7-5 (zonal shares as scalars, on every arm, with the share now shown to
-> be horizon-dependent -- it roughly doubles from T=0.1 to T=1.0); a real bug
-> where one diverged method's `inf` destroyed a sixteen-configuration run at the
-> JSON write, now sanitised and pinned by a test; D17.2 confirmed (r=43 yields at
-> N=128, t*=2.885) and D118 retired; and the crossover block now *takes* its
-> value from the rows rather than only comparing them. **One item I could not
-> close: `check_paper_builds.py` resolves `\includegraphics` against the
-> including section rather than the document root, so it cannot pass with the
-> figures where `main.tex` says they belong; I have no TeX toolchain to prove the
-> resolution and declined to mirror into a second directory to turn the gate
-> green on a rule I believe is wrong.** In flight: both crossover surfaces
-> re-running with the block fix. 41 engine tests pass.
+> Status: C11-1 closed -- all six of the paper's figures exist as PDF and PNG
+> in `paper/figures/`, generated from the artifacts. Four of the six draft
+> captions turned out to claim things the runs do not support, so I audited all
+> six, wrote the measured version of each into the generated `CAPTIONS.md`, and
+> added `check_figure_captions.py` + a test that report *drift* (a verdict
+> appearing or disappearing) rather than repeating the known list -- its first
+> positive control caught a bug in the checker itself. D106's zonal share is now
+> defined in machine-readable form: the recorded ~20% and the reviewer's ~82% are
+> exact complements (they sum to 100.0000%, because E is additive under the
+> zonal split), so the "factor of 4" and the "inverted Re trend" were both
+> artifacts of an unwritten definition -- `zonal_fraction_semantics` plus the
+> complement and the raw components are in every artifact, and three tests hold
+> them down. C8-2 closed: all four legacy artifacts reproduce bit-for-bit; the only
+> non-determinism is wall-clock time. 51 of 53 tests pass; the two failures are
+> the stale crossover surface, which is re-running.
 
 ## Mission
 
@@ -1052,3 +1050,50 @@ forced-turbulence test cases, and the benchmark numbers the paper will cite.
   POD checks. Benchmark drivers and measured Re results are still pending.
 - 2026-09-24 Worktree + branch created as part of the 5-agent scaffold
   (see `PROTOCOL.md`).
+
+## 2026-09-26 — D106's definition, C8-2's fingerprint, and the caption audit
+
+**D106 (the reviewer's blocking question).** `zonal_energy_fraction` is
+`(energy_history - fluctuation_energy_history) / energy_history` — the *zonal*
+share. The reviewer formed the complement and read the two as different
+quantities "a factor of 4 apart with the Re trend inverted". They are exact
+complements: `E(psi) = E(zonal) + E(psi')` holds exactly because `grad(psi_zonal)`
+and `grad(psi')` are orthogonal in Parseval (kx=0 vs kx!=0), measured at 1.5e-16
+relative on a random field and 100.0000% on the runs. Recomputing the reviewer's
+own ratio at the final step reproduces D106 exactly (79.911% complements
+20.089%). Fixed structurally, not with a note: `zonal_fraction_semantics` (formula,
+numerator, denominator, index as separate keys), `zonal_energy_fraction_fluctuation`
+(the complement), `zonal_energy_fraction_components` (raw energies, so the stored
+share can be recomputed and checked against the stored definition), and three
+tests including one that measures the additivity. Four suite cases re-run natively
+so the keys come from the driver that records them; all four bit-identical on every
+physical value. Reported that the share is a *weak* Re-dependent observable: the
+horizon (16.2% → 32.2% over T=0 → 1) and grid (18.398% @ N=64 vs 17.283% @ N=128)
+dependencies each exceed the 8.4% Re effect, so it should not carry a Re-dependent
+claim alone.
+
+**C8-2 closed.** All four legacy artifacts re-run from their own recorded
+`parameters`: every physical value identical, the only differences anywhere are
+`git_commit` and three `wall_seconds` entries (<=1.8%). The first attempt at the
+N=128 case *did* move a number (17.283% → 17.485%) because the re-run script passed
+`--dt` both in a shared list and per case — argparse takes the last, so it ran at
+twice the recorded `dt` with a fresh IC instead of `--ic-reference-N 64`. The
+fingerprint caught it; the committed artifact was restored and the corrected re-run
+reproduced 17.283% exactly. Eighth instance of this cycle's error shape and the
+first the tooling caught rather than me.
+
+**Caption audit.** Four of the paper's six figure captions claim what the artifacts
+do not support — `fig:tg` (rank cannot decay 3→2→1 on one Fourier mode; it is
+constant at 1), `fig:rank` (no spin-up growth, no r*(Re)), `fig:svd` (mode count is
+43 at every Re, though slower decay at higher Re is real, +19% across 50× in Re),
+`fig:cost` (no peak memory, no static-POD row, and not per Re — and the per-Re
+ratios that do exist differ by 18× from the interleaved ones at Re=100, which is a
+protocol difference, not a physics one). `fig:error` and `fig:kestats` also
+misdescribe their figures. Measured captions are generated into
+`experiments/figures/CAPTIONS.md` by the same run that draws the figures.
+`check_figure_captions.py` + a test report drift against a recorded baseline; the
+first positive control silently missed because possessive labels made the key
+`fig:cost's|per Re`, which is fixed and now fires correctly.
+
+**N=128 crossover surface, partial:** r=16 resolves at t\* = 0.975, r=43 at
+t\* = 2.990, r=85 unresolved so far. The N=64 surface is re-running.
