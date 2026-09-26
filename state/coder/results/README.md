@@ -467,3 +467,68 @@ effect. Any cost claim needs its thread count and load stated next to it, and
 should be a range rather than a value. That is not a weakness in the
 interleaving — the interleaving is what makes the *ratio* usable at all on a noisy
 node — it is a statement about what the ratio can be resolved to.
+
+## The never-yields rank is the grid's de-aliasing ceiling, at both grids measured
+
+`cost_retiming.json` records `dealias_rank_ceiling` = **43, 85, 171** for N = 64,
+128, 256 (D30.2: a wavenumber-derived bound, not a mode count). The crossover
+surfaces report exactly one rank as `never` at each grid:
+
+| grid | never-yields rank | de-aliasing ceiling | equal? |
+|---|---|---|---|
+| N=64, Re=5000 | **43** | **43** | yes |
+| N=128, Re=5000 | **85** | **85** | yes |
+
+and the reason the surface records is the same at both: *"the DLRA is exact at
+every horizon here (relative error at roundoff), so no static baseline can
+overtake it."*
+
+**So this is a mechanism, not an observation.** A rank that reproduces the whole
+resolved band has nothing left to adapt: its subspace is the band, its error is at
+roundoff, and no static baseline can overtake it. The crossover cannot exist above
+the ceiling, which is why "the rank at which the DLRA never yields" is a statement
+about the grid and not about the method — and why the never-yields rank moves from
+43 to 85 when the grid is refined (D17.2, D118 retired).
+
+Pinned by `test_the_rank_at_which_the_dlra_never_yields_is_the_grid_dealiasing_ceiling`,
+which also asserts the *reason* is the exactness one — if a rank ever reported
+`never` for a different reason, the identity would stop being a mechanism and the
+claim would need rewording rather than re-measuring.
+
+**Two points is thin, and that is stated rather than hidden.** The test asserts the
+identity at both grids where it is measured, and fails if a third grid is added
+without extending the check.
+
+## The full rank picture at Re=5000, both grids
+
+| rank | N=64 | N=128 |
+|---|---|---|
+| 2, 4, 8 | **unresolved** — the static baseline leads at every horizon | not measured |
+| 16 | resolved, t\* = 0.7077, bracket [0.5, 1.0] | resolved, t\* = 0.9755, bracket [0.5, 1.0] |
+| 32 | resolved, t\* = 1.5982, bracket [1.0, 2.0] | — |
+| 43 | **never** (it is the N=64 ceiling) | resolved, t\* = 2.9897, bracket [2.0, 3.0] |
+| 85 | not measured | **never** (it is the N=128 ceiling) |
+
+**The crossover exists in a band, and the band is bounded by the grid.** Below it
+the static baseline wins everywhere; above it the DLRA is exact. The highest rank
+that yields at all is the largest rank below the ceiling — 32 at N=64, 43 at N=128.
+
+### Superseded numbers still live in the reviewer's paste-ready blocks
+
+The values the writer will paste are in `state/reviewer/WRITER_ORDER.md` and
+`state/reviewer/START_HERE.md`, and they are the **un-provenanced block** values.
+Full correction set, all four crossings plus the two derived ratios:
+
+| quantity | in the paste-ready blocks | from the rows | change |
+|---|---|---|---|
+| N=64, Re=5000, r=16, W=0.25 | 0.649 | **0.7076762337623602** | +9.0% |
+| N=64, Re=5000, r=32, W=0.25 | 1.482 | **1.5981858222903682** | +7.8% |
+| N=128, Re=5000, r=16, W=0.25 | 0.939 | **0.9754557646562387** | +3.9% |
+| N=128, Re=5000, r=32, W=0.25 | 2.433 | **2.6942** | +10.7% |
+| N=128 / N=64 at r=16 | 1.45× | **1.378×** | −4.7% |
+| N=128 / N=64 at r=32 | 1.64× | **1.686×** | +2.7% |
+
+`WRITER_ORDER.md` line 42 also says the old pair is *"verified bit-for-bit"*, which
+is now false — and it is the sentence that discourages anyone from checking. The
+brackets are unaffected and exact under both derivations: [0.5, 1.0] for r=16 at
+both grids, [1.0, 2.0] for r=32 at N=64, [2.0, 3.0] for r=43 at N=128.

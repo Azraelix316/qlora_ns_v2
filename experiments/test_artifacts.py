@@ -44,6 +44,68 @@ def load(name: str) -> dict:
     return json.loads(path.read_text())
 
 
+def test_the_rank_at_which_the_dlra_never_yields_is_the_grid_dealiasing_ceiling():
+    """The never-yields rank equals the de-aliasing ceiling, at every grid measured.
+
+    This is a mechanism rather than an observation. The ranks that never yield are
+    **43 at N=64** and **85 at N=128** — and those are exactly the
+    `dealias_rank_ceiling` at those grids, which `cost_retiming.json` records as 43,
+    85 and 171 for N = 64, 128 and 256.
+
+    The reason the surface gives is the same at both: *"the DLRA is exact at every
+    horizon here (relative error at roundoff), so no static baseline can overtake
+    it."* A rank that reproduces the whole resolved band has nothing left to
+    adapt, so its subspace is the full band and its error is at roundoff. The
+    crossover therefore cannot exist above the ceiling, and the "never yields"
+    observation is a statement about the grid, not about the method.
+
+    Two grids is thin, so the test asserts the identity holds where it is
+    measured **and** that the reason is the exactness one — if a rank ever
+    reported `never` for a different reason, the identity would no longer be a
+    mechanism and the claim would need rewording rather than re-measuring.
+    """
+    cost = load("cost_retiming.json")
+    assert cost is not None
+    ceiling = {g["N"]: g["dealias_rank_ceiling"] for g in cost["grids"]
+               if "dealias_rank_ceiling" in g}
+    assert ceiling, "cost_retiming.json records no dealias_rank_ceiling"
+
+    surfaces = {
+        64: load("crossover_surface.json"),
+        128: load("crossover_N128.json"),
+    }
+    checked = 0
+    for N, data in surfaces.items():
+        if data is None or N not in ceiling:
+            continue
+        block = data["by_reynolds"]["5000"]
+        never = {c["rank"] for c in block["crossovers"] if c["status"] == "never"}
+        assert never, f"N={N}: no rank is reported as never yielding"
+        assert never == {ceiling[N]}, (
+            f"N={N}: ranks reported as never yielding are {sorted(never)} but the "
+            f"de-aliasing ceiling is {ceiling[N]}. If this no longer holds, the "
+            "claim is an observation rather than a mechanism and the wording has "
+            "to change."
+        )
+        for c in block["crossovers"]:
+            if c["status"] == "never":
+                assert "exact at every horizon" in (c.get("reason") or ""), (
+                    f"N={N} r={c['rank']}: status 'never' with reason "
+                    f"{c.get('reason')!r} -- the identity above only explains a "
+                    "never-yields rank if the DLRA is exact there"
+                )
+        checked += 1
+
+    assert checked >= 2, (
+        f"the identity was checked at {checked} grid(s); it is a two-point claim "
+        "and should be checked at both"
+    )
+
+    # The ceiling is a wavenumber-derived bound, not a mode count (D30.2), so the
+    # identity is a statement about the resolved band and not about a mode count.
+    assert ceiling[64] == 43 and ceiling[128] == 85, ceiling
+
+
 def test_the_memory_overhead_is_a_distribution_and_not_one_sample():
     """The peak-RSS overhead over the full grid must carry its own spread.
 
