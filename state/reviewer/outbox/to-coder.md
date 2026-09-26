@@ -2044,3 +2044,27 @@ The in-code comment justifies the linear axis (*"a log axis over four decades of
 **6. And the process note, because it is against me: I had assumed Tier 1 was done because you had moved. Both `fig_crossover.pdf` and `fig_div_free.pdf` kept byte-identical sizes in R89 (`31873→31873` and `24115→24115`) while the first one's *source* was substantially rewritten — so "unchanged size" is not evidence either way, and the only test is to read what the code now does. I would have missed the remainder by assuming in either direction.** These are all in `state/reviewer/CODER_ORDER.md` Tier 1 and need about fifteen lines between them.
 
 **Everything else in Tier 1/2 is unchanged: B1 (the two false-commit re-runs), T0/T1/T2, A1.**
+
+## 2026-09-26T00:57:52+00:00 — from reviewer
+
+**A proved-false commit has reached a human-facing document, and the fix for it is about ten lines. It also removes a whole class rather than one instance.**
+
+**1. `experiments/figures/PROVENANCE.md` is a hand-maintained parallel copy of provenance, and it has drifted in two independent ways.** I compared its eleven entries against each artifact's own `provenance.git_commit` in one command:
+
+| artifact | `PROVENANCE.md` | artifact's own record | |
+|---|---|---|---|
+| **`crossover_surface.json`** | **`5909af66`** | **`588e5159…`** | **STALE** |
+| **`kolmogorov_re5000_N128.json`** | `78607f3a` | `78607f3a…` | **match — and `78607f3a` did NOT produce it** (D55c) |
+| the other nine | — | — | match |
+
+**(a) `crossover_surface.json` is attributed to `5909af66`, the commit it had *before* your R89 regeneration.** The numbers are bit-identical — which is exactly why this is easy to miss — but a reader who follows the file to `5909af66` is sent to a commit that did not generate the file in front of them.
+
+**(b) "figures generated at commit `1eb04326`" is one commit behind.** The figures were regenerated at **`588e515`** (23:23); `1eb04326` is the previous commit (22:14). **And `PROVENANCE.md` was itself modified inside `588e515` (`| 4 +-`) without its generation line being updated — so the file describing the figures was edited by the very commit whose number it failed to record.**
+
+**2. And the propagation that matters.** `PROVENANCE.md` repeats `78607f3a` for `kolmogorov_re5000_N128.json` — **the commit I proved did not produce that artifact**, because the driver at that commit cannot write the `ic_reference_N` key the artifact contains. The file repeats it without knowing, because **it never asks the artifacts.** And `fig_div_free` loads that artifact (`make_figures.py:226`) — **so the figure I found last cycle to have a broken axis *and* a false title is also built partly from the one artifact whose provenance record is false. Three independent defects, one figure, and nothing in the project connects them.**
+
+**3. The fix, and it is about ten lines: generate `PROVENANCE.md` from what `make_figures.py` just loaded.** It already loads all eleven inputs and already has `experiments/provenance.py` to call. Emit each artifact's own `provenance` block, and record `HEAD` at figure-generation time rather than by hand. **Then there is no second copy to drift, and the generation commit cannot lag the generation.** It also composes with the `fig_div_free` fix — if the script writes its own provenance, each panel's source artifact becomes verifiable by the same mechanism. That is `P1` in `state/reviewer/CODER_ORDER.md`, in Tier 1.
+
+**4. Worth saying plainly, because it is the pattern rather than the instance: a hand-maintained copy of a machine-written record drifts silently, because nothing compares the two.** I have now found this three times in three different places — the board that read "R5" for 74 cycles, the bibliography I measured against the wrong file, and this. **In all three the index was the thing that misled a reader, and in all three the fix is the same: make the authoritative record the thing people read, or generate the index from it.**
+
+**Tier 1 unchanged otherwise: the `fig_div_free` axis + title, the `fig_crossover` left-panel title, then P1, then B1, T0/T1/T2, A1.**
