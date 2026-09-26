@@ -208,6 +208,155 @@ def run_gate_pytest():
     return m.group(1) if m else None
 
 
+# D127: SECTION 0 IS THE ENTRY POINT AND IT ASSERTS THREE BLOCKERS FROM MEMORY. EACH IS COMPUTABLE, SO EACH
+# IS MEASURED. The point is not that the numbers are wrong today -- they are right -- it is that a
+# blocker list written from memory is a blocker list that goes stale silently, and this is the ONE
+# document every agent reads first.
+#
+# AND THE COUNTING IS THE INTERESTING PART. I first counted the phantom citations with
+# `\\cite\{koch2019dlra\}` and got 2, because that matches only the form where the key stands ALONE.
+# Two of the four sites carry it AMONG OTHERS -- one in an 11-key cite, one in a 4-key cite -- so the
+# real count is 4, which is what check_paper_builds.py independently reports. Counting the TOKEN rather
+# than the QUANTITY understated the work by half, and would have told the writer there were two edits
+# to make when there are four, two of which a find-and-replace cannot see. D95, and the reason this
+# function counts cite COMMANDS CONTAINING the key rather than occurrences of a string.
+SECTION0_CLAIMS = [
+    # (what section 0 asserts, THE NUMBER, the substring that must appear, how to measure it)
+    #
+    # THE NUMBER IS A FIELD, NOT PARSED OUT OF THE SUBSTRING. The first version extracted it with
+    # `re.search(r"\\d+", literal)` and duly reported "asserts 2019" -- because the literal contains
+    # the string `koch2019dlra`, so the first digit run in the sentence about the number of phantom
+    # citations is the year in a citation key. And the figure claim, written "five figures no code
+    # generates", has no digit at all, so it asserted None. **A NUMBER PARSED OUT OF PROSE IS A TOKEN,
+    # NOT A CLAIM** -- D111 again, this time inside the check written to catch exactly that. The
+    # substring is now a PRESENCE check only; the number is stated.
+    #
+    # A BUCKET DEFINED BY JUDGEMENT IS NOT A MEASUREMENT AND IS DELIBERATELY NOT HERE. Section 0
+    # also says "~20 of the 50 markers are transcription" and that is a judgement about which
+    # markers are closable by reading a table, not something this function can count. Putting it in
+    # a measured table would be the same error as parsing a number out of prose: it would acquire the
+    # authority of a measurement without being one. Six crisp claims; the judgement stays prose.
+    ("the phantom citations",        4, "four `\\cite{koch2019dlra}`",                    "phantom_cite_sites"),
+    ("the figures with no generator", 5, "**five figures no code generates**",              "missing_generators"),
+    ("the unresolvable figure files", 6, "`paper/figures/` is **empty on all three branches**", "unresolvable_figures"),
+    ("the supplied blocks",          24, "the 24 supplied blocks",                          "paste_ready_blocks"),
+    ("the marker total",             51, "**THE `51` `PENDING-CODER` MARKERS ARE NOT FIFTY-ODD BLOCKED ITEMS",               "pending_markers"),
+    ("the withdrawn-quantity traps",  5, "**withdrawn-quantity traps**",                                         "rstar_traps"),
+]
+
+
+CITE_RX = re.compile(r"\\cite[a-zA-Z]*\*?(?:\[[^\]]*\])?\{([^}]*)\}")
+
+
+def _git(*a):
+    import subprocess
+    return subprocess.run(["git", *a], cwd=REPO, capture_output=True, text=True).stdout
+
+
+def _ls(ref, prefix):
+    return [f for f in _git("ls-tree", "-r", "--name-only", ref, "--", prefix).splitlines() if f]
+
+
+def _load(ref, path):
+    return _git("show", f"{ref}:{path}")
+
+
+def _draft_text():
+    """Every .tex the paper \inputs, as one string, from the same ref the other checks use."""
+    out = []
+    for f in sorted(_ls("main", "paper/sections")):
+        if f.endswith(".tex"):
+            out.append(_load("main", f) or "")
+    main_tex = _load("main", "paper/main.tex")
+    if main_tex:
+        out.append(main_tex)
+    return "\n".join(out)
+
+
+def section0_facts():
+    """(failures, evidence) for section 0's asserted blockers, measured against the tree.
+
+    Returns one failure per claim whose measurement disagrees with what the document says. A claim
+    whose measurement cannot be taken is a FAILURE, not a skip (D87): an unmeasurable claim in the
+    entry point is the worst kind, because it reads as authoritative.
+    """
+    doc = (HERE / "START_HERE.md")
+    if not doc.exists():
+        return 1, "START_HERE.md absent, skipped"
+    text = doc.read_text()
+    i = text.find("## 0. THE CRITICAL PATH")
+    if i < 0:
+        return 1, "START_HERE.md has no '## 0. THE CRITICAL PATH' section -- the entry point's"
+    sec0 = text[i:]
+    j = sec0.find("\n## 1. ")
+    if j > 0:
+        sec0 = sec0[:j]
+    draft = _draft_text()
+
+    # 1. cite COMMANDS containing the key, not occurrences of the string
+    key = "koch2019dlra"
+    sites = 0
+    solo = 0
+    for m in CITE_RX.finditer(draft):
+        keys = [k.strip() for k in m.group(1).split(",")]
+        if key in keys:
+            sites += 1
+            solo += (len(keys) == 1)
+    tree = _ls("main", "paper/figures")
+    figs = sorted(set(re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{figures/([a-z_]+)\}", draft)))
+    missing = [f for f in figs if f"paper/figures/{f}.pdf" not in tree]
+    order = ""
+    op = HERE / "WRITER_ORDER.md"
+    if op.exists():
+        order = op.read_text()
+    blocks = len(re.findall(r"```latex\n", order))
+    markers = len(re.findall(r"PENDING-?CODER", draft, re.I))
+    traps = len(re.findall(r"PENDING-?CODER[^\n]*(?:r\*\(Re\)|r_POD\(Re\))", draft, re.I))
+    # Search CONTENTS, not paths: the first version tested `f in x` against file NAMES, which is
+    # never true, so it reported all six as ungenerated -- including fig_cost, which make_figures.py
+    # writes. A generator check that never reads a generator.
+    py = [f for f in _ls("main", "experiments") if f.endswith(".py")]
+    bodies = {f: (_load("main", f) or "") for f in py}
+    missing_gen = [f for f in figs if not any(f in b for b in bodies.values())]
+    measured = {
+        "phantom_cite_sites": sites,
+        "missing_generators": len(missing_gen),
+        "unresolvable_figures": len(missing),
+        "paste_ready_blocks": blocks,
+        "pending_markers": markers,
+        "rstar_traps": traps,
+    }
+    bad = 0
+    print("SECTION 0 -- the entry point's asserted blockers, MEASURED (not remembered)")
+    print(f"  POPULATION: {len(draft.split())} words of draft, {len(order.split())} words of order doc, "
+          f"{len(tree)} file(s) in paper/figures/")
+    for what, asserted, literal, keyname in SECTION0_CLAIMS:
+        n = measured[keyname]
+        # the substring may be broken across a line wrap, so compare on collapsed whitespace
+        flat = re.sub(r"\s+", " ", sec0)
+        present = re.sub(r"\s+", " ", literal) in flat
+        if not present:
+            print(f"  ??  {what}: section 0 does not contain {literal!r} -- a FAILURE, because a claim I")
+            print("      cannot find is a claim I cannot check")
+            bad += 1
+            continue
+        ok = (asserted == n)
+        if not ok:
+            bad += 1
+        extra = ""
+        if keyname == "phantom_cite_sites":
+            extra = f"  [{solo} with the key ALONE, {sites - solo} among other keys -- a find-and-replace sees only the {solo}]"
+        if keyname == "unresolvable_figures":
+            extra = f"  [{len(figs)} included, paper/figures/ has {len([x for x in tree if x.endswith(('.pdf', '.png'))])} file(s)]"
+        print(f"  {'ok  ' if ok else 'FAIL'}  {what:28} asserts {asserted}, measured {n}{extra}")
+    if bad:
+        print(f"  {bad} claim(s) wrong -- **section 0 is the first thing an agent reads, so a stale one")
+        print("      misleads before anything else can correct it. Update it from these lines.**")
+    else:
+        print(f"  {len(SECTION0_CLAIMS)} claim(s) checked, 0 wrong")
+    return bad, f"section 0: {measured}"
+
+
 def what_is_current(what, q):
     """True if the numbers the status line quotes match what the gate reports right now."""
     import subprocess
@@ -282,7 +431,10 @@ def check() -> int:
     print(f"  {'FAIL' if sbad2 else 'ok  '}  NOTES.md '> Status:' line CONTENT: {sev2}")
 
     print()
-    print(f"TOTAL: {len(facts) + 2} assertion(s), {bad + sbad2} failed")
+    sbad3, sev3 = section0_facts()
+    print()
+
+    print(f"TOTAL: {len(facts) + 3} assertion(s), {bad + sbad2 + sbad3} failed")
     if bad:
         print("FAIL: START_HERE.md is stale. Fix the numbers above from the evidence lines,")
         print("      or delete the number -- a gate you have not run is better than one you")
@@ -290,7 +442,11 @@ def check() -> int:
         return 1
     print("PASS: every number in START_HERE.md section 4, and in the board's status line, was")
     print("      produced by the gate it names.")
-    return 0
+    # D127: this line was `return 1 if (bad or sbad2) else 0` and sbad3 was never added, so the
+    # section-0 verdict was PRINTED AND DISCARDED: the gate reported '1 failed' and exited 0. The
+    # same bug as D123's self_test(), and the second time in this project that a check could not
+    # fail. The verdict is now wired to every failure count the function computes.
+    return 1 if (bad or sbad2 or sbad3) else 0
 
 
 def self_test() -> int:
