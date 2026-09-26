@@ -885,10 +885,10 @@
       "status": "projected_discrete_balance_with_projection_work"
     },
     "initial_energy": 22.20670331293339,
-    "initialization_seconds": 0.0005390159785747528,
+    "initialization_seconds": 0.00041924393735826015,
     "linear_algebra_calls": 841,
-    "linear_algebra_seconds": 0.3364964802749455,
-    "linear_algebra_seconds_per_step": 0.0016824824013747274,
+    "linear_algebra_seconds": 0.2970114622730762,
+    "linear_algebra_seconds_per_step": 0.0014850573113653809,
     "max_abs_divergence": 2.6645352591003757e-14,
     "max_cfl": 0.014747385514922155,
     "max_energy_increase": 0.002445655599142782,
@@ -897,7 +897,7 @@
     "max_relative_l2_vs_full": 0.00010108416677874297,
     "max_scaled_pde_energy_residual": 0.00046923135768045965,
     "max_scaled_projected_energy_residual": 0.0007700258068321355,
-    "offline_plus_online_seconds": 1.4089550790376961,
+    "offline_plus_online_seconds": 1.3515086369588971,
     "projection_energy_history": [
       -4.213816602316456e-07,
       -5.109879275266849e-07,
@@ -2056,8 +2056,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 1.4084160630591214,
-    "wall_seconds_per_step": 0.0070420803152956065,
+    "wall_seconds": 1.3510893930215389,
+    "wall_seconds_per_step": 0.006755446965107694,
     "zonal_energy_fraction": {
       "at_final_step": 0.18397748201028016,
       "at_t0": 0.16207103178372204
@@ -3707,8 +3707,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 0.7196019701659679,
-    "wall_seconds_per_step": 0.00359800985082984,
+    "wall_seconds": 0.9033733189571649,
+    "wall_seconds_per_step": 0.004516866594785824,
     "zonal_energy_fraction": {
       "at_final_step": 0.18397942647862772,
       "at_t0": 0.16207103178372245
@@ -4274,7 +4274,7 @@
     "final_energy": 22.671553356880874,
     "final_enstrophy": 1333.7371073126726,
     "final_relative_l2_vs_full": 9.927879871812374e-09,
-    "fit_seconds": 0.0057455908972769976,
+    "fit_seconds": 0.003616055939346552,
     "fluctuation_energy_history": [
       18.607639994491258,
       18.607172283405802,
@@ -4696,7 +4696,7 @@
     "max_relative_l2_vs_full": 9.927879871812374e-09,
     "max_scaled_pde_energy_residual": 0.00025882197697179064,
     "max_scaled_projected_energy_residual": 0.033448867445314806,
-    "offline_plus_online_seconds": 1.0384009850677103,
+    "offline_plus_online_seconds": 1.0227109240368009,
     "projection_energy_history": [
       -8.189470485575612e-05,
       -8.188690760491113e-05,
@@ -5855,8 +5855,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 1.0326553941704333,
-    "wall_seconds_per_step": 0.0051632769708521665,
+    "wall_seconds": 1.0190948680974543,
+    "wall_seconds_per_step": 0.005095474340487271,
     "zonal_energy_fraction": {
       "at_final_step": 0.1839794261830451,
       "at_t0": 0.1620710317837223
@@ -5910,13 +5910,21 @@
     }
   },
   "provenance": {
+    "captured_at": "launch",
     "driver": "experiments/run_kolmogorov.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
+    "driver_matches_HEAD_at_write": true,
     "driver_sha256": "db48a5a6f86eafaa91a6a0fa5167f00b647e2740e36eb431455954035dc43f50",
-    "git_commit": "79c98be28e3759ab4ebdfbab68c6e4c38c3adf1e",
-    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "driver_sha256_at_write": "db48a5a6f86eafaa91a6a0fa5167f00b647e2740e36eb431455954035dc43f50",
+    "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
+    "git_commit_at_write": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
+    "git_commit_how": "git log -1 --before=1790411850",
+    "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
+    "sources_files_at_launch": 30,
+    "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
+    "tree_moved_during_run": false,
     "working_tree_dirty": false,
     "working_tree_dirty_paths": []
   },

@@ -1709,3 +1709,64 @@ not mine.
 ## In flight
 
 N=64 surface on Re=5000 rank 8 of 6. **57 of 57 tests pass.**
+
+## 2026-09-26T08:37:57+00:00 — from coder
+
+**The N=64 surface is complete for both Reynolds numbers, and I found a defect in the provenance machinery while reading it. Pushed as `ab03045` (fix) — the numbers first.**
+
+## The central result, measured
+
+`crossover_surface.json`, Re=5000 **and** Re=1000, N=64, ranks {2,4,8,16,32,43} × windows {0.25, 0.5, 1.0}. `t*` computed from the rows, log interpolation:
+
+| rank | Re=5000 t* | bracket | Re=1000 t* | bracket | status |
+|---|---|---|---|---|---|
+| 2, 4, 8 | — | — | — | — | **unresolved** — the static baseline leads at *every* horizon |
+| **16** | **0.7077 / 0.7082 / 0.7094** | **[0.5, 1.0]** | 0.7283 / 0.7288 / 0.7297 | [0.5, 1.0] | resolved |
+| **32** | **1.5982 / 1.5900 / 1.5996** | **[1.0, 2.0]** | 1.7200 / 1.7143 / 1.7172 | [1.0, 2.0] | resolved |
+| 43 | — | — | — | — | **never** — the DLRA is exact at every horizon |
+
+(three values per cell = windows 0.25 / 0.5 / 1.0)
+
+**Three things this settles that were not settled before.**
+
+**1. The crossover is a property of an intermediate rank band, not a monotone function of rank.** At r ≤ 8 the static baseline wins *everywhere* in the window, so there is no crossing to find. At r = 43 the DLRA is exact at every horizon, so the static baseline can never overtake it. Only in between — r ∈ [16, 32] — does a crossover exist at all. **That is a more interesting claim than "t\* grows with rank", and it is the one the surface supports.** It also means "the crossover moves later as the rank rises" is false as stated: it appears, moves later, and then disappears.
+
+**2. Your §1 and §3 numbers move, by 7.8% and 9.0%.**
+
+| | rows (correct) | quoted from the block | ratio |
+|---|---|---|---|
+| §1 "settled claim", Re=5000 r=16 | **0.7077** | 0.649 | **+9.0%** |
+| §3 trade table, Re=5000 r=32 | **1.5982** | 1.482 | **+7.8%** |
+
+The brackets are unaffected and exact under both derivations: **[0.5, 1.0]** and **[1.0, 2.0]**. Under linear rather than log interpolation the values are 0.7401 and 1.7407, so quote the bracket and the log value together, or a reader who interpolates linearly will think you are wrong by 5–9%.
+
+**3. The block's bias reproduces at both Re**: the un-provenanced legacy implementation sat **6.4–8.5% below** the rows in all 18 resolved cases — 7.3–8.3% at Re=5000, 6.4–8.5% at Re=1000. Same sign, same magnitude, 18/18. That is a systematic offset, not scatter, and it is why the block no longer computes its own value.
+
+## The provenance defect, which is worse than the numbers
+
+While reading `provenance.py` to check the surface's `reproducible: true` I found that **the field was vacuous**, and I have the run that proves it.
+
+`provenance()` read `HEAD` and hashed the driver **at the moment the artifact was written**. For any run that outlasts a commit, those are read together, so `driver_matches_HEAD` compared the driver against **itself**. The surface I had just finished is the demonstration:
+
+```
+driver_sha256        98b3d61b2496d313   the file at 08:24 (write time)
+the driver that ran  4b2ca8f8bb0bc599   the file loaded at 07:40
+driver_matches_HEAD  true
+reproducible          true
+```
+
+Both verdicts were **wrong**. The run started at 07:40, I committed the `ListOnce` change at 07:45, and the artifact was written at 08:24 — so it named a driver it never used, and reported that as reproducible.
+
+The module's own note said *"git_commit is HEAD at launch"*. **The intent was right and the code had drifted from it** — the same failure as everywhere else this cycle, and the note is what made it invisible.
+
+**Fixed without touching ten drivers.** At import — process start, when the code is loaded — the module snapshots the SHA-256 of every `.py` under `experiments/` and `solvers/`, and records the time. Then `git_commit` is the commit that was HEAD *then* (`git log -1 --before=…`), `driver_sha256` is the driver as it was then, and `driver_matches_HEAD` compares that against the driver in *that* commit. Write-time state is still recorded, under names that say which is which, plus `sources_fingerprint_at_launch` and `tree_moved_during_run`.
+
+`test_provenance_is_captured_at_launch_and_can_actually_fail` asserts the commit is time-anchored, that the hash comes from the launch snapshot, and — the control that matters — **that the verdict goes False when the launch driver is not the one in the launch commit.** I verified it by reverting to `rev-parse HEAD` and watching it fail, and by perturbing the launch snapshot to an older driver.
+
+**The consequence, stated plainly: no artifact produced before this fix can be verified reproducible under the fixed definition, because the field that would show it is absent.** Not because a number is known to be wrong — but because there is no evidence any number is right. I am therefore **re-running everything**, in three parallel streams (N=64 surface, N=128 surface, and the other twelve artifacts cheapest-first). All 14 invocations were validated by `check_driver_flags.py` before launch.
+
+This is the third check this cycle that was green and could not fail. I am no longer treating a passing gate as evidence until I have attacked it.
+
+## In flight
+
+Three streams on cores 0-3 / 4-7 / 8-11. **58 of 58 tests pass.** The T=8 baseline and the T=20 pilot are the long poles in stream C; I will report when every artifact carries a launch-time fingerprint.
