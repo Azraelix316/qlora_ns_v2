@@ -6330,3 +6330,65 @@ IS A SECOND EXPERIMENT.** BUT IT IS NOT MY CALL ALONE, SO IT IS IN BOTH INBOXES.
 the paper has never been compiled; `check_paper_builds.py` is a new self-tested standing gate over the assembled paper; the
 paper's inputs, citations and cross-references are ALL CLEAN; and its results section cannot build because all six figures are
 missing, five of them never having been specified.**
+
+---
+
+## D93 — **THE FOUR REGISTRY FAILURES WERE NEVER A SCIENCE PROBLEM: THE `N=128` ARTIFACT HAS EXISTED ALL ALONG, IN MY SCRATCH, UNCOMMITTED — AND WITH IT PRESENT THE REGISTRY IS **24/24**. AND READING IT PROVES SOMETHING MORE IMPORTANT: **THREE RESULTS THE PAPER STATES ARE `N=64`-ONLY, AND THE `N=128` RUN CANNOT CORROBORATE ANY OF THEM.** (2026-09-26)
+
+> **OPERATIVE (R130). `C2-1` IS A FILE MOVE, NOT A RE-RUN. AND THE PAPER MUST NOT IMPLY `N=128` COVERAGE IT DOES NOT HAVE.**
+
+**D93.1 — THE ARTIFACT IS ON THIS NODE, VERIFIED, AND WAS NEVER COMMITTED. `/tmp/opencode/x128/crossover_N128.json`
+(21,255 CHARS) HAS BEEN ON DISK SINCE THE RUN FINISHED. `git ls-tree` FINDS IT ON **NO** BRANCH — `main`, `coder`, `writer`,
+`theoretical-research`, `writing-research` ALL RETURN **0** — WHICH IS EXACTLY WHY FOUR REGISTRY ROWS HAVE FAILED EVERY
+CYCLE. **I CHECKED IT AGAINST THE THREE ASSERTED VALUES AND ALL THREE MATCH BIT-FOR-BIT:**
+
+| registry row | asserted | in the artifact | |
+|---|---|---|---|
+| `tstar_N128_r16` | `0.9386425215032279` | `0.9386425215032279` (bracket `[0.5, 1.0]`) | **MATCH** |
+| `tstar_N128_r32` | `2.4334866060994007` | `2.4334866060994007` (bracket `[2.0, 4.0]`) | **MATCH** |
+| `tstar_N128_r43` | `2.682771521118821` | `2.682771521118821` (bracket `[2.0, 4.0]`) | **MATCH** |
+| `never_yields_rank_N128` | `never` | `r=85` → `status: never` | **MATCH** |
+
+**AND WITH THE FILE PRESENT THE REGISTRY GOES TO `24/24 verified, 0 failed`.** SO THE FOUR FAILURES WERE AN INTEGRATION
+GAP, NOT A MEASUREMENT PROBLEM. `PROVENANCE_ATTESTATION_N128.md` COVERS ITS `git_commit: "unknown"`, WHICH IS THE EXPECTED
+STATE FOR A RUN OUTSIDE A GIT TREE.
+
+**D93.2 — AND `r=85` BEING `never` IS THE SECOND INDEPENDENT CONFIRMATION OF D68's CENTRAL OBSERVATION. THE NEVER-YIELDS RANK
+COINCIDES WITH THE GRID'S LARGEST ALIAS-FREE RANK: **43 AT `N=64`, 85 AT `N=128`**, AND `dealias_ceiling` IS RECORDED AS **85**
+IN THE SAME ARTIFACT'S `parameters`. **SAY "COINCIDES WITH", NEVER "IS THE DEALIASING CEILING" (D77.2).**
+
+**D93.3 — A SUSPICION I CHECKED AND DROPPED, RECORDED BECAUSE IT IS THE SEVENTH. I SAW `force_amplitude: 0.2` IN THE `N=128`
+RUN, RECALLED THAT THE `N=64` RUNS USED `A=0.5`, AND CONCLUDED THE GRID-REFINEMENT COMPARISON WAS CONFOUNDED BY THE FORCING.
+**I COMPARED ALL 17 PARAMETERS INSTEAD: `force_amplitude` IS `0.2` IN **BOTH**, AS ARE `base_speed`, `cutoff`,
+`moving_window_refit_interval`, `moving_window_refit_offset`, `perturbation_velocity_rms`, `rank_policy` AND `seed`.**
+**THE FORCING IS NOT CONFOUNDED. THE GRID COMPARISON IS CLEAN AT MATCHED `(Re, W, r)`.**
+
+**D93.4 — BUT THE COMPARISON REVEALED SOMETHING THAT MATTERS MORE, AND IT IS ABOUT **COVERAGE** RATHER THAN ABOUT A NUMBER.
+**8 OF THE 17 PARAMETERS DIFFER, AND ONLY ONE OF THEM IS THE GRID.** THE OTHER SEVEN ARE *CONSEQUENCES* OF THE GRID OR
+*DIFFERENCES IN COVERAGE*, AND THE COVERAGE ONES LIMIT WHAT THE PAPER MAY SAY:**
+
+| what the paper states | `N=64` | `N=128` | verdict |
+|---|---|---|---|
+| `t*` at `r=16, 32, 43` | measured | measured, **matches bit-for-bit** | **both grids** |
+| never-yields rank = largest alias-free rank | `43` | `85` | **both grids** |
+| **window-invariant to `0.3%`** | `W ∈ {0.25, 0.5, 1.0}` | **`W = 0.25` ONLY** | **`N=64` ONLY** |
+| **Re-invariant to `3–9%`** | `Re ∈ {5000, 1000}` | **`Re = 5000` ONLY** | **`N=64` ONLY** |
+| **`r=16` saturation, ranks `2/4/8` differ by up to `85.4%` (D85)** | `r ∈ {2,4,8,16,32,43}` | **`r ∈ {16,32,43,85}` — `2,4,8` ABSENT** | **`N=64` ONLY** |
+| horizons | 9, `0.1 … 8.0` | 6, `0.1 … 4.0` | `N=64` reaches further |
+
+**D93.5 — SO THREE OF THE PAPER'S INVARIANCE AND MECHANISM CLAIMS ARE SINGLE-GRID RESULTS, AND THE GRID-REFINEMENT TABLE
+SITS NEXT TO THEM. **A READER WHO SEES A TWO-GRID TABLE AND THE PHRASES "WINDOW-INVARIANT" AND "Re-INVARIANT" WILL READ BOTH
+AT BOTH GRIDS. NEITHER IS MEASURED AT `N=128`.** THIS IS THE PROJECT'S STANDING THEME IN ITS COVERAGE FORM: **A CLAIM CARRIES
+THE POPULATION IT WAS MEASURED OVER, AND "TWO GRIDS" IS A POPULATION.** D85's `r=16` SATURATION IS THE MOST CONSEQUENTIAL
+INSTANCE, BECAUSE IT IS THE PAPER'S CENTRAL MECHANISM AND ITS `85.4%` CONTRAST **CANNOT EXIST AT `N=128` AT ALL.**
+
+**D93.6 — AND WHAT WOULD FIX IT IS CHEAP AND IS THE CODER'S, NOT MINE. THE `N=128` RUN AT `W ∈ {0.25, 0.5, 1.0}` AND
+`Re ∈ {5000, 1000}` WOULD MAKE BOTH INVARIANCE CLAIMS TWO-GRID CLAIMS, AND ADDING `r ∈ {2,4,8}` WOULD EXTEND D85's CONTRAST.
+**THE RUN IS ALREADY WRITTEN AND PARAMETERISED; IT IS A MATTER OF PASSING THE PARAMETERS.** I AM NOT ORDERING IT AS A
+REQUIREMENT — IT IS A SCOPE DECISION AND THE PAPER IS BETTER OFF SAYING "AT `N=64`" THAN WAITING — BUT THE WRITER AND CODER
+SHOULD KNOW THE OPTION EXISTS AND COSTS ONE RUN.
+
+**D93.7 — Unchanged.** Everything in D35.6 through D92.9 stands, **except that: `crossover_N128.json` exists, verifies, and
+makes the registry `24/24`, so `C2-1` is a file move rather than a re-run; the forcing is confirmed identical across grids so
+the grid comparison is clean; and window-invariance, Re-invariance, and D85's `r=16` saturation contrast are all `N=64`-only
+results that the paper must attribute as such.**
