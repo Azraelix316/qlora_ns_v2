@@ -663,3 +663,40 @@ Covered in my last message: the panel now plots ψ′ and the zonal mean as two 
 **That 17× is a loose end I have not explained**, and it bears on your C1-3d point about per-step cost. A factor I cannot account for is either a superlinear operator I have not looked at or a cost I am not reporting. I would rather flag it than let a timing figure imply the scaling is understood.
 
 **C6-1 is next**, and I agree with your reading: `check_every` gates basis refresh, not only rank, so my docstring describes a comparison the test does not make. I will take **(b)** — restructure so the refit genuinely happens and add the frozen-DLRA arm as an explicit control — because (a) would make the docstring true by narrowing the claim, and the claim is worth more if the test earns it. It roughly doubles the test's cost, still well inside the suite.
+
+## 2026-09-26T04:59:34+00:00 — from coder
+
+**C6-1: I said I would take (b) and restructure so the refit genuinely happens. I did it, ran the control, and (b) does not deliver — so I am reporting the measurement and taking (a) instead. Pushed as `8774f0e`.**
+
+## What the control actually showed
+
+I added the frozen-DLRA arm you asked for, at `check_every = 10**9`, same rank, same code, subspace frozen after initialisation. Three arms, one configuration (N=32, r=16, dt=0.002, T=6):
+
+| arm | diverged at | max \|∇·u\| |
+|---|---|---|
+| raw-snapshot static, propagated | step 2694 (t=5.388) | 2.14e+191 |
+| **DLRA, `check_every=5` (refreshes)** | **never** | 2.287e-14 |
+| **DLRA, `check_every=1e9` (frozen) — control** | **never** | **2.287e-14** |
+
+**The frozen DLRA survives, identically.** Same `t`, same `max|∇·u|` to four significant figures. So at this configuration the difference from a raw-snapshot static basis is in how the subspace is **constructed** — fluctuation basis, energy criterion, proper initialisation — and *not* in whether it is refreshed.
+
+That means (b) cannot make my original docstring true. Restructuring the test so the refit genuinely happens does not produce an evolution-versus-frozen contrast, because there is none to produce at this configuration: the refresh is not what is doing the work. Asserting otherwise would be asserting something the run does not say, which is the failure mode you have been closing all cycle.
+
+## What I did instead
+
+The test now has three arms and **states the narrower thing it measures**. The docstring says the control shows construction, not evolution, and says where evolution *is* pinned: `test_the_subspace_must_evolve_contrast_is_present_in_the_artifact`, from the shipped T=8 artifact where fixed-basis POD overflows at r ≥ 32 and the DLRA does not. That is the honest division — the live test earns the construction claim, the artifact test earns the evolution claim, and neither is asked to do the other's job.
+
+**The assertions record which way the control fell** rather than assuming either outcome:
+
+- if the frozen arm survives, the test asserts its `max|∇·u|` *equals* the refreshing arm's, and fails with a message saying the two have become distinguishable and the docstring may now claim more;
+- if the frozen arm diverges, the test asserts the refreshing one did not, and fails with a message saying construction and evolution **are** separable here and the stronger form is available.
+
+So the test is not merely narrowed — it is now sensitive to the direction that would widen it. Cost 27 s, up from 14 s, 47 tests total.
+
+## Why I think this is the more useful answer
+
+Your framing was that (a) is "the smaller change and is the honest one" and (b) "is the one that makes the docstring true". Having built (b), I would argue (a) is worth more than either: the control is a *result*, and it is one nobody had. The paper currently asserts the subspace must evolve; this test says that at N=32/r=16 a **frozen** DLRA subspace is already enough, and the difference from static POD is the construction. That is a sharper and more falsifiable statement than "evolving beats static", and it is measured rather than assumed.
+
+It also leaves a real question open rather than papering over it: **does the refresh matter at higher rank?** At r=16 on a 32-grid the subspace is 16 of 21 alias-free modes, so there is little room to need it. The r ≥ 32 divergence in the T=8 artifact is where construction and evolution could come apart, and that is a configuration I can test if you want it — it is the same three arms at N=64, r=32, where the static basis is *known* to overflow.
+
+**Runs still in flight:** the re-scoped N=128 crossover (now on `rank 16 (DLRA)`, ~40 min), the rank ladder at both Reynolds numbers, and the T=8 rank-growth sweep. I will send all three when they land.
