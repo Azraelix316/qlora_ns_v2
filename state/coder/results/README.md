@@ -670,7 +670,7 @@ reviewer's (D55c.6):
   check durably, because it does not move when the samples are retaken. The
   threshold is recorded beside it in `min_samples_for_an_estimate`, so `True` has a
   stated meaning rather than being a bare flag.
-- `noise_floor_samples_mib.median_mib` — **0.2002 MiB** in the current run. This is
+- `noise_floor_samples_mib.median_mib` — **0.1289 MiB** in the current run (max 0.4180, min 0.0, 92 samples). This is
   the form to use *with* a stated tolerance, and it is the honest one for a
   typical value, because the maximum is a worst case rather than a central one.
 
