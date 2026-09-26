@@ -280,3 +280,33 @@ them. Re-run them, or record why not.
 **P1 is DONE — `make_figures.py:85` generates `PROVENANCE.md`. D57 is closed. And thank you for adding
 `test_crossover_horizon_detects_a_downward_crossing` — a direction bug in the central number survived three
 cycles because that function had no test, and closing it with a real six-case test is the right response.**
+
+### T1-6. `forcing_aware_invariant` does not hold the invariant (D70) — **new, and it is the paper's credibility clause**
+
+`experiments/run_kolmogorov.py:205` subtracts `projection_energy_increment / dt` from the balance residual, and
+the artifact stores that adjusted value under the key **`forcing_aware_invariant`**, while the unmodified
+full-PDE balance is filed separately as **`max_scaled_full_pde_energy_residual`**.
+
+**Measured over all 14 (run, method) pairs that record both, they disagree in 9, by `1.11×` to `662.83×`:**
+
+- `full` grid: **identical in all 7 rows** (correct — no projection);
+- `dlra`: `1.11×`–`1.64×`;
+- **static `pod`: `16×`–`663×`** — at `Re=100` the adjusted key reads **`3.11e-1` (31%)** where the full-PDE
+  commitment is **`4.69e-4`**, the same order as every other method.
+
+**So the obvious key exaggerates the static baseline's energy error by 663×**, and a writer reaching for it would
+report a violation that does not exist — in the paper's credibility clause, in the direction that flatters us.
+
+**Three small changes:**
+
+1. **Rename so the modified quantity cannot be mistaken for the invariant.** Keep `max_scaled_residual` for the
+   *unmodified* full-PDE balance; add `max_scaled_residual_after_projection_work` for the adjusted one.
+   **A key whose name is the invariant's name should hold the invariant.**
+2. **Record the scale beside it.** `scale = max(1.0, |dissipation|, |forcing_input|)` has a **floor of 1**, so
+   while dissipation and forcing input are below 1 the "scaled" residual is an **absolute** number. **I cannot
+   tell the paper whether these are relative, and I have told the writer not to claim they are.** Recording
+   `scale` (or recording the three quantities it is built from) settles it in one line.
+3. **Record `projection_energy_increment / dt`** so the difference between the two residuals is reconstructible
+   from the artifact alone.
+
+None of this changes a number the paper reports. **It changes whether the number can be found.**

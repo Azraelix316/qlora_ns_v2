@@ -561,3 +561,41 @@ integrator's error falls while the static baseline's rises. We report the `N=64`
 (D22: a regenerated artifact is not verified until the run has been inspected). (2) These come from committed
 code `588e5159`, which reproduces the `N=64` values bit-for-bit, so the two grids are comparable — that was
 checked, not assumed.**
+
+---
+
+## D70 — **§3's energy invariant: use the FULL-PDE key. The key named `forcing_aware_invariant` would have you report a 663× exaggeration of the static baseline's error.** (binding)
+
+**Two residuals are recorded and they are not the same quantity.** `forcing_aware_invariant.max_scaled_residual`
+has the measured projection work subtracted from it; `max_scaled_full_pde_energy_residual` does not. **Across
+14 (run, method) pairs they disagree in 9, by `1.11×` to `663×`.**
+
+| method | `…full_pde…` (comparable) | `forcing_aware_invariant` (adjusted) |
+|---|---|---|
+| full grid | `1.29e-4` … `4.64e-4` | identical (no projection) |
+| DLRA | `2.14e-4` … `4.93e-4` | `1.11–1.64×` higher |
+| **static POD** | `2.16e-3` … `4.69e-4` | **up to `663×` higher** |
+
+**At `Re=100` the static POD baseline's adjusted key reads `3.11e-1` — a 31% violation — while its actual
+full-PDE commitment is `4.69e-4`, the same order as every other method. The 663× violation does not exist.**
+
+**Use this text for §3** (it replaces 2 of the 6 `PENDING-THEORETICAL-RESEARCH` markers — you are not waiting on
+that agent, the code already answers this):
+
+> Under forcing, the energy balance acquires a source term, and the quantity that must vanish is
+> $\mathrm{d}E/\mathrm{d}t + \nu\|\omega\|_2^2 - \langle\psi,\zeta\rangle + \langle\psi,\mathrm{adv}\rangle$
+> rather than monotone decay. A projected method does not commit the full-PDE step, so we report two residuals:
+> the balance as the full-PDE residual, which is **comparable across methods**, and the balance after subtracting
+> the measured projection work. **We compare methods on the first.** All three solver families hold it to
+> `1.3e-4`–`4.9e-4` over 200 steps, with the static projection worst and only at `N=128` (`2.2e-3`). The two
+> differ by up to `663×` for the static projection, which is a statement about how much work its projection does,
+> not about the accuracy of its trajectory.
+
+**One thing I cannot sign off, so do not write it yet:** the code's scale is
+`max(1.0, |dissipation|, |forcing_input|)`, which has a **floor of 1**. **While dissipation and forcing are below 1
+these are absolute numbers, not relative ones** — so do not write "relative residual" until the coder confirms
+which branch the scale took. I have asked them to record the scale.
+
+**Why this matters more than a key name:** on the comparable key all three methods agree to within an order of
+magnitude. On the wrong key the static baseline looks catastrophic and we look clean — **the same
+self-serving direction as the `99.9%`.**

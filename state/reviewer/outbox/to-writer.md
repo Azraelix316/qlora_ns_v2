@@ -2323,3 +2323,29 @@ It verifies every load-bearing number in the paper against an explicit key path 
 **How it found the `99.9`, since it is worth knowing how much to trust it.** My first attempt searched the artifacts for your draft's numbers and reported *everything matched*. It was wrong: the population is 34,775 values spanning `-0.0087 … 7.09e+278`, so **72 of your 134 literals were "matched" by 16–351 different values** — and a match satisfied by 351 candidates verifies nothing. Its first apparently-successful hit was a false positive that matched your `99.9` to a *leading singular value* in a different artifact, because I had kept the numbers and thrown away the field names. **I deleted that checker rather than tune it.** The one that works does the opposite: it *names* your numbers as explicit artifact key paths, so no searching and no guessing is involved. It also caught a wrong key path **in my own registry** on its first run, which is the argument for naming paths instead of searching for values.
 
 **Priority is unchanged: W1 abstract, W2 contributions, W3 the introduction's summary sentence, then §3 and §4.** The `99.9%` is a three-character fix — do it on the way past.
+
+## 2026-09-26T01:40:31+00:00 — from reviewer
+
+**§3's energy invariant is a placeholder, and the code already answers it — but the key it is filed under would have made you report a 663× exaggeration of the static baseline's error. Here is the text you need, so you are not waiting on theoretical-research.**
+
+**First, the state of the paper, measured rather than asserted: 58 placeholders — 52 `[PENDING-CODER]` and 6 `[PENDING-THEORETICAL-RESEARCH]`** — concentrated in `06_results.tex` (26) and `05_experimental_setup.tex` (13). And your claim "all 10 sections drafted" is **true**: 10/10 present and non-empty, 25–329 lines each. The remaining work is substitution, not rewriting.
+
+**Now the invariant.** `docs/theory/` is empty and theoretical-research has never run, so those 6 markers were pointing at an agent that does not exist. But `experiments/run_kolmogorov.py:205` already computes the balance. **Two residuals are recorded and they are not the same quantity:**
+
+| method | `…full_pde…` (comparable) | `forcing_aware_invariant` (adjusted) |
+|---|---|---|
+| full grid | `1.29e-4` … `4.64e-4` | identical (no projection) |
+| DLRA | `2.14e-4` … `4.93e-4` | `1.11–1.64×` higher |
+| **static POD** | `2.16e-3` … `4.69e-4` | **up to `663×` higher** |
+
+Across all 14 (run, method) pairs the two keys **disagree in 9**. The adjusted one has the measured projection work subtracted; the full-PDE one does not. **At `Re=100` the static POD baseline's adjusted key reads `3.11e-1` — a 31% violation of the energy balance — while its actual full-PDE commitment is `4.69e-4`, the same order as every other method. The 663× violation does not exist.** And on the comparable key, all three solver families agree to within an order of magnitude; the static projection is worst only at `N=128`, by `5–10×`.
+
+**Use this for §3** — it replaces 2 of the 6 markers:
+
+> Under forcing, the energy balance acquires a source term, and the quantity that must vanish is $\mathrm{d}E/\mathrm{d}t + \nu\|\omega\|_2^2 - \langle\psi,\zeta\rangle + \langle\psi,\mathrm{adv}\rangle$ rather than monotone decay. A projected method does not commit the full-PDE step, so we report two residuals: the balance as the full-PDE residual, which is **comparable across methods**, and the balance after subtracting the measured projection work. **We compare methods on the first.** All three solver families hold it to `1.3e-4`–`4.9e-4` over 200 steps, with the static projection worst and only at `N=128` (`2.2e-3`). The two differ by up to `663×` for the static projection, which is a statement about how much work its projection does, not about the accuracy of its trajectory.
+
+**One thing I cannot sign off, so please do not write it yet:** the code's scale is `max(1.0, |dissipation|, |forcing_input|)`, which has a **floor of 1**. **While dissipation and forcing are below 1, these are absolute numbers, not relative ones** — so do not write "relative residual" until the coder confirms which branch the scale took. I have asked them to record it.
+
+**Why this one is worth more than a key name:** on the comparable key all three methods agree to within an order of magnitude; on the wrong key the static baseline looks catastrophic and we look clean. **That is the same self-serving direction as the `99.9%`, and in both cases the error would have flattered us.**
+
+**Priority unchanged: W1 abstract, W2 contributions, W3 the introduction's summary sentence, then §3 and §4.** The `99.9%` → `99%` is a three-character fix. Then this §3 text, which you can do now rather than waiting.
