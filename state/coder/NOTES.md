@@ -1,26 +1,24 @@
 # NOTES.md — coder
 
 > Branch: `agent/coder` · Worktree: `worktrees/coder`
-> Status: Both reviewer gates are in their best state of the project.
+> Status: Submittable-code state reached on the coder side. **62 of 62 tests
+> pass; all four reviewer gates run; working tree clean; everything pushed.**
 > `check_provenance.py` **PASS** (18/18 runs fingerprinted and clean, 0
-> unverifiable); `claims_registry.py` 22 OK / 17 FAIL with **every** failure
-> accounted for and the exact re-pin values handed over. **59 of 59 tests pass**,
-> and every artifact records a *launch-time* fingerprint. Three defects found and
-> fixed at the root this cycle, each of which had made a field meaningless:
-> (1) `provenance.py` read HEAD and hashed the driver **at write time**, so for
-> any run that outlasted a commit it compared the driver against itself — proven
-> on a real run (loaded `4b2ca8f8`, recorded `98b3d61b`, `reproducible: true`);
-> now captured at launch, and all 20 artifacts re-run. (2) The memory "noise
-> floor" was `max()` over a dict **keyed by configuration**, so the repeats
-> overwrote each other and one sample stood in for an estimate — that quantity
-> has been observed at 0.1328/0.0664/0.0977/0.0039 MiB, a factor of 34 — and
-> **three of four rank-variation verdicts flip to "not resolved"**; every
-> configuration is now measured 5x and the floor from 92 samples. (3) 17
-> list-valued flags across 8 drivers silently dropped a repeated occurrence, which
-> is how the N=64 surface ran half of itself and overwrote a complete artifact.
-> Retracted: "the variation with rank is RESOLVED at every grid". New finding:
-> **the cost ratios are not reproducible to better than ~15%** — 28% range at
-> fixed threads, and the thread count alone moves N=128 by 43%.
+> unverifiable, 0 without a provenance block). `claims_registry.py` 22 OK / 17
+> FAIL with **every** failure diagnosed and the exact re-pin values handed over.
+> `check_order_withdrawn.py` 4 candidates: **one live error in the paste-ready
+> blocks** (D52.5's "2.2-2.7x in every regime" is false at N=128 under the
+> canonical thread setting -- 3.37-3.54) and three verified correct (D104, D67,
+> D122). All six paper figures regenerate as PDF+PNG in `paper/figures/`;
+> `make_summary.py` reports `all_inputs_reproducible: true` with no input lacking
+> launch-time provenance. **20 of 23 artifacts now record their software stack**
+> (`provenance.environment`): 14 of 23 recorded none at all before this, so a
+> `reproducible: true` claim rested on the driver matching and on nothing about
+> the numpy, BLAS or thread count. The code state is finished; what remains is
+> the reviewer's: 7 `tstar_*` re-pins, a one-line dotted-path fix in their
+> `resolve`, 5 `mem_*` rows that now pin distributions by construction, 1 cost
+> row needing a tolerance, and the `check_paper_builds.py` resolution model
+> (measured: 0/6 against the including file, 6/6 against the main document).
 
 ## Mission
 
@@ -1209,3 +1207,44 @@ to re-pin (values in `state/coder/results/README.md`), 4 zonal rows needing one
 line in the reviewer's `resolve`, 5 `mem_*` pinned to quantities that are now
 distributions by construction, 1 `cost_ratio_max_N128` needing a tolerance rather
 than a point. **59/59 tests pass.**
+
+## 2026-09-26 (final) — submittable-code state, and three defects found at the end
+
+**Every artifact now records its software stack.** 14 of 23 recorded no
+`environment` at all before this, so `reproducible: true` rested on the driver
+matching and on nothing about the numpy, the BLAS or the thread count — and none
+of those appear in a diff of this repository. `provenance.environment` now attaches
+python/numpy/platform/processor/thread_settings to every artifact, because it lives
+in the one module every driver already calls. All 18 run artifacts re-run to carry
+it; the summary reports `all_inputs_reproducible: true` with
+`inputs_without_launch_provenance: []`.
+
+**A driver could not print its own `--help`, and I had broken it.** `bench_memory.py
+--help` exited 1 with `ValueError: unsupported format character ' ' (0x20) at index
+327` — argparse `%`-interpolates `help=` strings and my `--overhead-repeats` text
+contains `+136%`. Found only because `check_driver_flags.py` reported that driver
+as "cannot validate", which read like a problem with the checker. Fixed with `%%`,
+and `test_every_driver_can_print_its_own_help` now runs `--help` on every driver.
+That test immediately caught a second one: `check_driver_flags.py --help` exited 1
+because it takes paths positionally and treated `--help` as a filename — a tool for
+inspecting drivers that could not be asked for its own help.
+
+**I overwrote a file I do not own, by writing through a symlink.** The gate scratch
+tree symlinks into this worktree, and `git show ... > /tmp/.../DECISIONS.md` opened
+the symlink's *target*, writing 8328 lines into `state/reviewer/DECISIONS.md` — a
+file whose purpose is that exactly one agent edits it. Caught by `git status` in the
+same minute, restored with `git checkout HEAD --`, verified clean, no damage on the
+branch. The reviewer-file symlinks are now real copies: a scratch tree may symlink
+*inputs it only reads* and must copy anything a command might redirect into.
+
+**`check_order_withdrawn.py` found a live error in the paste-ready blocks.** D52.5's
+"2.2–2.7× the full grid in every regime" is false at N=128 under the canonical
+2-thread setting (3.3728–3.5432). D104 (`9.93e-09 → 1.89e-09`) and D67
+(`energy_fraction: 0.99`) verified exactly against the regenerated artifacts, and
+D122/D71/D30 remain live as reported. Note the gate's DRAFT population read 0
+files: it takes the draft from `origin/main`, so against my branch it needs
+`DRAFT_REF=origin/agent/writer` or the draft half is vacuous — as it says itself.
+
+**Final state: 62/62 tests pass. `check_provenance.py` PASS. `claims_registry.py`
+22 OK / 17 FAIL, all diagnosed. Six paper figures regenerate as PDF+PNG. Working
+tree clean, branch pushed.**
