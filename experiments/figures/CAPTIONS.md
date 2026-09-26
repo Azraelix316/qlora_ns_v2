@@ -10,6 +10,10 @@ Full-step time against the full grid, under one interleaved timing protocol, on 
 
 Cost against the full-grid spectral reference: full-step time, median of 7 repeats over 2000 steps under one interleaved protocol, with the thread settings named above the panel. **Three things this figure does NOT contain, which the draft's caption currently claims it does.** (1) *Peak memory* is in a different artifact from a different driver (`peak_memory.json`, `bench_memory.py`), measured for the full-grid, projected and BUG integrators at N=64 and N=128 only. (2) *The static POD baseline has no cost row here at all*: this driver times `full_grid_reference` and `projected_dlra`, and POD's memory was never measured, so the third method in the caption's list does not appear in this figure. (3) *It is not per Reynolds number* -- this protocol varies N, and Re is not one of its parameters. Per-Re wall times do exist in the suite artifacts, but they are single un-interleaved runs and are **not comparable with these**: the suite's dlra/full ratio is 33.6x at Re=100, 5.03x at Re=1000 and 1.90x at Re=5000, against 2.2-2.7x here. Quoting the two families side by side would be comparing measurement protocols, not methods.
 
+## `fig_crossover`
+
+Left: error against horizon by rank, for the evolving basis (solid) and an oracle trailing-window static baseline (dashed). Right: the spread of the static error across ranks as a function of horizon, at $N=64$, for every Reynolds number measured, with the 10% level marked. **Both rank sets are plotted and the distinction is the result**: over all ranks [2, 4, 8, 16, 32, 43] the spread is large from $t\approx1$ -- rank buys a static baseline something below $r=16$ -- while over $r\geq16$ alone it is 0.0% at every horizon, so the extra modes buy nothing measurable at all. The saturation contrast is an $N=64$ result and does not exist at $N=128$, where $r=16$ is half the resolved band.
+
 ## `fig_div_free`
 
 Maximum $|\nabla\!\cdot u|$ over each run. Every method that survives stays within two orders of the $10^{-14}$ roundoff floor for this grid and horizon, with one named exception annotated; the four fixed-subspace runs that overflowed are shown separately with their divergence times, because their final recorded value is meaningless.
@@ -53,6 +57,4 @@ Two different rank quantities against window length. Left: the modes needed to r
 ## Panels deliberately omitted
 
 - **fig_spectra_ek: $Z(k)$ panel** -- fluctuation enstrophy drifts 29% over the averaging window [13.3333, 20], outside the 10% S2 bar, so a time-averaged $Z(k)$ there would average a moving quantity
-
-- **fig_crossover** -- `crossover_surface.json` predates the error-column rename (`relative_l2_fluct_over_full`); regenerate it with run_crossover.py. Every other figure is unaffected, which is why this is a skip rather than a failure.
 

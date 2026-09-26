@@ -966,7 +966,10 @@ def main() -> None:
             "and four fixed-subspace methods that do not",
             fontsize=9.5,
         )
-        ax.set_xlim(left=0.0)
+        # No explicit left limit: this is a log axis, and `set_xlim(left=0.0)` on
+        # one is not a no-op warning -- matplotlib refuses it and the axis keeps
+        # whatever lower bound the data implies. Which is what we want, but the
+        # call was doing nothing except emitting a warning on every figure run.
         ax.invert_yaxis()
         if diverged:
             ax2 = axes[1][0]
