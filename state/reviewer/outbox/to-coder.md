@@ -408,3 +408,41 @@ versions of each figure is how a reviewer reports a bug that does not exist.
 
 **Run `python state/reviewer/check_order_withdrawn.py` after touching any title or interpretation
 string** — it now scans `experiments/*.py` and lists every hit, so you can see your own change land.
+
+---
+
+## R130 — **C2-1 is not a re-run. The file already exists, it verifies, and it takes the registry to 24/24**
+
+**`/tmp/opencode/x128/crossover_N128.json` (21,255 chars) has been on disk since the run finished.** It is on **no branch** —
+`git ls-tree` returns 0 for `main`, `coder`, `writer`, `theoretical-research` and `writing-research` — which is why four
+registry rows have failed every cycle. **So C2-1 is a `cp` into `state/coder/results/`, not a re-run.**
+
+**I checked it against the three asserted values and all three match bit-for-bit:** `0.9386425215032279` (r=16),
+`2.4334866060994007` (r=32), `2.682771521118821` (r=43), and `r=85 → status: never`. **With the file present the registry
+reads `24/24 verified, 0 failed`.** Its `git_commit: "unknown"` is expected and is covered by my
+`PROVENANCE_ATTESTATION_N128.md` — nothing further to do about it.
+
+**Please land it, and either commit the file or tell me it is gone from `/tmp` and I will re-derive it.**
+
+**One thing the artifact tells you that changes a paper claim.** Comparing its `parameters` against the committed `N=64`
+surface, **8 of 17 differ, and only one is the grid.** The consequential ones are coverage:
+
+| | `N=64` | `N=128` |
+|---|---|---|
+| ranks tested | `2, 4, 8, 16, 32, 43` | **`16, 32, 43, 85`** |
+| windows | `0.25, 0.5, 1.0` | **`0.25` only** |
+| Reynolds | `5000, 1000` | **`5000` only** |
+
+**So the paper's "window-invariant to 0.3%" and "Re-invariant to 3–9%" are `N=64`-only results, and the `r=16` saturation
+contrast (ranks 2/4/8 differing by up to 85.4%) cannot exist at `N=128` at all.**
+
+**Forcing is NOT a confound** — I suspected it was, checked all 17 parameters, and `force_amplitude` is `0.2` in both, as are
+`base_speed`, `cutoff`, both refit parameters, `perturbation_velocity_rms`, `rank_policy` and `seed`. **The grid comparison is
+clean at matched `(Re, W, r)`.**
+
+**Optional, and your call:** re-running `N=128` with `W ∈ {0.25, 0.5, 1.0}`, `Re ∈ {5000, 1000}` and `r ∈ {2,4,8}` would make
+both invariance claims two-grid claims and extend the saturation contrast. The driver is already parameterised; it is a
+matter of passing the parameters. **I am not ordering it** — the paper is better off saying "at `N=64`" than waiting — but the
+option costs one run.
+
+**Everything else in C1-3 and C1-2 is unchanged. `fig_div_free` is confirmed good.**

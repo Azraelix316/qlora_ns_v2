@@ -591,3 +591,40 @@ five, say so and I will put it to the coder as a build job with a cost.**
 exits non-zero on defects. Re-run it after every §6 edit; it is the only build check that can run here.
 
 **Your priority is unchanged: D13, D14, `99.9%` → `99%` in all three files.**
+
+---
+
+## R130 — **three of your invariance claims are `N=64`-only, and the `N=128` run cannot corroborate any of them**
+
+I read the finished `N=128` crossover artifact (it exists, is not committed — the coder is landing it) and compared its
+`parameters` against the committed `N=64` surface. **8 of 17 parameters differ and only one of them is the grid.** The
+consequential differences are *coverage*:
+
+| what the paper states | `N=64` | `N=128` | so it is |
+|---|---|---|---|
+| `t*` at `r = 16, 32, 43` | measured | measured, matches bit-for-bit | a **two-grid** result |
+| never-yields rank = largest alias-free rank | `43` | `85` | a **two-grid** result |
+| **window-invariant to `0.3%`** | `W ∈ {0.25, 0.5, 1.0}` | **`W = 0.25` only** | **`N=64` only** |
+| **Re-invariant to `3–9%`** | `Re ∈ {5000, 1000}` | **`Re = 5000` only** | **`N=64` only** |
+| **`r=16` saturation; ranks `2, 4, 8` differ by up to `85.4%`** | `r ∈ {2,4,8,16,32,43}` | **`r ∈ {16,32,43,85}`** | **`N=64` only** |
+
+**What this means for your prose.** If a two-grid table sits next to the words "window-invariant" or "Re-invariant", a reader
+will take both at both grids. **Neither is measured at `N=128`.** Write *"at `N=64`, window-invariant to `0.3%` across
+`W ∈ {0.25, 0.5, 1.0`"* and *"at `N=64`, Re-invariant to `3–9%`"* — the population travels with the claim, and it costs six
+words. **The `t*` values and the never-yields rank are genuinely two-grid**, so those need no hedge.
+
+**The saturation threshold needs the most care, because it is the paper's central mechanism.** D85's corrected statement —
+ranks `16, 32, 43` agreeing to `0.0000%` while ranks `2, 4, 8` differ by up to `85.4%` — **rests entirely on `N=64`, because
+`N=128` was never run at ranks `2, 4, 8`.** So §6 must attribute it: *"at `N=64`, the static subspace's error stops improving
+from rank 16"*. **Do not write "at every grid" or "in both runs" for the saturation claim.**
+
+**Good news in the same artifact:** `r = 85` is `never`, and its own `parameters` record `dealias_ceiling: 85`. That is a
+**second independent confirmation** that the never-yields rank coincides with the grid's largest alias-free rank — 43 at
+`N=64`, 85 at `N=128`. **Write "coincides with", never "is the dealiasing ceiling".**
+
+**And the forcing is not a confound** — I suspected it was, checked all 17 parameters, and `force_amplitude` is `0.2` in both
+grids, as are `base_speed`, `cutoff`, both refit parameters, `perturbation_velocity_rms`, `rank_policy` and `seed`. The grid
+comparison is clean at matched `(Re, W, r)`, and D68/D74's ratios stand.
+
+**Still your priority, unchanged: D13, D14, `99.9%` → `99%` in all three files.** The figure decision from R129 is also
+still open and is the one blocking your build.
