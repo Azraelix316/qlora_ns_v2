@@ -339,6 +339,18 @@ def make_paper_figures(results, out, paper_dir, used, skipped, colors) -> None:
         fig.savefig(out / "fig_error_vs_ref.pdf", bbox_inches="tight")
         fig.savefig(out / "fig_error_vs_ref.png", bbox_inches="tight")
         plt.close(fig)
+        # By how much static POD wins inside this window, computed here rather
+        # than written into the caption by hand: a magnitude in prose that is
+        # not read off the artifact is a magnitude that rots on the next re-run,
+        # and this figure's whole point is that the ordering is counter-intuitive
+        # and therefore needs the number attached.
+        pod_advantage = {}
+        for re, block in sorted(suite.items()):
+            dlra_err = block["dlra"].get("max_relative_l2_vs_full")
+            pod_err = block["pod"].get("max_relative_l2_vs_full")
+            if dlra_err and pod_err and pod_err > 0:
+                pod_advantage[re] = dlra_err / pod_err
+
         emit(fig, "fig_error_vs_ref",
              r"**The three SP-DLRA curves coincide**, so two of them are hidden "
              r"behind the third: over this window the reduced method's error is "
@@ -350,7 +362,25 @@ def make_paper_figures(results, out, paper_dir, used, skipped, colors) -> None:
              r"inside it the static baseline is the more accurate method: its "
              r"offline fitting window is a prefix of the evaluated trajectory. "
              r"The ordering reverses at longer horizons, and the crossover is "
-             r"measured separately.**")
+             r"measured separately.** The size of the gap inside the window is "
+             r"not small and should not be read off the log axis without it: by "
+             r"max relative $L^2$, static POD beats SP-DLRA by "
+             + (
+                 ", ".join(
+                     f"{r:.0f}$\\times$ at Re={k}"
+                     for k, r in sorted(pod_advantage.items())
+                 )
+                 if pod_advantage
+                 else "(see the artifact; POD is the more accurate method at "
+                      "every Re measured)"
+             )
+             + r", because a basis fitted offline on a prefix of the evaluated "
+             r"trajectory is a very good representation of a short, smooth "
+             r"window. **The two methods' Reynolds-sensitivities differ by two "
+             r"orders of magnitude** -- SP-DLRA's error is flat in Re to within a "
+             r"factor of 1.03, static POD's moves by a factor of 105 -- so a "
+             r"single $\\mathrm{Re}$ axis spanning both shows one method's "
+             r"sensitivity and hides the other's.")
 
     # --- fig_ke_spectrum (fig:kestats) --------------------------------------
     pilot = None
@@ -373,22 +403,76 @@ def make_paper_figures(results, out, paper_dir, used, skipped, colors) -> None:
         w0, w1 = entry["window_start"], entry["window_end"]
         fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.6), layout="constrained")
         ax = axes[0]
+        # The draft's caption for this figure promises "SP-DLRA against the
+        # full-grid reference".  Plotting one E(t) per Reynolds number -- which is
+        # what this panel did -- cannot deliver that: there is no second curve to
+        # compare against.  So plot the comparison itself, one Re per colour, the
+        # full grid solid and SP-DLRA dashed on top of it.
+        #
+        # The answer is that they coincide, and that is a result rather than a
+        # defect -- but "coincide" is not a caption, so the maximum relative
+        # difference is annotated per Re.  It is also the reason static POD looks
+        # no worse here: on the *total* energy all three methods agree to ~1e-7,
+        # and the methods separate on the fluctuation field (fig:error), not here.
+        max_rel: dict[int, float] = {}
+        # Colour encodes the Reynolds number and the line style encodes the
+        # method.  The first attempt did it the other way round -- one colour for
+        # "the full grid" at every Re -- so the three Re were indistinguishable and
+        # only the two line styles separated, which defeats the point of a
+        # per-Re panel.
+        re_list = sorted(suite)
+        palette = ["#264653", "#0072B2", "#E76F51"]
+        colour = dict(zip(re_list, palette))
         for re, block in sorted(suite.items()):
-            hist = block["full"].get("energy_history") or []
-            if not hist:
+            ref = block["full"].get("energy_history") or []
+            dlra = block["dlra"].get("energy_history") or []
+            if not ref or len(ref) != len(dlra):
                 continue
             dt = block["parameters"]["dt"]
-            ax.plot(np.arange(len(hist)) * dt, hist, linewidth=1.1,
+            t = np.arange(len(ref)) * dt
+            ax.plot(t, ref, color=colour[re], linewidth=1.5,
                     label=f"Re={re}")
+            rel = np.abs(np.asarray(dlra) - np.asarray(ref)) / np.asarray(ref)
+            max_rel[re] = float(rel.max())
+            ax.plot(t, dlra, color=colour[re], linewidth=1.1, linestyle="--")
         ax.set_xlabel("time $t$")
         ax.set_ylabel(r"$E$")
-        ax.set_title(r"$E(t)$ over the suite window", fontsize=9)
-        ax.legend(fontsize=7)
+        ax.set_title(
+            r"$E(t)$, SP-DLRA against the full grid" "\n"
+            r"(curves coincide; $\max|\Delta E|/E$ below)", fontsize=9,
+        )
+        # One box, not one annotation per curve: three annotations at the curve
+        # ends overlapped each other and the legend, which is worse than no
+        # annotation at all.
+        if max_rel:
+            ax.text(
+                0.02, 0.03,
+                r"$\max_t|\Delta E|/E$:" + "\n" + "\n".join(
+                    rf"  Re={re}: {rel:.1e}" for re, rel in sorted(max_rel.items())
+                ),
+                transform=ax.transAxes, fontsize=6, va="bottom", ha="left",
+                bbox={"facecolor": "white", "edgecolor": "0.8", "pad": 2},
+            )
+        # Below the axes, and one entry per Reynolds number rather than two: the
+        # six-entry version put the legend on top of the Re=1000 and Re=5000
+        # curves, and duplicated every Re just to restate the line style.
+        ax.legend(
+            fontsize=6, ncol=3, loc="upper center", frameon=False,
+            bbox_to_anchor=(0.5, -0.28),
+            title="solid: full grid    dashed: SP-DLRA", title_fontsize=6,
+        )
         ax = axes[1]
         ref = block["full"].get("energy_history") or []
         total = ref[-1] if ref else None
+        # Labelled "full grid" on purpose.  The draft's caption promises this
+        # panel is a method comparison, and it cannot be: the pilot is the only
+        # artifact carrying a time-averaged spectrum and it carries ONE, from the
+        # full-grid arm.  The suite runs with --spectrum-count unset and so carry
+        # no spectrum at all, which is why a per-method version would have to be a
+        # new run rather than a redraw.  Saying whose it is beats implying it is
+        # a comparison.
         ax.semilogy(k, e, color=colors["full"], linewidth=1.2,
-                    label=rf"time-averaged $\psi'$ spectrum")
+                    label=rf"full grid, time-averaged $\psi'$")
         if total:
             ax.axvline(k.max(), color=colors["ref"], linestyle=":", linewidth=1.0)
             ax.annotate("dealiased range", (k.max(), e.max()), fontsize=6,
@@ -396,7 +480,7 @@ def make_paper_figures(results, out, paper_dir, used, skipped, colors) -> None:
         ax.set_xlabel("wavenumber $k$")
         ax.set_ylabel(r"$E_{\mathrm{fluct}}(k)$")
         ax.set_title(
-            rf"$\psi'$ spectrum, $t\in[{w0:.4g},{w1:.4g}]$"
+            rf"$\psi'$ spectrum, full grid only, $t\in[{w0:.4g},{w1:.4g}]$"
             "\n$Z(k)$ omitted: enstrophy drifts, so it would\n"
             "average a moving quantity", fontsize=8,
         )
@@ -405,13 +489,31 @@ def make_paper_figures(results, out, paper_dir, used, skipped, colors) -> None:
         fig.savefig(out / "fig_ke_spectrum.png", bbox_inches="tight")
         plt.close(fig)
         emit(fig, "fig_ke_spectrum",
-             r"Kinetic-energy statistics. Left: $E(t)$ for the full grid at each "
-             r"Reynolds number over the suite window. Right: the time-averaged "
+             r"Kinetic-energy statistics. Left: $E(t)$, **SP-DLRA against the "
+             r"full-grid reference at each Reynolds number** -- the comparison the "
+             r"draft's caption promised, which the previous version of this panel "
+             r"could not deliver because it plotted one curve per Re and so had "
+             r"nothing to compare against. The answer is that they coincide, and "
+             r"the figure annotates the gap rather than asserting it: the maximum "
+             r"relative difference is "
+             + ", ".join(
+                 f"{rel:.1e} at Re={re}"
+                 for re, rel in sorted(max_rel.items())
+             )
+             + ". **So the total energy does not discriminate between the methods "
+             r"here** -- static POD is within 1.1e-07 of the full grid on this "
+             r"quantity too, which is why the methods separate on the *fluctuation* "
+             r"field in fig:error and not on the total. Right: the time-averaged "
              r"fluctuation spectrum against wavenumber, over the window named in "
-             r"the title. **The $Z(k)$ half of the enstrophy spectrum is omitted "
-             r"and the reason is on the figure: the fluctuation enstrophy drifts "
-             r"across this averaging window, outside the 10% stationary bar, so a "
-             r"time-averaged $Z(k)$ would be averaging a moving quantity.**")
+             r"the title. **This panel is the full grid only, and cannot be a "
+             r"method comparison: the regime pilot is the only artifact carrying a "
+             r"time-averaged spectrum and it carries one, from the full-grid arm. "
+             r"The suite runs with `--spectrum-count` unset and so carries no "
+             r"spectrum at all, so a per-method version is a new run rather than a "
+             r"redraw.** The $Z(k)$ half of the enstrophy spectrum is omitted and "
+             r"the reason is on the figure: the fluctuation enstrophy drifts across "
+             r"this averaging window, outside the 10% stationary bar, so a "
+             r"time-averaged $Z(k)$ would be averaging a moving quantity.")
 
 
 def provenance(

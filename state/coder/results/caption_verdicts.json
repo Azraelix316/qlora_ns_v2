@@ -5,6 +5,9 @@
     "fig:cost|peak memory",
     "fig:cost|per Re",
     "fig:cost|static POD",
+    "fig:error|per Re",
+    "fig:error|static POD",
+    "fig:kestats|other",
     "fig:rank|r*(Re)",
     "fig:svd|mode count",
     "fig:tg|rank decays"

@@ -233,6 +233,103 @@ def check() -> list[str]:
             "-- POD is not among them."
         )
 
+    # --- fig:error -- SP-DLRA versus static POD, per Re ---------------------
+    # The claim has two parts: a method comparison, and a per-Re breakdown.  The
+    # suite records only scalars, not a series, so this checks the scalars: which
+    # method is more accurate, and how much each depends on Re.  Both matter,
+    # because a reader shown "SP-DLRA versus static POD" will assume the first is
+    # the better one, and the measurement is the other way round.
+    per_re: dict[int, dict[str, float]] = {}
+    for re in (100, 1000, 5000):
+        data = load(f"kolmogorov_re{re}_N64.json")
+        if not data:
+            continue
+        row = {
+            m: data[m].get("max_relative_l2_vs_full")
+            for m in ("dlra", "pod")
+            if isinstance(data.get(m), dict)
+            and data[m].get("max_relative_l2_vs_full") is not None
+        }
+        if row:
+            per_re[re] = row
+    if len(per_re) >= 2:
+        better = {
+            re: row["dlra"] / row["pod"]
+            for re, row in sorted(per_re.items())
+            if {"dlra", "pod"} <= set(row) and row["pod"] > 0 and row["pod"] < row["dlra"]
+        }
+        if better:
+            problems.append(
+                "fig:error presents 'SP-DLRA (adaptive) versus the static POD "
+                "baseline' with no indication of which is better; at every Re "
+                "measured static POD is the MORE accurate method, by factors "
+                + ", ".join(f"{r:.0f}x at Re={k}" for k, r in better.items())
+                + ". A reader will assume the opposite ordering. The ordering "
+                "is not a bug in either method -- a static basis fitted on the "
+                "training snapshots is simply the better representation of a "
+                "short, smooth window -- but it has to be stated."
+            )
+        # One "per Re" axis spanning both methods only makes sense if the two
+        # have comparable Re-sensitivity.  They do not, by two orders of
+        # magnitude, and DLRA's own spread is negligible -- so a threshold is
+        # needed or the flat one reads as a fault when it is a property.
+        factor = {}
+        for method in ("dlra", "pod"):
+            values = [row[method] for row in per_re.values() if method in row]
+            if len(values) >= 2 and min(values) > 0:
+                factor[method] = max(values) / min(values)
+        large = {m: f for m, f in factor.items() if f >= 10}
+        if large:
+            problems.append(
+                "fig:error's 'per Re' breakdown is not comparable across the two "
+                "methods: max relative L2 varies across Re by "
+                + ", ".join(
+                    f"a factor of {factor[m]:.0f} for {m.upper()}"
+                    + (
+                        ""
+                        if m in large
+                        else f" ({factor[m]:.2f}, i.e. flat -- a property, not a fault)"
+                    )
+                    for m in ("dlra", "pod")
+                    if m in factor
+                )
+                + f". The axis shows {max(large, key=lambda m: factor[m]).upper()}'s "
+                "Re-sensitivity and hides SP-DLRA's; say which."
+            )
+    elif per_re:
+        problems.append(
+            f"fig:error: max_relative_l2_vs_full present for only {sorted(per_re)}"
+        )
+
+    # --- fig:kestats -- SP-DLRA against the full grid, per Re --------------
+    # The right panel is claimed to be a method comparison.  It cannot be unless
+    # some artifact carries a spectrum per method; check that rather than assume.
+    methods_with_spectra: set[str] = set()
+    for name in ("kolmogorov_re100_N64.json", "kolmogorov_re1000_N64.json",
+                 "kolmogorov_re5000_N64.json", "kolmogorov_re5000_N128.json",
+                 "regime_pilot_re5000_A0p2.json",
+                 "regime_pilot_re5000_N128_A0p2.json"):
+        data = load(name)
+        if not data:
+            continue
+        windows = data.get("windowed_spectra") or {}
+        if windows:
+            # A single unnamed spectrum is one arm, not a comparison.
+            methods_with_spectra.add(f"{name}:1 spectrum")
+        for method, block in data.items():
+            if isinstance(block, dict) and (
+                block.get("isotropic_spectrum") or block.get("spectrum_E")
+            ):
+                methods_with_spectra.add(f"{name}:{method}")
+    if not any(":" in m and not m.endswith("1 spectrum") for m in methods_with_spectra):
+        problems.append(
+            "fig:kestats's right panel is claimed to be 'SP-DLRA against the "
+            "full-grid reference', but no artifact carries a spectrum per "
+            f"method: the suite sets --spectrum-count unset ({len(methods_with_spectra)} "
+            "single-arm spectrum(s) found, none per method). A per-method version "
+            "is a new run, not a redraw."
+        )
+
     return problems
 
 
