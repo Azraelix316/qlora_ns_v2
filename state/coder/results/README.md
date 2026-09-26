@@ -651,3 +651,37 @@ PART 4's "nearest registry value" line is the one that localises the error.**
 The remaining FAIL, `mem_noise_floor_mib`, is not a number: the floor is the
 maximum of 92 same-configuration differences, so no point value pins it. It needs
 a tolerance or a distributional claim.
+
+## The last failing registry row: both candidate forms are now in the artifact
+
+`mem_noise_floor_mib` fails for a structural reason, not a numerical one. The
+floor is **the maximum of N same-configuration differences by construction**, and a
+maximum of noisy samples moves every time it is retaken — it has been
+0.1328 / 0.0664 / 0.0977 / 0.0039 as a single sample, and
+0.3242 / 0.1289 / 0.1445 / 0.3281 / 0.3984 / 0.4180 as a max-of-92. Re-pinning it
+each time is not a fix, and it is the reason it has been chased twice.
+
+**The durable claim is not the value but the fact that the value is an estimate**,
+so the artifact now carries both, and the decision of which to make is the
+reviewer's (D55c.6):
+
+- `noise_floor_samples_mib.noise_floor_is_estimated_from_many_samples` — a
+  **boolean**, computed as `samples >= 8`. This is the form a registry row can
+  check durably, because it does not move when the samples are retaken. The
+  threshold is recorded beside it in `min_samples_for_an_estimate`, so `True` has a
+  stated meaning rather than being a bare flag.
+- `noise_floor_samples_mib.median_mib` — **0.2002 MiB** in the current run. This is
+  the form to use *with* a stated tolerance, and it is the honest one for a
+  typical value, because the maximum is a worst case rather than a central one.
+
+**Why not simply pin the median and stop:** the rank-variation verdicts are taken
+against the maximum *on purpose*, so a median row would understate the resolution
+they actually use — the same class of error as D67's 99.9%, a true number that is
+not the one the claim is about. If the median is used, the row and the verdict
+criterion should say so together.
+
+`test_the_noise_floor_says_whether_it_is_an_estimate_at_all` asserts the boolean
+agrees with the sample count and the recorded threshold, and that the shipped run
+clears its own threshold — because the floor the verdicts divide by being an
+anecdote would make every verdict derived from it one. It is computed, not
+asserted, so it can be `False`: at 4 samples a smoke run reports `False`.
