@@ -885,10 +885,10 @@
       "status": "projected_discrete_balance_with_projection_work"
     },
     "initial_energy": 22.20670331293339,
-    "initialization_seconds": 0.0011648039799183607,
+    "initialization_seconds": 0.0005286880768835545,
     "linear_algebra_calls": 841,
-    "linear_algebra_seconds": 0.366220957133919,
-    "linear_algebra_seconds_per_step": 0.001831104785669595,
+    "linear_algebra_seconds": 0.3304457268677652,
+    "linear_algebra_seconds_per_step": 0.001652228634338826,
     "max_abs_divergence": 2.5757174171303632e-14,
     "max_cfl": 0.014747385514922155,
     "max_energy_increase": 0.0013958426564677495,
@@ -897,7 +897,7 @@
     "max_relative_l2_vs_full": 9.996097701095017e-05,
     "max_scaled_pde_energy_residual": 0.0004896931406322086,
     "max_scaled_projected_energy_residual": 0.0007903269525705709,
-    "offline_plus_online_seconds": 1.4587115719914436,
+    "offline_plus_online_seconds": 1.4036004152148962,
     "projection_energy_history": [
       -4.21356602942069e-07,
       -5.108918159635323e-07,
@@ -2056,8 +2056,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 1.4575467680115253,
-    "wall_seconds_per_step": 0.007287733840057626,
+    "wall_seconds": 1.4030717271380126,
+    "wall_seconds_per_step": 0.007015358635690063,
     "zonal_energy_fraction": {
       "at_final_step": 0.18532581041647067,
       "at_t0": 0.16207103178372204
@@ -3707,8 +3707,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 0.7254490910563618,
-    "wall_seconds_per_step": 0.003627245455281809,
+    "wall_seconds": 0.7478336880449206,
+    "wall_seconds_per_step": 0.0037391684402246026,
     "zonal_energy_fraction": {
       "at_final_step": 0.1853277478104425,
       "at_t0": 0.16207103178372245
@@ -4274,7 +4274,7 @@
     "final_energy": 22.459561625720433,
     "final_enstrophy": 1316.186277446869,
     "final_relative_l2_vs_full": 1.2107920225370606e-08,
-    "fit_seconds": 0.007266823202371597,
+    "fit_seconds": 0.0056091349106282,
     "fluctuation_energy_history": [
       18.607639994491254,
       18.606139704453653,
@@ -4696,7 +4696,7 @@
     "max_relative_l2_vs_full": 1.2107920225370606e-08,
     "max_scaled_pde_energy_residual": 0.0002795374037463966,
     "max_scaled_projected_energy_residual": 0.16582158132357053,
-    "offline_plus_online_seconds": 1.1130672332365066,
+    "offline_plus_online_seconds": 1.0391665308270603,
     "projection_energy_history": [
       -0.00040846635299018885,
       -0.00040840001918240887,
@@ -5855,8 +5855,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 1.105800410034135,
-    "wall_seconds_per_step": 0.005529002050170675,
+    "wall_seconds": 1.0335573959164321,
+    "wall_seconds_per_step": 0.005167786979582161,
     "zonal_energy_fraction": {
       "at_final_step": 0.1853277464261573,
       "at_t0": 0.16207103178372245
@@ -5911,18 +5911,15 @@
   },
   "provenance": {
     "driver": "experiments/run_kolmogorov.py",
-    "driver_dirty": true,
-    "driver_matches_HEAD": false,
+    "driver_dirty": false,
+    "driver_matches_HEAD": true,
     "driver_sha256": "db48a5a6f86eafaa91a6a0fa5167f00b647e2740e36eb431455954035dc43f50",
-    "git_commit": "d48317eaf73d3d11ddb52b3ddda18b9c2cbdaae1",
+    "git_commit": "79c98be28e3759ab4ebdfbab68c6e4c38c3adf1e",
     "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
-    "reproducible": false,
-    "working_tree_diff_sha256": "c51afaa7cbbd372ede3ddbb0cd0a94c4ae3c12d19ae4e1971eececf74d9eb9c0",
+    "reproducible": true,
+    "working_tree_diff_sha256": "b56f2b3ec00964a77491e260e21a3be999766076df41b773a6432ddb079e79d5",
     "working_tree_dirty": true,
     "working_tree_dirty_paths": [
-      "experiments/run_kolmogorov.py",
-      "experiments/run_long_time.py",
-      "experiments/test_artifacts.py",
       "state/coder/results/kolmogorov_re5000_N64.json"
     ]
   },

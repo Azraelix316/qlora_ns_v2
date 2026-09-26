@@ -3,7 +3,7 @@
     "5000": {
       "crossovers": [
         {
-          "agrees_with_rows": false,
+          "agrees_with_legacy": false,
           "all_crossings": [
             {
               "bracket": [
@@ -23,7 +23,7 @@
             0.5,
             1.0
           ],
-          "bracket_from_rows": [
+          "bracket_legacy": [
             0.5,
             1.0
           ],
@@ -33,6 +33,8 @@
           ],
           "column": "relative_l2",
           "crossings": 1,
+          "interpolation": "log",
+          "legacy_relative_offset": -0.03773953108574248,
           "note": "ratio = static error / DLRA error, so >1 means the DLRA leads. bracket is the measured pair containing the crossing; the two t values are the log-log and linear interpolations of it and differ, so quote the bracket if a convention is not stated.",
           "rank": 16,
           "ratio_by_horizon": [
@@ -63,15 +65,15 @@
           ],
           "reason": "the static baseline takes the lead between t=0.5 and t=1 and holds from there on",
           "status": "resolved",
-          "t_star": 0.9386425215032279,
-          "t_star_from_rows": 0.9754557646562387,
+          "t_star": 0.9754557646562387,
+          "t_star_legacy": 0.9386425215032279,
           "t_star_linear": 0.968755059044961,
           "t_star_linear_interpolation": 0.9835208597096659,
           "t_star_loglog": 0.9386425215032279,
           "window": 0.25
         },
         {
-          "agrees_with_rows": false,
+          "agrees_with_legacy": false,
           "all_crossings": [
             {
               "bracket": [
@@ -91,7 +93,7 @@
             2.0,
             3.0
           ],
-          "bracket_from_rows": [
+          "bracket_legacy": [
             2.0,
             3.0
           ],
@@ -101,6 +103,8 @@
           ],
           "column": "relative_l2",
           "crossings": 1,
+          "interpolation": "log",
+          "legacy_relative_offset": -0.06238668585581917,
           "note": "ratio = static error / DLRA error, so >1 means the DLRA leads. bracket is the measured pair containing the crossing; the two t values are the log-log and linear interpolations of it and differ, so quote the bracket if a convention is not stated.",
           "rank": 32,
           "ratio_by_horizon": [
@@ -131,15 +135,15 @@
           ],
           "reason": "the static baseline takes the lead between t=2 and t=3 and holds from there on",
           "status": "resolved",
-          "t_star": 2.526111749416177,
-          "t_star_from_rows": 2.694193556457674,
+          "t_star": 2.694193556457674,
+          "t_star_legacy": 2.526111749416177,
           "t_star_linear": 2.635645131888638,
           "t_star_linear_interpolation": 2.746123684205413,
           "t_star_loglog": 2.526111749416177,
           "window": 0.25
         },
         {
-          "agrees_with_rows": false,
+          "agrees_with_legacy": false,
           "all_crossings": [
             {
               "bracket": [
@@ -159,7 +163,7 @@
             2.0,
             3.0
           ],
-          "bracket_from_rows": [
+          "bracket_legacy": [
             2.0,
             3.0
           ],
@@ -169,6 +173,8 @@
           ],
           "column": "relative_l2",
           "crossings": 1,
+          "interpolation": "log",
+          "legacy_relative_offset": -0.034927671075021205,
           "note": "ratio = static error / DLRA error, so >1 means the DLRA leads. bracket is the measured pair containing the crossing; the two t values are the log-log and linear interpolations of it and differ, so quote the bracket if a convention is not stated.",
           "rank": 43,
           "ratio_by_horizon": [
@@ -199,20 +205,23 @@
           ],
           "reason": "the static baseline takes the lead between t=2 and t=3 and holds from there on",
           "status": "resolved",
-          "t_star": 2.8852569045257255,
-          "t_star_from_rows": 2.989679444793215,
+          "t_star": 2.989679444793215,
+          "t_star_legacy": 2.8852569045257255,
           "t_star_linear": 2.929465261441987,
           "t_star_linear_interpolation": 2.9926834532008537,
           "t_star_loglog": 2.8852569045257255,
           "window": 0.25
         },
         {
-          "agrees_with_rows": false,
+          "agrees_with_legacy": false,
           "all_crossings": [],
-          "bracket_from_rows": null,
+          "bracket": null,
+          "bracket_legacy": null,
           "bracket_linear_interpolation": null,
           "column": "relative_l2",
           "crossings": 0,
+          "interpolation": "log",
+          "legacy_relative_offset": null,
           "note": "ratio = static error / DLRA error, so >1 means the DLRA leads. bracket is the measured pair containing the crossing; the two t values are the log-log and linear interpolations of it and differ, so quote the bracket if a convention is not stated.",
           "rank": 85,
           "ratio_by_horizon": [
@@ -244,7 +253,7 @@
           "reason": "the DLRA is exact at every horizon here (relative error at roundoff), so no static baseline can overtake it",
           "status": "never",
           "t_star": null,
-          "t_star_from_rows": null,
+          "t_star_legacy": null,
           "t_star_linear_interpolation": null,
           "window": 0.25
         }
@@ -512,35 +521,35 @@
       "reference": {
         "max_abs_divergence": 1.1501910535116622e-13,
         "nsteps": 12000,
-        "wall_seconds": 139.69074067799374
+        "wall_seconds": 103.58256124495529
       },
       "run_diagnostics": {
         "16": {
           "dlra": {
             "max_abs_divergence": 1.056932319443149e-13,
             "rank_actual": 16,
-            "wall_seconds": 282.256115661934
+            "wall_seconds": 244.9597761160694
           }
         },
         "32": {
           "dlra": {
             "max_abs_divergence": 1.0946799022804043e-13,
             "rank_actual": 32,
-            "wall_seconds": 224.93800669489428
+            "wall_seconds": 218.95585363497958
           }
         },
         "43": {
           "dlra": {
             "max_abs_divergence": 1.1102230246251565e-13,
             "rank_actual": 43,
-            "wall_seconds": 272.6871402740944
+            "wall_seconds": 223.18847378809005
           }
         },
         "85": {
           "dlra": {
             "max_abs_divergence": 1.1013412404281553e-13,
             "rank_actual": 85,
-            "wall_seconds": 307.9620591108687
+            "wall_seconds": 230.8621182439383
           }
         },
         "W0.25_r16": {
@@ -548,28 +557,28 @@
           "max_abs_divergence": 1.4210854715202004e-13,
           "refits": 12,
           "refits_with_fewer_snapshots_than_rank": 12,
-          "wall_seconds": 128.63812163402326
+          "wall_seconds": 124.51073340699077
         },
         "W0.25_r32": {
           "diverged": false,
           "max_abs_divergence": 1.4210854715202004e-13,
           "refits": 12,
           "refits_with_fewer_snapshots_than_rank": 12,
-          "wall_seconds": 129.03970785206184
+          "wall_seconds": 122.9085454500746
         },
         "W0.25_r43": {
           "diverged": false,
           "max_abs_divergence": 1.4210854715202004e-13,
           "refits": 12,
           "refits_with_fewer_snapshots_than_rank": 12,
-          "wall_seconds": 176.37247828696854
+          "wall_seconds": 125.02793076401576
         },
         "W0.25_r85": {
           "diverged": false,
           "max_abs_divergence": 1.4210854715202004e-13,
           "refits": 12,
           "refits_with_fewer_snapshots_than_rank": 12,
-          "wall_seconds": 156.13296529301442
+          "wall_seconds": 123.5589514921885
         }
       },
       "static_moving_window": {
@@ -819,7 +828,7 @@
   "interpretation": "An accuracy surface, not a cost surface. The rank is fixed per run, so the advantage comes from re-fitting the subspace to the current state each step and says nothing about adaptive rank. The static baseline is the oracle form: refitted on a trailing window of the reference trajectory, with the refit schedule offset from the evaluation grid so that no basis ever contains the time it is scored at. Its accuracy is a function of the window length, the refit interval and the offset, all recorded above -- three successive corrections to this baseline moved the advantage horizon by factors of two to four, so a t* quoted without them is not reproducible. Per-step cost is Theta(N^3) and rank-independent (D11.1, measured in cost_retiming.json). The highest rank tested is the only one that never yields, and the reason is that its error is already at roundoff -- the dynamics are effectively low-dimensional at these settings, not that the rank has reached the grid. That rank is the largest one tested and it happens to coincide with the wavenumber 2*floor(N/3)+1; the wavenumber is not a rank, it is 43 at N=64 and 85 at N=128, and the dealiased grid carries far more degrees of freedom than either. So a rank-43 subspace is not the full-grid solver, and it is not exact either -- it is near-roundoff.",
   "key_schema": {
     "by_reynolds": "top level key is the Reynolds number, formatted with %g",
-    "crossovers": "one entry per (rank, window) pair, each carrying its own rank and window",
+    "crossovers": "one entry per (rank, window) pair. `t_star` and `bracket` are computed from the `dlra` and `static_moving_window` rows under the declared column 'relative_l2' with log interpolation (D22.5). `t_star_legacy` is an earlier, independent implementation of the same crossing, kept so the discrepancy between the two stays measurable: it sat 6-9% BELOW the rows on every resolved case of the N=64 surface, which is why the block no longer computes its own value.",
     "dlra": "keyed by the rank as a string, e.g. '16'",
     "static_moving_window": "keyed by f'W{window:g}_r{rank}', e.g. 'W0.25_r16' for a window of 0.25 and rank 16"
   },
@@ -862,11 +871,18 @@
     "driver": "experiments/run_crossover.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "60fdd1ade90c9f8a43f6a19a893266f2ef53d7ee0982c9862db7e4d0318d15e1",
-    "git_commit": "ad0f8b10a4b6dfe27105c548202380d81307cad4",
+    "driver_sha256": "4b2ca8f8bb0bc5998c53ef941a4c64dc12798b20579b6e5ad5afc2c3a0aa937d",
+    "git_commit": "79c98be28e3759ab4ebdfbab68c6e4c38c3adf1e",
     "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_diff_sha256": "eead8c027891c608d965e8e5fee9d805cb4a83cd63c52266de250dbe36ef3495",
-    "working_tree_dirty": true
+    "working_tree_diff_sha256": "b8d19e0e494f7b9abe8d10c07a78820bb13ebec06552ec77bbe59796e6aa9644",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "state/coder/results/kolmogorov_re1000_N64.json",
+      "state/coder/results/kolmogorov_re100_N64.json",
+      "state/coder/results/kolmogorov_re5000_N128.json",
+      "state/coder/results/kolmogorov_re5000_N64.json",
+      "state/coder/results/regime_pilot_re5000_A0p5.json"
+    ]
   }
 }

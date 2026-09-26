@@ -885,10 +885,10 @@
       "status": "projected_discrete_balance_with_projection_work"
     },
     "initial_energy": 22.20670331293339,
-    "initialization_seconds": 0.012466966873034835,
+    "initialization_seconds": 0.0005390159785747528,
     "linear_algebra_calls": 841,
-    "linear_algebra_seconds": 0.34747093659825623,
-    "linear_algebra_seconds_per_step": 0.0017373546829912811,
+    "linear_algebra_seconds": 0.3364964802749455,
+    "linear_algebra_seconds_per_step": 0.0016824824013747274,
     "max_abs_divergence": 2.6645352591003757e-14,
     "max_cfl": 0.014747385514922155,
     "max_energy_increase": 0.002445655599142782,
@@ -897,7 +897,7 @@
     "max_relative_l2_vs_full": 0.00010108416677874297,
     "max_scaled_pde_energy_residual": 0.00046923135768045965,
     "max_scaled_projected_energy_residual": 0.0007700258068321355,
-    "offline_plus_online_seconds": 1.4236297886818647,
+    "offline_plus_online_seconds": 1.4089550790376961,
     "projection_energy_history": [
       -4.213816602316456e-07,
       -5.109879275266849e-07,
@@ -2056,8 +2056,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 1.41116282180883,
-    "wall_seconds_per_step": 0.007055814109044149,
+    "wall_seconds": 1.4084160630591214,
+    "wall_seconds_per_step": 0.0070420803152956065,
     "zonal_energy_fraction": {
       "at_final_step": 0.18397748201028016,
       "at_t0": 0.16207103178372204
@@ -3707,8 +3707,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 0.7244670079089701,
-    "wall_seconds_per_step": 0.0036223350395448504,
+    "wall_seconds": 0.7196019701659679,
+    "wall_seconds_per_step": 0.00359800985082984,
     "zonal_energy_fraction": {
       "at_final_step": 0.18397942647862772,
       "at_t0": 0.16207103178372245
@@ -4274,7 +4274,7 @@
     "final_energy": 22.671553356880874,
     "final_enstrophy": 1333.7371073126726,
     "final_relative_l2_vs_full": 9.927879871812374e-09,
-    "fit_seconds": 0.006821817019954324,
+    "fit_seconds": 0.0057455908972769976,
     "fluctuation_energy_history": [
       18.607639994491258,
       18.607172283405802,
@@ -4696,7 +4696,7 @@
     "max_relative_l2_vs_full": 9.927879871812374e-09,
     "max_scaled_pde_energy_residual": 0.00025882197697179064,
     "max_scaled_projected_energy_residual": 0.033448867445314806,
-    "offline_plus_online_seconds": 1.0430428870022297,
+    "offline_plus_online_seconds": 1.0384009850677103,
     "projection_energy_history": [
       -8.189470485575612e-05,
       -8.188690760491113e-05,
@@ -5855,8 +5855,8 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 1.0362210699822754,
-    "wall_seconds_per_step": 0.005181105349911377,
+    "wall_seconds": 1.0326553941704333,
+    "wall_seconds_per_step": 0.0051632769708521665,
     "zonal_energy_fraction": {
       "at_final_step": 0.1839794261830451,
       "at_t0": 0.1620710317837223
@@ -5911,19 +5911,14 @@
   },
   "provenance": {
     "driver": "experiments/run_kolmogorov.py",
-    "driver_dirty": true,
-    "driver_matches_HEAD": false,
+    "driver_dirty": false,
+    "driver_matches_HEAD": true,
     "driver_sha256": "db48a5a6f86eafaa91a6a0fa5167f00b647e2740e36eb431455954035dc43f50",
-    "git_commit": "d48317eaf73d3d11ddb52b3ddda18b9c2cbdaae1",
+    "git_commit": "79c98be28e3759ab4ebdfbab68c6e4c38c3adf1e",
     "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
-    "reproducible": false,
-    "working_tree_diff_sha256": "f272ed2a52007ceb32a0207ceb5bd43ae1a752442a882b793e72acb93e897f21",
-    "working_tree_dirty": true,
-    "working_tree_dirty_paths": [
-      "experiments/run_kolmogorov.py",
-      "experiments/run_long_time.py",
-      "experiments/test_artifacts.py"
-    ]
+    "reproducible": true,
+    "working_tree_dirty": false,
+    "working_tree_dirty_paths": []
   },
   "reynolds": 5000,
   "viscosity": 0.0002

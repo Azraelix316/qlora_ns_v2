@@ -175,3 +175,87 @@ instance of the same arm. The narrower claim the artifact actually earns is the
 one above.
 
 The files are intentionally compact JSON rather than raw field snapshots.
+
+## The zonal share and the fluctuation share are complements, not two quantities
+
+`zonal_energy_fraction` is `(energy_history - fluctuation_energy_history) /
+energy_history` — the share of the kinetic energy in the **zonal** (x-independent)
+mode. That definition was ambiguous until 2026-09-26, when the reviewer formed
+the *other* ratio from the same two series, got ≈82%, and read the recorded
+≈20% as a different quantity "a factor of 4 apart with the Re trend inverted".
+Neither is true. The two are exact complements, because
+
+    E(psi) = E(zonal) + E(psi')    exactly,
+
+since the Parseval inner product of `grad(psi_zonal)` with `grad(psi')` vanishes —
+the zonal mode occupies only kx=0 and `psi'` occupies only kx≠0. Measured, not
+argued: on a random field at N=16/32/64 the defect is 1.5e-16, 0, 0 relative;
+on the runs the two shares sum to 100.0000% at the final step at every Re.
+
+So ≈20% and ≈82% are the *same* measurement with the halves named in opposite
+order, and the Re trend is the same trend seen from the other side:
+
+| | Re=100 | Re=1000 | Re=5000 | N=128 |
+|---|---|---|---|---|
+| zonal share of total E (recorded) | 20.089% | 18.533% | 18.398% | 17.283% |
+| fluctuation share of total E (complement) | 79.911% | 81.467% | 81.602% | 82.717% |
+
+**Three things were added because of this**, all in `run_kolmogorov.py` and all in
+every artifact:
+
+- `zonal_fraction_semantics` — the formula, the numerator, the denominator and
+  the index as separate keys, so the definition is read rather than inferred;
+- `zonal_energy_fraction_fluctuation` — the complement, recorded so nobody takes
+  it by hand;
+- `zonal_energy_fraction_components` — the raw total/fluctuation/zonal energies
+  at each index, so the stored share can be recomputed and *checked* against
+  the stored definition rather than trusted.
+
+Asserted by `test_the_zonal_share_and_the_fluctuation_share_are_exact_complements`
+and `test_the_energy_is_additive_under_the_zonal_split`. Four suite cases were
+re-run natively so the keys come from the driver that records them; all four came
+back bit-identical on every physical value, which is also the check that the
+configuration was reproduced.
+
+**What the share is, and is not, good for.** It *is* a Re-dependent observable,
+and it *decreases* with Re at fixed N and T: 20.089% → 18.533% → 18.398% across
+50× in Re, an 8.4% change. But it is weak, and two of its dependencies are larger
+than the Re effect, so it cannot carry a Re-dependent claim alone:
+
+- **horizon**: 16.21% at t=0 → 18.40% at T=0.1 → **32.16%** at T=1.0
+  (`run_long_time.py`, A=0.2), i.e. it nearly doubles over the first unit of time
+  while Re is fixed;
+- **grid**: 18.398% at N=64 vs 17.283% at N=128 at the same Re — a 6.1% change,
+  comparable to the whole Re range.
+
+The enstrophy share is flat in Re over the same range, so this is specific to the
+energy, not to the split.
+
+## C8-2: the legacy runs reproduce bit-for-bit
+
+Four artifacts named a commit but recorded no `reproducible`, so nothing had ever
+checked the driver that produced them. All four were re-run with the parameters
+each one's own `parameters` block records, and all four came back **identical in
+every physical value** — the equality is the check:
+
+| artifact | physical values | what differs |
+|---|---|---|
+| `regime_pilot_re5000_A0p2.json` | identical | nothing (byte-identical) |
+| `regime_pilot_re5000_N128_A0p2.json` | identical | nothing (byte-identical) |
+| `baselines_re5000_N64_T8.json` | identical | nothing (byte-identical) |
+| `regime_pilot_re5000_A0p5.json` | identical | provenance + 3 `wall_seconds` (≤1.8% timing noise) |
+
+Not one energy, enstrophy, divergence, rank, singular value or spectrum entry
+moved in any of the four. The only non-determinism anywhere is wall-clock time,
+which is the one quantity that is not supposed to be reproducible.
+
+The first attempt at this re-run *did* change a number, and the reason is worth
+recording: the shell script put `--dt` in a shared argument list *and* per case,
+and argparse takes the last occurrence, so the N=128 case ran at twice its
+recorded `dt` and with a freshly-generated initial condition instead of the
+`--ic-reference-N 64` one — a different case written under the same filename. It
+was caught by the fingerprint failing (17.485% against a recorded 17.283%), the
+committed artifact was restored, the driver was committed so
+`driver_matches_HEAD` could be true, and the re-run then reproduced 17.283% exactly.
+**A fingerprint that fails is doing its job; the bug was in the invocation, not
+in the driver.**

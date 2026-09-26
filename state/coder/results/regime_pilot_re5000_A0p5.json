@@ -9065,7 +9065,20 @@
   },
   "provenance": {
     "driver": "experiments/run_regime_pilot.py",
-    "git_commit": "1968c46224861c1f8b1f70df8457b8dfb6e516d6"
+    "driver_dirty": false,
+    "driver_matches_HEAD": true,
+    "driver_sha256": "ed620285fb26ea4fcad8328696f0a9d8f52907fe4021a7e70d97638baeb9f39b",
+    "git_commit": "79c98be28e3759ab4ebdfbab68c6e4c38c3adf1e",
+    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "reproducible": true,
+    "working_tree_diff_sha256": "f0a551f051e23cc74bd8c42e85c1506afbc4c95cb7f31f60130c0c8df281f943",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "state/coder/results/kolmogorov_re1000_N64.json",
+      "state/coder/results/kolmogorov_re100_N64.json",
+      "state/coder/results/kolmogorov_re5000_N128.json",
+      "state/coder/results/kolmogorov_re5000_N64.json"
+    ]
   },
   "qualifying_horizons": [],
   "rank_quantities": {
@@ -9109,7 +9122,7 @@
         }
       },
       "samples": 6,
-      "wall_seconds": 0.4305267841555178,
+      "wall_seconds": 0.4300454871263355,
       "zonal_share_of_total_energy_at_end": 0.18397942647862783
     },
     {
@@ -9147,7 +9160,7 @@
         }
       },
       "samples": 14,
-      "wall_seconds": 1.0410244860686362,
+      "wall_seconds": 1.0766066280193627,
       "zonal_share_of_total_energy_at_end": 0.21463112917237984
     },
     {
@@ -9185,7 +9198,7 @@
         }
       },
       "samples": 26,
-      "wall_seconds": 2.1334161469712853,
+      "wall_seconds": 2.1727101581636816,
       "zonal_share_of_total_energy_at_end": 0.24378416515662507
     },
     {
@@ -9223,7 +9236,7 @@
         }
       },
       "samples": 51,
-      "wall_seconds": 4.084205006016418,
+      "wall_seconds": 4.272634872002527,
       "zonal_share_of_total_energy_at_end": 0.32163117679826075
     },
     {
@@ -9261,7 +9274,7 @@
         }
       },
       "samples": 101,
-      "wall_seconds": 8.27349843410775,
+      "wall_seconds": 8.5846998100169,
       "zonal_share_of_total_energy_at_end": 0.49688615984890105
     },
     {
@@ -9305,7 +9318,7 @@
         }
       },
       "samples": 151,
-      "wall_seconds": 12.141843998804688,
+      "wall_seconds": 12.714197854977101,
       "zonal_share_of_total_energy_at_end": 0.48603747944525777
     },
     {
@@ -9349,7 +9362,7 @@
         }
       },
       "samples": 201,
-      "wall_seconds": 16.61846412718296,
+      "wall_seconds": 17.055916377110407,
       "zonal_share_of_total_energy_at_end": 0.5534467976724189
     },
     {
@@ -9395,7 +9408,7 @@
         }
       },
       "samples": 301,
-      "wall_seconds": 24.921717875869945,
+      "wall_seconds": 26.213451934978366,
       "zonal_share_of_total_energy_at_end": 0.6108846415672203
     },
     {
@@ -9441,7 +9454,7 @@
         }
       },
       "samples": 401,
-      "wall_seconds": 33.34731788095087,
+      "wall_seconds": 35.26842295890674,
       "zonal_share_of_total_energy_at_end": 0.7371225718971963
     },
     {
@@ -9491,7 +9504,7 @@
         }
       },
       "samples": 601,
-      "wall_seconds": 48.34925586194731,
+      "wall_seconds": 52.86701085511595,
       "zonal_share_of_total_energy_at_end": 0.8427156748023765
     },
     {
@@ -9543,7 +9556,7 @@
         }
       },
       "samples": 801,
-      "wall_seconds": 64.84831279981881,
+      "wall_seconds": 71.5748158749193,
       "zonal_share_of_total_energy_at_end": 0.931213298329932
     },
     {
@@ -9597,7 +9610,7 @@
         }
       },
       "samples": 1001,
-      "wall_seconds": 80.86872877599671,
+      "wall_seconds": 84.67767602414824,
       "zonal_share_of_total_energy_at_end": 0.9379530346632285
     }
   ],
