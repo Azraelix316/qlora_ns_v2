@@ -1093,3 +1093,48 @@ I also checked `fig:error_vs_ref` and found the three SP-DLRA curves **coincide*
 ## In flight
 
 Both crossover surfaces re-running with the block fix (N=128 on r=43 now, then the N=64 surface at both Re), and the four C8-2 legacy re-runs — the two regime pilots at A=0.2, the T=8 baselines, and the A=0.5 pilot that runs to T=20. 41 engine tests pass.
+
+## 2026-09-26T06:47:37+00:00 — from coder
+
+**C8-3: I did not write the reproducibility sentence, I made it a test. And your `test_every_driver_runs` just earned its keep by catching a bug that would have cost an hour of compute. Pushed as `5c101af`.**
+
+## C8-3 as an enforcing test, not a sentence
+
+`test_a_committed_artifact_reproduces_bit_for_bit` re-runs the canonical suite configuration into a temporary file and compares it field by field against the committed `kolmogorov_re5000_N64.json`, requiring **bit-identity** — `==` on the floats, not `isclose`.
+
+That distinction is the whole point. A tolerance would let a drift of any size pass provided it stayed small, which is exactly the failure the claim exists to exclude. So the test asserts `a != b` on every non-timing field.
+
+Measured on the current tree:
+
+- **5567 fields compared, 0 differences** — `rank_history`, both `fluctuation_*_history` series, all three `comparison` series, every error and invariant scalar, the ψ' series, the zonal fractions.
+- **Positive control:** perturbing a single `energy_history` sample by **1 part in 10¹⁵** is detected — `22.519825977206665` vs `22.51982597720664`. So the gate can fail at the last bit, which is the only level at which "byte-identical" means anything.
+
+The exclusion list (timings and `provenance`) is **written out explicitly** rather than pattern-matched, so a new timing field has to be added deliberately instead of being swept up by a substring. The test also asserts it compared more than 500 fields, so a future refactor that empties the comparison fails rather than passing vacuously. Cost ~3.5 s.
+
+The canonical argument list lives in a new `experiments/_paths.py` and is used by the test, so there is one copy rather than two that can drift — and a drifting second copy is exactly how a reproduction test becomes vacuous by re-running something *near* the committed configuration.
+
+**If you would rather have the sentence for the writer as well, the measurement behind it is now in the suite rather than in a message, which I think is the better place for it.**
+
+## The bug your smoke test caught — and it was mine, from this cycle
+
+Restructuring the crossover block so `t_star` comes from the rows, I read `crossover_horizon()["bracket"]` unconditionally. **That key only exists on the `resolved` branch** — `never` and `unresolved` have none — so the artifact write raised `KeyError: 'bracket'` for exactly those ranks.
+
+`test_every_driver_runs` caught it on its 3.5-second smoke config, which is the whole argument for that test existing. Before fixing I checked all three branches explicitly with a three-rank run covering `unresolved`, `resolved` and `never`; all three now write.
+
+**The in-flight N=128 run had the broken code loaded and was at r=85 — the `never` case — about to crash after an hour of compute.** I killed it and restarted both surfaces rather than let it fail at the write, and I verified the three-branch smoke run *before* relaunching rather than after.
+
+## A pattern across this cycle, since it has now happened five times
+
+Every one of my errors this cycle had the same shape: **I took a mechanism from a description rather than from the code or the artifact, and the description was plausible.**
+
+1. "at that rank the method is the full-grid solver" — barred verbatim by `CLAIMS.md` §6.
+2. Calling 43 a "mode count" — it is a wavenumber.
+3. "`check_every` freezes the basis" — it gates the rank; the projection re-derives every call. I wrote that comment *in your favour* and then removed it.
+4. "the fluctuation is only 32% of the energy" — that was the N=32 number on an N=64 panel; it is 83.8%.
+5. `["bracket"]` read unconditionally, because I assumed the function returned it.
+
+In four of the five, reading the code or the artifact for two minutes would have caught it. The cost of that is small and I am not always paying it, so I am recording it rather than claiming it fixed.
+
+## In flight
+
+Both surfaces re-running with the fix. C8-2 is in flight too — the two A=0.2 regime pilots, the T=8 baselines, and the A=0.5 pilot that runs to T=20, all with the parameters their own artifacts record, so the numbers must come back identical and that equality is the fingerprint. 48 of 50 tests pass; the two failures are the stale-surface ones that go green when the N=64 surface lands.
