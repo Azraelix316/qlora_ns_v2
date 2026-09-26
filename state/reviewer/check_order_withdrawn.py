@@ -48,6 +48,35 @@ from pathlib import Path
 # this: Python needs a fixed-width lookbehind and the negator list is variable-width.
 NEGATOR = re.compile(r"\b(?:no|not|never|without|neither|nor|non)\b", re.I)
 
+def claim_present(row, probe):
+    """Does `probe` assert `row`'s withdrawn claim?  ONE definition, used by every scanner.
+
+    D111: this logic was duplicated across the scanning loops, and a fix landed in one copy
+    and not the others, so the draft and the order documents disagreed about the same
+    sentence. A check whose logic is duplicated cannot be fixed in one place. Three
+    conditions, in the order the D60 comment demands:
+
+      1. the claim's pattern matches;
+      2. the probe is not already marked withdrawn (PROHIBITION);
+      3. if the row carries a negation guard, no negator sits in the 34 characters
+         before the match -- "(no online rank adaptation)" DESCRIBES a baseline and is
+         true, while the bare phrase CLAIMS a contribution.
+
+    A regex cannot do (3): Python's lookbehind is fixed-width and the negator list is
+    not. So it is a windowed test, here, once.
+    """
+    pattern = row[1]
+    window = row[3] if len(row) > 3 else 1
+    neg_guard = row[4] if len(row) > 4 else False
+    rx = re.compile(pattern, re.I | (re.S if window > 1 else 0))
+    m = rx.search(probe)
+    if not m or PROHIBITION.search(probe):
+        return False
+    if neg_guard and NEGATOR.search(probe[max(0, m.start() - 34):m.start()]):
+        return False
+    return True
+
+
 WITHDRAWN = [
     ("D29",   r"\b1\.26\b|\b2\.44\b|\b1\.46\b|\b2\.45\b|\b1\.24\b|\b2\.53\b|\b1\.33\b",
      "the pre-D29 t* values"),
@@ -163,23 +192,13 @@ def scan(path):
         in_latex.update(range(a, b))
     found = []
     for row in WITHDRAWN:
-        decision, pattern, what = row[0], row[1], row[2]
+        decision, what = row[0], row[2]
         window = row[3] if len(row) > 3 else 1
-        # D111: optional 5th element, a negation guard. A phrase like "no online rank adaptation"
-        # DESCRIBES A BASELINE and is correct; the same phrase as an unqualified claim is the
-        # defect. A regex cannot separate them (Python requires a fixed-width lookbehind; the
-        # negator list is variable-width), so it is a windowed test in code. Applied in the order
-        # the D60 comment demands: the claim must be present AND not negated.
-        neg_guard = row[4] if len(row) > 4 else False
-        rx = re.compile(pattern, re.I | (re.S if window > 1 else 0))
         for i, line in enumerate(lines):
             if i >= cut and i not in in_latex:
                 continue                      # order region, or paste-ready text
             probe = "\n".join(lines[i:i + window])
-            m = rx.search(probe)
-            if not m or PROHIBITION.search(probe):
-                continue
-            if neg_guard and NEGATOR.search(probe[max(0, m.start() - 34):m.start()]):
+            if not claim_present(row, probe):
                 continue
             kind = "PASTE-READY TEXT" if i in in_latex else "order"
             found.append((decision, what, i + 1, kind, line.strip()[:100]))
@@ -240,6 +259,68 @@ def figure_titles(root):
                 continue
             out.append((f"{n}:{i}", line))
     return out, f"git {ref}:experiments/*.py", len(names)
+
+
+def self_test():
+    """D111 ADDED THIS, AND THE REASON IS THE FINDING.
+
+    `--self-test` was DOCUMENTED in the usage line and SILENTLY IGNORED, so this gate had no
+    positive control at all: it could report candidates, but nothing verified that any pattern
+    fires on the thing it claims to detect. That is how D52.5's `1\\.78|2\\.18` survived
+    cycles while returning ZERO hits on the draft -- a pattern that cannot fail and cannot fire
+    looks identical to a pattern that is working.
+
+    Each case below is a hand-built string with a stated expectation. The three that matter most
+    are the D111 changes: the negation guard, and the two patterns re-keyed from values to
+    claims. `claims_registry.py` ALSO has no self-test, for the same reason and with the same
+    risk; it is C10-1.
+    """
+    by_id = {r[0]: r for r in WITHDRAWN}
+    cases = [
+        # (row id, probe, must_fire, what the case is)
+        ("D52.5", r"a per-step cost $2.1$--$2.7\times$ the full grid with no memory saving", True,
+         "the real defect: a cost band attributed to the full grid (the OLD pattern missed this)"),
+        ("D52.5", r"the band was $1.78$ or $2.18$ in an earlier measurement", False,
+         "the OLD pattern's own values, which are no longer the claim"),
+        ("D52.5", r"the cost is 2.24x the reference step", False,
+         "a single ratio is not a band"),
+        ("D52.5", r"a per-step cost $2.2$--$2.7\times$ the full-grid step", True,
+         "the CORRECTED band still fires, so the fix did not blind the pattern"),
+        ("D32.2", "the contribution is online rank adaptation, validated in a regime", True,
+         "the real defect: the claim, unqualified"),
+        ("D32.2", "a static basis (no online rank adaptation), same nonlinear step", False,
+         "the FALSE POSITIVE the guard removes: describing a baseline"),
+        ("D32.2", "we do not claim online rank adaptation here", False,
+         "a negated claim is not a claim"),
+        ("D32.2", "with adaptive rank", False,
+         "DESCRIPTIVE and correct: the runs did use an adaptive criterion (D111.7)"),
+        ("D85", r"above rank $\approx 8$ additional rank buys it nothing measurable", True,
+         "an untouched pattern still fires"),
+    ]
+    print(f"POPULATION: {len(cases)} hand-built strings, {sum(1 for c in cases if c[2])} must-fire "
+          f"and {sum(1 for c in cases if not c[2])} must-pass, drawn from "
+          f"{len({c[0] for c in cases})} pattern(s).")
+    print("  A pattern that can neither fire nor fail is indistinguishable from a working one, so")
+    print("  every case states which of the two it is.")
+    print()
+    fails = 0
+    for rid, probe, want, why in cases:
+        row = by_id.get(rid)
+        if row is None:
+            print(f"  MISSING PATTERN {rid}")
+            fails += 1
+            continue
+        got = claim_present(row, probe)
+        ok = got == want
+        print(f"  {'ok  ' if ok else 'FAIL'}  [{rid:<6}] fires={str(got):<5} expected={str(want):<5} {why}")
+        if not ok:
+            fails += 1
+    print()
+    if fails:
+        print(f"FAIL: {fails} case(s) wrong -- the gate cannot be trusted until they pass")
+        return 1
+    print("PASS: every case behaves as stated, including the negation guard and both re-keyed patterns")
+    return 0
 
 
 def main():
@@ -341,16 +422,11 @@ def main():
     hits = 0
     idx = {loc: k for k, (loc, _) in enumerate(rendered)}   # so a window can look ahead
     for row in WITHDRAWN:
-        decision, pat, what = row[0], row[1], row[2]
+        decision, what = row[0], row[2]
         window = row[3] if len(row) > 3 else 1
-        neg_guard = row[4] if len(row) > 4 else False
-        p = re.compile(pat, re.I | (re.S if window > 1 else 0))
         for loc, line in rendered:
             probe = "\n".join(l for _, l in rendered[idx[loc]:idx[loc] + window])
-            m = p.search(probe)
-            if (m and not PROHIBITION.search(probe)
-                    and not (neg_guard
-                             and NEGATOR.search(probe[max(0, m.start() - 34):m.start()]))):
+            if claim_present(row, probe):
                 hits += 1
                 print(f"  CANDIDATE [{decision}] {what}  {loc} (RENDERED TEXT): "
                       f"{line.strip()[:100]}")
@@ -367,6 +443,8 @@ def main():
 
 
 if __name__ == "__main__":
+    if "--self-test" in sys.argv:
+        sys.exit(self_test())
     # A CRASH MUST NOT LOOK LIKE A PASS. An unhandled exception propagated out of main() and the
     # interpreter still exited 0, so a gate that had stopped running entirely reported success
     # (D95). Anything unexpected is now a non-zero exit with the reason.
