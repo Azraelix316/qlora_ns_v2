@@ -406,6 +406,40 @@ def test_a_committed_artifact_reproduces_bit_for_bit(tmp_path):
     )
 
 
+def test_the_papers_figure_captions_have_not_drifted_from_the_artifacts():
+    """The caption check reports drift, and there is none.
+
+    Six of the paper's six figure captions were written before the figures
+    existed, and four of them claim things the artifacts do not support. Those
+    are recorded in ``state/coder/results/caption_verdicts.json`` and the
+    measured values are in ``experiments/figures/CAPTIONS.md``.
+
+    This asserts the *absence of drift*, not the absence of disagreement: a
+    re-run that turns a supported claim into an unsupported one, or moves a
+    measured value, is what would otherwise reach the paper unnoticed. The check
+    is not a gate on the draft -- the captions are the writer's to correct, and a
+    permanently-red gate is a gate that gets bypassed.
+    """
+    import subprocess
+    import sys
+
+    from _paths import EXPERIMENTS, REPO_ROOT
+
+    result = subprocess.run(
+        [sys.executable, str(EXPERIMENTS / "check_figure_captions.py")],
+        cwd=REPO_ROOT, capture_output=True, text=True, timeout=600,
+    )
+    assert result.returncode == 0, (
+        "a figure caption's support changed since the recorded baseline:\n"
+        f"{result.stdout[-1200:]}\n{result.stderr[-600:]}\n"
+        "Either a re-run moved a measured value, or a claim was resolved. If it "
+        "was resolved, re-record the baseline deliberately; if a re-run moved a "
+        "value, the draft's caption needs the new number."
+    )
+    # And the check must actually be looking at something.
+    assert "unsupported claims:" in result.stdout, result.stdout[-400:]
+
+
 def test_every_driver_runs(tmp_path):
     """Each driver must actually execute, at a size that costs nothing.
 

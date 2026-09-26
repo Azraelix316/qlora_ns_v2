@@ -1,0 +1,12 @@
+{
+  "case": "caption_verdicts",
+  "note": "Which of the draft's figure captions the artifacts do not support, recorded so the check reports DRIFT rather than repeating a known list. Keyed on figure label and topic, not on the message text, so rewording a verdict is not a change.",
+  "verdicts": [
+    "fig:cost|peak memory",
+    "fig:cost|per Re",
+    "fig:cost|static POD",
+    "fig:rank|r*(Re)",
+    "fig:svd|mode count",
+    "fig:tg|rank decays"
+  ]
+}
