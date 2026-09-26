@@ -356,7 +356,7 @@ The trade with the horizon, now at both measured Reynolds numbers:
 | 16 | **1.88×** | **`t* = 0.649`** (D29.4) |
 | 32 | **1.90×** | **`t* = 1.482`** (D29.4) |
 | 43 | **1.94–2.07×** | **never yields — error `1e-13`–`1e-8`, 6–11 orders below the static baseline. `r=43` is the largest rank TESTED, not a ceiling (D30.2)** |
-| any | — | **and no memory advantage: `+2.5 MiB` (N=64) to `+3.8 MiB` (N=128`) _more_ than the full-grid step; peak RSS varies by `0.29 MiB` across a 21x rank range (`r = 2 ... 43`) at both grids - `2.2x` the `0.13 MiB` run-to-run noise floor, so **the variation is real though small** - against a `2.52 MiB` (`N=64`) / `3.79 MiB` (`N=128`) overhead that is itself 19-29x the noise floor** |
+| any | — | **and no memory advantage: `+2.37 MiB` (N=64) to `+4.21 MiB` (N=128) _more_ than the full-grid step; every overhead is `24-43x` the `0.098 MiB` run-to-run noise floor, so **the overhead is resolved at every rank**. The overhead's own variation across a 21x rank range (`r = 2 ... 43`) is `0.266 MiB` at `N=64` (`2.7x` the floor, **resolved - a real variation**) and `0.188 MiB` at `N=128` (`1.9x`, **NOT resolved**). **D89: supersedes D19.4a's `+2.24`/`+4.27`, which in turn superseded the `+2.5`/`+3.8` this row carried until now** |
 
 **The trade: the lead grows linearly in rank and the cost is nearly rank-independent, so rank
 buys *lead time* rather than speed.** Going from `r=8` to `r=32` costs **~2% more per step**
@@ -380,10 +380,15 @@ speed.** Source: R42, R47, D12.4, **D25.7**.
 - **Time: unresolved.** `bug_full_step_ratio_hi_over_lo = 1.366` at `N=64` (`rank_dependent: true`)
   but `1.043` at `N=128` (`false`). The projected integrator's is `1.013`/`1.012`. **Resolved at one
   grid and not the other is not a resolved result.** *(The earlier `1.165` was noise.)*
-- **Memory: the committed artifact is stale and contradicted.** `peak_memory.json` still carries
-  BUG spread `1.531 MiB` at `N=128` (`5.76×` the `0.1328 MiB` floor,
-  `rank_independence_resolved: true`) while the spread **moved `0.125 → 0.398 MiB` between two runs
-  of identical code.** **Not reproducible — do not quote `1.531`.**
+- **Memory: RESOLVED by D89 — this note is obsolete, kept for the record.** *(It read: "`peak_memory.json`
+  still carries BUG spread `1.531 MiB` at `N=128` (`5.76×` the `0.1328 MiB` floor) while the spread moved
+  `0.125 → 0.398 MiB` between two runs of identical code. Not reproducible — do not quote `1.531`.")* **The
+  coder re-ran it on committed code with a driver fingerprint, and it now reproduces: noise floor
+  `0.098 MiB`, and every overhead `24–43×` it. The BUG `N=128` spread is `1.902 MiB` (`19.5×` the floor,
+  resolved). `1.531` is indeed not to be quoted. What the re-run newly exposed is the *projected*
+  integrator at `N=128`, whose spread fell to `0.188 MiB` (`1.9×`) and is flagged
+  `rank_independence_resolved: false` — so rank-independence of the memory overhead is established at
+  `N=64` and **unresolved at `N=128`.**
 
 **So `CLAIMS.md` no longer calls this the project's best-evidenced positive claim. A slowdown is a
 negative result; it is still the honest one, and it is weaker than previously stated.**
@@ -546,9 +551,9 @@ the bar) against Z `23.47%` (outside); `T=8` gives E `2.22%` against Z `24.66%`.
 | `27.5%` / `1.5%` for the rank rules | **D18.6** — message-only, no artifact; not admissible until committed |
 | "a window-accumulating rank rule would fix the criterion" | **D18.1** — implemented and measured: it is **worse** (`1.5%` vs `27.5%` of fluctuation energy) |
 | "the window collapses because it fills with the method's own states" | **D18.3** — **refuted**: seeding with reference states gave `1.3%` vs `1.5%`. Record as refuted; do not tell it to a reader |
-| any memory or footprint advantage | **D16.4, D19.1** — the reduced method costs `+2.5` to `+3.8 MiB` **more** than the full grid; two independent measurements agree |
-| "peak memory is rank-independent" for the projected integrator | **D19.4/D19.4a** — the rank variation **is resolved** (just, by `9-10%` over the `2x` threshold: `0.293`/`0.289` against `0.266`), so say **"varies by `0.29 MiB`, resolved at `2.2x` the noise floor"** — **NOT "flat"**, which asserts the opposite |
-| "the BUG port costs more memory as well as more time" | **D19.3** — BUG's overhead is **smaller** (`+2.32` vs `+2.52`); it trades memory for time |
+| any memory or footprint advantage | **D16.4, D19.1, D89** — the reduced method costs `+2.37` to `+4.21 MiB` **more** than the full grid (`24-43x` the `0.098 MiB` noise floor, so resolved at every rank); two independent measurements agree |
+| "peak memory is rank-independent" for the projected integrator | **D19.4/D19.4a, and D89 WEAKENS IT** — the rank variation **is resolved at `N=64`** (`2.7x` the `0.098 MiB` floor, so a real variation) but **is NOT resolved at `N=128`** (`1.9x`, `rank_independence_resolved: false`). **So neither "flat in rank" nor "grows with rank" is supported at `N=128`; the overhead is positive at every rank either way** (was: the variation **is resolved**, just, by `9-10%` over the `2x` threshold: `0.293`/`0.289` against `0.266`), so say **"varies by `0.29 MiB`, resolved at `2.2x` the noise floor"** — **NOT "flat"**, which asserts the opposite |
+| "the BUG port costs more memory as well as more time" | **D19.3, re-measured D89** — BUG's overhead is **smaller** (`+2.18` vs `+2.37` at `N=64`; `+3.63` vs `+4.21` at `N=128`); it trades memory for time |
 | quoting raw RSS as the memory figure | the ~34 MiB interpreter baseline dominates; report the **overhead over the full grid** |
 | quoting `crossover_surface.json`'s `crossovers` block | its reason string is **false** for `r = 2, 4, 16`; read the `dlra` / `static_moving_window` rows instead |
 | **`t* = 1.26` / `2.44`, or window robustness `≤7%`, or Re robustness `1–4%`** | **D29.2** — my values, from a one-horizon index shift in the `dlra` list. The block is correct: `0.649`/`1.482`, window `≤0.63%`, Re `3–9%`. |

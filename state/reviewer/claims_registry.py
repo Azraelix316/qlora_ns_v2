@@ -53,14 +53,47 @@ REGISTRY = [
 
     # --- cost (D52.5: 2.08-2.71x SLOWER. 2.08 is the MINIMUM, so "comparable to" is false
     #     everywhere -- the euphemism the abstract had to be rewritten for.)
+    # D91: this row asserted 16 SIGNIFICANT FIGURES on a quantity whose own recorded within-run
+    # spread is 8.7-26.5% and whose REFERENCE varies 16-32% across repeats. A re-run moved it
+    # +7.58% -- WITHIN its own recorded noise -- so a 16-s.f. gate reports a defect where the
+    # measurement says there is none. The precision is now set FROM the measurement: sf=1.
+    # A real regression (the method becoming cheaper than the grid) still fails at sf=1,
+    # because 2.24 -> 1.1 crosses the leading digit.
     ("cost_ratio_min_N64", "cost_retiming.json", "grids", {"N": 64},
-     "@min:rows.full_step_ratio_vs_reference", 2.0800072205298386, 16),
+     "@min:rows.full_step_ratio_vs_reference", 2.237746367620425, 1),
+    # I ADDED TWO ROWS PINNING THE NOISE ITSELF AND THEN REMOVED THEM (D91.5). The noise estimate
+    # is only reproducible to 11-173% between two runs of the SAME protocol, so a value row
+    # for it fails on nearly every re-run: a tripwire, not a gate. The noise belongs in D91,
+    # which is where the sf=1 justification lives; the registry keeps the quantities that are
+    # stable enough to pin.
 
     # --- the rank ceiling is a WAVENUMBER count, not an accuracy result (D30). Recorded so
     #     that "the dealiasing ceiling" can never again be used as a rank claim.
     ("dealias_ceiling_N64", "cost_retiming.json", "grids", {"N": 64}, "dealias_rank_ceiling", 43, 2),
     ("dealias_ceiling_N128", "cost_retiming.json", "grids", {"N": 128}, "dealias_rank_ceiling", 85, 2),
     ("dealias_ceiling_N256", "cost_retiming.json", "grids", {"N": 256}, "dealias_rank_ceiling", 171, 2),
+
+    # --- MEMORY (added R126/D89). These were load-bearing in FOUR documents and the registry
+    #     asserted NONE of them, which is exactly how D19.4a's numbers went stale through two
+    #     regenerations before I found them by reading the coder's message. Now a re-run that
+    #     moves them fails here instead.
+    #     D89: the SIGN is the claim (no memory saving); these rows pin the digits AND the
+    #     resolution flag, because the flag is what changed qualitatively.
+    ("mem_noise_floor_mib", "peak_memory.json", ".", None,
+     "noise_floor_mib", 0.09765625, 8),
+    ("mem_overhead_N64_dlra", "peak_memory.json", "rank_scaling", {"N": 64, "method": "dlra"},
+     "overhead_vs_full_grid_mib", 2.37109375, 8),
+    ("mem_overhead_N128_dlra", "peak_memory.json", "rank_scaling", {"N": 128, "method": "dlra"},
+     "overhead_vs_full_grid_mib", 4.2109375, 8),
+    ("mem_overhead_N64_bug", "peak_memory.json", "rank_scaling", {"N": 64, "method": "bug"},
+     "overhead_vs_full_grid_mib", 2.17578125, 8),
+    ("mem_overhead_N128_bug", "peak_memory.json", "rank_scaling", {"N": 128, "method": "bug"},
+     "overhead_vs_full_grid_mib", 3.6328125, 8),
+    # A non-numeric claim, asserted because D89's whole point is that it is FALSE: the N=128
+    # projected rank-variation is NOT resolved, so neither "flat in rank" nor "grows with rank"
+    # is supported there. If a future run resolves it, this row fails and the guidance changes.
+    ("mem_rank_resolved_N128_dlra", "peak_memory.json", "rank_scaling", {"N": 128, "method": "dlra"},
+     "rank_independence_resolved", None, None),
 
     # --- divergence (D66: a POPULATION, never a single universal bound)
     ("div_worst_our_method", "baselines_re5000_N64_T8.json", "methods.dlra_fixed_r1", None,
@@ -251,6 +284,16 @@ def main():
     res = os.path.join(root, "state", "coder", "results")
 
     print("PART 1 — VERIFY every registry entry against its artifact\n")
+    # PRINT THE POPULATION (D87 / CHECKLIST 1.15). Part 1 reads state/coder/results, which is NOT
+    # reviewer's to own and is NOT present in every checkout — agent/reviewer's tree has 0 of the
+    # 17 artifact files, so a run from the reviewer worktree reports 0/18. That answer is honest
+    # but useless, and without this line a reader cannot tell which tree the run came from.
+    nart = len(glob.glob(os.path.join(res, "*.json")))
+    print(f"  POPULATION: {nart} artifact file(s) in {res}")
+    print(f"  ROOT: {root}")
+    if nart == 0:
+        print("  !! NO ARTIFACTS — every row will report 'artifact missing'. Run this from a tree")
+        print("     that has state/coder/results (the main checkout does; agent/reviewer does not).")
     ok_n, bad, values = 0, [], {}
     for cid, art, path, sel, field, expect, sf in REGISTRY:
         f = os.path.join(res, art)
@@ -270,7 +313,15 @@ def main():
             continue
         if expect is None:                     # a non-numeric claim, e.g. status == "never"
             want_lit = True
-        if expect is None:
+        if expect is None and isinstance(actual, bool):
+            # A BOOLEAN CLAIM (D89). The claim asserted is that the flag is FALSE --
+            # e.g. peak_memory rank_independence_resolved at N=128 for the projected
+            # integrator. Accepted only when it really is False; a future run that
+            # resolves it fails this row, and the guidance that depends on it changes.
+            ok = (actual is False)
+            note = (f"{field}={actual!r} (asserted False; a run that RESOLVES it must fail "
+                    f"this row and the rank-independence guidance must be revisited)")
+        elif expect is None:
             ok = str(actual) in ("never", "unresolved", "resolved")
             note = f"status={actual!r} (a non-numeric claim; accepted if it is a status word)"
         else:

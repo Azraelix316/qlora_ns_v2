@@ -31,6 +31,7 @@ project that exits 1 for candidates rather than for defects.
 
 Run:  python3 check_order_withdrawn.py
 """
+import os
 import re
 import sys
 from pathlib import Path
@@ -52,7 +53,19 @@ WITHDRAWN = [
      "the barred novelty claims"),
     ("D71",   r"3-5x slower", "the wrong BUG slowdown in a figure title"),
     ("D30",   r"dealiasing ceiling", "a wavenumber count used as a rank claim"),
+    # Added R124, with the draft itself now scanned (D88).
+    ("D67",   r"99\.9\s*\\?%", "the baseline energy threshold: draft says 99.9%, runs used 99%"),
+    ("D32.2", r"rank is adapted online|adapted online by|online rank adaptation|"
+              r"rank is adapted online as",
+     "the barred online-adaptive-rank claim (only evidence is nsteps: 200)"),
+    ("D85",   r"above rank[^.]{0,24}(?:\\approx\s*)?8\b",
+     "the withdrawn saturation threshold (it is r=16, not above r~8)"),
 ]
+
+# Lines beginning with % are LaTeX COMMENTS: they do not render, so a barred claim in one is not
+# a submission defect. The draft carries the barred-claims list itself in comments, which is good
+# practice — so comment hits are counted and printed separately, never mixed with rendered text.
+COMMENT = re.compile(r"^\s*%")
 
 # A hit is only a CANDIDATE if the line is not itself telling the reader not to write it.
 # NEGATIVE-CONTROLLED (D78). An earlier version of this filter also suppressed any line beginning
@@ -117,6 +130,55 @@ def scan(path):
     return len(lines), cut, len(latex), found
 
 
+def draft_lines(root):
+    """The DRAFT, read from git (D88). `paper/` does not exist on `main` — the draft lives only
+    on origin/agent/writer — so a filesystem glob here would silently scan nothing, which is
+    exactly how claims_registry.py came to report clean results over an empty population (D87).
+    Returns (rendered, commented, source)."""
+    import subprocess
+    ref = os.environ.get("DRAFT_REF", "origin/agent/writer")
+    # `git ls-tree` restricts to the CURRENT SUBDIRECTORY, and --full-name does not lift that
+    # restriction (verified: 0 hits from state/reviewer, 10 from the repo root). So run git from
+    # the toplevel, not from this file's directory.
+    top = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=str(root),
+                         capture_output=True, text=True).stdout.strip() or str(root)
+    def sh(*a):
+        return subprocess.run(a, cwd=top, capture_output=True, text=True).stdout
+    names = [l for l in sh("git", "ls-tree", "-r", "--name-only", ref).splitlines()
+             if l.startswith("paper/sections/") and l.endswith(".tex")]
+    rendered, commented = [], []
+    for n in names:
+        for i, l in enumerate(sh("git", "show", f"{ref}:{n}").splitlines(), 1):
+            (commented if COMMENT.match(l) else rendered).append((f"{n}:{i}", l))
+    return rendered, commented, f"git {ref}:paper/sections", len(names)
+
+
+def figure_titles(root):
+    """Matplotlib title/label strings in the figure code, read from git (D91.10).
+
+    Returns (lines, source, nfiles). Scans title/label/annotate/suptitle calls, because a
+    withdrawn claim in a figure title reaches every reader of the paper while a withdrawn
+    claim in a code comment reaches nobody.
+    """
+    import subprocess
+    ref = os.environ.get("CODE_REF", "origin/main")
+    top = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=str(root),
+                         capture_output=True, text=True).stdout.strip() or str(root)
+
+    def sh(*a):
+        return subprocess.run(a, cwd=top, capture_output=True, text=True).stdout
+    names = [l for l in sh("git", "ls-tree", "-r", "--name-only", ref).splitlines()
+             if l.startswith("experiments/") and l.endswith(".py")]
+    out = []
+    for n in names:
+        for i, line in enumerate(sh("git", "show", f"{ref}:{n}").splitlines(), 1):
+            s = line.strip()
+            if not s or s.startswith("#"):
+                continue
+            out.append((f"{n}:{i}", line))
+    return out, f"git {ref}:experiments/*.py", len(names)
+
+
 def main():
     root = Path(__file__).resolve().parent
     # START_HERE.md is FIRST in this list deliberately: it is the file an agent opens first,
@@ -141,6 +203,22 @@ def main():
         return 2
     print(f"SELF-TEST PASS: {fired}/{len(WITHDRAWN)} patterns fire on a known-bad string")
 
+    # CHECKLIST 1.15.4: every pattern must fire on a known instance of the thing it withdraws.
+    # A pattern that has never been observed to fire is a pattern that has not been shown to work.
+    for decision, pat, what in WITHDRAWN:
+        inst = {
+            "D67":   r"$r_{\mathrm{POD}}$ resolving 99.9\% of the energy",
+            "D32.2": "The rank is adapted online by incremental singular value decomposition.",
+            "D85":   "above rank $\\approx 8$ additional rank buys it nothing measurable",
+        }.get(decision)
+        if inst is None:
+            continue
+        if not re.search(pat, inst, re.I):
+            print(f"SELF-TEST FAILED: [{decision}] does not fire on a known instance "
+                  f"({what}): {inst!r}")
+            return 2
+    print(f"SELF-TEST PASS: every draft-targeted pattern fires on a known instance of its claim")
+
     total = 0
     for d in docs:
         n, cut, nlatex, found = scan(d)
@@ -152,6 +230,52 @@ def main():
             print(f"  CANDIDATE [{decision}] {what}  line {line} ({kind}): {text}{flag}")
         if not found:
             print("  no candidates")
+
+    # The DRAFT — the artifact actually submitted (D88). Scanned last because it is the one a
+    # reviewer of the paper will read, and the one no earlier decision could reach from `main`.
+    rendered, commented, src, nfiles = draft_lines(root)
+    print(f"\nDRAFT: {nfiles} file(s), {len(rendered)} rendered line(s) + {len(commented)} "
+          f"comment line(s), from {src}")
+    if not nfiles:
+        print("  !! EMPTY POPULATION — the draft was not found, so NOTHING BELOW IS EVIDENCE.")
+        print("     A clean result here would be vacuous (D87). Check DRAFT_REF.")
+        return 1
+    # The FIGURE CODE (D91.10). Both barred titles live here and nowhere else: D71's "3-5x
+    # slower" and D77.2's "the dealiasing ceiling". A barred phrase in a figure title is a
+    # submission defect, and this gate could not see the file that produces the most visible
+    # text in the paper. Third population after the three orders (D84) and the draft (D88).
+    fig, figsrc, nfig = figure_titles(root)
+    print(f"\nFIGURE CODE: {nfig} file(s), {len(fig)} non-comment line(s), from {figsrc}")
+    if not nfig:
+        print("  !! EMPTY POPULATION - the figure code was not found (D87).")
+        total += 1
+    fighits = 0
+    for decision, pat, what in WITHDRAWN:
+        pp = re.compile(pat, re.I)
+        for loc, line in fig:
+            if pp.search(line):
+                fighits += 1
+                print(f"  CANDIDATE [{decision}] {what}  {loc} (FIGURE TITLE/CODE): "
+                      f"{line.strip()[:100]}")
+    if not fighits:
+        print("  no candidates in figure titles")
+    total += fighits
+
+    hits = 0
+    for decision, pat, what in WITHDRAWN:
+        p = re.compile(pat, re.I)
+        for loc, line in rendered:
+            if p.search(line) and not PROHIBITION.search(line):
+                hits += 1
+                print(f"  CANDIDATE [{decision}] {what}  {loc} (RENDERED TEXT): "
+                      f"{line.strip()[:100]}")
+    ncom = sum(1 for d, pat, _ in WITHDRAWN for loc, l in commented if re.search(pat, l, re.I))
+    print(f"  {hits} candidate(s) in RENDERED draft text; {ncom} further match(es) in LaTeX "
+          f"COMMENTS (not rendered, listed for the record only)")
+    if not hits:
+        print("  no candidates in rendered draft text")
+    total += hits
+
     print(f"\n{total} CANDIDATE(S). Exit 1 means candidates exist, NOT that a defect does.")
     print("Read each one: it is a prohibition, a quoted defect, or a finding - or it is real.")
     return 1 if total else 0
