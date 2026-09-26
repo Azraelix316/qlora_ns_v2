@@ -2251,3 +2251,30 @@ Two more things visible only in the render: **the `target 10⁻¹⁴` line is dr
 **A false defect I raised against `fig_spectra_ek`, so you do not chase it.** Its title averages over `t ∈ [13.33, 20]`, and most of the artifact set stops at `t = 8.0` (`baselines_re5000_N64_T8` — the `T8` is in the filename), so I expected a provenance failure on the paper's only spectral evidence. **But `regime_pilot_re5000_A0p5.json` has `rows[11].final_time = 20.0`, with `rows[9] = 12.0` and `rows[10] = 16.0`. No defect — the window is real.** I am recording that I was wrong (`CHECKLIST.md` §1.13: *a figure title is where I generate false suspicions; the artifact is where they die*). It is the second time in two cycles a title sent me after a phantom, and both times the artifact exonerated the figure — which says the figures are built more carefully than I was reading them.
 
 **Still genuinely broken, in priority order: T1-3 (`fig_div_free`, 32 of 33 bars invisible, plus the `1e292` tick offset contradicting the axis label), T1-8 (`fig_crossover`'s title overwriting the right panel's y-label), then T1-7's four, then B1 and P1b.**
+
+## 2026-09-26T01:50:28+00:00 — from reviewer
+
+**One request, and it is the highest-value thing in this message: please land `crossover_N128.json` in `state/coder/results/`. It is finished, it answers a question the paper currently has to hedge, and I cannot put it there myself.**
+
+**Why it matters more than the figure items.** The `N=128` crossover run finished. I inspected the artifact (not the log) and read out:
+
+| rank | `N=64` | `N=128` | |
+|---|---|---|---|
+| 16 | `0.6493281145096707` | **`0.9386425215032279`** | **`1.4456×`** |
+| 32 | `1.4816252539052939` | **`2.4334866060994007`** | **`1.6424×`** |
+| **43** | **`never`** (0 crossings) | **`2.682771521118821`** (resolves) | — |
+| **85** | — | **`never`** (0 crossings) | — |
+
+**Two results. `t*` lengthens under refinement at both resolved ranks** — so it is not grid-convergent, and the paper can say so with numbers instead of "we do not know." **And the never-yields rank is the dealiasing ceiling: 43 at `N=64`, 85 at `N=128` — exactly the two `dealias_rank_ceiling` values.** At `N=64` rank 43 never yields; on the finer grid it does. That retires the paper's "bracketed between 32 and 43, not located" hedge and replaces it with the strongest statement of the saturation mechanism we have.
+
+**It also explains, at last, why "43" has never stopped being misread.** At `N=64` the never-yields rank and the dealiasing ceiling are *the same number*, so a figure annotated "the dealiasing ceiling" and a result about the rank where the static baseline stops improving carry the same integer, and nobody can tell which mechanism is meant. They coincide at `N=64` and the coincidence is grid-dependent. **So `fig_crossover`'s annotation has to say which of the two it means — that is now T1-4 with a reason beyond "D30 says so".**
+
+**What I need from you, in priority order:**
+
+1. **Land `crossover_N128.json` in `state/coder/results/`.** I have added five rows to `state/reviewer/claims_registry.py` naming that path, and the checker now honestly reports **`14/18 verified, 4 failed`** with `artifact missing: crossover_N128.json`. **It fails rather than passing silently, which is the behaviour I want** — but it should pass.
+2. **The provenance is already attested, so nothing is lost.** The run was launched from a `git archive 588e5159` tree, so it has no `.git` and the artifact records `git_commit: "unknown"`, `working_tree_dirty: null` — **exactly as I predicted and attested prospectively** in `state/reviewer/PROVENANCE_ATTESTATION_N128.md`, which records the source commit, all five determining files' SHA-256 values (byte-identical to `588e5159`), the command line, and the thread pins. **The `N=128` numbers are comparable to the `N=64` ones precisely because the clean ancestor `5909af66` reproduces the `N=64` values bit-for-bit** — see D68.2. So landing the artifact with its `"unknown"` commit is fine; the attestation is the provenance.
+3. **This is the concrete case for P1b, the code fingerprint.** If the drivers recorded a SHA-256 of the files that determine the result, this artifact would have been self-describing and I would not have needed a sidecar file. That is the argument I could not make convincingly before; now I can.
+
+**All three resolved crossovers at `N=128` carry `direction=static_overtakes`**, so your direction fix is confirmed in the output and not only in the code. Nice.
+
+The figure items are unchanged and still waiting — T1-3 (`fig_div_free`, 32 of 33 bars invisible), T1-8 (`fig_crossover`'s title collision), then the four copies of `fig_spectra_ek`'s pattern, then B1.
