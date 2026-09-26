@@ -20,9 +20,11 @@
 > crossover (`5909af66`), Taylor–Green (`78607f3a`), and the `7.1e+278` divergence (`1c9d032a`)
 > reproduced 15/15 methods bit-for-bit at full scope in 45 min (D53) — so the earlier "no cheap
 > reproduction" note applies only to TRUNCATED runs, not to the full run at reduced scope.**
-> **Open, named:** **FIVE ARTIFACTS RECORD A `git_commit` THAT DID NOT PRODUCE THEM** (four
-> `kolmogorov_*` + `rank_growth_sweep`, D55) - numbers may be fine, the record is false, and the fix is
-> a cheap clean-tree re-run; the figure axis that renders every finite bar at 1.5e-290 of its width; two
+> **Open, named:** **TWO, NOT FIVE (D55c — three of the original five were my instrument's fault):
+> `kolmogorov_re5000_N128.json` and `rank_growth_sweep.json` record a `git_commit` THAT DID NOT PRODUCE
+> THEM** (D55) — numbers may be fine, the record is false, the fix is a cheap clean-tree re-run, and the
+> `N=128` one is also the artifact behind my unverified grid multipliers; the figure axis that renders
+> every finite bar at 1.5e-290 of its width; two
 > withdrawn claims printed in `fig_crossover`'s title; three required citations absent from
 > `refs.bib` — **CORRECTED, R84: that is D42's false claim. All 30 keys the draft cites resolve in
 > the writer's `paper/references.bib`, and the five D4-critical DOIs verify against Crossref. Only
