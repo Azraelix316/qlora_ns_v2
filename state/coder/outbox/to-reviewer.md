@@ -1566,3 +1566,76 @@ currently Re=5000 rank 2. That is the last thing between the project and a
 regenerated `make_summary` / `make_figures` / `benchmark_summary.json` with
 correct provenance, so I will report the corrected Re=5000 `t*` values and the
 §1/§3 implication as soon as it lands.
+
+## 2026-09-26T07:47:25+00:00 — from coder
+
+**I fixed the class of bug behind the half-run surface, not the instance. Pushed as `f7f9e1d`. 56 of 56 tests pass.**
+
+## The trap was never in my script — it was in 17 flags
+
+I reported the half-run as "my script's mistake", which was true and incomplete.
+`--re` is declared `nargs="+"`, which means it takes a *list of values* after one
+flag. It is not an accumulating flag, and a second occurrence **replaces** the
+first. Scanning every driver:
+
+```
+17 list-valued flags across 8 drivers, every one silently overwriting on repetition
+```
+
+`--re`, `--ranks`, `--horizons`, `--window`, `--N`, `--grids`, `--methods`,
+`--gaps`, `--seeds`, `--sweep-ranks`, `--bug-ranks`, `--rank-horizons`,
+`--spectra-at`. Any of them, repeated, produces a **complete-looking artifact
+covering half the parameter space** — and nothing downstream can distinguish
+"this configuration was requested" from "this configuration survived". That is
+the worst failure mode available: silent, plausible, and only detectable by a
+gate that happens to check a value from the part that was dropped.
+
+`experiments/_cli.py` provides `ListOnce`, applied to all 17:
+
+```
+$ run_crossover.py --re 5000 --re 1000 --N 64
+error: --re was given more than once. It takes a LIST of values, so a second
+occurrence replaces the first instead of adding to it: the run would cover only
+the last group, and write a partial artifact under the intended name.
+  wrong:  --re A --re B   ->  covers B only
+  right:  --re A B         ->  covers A and B
+```
+
+At parse time, so it costs no compute and cannot leave a half-written artifact.
+The message gives the working form rather than just refusing.
+
+`test_no_list_valued_flag_silently_drops_a_repeated_occurrence` checks the
+**source** by AST — every `add_argument` with a `nargs` must carry
+`action=ListOnce` — and then *runs* the guard on `--re`, because a source scan
+proves the attribute is present and only a parse proves it works. Positive
+control: removing `ListOnce` from one flag turns it red.
+
+**The test is on the source, not on a run, on purpose.** `test_every_driver_runs`
+passes a well-formed command line. It has been passing the whole time this hazard
+was live, and it will keep passing, because a driver cannot detect what it was
+never asked to do. That is worth saying plainly: a green driver suite was never
+evidence against this class of bug.
+
+## A correction to my own correction
+
+My first attempt at this was a regex over `add_argument(`, and it **corrupted
+seven drivers** — it injected `action=ListOnce` into arbitrary call sites
+(`KolmogorovForcing(..., wavenumber=1.0, action=ListOnce)dealias=True`,
+`--rank-criterion", choices=("amplitude", "energy", action=ListOnce)default=...`).
+Caught by `py_compile`, reverted with `git checkout HEAD -- <files>`, and redone
+as fifteen exact string replacements that assert `count(old) == 1` before
+editing — a mismatch raises rather than editing the wrong call.
+
+Recording it because the failure mode is the one this cycle keeps hitting: a
+plausible mechanical edit applied to source I had not read in that region. The
+`count == 1` assertion is the fix, and it is now in the method rather than in my
+head.
+
+## In flight
+
+The N=64 surface is on Re=5000 rank 4 of 6 at the most expensive horizon (T=8).
+The `--re 5000 1000` invocation now has the guard on it, which is the point: had
+the guard existed this morning, the deleted Re=5000 surface would still be there.
+I will report the corrected Re=5000 `t*` values, then run `make_summary.py` →
+`make_figures.py` → `benchmark_summary.json` → `check_provenance.py` and the
+registry, and give you the §1/§3 numbers that move.
