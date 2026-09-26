@@ -6502,3 +6502,61 @@ DATA STRUCTURE WITH AN OPTIONAL FIELD IS A TRAP, AND THE FIFTH ONE FAILED ONLY W
 two-line window and produces zero false positives on the fifteen sites previously flagged; **the draft carries THREE instances
 of D60's withdrawn universal bound — `04_methods.tex:275`, `06_results.tex:105` and the `tab:div` caption at
 `06_results.tex:124` — not one**; and a crash in `check_order_withdrawn.py` is now a non-zero exit rather than a silent pass.**
+
+---
+
+## D96 — **THE ENERGY-KEY RENAME IS HALF DONE AND HAS PRODUCED **FOUR** NAMES FOR **TWO** QUANTITIES; AND CHECKING IT FOUND THAT **MY OWN D18a CEILING IS WRONG BY A FACTOR OF 4.4** — THE TRUE POPULATION REACHES `2.2e-3`, NOT `4.9e-4`.** (2026-09-26)
+
+> **OPERATIVE (R133). REVIEWED AND MERGED THE COADER'S `dcc4a64`-FOLLOW-UP. C1-3b/c/d ARE STILL OPEN, `C2-1` IS STILL
+> NOT DONE, AND ONE OF MY OWN NUMBERS WAS WRONG.**
+
+**D96.1 — THE RENAME IS HALF DONE, AND IT HAS MADE THE AMBIGUITY WORSE. `run_kolmogorov.py` NOW WRITES
+`max_scaled_pde_energy_residual` AND `max_scaled_projected_energy_residual`. **NO COMMITTED ARTIFACT USES EITHER NAME.**
+ALL FIVE `kolmogorov_*.json` AND `taylor_green.json` STILL CARRY `max_scaled_energy_balance_residual` AND
+`max_scaled_full_pde_energy_residual`; `benchmark_summary.json` CARRIES BOTH OLD NAMES **PLUS A THIRD**,
+`max_scaled_invariant_residual`; AND `rank_growth_sweep.json` USES **ONLY** THAT THIRD NAME. SO THERE ARE NOW **FOUR NAMES
+IN CIRCULATION FOR TWO QUANTITIES**, AND THE TWO THE CODE WRITES ARE THE TWO NO DATA USES. A WRITER WHO REGENERATES AND
+LOOKS FOR THE NEW NAME FINDS NOTHING; ONE WHO LOOKS FOR THE OLD NAME FINDS NOTHING IN A NEW RUN. **THE RISK D66 IDENTIFIED
+WENT UP, NOT DOWN.**
+
+**D96.2 — AND D66's CENTRAL NUMBER REPRODUCES FROM A SECOND, INDEPENDENT ARTIFACT. IN
+`benchmark_summary.json`, FOR THE SAME CASE AND METHOD, THE TWO KEYS DISAGREE AS FOLLOWS:**
+
+| case / method | `max_scaled_energy_balance_residual` | `max_scaled_full_pde_energy_residual` | ratio |
+|---|---|---|---|
+| `cases[*].full` (all three) | identical to the other key | — | **1.0×** |
+| `cases[*].dlra` | `5.49e-4` … `7.90e-4` | `4.93e-4` … `4.90e-4` | **1.1–1.6×** |
+| **`cases[0..2].pod`** | **`0.311`, `0.166`, `0.0333`** | **`4.69e-4`, `2.80e-4`, `2.59e-4`** | **`662.8×`, `594.8×`, `128.7×`** |
+| **`grid_check.pod`** | **`0.0353`** | **`2.157e-3`** | **`16.4×`** |
+
+**`662.8×` REPRODUCES D66's `662.83×` FROM A DIFFERENT FILE. THE FULL-GRID `1.0×` IS ALSO THE SANITY CHECK THAT THE TWO
+KEYS ARE THE SAME BALANCE WITH AND WITHOUT THE PROJECTION TERM: WITH NO PROJECTION THEY MUST AGREE, AND THEY DO.**
+
+**D96.3 — AND **MY OWN D18a TEXT IS WRONG**, WHICH IS THE PART THAT MATTERS. D18a'S BLOCK 7 SAID ALL THREE SOLVER FAMILIES
+HOLD THE ENERGY BALANCE *"TO BETWEEN `1.3e-4` AND `4.9e-4`"*. **THE TRUE POPULATION OF
+`max_scaled_full_pde_energy_residual` ACROSS ALL COMMITTED ARTIFACTS IS **26 MEASUREMENTS**, MIN `1.287e-4`, MAX
+`2.157e-3`.** THE MINIMUM IS RIGHT AND THE **CEILING IS WRONG BY A FACTOR OF `4.4`.** THE FOUR VALUES ABOVE `4.9e-4` ARE
+`benchmark_summary.json:grid_check.pod` AND `kolmogorov_re5000_N128.json:pod`, **BOTH THE STATIC POD AT THE FINEST GRID** —
+SO D18a's DIRECTION ("THE STATIC PROJECTION WORST, AT THE FINEST GRID") WAS RIGHT AND ITS MAGNITUDE WAS NOT.
+**D18a NOW READS `1.3e-4` TO `2.2e-3` OVER THE `26` COMMITTED MEASUREMENTS, WITH THE POPULATION NAMED. THE CLAIM SURVIVES —
+A `2.2e-3` RELATIVE VIOLATION IS STILL SMALL — BUT THE NUMBER WAS WRONG IN TEXT THE WRITER WAS ABOUT TO PASTE.**
+
+**D96.4 — FIVE REGISTRY ROWS ADDED, AND THIS IS THE FIRST TIME EITHER ENERGY QUANTITY HAS BEEN PINNED. `energy_pde_worst`
+(`2.157e-3`), `energy_pde_best` (`1.287e-4`), `energy_pde_dlra_N64` (`4.692e-4`), `energy_full_keys_agree`
+(`2.589e-4` — THE IDENTITY ROW: FOR THE FULL GRID THE TWO KEYS MUST BE EQUAL, AND A RUN THAT BREAKS THAT IS A BUG), AND
+`energy_projected_pod` (`3.332e-2`, THE `128.7×` CASE). **POSITIVE-CONTROLLED: PERTURBING `energy_pde_worst` FAILS THAT ROW
+AND PERTURBING `energy_projected_pod` FAILS THAT ROW, WITH EVERY UNPERTURBED ROW STILL `OK` — SO THE ROWS ARE SPECIFIC
+RATHER THAN TRIPWIRES. REGISTRY IS NOW `27/31` ON `main`, THE FOUR FAILURES BEING ONLY THE UNLANDED `crossover_N128.json`.**
+
+**D96.5 — TWO SMALLER THINGS IN THE SAME PUSH. (1) `run_kolmogorov.py`'s ONLY CHANGE IS `N` → `args.N` IN ONE EXPRESSION, AND
+**IT IS COSMETIC, NOT A BUG FIX** — LINE 931 OF THE SAME CALL ALREADY PASSES `N=args.N`, SO BARE `N` WAS IN SCOPE AND THE
+OLD CODE RAN. **THE ARTIFACT WAS REGENERATED FOR IT NONETHELESS, WHICH IS FINE BUT WORTH NAMING SO IT IS NOT COUNTED AS A
+FIX. (2) `rank_growth_sweep.json`'s PHYSICS REPRODUCES TO `~1e-8` RELATIVE — `max_scaled_invariant_residual`
+`7.7002579e-4 → 7.7002581e-4` — WHILE ITS `seconds_per_step` MOVED **`0.00766 → 0.01038`, A `35%` CHANGE. THAT IS D91's PATTERN
+EXACTLY, AND IT IS THE THIRD INDEPENDENT CONFIRMATION THAT THE PROJECT'S TIMING MEASUREMENTS ARE THE NOISY ONES AND ITS
+PHYSICS ARE THE REPRODUCIBLE ONES. THE FILE IS UNPINNED, WHICH D94.4 SAYS IS HOW A NUMBER GOES STALE QUIETLY.**
+
+**D96.6 — Unchanged.** Everything in D35.6 through D95.8 stands, **except that: four names circulate for the two energy
+quantities and the two the code writes are the two no data uses; D66's `662.8×` reproduces from a second artifact; **D18a's
+energy ceiling is corrected from `4.9e-4` to `2.2e-3` over a population of 26**; and five registry rows now pin both
+quantities, including the full-grid identity that must hold.**

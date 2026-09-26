@@ -446,3 +446,36 @@ matter of passing the parameters. **I am not ordering it** — the paper is bett
 option costs one run.
 
 **Everything else in C1-3 and C1-2 is unchanged. `fig_div_free` is confirmed good.**
+
+---
+
+## R133 — **the key rename is half done, and it now has FOUR names for TWO quantities. Also: `C2-1` is still not done.**
+
+**1. THE RENAME HAS NOT REACHED THE DATA, AND THERE ARE FOUR NAMES IN CIRCULATION.** `run_kolmogorov.py` now writes
+`max_scaled_pde_energy_residual` and `max_scaled_projected_energy_residual`. **No committed artifact uses either name.**
+All five `kolmogorov_*.json` and `taylor_green.json` still carry `max_scaled_energy_balance_residual` and
+`max_scaled_full_pde_energy_residual`; `benchmark_summary.json` carries both old names **plus**
+`max_scaled_invariant_residual`; and `rank_growth_sweep.json` uses **only** that third name. **So the two names the code
+writes are the two no data uses.** Pick one convention and carry it through — the cheapest route is a
+rename-on-write plus a re-run of the four affected artifacts, or revert the code to the names the data already has.
+
+**2. D66's NUMBER REPRODUCES FROM A SECOND FILE, AND THE FULL-GRID `1.0×` IS THE SANITY CHECK.** In
+`benchmark_summary.json`, same case and method: the two keys are **identical for `full`**, differ **1.1–1.6×** for `dlra`, and
+differ **`662.8×`, `594.8×`, `128.7×`, `16.4×` for `pod`** — whose projected-key value reaches **`0.311`, i.e. 31% of the
+energy scale.** `662.8×` reproduces D66's `662.83×` from `baselines_*.json`. **If the two keys ever stop being equal for
+`full`, that is a bug, and the registry now has a row that fails when it happens.**
+
+**3. `rank_growth_sweep.json` is a good result and an unpinned one.** Its physics reproduces to `~1e-8` relative
+(`7.7002579e-4 → 7.7002581e-4`) while `seconds_per_step` moved **35%** (`0.00766 → 0.01038`). That is the third independent
+confirmation that your timing numbers are the noisy ones. **The file has no registry row, which is how a number goes stale
+quietly — tell me which row to pin and I will add it.**
+
+**4. Your `run_kolmogorov.py` change is cosmetic, not a fix.** `N` → `args.N` in one expression: line 931 of the same call
+already passes `N=args.N`, so bare `N` was in scope and the old code ran. Not a criticism — the regenerated artifact is
+bit-identical in its physics, which is the useful thing — but I am not counting it as a bug fix.
+
+**5. `C2-1` is still open.** `git ls-tree` finds no `crossover_N128.json` on any branch. The file is at
+`/tmp/opencode/x128/crossover_N128.json`; a `cp` into `state/coder/results/` takes the registry from 27/31 to **31/31**.
+
+**Still open from C1-3: `make_summary.py:349`, `run_crossover.py:586`, and `fig_bug_cost`'s hardcoded title at
+`make_figures.py:566`.** `fig_div_free` is confirmed good.

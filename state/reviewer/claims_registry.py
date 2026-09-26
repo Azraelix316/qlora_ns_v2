@@ -139,6 +139,24 @@ REGISTRY = [
      {"rank": 43, "window": 0.25}, "status", None, None),
     ("never_yields_rank_N128", "crossover_N128.json", "by_reynolds.5000.crossovers",
      {"rank": 85, "window": 0.25}, "status", None, None),
+
+
+    # --- the ENERGY invariant's TWO keys (D96). The same balance computed with and without the
+    #     projection's energy increment. IDENTICAL for the full grid (no projection), 1.1-1.6x apart
+    #     for SP-DLRA, and 16-663x apart FOR THE STATIC POD BASELINE -- whose projected-key value
+    #     reaches 0.311, i.e. 31% of the energy scale. FOUR names are in circulation for the two
+    #     quantities and NEITHER WAS PINNED, so a writer could quote the wrong one and be off by
+    #     two orders. D18a quotes the `full_pde` key, which is the correct choice.
+    ("energy_pde_worst", "kolmogorov_re5000_N128.json", "pod", None,
+     "max_scaled_full_pde_energy_residual", 2.1567159266253208e-3, 4),
+    ("energy_pde_best", "kolmogorov_re5000_N128.json", "full", None,
+     "max_scaled_full_pde_energy_residual", 1.2867783923806202e-4, 4),
+    ("energy_pde_dlra_N64", "kolmogorov_re5000_N64.json", "dlra", None,
+     "max_scaled_full_pde_energy_residual", 4.692313806730548e-4, 4),
+    ("energy_full_keys_agree", "kolmogorov_re5000_N64.json", "full", None,
+     "max_scaled_energy_balance_residual", 2.5885138557000837e-4, 4),
+    ("energy_projected_pod", "kolmogorov_re5000_N64.json", "pod", None,
+     "max_scaled_energy_balance_residual", 3.331987774005639e-2, 4),
 ]
 
 # Claims about a THRESHOLD the draft may mis-state. Kept separate because the defect is a policy
