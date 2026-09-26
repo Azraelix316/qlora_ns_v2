@@ -3664,42 +3664,14 @@
     "driver": "experiments/run_regime_pilot.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "ed620285fb26ea4fcad8328696f0a9d8f52907fe4021a7e70d97638baeb9f39b",
-    "git_commit": "270d05d738a014fa1ac6af1c4722cfa24aedd946",
+    "driver_sha256": "f2e920fed9cf3d82a770c0dde7a1568671a272fe8f537b6bbd91353b4700c384",
+    "git_commit": "7385cead881f2f12e402ae7441ec2578980aff43",
     "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_diff_sha256": "b8938365aa2902742be51896b558cfe2ecce234c0bea71595f632bf21e541948",
+    "working_tree_diff_sha256": "8200a34f96bceedbe25adcf06e3fc16eb71587d418bd9c6536b8b978f584fd66",
     "working_tree_dirty": true,
     "working_tree_dirty_paths": [
-      "experiments/figures/CAPTIONS.md",
-      "experiments/figures/PROVENANCE.md",
-      "experiments/figures/fig_bug_cost.pdf",
-      "experiments/figures/fig_cost.pdf",
-      "experiments/figures/fig_div_free.pdf",
-      "experiments/figures/fig_divergence.pdf",
-      "experiments/figures/fig_error_vs_ref.pdf",
-      "experiments/figures/fig_ke_spectrum.pdf",
-      "experiments/figures/fig_rank_vs_time.pdf",
-      "experiments/figures/fig_spectra_ek.pdf",
-      "experiments/figures/fig_spectrum.pdf",
-      "experiments/figures/fig_sv_decay.pdf",
-      "experiments/figures/fig_sv_decay.png",
-      "experiments/figures/fig_tg_ke_rank.pdf",
-      "experiments/figures/fig_window_rank.pdf",
-      "experiments/make_figures.py",
-      "paper/figures/fig_bug_cost.pdf",
-      "paper/figures/fig_cost.pdf",
-      "paper/figures/fig_div_free.pdf",
-      "paper/figures/fig_divergence.pdf",
-      "paper/figures/fig_error_vs_ref.pdf",
-      "paper/figures/fig_ke_spectrum.pdf",
-      "paper/figures/fig_rank_vs_time.pdf",
-      "paper/figures/fig_spectra_ek.pdf",
-      "paper/figures/fig_spectrum.pdf",
-      "paper/figures/fig_sv_decay.pdf",
-      "paper/figures/fig_sv_decay.png",
-      "paper/figures/fig_tg_ke_rank.pdf",
-      "paper/figures/fig_window_rank.pdf"
+      "state/coder/results/peak_memory.json"
     ]
   },
   "qualifying_horizons": [
@@ -3746,7 +3718,7 @@
         }
       },
       "samples": 6,
-      "wall_seconds": 0.7002707871142775,
+      "wall_seconds": 0.4562309659086168,
       "zonal_share_of_total_energy_at_end": 0.1724282915427111
     },
     {
@@ -3784,7 +3756,7 @@
         }
       },
       "samples": 14,
-      "wall_seconds": 1.5657879889477044,
+      "wall_seconds": 1.1232369358185679,
       "zonal_share_of_total_energy_at_end": 0.18493386168751563
     },
     {
@@ -3822,7 +3794,7 @@
         }
       },
       "samples": 26,
-      "wall_seconds": 2.8236273359507322,
+      "wall_seconds": 2.310201893094927,
       "zonal_share_of_total_energy_at_end": 0.1824905200045937
     },
     {
@@ -3860,7 +3832,7 @@
         }
       },
       "samples": 51,
-      "wall_seconds": 4.6431786578614265,
+      "wall_seconds": 4.5399744210299104,
       "zonal_share_of_total_energy_at_end": 0.19695294704648406
     },
     {
@@ -3898,7 +3870,7 @@
         }
       },
       "samples": 101,
-      "wall_seconds": 8.974623108981177,
+      "wall_seconds": 9.004760979907587,
       "zonal_share_of_total_energy_at_end": 0.2704604569946258
     },
     {
@@ -3942,7 +3914,7 @@
         }
       },
       "samples": 151,
-      "wall_seconds": 13.574563381029293,
+      "wall_seconds": 13.186166126048192,
       "zonal_share_of_total_energy_at_end": 0.38280665894181637
     },
     {
@@ -3986,7 +3958,7 @@
         }
       },
       "samples": 201,
-      "wall_seconds": 18.166640277951956,
+      "wall_seconds": 17.0782244510483,
       "zonal_share_of_total_energy_at_end": 0.5164844784410212
     },
     {
@@ -4032,7 +4004,7 @@
         }
       },
       "samples": 301,
-      "wall_seconds": 26.89933672407642,
+      "wall_seconds": 25.093887608032674,
       "zonal_share_of_total_energy_at_end": 0.5385842355330672
     },
     {
@@ -4078,7 +4050,7 @@
         }
       },
       "samples": 401,
-      "wall_seconds": 35.56369282491505,
+      "wall_seconds": 33.143216860014945,
       "zonal_share_of_total_energy_at_end": 0.5613868405027024
     }
   ],

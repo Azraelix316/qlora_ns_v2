@@ -317,3 +317,64 @@ The registry row `mem_noise_floor_mib` is pinned at 0.0977 MiB, one of the four
 single-sample values above, and cannot be satisfied by any correct measurement of
 this quantity. It needs re-pinning against the distribution, or replacing by a
 claim about the distribution — see the message to the reviewer.
+
+## Driver drift: which artifacts are actually in question
+
+`provenance.py` sets `driver_matches_HEAD` by comparing the driver on disk with
+the one in the recorded `git_commit`, and `reproducible` follows it. That is the
+right check and it is unforgiving on purpose. But it currently conflates two very
+different situations:
+
+* the driver's **computation** changed, so the recorded numbers may no longer be
+  what the code produces — re-run required; and
+* only the **command-line wiring** changed, so the computation is byte-identical
+  and the numbers still are what the current code produces.
+
+The second case is real. On 2026-09-26 all 17 list-valued flags across 8 drivers
+gained `action=ListOnce` so that a repeated flag fails loudly instead of silently
+running half the parameter space (see `experiments/_cli.py`). That touched seven
+drivers and so invalidated the recorded provenance of every artifact they
+produced — including a T=8 baseline and a T=20 pilot — while changing no
+arithmetic.
+
+`experiments/check_driver_drift.py` separates them **by parsed structure**: it
+recovers the driver at the recorded commit, strips `action=ListOnce` and its
+import from the current file, and compares `ast.dump` of the two. Identical means
+the computation is unchanged; different means name what changed.
+
+A *line-based* comparison is the obvious implementation and it is wrong: adding
+`action=ListOnce` to an `add_argument` that already spanned two lines pushes its
+`default=` onto a continuation line, so a pure wiring change produced
+`+ default=[64, 128])` and **13 of 20 artifacts were mislabelled "substantive"**.
+Comparing parsed structure cannot have that failure, because a continuation line
+is not a node.
+
+At the time of writing: **7 current, 9 wiring-only, 4 substantive.** All four
+substantive ones are changes to what is written or described rather than to the
+arithmetic — two gained a description string, one gained the zonal-share keys,
+and one (`json_safe`) changes non-finite floats to `null`, which only bites
+artifacts that contain one.
+
+## Flags that do not exist, checked before the run
+
+`experiments/check_driver_flags.py` asks each driver for its own `--help` and
+verifies every flag in a launch script against it. It exists because two bad
+invocations cost real time on 2026-09-26, both of the same shape — an argument
+the parser does not have, or has differently — and **neither failed loudly**: a
+shared `--dt` plus a per-case `--dt` ran one case at twice its recorded timestep,
+and `--re 5000 --re 1000` ran half the parameter space and overwrote a complete
+artifact. Both produced complete-looking files from runs that did not do what
+their names said.
+
+The first draft of the refresh script that this check validated contained two
+flags that do not exist (`--seed` on `run_static_basis_construction.py`, which
+takes `--seeds` only, and `--adaptive-rank` on `run_baselines.py`, whose adaptive
+rank is read off the adaptive run rather than given). Both would have failed at
+parse time, so they were caught for free — but they were caught by *asking the
+parser*, not by reading the driver, which is the point.
+
+**What the check cannot see:** a flag the parser *has* but means differently
+still runs happily and still produces a wrong artifact. Every argument list in
+these runs is transcribed from the artifact's own recorded `parameters` block
+for that reason, and written out in full rather than assembled from a shared
+block — the shared block is what produced the duplicated `--dt`.
