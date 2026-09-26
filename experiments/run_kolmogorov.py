@@ -943,7 +943,7 @@ def main() -> None:
         pod_rank=args.pod_rank,
         dlra_rank=args.dlra_rank,
         dlra_min_rank=args.dlra_min_rank,
-        dlra_max_rank=args.dlra_max_rank or 2 * (N // 3) + 1,
+        dlra_max_rank=args.dlra_max_rank or 2 * (args.N // 3) + 1,
         dlra_relative_amplitude_cutoff=args.dlra_relative_amplitude_cutoff,
         dlra_rank_criterion=args.rank_criterion,
         dlra_energy_fraction=args.energy_fraction,

@@ -29,6 +29,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+EXPERIMENTS = ROOT / "experiments"
 RESULTS = ROOT / "state" / "coder" / "results"
 
 if str(ROOT) not in sys.path:
@@ -40,6 +41,90 @@ def load(name: str) -> dict:
     if not path.exists():
         pytest.skip(f"{name} is not present; nothing to assert against")
     return json.loads(path.read_text())
+
+
+def test_every_driver_runs(tmp_path):
+    """Each driver must actually execute, at a size that costs nothing.
+
+    This is a test of the *harness*, not the physics, and it exists because a
+    driver was broken for many cycles without anyone noticing:
+    `run_kolmogorov.py` referenced a bare `N` that does not exist in `main()`,
+    so the project's canonical suite driver raised `NameError` on every
+    invocation -- and nothing caught it, because the committed artifacts predate
+    the break. A driver that cannot run is indistinguishable from a driver that
+    has not been run, which is the same failure D14.4 exists to prevent.
+
+    Each driver is invoked as a subprocess with a minimal configuration and a
+    temporary output, so the test exercises argparse, the run, the artifact
+    assembly and the write -- the whole path, not just the import.
+    """
+    import os
+    import subprocess
+    import sys
+
+    env = dict(os.environ)
+    env.update({
+        "OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1", "MKL_NUM_THREADS": "1",
+    })
+    # Minimal configurations chosen to satisfy each driver's own preconditions
+    # (enough snapshots to fit the default pod_rank of 16).
+    cases = {
+        "run_kolmogorov.py": [
+            "--re", "5000", "--N", "16", "--dt", "0.0005", "--steps", "40",
+            "--train-steps", "20", "--snapshot-stride", "2", "--compare-stride", "10",
+            # Small ranks: the driver refuses a rank it cannot fit from the
+            # snapshots supplied, which is the behaviour worth keeping, so the
+            # smoke configuration has to respect it.
+            "--pod-rank", "4", "--dlra-rank", "2", "--dlra-min-rank", "2",
+            "--dlra-max-rank", "8",
+        ],
+        "run_baselines.py": [
+            "--re", "5000", "--N", "16", "--T", "0.05", "--train-time", "0.02",
+            "--ranks", "4", "--train-snapshot-stride", "0.001", "--sample-every", "20",
+            "--refit-interval", "0.01",
+        ],
+        # The block time is the S2 specification's own (>= 2 time units) and the
+        # driver enforces it.  A short horizon is still run: the statistic is
+        # recorded as unevaluable with a reason rather than failing, which is the
+        # distinction the project cares about.
+        "run_regime_pilot.py": [
+            "--re", "5000", "--N", "16", "--horizons", "0.02", "--block-time", "2.0",
+            "--sample-every", "10",
+        ],
+        # This driver hard-codes pod_rank=16 and takes train_steps = steps // 2
+        # with snapshot_stride 5, so 160 steps is the least that supplies 16
+        # snapshots.  Cheap at N=16.
+        "run_rank_growth_sweep.py": ["--N", "16", "--re", "5000", "--dt", "0.0005",
+                                     "--steps", "160"],
+        # window / snapshot-stride chosen so the window still holds more
+        # snapshots than the rank, which the driver requires.
+        "run_crossover.py": [
+            "--re", "5000", "--N", "16", "--horizons", "0.02", "0.04",
+            "--ranks", "4", "--window", "0.04", "--refit-interval", "0.01",
+            "--snapshot-stride", "0.002",
+        ],
+        "run_taylor_green.py": [],
+        "bench_memory.py": ["--N", "16", "--ranks", "2", "--methods", "full", "dlra",
+                            "--steps", "5"],
+    }
+    for script, extra in cases.items():
+        out = tmp_path / f"{script}.json"
+        cmd = [sys.executable, str(EXPERIMENTS / script), "--output", str(out), *extra]
+        result = subprocess.run(
+            cmd, cwd=ROOT, env=env, capture_output=True, text=True, timeout=900,
+        )
+        assert result.returncode == 0, (
+            f"{script} exited {result.returncode}\n"
+            f"--- stdout tail ---\n{result.stdout[-1500:]}\n"
+            f"--- stderr tail ---\n{result.stderr[-1500:]}"
+        )
+        assert out.exists() and out.stat().st_size > 0, (
+            f"{script} exited cleanly but wrote no artifact"
+        )
+        data = json.loads(out.read_text())
+        assert data.get("provenance", {}).get("git_commit"), (
+            f"{script} wrote an artifact with no commit recorded"
+        )
 
 
 def test_the_subspace_must_evolve_contrast_is_present_in_the_artifact():
