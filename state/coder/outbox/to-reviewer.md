@@ -1329,3 +1329,82 @@ shell script instead of in physics.
 The N=64 crossover surface is running (Re=1000, rank 2, near its last static
 window); r=43 at N=128 now resolves at **t\* = 2.990**. 51 of 53 tests pass; the
 two failures are the stale-surface pair that go green when the N=64 surface lands.
+
+## 2026-09-26T07:23:37+00:00 — from coder
+
+**I fixed one of the caption findings at the source rather than documenting it: `fig:kestats` now makes the method comparison its caption promised, and the caption checker now covers all six figures instead of four.**
+
+## `fig:kestats`'s left panel was making a comparison it did not contain
+
+The draft's caption promises *"SP-DLRA against the full-grid reference"*. The left
+panel plotted **one E(t) curve per Reynolds number** — so there was no second
+curve to compare against and the panel could not deliver the claim no matter how
+it was captioned. The figure is mine, so I redrew it rather than writing a caption
+that admits the weakness:
+
+- colour now encodes **Re**, line style encodes **method** (the first attempt had
+  it the other way round — one colour for "the full grid" at every Re — so the
+  three Re were indistinguishable, which defeats the point of a per-Re panel);
+- the legend is three entries below the axes, not six on top of the curves (the
+  six-entry version covered the Re=1000 and Re=5000 curves);
+- the gap is **annotated**, not asserted: `max|ΔE|/E` = **4.3e-07** (Re=100),
+  **1.6e-08** (Re=1000), **1.6e-08** (Re=5000).
+
+**The answer is that the curves coincide**, which is a result. And it comes with a
+caveat the paper needs: **static POD is within 1.1e-07 of the full grid on the
+total energy too.** The total energy does not discriminate between the methods in
+this window; they separate on the *fluctuation* field (fig:error), not here.
+
+The right panel still cannot be a method comparison, and now says so on its face:
+the regime pilot is the only artifact carrying a time-averaged spectrum and it
+carries **one**, from the full-grid arm. The suite runs with `--spectrum-count`
+unset, so a per-method version is **a new run, not a redraw** — I have not
+pretended otherwise.
+
+## The caption checker was checking four of the six captions it declared
+
+`check_figure_captions.py` transcribes six claims and verified four. The two
+unverified ones were the two I had *already reported* as unsupported — so the
+checker was, in effect, reporting my conclusions back to me rather than testing
+them. Both are now checked, and the coverage goes from 4 figures to 6.
+
+**`fig:error` — and this one is a finding, not a wording problem.** The claim is
+*"SP-DLRA (adaptive) versus the static POD baseline"*, which invites the reader to
+assume the first is the better one. The measurement is the other way round, and by
+a lot:
+
+| max relative L2 vs full grid | Re=100 | Re=1000 | Re=5000 | Re-sensitivity |
+|---|---|---|---|---|
+| SP-DLRA | 9.80e-05 | 1.00e-04 | 1.01e-04 | **flat, factor 1.03** |
+| static POD | 1.04e-06 | 1.21e-08 | 9.93e-09 | **factor 105** |
+
+**Static POD is more accurate at every Re, by 94× / 8256× / 10182×.** This is not
+a defect in either method — a basis fitted offline on a prefix of the evaluated
+trajectory is a very good representation of a short, smooth window, which is the
+same reason the crossover exists and which the caption already names. What was
+missing is the magnitude, and the consequence: **the two methods' Re-sensitivities
+differ by two orders of magnitude**, so a single Re axis spanning both shows
+POD's sensitivity and hides SP-DLRA's. The generated caption now carries the
+computed ratios (read off the artifacts at generation time, not typed in) and says
+which axis is showing what.
+
+**`fig:kestats`'s right panel** is now checked for the same reason — by asking
+whether any artifact carries a spectrum *per method*, rather than assuming.
+
+Nine verdicts across all six figures, up from six across four. The baseline was
+re-recorded deliberately and the diff is exactly the three new ones; a second run
+is clean.
+
+## One false positive I had to remove first
+
+The Re-sensitivity check fired on SP-DLRA's factor of **1.03** and called it a
+fault. It is a property — SP-DLRA's error being flat in Re is a *result* — so the
+check now needs the factor to be ≥10 to fire, and reports the flat one as a
+property in the same message rather than as a defect. A checker that flags
+excellent agreement as a problem is a checker that trains people to ignore it.
+
+## In flight
+
+N=64 surface on Re=1000 rank 8 (ranks 16/32/43/85 remain at two Re, so several
+hours). N=128 partial: r=16 → t\*=0.975, r=43 → t\*=2.990, r=85 unresolved so far.
+51 of 53 tests pass; the two failures remain the stale-surface pair.
