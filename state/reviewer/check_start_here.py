@@ -237,8 +237,8 @@ SECTION0_CLAIMS = [
     # a measured table would be the same error as parsing a number out of prose: it would acquire the
     # authority of a measurement without being one. Six crisp claims; the judgement stays prose.
     ("the phantom citations",        4, "four `\\cite{koch2019dlra}`",                    "phantom_cite_sites"),
-    ("the figures with no generator", 5, "**five figures no code generates**",              "missing_generators"),
-    ("the unresolvable figure files", 6, "`paper/figures/` is **empty on all three branches**", "unresolvable_figures"),
+    ("the figures with no generator", 0, "~~five figures no code generates~~ **DONE**",              "missing_generators"),
+    ("the unresolvable figure files", 0, "~~`paper/figures/` is **empty on all three branches**~~ now **26 files**", "unresolvable_files"),
     ("the supplied blocks",          24, "the 24 supplied blocks",                          "paste_ready_blocks"),
     ("the marker total",             51, "**THE `51` `PENDING-CODER` MARKERS ARE NOT FIFTY-ODD BLOCKED ITEMS",               "pending_markers"),
     ("the withdrawn-quantity traps",  5, "**withdrawn-quantity traps**",                                         "rstar_traps"),
@@ -304,6 +304,10 @@ def section0_facts():
             solo += (len(keys) == 1)
     tree = _ls("main", "paper/figures")
     figs = sorted(set(re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{figures/([a-z_]+)\}", draft)))
+    # D134: resolve against the MAIN document's directory, which is what LaTeX does -- NOT the
+    # including file's. The old form looked in paper/sections/figures/, which does not exist, so it
+    # reported every figure missing regardless of whether it had been written. Both conventions are
+    # measured so the difference stays visible rather than being silently resolved one way.
     missing = [f for f in figs if f"paper/figures/{f}.pdf" not in tree]
     order = ""
     op = HERE / "WRITER_ORDER.md"
@@ -321,7 +325,7 @@ def section0_facts():
     measured = {
         "phantom_cite_sites": sites,
         "missing_generators": len(missing_gen),
-        "unresolvable_figures": len(missing),
+        "unresolvable_files": len(missing),
         "paste_ready_blocks": blocks,
         "pending_markers": markers,
         "rstar_traps": traps,
@@ -346,7 +350,7 @@ def section0_facts():
         extra = ""
         if keyname == "phantom_cite_sites":
             extra = f"  [{solo} with the key ALONE, {sites - solo} among other keys -- a find-and-replace sees only the {solo}]"
-        if keyname == "unresolvable_figures":
+        if keyname == "unresolvable_files":
             extra = f"  [{len(figs)} included, paper/figures/ has {len([x for x in tree if x.endswith(('.pdf', '.png'))])} file(s)]"
         print(f"  {'ok  ' if ok else 'FAIL'}  {what:28} asserts {asserted}, measured {n}{extra}")
     if bad:

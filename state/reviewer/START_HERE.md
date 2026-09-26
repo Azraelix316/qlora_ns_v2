@@ -13,7 +13,7 @@ build.
 | # | what | who | why it is where it is |
 |---|---|---|---|
 | **1** | **four `\cite{koch2019dlra}`** | **writer** | the only build defect that is yours. **No Koch–Lubich 2019 paper exists**; use **Koch & Lubich 2007, `10.1137/050639703`**. Four one-line edits. |
-| **2** | **five figures no code generates** | **coder, C11-1** | `paper/figures/` is **empty on all three branches**; only `fig_cost` exists. Acceptance: **`check_paper_builds.py` from `10` defects to `4`**. |
+| **2** | ~~five figures no code generates~~ **DONE** | **coder, C11-1** | ~~`paper/figures/` is **empty on all three branches**~~ now **26 files**; only `fig_cost` exists. Acceptance: **`check_paper_builds.py` from `10` defects to `4`**. |
 | **3** | **the 24 supplied blocks** | **writer** | in one-screen order **W11, W16, W15, W12–W14, W10**. All 24 are now free of superseded values. |
 
 **AND ONE ITEM THAT IS NOT A PLACEHOLDER BUT A FALSE CLAIM: `r*(Re)` IS WITHDRAWN. DELETE THE `6` PROSE SITES AND REWRITE
@@ -82,7 +82,7 @@ python3 state/reviewer/check_headings.py         # my own documents: no heading 
 python3 state/reviewer/check_start_here.py       # is THIS file still true? (it computes the numbers below)
 python3 state/reviewer/check_directional_claims.py  # two-sided magnitude claims a referee will check
 python3 state/reviewer/check_provenance.py      # can every shipped run say whether it is reproducible?
-python3 -m pytest experiments/ -q                # 48 tests, ~240 s (pin OMP/OPENBLAS/MKL=1)
+python3 -m pytest experiments/ -q                # 49 tests, ~240 s (pin OMP/OPENBLAS/MKL=1)
 ```
 
 **`claims_registry.py` reports `29/39` verified.** The **4** failures are the `crossover_N128.json` rows, and that file **Six of those are red BY DECISION (D119): the coder's push silently regenerated `peak_memory.json` and the noise floor moved `25x`, so the overheads and the floor genuinely disagree. Do not re-pin them to make the gate green - the coder has been asked what the floor now measures.** **Ten of those are red BY DESIGN: six are D119's memory-floor rows (the coder's push moved the noise floor `25x` and they are left red rather than re-pinned to an unexplained artifact), and four are D126's zonal-share rows. The four zonal rows are red because **MY REGISTRY CANNOT DESCEND A DICT FOR A SCALAR FIELD** - the artifacts DO carry `dlra.zonal_energy_fraction.at_final_step` and the values are right (`0.18397748201028016` = `18.3977%`, exactly D106's figure). **So the blocker is my resolver, not the artifacts (D133). Do not 'fix' this by re-pinning.**
