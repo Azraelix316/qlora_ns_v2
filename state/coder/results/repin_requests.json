@@ -9,9 +9,8 @@
     "captured_at": "launch",
     "driver": "experiments/make_repin_requests.py",
     "driver_dirty": false,
-    "driver_matches_HEAD": false,
+    "driver_matches_HEAD": true,
     "driver_matches_HEAD_at_write": true,
-    "driver_matches_HEAD_note": "experiments/make_repin_requests.py is not in c96eab9d: new or uncommitted at launch",
     "driver_sha256": "f7c7a1393f7f73e720baad5dfe71a4bce64c5584d3126534d7a493b03a813f30",
     "driver_sha256_at_write": "f7c7a1393f7f73e720baad5dfe71a4bce64c5584d3126534d7a493b03a813f30",
     "environment": {
@@ -27,18 +26,18 @@
         "VECLIB_MAXIMUM_THREADS": null
       }
     },
-    "git_commit": "c96eab9de76c4291efa4f3f16ef3e2b38665c1d7",
-    "git_commit_at_write": "c96eab9de76c4291efa4f3f16ef3e2b38665c1d7",
-    "git_commit_how": "git log -1 --before=1790436972",
+    "git_commit": "5d9d1addfdce36c87c4a5e1b0ca35b5a264a6347",
+    "git_commit_at_write": "5d9d1addfdce36c87c4a5e1b0ca35b5a264a6347",
+    "git_commit_how": "git log -1 --before=1790437060",
     "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
-    "reproducible": false,
+    "reproducible": true,
     "sources_files_at_launch": 33,
     "sources_fingerprint_at_launch": "2ca1fc9842efce2b46dc46a4cbd6890cb25f362dda65bff26e2451855f185f4d",
     "tree_moved_during_run": false,
-    "working_tree_diff_sha256": "6de3975c17dc5d626c2d2e57699531c1e319914caa2cd3f395e4a1ec2bc5b9fd",
+    "working_tree_diff_sha256": "e4f2321194100c5291bc7c9cd81204ec648dacd9274525e4f40a0d81d51a3238",
     "working_tree_dirty": true,
     "working_tree_dirty_paths": [
-      "experiments/test_artifacts.py"
+      "state/coder/results/repin_requests.json"
     ]
   },
   "regenerate_with": "python experiments/make_repin_requests.py",

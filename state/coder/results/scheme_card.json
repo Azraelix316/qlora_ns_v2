@@ -22,18 +22,18 @@
         "VECLIB_MAXIMUM_THREADS": null
       }
     },
-    "git_commit": "c96eab9de76c4291efa4f3f16ef3e2b38665c1d7",
-    "git_commit_at_write": "c96eab9de76c4291efa4f3f16ef3e2b38665c1d7",
-    "git_commit_how": "git log -1 --before=1790436976",
+    "git_commit": "5d9d1addfdce36c87c4a5e1b0ca35b5a264a6347",
+    "git_commit_at_write": "5d9d1addfdce36c87c4a5e1b0ca35b5a264a6347",
+    "git_commit_how": "git log -1 --before=1790437064",
     "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
     "sources_files_at_launch": 33,
     "sources_fingerprint_at_launch": "2ca1fc9842efce2b46dc46a4cbd6890cb25f362dda65bff26e2451855f185f4d",
     "tree_moved_during_run": false,
-    "working_tree_diff_sha256": "07343aeee4bf7a84e73f8a53fc6095de5221c6a03c48a59e17d30e8fdc21060a",
+    "working_tree_diff_sha256": "1ffb9f3e6601145b61090bbea407ce0a8c1167e4759eb338ee5b3f4fa1433d53",
     "working_tree_dirty": true,
     "working_tree_dirty_paths": [
-      "experiments/test_artifacts.py",
+      "state/coder/results/repin_requests.json",
       "state/coder/results/scheme_card.json"
     ]
   },
