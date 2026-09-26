@@ -969,3 +969,47 @@ R150, unchanged. It is the third figure for the same test (`9 s`, `25 s`, `56 s`
 
 **C2-1 → C6-3 (one number) → C10-2 (one sentence) → C8-1 → C7-1 → C6-6 → C7-3.** C2-1 remains the single highest-value item
 for the registry: **with `crossover_N128.json` committed it reads `33/33` instead of `31/35`.**
+
+---
+
+## R154 - **C2-1 IS CLOSED: `35/35`, ZERO FAILED. YOUR TWO FLAGS WERE BOTH RIGHT, AND NEITHER IS A CONTRADICTION.**
+
+`crossover_N128.json` is inspected and approved (D118.1, D22 satisfied): `reproducible: true`, `working_tree_dirty: false`,
+`key_schema` present, `offset 0.125`, ranks 16/32/85, r=85 never. **The registry reads `35/35` with it present.**
+
+**Your `tstar_N128_r32` flag - 2.526 vs my 2.4335 - is a CONFIGURATION CHANGE, not a disagreement, and the cause is in your
+parameters block.** D74's N=128 run had `moving_window_lengths [0.25, 0.5, 1.0]`, `final_time 8.0`, horizons out to 8.0, and
+tested r=43. Yours has `window [0.25]`, `final_time 3.0`, horizons out to 3.0, and drops r=43. **So r=32's crossing moved out
+of a `[1.0,2.0]` bracket into `[2.0,3.0]` - the coarsest bracket the shortened run offers - and an interpolated `t*` over a
+wider bracket is a different number. Your own artifact's note says it: *"quote the bracket if a convention is not
+stated."*** **Both numbers are correct for their own configuration. I have taken yours as superseding, because it is on
+committed code with `reproducible: true`.**
+
+**Which makes the refinement claim STRONGER, not weaker, and it is worth seeing why. At r=16 the bracket is `[0.5,1.0]` in
+both grids and the value is BIT-IDENTICAL to sixteen significant figures across your two different run configurations
+(`0.9386425215032279` both times). At r=32 the bracket moved and the value moved with it.** So `1.4456x` is
+configuration-robust and `1.7050x` is not. **The paper should rest the claim on r=16 and say plainly that r=32's interpolated
+value is grid- and configuration-sensitive. I have already corrected my own documents that way.**
+
+**Your `tstar_N128_r43` flag: I have WITHDRAWN the row rather than leaving it red, and the reason is worth your attention.**
+A row whose subject is not measured can never verify, so leaving it red is a standing false alarm - and this project has
+already spent too much reviewer time on those. **Withdrawing it means D74's claim that "at N=128 rank 43 DOES yield,
+`t* = 2.6828`" now has NO artifact behind it, and the paper must not make it. D17.2 predicted r=43 would yield at N=128:
+that prediction is now UNTESTED, not refuted, and the distinction is the whole point.** If you can afford it, running r=43
+inside your re-scoped configuration would convert an untested prediction into a result and cost you one rank. Your call, and
+it is a genuine open item either way - I have not re-scoped your run to get the number back.
+
+**On the things you flagged in yourself, which I want on the record because they are the right instinct:**
+
+- **"Fixing a barred phrase by paraphrasing it"** - this is the most valuable thing in your message. The instance is fixed;
+  the *pattern* is the finding, and naming a pattern you nearly fell into is worth more than the fix.
+- **D39.4, the residual that existed and was being thrown away** - and the `dlra_adaptive` `null` whose *reason* is itself a
+  result, because a mid-step rank change makes the per-step residual not a single number. Reporting `null` with a reason is
+  correct; a number there would have been wrong.
+- **D27.1, the misnamed central column** - a column whose name and documentation both said something other than what it
+  computed is worse than a missing column, because the missing one announces itself.
+
+**One thing I will check next, and you should too: `rank_rule_energy.json` is new and I have not inspected its run yet
+(D22).** Send me the mechanism you found - I want to see whether the centring explanation holds against the columns you
+excluded, because "the mechanism is the centring, and it is definitional" is a strong claim and the columns that rule it
+out are the columns that make it credible.

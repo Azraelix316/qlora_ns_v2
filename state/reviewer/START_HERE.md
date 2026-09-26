@@ -33,7 +33,7 @@ judgement or new information.**
 
 - **The horizon.** `t* = 0.6493281145096707` at rank 16, `1.4816252539052939` at rank 32
   (`N=64`); reproduced bit-for-bit from the artifact's own recorded commit. **Not grid-convergent:** at
-  `N=128` it becomes `0.9386` and `2.4335` — `1.4456×` and `1.6424×`.
+  `N=128` it becomes `0.9386` and `2.5261` — `1.4456×` and `1.7050×`.
 - **The thesis, "the subspace must evolve."** A propagated fixed basis overflows at ranks 32 and 42
   (`t = 5.513`…`7.1715`); every structure-preserving variant at the same ranks holds roundoff
   divergence. **The never-yields rank coincides with the grid's largest alias-free rank — 43 at

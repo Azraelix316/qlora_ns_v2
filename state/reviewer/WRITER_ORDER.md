@@ -669,13 +669,13 @@ self-serving direction as the `99.9%`.**
 | rank | `N=64` | `N=128` | |
 |---|---|---|---|
 | 16 | `0.6493281145096707` | **`0.9386425215032279`** | **`1.4456x`** |
-| 32 | `1.4816252539052939` | **`2.4334866060994007`** | **`1.6424x`** |
-| **43** | **`never`** (0 crossings) | **`2.682771521118821`** (resolves) | — |
+| 32 | `1.4816252539052939` | **`2.526111749416177`** (bracket `[2,3]`) | **`1.7050x`** |
+| **43** | **`never`** (0 crossings) | **not measured** — the N=128 re-scope dropped r=43 | — |
 | **85** | — | **`never`** (0 crossings) | — |
 
 **Two results, and the second is the better one.**
 
-**1. `t*` lengthens under refinement at both resolved ranks** — `1.4456x` and `1.6424x`. So the horizon is **not
+**1. `t*` lengthens under refinement at both resolved ranks** — `1.4456x` and `1.7050x`. **The r=16 figure is the one to lean on:** its bracket is `[0.5,1.0]` in both grids and its value is bit-identical across two different run configurations, whereas r=32's interpolated value moved `3.8%` when the run was re-scoped (D118).** So the horizon is **not
 grid-convergent over `64 -> 128`**, and the direction is the expected one: the reduced integrator's error falls while the
 static baseline's rises, so the gap widens. **Write it as a result, not as the open question you had to hedge.**
 
@@ -692,7 +692,7 @@ $N = 64$ and 85 at $N = 128$, each equal to that grid's largest
 alias-free rank. Rank therefore helps the evolving subspace all the way up
 to the point where the representation, not the method, runs out. The accuracy
 horizon is not grid-convergent — it lengthens by $1.45\times$ at rank 16 and
-$1.64\times$ at rank 32 on refinement — because the reduced integrator
+$1.71\times$ at rank 32 on refinement — because the reduced integrator
 converges while the static baseline degrades.
 ```
 
