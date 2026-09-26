@@ -268,6 +268,17 @@ def main() -> None:
             "worker subprocesses and no integration time."
         ),
     )
+    parser.add_argument(
+        "--overhead-repeats", type=int, default=5,
+        help=(
+            "how many times to measure EVERY configuration, so the overhead "
+            "over the full grid is a distribution rather than a single sample. "
+            "Four registry rows are pinned to that single sample and cannot be "
+            "satisfied by any correct measurement: across three independent "
+            "measurements the projected integrator's N=64 overhead moved by "
+            "+136%. 5 keeps the driver's cost near 5x, which is minutes."
+        ),
+    )
     parser.add_argument("--dt", type=float, default=None)
     parser.add_argument("--output", type=Path,
                         default=Path("state/coder/results/peak_memory.json"))
@@ -296,7 +307,18 @@ def main() -> None:
                 # against its MAXIMUM, which is the conservative side.
                 is_reference = (N == args.N[0] and method == args.methods[0]
                                 and rank == 0)
-                repeats = args.noise_repeats + 1 if is_reference else 1
+                # EVERY configuration is now repeated, not just the one the noise
+                # floor is estimated from.  The reason is the registry: four
+                # `mem_overhead_*` rows are pinned to a single-sample peak-RSS
+                # overhead, and across three independent measurements the
+                # projected integrator's N=64 overhead moved by +136% -- so those
+                # rows cannot be satisfied by any correct measurement, exactly
+                # like the noise-floor row.  Recording the overhead as a
+                # distribution over repeats makes it pinnable, and it is cheap:
+                # peak RSS is a subprocess high-water mark, so a repeat costs one
+                # worker launch and no integration time.
+                repeats = (args.noise_repeats + 1) if is_reference else 1
+                repeats = max(repeats, args.overhead_repeats)
                 for rep in range(repeats):
                     cmd = [
                         sys.executable, str(Path(__file__).resolve()),
@@ -377,6 +399,10 @@ def main() -> None:
         }
     for N in args.N:
         base = by_key.get(("full", N, 0))
+        base_repeats = [
+            r["peak_rss_mib"] for r in rows
+            if r["method"] == "full" and r["N"] == N and r["rank"] == 0
+        ]
         if base is None:
             continue
         for method in args.methods:
@@ -390,6 +416,44 @@ def main() -> None:
                 row["peak_overhead_fraction"] = (
                     row["peak_overhead_vs_full_grid_mib"] / base["peak_rss_mib"]
                 )
+                # The same quantity over every repeat of THIS configuration and
+                # of the full-grid reference, so the overhead is a distribution.
+                #
+                # A single-sample overhead is not pinnable: the projected
+                # integrator's N=64 overhead was measured at 0.098 MiB, 0.230 and
+                # 0.231 across three runs -- +136% -- while the registry row for
+                # it is fixed to 8 significant figures. Reporting the spread
+                # alongside the point is what lets a reader (or a gate) say
+                # whether a given pinned value is even in the right range, and it
+                # costs nothing because the repeats were already being taken.
+                own = [
+                    r["peak_rss_mib"] for r in rows
+                    if (r["method"], r["N"], r["rank"]) == (method, N, rank)
+                ]
+                if len(own) > 1 and base_repeats:
+                    overheads = sorted(o - b for o in own for b in base_repeats)
+                    median = (
+                        overheads[len(overheads) // 2] if len(overheads) % 2
+                        else 0.5 * (overheads[len(overheads) // 2 - 1]
+                                    + overheads[len(overheads) // 2])
+                    )
+                    row["peak_overhead_samples_mib"] = {
+                        "samples": len(overheads),
+                        "min_mib": overheads[0],
+                        "median_mib": median,
+                        "max_mib": overheads[-1],
+                        "spread_mib": overheads[-1] - overheads[0],
+                        "spreads_over_median": (
+                            (overheads[-1] - overheads[0]) / abs(median)
+                            if median else None
+                        ),
+                        "note": (
+                            "every pairing of this configuration's repeats with "
+                            "the reference's repeats, so the spread includes the "
+                            "reference's own variation and not only this "
+                            "configuration's"
+                        ),
+                    }
 
     # The claim that matters: is the reduced method's peak *rank*-independent,
     # and is it below the full grid's?

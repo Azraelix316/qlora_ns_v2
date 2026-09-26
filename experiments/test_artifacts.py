@@ -44,6 +44,74 @@ def load(name: str) -> dict:
     return json.loads(path.read_text())
 
 
+def test_the_memory_overhead_is_a_distribution_and_not_one_sample():
+    """The peak-RSS overhead over the full grid must carry its own spread.
+
+    Four `mem_overhead_*` registry rows are pinned to a single-sample overhead at
+    eight significant figures, and they cannot be satisfied by any correct
+    measurement: the projected integrator's N=64 overhead was measured at 0.098,
+    0.230 and 0.231 MiB across three independent runs — **+136%** — while the row
+    is fixed. So the artifact now records, per configuration, the overhead over
+    every pairing of its own repeats with the reference's repeats.
+
+    A smoke run makes the point concretely: for one configuration the recorded
+    point value was the *minimum* of its own distribution. A gate pinning that
+    point would be pinning a lower bound it had no way of knowing was one.
+
+    The assertion is deliberately about the distribution's presence and internal
+    consistency rather than about any value, because the values are measurements
+    of allocator behaviour and asserting them would be asserting noise.
+    """
+    data = load("peak_memory.json")
+    assert data is not None
+    measured = [
+        m for m in data.get("measurements", [])
+        if m.get("peak_overhead_samples_mib")
+    ]
+    assert measured, (
+        "no configuration carries peak_overhead_samples_mib: the overhead is a "
+        "single sample again, so the four mem_overhead_* rows cannot be pinned"
+    )
+    for m in measured:
+        s = m["peak_overhead_samples_mib"]
+        assert s["samples"] > 1, (m.get("method"), m["N"], s["samples"])
+        assert s["min_mib"] <= s["median_mib"] <= s["max_mib"], s
+        assert abs(s["spread_mib"] - (s["max_mib"] - s["min_mib"])) < 1e-12, s
+        # The point value must be *inside* the distribution it summarises. If it
+        # is not, the two are measuring different things.
+        point = m["peak_overhead_vs_full_grid_mib"]
+        assert s["min_mib"] - 1e-9 <= point <= s["max_mib"] + 1e-9, (
+            f"{m.get('method')} N={m.get('N')}: the recorded point {point} is "
+            f"outside its own distribution {s['min_mib']}..{s['max_mib']}"
+        )
+
+    # And the parameter that makes it so must exist, or the distribution is a
+    # lucky accident of one configuration being repeated for the noise floor.
+    parameters = data.get("parameters", {})
+    assert "overhead_repeats" in parameters or any(
+        "repeats" in str(k) for k in parameters
+    ), (
+        f"the artifact does not record how many repeats produced the "
+        f"distribution: {sorted(parameters)}"
+    )
+
+    # The full grid's own overhead against itself is the degenerate case and must
+    # still be reported -- it is what makes the reference's variation visible.
+    full = [
+        m for m in measured
+        if m.get("method") == "full" and m.get("N") == data.get("grids", [None])[0]
+    ] or [m for m in measured if m.get("method") == "full"]
+    if full:
+        assert any(
+            m["peak_overhead_samples_mib"]["min_mib"] < 0 < m["peak_overhead_samples_mib"]["max_mib"]
+            for m in full
+        ), (
+            "the full grid's overhead against itself has no spread, so the "
+            "reference's own variation is not being carried into the "
+            "distributions above"
+        )
+
+
 def test_provenance_is_captured_at_launch_and_can_actually_fail():
     """`driver_matches_HEAD` must be able to say False, and mean it.
 
