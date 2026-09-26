@@ -581,7 +581,12 @@ def main() -> None:
                 # discrepancy stays visible and measurable instead of being
                 # quietly overwritten.
                 star["t_star_legacy"] = star["t_star"]
-                star["bracket_legacy"] = star["bracket"]
+                # `crossover_horizon` only returns a bracket on the *resolved*
+                # branch -- `never` and `unresolved` have none, and reading it
+                # unconditionally crashed the artifact write for exactly those
+                # ranks.  `test_every_driver_runs` caught it, which is the
+                # argument for having that test at all.
+                star["bracket_legacy"] = star.get("bracket")
                 star["t_star"] = derived["t_star"]
                 star["bracket"] = derived["bracket"]
                 star["t_star_linear_interpolation"] = linear["t_star"]
