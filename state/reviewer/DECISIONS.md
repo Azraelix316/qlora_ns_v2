@@ -8885,3 +8885,54 @@ shaped request to the writer than D128's, because it says: *you already wrote th
 except at item 3, item 2 is the strongest sentence in the paper and must not be softened, and D128's consequence is already in
 `02_contributions.tex` item 5 rather than in the sections I had been searching.**
 
+---
+
+## D132 - **THE DRAFT'S ABSTRACT STILL CARRIES **TWO** WITHDRAWN CLAIMS AND ITS CONCLUSION A **THIRD**, ALL OF WHICH I HAD ALREADY CORRECTED IN THE SUPPLIED BLOCKS. **THE SUPPLIED BLOCKS ARE CLEAN ON ALL THREE (`0` HITS); THE DRAFT CARRIES ALL THREE. THIS IS THE THIRD TIME I HAVE FIXED THE BLOCK AND NOT THE PAPER, AND IT IS NOW A NAMED CLASS WITH A RULE.** (2026-09-26)
+
+> **OPERATIVE (R168). FOUR SITES IN `00_abstract.tex` AND `09_conclusion.tex` CARRY CLAIMS D104, D117 AND D122 WITHDREW.
+> A GATE NOW EXISTS. SEE D132.5.**
+
+**D132.1 - THE FOUR SITES, AS THEY STAND IN THE DRAFT:**
+
+| # | where | the draft says | withdrawn by |
+|---|---|---|---|
+| **A4** | `00_abstract.tex` | *"under grid refinement the reduced error falls by a factor $2.2$ while **the static baseline's grows by three orders of magnitude**"* | **D104** |
+| **A5** | `00_abstract.tex` | *"a per-step cost **$2.1$--$2.7$** the full grid with no memory saving"* | **D117.2** |
+| **C7** | `09_conclusion.tex` | *"a theory of rank growth in forced turbulence: **the quasi-stationary rank $r^*(Re)$ measured in Section~\ref{sec:results} is ... the observable that a turbulent-rank-growth theory should explain**"* | **D122** |
+| **C5** | `09_conclusion.tex` | a `PENDING-CODER` marker requesting *"quasi-stationary rank r*(Re) per Re"* among the conclusion's headline numbers | **D122** (a trap, not a gap) |
+
+**D132.2 - AND THE SUPPLIED BLOCKS ARE **CLEAN ON ALL THREE**: `0` HITS FOR `three orders of magnitude`, `0` FOR
+`$2.1$--$2.7$`, AND `0` FOR `r^*(Re)`/`r*(Re)` ACROSS ALL `24` PASTE-READY BLOCKS. **SO THE FIX IS ONE-SIDED: THE DRAFT IS WRONG
+AND MY SUPPLIED PROSE IS RIGHT. THAT IS ALSO WHY NOBODY CAUGHT IT** - every gate I have reads the blocks, the order documents and
+the artifacts, and the one place all four checks missed is the same place each time: **THE DRAFT.**
+
+**D132.3 - WHAT EACH CORRECTION IS, AND NONE IS A MATTER OF TASTE:**
+
+- **A4.** D104's measurement: of the `36` error quantities shared by the two grid artifacts, **none grows by more than `10x`**,
+  and **the static baseline's error IMPROVES, `9.93e-09 -> 1.89e-09`.** "Grows by three orders of magnitude" is not a
+  defensible rounding of that - it is the opposite sign. **The defensible sentence is that the reduced error falls under
+  refinement while the static baseline's does not rise, and that the advantage does not come from the baseline degrading.**
+- **A5.** `2.2--2.7x` at two significant figures, pinned by `cost_ratio_min_all`/`cost_ratio_max_N128` (D117.2/D117.5). The
+  `2.1` is the pre-D52.4 figure.
+- **C7 and C5.** **DELETE BOTH.** `r^*(Re)` does not vary with Re - the rank history is byte-identical across all three Reynolds
+  numbers (`sha1 a317f44b850b`, `0` differing steps of `201`) - so it cannot be the observable a rank-growth theory should
+  explain. **The substitute IS available and verified: the zonal share of the kinetic energy, `20.09% -> 18.53% -> 18.40%` at
+  `N=64` and `17.28%` at `N=128` (D126), whose definition lives in `run_kolmogorov.py:_zonal_fraction`.** D122 withdrew the
+  quantity and D126 restored the replacement, and **the conclusion is the last place in the paper still asking for the
+  withdrawn one.**
+
+**D132.4 - AND THE ABSTRACT IS THE WORST PLACE FOR ANY OF THIS, WHICH IS WHY I AM CALLING IT THE MOST MATERIAL REMAINING EDIT
+AFTER THE FIGURES.** A4 IS A SIGN ERROR IN THE HEADLINE SENTENCE OF THE ABSTRACT - IT SAYS THE BASELINE DEGRADES WHERE THE DATA
+SAYS IT IMPROVES. **A REVIEWER WHO CHECKS ONE NUMBER IN THE ABSTRACT WILL FIND THIS ONE, BECAUSE IT IS THE ONE THAT SOUNDS MOST
+CHECKABLE, AND A PAPER WHOSE ABSTRACT MISSTATES THE DIRECTION OF ITS OWN CONTROL IS DISMISSED AS SLOPPY RATHER THAN CORRECTED.**
+
+**D132.5 - THE CLASS, AND THE RULE, BECAUSE THIS IS THE THIRD OCCURRENCE AND THE GENERAL FORM IS NOW CLEAR. D115's W7 ROW
+CONTRADICTED D18c's TEXT; D120's EIGHT BLOCKS WERE FIXED AND `02_contributions.tex` KEPT THE CLAIM; NOW D104's, D117's AND D122's
+CORRECTIONS ARE ALL IN THE BLOCKS AND ALL THREE SURVIVE IN THE DRAFT. THE RULE: **A CORRECTION IS NOT DONE WHEN THE SUPPLIED
+PROSE IS RIGHT; IT IS DONE WHEN EVERY SITE THAT STATES THE CLAIM IS RIGHT, AND THE SUPPLIED BLOCKS ARE NOT A SUBSET OF THOSE
+SITES - THEY ARE A DISJOINT SET.** CONCRETELY: WHEN A CLAIM IS WITHDRAWN OR CORRECTED, **GREP THE WHOLE REPOSITORY FOR THE
+CLAIM'S TEXT, NOT FOR ITS IDENTIFIER** - D95 again, and this time the string is prose rather than a key.
+
+**D132.6 - Unchanged.** Everything in D35.6 through D131.4 stands, **except that four sites in the abstract and conclusion carry
+claims D104, D117 and D122 withdrew, and the supplied blocks are clean on all three.**
+

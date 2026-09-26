@@ -1533,3 +1533,39 @@ checks the summary finds the sentence they read in the paper.
 **Unchanged: the four `koch2019dlra` citations** (Koch & Lubich 2007, `10.1137/050639703`; **two of the four carry the key among
 others, so a find-and-replace finds half**)**, then the 24 blocks in one-screen order W11, W16, W15, W12-W14, W10, then the ~20
 transcription markers via D124.1.**
+
+---
+
+## R168 - **FOUR PLACES IN THE ABSTRACT AND THE CONCLUSION CARRY CLAIMS I ALREADY WITHDREW. **THE SUPPLIED BLOCKS ARE CLEAN ON ALL
+THREE** - SO NOBODY CAUGHT IT, AND THE FIX IS ONE-SIDED.**
+
+**I have to start by owning the pattern. This is the third time I have corrected my supplied prose and left your draft alone
+(D115's order row, D120's eight blocks, and now these three). The rule I am adopting, and which applies to anything I send you
+from here: a correction is not done when my blocks are right; it is done when every site that states the claim is right. My
+blocks and your draft are a **disjoint** set of sites, and I have been treating them as if the blocks covered the paper.**
+
+**Here is what your draft still says, and what each one should say.**
+
+**1. The abstract, sentence 4 — a sign error in the headline.** It says *"under grid refinement the reduced error falls by a
+factor $2.2$ while **the static baseline's grows by three orders of magnitude**."* **It does not grow. It improves:
+`9.93e-09 -> 1.89e-09`.** And of the 36 error quantities the two grid runs share, **none grows by more than 10x.** So this is
+not a defensible rounding - it is the opposite sign. Replace with the direction the data supports: the reduced error falls under
+refinement, the static baseline's does not rise, and the advantage therefore does not come from the baseline degrading. **This is
+the most material edit in the paper after the figures: a reviewer who checks one number in the abstract will check this one,
+because it sounds most checkable, and a paper whose abstract misstates the direction of its own control gets dismissed as sloppy
+rather than corrected.**
+
+**2. The abstract, sentence 5 — a stale number.** *"a per-step cost $2.1$--$2.7$"* should be **`$2.2$--$2.7$`**, which is what
+`cost_retiming.json` gives at two significant figures and what the registry now pins at both ends.
+
+**3 and 4. The conclusion — delete both.** Sentence 7 nominates *"the quasi-stationary rank $r^*(Re)$ ... the observable that a
+turbulent-rank-growth theory should explain"*, and the `PENDING-CODER` marker above it asks for *"quasi-stationary rank r*(Re)
+per Re"* among the headline numbers. **Both go.** The rank history is byte-identical across all three Reynolds numbers
+(`sha1 a317f44b850b`, 0 differing steps of 201), so `r*(Re)` does not vary with Re and cannot be the observable a theory should
+explain. **The substitute is available and verified — the zonal share of the kinetic energy, `20.09% -> 18.53% -> 18.40%` at
+`N=64` and `17.28%` at `N=128`** — and if you want a forward-looking item there, that is a real Re-dependent observable and
+`r^*(Re)` is not. **The conclusion is the last place in the paper still asking for the withdrawn quantity.**
+
+**After those four, the queue is unchanged: the `koch2019dlra` citations** (Koch & Lubich 2007, `10.1137/050639703`; **two of
+the four carry the key among others, so a find-and-replace finds half**)**, the 24 blocks in one-screen order W11, W16, W15,
+W12-W14, W10, the two cost sentences in D128, the two edits in D130, and the ~20 transcription markers via D124.1.**
