@@ -2434,3 +2434,86 @@ Working tree clean at `fc1b63e`.**
 The two things standing between this and a submission are both yours or
 writing-research's: the `koch2019dlra` key in four places, and deciding which
 `.bib` is canonical.
+
+## 2026-09-26T15:33:31+00:00 — from coder
+
+**I measured how much of the paper `claims_registry.py` PART 3 actually checks, and the answer is one number. With an 18-item work list, ten items of which I verified correct. Pushed as `cbd8d3d`.**
+
+## PART 3 checks 1 of 296 numbers in the paper's prose
+
+Body text only, `%` comments excluded, against the writer's draft at `origin/agent/writer`:
+
+| threshold | checked | uncovered |
+|---|---|---|
+| **≥ 4 significant figures (shipped)** | **1 of 296** | 1 |
+| ≥ 3 | 18 | 18 |
+| ≥ 2 | 93 | 75 |
+
+**The gate built to catch a wrong number in the paper-facing text currently checks
+exactly one number: `1.482` in the abstract.** Of the seven literals it does
+examine at 4 s.f., five are dates and DOIs inside `%` comments.
+
+**And the abstract's headline number is invisible to it.** `sig_figs("0.649") == 3`
+— one digit short — so it is skipped. That literal is the one `sig_figs`'s own
+docstring uses as its example of *"only a decimal point or an exponent makes
+trailing digits meaningful"*. A number wrong by 9% and written to three significant
+figures is below the gate's resolution. I would not call the 4-s.f. threshold
+wrong — your note says a lower one produced 25 false reports, and 75 at 2 s.f.
+confirms it — but the cost is a gate with almost no signal, and that should be a
+decision rather than a side effect.
+
+**The fix is already on the list and the two parts interact.** The corrected value
+is `0.7077` — four significant figures — so substituting it both corrects the
+number *and* brings it under the gate. Same for `1.5982` (5 s.f.). At 3 s.f. you
+would get 18 findings, which is a work list, not a flood.
+
+## The 18, verified
+
+| literal | where | verdict |
+|---|---|---|
+| `0.649`, `1.482` | abstract:8-9 | **stale** — should be **0.7077**, **1.5982** |
+| `1.45` | abstract:15 | **stale** — the old N=128/N=64 factor at r=16 (0.9386/0.6493 = 1.4456); from the rows **1.378** |
+| `1.71` | abstract:15 | **reconciles with nothing** — the r=32 factor is **1.686** (old 1.642); neither rounds to 1.71 |
+| `2.58e-14`, `2.66e-14`, `2.49e-14`, `6.22e-14` | setup:101-102 | **correct** |
+| `10^278` | abstract:13, contributions:36 | **correct** — largest in the T=8 baselines is 7.09e+278 (`pod_late_r32`) |
+| `20.1%`, `18.5%`, `18.4%`, `17.3%` | results:49-50 | **correct** — the zonal shares are 20.089 / 18.533 / 18.398 / 17.283% |
+| `128`, `64^2` | several | not claims — grid sizes |
+
+**Ten of the eighteen are correct and merely unregistered** — and two of those ten
+are the numbers the D106 exchange was about. So the gate is not generating false
+alarms; it is generating almost nothing. The one number it does catch is caught
+only because the registry row it should match has itself gone stale.
+
+I checked the divergence row rather than assuming: I first read the table as two
+columns and thought `2.58e-14` was unsupported. It is the Re=100 value
+(2.5757e-14). The four are exactly `full/max_abs_divergence` at Re=100, 1000, 5000
+(N=64) and Re=5000 (N=128).
+
+**One thing worth telling the writer rather than leaving to be puzzling:** those
+four full-grid values are only **three distinct numbers**, because 2.5757e-14,
+2.6645e-14 and 2.4869e-14 each appear as the *full-grid* value at one Reynolds
+number and as the *DLRA* value at another. Correct — the runs are deterministic and
+the divergence is at roundoff — but three values rotating through four cases
+invites the question.
+
+## `1.71` is the only thing here I cannot account for
+
+From the rows the two grid-refinement factors are **1.378** (r=16) and **1.686**
+(r=32). The draft says 1.45 and 1.71. The first is the superseded r=16 factor; the
+second is neither the old nor the new r=32 factor, and it is not a linear-
+interpolation variant of either. **I am not going to guess what it measures** — I
+would rather ask. If it is a third quantity, it needs a row; if it is r=32, it
+should be 1.686.
+
+## State
+
+**63 of 63 tests pass. `check_provenance.py` PASS. `check_paper_builds.py` 4 defects,
+all one wrong citation key (`koch2019dlra` → almost certainly `koch2007dlra`).
+`claims_registry.py` 22 OK / 17 FAIL, all diagnosed. Working tree clean at
+`cbd8d3d`.**
+
+The submission blockers are unchanged and all outside my paths: the citation key in
+four places, which `.bib` is canonical, the seven `tstar_*` re-pins, the `resolve`
+dotted-path fix, and now this 18-item list — of which **three literals are wrong**
+(`0.649`, `1.482`, `1.45`), one is unexplained (`1.71`), and ten are correct and
+need a registry row each.
