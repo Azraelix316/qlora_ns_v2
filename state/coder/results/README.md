@@ -556,3 +556,53 @@ left in that tree are this agent's own result files, which are read and never
 written. The general rule this establishes for the gates: a scratch tree may
 symlink *inputs it only reads*, and must copy anything a command might redirect
 into.
+
+## `claims_registry.py` PART 3 checks ONE number in the paper's prose
+
+Measured on 2026-09-26 against the writer's draft at `origin/agent/writer`
+(a640cd8), body text only with `%` comment lines excluded.
+
+| threshold | literals checked | uncovered |
+|---|---|---|
+| ≥ 4 significant figures (the shipped rule) | **1 of 296** | 1 |
+| ≥ 3 | 18 | 18 |
+| ≥ 2 | 93 | 75 |
+
+**So the gate that exists to catch a wrong number in the paper-facing text
+currently checks exactly one number: `1.482` in the abstract.** Five of the seven
+literals it does examine at 4 s.f. are dates and DOIs inside `%` comments.
+
+**The abstract's headline number is invisible to it.** `sig_figs("0.649") == 3`,
+one digit short of the threshold, so `0.649` is skipped — and it is the literal
+`sig_figs`'s own docstring uses as its example of "a decimal point makes trailing
+digits meaningful". A number wrong by 9% and written to three significant figures
+is below the gate's resolution.
+
+**The fix is already on the list and the two interact.** The corrected value is
+`0.7077` — four significant figures — so substituting it both corrects the number
+*and* brings it under the gate. The same holds for `1.5982` (5 s.f.). A 3-s.f.
+threshold would give 18 findings, which is a work list rather than a flood, and
+the 4-s.f. choice was presumably made to avoid exactly that.
+
+### The 18, and what I could verify
+
+| literal | where | verdict |
+|---|---|---|
+| `0.649`, `1.482` | `00_abstract.tex:8-9` | **stale** — the crossover-block values; should be 0.7077 and 1.5982 |
+| `1.45` | `00_abstract.tex:15` | **stale** — the old N=128/N=64 factor at r=16 (0.9386/0.6493 = 1.4456); from the rows it is **1.378** |
+| `1.71` | `00_abstract.tex:15` | **reconciles with nothing** — the r=32 factor is **1.686** (old 1.642). Neither rounds to 1.71 |
+| `2.58e-14`, `2.66e-14`, `2.49e-14`, `6.22e-14` | `05_experimental_setup.tex:101-102` | **correct** — `full/max_abs_divergence` at Re=100, 1000, 5000 (N=64) and Re=5000 (N=128) are 2.5757e-14, 2.6645e-14, 2.4869e-14, 6.2172e-14 |
+| `10^278` | `00_abstract.tex:13`, `02_contributions.tex:36` | **correct** — the largest divergence in the T=8 baselines is 7.09e+278 (`pod_late_r32`) |
+| `20.1%`, `18.5%`, `18.4%`, `17.3%` | `06_results.tex:49-50` | **correct** — the zonal shares are 20.089%, 18.533%, 18.398%, 17.283% |
+| `128`, `64^2` | several | **not claims** — grid sizes and mode counts |
+
+**Ten of the eighteen are correct and merely unregistered, and two of those ten
+are the numbers the D106 exchange was about.** So the gate is not producing false
+alarms here; it is producing almost no signal, and the one number it does catch is
+caught only because the registry row it should match has itself gone stale.
+
+**Worth knowing about the divergence set:** the four full-grid values are three
+distinct numbers, because 2.5757e-14, 2.6645e-14 and 2.4869e-14 each appear as
+the *full-grid* value at one Reynolds number and as the *DLRA* value at another.
+That is correct — the runs are deterministic and the divergence is at roundoff —
+but a reader seeing three values rotate through four cases should be told why.
