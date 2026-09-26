@@ -4,9 +4,9 @@
   "case_variant": "projected+bug",
   "environment": {
     "load_average_at_end": [
-      1.18896484375,
-      1.2353515625,
-      2.404296875
+      2.18408203125,
+      2.32275390625,
+      2.318359375
     ],
     "numpy": "2.5.3",
     "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
@@ -14,10 +14,10 @@
     "python": "3.12.3",
     "shared_node_note": "this node also serves a language model, so its load moves with someone else's work; the protocol interleaves configurations because on a node this noisy the per-configuration median is unreliable while the ratio between interleaved configurations is not",
     "thread_settings": {
-      "MKL_NUM_THREADS": "1",
-      "NUMEXPR_NUM_THREADS": "1",
-      "OMP_NUM_THREADS": "1",
-      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "2",
+      "NUMEXPR_NUM_THREADS": null,
+      "OMP_NUM_THREADS": "2",
+      "OPENBLAS_NUM_THREADS": "2",
       "VECLIB_MAXIMUM_THREADS": null
     }
   },
@@ -26,142 +26,88 @@
       "N": 64,
       "benchmark_state": "unforced multi-mode decay (nu=0.02, ZeroForcing) at amplitude 1, with an amplitude-1e-3 repeat to measure content-independence",
       "dealias_rank_ceiling": 43,
+      "dealias_rank_ceiling_is": "a WAVENUMBER (the largest k the 2/3 rule leaves resolved), not a mode count and not a rank; the dealiased NxN grid carries far more degrees of freedom than it (~1849 at N=64). The key name is historical and is kept because claims_registry.py verifies against it; D30.2 forbids expressing a rank as a multiple of it.",
       "dt": 0.0005,
       "protocol": "interleaved: one round times the reference and every configuration once, so a slow patch of machine time inflates all of them together rather than whichever block happened to run during it",
-      "reference_full_step_seconds_median": 1.3207511329092085,
-      "reference_full_step_seconds_per_step": 0.0013207511329092086,
-      "reference_relative_spread": 0.4003232561295646,
+      "reference_full_step_seconds_median": 2.4814702949952334,
+      "reference_full_step_seconds_per_step": 0.0012407351474976167,
+      "reference_relative_spread": 0.08252228028300876,
       "repeats": 7,
       "rows": [
         {
-          "amplitude_1e_3_seconds_median": 2.472867632517591,
-          "amplitude_cost_ratio": 1.0134414086786725,
+          "amplitude_1e_3_seconds_median": 5.695098198484629,
+          "amplitude_cost_ratio": 0.9911428850109169,
           "bug": {
-            "full_step_ratio_vs_reference": 8.361757453565172,
-            "full_step_relative_spread": 0.2416103263223031,
-            "full_step_seconds_max": 12.680904550943524,
-            "full_step_seconds_median": 11.043800629908219,
-            "full_step_seconds_min": 10.012608276912943,
-            "full_step_seconds_per_step": 0.011043800629908219,
+            "full_step_ratio_vs_reference": 8.315211695050342,
+            "full_step_relative_spread": 0.05612520192251567,
+            "full_step_seconds_max": 21.196273134090006,
+            "full_step_seconds_median": 20.63395081786439,
+            "full_step_seconds_min": 20.03818847797811,
+            "full_step_seconds_per_step": 0.010316975408932194,
             "note": "same state, same held rank, same warm-up and repeat count; the only factorization inside a BUG step is of the augmented S-matrix, so svd_max_dimension is at most 4r",
-            "speedup_over_projected_same_rank": 0.22692427552409994,
+            "speedup_over_projected_same_rank": 0.27356157377187895,
             "svd_calls_per_step": 1.0,
             "svd_max_dimension": 8,
-            "svd_seconds_median": 0.03773975931107998
+            "svd_seconds_median": 0.06779213855043054
           },
-          "full_step_ratio_vs_reference": 1.8974857522585193,
-          "full_step_relative_spread": 0.17774667182679832,
-          "full_step_seconds_max": 2.885150648886338,
-          "full_step_seconds_median": 2.5061064569745213,
-          "full_step_seconds_min": 2.4396985669154674,
-          "full_step_seconds_per_step": 0.0025061064569745213,
-          "linear_algebra_ratio_vs_reference": 0.6388893151203546,
-          "linear_algebra_seconds_median": 0.8438137867487967,
-          "linear_algebra_seconds_per_step": 0.0008438137867487967,
+          "full_step_ratio_vs_reference": 2.2747223975443047,
+          "full_step_relative_spread": 0.06553862115594876,
+          "full_step_seconds_max": 5.9223988649901,
+          "full_step_seconds_median": 5.644656058866531,
+          "full_step_seconds_min": 5.552455889992416,
+          "full_step_seconds_per_step": 0.0028223280294332655,
+          "linear_algebra_ratio_vs_reference": 0.8391154986904819,
+          "linear_algebra_seconds_median": 2.0822401840705425,
+          "linear_algebra_seconds_per_step": 0.0010411200920352713,
           "rank": 2,
-          "svd_calls_per_step": 4.005
-        },
-        {
-          "amplitude_1e_3_seconds_median": 2.4706570979906246,
-          "amplitude_cost_ratio": 1.0753411876622878,
-          "bug": {
-            "full_step_ratio_vs_reference": 10.29520783971362,
-            "full_step_relative_spread": 0.16470427347954472,
-            "full_step_seconds_max": 14.833108833059669,
-            "full_step_seconds_median": 13.59740741783753,
-            "full_step_seconds_min": 12.593557723099366,
-            "full_step_seconds_per_step": 0.01359740741783753,
-            "note": "same state, same held rank, same warm-up and repeat count; the only factorization inside a BUG step is of the augmented S-matrix, so svd_max_dimension is at most 4r",
-            "speedup_over_projected_same_rank": 0.19539013993022097,
-            "svd_calls_per_step": 1.0,
-            "svd_max_dimension": 64,
-            "svd_seconds_median": 0.31220603454858065
-          },
-          "full_step_ratio_vs_reference": 2.0115821004123524,
-          "full_step_relative_spread": 0.1522152452806035,
-          "full_step_seconds_max": 3.031444750027731,
-          "full_step_seconds_median": 2.6567993380595,
-          "full_step_seconds_min": 2.6270393871236593,
-          "full_step_seconds_per_step": 0.0026567993380594997,
-          "linear_algebra_ratio_vs_reference": 0.7359330889301718,
-          "linear_algebra_seconds_median": 0.9719844609498978,
-          "linear_algebra_seconds_per_step": 0.0009719844609498978,
-          "rank": 16,
           "svd_calls_per_step": 4.005
         }
       ],
-      "steps_per_repeat": 1000,
+      "steps_per_repeat": 2000,
       "warmup_steps_discarded": 200
     },
     {
       "N": 128,
       "benchmark_state": "unforced multi-mode decay (nu=0.02, ZeroForcing) at amplitude 1, with an amplitude-1e-3 repeat to measure content-independence",
       "dealias_rank_ceiling": 85,
-      "dt": 0.00025,
+      "dealias_rank_ceiling_is": "a WAVENUMBER (the largest k the 2/3 rule leaves resolved), not a mode count and not a rank; the dealiased NxN grid carries far more degrees of freedom than it (~1849 at N=64). The key name is historical and is kept because claims_registry.py verifies against it; D30.2 forbids expressing a rank as a multiple of it.",
+      "dt": 0.0005,
       "protocol": "interleaved: one round times the reference and every configuration once, so a slow patch of machine time inflates all of them together rather than whichever block happened to run during it",
-      "reference_full_step_seconds_median": 5.20611388515681,
-      "reference_full_step_seconds_per_step": 0.00520611388515681,
-      "reference_relative_spread": 0.30920510604145773,
+      "reference_full_step_seconds_median": 10.019535732921213,
+      "reference_full_step_seconds_per_step": 0.005009767866460606,
+      "reference_relative_spread": 0.2102684370837368,
       "repeats": 7,
       "rows": [
         {
-          "amplitude_1e_3_seconds_median": 12.119229504838586,
-          "amplitude_cost_ratio": 0.9589129967691102,
+          "amplitude_1e_3_seconds_median": 31.713483648491092,
+          "amplitude_cost_ratio": 1.0301646892572243,
           "bug": {
-            "full_step_ratio_vs_reference": 7.684093051276654,
-            "full_step_relative_spread": 0.1808259529360963,
-            "full_step_seconds_max": 43.68282408895902,
-            "full_step_seconds_median": 40.00426352908835,
-            "full_step_seconds_min": 36.4490150148049,
-            "full_step_seconds_per_step": 0.04000426352908835,
+            "full_step_ratio_vs_reference": 7.427981715607598,
+            "full_step_relative_spread": 0.22320841725518437,
+            "full_step_seconds_max": 87.17691722000018,
+            "full_step_seconds_median": 74.42492822301574,
+            "full_step_seconds_min": 70.56464678701013,
+            "full_step_seconds_per_step": 0.03721246411150787,
             "note": "same state, same held rank, same warm-up and repeat count; the only factorization inside a BUG step is of the augmented S-matrix, so svd_max_dimension is at most 4r",
-            "speedup_over_projected_same_rank": 0.2905012030671978,
+            "speedup_over_projected_same_rank": 0.4389673165705349,
             "svd_calls_per_step": 1.0,
             "svd_max_dimension": 8,
-            "svd_seconds_median": 0.053282375214621425
+            "svd_seconds_median": 0.099037493346259
           },
-          "full_step_ratio_vs_reference": 2.2322382758761625,
-          "full_step_relative_spread": 0.07375088837948371,
-          "full_step_seconds_max": 12.219210468931124,
-          "full_step_seconds_median": 11.621286683017388,
-          "full_step_seconds_min": 11.362130251945928,
-          "full_step_seconds_per_step": 0.011621286683017387,
-          "linear_algebra_ratio_vs_reference": 1.0505633220095794,
-          "linear_algebra_seconds_median": 5.469352297950536,
-          "linear_algebra_seconds_per_step": 0.005469352297950536,
+          "full_step_ratio_vs_reference": 3.2606412012352655,
+          "full_step_relative_spread": 0.039413017997909465,
+          "full_step_seconds_max": 33.0683907631319,
+          "full_step_seconds_median": 32.67011102801189,
+          "full_step_seconds_min": 31.78076308919117,
+          "full_step_seconds_per_step": 0.016335055514005943,
+          "linear_algebra_ratio_vs_reference": 2.0010763928735726,
+          "linear_algebra_seconds_median": 20.04985642270185,
+          "linear_algebra_seconds_per_step": 0.010024928211350925,
           "rank": 2,
-          "svd_calls_per_step": 4.005
-        },
-        {
-          "amplitude_1e_3_seconds_median": 11.694264794117771,
-          "amplitude_cost_ratio": 1.0026606001578988,
-          "bug": {
-            "full_step_ratio_vs_reference": 8.634648747180588,
-            "full_step_relative_spread": 0.36177633233904094,
-            "full_step_seconds_max": 53.24412148492411,
-            "full_step_seconds_median": 44.952964736148715,
-            "full_step_seconds_min": 36.98120277491398,
-            "full_step_seconds_per_step": 0.044952964736148716,
-            "note": "same state, same held rank, same warm-up and repeat count; the only factorization inside a BUG step is of the augmented S-matrix, so svd_max_dimension is at most 4r",
-            "speedup_over_projected_same_rank": 0.2608366016723832,
-            "svd_calls_per_step": 1.0,
-            "svd_max_dimension": 64,
-            "svd_seconds_median": 0.33713902556337416
-          },
-          "full_step_ratio_vs_reference": 2.252232435849286,
-          "full_step_relative_spread": 0.11065819493357582,
-          "full_step_seconds_max": 12.436494665918872,
-          "full_step_seconds_median": 11.725378556875512,
-          "full_step_seconds_min": 11.138985439902171,
-          "full_step_seconds_per_step": 0.011725378556875513,
-          "linear_algebra_ratio_vs_reference": 1.0680313766835137,
-          "linear_algebra_seconds_median": 5.560292979935184,
-          "linear_algebra_seconds_per_step": 0.005560292979935184,
-          "rank": 16,
           "svd_calls_per_step": 4.005
         }
       ],
-      "steps_per_repeat": 1000,
+      "steps_per_repeat": 2000,
       "warmup_steps_discarded": 200
     }
   ],
@@ -181,44 +127,26 @@
     "why": "the factorization is of the whole N x N field, so it is rank-independent and Theta(N^3); a linear-algebra win is not a per-step win"
   },
   "provenance": {
+    "captured_at": "launch",
     "driver": "experiments/bench_cost.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "8d6c0f35bf6018a5ea92e1afed3cbd4bdf57fbc6bd8fc3cf0546aa85b8f27706",
-    "git_commit": "896b3bfb1ef49ff1a9ebea8f0c3802e9e0ad0182",
-    "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
+    "driver_matches_HEAD_at_write": true,
+    "driver_sha256": "5111b2f950e7da2f1eb8c2187aadf153b7b9be7428b8d4d7ed279414f33d9762",
+    "driver_sha256_at_write": "5111b2f950e7da2f1eb8c2187aadf153b7b9be7428b8d4d7ed279414f33d9762",
+    "git_commit": "b31a5c5dffc056b9f84b86394523b7e3cd4af403",
+    "git_commit_at_write": "4923f79f6596f92c4862540a4fe4640566abafb5",
+    "git_commit_how": "git log -1 --before=1790418474",
+    "note": "git_commit, driver_sha256 and driver_matches_HEAD are all captured at LAUNCH -- the commit that was HEAD when the process loaded its code, and the driver as it was then. driver_matches_HEAD compares that hash against the driver in that commit, and is what reproducible follows. An earlier version read HEAD and hashed the driver when the artifact was WRITTEN; for any run that outlasts a commit those were read together and the check compared the driver against itself, reporting true while the artifact recorded a driver the run never used. *_at_write and tree_moved_during_run are informational: a tree that moved during a run is a fact about the run, not a reason to discard the launch verdict. working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_diff_sha256": "d6842bb5f7843c16509d8d2154140c57440643c5e8bf9642bcb96550035e1981",
-    "working_tree_dirty": true
+    "sources_files_at_launch": 31,
+    "sources_fingerprint_at_launch": "acfb9770f4ea5242ba63fd9f687f0a01f6a8640a67f81bdcc99e01c0b4ba1c32",
+    "tree_moved_during_run": true,
+    "working_tree_diff_sha256": "53a23ec24252672a6c7e1f631d322c761983be8971b73c91907901d91205370f",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "state/coder/results/peak_memory.json"
+    ]
   },
-  "rank_independence": [
-    {
-      "N": 64,
-      "bug_full_step_ratio_hi_over_lo": 1.231225361042264,
-      "bug_rank_dependent": false,
-      "bug_speedup_hi": 0.19539013993022097,
-      "bug_speedup_lo": 0.22692427552409994,
-      "full_step_ratio_hi_over_lo": 1.0601302792487521,
-      "linear_algebra_ratio_hi_over_lo": 1.1518945011492892,
-      "ranks_compared": [
-        2,
-        16
-      ],
-      "within_1p25": true
-    },
-    {
-      "N": 128,
-      "bug_full_step_ratio_hi_over_lo": 1.1237043447497044,
-      "bug_rank_dependent": false,
-      "bug_speedup_hi": 0.2608366016723832,
-      "bug_speedup_lo": 0.2905012030671978,
-      "full_step_ratio_hi_over_lo": 1.0089570007777398,
-      "linear_algebra_ratio_hi_over_lo": 1.016627322035687,
-      "ranks_compared": [
-        2,
-        16
-      ],
-      "within_1p25": true
-    }
-  ]
+  "rank_independence": []
 }

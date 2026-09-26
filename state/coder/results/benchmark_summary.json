@@ -289,41 +289,41 @@
   "cost_note": "Per-step cost is reported under two accountings and no per-step speedup is claimed: the reduced method pays the same full-grid nonlinear evaluation as the reference plus its own whole-field SVD, which is Theta(N^3) and rank-independent (D11.1). Threads are pinned and recorded, a warm-up is discarded, and the median of 7 repeats over 2000 steps is reported with its min/max spread. Two caveats on the numbers themselves: the node is shared, so the spread is the honest uncertainty and the minimum is the least-contended estimate; and the reference block and the reduced blocks are timed sequentially rather than interleaved, so a load drift between them would bias the ratio by no more than the reported spreads.",
   "cost_retiming": {
     "file": "cost_retiming.json",
-    "git_commit": "41642ba7d82aee3ff21b6b3a34b826170bc849eb",
+    "git_commit": "2aff39a41f39f772544917273da5e7489c43fe53",
     "grids": [
       {
         "N": 64,
-        "reference_relative_spread": 0.3191139466051705,
-        "reference_seconds_per_step": 0.0012175731650786474,
+        "reference_relative_spread": 0.07296970475425359,
+        "reference_seconds_per_step": 0.0012856902569765224,
         "repeats": 7,
         "rows": [
           {
-            "amplitude_1e_3_seconds_median": 5.080151480506174,
-            "amplitude_cost_ratio": 1.0726530253760749,
-            "full_step_ratio_vs_reference": 2.237746367620425,
-            "full_step_relative_spread": 0.08687985010796495,
-            "full_step_seconds_max": 5.515849001938477,
-            "full_step_seconds_median": 5.449239854933694,
-            "full_step_seconds_min": 5.042419860139489,
-            "full_step_seconds_per_step": 0.002724619927466847,
-            "linear_algebra_ratio_vs_reference": 0.7289693115219062,
-            "linear_algebra_seconds_median": 1.77514694374986,
-            "linear_algebra_seconds_per_step": 0.00088757347187493,
+            "amplitude_1e_3_seconds_median": 5.930829180520959,
+            "amplitude_cost_ratio": 0.9721980174217392,
+            "full_step_ratio_vs_reference": 2.2423520516243456,
+            "full_step_relative_spread": 0.07756925500761921,
+            "full_step_seconds_max": 6.037510605063289,
+            "full_step_seconds_median": 5.765940370969474,
+            "full_step_seconds_min": 5.590250906068832,
+            "full_step_seconds_per_step": 0.0028829701854847373,
+            "linear_algebra_ratio_vs_reference": 0.8172322285485946,
+            "linear_algebra_seconds_median": 2.1014150278642774,
+            "linear_algebra_seconds_per_step": 0.0010507075139321387,
             "rank": 2,
             "svd_calls_per_step": 4.005
           },
           {
-            "amplitude_1e_3_seconds_median": 5.957125849556178,
-            "amplitude_cost_ratio": 1.0137361440102475,
-            "full_step_ratio_vs_reference": 2.4799141280855888,
-            "full_step_relative_spread": 0.26448759964656327,
-            "full_step_seconds_max": 7.419656705809757,
-            "full_step_seconds_median": 6.038953788112849,
-            "full_step_seconds_min": 5.822428314015269,
-            "full_step_seconds_per_step": 0.0030194768940564245,
-            "linear_algebra_ratio_vs_reference": 1.0119830341018965,
-            "linear_algebra_seconds_median": 2.4643267716746777,
-            "linear_algebra_seconds_per_step": 0.001232163385837339,
+            "amplitude_1e_3_seconds_median": 6.482359662419185,
+            "amplitude_cost_ratio": 1.0163718982282903,
+            "full_step_ratio_vs_reference": 2.562237739354587,
+            "full_step_relative_spread": 0.03990799470912047,
+            "full_step_seconds_max": 6.69542344706133,
+            "full_step_seconds_median": 6.588488195091486,
+            "full_step_seconds_min": 6.432490095030516,
+            "full_step_seconds_per_step": 0.003294244097545743,
+            "linear_algebra_ratio_vs_reference": 1.0933962351582558,
+            "linear_algebra_seconds_median": 2.8115377731155604,
+            "linear_algebra_seconds_per_step": 0.0014057688865577803,
             "rank": 64,
             "svd_calls_per_step": 4.005
           }
@@ -332,37 +332,37 @@
       },
       {
         "N": 128,
-        "reference_relative_spread": 0.3011629478427993,
-        "reference_seconds_per_step": 0.0045581317235482855,
+        "reference_relative_spread": 0.23212538961826915,
+        "reference_seconds_per_step": 0.004535904229036532,
         "repeats": 7,
         "rows": [
           {
-            "amplitude_1e_3_seconds_median": 22.715085554053076,
-            "amplitude_cost_ratio": 1.0279492337140852,
-            "full_step_ratio_vs_reference": 2.5613514708677543,
-            "full_step_relative_spread": 0.08020491940696439,
-            "full_step_seconds_max": 24.489591527031735,
-            "full_step_seconds_median": 23.349954789038748,
-            "full_step_seconds_min": 22.61681028502062,
-            "full_step_seconds_per_step": 0.011674977394519373,
-            "linear_algebra_ratio_vs_reference": 1.1998821695328257,
-            "linear_algebra_seconds_median": 10.93844196293503,
-            "linear_algebra_seconds_per_step": 0.005469220981467515,
+            "amplitude_1e_3_seconds_median": 30.5241800310323,
+            "amplitude_cost_ratio": 1.0302089948680244,
+            "full_step_ratio_vs_reference": 3.4663744251518165,
+            "full_step_relative_spread": 0.04181799199274209,
+            "full_step_seconds_max": 31.650239006150514,
+            "full_step_seconds_median": 31.446284828940406,
+            "full_step_seconds_min": 30.335218518972397,
+            "full_step_seconds_per_step": 0.015723142414470204,
+            "linear_algebra_ratio_vs_reference": 2.120766886310616,
+            "linear_algebra_seconds_median": 19.239190976833925,
+            "linear_algebra_seconds_per_step": 0.009619595488416963,
             "rank": 2,
             "svd_calls_per_step": 4.005
           },
           {
-            "amplitude_1e_3_seconds_median": 24.205055713071488,
-            "amplitude_cost_ratio": 1.0321323658214485,
-            "full_step_ratio_vs_reference": 2.7404672498718976,
-            "full_step_relative_spread": 0.1301565603678174,
-            "full_step_seconds_max": 25.55103010404855,
-            "full_step_seconds_median": 24.982821417972445,
-            "full_step_seconds_min": 22.299352000001818,
-            "full_step_seconds_per_step": 0.012491410708986224,
-            "linear_algebra_ratio_vs_reference": 1.3407318352700657,
-            "linear_algebra_seconds_median": 12.2224646222312,
-            "linear_algebra_seconds_per_step": 0.006111232311115601,
+            "amplitude_1e_3_seconds_median": 32.39206194446888,
+            "amplitude_cost_ratio": 1.0192847800063818,
+            "full_step_ratio_vs_reference": 3.639487747742208,
+            "full_step_relative_spread": 0.03517828562848214,
+            "full_step_seconds_max": 33.390378691023216,
+            "full_step_seconds_median": 33.01673573302105,
+            "full_step_seconds_min": 32.22890653088689,
+            "full_step_seconds_per_step": 0.016508367866510526,
+            "linear_algebra_ratio_vs_reference": 2.2644883277810917,
+            "linear_algebra_seconds_median": 20.543004365172237,
+            "linear_algebra_seconds_per_step": 0.010271502182586118,
             "rank": 64,
             "svd_calls_per_step": 4.005
           }
@@ -371,37 +371,37 @@
       },
       {
         "N": 256,
-        "reference_relative_spread": 0.16347086355189228,
-        "reference_seconds_per_step": 0.023058864605496637,
+        "reference_relative_spread": 0.25874220123006597,
+        "reference_seconds_per_step": 0.018940304838586598,
         "repeats": 7,
         "rows": [
           {
-            "amplitude_1e_3_seconds_median": 104.50131225155201,
-            "amplitude_cost_ratio": 1.0180002419677765,
-            "full_step_ratio_vs_reference": 2.3067562730879496,
-            "full_step_relative_spread": 0.1693380572408016,
-            "full_step_seconds_max": 110.42861822200939,
-            "full_step_seconds_median": 106.38236115803011,
-            "full_step_seconds_min": 92.41403585881926,
-            "full_step_seconds_per_step": 0.053191180579015056,
-            "linear_algebra_ratio_vs_reference": 1.236030419763361,
-            "linear_algebra_seconds_median": 57.00291619519703,
-            "linear_algebra_seconds_per_step": 0.028501458097598516,
+            "amplitude_1e_3_seconds_median": 112.00059810141101,
+            "amplitude_cost_ratio": 1.0163533580761133,
+            "full_step_ratio_vs_reference": 3.005025129136117,
+            "full_step_relative_spread": 0.038534882090064275,
+            "full_step_seconds_max": 115.83312898501754,
+            "full_step_seconds_median": 113.83218398690224,
+            "full_step_seconds_min": 111.44661919702776,
+            "full_step_seconds_per_step": 0.056916091993451115,
+            "linear_algebra_ratio_vs_reference": 1.7090034065092263,
+            "linear_algebra_seconds_median": 64.73809097893536,
+            "linear_algebra_seconds_per_step": 0.03236904548946768,
             "rank": 2,
             "svd_calls_per_step": 4.005
           },
           {
-            "amplitude_1e_3_seconds_median": 106.94813480158336,
-            "amplitude_cost_ratio": 1.011713781289799,
-            "full_step_ratio_vs_reference": 2.3461888456600057,
-            "full_step_relative_spread": 0.11863258114374867,
-            "full_step_seconds_max": 109.1614037710242,
-            "full_step_seconds_median": 108.20090186200105,
-            "full_step_seconds_min": 96.32525150105357,
-            "full_step_seconds_per_step": 0.05410045093100052,
-            "linear_algebra_ratio_vs_reference": 1.2587206148735586,
-            "linear_algebra_seconds_median": 58.04933646903373,
-            "linear_algebra_seconds_per_step": 0.029024668234516868,
+            "amplitude_1e_3_seconds_median": 112.99386412801687,
+            "amplitude_cost_ratio": 1.0219745379287817,
+            "full_step_ratio_vs_reference": 3.04844227865223,
+            "full_step_relative_spread": 0.03224805485937707,
+            "full_step_seconds_max": 116.76503463182598,
+            "full_step_seconds_median": 115.47685208101757,
+            "full_step_seconds_min": 113.04113077092916,
+            "full_step_seconds_per_step": 0.057738426040508786,
+            "linear_algebra_ratio_vs_reference": 1.7430466772075455,
+            "linear_algebra_seconds_median": 66.02767082839273,
+            "linear_algebra_seconds_per_step": 0.03301383541419636,
             "rank": 64,
             "svd_calls_per_step": 4.005
           }
@@ -412,8 +412,8 @@
     "rank_independence": [
       {
         "N": 64,
-        "full_step_ratio_hi_over_lo": 1.1082194854471736,
-        "linear_algebra_ratio_hi_over_lo": 1.3882381852112924,
+        "full_step_ratio_hi_over_lo": 1.1426563181720366,
+        "linear_algebra_ratio_hi_over_lo": 1.3379259859833588,
         "ranks_compared": [
           2,
           64
@@ -422,8 +422,8 @@
       },
       {
         "N": 128,
-        "full_step_ratio_hi_over_lo": 1.0699301837492303,
-        "linear_algebra_ratio_hi_over_lo": 1.1173862478447194,
+        "full_step_ratio_hi_over_lo": 1.0499407453892722,
+        "linear_algebra_ratio_hi_over_lo": 1.0677686182287107,
         "ranks_compared": [
           2,
           64
@@ -432,8 +432,8 @@
       },
       {
         "N": 256,
-        "full_step_ratio_hi_over_lo": 1.0170943818521712,
-        "linear_algebra_ratio_hi_over_lo": 1.0183573112339273,
+        "full_step_ratio_hi_over_lo": 1.0144481818455189,
+        "linear_algebra_ratio_hi_over_lo": 1.0199199548512632,
         "ranks_compared": [
           2,
           64
@@ -442,10 +442,10 @@
       }
     ],
     "thread_settings": {
-      "MKL_NUM_THREADS": "1",
-      "NUMEXPR_NUM_THREADS": "1",
-      "OMP_NUM_THREADS": "1",
-      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "2",
+      "NUMEXPR_NUM_THREADS": null,
+      "OMP_NUM_THREADS": "2",
+      "OPENBLAS_NUM_THREADS": "2",
       "VECLIB_MAXIMUM_THREADS": null
     }
   },
@@ -7765,7 +7765,7 @@
   },
   "forcing_name_caveat": "The driver calls this a Kolmogorov flow, but the forcing is a periodic unidirectional shear f = (A sin(k y), 0), not the Arnold-Korkin-Sinitsyn cellular pump. CHECKLIST 1.3 asks that the forcing match what the name claims; the naming decision belongs to the reviewer and writer, and no result is affected by it because the forcing is recorded in every artifact's parameters.",
   "generated_by": "experiments/make_summary.py",
-  "git_commit": "2aff39a41f39f772544917273da5e7489c43fe53",
+  "git_commit": "4923f79f6596f92c4862540a4fe4640566abafb5",
   "grid_check": {
     "N": 128,
     "dlra": {
@@ -7864,29 +7864,29 @@
   "peak_memory": {
     "file": "peak_memory.json",
     "full_grid_peak_mib": {
-      "N=128": 39.6171875,
-      "N=64": 37.32421875
+      "N=128": 39.46484375,
+      "N=64": 37.296875
     },
-    "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
+    "git_commit": "4923f79f6596f92c4862540a4fe4640566abafb5",
     "grids": [
       64,
       128
     ],
-    "interpretation": "Report the overhead over the full-grid step, not raw RSS: the interpreter and BLAS baseline is tens of MiB and no method choice affects it. THE ANSWER TO THE QUESTION THAT MATTERS IS NEGATIVE AND ROBUST: the reduced integrator does not save memory. It costs MORE than the full-grid step at both grids and every rank, because its state is a full N x N field plus its factors plus the factorization workspace, and that overhead is many times the run-to-run noise floor measured here from repeating one configuration, so it is real. For the midpoint BUG integrator, peak RSS N=64: varies by 0.45 MiB, which is 3.1x the noise floor (threshold 2x, so the margin is 1.6x either side) -- RESOLVED, so the variation with rank is real; N=128: varies by 1.86 MiB, which is 12.8x the noise floor (threshold 2x, so the margin is 6.4x either side) -- RESOLVED, so the variation with rank is real. The variation with rank is resolved at every grid, so 'flat in rank' would assert the opposite of the measurement. For the projected integrator, peak RSS N=64: varies by 0.23 MiB, which is 1.6x the noise floor (threshold 2x, so the margin is 0.8x either side) -- NOT resolved, so no variation is established; N=128: varies by 0.25 MiB, which is 1.8x the noise floor (threshold 2x, so the margin is 0.9x either side) -- NOT resolved, so no variation is established. No variation with rank is resolved at any grid, so the spread is consistent with zero but does not demonstrate it. THE NOISE FLOOR IS A DISTRIBUTION, not a point: it is the largest of 8 re-measurements of one configuration (0.0195 to 0.1445 MiB, a factor of 7 between them). With a single repeat this number has been observed at 0.1328, 0.0664, 0.0977 and 0.0039 MiB -- a factor of 34 -- and the verdicts above flip between 'resolved' and 'not established' across that range for the projected integrator. **Any claim of the form 'the variation with rank is N times the noise floor' therefore carries the floor's own spread, and the verdicts here are taken against its maximum so that the error can only fall on the side of not claiming a rank dependence.** The BUG integrator trades memory for time: its overhead is SMALLER than the projected integrator's at both grids, while its cost per step is 3.4-5.1x the projected one. Its spread over rank is also larger, in the direction its construction predicts, since it holds augmented factors of size up to 4r rather than a whole-field factorization.",
+    "interpretation": "Report the overhead over the full-grid step, not raw RSS: the interpreter and BLAS baseline is tens of MiB and no method choice affects it. THE ANSWER TO THE QUESTION THAT MATTERS IS NEGATIVE AND ROBUST: the reduced integrator does not save memory. It costs MORE than the full-grid step at both grids and every rank, because its state is a full N x N field plus its factors plus the factorization workspace, and that overhead is many times the run-to-run noise floor measured here from repeating one configuration, so it is real. For the midpoint BUG integrator, peak RSS N=64: varies by 0.68 MiB, which is 1.6x the noise floor (threshold 2x, so the margin is 0.8x either side) -- NOT resolved, so no variation is established; N=128: varies by 1.73 MiB, which is 4.1x the noise floor (threshold 2x, so the margin is 2.0x either side) -- RESOLVED, so the variation with rank is real. Neither 'flat in rank' nor 'varies with rank' is supported here, because the two grids disagree about whether a variation exists at all. For the projected integrator, peak RSS N=64: varies by 0.47 MiB, which is 1.1x the noise floor (threshold 2x, so the margin is 0.6x either side) -- NOT resolved, so no variation is established; N=128: varies by 0.34 MiB, which is 0.8x the noise floor (threshold 2x, so the margin is 0.4x either side) -- NOT resolved, so no variation is established. No variation with rank is resolved at any grid, so the spread is consistent with zero but does not demonstrate it. THE NOISE FLOOR IS A DISTRIBUTION, not a point: it is the largest of 92 re-measurements of one configuration (0.0000 to 0.4258 MiB, a factor of nan between them). With a single repeat this number has been observed at 0.1328, 0.0664, 0.0977 and 0.0039 MiB -- a factor of 34 -- and the verdicts above flip between 'resolved' and 'not established' across that range for the projected integrator. **Any claim of the form 'the variation with rank is N times the noise floor' therefore carries the floor's own spread, and the verdicts here are taken against its maximum so that the error can only fall on the side of not claiming a rank dependence.** The BUG integrator trades memory for time: its overhead is SMALLER than the projected integrator's at both grids, while its cost per step is 3.4-5.1x the projected one. Its spread over rank is also larger, in the direction its construction predicts, since it holds augmented factors of size up to 4r rather than a whole-field factorization.",
     "methods": [
       "full",
       "dlra",
       "bug"
     ],
-    "noise_floor_mib": 0.14453125,
+    "noise_floor_mib": 0.42578125,
     "rank_scaling": [
       {
         "N": 64,
         "method": "dlra",
-        "noise_floor_mib": 0.14453125,
-        "overhead_vs_full_grid_mib": 2.42578125,
-        "peak_mib_max": 39.75,
-        "peak_mib_min": 39.51953125,
+        "noise_floor_mib": 0.42578125,
+        "overhead_vs_full_grid_mib": 2.53125,
+        "peak_mib_max": 39.828125,
+        "peak_mib_min": 39.35546875,
         "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
         "rank_independence_resolved": false,
         "ranks": [
@@ -7896,33 +7896,15 @@
           32,
           43
         ],
-        "spread_over_rank_mib": 0.23046875
+        "spread_over_rank_mib": 0.47265625
       },
       {
         "N": 64,
         "method": "bug",
-        "noise_floor_mib": 0.14453125,
-        "overhead_vs_full_grid_mib": 2.203125,
-        "peak_mib_max": 39.52734375,
-        "peak_mib_min": 39.078125,
-        "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
-        "rank_independence_resolved": true,
-        "ranks": [
-          2,
-          8,
-          16,
-          32,
-          43
-        ],
-        "spread_over_rank_mib": 0.44921875
-      },
-      {
-        "N": 128,
-        "method": "dlra",
-        "noise_floor_mib": 0.14453125,
-        "overhead_vs_full_grid_mib": 4.27734375,
-        "peak_mib_max": 43.89453125,
-        "peak_mib_min": 43.640625,
+        "noise_floor_mib": 0.42578125,
+        "overhead_vs_full_grid_mib": 2.32421875,
+        "peak_mib_max": 39.62109375,
+        "peak_mib_min": 38.9453125,
         "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
         "rank_independence_resolved": false,
         "ranks": [
@@ -7932,15 +7914,33 @@
           32,
           43
         ],
-        "spread_over_rank_mib": 0.25390625
+        "spread_over_rank_mib": 0.67578125
+      },
+      {
+        "N": 128,
+        "method": "dlra",
+        "noise_floor_mib": 0.42578125,
+        "overhead_vs_full_grid_mib": 4.32421875,
+        "peak_mib_max": 43.7890625,
+        "peak_mib_min": 43.44921875,
+        "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
+        "rank_independence_resolved": false,
+        "ranks": [
+          2,
+          8,
+          16,
+          32,
+          43
+        ],
+        "spread_over_rank_mib": 0.33984375
       },
       {
         "N": 128,
         "method": "bug",
-        "noise_floor_mib": 0.14453125,
-        "overhead_vs_full_grid_mib": 3.83203125,
-        "peak_mib_max": 43.44921875,
-        "peak_mib_min": 41.59375,
+        "noise_floor_mib": 0.42578125,
+        "overhead_vs_full_grid_mib": 3.92578125,
+        "peak_mib_max": 43.390625,
+        "peak_mib_min": 41.65625,
         "rank_independence_note": "true means the spread over rank exceeds twice the run-to-run noise floor of an identical configuration, i.e. the variation with rank is real rather than allocator noise",
         "rank_independence_resolved": true,
         "ranks": [
@@ -7950,7 +7950,7 @@
           32,
           43
         ],
-        "spread_over_rank_mib": 1.85546875
+        "spread_over_rank_mib": 1.734375
       }
     ],
     "ranks": [
@@ -7967,7 +7967,7 @@
     "all_inputs_reproducible": true,
     "generated_by": "experiments/make_summary.py",
     "generator_dirty": true,
-    "generator_git_commit": "2aff39a41f39f772544917273da5e7489c43fe53",
+    "generator_git_commit": "4923f79f6596f92c4862540a4fe4640566abafb5",
     "how_to_read_this": "every number in this file comes from one of the artifacts listed under `inputs`, at the commit listed beside it. An artifact whose `reproducible` is not true was produced by a driver that did not match its own recorded commit, so a number taken from it is not covered by that commit. An artifact listed under `inputs_absent` contributed nothing.",
     "inputs": [
       {
@@ -8050,12 +8050,15 @@
       },
       {
         "artifact": "cost_retiming.json",
+        "captured_at": "launch",
         "driver": "experiments/bench_cost.py",
         "driver_matches_HEAD": true,
-        "git_commit": "41642ba7d82aee3ff21b6b3a34b826170bc849eb",
+        "git_commit": "2aff39a41f39f772544917273da5e7489c43fe53",
+        "git_commit_how": "git log -1 --before=1790415341",
         "present": true,
-        "provenance_is_write_time": "this input predates the 2026-09-26 fix to provenance.py: its commit and driver hash were read when the artifact was WRITTEN, so for a run that outlasted a commit the two were read together and the reproducible verdict compared the driver against itself. Re-run the driver to make this input verifiable.",
         "reproducible": true,
+        "sources_fingerprint_at_launch": "8b8e1412ab2a40a859d734885074b516cd07e50f889cbe35a1b7ec52ee9021cc",
+        "tree_moved_during_run": true,
         "working_tree_dirty": true
       },
       {
@@ -8107,12 +8110,12 @@
         "captured_at": "launch",
         "driver": "experiments/bench_memory.py",
         "driver_matches_HEAD": true,
-        "git_commit": "ab0304573734a86c0d73d828ef96a3b5b46ec561",
-        "git_commit_how": "git log -1 --before=1790411872",
+        "git_commit": "4923f79f6596f92c4862540a4fe4640566abafb5",
+        "git_commit_how": "git log -1 --before=1790418700",
         "present": true,
         "reproducible": true,
-        "sources_fingerprint_at_launch": "cecfa69c6dbe0ca2df6d296bb2c06e277a6f44240de6a0360b4c4d1f02888df1",
-        "tree_moved_during_run": true,
+        "sources_fingerprint_at_launch": "7aeba4b7a2eb283f1277715b541aaeed746532eb80a770674831af1791f3c71c",
+        "tree_moved_during_run": false,
         "working_tree_dirty": false
       }
     ],
@@ -8120,9 +8123,7 @@
       "regime_pilot.json"
     ],
     "inputs_with_warnings": [],
-    "inputs_without_launch_provenance": [
-      "cost_retiming.json"
-    ]
+    "inputs_without_launch_provenance": []
   },
   "rank_matched_comparison": "CHECKLIST 1.0: the static-POD baseline is fixed-rank and the DLRA is adaptive, so the suite is not a rank-matched comparison. A matched-rank POD is F5 and is downstream of the regime decision.",
   "rank_threshold_sweep": {
