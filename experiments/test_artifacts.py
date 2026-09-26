@@ -44,6 +44,104 @@ def load(name: str) -> dict:
     return json.loads(path.read_text())
 
 
+def test_provenance_is_captured_at_launch_and_can_actually_fail():
+    """`driver_matches_HEAD` must be able to say False, and mean it.
+
+    It could not, until 2026-09-26. `provenance()` read `HEAD` and hashed the
+    driver *when the artifact was written*, so for any run that outlasted a commit
+    the two were read together and the check compared the driver against itself.
+    Demonstrated on a real run: a crossover surface started at 07:40, a commit
+    landed at 07:45, the artifact was written at 08:24, and it recorded
+
+        driver_sha256        98b3d61b2496d313   (the file at 08:24)
+        the driver that ran  4b2ca8f8bb0bc599   (loaded at 07:40)
+        driver_matches_HEAD  true
+        reproducible          true
+
+    Both verdicts were wrong, and the module's own note claimed "git_commit is
+    HEAD at launch" -- so the intent was right and the code had drifted from it.
+
+    The properties asserted here, in order of how much they would have caught:
+
+    1. `git_commit` comes from a *time* query, not from `rev-parse HEAD` -- the
+       old implementation used the latter, which is by definition current;
+    2. `driver_sha256` is the driver's hash **at launch**, so if the file changed
+       after the process started, the recorded hash is still the one that ran;
+    3. `driver_matches_HEAD` goes **False** when the launch driver is not the one
+       in the launch commit. That is the check the whole module exists for, and
+       it is exercised here by perturbing the launch snapshot directly.
+    """
+    import importlib
+    import sys
+
+    from _paths import EXPERIMENTS
+    sys.path.insert(0, str(EXPERIMENTS))
+    import provenance as prov
+
+    importlib.reload(prov)
+    from pathlib import Path as _Path
+
+    driver = _Path(EXPERIMENTS / "run_kolmogorov.py")
+    rel = "experiments/run_kolmogorov.py"
+
+    block = prov.provenance(driver)
+
+    # (1) a time-anchored query, not HEAD.
+    assert block.get("git_commit_how", "").startswith("git log -1 --before="), (
+        f"git_commit is not time-anchored: {block.get('git_commit_how')!r}. "
+        "rev-parse HEAD is by definition current, which is what made the "
+        "original check vacuous."
+    )
+    assert block.get("captured_at") == "launch", block.get("captured_at")
+
+    # (2) the recorded hash is the launch snapshot's, not a fresh read.
+    assert block["driver_sha256"] == prov.LAUNCH_SOURCE_SHAS[rel], (
+        "driver_sha256 was re-read at write time instead of taken from the "
+        "launch snapshot"
+    )
+    assert block["sources_files_at_launch"] > 20, block["sources_files_at_launch"]
+    assert len(block["sources_fingerprint_at_launch"]) == 64
+
+    # (3) THE CONTROL: if the driver that ran is not the one in the launch
+    # commit, the verdict must be False. Aiming the old implementation at an
+    # older commit's driver is exactly the situation it reported as true.
+    original = dict(prov.LAUNCH_SOURCE_SHAS)
+    try:
+        import hashlib
+        import subprocess
+        older = subprocess.run(
+            ["git", "rev-list", "--max-count=40", "HEAD"],
+            cwd=str(EXPERIMENTS.parent), capture_output=True, text=True,
+        ).stdout.split()
+        stale = None
+        for commit in older:
+            blob = subprocess.run(
+                ["git", "show", f"{commit}:{rel}"],
+                cwd=str(EXPERIMENTS.parent), capture_output=True,
+            )
+            if blob.returncode == 0:
+                digest = hashlib.sha256(blob.stdout).hexdigest()
+                if digest != original[rel]:
+                    stale = digest
+                    break
+        assert stale is not None, "no earlier version of the driver to test against"
+        prov.LAUNCH_SOURCE_SHAS[rel] = stale
+        perturbed = prov.provenance(driver)
+        assert perturbed["driver_sha256"] == stale
+        assert perturbed["driver_matches_HEAD"] is False, (
+            "a driver that ran but is not the one in the recorded commit was "
+            "reported as matching -- the exact failure this test exists for"
+        )
+        assert perturbed["reproducible"] is False
+    finally:
+        prov.LAUNCH_SOURCE_SHAS.clear()
+        prov.LAUNCH_SOURCE_SHAS.update(original)
+
+    # And it is not stuck at False either: restoring the truth restores the
+    # verdict, so the check discriminates rather than defaulting.
+    assert prov.provenance(driver)["driver_matches_HEAD"] is True
+
+
 def test_the_driver_drift_classifier_separates_wiring_from_computation():
     """`check_driver_drift.py` must not confuse a parser edit with a maths edit.
 

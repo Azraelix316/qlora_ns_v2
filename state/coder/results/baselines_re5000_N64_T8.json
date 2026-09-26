@@ -556,7 +556,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 93.11319085001014
+      "wall_seconds": 85.30252659507096
     },
     "dlra_fixed_r1": {
       "accuracy_metrics_valid": true,
@@ -1086,7 +1086,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 80.00604110001586
+      "wall_seconds": 73.758355878992
     },
     "dlra_fixed_r16": {
       "accuracy_metrics_valid": true,
@@ -1616,7 +1616,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 85.09131252393126
+      "wall_seconds": 79.08641145098954
     },
     "dlra_fixed_r32": {
       "accuracy_metrics_valid": true,
@@ -2146,7 +2146,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 86.81121234898455
+      "wall_seconds": 78.9100024132058
     },
     "dlra_fixed_r42": {
       "accuracy_metrics_valid": true,
@@ -2676,7 +2676,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 86.08160247304477
+      "wall_seconds": 79.97723959106952
     },
     "full_grid": {
       "accuracy_metrics_valid": true,
@@ -3225,7 +3225,7 @@
       "diverged_at_time": null,
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.8834010524830029,
-      "fit_seconds": 5.993107333779335e-05,
+      "fit_seconds": 5.693291313946247e-05,
       "max_abs_divergence": 2.2648549702353193e-14,
       "max_scaled_projected_energy_residual": null,
       "max_trajectory_divergence": 0.883478154111058,
@@ -3422,7 +3422,7 @@
       "rank_requested": 1,
       "ridge": 0.0,
       "role": "dynamic data-driven baseline at a matched rank; it does no PDE work per step, so its cost is reported per operator application as well as per step",
-      "seconds_per_application": 0.0006002356254612096,
+      "seconds_per_application": 0.0005847999258548952,
       "steps_per_application": 100,
       "training_pairs": 56,
       "training_steps": 5700,
@@ -3752,7 +3752,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 0.09603716991841793,
+      "wall_seconds": 0.09356752410531044,
       "window": "early"
     },
     "pod_dmd_r16": {
@@ -3764,7 +3764,7 @@
       "diverged_at_time": null,
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.8056549009968295,
-      "fit_seconds": 5.925493314862251e-05,
+      "fit_seconds": 5.146116018295288e-05,
       "max_abs_divergence": 3.907985046680551e-14,
       "max_scaled_projected_energy_residual": null,
       "max_trajectory_divergence": 0.9000700325016758,
@@ -3961,7 +3961,7 @@
       "rank_requested": 16,
       "ridge": 0.0,
       "role": "dynamic data-driven baseline at a matched rank; it does no PDE work per step, so its cost is reported per operator application as well as per step",
-      "seconds_per_application": 0.0006438592303311452,
+      "seconds_per_application": 0.0005731367549742572,
       "steps_per_application": 100,
       "training_pairs": 56,
       "training_steps": 5700,
@@ -4291,7 +4291,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 0.10301696183159947,
+      "wall_seconds": 0.09170144097879529,
       "window": "early"
     },
     "pod_dmd_r32": {
@@ -4303,7 +4303,7 @@
       "diverged_at_time": null,
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 60.694156570094535,
-      "fit_seconds": 6.659911014139652e-05,
+      "fit_seconds": 6.747106090188026e-05,
       "max_abs_divergence": 1.0459189070388675e-11,
       "max_scaled_projected_energy_residual": null,
       "max_trajectory_divergence": 76.51473962264755,
@@ -4500,7 +4500,7 @@
       "rank_requested": 32,
       "ridge": 0.0,
       "role": "dynamic data-driven baseline at a matched rank; it does no PDE work per step, so its cost is reported per operator application as well as per step",
-      "seconds_per_application": 0.0006610486190766097,
+      "seconds_per_application": 0.0006033545942045748,
       "steps_per_application": 100,
       "training_pairs": 56,
       "training_steps": 5700,
@@ -4830,7 +4830,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 0.10576743609271944,
+      "wall_seconds": 0.09653642890043557,
       "window": "early"
     },
     "pod_dmd_r42": {
@@ -4842,7 +4842,7 @@
       "diverged_at_time": null,
       "final_time_reached": 8.0,
       "final_trajectory_divergence": 0.7183272398904665,
-      "fit_seconds": 0.00010357704013586044,
+      "fit_seconds": 8.899415843188763e-05,
       "max_abs_divergence": 3.552713678800501e-14,
       "max_scaled_projected_energy_residual": null,
       "max_trajectory_divergence": 0.8771412344438722,
@@ -5039,7 +5039,7 @@
       "rank_requested": 42,
       "ridge": 0.0,
       "role": "dynamic data-driven baseline at a matched rank; it does no PDE work per step, so its cost is reported per operator application as well as per step",
-      "seconds_per_application": 0.0006687468572636135,
+      "seconds_per_application": 0.0006514990629511886,
       "steps_per_application": 100,
       "training_pairs": 56,
       "training_steps": 5700,
@@ -5369,7 +5369,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 0.10699921217747033,
+      "wall_seconds": 0.10423949407413602,
       "window": "early"
     },
     "pod_early_r1": {
@@ -5902,7 +5902,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 54.06750756385736,
+      "wall_seconds": 47.482721543870866,
       "window": "early",
       "window_end": 2.8,
       "window_snapshots": 57,
@@ -6438,7 +6438,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 59.75978095107712,
+      "wall_seconds": 55.5450503830798,
       "window": "early",
       "window_end": 2.8,
       "window_snapshots": 57,
@@ -6924,7 +6924,7 @@
           "time": 6.9
         }
       ],
-      "wall_seconds": 54.75074308994226,
+      "wall_seconds": 51.639623866882175,
       "window": "early",
       "window_end": 2.8,
       "window_snapshots": 57,
@@ -7356,7 +7356,7 @@
           "time": 5.7
         }
       ],
-      "wall_seconds": 47.25172475702129,
+      "wall_seconds": 45.327606566017494,
       "window": "early",
       "window_end": 2.8,
       "window_snapshots": 57,
@@ -7892,7 +7892,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 49.920146978925914,
+      "wall_seconds": 49.47454781807028,
       "window": "late",
       "window_end": 8.0,
       "window_snapshots": 57,
@@ -8428,7 +8428,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 58.66233667382039,
+      "wall_seconds": 54.716377191012725,
       "window": "late",
       "window_end": 8.0,
       "window_snapshots": 57,
@@ -8852,7 +8852,7 @@
           "time": 5.5
         }
       ],
-      "wall_seconds": 43.44972768379375,
+      "wall_seconds": 40.71668822388165,
       "window": "late",
       "window_end": 8.0,
       "window_snapshots": 57,
@@ -9348,7 +9348,7 @@
           "time": 7.1000000000000005
         }
       ],
-      "wall_seconds": 52.76909875799902,
+      "wall_seconds": 55.667601299937814,
       "window": "late",
       "window_end": 8.0,
       "window_snapshots": 57,
@@ -9884,7 +9884,7 @@
           "time": 8.0
         }
       ],
-      "wall_seconds": 50.29329286213033
+      "wall_seconds": 48.7080008990597
     }
   },
   "parameters": {
@@ -9929,20 +9929,17 @@
     "driver": "experiments/run_baselines.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "ea5bd2381969d555682e894e4fd7729ec6bf2fcb5b22c955434bab5cdd45a5d7",
-    "git_commit": "d48317eaf73d3d11ddb52b3ddda18b9c2cbdaae1",
+    "driver_sha256": "5571a456305a533b901dee33740e4df33f57b87afb3292b06971fd3e89553d7f",
+    "git_commit": "2dd252c79b085ad5256a800f51d98d531ac33a36",
     "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_diff_sha256": "40870f90fa24fb7361c5d8e3893fc29c30a4fca7d111c8cfcbd70727bb4cc6f2",
+    "working_tree_diff_sha256": "12bb883162186bd790785a986382ce2ff8fd7baf45815ed548f620a368823920",
     "working_tree_dirty": true,
     "working_tree_dirty_paths": [
-      "experiments/run_kolmogorov.py",
-      "experiments/run_long_time.py",
-      "experiments/test_artifacts.py",
-      "state/coder/results/kolmogorov_re1000_N64.json",
-      "state/coder/results/kolmogorov_re100_N64.json",
-      "state/coder/results/kolmogorov_re5000_N128.json",
-      "state/coder/results/kolmogorov_re5000_N64.json"
+      "state/coder/results/crossover_surface.json",
+      "state/coder/results/rank_rule_energy.json",
+      "state/coder/results/regime_pilot_re5000_N128_A0p2.json",
+      "state/coder/results/static_basis_construction_N32.json"
     ]
   },
   "rank_quantities": {

@@ -12,7 +12,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "static (projected every step, basis never refitted)",
-      "wall_seconds": 6.123733963118866
+      "wall_seconds": 4.118540531024337
     },
     {
       "arm": "2_fluctuation_snapshots_static_stepper",
@@ -26,7 +26,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "static (projected every step, basis never refitted)",
-      "wall_seconds": 4.103347253985703
+      "wall_seconds": 2.9441992610227317
     },
     {
       "arm": "3_dlra_basis_frozen",
@@ -40,7 +40,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "DLRA, check_every=10**9 (frozen; expect rebuilds=0)",
-      "wall_seconds": 6.669172136113048
+      "wall_seconds": 5.574832238024101
     },
     {
       "arm": "4_dlra_basis_refreshing",
@@ -54,7 +54,7 @@
       "rank": 16,
       "seed": 20260925,
       "stepper": "DLRA, check_every=5 (refreshes)",
-      "wall_seconds": 8.620682580862194
+      "wall_seconds": 5.882635466987267
     }
   ],
   "case": "static_basis_construction",
@@ -90,12 +90,15 @@
     "driver": "experiments/run_static_basis_construction.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "ab2961f9c14aebcb5eada09aa9a6eff11d46df0a832f6fb5fdbbc8a0fddaf379",
-    "git_commit": "acbb0ad9c940efea580c1b469d24bc72b28c9d78",
+    "driver_sha256": "dcaaa897957c15c3a306054cd46c206f8d645b5fa15b0e4f2ed1d77ce7e24026",
+    "git_commit": "2dd252c79b085ad5256a800f51d98d531ac33a36",
     "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_dirty": false,
-    "working_tree_dirty_paths": []
+    "working_tree_diff_sha256": "cdaabc7d1efd428d1ce6dcf929f29ab6df9a2b992786c64e28c8bdecb91152da",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "state/coder/results/regime_pilot_re5000_N128_A0p2.json"
+    ]
   },
   "rank_sweep": [
     {
@@ -107,7 +110,7 @@
       "final_time_reached": 5.478,
       "max_abs_divergence": 1.6414204589195224e+132,
       "rank": 14,
-      "wall_seconds": 6.780263631138951
+      "wall_seconds": 3.562651000916958
     },
     {
       "basis": "fluctuations",
@@ -118,7 +121,7 @@
       "final_time_reached": 4.08,
       "max_abs_divergence": 6.477610257926561e+224,
       "rank": 14,
-      "wall_seconds": 5.826417803065851
+      "wall_seconds": 2.72487426106818
     },
     {
       "basis": "raw",
@@ -129,7 +132,7 @@
       "final_time_reached": 3.922,
       "max_abs_divergence": 2.8392137667797144e+133,
       "rank": 15,
-      "wall_seconds": 5.613968692952767
+      "wall_seconds": 2.700093436986208
     },
     {
       "basis": "fluctuations",
@@ -140,7 +143,7 @@
       "final_time_reached": 4.96,
       "max_abs_divergence": 2.864581841720371e+89,
       "rank": 15,
-      "wall_seconds": 7.282449014950544
+      "wall_seconds": 3.2554236608557403
     },
     {
       "basis": "raw",
@@ -151,7 +154,7 @@
       "final_time_reached": 5.388,
       "max_abs_divergence": 2.138644039510404e+191,
       "rank": 16,
-      "wall_seconds": 7.9747730570379645
+      "wall_seconds": 3.716561089968309
     },
     {
       "basis": "fluctuations",
@@ -162,7 +165,7 @@
       "final_time_reached": 4.438,
       "max_abs_divergence": 3.8194424556271614e+89,
       "rank": 16,
-      "wall_seconds": 6.557428947882727
+      "wall_seconds": 2.96555157401599
     },
     {
       "basis": "raw",
@@ -173,7 +176,7 @@
       "final_time_reached": 2.952,
       "max_abs_divergence": 1.4196068833898572e+132,
       "rank": 17,
-      "wall_seconds": 3.2538919469807297
+      "wall_seconds": 2.133323771879077
     },
     {
       "basis": "fluctuations",
@@ -184,7 +187,7 @@
       "final_time_reached": 6.0,
       "max_abs_divergence": 7.105427357601002e-14,
       "rank": 17,
-      "wall_seconds": 8.520269950851798
+      "wall_seconds": 4.2081014642026275
     },
     {
       "basis": "raw",
@@ -195,7 +198,7 @@
       "final_time_reached": 6.0,
       "max_abs_divergence": 6.394884621840902e-14,
       "rank": 18,
-      "wall_seconds": 8.676165394019336
+      "wall_seconds": 4.010185637045652
     },
     {
       "basis": "fluctuations",
@@ -206,7 +209,7 @@
       "final_time_reached": 2.876,
       "max_abs_divergence": 2.0859248397665138e+93,
       "rank": 18,
-      "wall_seconds": 4.152616209117696
+      "wall_seconds": 1.9817743538878858
     }
   ],
   "seed_replication": [
@@ -220,7 +223,7 @@
       "initial_energy": 22.28992861738245,
       "max_abs_divergence": 2.138644039510404e+191,
       "seed": 20260925,
-      "wall_seconds": 5.7078353320248425
+      "wall_seconds": 3.539267289917916
     },
     {
       "basis": "fluctuations",
@@ -232,7 +235,7 @@
       "initial_energy": 22.28992861738245,
       "max_abs_divergence": 3.8194424556271614e+89,
       "seed": 20260925,
-      "wall_seconds": 5.021903202170506
+      "wall_seconds": 3.004087831825018
     },
     {
       "basis": "raw",
@@ -244,7 +247,7 @@
       "initial_energy": 22.215153823348857,
       "max_abs_divergence": 5.558020283391177e+78,
       "seed": 7,
-      "wall_seconds": 5.102371867047623
+      "wall_seconds": 3.1813919409178197
     },
     {
       "basis": "fluctuations",
@@ -256,7 +259,7 @@
       "initial_energy": 22.215153823348857,
       "max_abs_divergence": 2.4550429559221064e+150,
       "seed": 7,
-      "wall_seconds": 3.499162877909839
+      "wall_seconds": 2.7308804320637137
     },
     {
       "basis": "raw",
@@ -268,7 +271,7 @@
       "initial_energy": 22.286048551199556,
       "max_abs_divergence": 4.1010951089681474e+99,
       "seed": 991,
-      "wall_seconds": 5.286515793064609
+      "wall_seconds": 3.8740013618953526
     },
     {
       "basis": "fluctuations",
@@ -280,7 +283,7 @@
       "initial_energy": 22.286048551199556,
       "max_abs_divergence": 2.154551665274214e+214,
       "seed": 991,
-      "wall_seconds": 4.509381401119754
+      "wall_seconds": 2.5725810970179737
     }
   ]
 }

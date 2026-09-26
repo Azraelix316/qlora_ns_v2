@@ -30,12 +30,16 @@
     "driver": "experiments/run_rank_rule_energy.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "7310a88f88ecf6cfa7b2dcd6aa5ef84da2cbdbfc83eb9d0190dcc720ada55deb",
-    "git_commit": "a1a42dcf32a29f0c81e3eff83483a51470d82b15",
+    "driver_sha256": "d6fd1e5d1cc10cc625c63ca426738aed50246a0e1807ad229387096be531733d",
+    "git_commit": "2dd252c79b085ad5256a800f51d98d531ac33a36",
     "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_diff_sha256": "c498a0579150aec6a8fbc05c10cc116a1be64071170fee256dc4f46648f1f14c",
-    "working_tree_dirty": true
+    "working_tree_diff_sha256": "a940ed402b779c388d54c5598797f606b20377d6a4da19ef72fbd78397ab4ed5",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "state/coder/results/regime_pilot_re5000_N128_A0p2.json",
+      "state/coder/results/static_basis_construction_N32.json"
+    ]
   },
   "rows": [
     {
