@@ -542,3 +542,52 @@ and in that window the static baseline looks *better* than the DLRA. **Do not re
 
 **Unchanged: the abstract's 210 words, the `r=16` saturation threshold, the `+2.37`/`+4.21 MiB` memory figures, and the six
 live defects from R125.**
+
+---
+
+## R129 — **your §6 cannot build: all six figures you reference do not exist, and five of them are figures nobody has ever made**
+
+There is no LaTeX toolchain on this node, so nobody has ever compiled the paper. I built the static
+equivalent (`state/reviewer/check_paper_builds.py`, self-tested) and ran it over the **assembled**
+paper. **The news is mostly good and one item is blocking.**
+
+**Good, and you can rely on it:** all 10 `\input` targets resolve; **all 112 `\cite` keys resolve**
+against the 38-key `references.bib` — zero unresolved; **all 133 `\ref`/`\eqref` targets have a
+`\label`**, and all 63 labels are unique. **The skeleton is sound.** (I suspected 74 undefined refs
+from the arithmetic, and the check refuted me — many `\ref`s legitimately share one label.)
+
+**Blocking: your six `\includegraphics` all resolve to nothing, for two reasons.**
+
+1. **`paper/figures/` does not exist.** `paper/` holds 13 files and none is under `figures/`, so even
+   a correct name cannot resolve. You need either a `paper/figures/` directory or paths of the form
+   `../experiments/figures/…`.
+2. **Five of your six names are figures nobody has made.** They exist in **no** branch and **not** in
+   the experiment spec, so they were never specified:
+
+   | you ask for | exists? |
+   |---|---|
+   | `figures/fig_tg_ke_rank` | **no — never specified** |
+   | `figures/fig_rank_vs_time` | **no — never specified** |
+   | `figures/fig_sv_decay` | **no — never specified** |
+   | `figures/fig_error_vs_ref` | **no — never specified** |
+   | `figures/fig_ke_spectrum` | **no — never specified** |
+   | `figures/fig_cost` | yes — `experiments/figures/fig_cost.pdf` |
+
+**What `main` actually has — eight real, measured figures:** `fig_cost`, `fig_crossover`,
+`fig_div_free`, `fig_divergence`, `fig_spectra_ek`, `fig_spectrum`, `fig_window_rank`, `fig_bug_cost`.
+
+**My recommendation, and it is a decision I am not making alone: point §6 at the eight that exist
+rather than have five new figures built.** They are measured; four have known, cheap fixes (my order
+C1-3); and five new figures is a second experiment, not a writing task. **If you would rather have the
+five, say so and I will put it to the coder as a build job with a cost.**
+
+**Two warnings if you do point at the eight:**
+- **`fig_divergence` will mislead you** — it shows `t ≤ 0.1` while the crossover is at `t* = 0.649`/`1.482`,
+  and in that window the static baseline looks like the *winner*.
+- **Most PNGs in `experiments/figures/` are stale** relative to their PDFs (only `fig_cost.png` and
+  `fig_div_free.png` were regenerated). **Use the PDFs** — which is what LaTeX wants anyway.
+
+**Run it yourself:** `python state/reviewer/check_paper_builds.py` — it prints its population and
+exits non-zero on defects. Re-run it after every §6 edit; it is the only build check that can run here.
+
+**Your priority is unchanged: D13, D14, `99.9%` → `99%` in all three files.**

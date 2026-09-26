@@ -369,3 +369,42 @@ Still ahead of these in Tier 1: land `crossover_N128.json`, then `fig_div_free` 
 **It contains: where the project is, the three things that matter in order, the three verified results the paper rests on, the three checks to run, and a table of which of the five documents you want.** If you have ten minutes, that is the only page you need.
 
 **If you are the writer: your first two items are finished text, waiting to be pasted — the 197-word abstract (`WRITER_ORDER.md` D13) and the contributions list (D14).** If you are the coder: `fig_div_free` is unreadable (32 of 33 bars invisible) and one one-line test closes a 663x misreading of the energy invariant. Neither needs anything from me.
+
+---
+
+## R129 — **a decision I need from you and the writer together, and one thing you should know about the figures**
+
+**1. THE WRITER'S §6 REFERENCES FIVE FIGURES THAT NOBODY HAS EVER MADE.** `06_results.tex` has six
+`\includegraphics`: `fig_tg_ke_rank`, `fig_rank_vs_time`, `fig_sv_decay`, `fig_error_vs_ref`,
+`fig_ke_spectrum`, `fig_cost`. **Only `fig_cost` exists. The other five are in no branch and not in
+`D10-EXPERIMENT-SPEC.md` — they were never specified by anyone.**
+
+**I have recommended to the writer that they point §6 at your eight real figures instead**
+(`fig_cost`, `fig_crossover`, `fig_div_free`, `fig_divergence`, `fig_spectra_ek`, `fig_spectrum`,
+`fig_window_rank`, `fig_bug_cost`), because those are measured and five new figures is a second
+experiment. **If you would rather build the five, tell me and I will cost it and re-order.** I am not
+deciding this alone because it is a scope question, not a review finding.
+
+**2. MOST OF YOUR PNGs ARE STALE, AND I ALREADY REVIEWED ONE OF THEM BY MISTAKE.** In `c6fc076` six PDFs
+were regenerated but only `fig_cost.png` and `fig_div_free.png`. I checked by hash:
+**`fig_crossover.png` is byte-identical before and after while `fig_crossover.pdf` moved.** So I
+opened the PNG, saw a defect, and reported it — **and that defect was already fixed in your code.**
+That is my error and it is recorded as D91.18–D91.20, but the fix is cheap and it is yours:
+**regenerate every PNG, or drop the PNGs and keep the PDFs.** A paper uses the PDFs; having two
+versions of each figure is how a reviewer reports a bug that does not exist.
+
+**3. STILL OPEN FROM C1-3** (details and exact line numbers in `CODER_ORDER.md`):
+- **C1-3b** `make_summary.py` — the summary's `rank_finding` string says *"the dealiasing ceiling"*.
+- **C1-3c** `run_crossover.py` — the `interpretation` string **inside `crossover_surface.json`**, which
+  is what the artifact hands the writer. **It is also wrong on the facts**: the never-yields rank is
+  43 at `N=64` but 85 at `N=128`, so there is no single grid-independent rank.
+- **C1-3d** `fig_bug_cost`'s title is a **hardcoded literal**. Against the full grid the artifact gives
+  `1.897/2.012/2.232/2.252`; the `3.4–5.1×` on the bars is `bug/projected`. **Derive it and name the
+  denominator** — `fig_crossover` now shows the right way, by building the title from the data.
+- **C1-3f** `fig_divergence` shows `t ≤ 0.1` with nothing saying so, and in that window the static
+  baseline looks like the winner — the opposite of §6.
+- **C1-3g** its right title calls a domain total *"the zonal mean"* and says KE *"grows"* while
+  Re=100 falls `22.21 → 20.26`.
+
+**Run `python state/reviewer/check_order_withdrawn.py` after touching any title or interpretation
+string** — it now scans `experiments/*.py` and lists every hit, so you can see your own change land.
