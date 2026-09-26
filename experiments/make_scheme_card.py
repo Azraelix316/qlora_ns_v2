@@ -23,6 +23,7 @@ citations are the mechanism.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -197,9 +198,31 @@ def main() -> int:
     # `--check` verifies without writing. A test that regenerates the artifact in
     # place leaves the working tree dirty, and a dirty tree is how this project
     # detects contamination -- so a test that dirties it destroys the signal it is
-    # meant to preserve. The content is compared, provenance included, because a
-    # stale card is exactly what this must catch.
-    check_only = "--check" in sys.argv
+    # meant to preserve.
+    #
+    # Parsed with argparse rather than by scanning `sys.argv`, which is the point:
+    # this script previously read `"--check" in sys.argv` and **ignored every
+    # other flag**, so `make_scheme_card.py --help` regenerated the card instead of
+    # printing help. `test_every_driver_can_print_its_own_help` runs `--help` on
+    # every driver, so the suite was silently rewriting this artifact on every run
+    # and no amount of `--check` in the tests could stop it. **Third instance of
+    # this pattern today** -- `check_driver_flags.py --help` exited 1, and this one
+    # did the work it was asked not to do -- which is why it is named here.
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--check", action="store_true",
+        help=(
+            "verify the committed card against the code and write nothing; exit 1 "
+            "if it is stale. Compares the card's CONTENT, not its provenance block, "
+            "so a card written by this commit does not report itself stale."
+        ),
+    )
+    args = parser.parse_args()
+    check_only = args.check
+
     problems = verify()
     if problems:
         print("SCHEME CARD — CITATION CHECK FAILED\n")
