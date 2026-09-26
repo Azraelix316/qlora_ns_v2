@@ -90,6 +90,112 @@ def test_the_static_baseline_error_is_flat_in_rank_above_16():
             )
 
 
+def test_a_propagated_fixed_basis_overflows_and_the_evolving_one_does_not():
+    """The project's central claim, re-derived from scratch — the one live test.
+
+    The thesis is a *contrast*: on the same runner, the same splitting, the same
+    initial condition and the same rank, a basis propagated without refitting
+    overflows and an evolving basis does not. Every other test either checks the
+    engine's operators or reads a recorded artifact, so this is the only place
+    the claim is re-established rather than re-read. If the contrast quietly
+    stopped holding — a sign error in the projection, a rank criterion that
+    stopped evolving, a change in the splitting — this is what would notice.
+
+    The configuration was chosen by probing for the cheapest one that shows the
+    contrast at all, and the answer is not the one the shipped artifact uses:
+    at **N=32, rank 16, dt=0.002** the static basis overflows at ``t = 5.388``
+    while the fixed-rank DLRA at the *same* rank reaches ``T = 6.0``. At N=64 the
+    same rank survives statically, so the threshold is not merely in the rank --
+    it is in the rank *relative to the resolved band* (the N=32 dealias ceiling
+    is 21, the N=64 one is 43). That is worth knowing, and it is why the test
+    fixes the grid rather than the rank alone.
+
+    Cost is about 9 s, which is why this lives in the results layer rather than
+    being deferred to a benchmark.
+    """
+    import numpy as np
+
+    from solvers import DLRA, Grid2D
+    from solvers.pod import PODGalerkin
+    from run_baselines import make_initial_state, new_model
+
+    N, dt, final_time, rank, re, amplitude = 32, 0.002, 6.0, 16, 5000, 0.5
+    grid = Grid2D(N)
+    model = new_model(grid, re, amplitude)
+    initial = make_initial_state(
+        grid, base_speed=0.5, perturbation_velocity_rms=1.0, cutoff=8,
+        seed=20260925,
+    )
+
+    # A basis fitted once on a short window and then never touched: this is the
+    # whole mechanism, so the test builds it the way the artifact's baselines
+    # do rather than reaching for a shortcut.
+    n_train = int(0.5 / dt)
+    stride = max(1, n_train // (rank + 2))
+    snapshots = [initial]
+    trained = initial.copy()
+    for k in range(n_train):
+        trained = model.step(trained, dt, t=k * dt)
+        if (k + 1) % stride == 0:
+            snapshots.append(trained.copy())
+    static = PODGalerkin(grid, rank=rank).fit(snapshots)
+
+    nsteps = int(round(final_time / dt))
+
+    def rollout(projector=None, dlra=None):
+        state = dlra.initialize(initial) if dlra is not None else projector(
+            initial.copy()
+        )
+        max_div = grid.max_div_velocity(state)
+        diverged_at = None
+        for step in range(1, nsteps + 1):
+            if dlra is not None:
+                state = dlra.step(state, dt, t=(step - 1) * dt)
+            else:
+                state = model.step(
+                    state, dt, t=(step - 1) * dt, projector=projector
+                )
+            if not np.isfinite(state).all():
+                diverged_at = step
+                break
+            max_div = max(max_div, grid.max_div_velocity(state))
+        return diverged_at, max_div, state
+
+    # The overflow is the *expected* outcome on the static side, so the invalid
+    # and overflow warnings it provokes are the mechanism rather than a problem.
+    # They are contained here instead of being left to train a reader to ignore
+    # warnings, and nothing is suppressed on the side that must stay finite.
+    with np.errstate(invalid="ignore", over="ignore"):
+        static_div, _, _ = rollout(projector=static.project)
+    assert static_div is not None, (
+        f"the propagated fixed basis survived to t={final_time} at rank {rank} "
+        f"on N={N}. The claim under test is that it overflows, so either the "
+        f"projection has changed or this configuration no longer exhibits the "
+        f"contrast -- in which case the test is pinning nothing."
+    )
+
+    evolving = DLRA(
+        new_model(grid, re, amplitude),
+        rank=rank, min_rank=rank, max_rank=rank,   # identical rank, no adaptivity
+        rank_criterion="energy", energy_fraction=0.99,
+        rank_basis="fluctuations",
+        check_every=10**9,        # never adapt: this isolates the basis, not rank
+        adapt_initial=False,
+    )
+    evolving_div, evolving_max_div, _ = rollout(dlra=evolving)
+    assert evolving_div is None, (
+        f"the evolving basis also overflowed, at step {evolving_div} "
+        f"(t={evolving_div * dt:.3f}); the static basis went at step "
+        f"{static_div} (t={static_div * dt:.3f}). The claim is a contrast, and a "
+        f"contrast in which both sides fail is not evidence for the thesis."
+    )
+    assert evolving_max_div < 1e-12, (
+        f"the surviving evolving run reached {evolving_max_div:.3e} in max "
+        f"|div u|, so it survived without keeping the invariant that the "
+        f"structure-preserving split exists to enforce"
+    )
+
+
 def test_every_driver_runs(tmp_path):
     """Each driver must actually execute, at a size that costs nothing.
 
