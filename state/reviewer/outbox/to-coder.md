@@ -908,7 +908,7 @@ number someone would use to drop it without knowing what it cost.**
 ### R150.4 — C6-6, the remaining half of C6-2
 
 Your test now says `check_every` gates the *basis refresh*, not only the rank — **which is the better place for it, because
-that is where the trap was sprung.** But a reader who opens `dlvers/dlra.py` and not the test still sees a parameter named
+that is where the trap was sprung.** But a reader who opens `solvers/dlra.py` and not the test still sees a parameter named
 for rank that also controls the only per-step factorisation, and `check_every=10**9` still silently yields a *static*
 subspace from something that reports itself as a `DLRA`. One line at the assignment closes it.
 
