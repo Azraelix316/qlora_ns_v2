@@ -19,7 +19,7 @@ describing a paper we are no longer writing.**
 | **W4** | **§3 method + invariants** | The credibility. Both invariants as equations, then the verification. **For the energy invariant use the FULL-PDE key, not the one named `forcing_aware_invariant`** — they differ by up to `663×` and the wrong one reports a 31% violation that does not exist. | `\ | ∇·u\ | ≤ 1.1e-13`; balance `dE/dt + nu‖ω‖² − ⟨ψ,ζ⟩ = 0`, advection input vanishing to roundoff, *not assumed away*; Taylor–Green `2.8e-14` / `2.3e-14` over 200 steps; balance residual `3.2e-4` | **D2**, **D8** |
 | **W5** | **§4 protocol + table 1** | The spine. The **five** things a reported horizon must state, the four baseline bugs, and the fix. | five = window · refit interval · offset · in-sample check · grid + largest rank tested; correcting the baseline moved `t*` **down `1.6–2.8×`** and cost 3 of 6 ranks their crossover | **D4**, **D6**, **D7**, **D9**, **D10** |
 | **W6** | **§5 stability** | The thesis, as a measurement. | fixed basis overflows at `r=32, 42` (`t = 5.513, 6.96, 5.7425, 7.1715`); SP-DLRA at the same ranks: `\ | ∇·u\ | ≤ 1.1e-13`, traj error `< 1.1` | **D1** |
-| **W7** | **§6 results** | The horizon, the mechanism, the costs. **This section has no numbers in it yet — everything below is new text.** | `t*` = `0.649` (`r=16`), `1.482` (`r=32`); window `0.15–0.63%`; Re `2.8%` / `8.6%`; **the static baseline saturates**; cost `2.08–2.71×` slower; memory `+2.24` (N=64) / `+4.27` MiB (N=128) **more**. **GRID (`N=128`, new): `t*` = `0.939` (`r=16`), `2.433` (`r=32`) — `1.4456×` / `1.6424×`, so `t*` is NOT grid-convergent. The never-yields rank coincides with the grid's largest alias-free rank: 43 at `N=64`, 85 at `N=128`.** | **D5**, **D3**, **D18** |
+| **W7** | **§6 results — the whole section, prose only** | **7 blocks supplied: D18c**, 1,321 words, every number a registry row. **§6 is where the contribution is and it has no numbers in it. Paste per subsection; do NOT replace the section — its labels are referenced 26 times from elsewhere.** Also in D18c: the figure mapping, and one real gap (no Taylor--Green figure exists). | `WRITER_ORDER.md` **D18c** |
 | **W8** | **§7 discussion** | The honest gaps — **and one former gap is now a result.** | 2nd order conditional on rank; rank criterion verified only to `T=0.1`; grid: DLRA **improves `≈2.18×`**, static rank-16 **degrades `2.5–1464×`**. **The never-yields rank is no longer a gap: it is located at each grid's dealiasing ceiling — 43 at `N=64`, 85 at `N=128` — which is a *representation* limit and the strongest statement of the saturation mechanism. Do NOT write "bracketed between 32 and 43"; that is withdrawn (D74).** | **D1**, **D18** |
 | **W9** | **§8 conclusion** | Short. Do not introduce anything not already above. | — | — |
 
@@ -700,3 +700,177 @@ converges while the static baseline degrades.
   `state/coder/results/crossover_N128.json`, and the checker now reports `14/18 verified, 4 failed` with
   `artifact missing`. I have asked the coder to land it. **The numbers above are read out of the finished artifact, not
   from a log — but if the artifact does not land, these numbers are not in the repository and should not be printed.**
+
+---
+
+## D18c — **§6 RESULTS, SUPPLIED SUBSECTION BY SUBSECTION SO THE 26 EXISTING CROSS-REFERENCES SURVIVE — PLUS THE FIGURE MAPPING, WHICH REVEALS ONE REAL CONTENT GAP**
+
+**Paste each block into the matching existing subsection. Do not replace the section wholesale, and do not touch its
+`\subsection` or `\label` lines** — they are not repeated here for that reason. R130's first attempt at this was a single
+replacement `\section`, and it was **wrong**: `06_results.tex`'s labels are referenced **26 times from other sections**
+(`sec:results` ×10, `sec:res-error` ×5, `sec:res-fidelity` ×5, `sec:res-pod` ×3, `sec:res-cost` ×2, `sec:res-tg` ×1), so a
+replacement would have broken 26 cross-references in a paper **nobody can compile** to find out.
+
+**There are no `\cite`s in any block. The only `\ref` is `\ref{sec:setup}`, which resolves** (`05_experimental_setup.tex:4`
+defines it). Nothing else here can fail to compile.
+
+### The figure mapping — read this first, it is a real finding
+
+Your six figure slots and the eight figures that exist do not line up, and one slot has no figure at all:
+
+| your label | your file | what exists on `main` |
+|---|---|---|
+| `fig:tg` | `fig_tg_ke_rank` | **NOTHING — no Taylor--Green figure has ever been made** (the data, `taylor_green.json`, exists) |
+| `fig:rank` | `fig_rank_vs_time` | `fig_window_rank` |
+| `fig:svd` | `fig_sv_decay` | `fig_spectra_ek` **or** `fig_spectrum` — your choice, they show different things |
+| `fig:error` | `fig_error_vs_ref` | `fig_crossover` |
+| `fig:cost` | `fig_cost` | `fig_cost` — the only one of your six names that is real |
+| `fig:kestats` | `fig_ke_spectrum` | `fig_divergence`, **with the window warning below** |
+| *(no slot)* | — | **`fig_div_free` has no home**, and it is the best figure in the project |
+
+**So the decision from R129 is sharper than I put it: not "five new figures or repoint eight", but six slots, five invented
+names, one real name, and one genuine content gap — nobody has made a Taylor--Green figure.** `sec:res-div` has no figure at
+all, only `tab:div`, which is where `fig_div_free` belongs: it is the figure I have checked most carefully and it shows
+exactly the contrast the I1 subsection is about.
+
+**Two warnings before you wire anything.** `fig_divergence` shows `t ≤ 0.1` while the crossover is at `t* = 0.649`/`1.482`,
+and in that window the static baseline looks like the *winner* — if you use it for `fig:kestats`, label the window on the
+figure. And **most PNGs in `experiments/figures/` are stale** relative to their PDFs; use the PDFs, which is what LaTeX
+wants anyway.
+
+### 1. into `\label{sec:res-tg}` — Taylor--Green
+
+```latex
+A manufactured-solution verification. The numerical rank required to hold the
+solution to machine precision over the integrated horizon is one, so this case
+establishes that the discretisation and the exponential flow are exact. It does not
+discriminate between methods, because a rank-one subspace represents this solution
+exactly and so cannot separate a structure-preserving split from a plain one. We
+report it as a correctness check on the solver and not as evidence for the method's
+advantage.
+```
+
+### 2. into `\label{sec:res-rank}` — rank and singular-value dynamics
+
+```latex
+The subspace must evolve, and the evidence is that a propagated one fails. Our runs
+fix the rank and rebuild the factors at every step; the quantities reported are the
+rank required to represent the state and the decay of the singular-value spectrum
+that makes a small rank sufficient. Over the horizons we integrate, the rank
+criterion our solver uses grows from one to sixteen over the first eight time units,
+which is why the evidence for adaptive rank in this project is bounded to that
+horizon and why we claim nothing about rank behaviour beyond it. The amplitude rule
+saturates against the grid rather than against the dynamics from $t=2$ onward, so
+its rank trace is the grid's and not the dynamics'.
+```
+
+### 3. into `\label{sec:res-error}` — accuracy, the horizon, and the mechanism
+
+```latex
+Against an equal-rank static subspace, the reduced integrator is the more accurate
+method until a horizon $t^\ast$, and the static baseline is the more accurate method
+afterwards. The crossing is a single downward crossing of the error ratio in every
+case we report, and it is bracketed between evaluation horizons rather than
+interpolated. At $N=64$ and $\mathrm{Re}=5000$ we measure $t^\ast = 0.649$ at $r=16$
+and $t^\ast = 1.482$ at $r=32$; at $r=43$ there is no crossing at all, and the static
+baseline never overtakes the reduced integrator. At $\mathrm{Re}=1000$ on the same
+grid the horizons are $0.667$ and $1.609$, that is $2.7\%$ and $8.6\%$ above the
+$\mathrm{Re}=5000$ values, so the horizon is a property of the rank and of how the
+subspace is built rather than of the Reynolds number. Sweeping the trailing-window
+length over $W \in \{0.25, 0.5, 1.0\}$ moves the horizon by between $0.15\%$ and
+$0.63\%$ depending on rank and Reynolds number, over the eight rank--window--Reynolds
+combinations we measure. Both of these invariances are measured at $N=64$: the $N=128$
+surface was run at $W=0.25$ alone and at $\mathrm{Re}=5000$ alone, so neither is
+corroborated at the second grid.
+
+Refining the grid is the one thing that does move the horizon. At $N=128$ and
+$\mathrm{Re}=5000$ we measure $t^\ast = 0.939$ at $r=16$, $2.433$ at $r=32$ and
+$2.683$ at $r=43$, factors of $1.45$ and $1.64$ above the $N=64$ values at the
+corresponding ranks. The horizon is therefore not grid-convergent over this range and
+we do not extrapolate it. What does carry across the refinement is the rank at which
+the crossing stops existing: $43$ at $N=64$ and $85$ at $N=128$. Each coincides with
+the largest rank that grid retains without aliasing at our cutoff, so the rank at
+which a propagated static subspace stops improving is set by the grid before it is set
+by the dynamics. These are the largest ranks we ran at each grid, not limits, and we
+report them as such.
+
+The horizon is not a claim about rank in general, and the clearest evidence is that
+extra rank does not help the static baseline at all. At $N=64$ the static baseline's
+error at $r=16$, $r=32$ and $r=43$ is identical at every horizon we evaluate and at
+both Reynolds numbers, to the precision we report; against rank $16$ the ranks $2$,
+$4$ and $8$ differ by up to $85\%$, and the difference grows with the horizon. The
+static subspace stops improving from rank $16$ onward, so the reduced integrator's
+residual advantage at long horizons is bought by re-fitting rather than by dimension.
+This is an $N=64$ result: the $N=128$ surface was not run at ranks $2$, $4$ or $8$,
+so the contrast cannot be, and is not, claimed at the second grid.
+```
+
+### 4. into `\label{sec:res-div}` — divergence-free invariant
+
+```latex
+Divergence-freeness holds identically and by construction rather than to a
+tolerance. The velocity is recovered from a stream function, so the discrete
+divergence vanishes algebraically at every step, for every rank and every Reynolds
+number; this is a property of the formulation and not of the numerics. Over the
+$124$ measurements we pool from our committed runs, the largest divergence residual
+of any surviving method is $1.1\times 10^{-13}$ and the full-grid solver's own is
+$7.6\times 10^{-14}$, both at the level of the $10^{-14}$ roundoff floor. The spread
+across the pool runs from $1.6\times 10^{-14}$ to $2.2\times 10^{-13}$, and we report
+that band rather than a single bound, because the baselines that do not diverge are
+not at the floor: one reaches $1.0\times 10^{-11}$, three orders above it. We make no
+universal bound of the form ``at most $2.2\times 10^{-13}$'', because four committed
+baselines reach $4.6\times 10^{64}$ to $7.1\times 10^{278}$, and one non-diverging
+baseline reaches $10^{-11}$; the bound is a property of a population, and the population
+is the one we name here.
+```
+
+### 5. into `\label{sec:res-pod}` — rank economy against static POD
+
+```latex
+The static baseline is not a strawman: it is the oracle form of a fixed subspace,
+re-fitted on a trailing window of the reference trajectory with the refit schedule
+offset from the evaluation grid, so that no basis ever contains the time at which it
+is scored. It is the strongest static comparator we can construct, and it still stops
+improving from rank $16$ onward while the reduced integrator's error keeps falling. Its
+accuracy is a function of the window length, the refit interval and the offset, all of
+which we record; three successive corrections to this baseline moved the advantage
+horizon by factors of two to four, so a $t^\ast$ quoted without them is not
+reproducible, and we quote the schedule alongside every horizon.
+```
+
+### 6. into `\label{sec:res-cost}` — cost
+
+```latex
+We measure the per-step cost of the reduced integrator against the pinned-thread
+full-grid reference under the same accounting in both cases, discarding a warm-up,
+repeating each configuration, and taking medians. Across the six grid--rank
+configurations we time, the ratio lies between $2.24$ and $2.74$. The measurement is
+not sharp enough to justify more than one significant figure, and we say so rather
+than quoting the endpoints as if it did: per-configuration timing spreads are $4\%$
+to $26\%$, and the reference timing itself varies by $16\%$ to $32\%$ across its own
+repeats. Discounting every configuration by both of those spreads gives a pessimistic
+lower bound of $1.4\times$ the full-grid step. The conclusion does not depend on the
+precision: even at the most pessimistic end of the measurement's own noise the reduced
+integrator is at least $1.4\times$ the cost of the full-grid step in every
+configuration we measured. We identify no per-step speedup, and a full-grid solver on
+this problem is never comparable to, or faster than, the reduced one. The
+linear-algebra share of the step is smaller for the reduced integrator than for the
+reference, which is where a benefit would have had to come from, and it does not.
+```
+
+### 7. into `\label{sec:res-fidelity}` — the energy invariant
+
+```latex
+Under forcing, kinetic energy is not monotone, so the second invariant is a balance
+and not a decay law. Measured as the energy balance residual of the projected discrete
+dynamics, all three solver families hold it to between $1.3\times 10^{-4}$ and
+$4.9\times 10^{-4}$ over the $200$ steps we integrate, with the static projection
+worst and only at the finest grid. We report this quantity and not the balance of the
+full partial differential equation, because for a projected method the two differ by
+the size of the projection's own energy increment: the two keys in our artifacts
+differ by up to a factor of several hundred across configurations, and quoting one for
+the other would misstate the violation by orders of magnitude. We integrate $200$
+steps, so every statement here concerns horizons of order one; we claim no long-time
+behaviour, and the only evidence we hold at longer horizons is a single run we do not
+rely on.
+```

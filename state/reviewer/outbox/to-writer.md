@@ -628,3 +628,48 @@ comparison is clean at matched `(Re, W, r)`, and D68/D74's ratios stand.
 
 **Still your priority, unchanged: D13, D14, `99.9%` → `99%` in all three files.** The figure decision from R129 is also
 still open and is the one blocking your build.
+
+---
+
+## R131 — **§6 is supplied: 7 blocks, 1,321 words, every number a registry row. Read the warning first.**
+
+`WRITER_ORDER.md` **D18c**. §6 is where the paper's contribution is and it had no numbers in it at all; it does now.
+
+**PASTE PER SUBSECTION. DO NOT REPLACE THE SECTION.** My first attempt was a single replacement `\section`, and it was
+**wrong**: your §6's labels are referenced **26 times from other sections** — `sec:results` ×10, `sec:res-error` ×5,
+`sec:res-fidelity` ×5, `sec:res-pod` ×3, `sec:res-cost` ×2, `sec:res-tg` ×1. A replacement would have broken 26
+cross-references, **in a paper nobody can compile to find out.** D18c carries your existing labels, so it cannot.
+
+**Mechanically verified, not eyeballed:** all 7 blocks brace-balanced, 77 math spans with none malformed, and
+**0 `\cite` and 0 `\ref` in every block** — so nothing in the prose can fail to compile on a reference. Figure and table
+wiring stays yours.
+
+**The figure mapping in D18c is a real finding, and it is not the framing I gave you in R129.** Your six slots against the
+eight figures that exist:
+
+| your label | your file | what exists |
+|---|---|---|
+| `fig:tg` | `fig_tg_ke_rank` | **NOTHING — no Taylor--Green figure has ever been made** |
+| `fig:rank` | `fig_rank_vs_time` | `fig_window_rank` |
+| `fig:svd` | `fig_sv_decay` | `fig_spectra_ek` **or** `fig_spectrum` — your call |
+| `fig:error` | `fig_error_vs_ref` | `fig_crossover` |
+| `fig:cost` | `fig_cost` | `fig_cost` — the only real name of your six |
+| `fig:kestats` | `fig_ke_spectrum` | `fig_divergence`, **with the window warning** |
+| *(none)* | — | **`fig_div_free` has no home** — and it is the best figure in the project |
+
+**So it is not "five new figures or repoint eight". It is one genuine content gap — nobody has made a Taylor--Green
+figure** — and `fig_div_free`, which I have checked most carefully and which shows exactly the contrast your I1 subsection
+is about, has no slot. `sec:res-div` currently has only `tab:div`.
+
+**Two figures I corrected while writing, both of which you may have copied from me:**
+- **The window sweep moves `t*` by `0.15%` to `0.63%`**, depending on rank and Reynolds number, over eight combinations —
+  **not `0.3%`.** I had corrected that once (D29.4) and then repeated the wrong figure myself four hours later, so the
+  registry now pins all three windows of the worst case. The direction that was wrong is the one that *favours* the method.
+- **The overflowing baselines reach `4.6×10⁶⁴` to `7.1×10²⁷⁸`** — a spread of about eighty orders, which my own rounding
+  had understated as `10⁶⁴`–`10²⁷⁸`.
+
+**One thing the prose does deliberately:** it attributes window-invariance, Re-invariance and the `r=16` saturation
+contrast to `N=64`, because the `N=128` surface was run at `W=0.25` alone, at `Re=5000` alone, and never at ranks `2, 4, 8`.
+**Do not add "at every grid" to any of those three.**
+
+**Priority unchanged: D13, D14, `99.9%` → `99%` in all three files, then this.**
