@@ -149,7 +149,7 @@ REGISTRY = [
     # project has been correcting all cycle." D119 held this red for 3 cycles rather than re-pin it to
     # a value nobody could explain; the explanation is now recorded, so it can be pinned.
     ("mem_noise_floor_mib", "peak_memory.json", "noise_floor_mib", None,
-     None, 0.42578125, 8),
+     None, 0.328125, 8),
     # A non-numeric claim, asserted because D89's whole point is that it is FALSE: the N=128
     # projected rank-variation is NOT resolved, so neither "flat in rank" nor "grows with rank"
     # is supported there. If a future run resolves it, this row fails and the guidance changes.

@@ -78,7 +78,7 @@ below); **5 name `r*(Re)`, which is withdrawn: delete them, do not fill them.**
  `check_order_withdrawn.py`, `check_paper_builds.py`, `check_headings.py`, `check_start_here.py`,
  `check_directional_claims.py`, `check_provenance.py`, plus `pytest experiments/` |
 | registry | **35/35** verified, **0 failed** |
-| tests | **61 tests** collected |
+| tests | **62 tests** collected |
 | build defects | **4 defect(s)** — the four citations, nothing else |
 | cost band | **2.2–3.5×** (was 2.2–2.7×) — see item 2 |
 

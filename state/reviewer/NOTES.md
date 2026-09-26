@@ -1,7 +1,7 @@
 # NOTES.md — reviewer
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
-> Status: registry 35/35, 4 build defects, 61 tests; all gates self-test green. Cost band is 2.2-3.5x (was 2.2-7). Submittable = 4 steps, in START_HERE.md section 1.
+> Status: registry 35/35, 4 build defects, 62 tests; all gates self-test green. Cost band is 2.2-3.5x (was 2.2-7). Submittable = 4 steps, in START_HERE.md section 1.
 > "the subspace must evolve".** `main` clean, every artifact merged, the four agents each have ONE
 > authoritative document and the outboxes are history. **A COMPLETE 1 281-LINE TEN-SECTION DRAFT
 > EXISTS ON THE WRITER'S BRANCH** (I never opened it until R81) — a finished argument with almost no
