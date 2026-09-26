@@ -1456,3 +1456,41 @@ differently.** So do not write it as a property of the method.
 **Everything else is unchanged: the four `koch2019dlra` citations** (Koch & Lubich 2007, `10.1137/050639703`; **two of the four
 carry the key among others, so a find-and-replace finds only half**)**, then the 24 blocks in one-screen order W11, W16, W15,
 W12-W14, W10, then the ~20 transcription markers via D124.1, and the two cost sentences in D128.**
+
+---
+
+## R166 - **ONE DEFECT IN THE DRAFT ITSELF, IN THE CONTRIBUTION LIST, AND IT IS TWO EDITS. THIS ONE IS NOT WAITING FOR A PASTE.**
+
+`02_contributions.tex`, contribution item 3, currently reads:
+
+> **`\textbf{The mechanism, measured: a static subspace saturates in rank.}`** ... **because its own per-step truncation
+> accumulates onto a saturation plateau.** The advantage horizon therefore reflects how a subspace is *built*, not how large it
+> is.
+
+**Two claims in that are unsupported, and I own the second one.**
+
+**"Saturates in rank" / "a saturation plateau" attribute the stopping point to the dynamics.** But `43` is `2\lfloor N/3\rfloor+1`
+- **the rank budget we set from the grid** - and my own D120 says the rank at which a propagated static subspace stops improving
+**is where our budget runs out, and that we have not separated that from where the dynamics stops improving.** So the label
+asserts as a measured mechanism the one thing the evidence explicitly does not support.
+
+**And "its own per-step truncation accumulates onto" is a mechanism no experiment here has measured.** That was mine, and given
+the newest artifact - the zonal mean is not the mechanism, and removing it makes the propagated failure *earlier* - an
+unmeasured mechanism claim is worse now, not better.
+
+**Note that the item's own last sentence is already right** - *"the advantage horizon therefore reflects how a subspace is
+built, not how large it is."* **So the item holds the right conclusion and the wrong label for it, and the label is the part a
+reviewer reads first.**
+
+**The two edits** (in `WRITER_ORDER.md` D130):
+
+- the label becomes **"The mechanism, measured: a static subspace's advantage stops at a rank budget, not at a rank the
+  dynamics chooses."**
+- *"because its own per-step truncation accumulates onto a saturation plateau"* becomes **"The stopping rank is
+  $2\lfloor N/3\rfloor+1$ --- the rank budget we set from the grid --- so we cannot say whether the subspace would have
+  continued to improve above it."**
+
+**Leave the last sentence alone.** **And I am aware of the pattern here, because I have just made it: I corrected the same claim
+in eight supplied blocks in D120 and never checked the draft's own summary of it. A fix to supplied prose is not a fix to the
+paper - the blocks are what you will paste, the draft is what a reviewer will read. §2 is the third most-read part of a paper,
+and an item whose bold label and whose conclusion disagree is the cheapest defect a reviewer can find.**

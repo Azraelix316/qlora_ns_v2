@@ -8789,3 +8789,58 @@ BEHAVE DIFFERENTLY.** THE PAPER MUST NOT STATE IT AS A PROPERTY OF SP-DLRA.
 **D129.7 - Unchanged.** Everything in D35.6 through D128.8 stands, **except that the zonal mean is not the general mechanism of
 propagated-basis overflow, the paper needs no correction, and the re-derivation is both the cost and the mechanism.**
 
+---
+
+## D130 - **THE CONTRIBUTION LIST SAYS "THE MECHANISM, MEASURED: A STATIC SUBSPACE SATURATES IN RANK", AND D120 ESTABLISHED THAT THE RANK IS THE **BUDGET** `2*floor(N/3)+1`, NOT A DYNAMIC SATURATION. I FIXED EIGHT PASTE-READY BLOCKS IN D120 AND NEVER CHECKED THE DRAFT'S OWN SUMMARY OF THE SAME CLAIM - AND §2 IS THE CONTRIBUTION LIST.** (2026-09-26)
+
+> **OPERATIVE (R166). `02_contributions.tex` ITEM 3 IS **WRONG AS WRITTEN** AND MUST BE REWORDED. THE ITEM'S OWN FINAL
+> SENTENCE IS ALREADY CORRECT, SO THE FIX IS TO MAKE THE LABEL MATCH IT.**
+
+**D130.1 - THE DEFECT, VERBATIM. `02_contributions.tex` ITEM 3, IN FULL:**
+
+> **`\textbf{The mechanism, measured: a static subspace saturates in rank.}`** From rank $16$ a propagated static subspace
+> stops improving altogether: ranks $16$, $32$ and $43$ agree exactly at every horizon and both Reynolds numbers, while ranks
+> $2$, $4$ and $8$ differ from them by up to $85\%$, **because its own per-step truncation accumulates onto a saturation
+> plateau.** The advantage horizon therefore reflects how a subspace is \emph{built}, not how large it is.
+
+**D130.2 - AND TWO CLAIMS IN IT ARE UNSUPPORTED. (a) "SATURATES IN RANK" AND "A SATURATION PLATEAU" ATTRIBUTE THE STOPPING POINT
+TO THE DYNAMICS. D120 ESTABLISHED THAT `43` IS `2*floor(N/3)+1` - THE RANK **BUDGET** WE SET FROM THE GRID - AND ITS OWN WORDING
+WAS: *"THE RANK AT WHICH A PROPAGATED STATIC SUBSPACE STOPS IMPROVING IS WHERE **OUR BUDGET RUNS OUT**, AND WE HAVE NOT
+SEPARATED THAT FROM WHERE THE DYNAMICS STOPS IMPROVING."* (b) "ITS OWN PER-STEP TRUNCATION ACCUMULATES ONTO" IS A **MECHANISM
+THAT NO EXPERIMENT IN THIS PROJECT MEASURED** - AND D129's ARTIFACT SAYS OF THE RELATED QUESTION THAT THE ZONAL MEAN IS NOT THE
+MECHANISM AND THAT **REMOVING IT MAKES THE FAILURE EARLIER**, WHICH IS THE SORT OF RESULT THAT MAKES AN UNMEASURED MECHANISM
+STATEMENT MORE, NOT LESS, dangerous.
+
+**D130.3 - AND THE ITEM'S OWN LAST SENTENCE IS **ALREADY CORRECT** - *"THE ADVANTAGE HORIZON THEREFORE REFLECTS HOW A SUBSPACE IS
+BUILT, NOT HOW LARGE IT IS"* - WHICH IS D129's FINDING, IN THE PAPER, ALREADY. **SO THE ITEM CONTAINS THE RIGHT CONCLUSION AND
+THE WRONG LABEL FOR IT, AND THE LABEL IS THE PART A REVIEWER READS FIRST AND THE PART THAT SURVIVES BEING SKIMMED.**
+
+**D130.4 - WHY I MISSED IT, AND THE CLASS IS D115's. IN D120 I FOUND EIGHT PASTE-READY BLOCKS ASSERTING THE ALIAS-FREE-RANK
+CLAIM AND CORRECTED ALL EIGHT. I NEVER CHECKED WHETHER THE DRAFT'S **OWN** TEXT CARRIES IT.** **A FIX TO SUPPLIED PROSE IS NOT A
+FIX TO THE PAPER** - the supplied blocks are what the writer *will* paste; the draft is what a reviewer *will* read, and until the
+paste happens the draft is the paper. **AND §2 IS THE CONTRIBUTION LIST: THE THIRD MOST-READ PART OF A PAPER AFTER THE ABSTRACT
+AND THE INTRODUCTION, AND THE PART THAT TELLS A REVIEWER WHAT THE CONTRIBUTIONS ARE BEFORE THEY READ ANYTHING ELSE.**
+
+**AND THE MEASUREMENT SAYS THIS IS NOT AN ISOLATED SLIP: ACROSS ALL ELEVEN `.tex` FILES, "SATURAT" APPEARS IN EXACTLY ONE PLACE
+- `02_contributions.tex`, LINES 26 AND 30, WHICH ARE THIS ITEM. SO THE DRAFT'S ONLY TWO USES OF THE WORD ARE BOTH WRONG.**
+
+**D130.5 - THE FIX, AND IT IS THE ITEM WITH TWO SUBSTITUTIONS RATHER THAN A REWRITE:**
+
+> **`\textbf{The mechanism, measured: a static subspace's advantage stops at a rank budget, not at a rank the dynamics
+> chooses.}`** From rank $16$ a propagated static subspace stops improving altogether: ranks $16$, $32$ and $43$ agree exactly
+> at every horizon and both Reynolds numbers, while ranks $2$, $4$ and $8$ differ from them by up to $85\%$. **The stopping
+> rank is $2\lfloor N/3\rfloor+1$ - the rank budget we set from the grid - so we cannot say whether the subspace would have
+> continued to improve above it.** The advantage horizon therefore reflects how a subspace is \emph{built}, not how large it is.
+
+**TWO EDITS: THE LABEL, AND THE SENTENCE THAT INVENTED A MECHANISM. THE FINAL SENTENCE IS UNCHANGED BECAUSE IT IS ALREADY
+RIGHT.**
+
+**D130.6 - AND THE CHECK THAT SHOULD HAVE CAUGHT IT, WHICH IS ONE LINE, AND IT IS THE GENERAL FORM OF D115/D120. **FOR EVERY
+CONTRIBUTION ITEM, THE LABEL AND THE LAST SENTENCE MUST AGREE.**** A contribution list is a table of contents for the argument,
+and an item whose bold label and whose conclusion say different things is the cheapest possible defect for a reviewer to find
+and the most damaging one for the paper's credibility - because it reads as carelessness in the part that was supposed to be
+the most carefully written.
+
+**D130.7 - Unchanged.** Everything in D35.6 through D129.7 stands, **except that `02_contributions.tex` item 3 asserts a
+dynamic saturation the evidence does not support, and its bold label must be reworded.**
+

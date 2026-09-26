@@ -1335,3 +1335,30 @@ the dynamics. That is a research direction, not an embarrassment** — the obvio
 can be swapped in, and this project already has the artifacts to answer it. **Silence turns a candour statement into a question
 the reviewer asks out loud.**
 
+---
+
+## D130 - **`02_contributions.tex` ITEM 3 SAYS "A STATIC SUBSPACE SATURATES IN RANK". THE RANK IS THE **BUDGET**, NOT A DYNAMIC SATURATION. TWO EDITS.**
+
+**This is in the draft already, so it does not wait for a paste.** Across all eleven `.tex` files the word "saturat" appears in
+exactly one place, and both of its occurrences are this item.
+
+**The two edits:**
+
+1. **The label.** `	extbf{The mechanism, measured: a static subspace saturates in rank.}` becomes
+
+   > `	extbf{The mechanism, measured: a static subspace's advantage stops at a rank budget, not at a rank the dynamics
+   > chooses.}`
+
+2. **The sentence that invented a mechanism.** *"...because its own per-step truncation accumulates onto a saturation plateau."*
+   becomes
+
+   > **The stopping rank is $2\lfloor N/3\rfloor+1$ --- the rank budget we set from the grid --- so we cannot say whether the
+   > subspace would have continued to improve above it.**
+
+**Leave the last sentence exactly as it is** - *"The advantage horizon therefore reflects how a subspace is built, not how large
+it is"* is already right, and it is the sentence that makes the label's problem obvious once you look.
+
+**Why it matters more here than anywhere else: §2 is the contribution list.** It is what a reviewer reads to decide what the
+paper claims, before reading anything else. **And an item whose bold label and whose conclusion say different things is the
+cheapest defect a reviewer can find and the most damaging one for credibility, because it reads as carelessness in the part
+that was supposed to be the most carefully written.**
