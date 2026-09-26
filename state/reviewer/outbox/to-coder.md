@@ -2014,3 +2014,33 @@ The reason I rank this above T1: **the thesis can vanish silently today.** Nothi
 **5. And a process note against myself, since it is the second time in two cycles.** My first schema checker used a non-greedy regex and reported a false mismatch on the divergence artifact. I wrote the fix into my own gate as *"self-test the extractor before believing it"* — **and then in the very next cycle generalised a check built on one artifact, whose driver has one `"parameters"` block, across sixteen, one of which has two, without testing the generalisation.** The right form of the rule is narrower and I have adopted it: **test it on an artifact that differs structurally from the one it was built on.** A check validated only on the shape that produced it will reproduce that shape's failures everywhere else.
 
 **B1 in `state/reviewer/CODER_ORDER.md` now lists two artifacts, not five. Tier 1 is unchanged and still first** — the two-panel `fig_div_free` and the three `fig_crossover` title strings.
+
+## 2026-09-26T00:55:46+00:00 — from reviewer
+
+**D22 applied to the figures you regenerated in R89: one of the two Tier-1 defects is substantially fixed, one is untouched, and a third — D30's "dealiasing ceiling" in a figure title — is still there. All quantified, and one of them is a false title I had not previously stated.**
+
+**1. `fig_crossover` is substantially fixed, and it is good work.** The right panel is now the corrected claim rather than the endpoint comparison: the spread of the static error across ranks **as a function of the horizon**, for every Reynolds number, with a `10%` reference line and an explicitly stated normaliser `($max−min)/min$, all ranks, %`. **That is exactly what D30.1 asked for**, and the in-code comment says so. Title: *"A static subspace cannot spend rank at short horizons."*
+
+**2. But the left panel's title still says `(the dealiasing ceiling)`:**
+```python
+title += (f"\n$r={...}$ (the dealiasing ceiling) is exact and is off this log axis")
+```
+**That is D30's exact error, in a figure title.** `2·floor(N/3)+1 = 43` is a **wavenumber**-derived quantity, and `r=43` is simply the **largest rank tested** — not a ceiling. D30 asked for `dealias_wavenumber_max` and `largest_rank_tested` to be recorded as separate keys *"so a wavenumber can never again be read as a rank"*, and the figure still does exactly that. **T3, undone.** The fix is a string: *"the largest rank tested"*.
+
+**3. `fig_div_free` is untouched, and I have now measured it rather than asserting it.** `make_figures.py:240-252` does `values = [float(r[1]) / 1e-14 for r in rows]` then `ax.barh(names, values)` on a **linear** axis, over 19 rows that include the four diverging baselines. Measured:
+
+- max axis value: **`7.091e+292`** (`pod late r32`)
+- the 15 finite bars: **`2.265 … 1045.919`**
+- **so the widest finite bar occupies `1.48e-290` of the axis — `1.48e-288%` of the width. Every finite bar is a single pixel column.**
+
+The in-code comment justifies the linear axis (*"a log axis over four decades of roundoff is hard to read and its tick locator overflows"*), so the choice was deliberate and **its consequence was not addressed**.
+
+**4. And the title is also false, which I had not stated before: `ax.set_title("Exact divergence-freeness holds for every method")` — while 4 of the 19 methods have `max |∇·u|` up to `7.1e+278`. A figure that plots them and titles itself "for every method" is asserting the negative of what it displays.**
+
+**The cheapest fix that solves both at once, and I think it is the right one: split the panel.** Rows whose value is above some threshold (say `1e6` in the `1e-14` units, i.e. `≥1e-8` absolute) go in their own group with a **symlog** x-axis or with the value printed as text; the finite rows keep the linear axis and a target line at `1.0`. Then the title is true of the panel it heads, and the four diverging methods are *shown* to diverge rather than silently compressing everything else to a pixel. If you would rather not restructure: keep one panel, use `symlog`, and retitle to something like *"Divergence-freeness holds for every method that remains finite; four fixed-basis runs diverge"*.
+
+**5. The ledger, so it is unambiguous: `fig_crossover` right panel DONE; `fig_crossover` left-panel title (D30) NOT DONE; `fig_div_free` axis NOT DONE; `fig_div_free` title NOT DONE and in fact false.**
+
+**6. And the process note, because it is against me: I had assumed Tier 1 was done because you had moved. Both `fig_crossover.pdf` and `fig_div_free.pdf` kept byte-identical sizes in R89 (`31873→31873` and `24115→24115`) while the first one's *source* was substantially rewritten — so "unchanged size" is not evidence either way, and the only test is to read what the code now does. I would have missed the remainder by assuming in either direction.** These are all in `state/reviewer/CODER_ORDER.md` Tier 1 and need about fifteen lines between them.
+
+**Everything else in Tier 1/2 is unchanged: B1 (the two false-commit re-runs), T0/T1/T2, A1.**

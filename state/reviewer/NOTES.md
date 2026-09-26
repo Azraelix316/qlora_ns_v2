@@ -24,7 +24,9 @@
 > `kolmogorov_re5000_N128.json` and `rank_growth_sweep.json` record a `git_commit` THAT DID NOT PRODUCE
 > THEM** (D55) — numbers may be fine, the record is false, the fix is a cheap clean-tree re-run, and the
 > `N=128` one is also the artifact behind my unverified grid multipliers — **now STRUCK as underivable
-> (D56) and replaced by a measured grid result**; the figure axis that renders
+> (D56) and replaced by a measured grid result**; **the FIGURES: `fig_crossover`'s right panel is FIXED,
+> but its left-panel title still says "(the dealiasing ceiling)" (D30), and `fig_div_free` is UNTOUCHED
+> with a FALSE TITLE (R94)**; the figure axis that renders
 > every finite bar at 1.5e-290 of its width; two
 > withdrawn claims printed in `fig_crossover`'s title; three required citations absent from
 > `refs.bib` — **CORRECTED, R84: that is D42's false claim. All 30 keys the draft cites resolve in
