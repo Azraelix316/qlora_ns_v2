@@ -885,10 +885,10 @@
       "status": "projected_discrete_balance_with_projection_work"
     },
     "initial_energy": 22.20670331293339,
-    "initialization_seconds": 0.0035810971166938543,
+    "initialization_seconds": 0.07249011495150626,
     "linear_algebra_calls": 841,
-    "linear_algebra_seconds": 2.85588480415754,
-    "linear_algebra_seconds_per_step": 0.0142794240207877,
+    "linear_algebra_seconds": 3.668047047685832,
+    "linear_algebra_seconds_per_step": 0.018340235238429158,
     "max_abs_divergence": 2.5757174171303632e-14,
     "max_cfl": 0.014747385514922155,
     "max_energy_increase": 0.0013958426564677495,
@@ -897,7 +897,7 @@
     "max_relative_l2_vs_full": 9.996097701095017e-05,
     "max_scaled_pde_energy_residual": 0.0004896931406322086,
     "max_scaled_projected_energy_residual": 0.0007903269525705709,
-    "offline_plus_online_seconds": 6.891389647964388,
+    "offline_plus_online_seconds": 5.254302791086957,
     "projection_energy_history": [
       -4.21356602942069e-07,
       -5.108918159635323e-07,
@@ -2056,8 +2056,17 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 6.887808550847694,
-    "wall_seconds_per_step": 0.03443904275423847
+    "wall_seconds": 5.181812676135451,
+    "wall_seconds_per_step": 0.025909063380677253,
+    "zonal_energy_fraction": {
+      "at_final_step": 0.18532581041647067,
+      "at_t0": 0.16207103178372204
+    },
+    "zonal_enstrophy_fraction": {
+      "at_final_step": 0.03856093704169915,
+      "at_t0": 0.03501861052034957
+    },
+    "zonal_fraction_definition": "zonal/total at t=0 and at the final step, from the psi' series"
   },
   "full": {
     "checkpoint_steps": [
@@ -3656,8 +3665,17 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 1.8979089730419219,
-    "wall_seconds_per_step": 0.00948954486520961
+    "wall_seconds": 1.0302224189508706,
+    "wall_seconds_per_step": 0.005151112094754353,
+    "zonal_energy_fraction": {
+      "at_final_step": 0.1853277478104425,
+      "at_t0": 0.16207103178372245
+    },
+    "zonal_enstrophy_fraction": {
+      "at_final_step": 0.038562215833435484,
+      "at_t0": 0.03501861052034979
+    },
+    "zonal_fraction_definition": "zonal/total at t=0 and at the final step, from the psi' series. The fluctuation dominates at these settings (about 5:1 at N=64), so the total KE is NOT zonal-dominated and a figure of the total alone does not show the zonal part at all."
   },
   "grid": {
     "L": 6.283185307179586,
@@ -4172,7 +4190,7 @@
     "final_energy": 22.459561625720433,
     "final_enstrophy": 1316.186277446869,
     "final_relative_l2_vs_full": 1.2107920225370606e-08,
-    "fit_seconds": 0.018947164993733168,
+    "fit_seconds": 0.2052371718455106,
     "fluctuation_energy_history": [
       18.607639994491254,
       18.606139704453653,
@@ -4594,7 +4612,7 @@
     "max_relative_l2_vs_full": 1.2107920225370606e-08,
     "max_scaled_pde_energy_residual": 0.0002795374037463966,
     "max_scaled_projected_energy_residual": 0.16582158132357053,
-    "offline_plus_online_seconds": 2.950046718819067,
+    "offline_plus_online_seconds": 1.6424425358418375,
     "projection_energy_history": [
       -0.00040846635299018885,
       -0.00040840001918240887,
@@ -5753,19 +5771,31 @@
     "stable": true,
     "unstable_reason": [],
     "unstable_step": null,
-    "wall_seconds": 2.9310995538253337,
-    "wall_seconds_per_step": 0.014655497769126669
+    "wall_seconds": 1.437205363996327,
+    "wall_seconds_per_step": 0.0071860268199816345,
+    "zonal_energy_fraction": {
+      "at_final_step": 0.1853277464261573,
+      "at_t0": 0.16207103178372245
+    },
+    "zonal_enstrophy_fraction": {
+      "at_final_step": 0.03856221535983241,
+      "at_t0": 0.03501861052034979
+    },
+    "zonal_fraction_definition": "zonal/total at t=0 and at the final step, from the psi' series. The fluctuation dominates at these settings (about 5:1 at N=64), so the total KE is NOT zonal-dominated and a figure of the total alone does not show the zonal part at all."
   },
   "provenance": {
     "driver": "experiments/run_kolmogorov.py",
     "driver_dirty": false,
     "driver_matches_HEAD": true,
-    "driver_sha256": "61266d45002cad6a781a62a7ac770bb7ecc0e735fefc106cca438b05934e08df",
-    "git_commit": "ff19721ab31edcc374069726f5d0b5b7b24f39d4",
+    "driver_sha256": "b01fd88e4cfd4b31a4ac8aa657836b2b0b82b7687b999e78c63c4e772b438cef",
+    "git_commit": "5d0790158cd65f00284728fdf372cd50796830c8",
     "note": "git_commit is HEAD at launch. driver_matches_HEAD compares the driver file on disk with the one in that commit, and is the check that decides reproducibility; working_tree_dirty is recorded too, but a rewritten result file alone does not invalidate a run.",
     "reproducible": true,
-    "working_tree_diff_sha256": "337080c536db5a194973dd1d48ae2fa9c9731acaec5ea09fda467890c2006688",
-    "working_tree_dirty": true
+    "working_tree_diff_sha256": "0c740a8bc07b94913d337e81aafa60ba852d3360fe05212851a5b35843786ace",
+    "working_tree_dirty": true,
+    "working_tree_dirty_paths": [
+      "state/coder/results/kolmogorov_re100_N64.json"
+    ]
   },
   "reynolds": 1000,
   "viscosity": 0.001

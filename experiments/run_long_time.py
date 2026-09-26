@@ -22,6 +22,7 @@ if str(ROOT) not in sys.path:
 
 from experiments.run_kolmogorov import (
     _energy_residual,
+    _zonal_fraction,
     _stability_assessment,
     _git_commit,
     initial_state_fingerprint,
@@ -30,6 +31,7 @@ from experiments.run_kolmogorov import (
     relative_l2,
 )
 from solvers import DLRA, Grid2D, KolmogorovForcing, StreamFunctionNS
+from solvers.spectral import fluctuations
 
 
 def run_case(
@@ -82,6 +84,14 @@ def run_case(
     dlra_energy = [grid.ke(reduced)]
     full_enstrophy = [grid.enstrophy(full)]
     dlra_enstrophy = [grid.enstrophy(reduced)]
+    # C7-5: this run is the one place a longer-horizon statement could be
+    # checked, and it had no psi' diagnostic at all -- so the zonal share the
+    # paper's mechanism section leans on was measured only at T=0.1.  Tracked
+    # here, from t=0, so the share has a horizon rather than an instant.
+    full_fluctuation_energy = [grid.ke(fluctuations(full))]
+    dlra_fluctuation_energy = [grid.ke(fluctuations(reduced))]
+    full_fluctuation_enstrophy = [grid.enstrophy(fluctuations(full))]
+    dlra_fluctuation_enstrophy = [grid.enstrophy(fluctuations(reduced))]
     full_projection_energy = []
     dlra_projection_energy = []
     full_div = grid.max_div_velocity(full)
@@ -119,6 +129,12 @@ def run_case(
         if not np.isfinite(reduced).all():
             unstable["dlra"] = step
             break
+        full_psi = fluctuations(full)
+        dlra_psi = fluctuations(reduced)
+        full_fluctuation_energy.append(grid.ke(full_psi))
+        dlra_fluctuation_energy.append(grid.ke(dlra_psi))
+        full_fluctuation_enstrophy.append(grid.enstrophy(full_psi))
+        dlra_fluctuation_enstrophy.append(grid.enstrophy(dlra_psi))
         full_energy_now = grid.ke(full)
         dlra_energy_now = grid.ke(reduced)
         full_enstrophy_now = grid.enstrophy(full)
@@ -244,6 +260,20 @@ def run_case(
             "max_abs_divergence": full_div,
             "max_scaled_pde_energy_residual": full_residual,
             "max_scaled_projected_energy_residual": full_residual,
+            "fluctuation_energy_history": full_fluctuation_energy,
+            "fluctuation_enstrophy_history": full_fluctuation_enstrophy,
+            "zonal_energy_fraction": _zonal_fraction(
+                full_energy, full_fluctuation_energy
+            ),
+            "zonal_enstrophy_fraction": _zonal_fraction(
+                full_enstrophy, full_fluctuation_enstrophy
+            ),
+            "zonal_fraction_definition": (
+                "zonal/total at t=0 and at the final step, from the psi' series. "
+                "The fluctuation dominates at these settings, so the total is NOT "
+                "zonal-dominated; this run measures the share over the whole "
+                "horizon rather than at one instant."
+            ),
             "singular_value_steps": sorted(full_spectrum),
             "singular_values": [full_spectrum[s] for s in sorted(full_spectrum)],
         },
@@ -267,6 +297,14 @@ def run_case(
             },
             "max_abs_divergence": dlra_div,
             "max_scaled_pde_energy_residual": dlra_full_pde_residual,
+            "fluctuation_energy_history": dlra_fluctuation_energy,
+            "fluctuation_enstrophy_history": dlra_fluctuation_enstrophy,
+            "zonal_energy_fraction": _zonal_fraction(
+                dlra_energy, dlra_fluctuation_energy
+            ),
+            "zonal_enstrophy_fraction": _zonal_fraction(
+                dlra_enstrophy, dlra_fluctuation_enstrophy
+            ),
             "max_scaled_projected_energy_residual": dlra_residual,
             "rank_history": [int(x) for x in dlra.rank_history],
             "rank_min": int(min(dlra.rank_history)),
