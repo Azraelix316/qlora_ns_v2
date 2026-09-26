@@ -441,3 +441,34 @@ All three resolved crossovers at `N=128` carry `direction=static_overtakes`, so 
 **4. And the checker now covers the place it was blind.** `state/reviewer/check_order_withdrawn.py` scanned only the first 36 lines — the order — so a withdrawn phrase inside a paste-ready block near line 670 was invisible to it. **It now scans every fenced LaTeX block and labels such a hit `PASTE-READY TEXT` as highest priority.** I positive-controlled it by injecting two withdrawn claims into a copy of D18b: both caught, both labelled. Run it before you paste anything.
 
 **Priority is unchanged: D13 and D14 first, then the `99.9%` → `99%` fix.** All four texts now need nothing from me.
+
+---
+
+## R124 — **two corrections, and one of them is a wrong number in the paper's central mechanism**
+
+**1. THE SATURATION THRESHOLD WAS WRONG, AND IT IS NOW FIXED IN THE TEXT YOU WILL PASTE.** The abstract and
+contribution 3 both said *"above rank $\approx 8$, additional rank buys the static baseline nothing measurable."*
+**That is false.** From `crossover_surface.json` → `static_moving_window["W0.25_r<rank>"]`, comparing each rank's
+static `relative_l2` to rank 16's, at all nine horizons and both Reynolds numbers:
+
+| comparison | measured |
+|---|---|
+| ranks **16, 32, 43** against each other | **max spread `0.0000%`** over all 18 (Re, horizon) pairs — *exactly* equal |
+| ranks **2, 4, 8** against rank 16 | **differ by up to `85.4%`** (Re=1000, t=4.0: `r=2` gives `0.12917` vs `r=16`'s `0.069669`) |
+
+**So the static subspace saturates AT `r = 16`, not above `r ≈ 8`.** At `r = 8` it is still improving,
+substantially. Both texts now read *"from rank 16 the static subspace stops improving altogether, with ranks
+16, 32 and 43 identical at every horizon and both Reynolds numbers, while ranks 2, 4 and 8 differ by up to
+85%"* — which is **both true and stronger** than what it replaced.
+
+**The abstract is therefore 210 words, not 200.** It fits a 250-word cap and not a 200-word cap, **and I am
+not shaving a measured finding to fit a cap I have not confirmed.** If your venue caps at 200, drop the `85%`
+contrast and the thesis-opening sentence — your call, not mine.
+
+**2. MY OWN NUMERIC GATE WAS NOT LOOKING AT YOUR DRAFT.** `claims_registry.py` read `paper/sections` on
+`main`, **which does not exist** — your draft is the only place it exists. So the gate had been reporting
+*"nothing to fix"* and *"0 uncovered"* over **zero files**, while your draft said `99.9%`. It now reads your
+branch from git, prints its population (10 files, 52,351 chars), and **catches the `99.9%` on every run**.
+`0 uncovered high-precision literals` is now a real result for the first time.
+
+**Priority is unchanged: D13, D14, then the `99.9%` → `99%` fix.** All three need nothing from me.
