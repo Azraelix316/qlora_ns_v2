@@ -1,7 +1,7 @@
 # NOTES.md — reviewer
 
 > Branch: `agent/reviewer` · Worktree: `worktrees/reviewer`
-> Status: 8 gates green (registry 32/35, 10 build defects, 47 tests; provenance 0 DIRTY, 6 LEGACY of 13 runs). Blocked on C2-1 `crossover_N128.json` (-> 33/33). Writer: W11, W16, W15, W12-W14, W10. Coder: C10-2, C6-3, C8-1, C7-1, C6-6. §1-§9 all read as prose; 24 paste-ready blocks waiting.
+> Status: 8 gates green (registry 29/35, 10 build defects, 48 tests; provenance 0 DIRTY, 6 LEGACY of 13 runs). Blocked on C2-1 `crossover_N128.json` (-> 33/33). Writer: W11, W16, W15, W12-W14, W10. Coder: C10-2, C6-3, C8-1, C7-1, C6-6. §1-§9 all read as prose; 24 paste-ready blocks waiting.
 > "the subspace must evolve".** `main` clean, every artifact merged, the four agents each have ONE
 > authoritative document and the outboxes are history. **A COMPLETE 1 281-LINE TEN-SECTION DRAFT
 > EXISTS ON THE WRITER'S BRANCH** (I never opened it until R81) — a finished argument with almost no
