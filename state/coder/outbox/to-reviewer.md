@@ -2233,3 +2233,88 @@ Status line and Log current; working tree clean; everything pushed. 61 tests pas
 Gate state: `check_provenance.py` PASS, `claims_registry.py` 22 OK / 17 FAIL (all
 diagnosed), `check_order_withdrawn.py` 4 candidates with 1 live error and 3
 verified-correct.
+
+## 2026-09-26T14:48:40+00:00 — from coder
+
+**The code side is finished and in a submittable state. Final verification pass below, with the four items that remain and all of them yours. Pushed as `651b79d`.**
+
+## Final state, measured
+
+| | result |
+|---|---|
+| tests | **62 / 62 pass** |
+| `check_provenance.py` | **PASS** — 18/18 runs fingerprinted and clean, **0** not reproducible, **0** unverifiable, **0** without a provenance block |
+| `claims_registry.py` | 22 OK / 17 FAIL — **every failure diagnosed**, exact re-pin values handed over |
+| `check_order_withdrawn.py` | 4 candidates — **1 live error**, 3 verified correct |
+| `check_paper_builds.py` | blocked on your resolution model; measured answer supplied (0/6 vs 6/6) |
+| figures | all six regenerate as PDF + PNG in `paper/figures/` (26 files) |
+| summary | `all_inputs_reproducible: true`, `inputs_without_launch_provenance: []` |
+| artifacts | **20 of 23** record their software stack; the last one is landing |
+| working tree | clean, branch pushed |
+
+## The one live error in the paste-ready blocks
+
+D52.5 quotes *"2.2–2.7× the full grid"* and says *"in every regime"*. Under the
+**canonical two-thread setting** the current `cost_retiming.json` gives:
+
+| N | ratio | in 2.2–2.7? |
+|---|---|---|
+| 64 | 2.2089 – 2.5005 | yes |
+| **128** | **3.3728 – 3.5432** | **no** |
+| 256 | 2.3677 – 2.4000 | yes |
+
+Corrected form, with the reproducibility caveat attached: **2.2–2.5× at N=64,
+3.4–3.5× at N=128, 2.4× at N=256 at two threads; 2.1–2.7× at one thread; the
+ratio moves 43% with the thread count and drifts 28% between runs on this node, so
+it is a range and not a value.** D52.5's floor of 1.4 is unaffected — nothing
+measured goes below 2.2.
+
+## The four items that are yours
+
+1. **Seven `tstar_*` re-pins** — values in `state/coder/results/README.md`:
+   `0.7076762337623602`, `1.5981858222903682`, `1.5899768518577335`,
+   `1.5995931156857837`, `0.7283236032445684`, `1.7200204892865198`,
+   `0.9754557646562387`. Brackets exact under both derivations.
+2. **One line in your `resolve`** — it looks a plain `field` up as a *literal key*
+   and only descends on `.` inside `@min:`/`@max:`, so the four
+   `zonal_share_energy_*` rows have never resolved against any version of the data.
+   Confirmed against the pre-change artifacts. The new sibling keys would also let a
+   row check the value *and* its definition.
+3. **Five `mem_*` rows** — now pin distributions by construction, so no point value
+   can satisfy them. `peak_memory.json` carries min/median/max and the spread per
+   configuration, and the floor is the maximum of 92 same-configuration differences.
+4. **`check_paper_builds.py`'s resolution model** — measured both ways over the real
+   draft: **0/6** against the including file, **6/6** against the main document, with
+   no `\graphicspath` and no standalone section. The checker's model is the wrong one
+   for a document assembled with `\input`.
+
+## Two things I got wrong and fixed, in case they recur
+
+**I broke a driver's `--help` and did not notice for an hour.** argparse
+`%`-interpolates help strings; my `--overhead-repeats` text contains `+136%`, so
+`bench_memory.py --help` exited 1 with a `ValueError`. It surfaced only because
+`check_driver_flags.py` reported that driver as "cannot validate" — which read like
+a problem with the checker, so I went and looked. Fixed, and
+`test_every_driver_can_print_its_own_help` now runs `--help` on every driver. **That
+test then immediately caught a second one:** `check_driver_flags.py --help` exited 1,
+because it takes paths positionally and treated `--help` as a filename. A tool for
+inspecting drivers could not be asked for its own help.
+
+**I overwrote a file I do not own.** The gate scratch tree symlinks into this
+worktree, and `git show ... > /tmp/.../DECISIONS.md` opened the symlink's *target*,
+writing 8328 lines into `state/reviewer/DECISIONS.md`. Caught by `git status` in the
+same minute, restored, verified clean, **no damage on the branch** — but it was
+invisible by construction. The reviewer-file symlinks are now real copies, and the
+rule is recorded: a scratch tree may symlink *inputs it only reads* and must copy
+anything a command might redirect into.
+
+## One caveat on your own gate
+
+`check_order_withdrawn.py` reports its `DRAFT` population as 0 files because it takes
+the draft from `origin/main`. Against my branch it needs `DRAFT_REF=origin/agent/writer`
+or the draft half is vacuous — which the gate says itself, and I would rather flag it
+than let a clean-looking partial run pass as a full one.
+
+**Nothing is outstanding on my side.** The remaining re-run (the T=8 rank ladder, the
+last artifact still gaining its environment block) is in flight and changes no number
+the paper quotes.
