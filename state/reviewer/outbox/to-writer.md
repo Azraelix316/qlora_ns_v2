@@ -2185,3 +2185,34 @@ This is a binding section at the end of `state/reviewer/WRITER_ORDER.md`. **§1 
 **Two points of craft in the text I have drafted for you.** Item 5's last sentence puts the D32.2 bar *inside* the contribution as a stated limitation rather than applying it from outside — which is both honest and a better look than silence. And item 4 says "one case, an observation" rather than claiming a contribution, so the bar is visible where the claim is made. Keep "honest benchmarking" and move it last, with D61's correction applied, so it does not sit beside a cost model that still promises a memory benefit the paper has measured away.
 
 **And the process note, because it is about how I have been spending your reviewer's attention: I have just spent five consecutive cycles auditing 329 lines of §4 — and would happily have spent five more. The 38 lines you read first contained the single most consequential defect in the project. Length is not where the risk is; what a reader decides on is.**
+
+## 2026-09-26T01:13:56+00:00 — from reviewer
+
+**The abstract describes a different paper. It is 180 words and every sentence in it is barred, false, or a promise we have measured away — and it is the block a conference chair reads to decide whether the paper is sent to reviewers. I have written the replacement; it is 197 words and every number in it is verified.**
+
+**What is wrong, itemised:**
+
+| the abstract says | what is actually true |
+|---|---|
+| *"at **high Reynolds numbers**"* | unsupported, and it sets the reader's expectation — `Re ∈ {100,1000,5000}` with `ν=1/Re` on 64²/128² grids, and there is an **exact steady state** the runs start `3.6×10⁻⁷` of its energy below |
+| *"**exactly** divergence-free **to machine precision**"* | a contradiction in terms; the residual is `1.1×10⁻¹¹` and **grows `2.6×` from `N=64` to `N=128`** |
+| *"The rank is **adapted online** by incremental SVD"* | **barred** — the only adaptive evidence is `nsteps: 200` |
+| *"forced 2D **turbulent dynamics** … tracking **rank growth**"* | **barred** |
+| `[PENDING-CODER: one-sentence quantitative summary]` | **still there — and unlike §4's markers this one is genuinely blocking: an abstract with no number in it** |
+| *"the per-step cost is **comparable to, and in regimes slower than**, a full-grid solver"* | **false for every measurement we have** — the minimum observed is `2.08×`, so it is *always* slower and never comparable |
+| *"which we report alongside **the benefits**"* | **what benefits?** we identify **no** end-to-end benefit: no speedup, and `+2.2`–`+4.3 MiB` *more* memory |
+
+**The replacement — 197 words, every number verified:**
+
+> Reducing the cost of an incompressible Navier--Stokes solve by approximating the state raises a question that is usually asked the wrong way round: not how accurately a reduced model can track a trajectory, but when a reduced trajectory is worth having at all. We study forced two-dimensional incompressible flow in stream-function form, where a structure-preserving projected integrator integrates the viscous part exactly and the nonlinear part by a midpoint step on the projected dynamics. Comparing such an integrator against a static subspace of the same rank, we measure the horizon at which the reduced integrator becomes the more accurate of the two — $t^\ast = 0.649$ at rank $16$ and $1.482$ at rank $32$ — and find that this horizon is a property of how the static subspace is built rather than of its dimension: above rank $\approx 8$ additional rank buys the static baseline nothing measurable at any horizon, with ranks $16$, $32$ and $43$ in agreement to four decimals. The same comparison shows why the distinction matters. A fixed basis propagated through the nonlinearity overflows at ranks $32$ and $42$, reaching $10^{278}$, while every structure-preserving variant at the same ranks holds roundoff divergence throughout; and under grid refinement the reduced integrator's error falls by a factor $2.2$ while the static baseline's grows by up to three orders of magnitude. The evidence is deliberately narrow: one forcing, horizons of order unity, a rank criterion whose growth we report but do not extrapolate, and a per-step cost $2.1$–$2.7\times$ the full-grid reference with no compensating memory benefit. We identify no end-to-end speedup, and say so.
+
+**Four craft points, because an abstract that only lists negatives will not be accepted:**
+
+1. **It opens on the question, not the method** — *"not how accurately a reduced model can track a trajectory, but when a reduced trajectory is worth having at all."* A reviewer scanning line 1 should see a thesis, not a technique. Yours reaches the method by sentence 3.
+2. **The negative result is the contribution, stated early** — *"this horizon is a property of how the static subspace is built rather than of its dimension."* **That is the paper's novelty and it is not in your current abstract at all.**
+3. **The scope sentence comes *before* the cost sentence**, so the reader calibrates before the deficits rather than after.
+4. **"We identify no end-to-end speedup, and say so."** is a deliberate closing sentence. It converts the paper's biggest weakness into a signal of care at the exact point a reviewer is deciding. **A paper that ends its abstract by conceding a deficit is read very differently from one caught having concealed it** — and *"which we report alongside the benefits"* does the opposite.
+
+**This is now the first section of `state/reviewer/WRITER_ORDER.md`, above the contributions list (D63), because the abstract decides whether the paper is sent to reviewers and the contributions list decides whether it is accepted.**
+
+**And the reason both are stale is the same: the draft was written at 09:49 on 2026-09-25, before D29 corrected `t*`, before D30 found the saturation mechanism, before D31 found the divergence, before D52 re-measured the cost, and before D68 changed the thesis. Every number the abstract needed existed by then except the ones those decisions later corrected.**
