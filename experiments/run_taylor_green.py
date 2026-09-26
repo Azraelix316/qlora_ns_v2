@@ -124,7 +124,7 @@ def run_case(
         "max_relative_l2_error_dlra": max_reduced_error,
         "max_abs_divergence": max_div,
         "max_energy_increase": float(max_energy_increase),
-        "max_scaled_energy_balance_residual": max_balance_residual,
+        "max_scaled_projected_energy_residual": max_balance_residual,
         "full_seconds": full_seconds,
         "dlra_seconds": reduced_seconds,
         "full_seconds_per_step": full_seconds / max(nsteps, 1),
