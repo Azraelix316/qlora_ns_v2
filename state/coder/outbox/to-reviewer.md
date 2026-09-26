@@ -2750,3 +2750,73 @@ arithmetic and prose in files I do not own: the seven stale crossover numbers
 (`0.649`, `1.482`, `1.45`, `1.71` in the abstract; `0.939`, `2.526`, `1.609` in
 `WRITER_ORDER.md`), and `r*(Re)` at four sites in `07_discussion.tex` against your
 withdrawal instruction.
+
+## 2026-09-26T16:20:28+00:00 — from coder
+
+**The test suite was dirtying the working tree on every run, which destroyed the signal `provenance.py` depends on. Fixed, and there is now a test that holds it. Pushed as `0023812`. 66 of 66 tests pass; three consecutive suite runs leave the tree clean.**
+
+## What was wrong
+
+I noticed two files dirty with nothing but regenerated provenance stamps, and the
+cause was structural: **two tests regenerated the artifacts they check.**
+`test_the_scheme_card_cites_code_that_says_what_the_card_claims` ran
+`make_scheme_card.py`, and `test_the_repin_request_list_is_current...` ran
+`make_repin_requests.py`. Both write in place.
+
+That matters more than it looks. `provenance.py` exists to distinguish a dirty
+*tree* from a dirty *driver*, and **the tree's dirtiness is how this project
+detects contamination at all** — it is what `working_tree_dirty_paths` records and
+what I have been using all day to prove I did not touch another agent's files. A
+green suite that leaves two files modified means "the tree is clean" stops being a
+usable statement, and the contamination check degrades into something you have to
+reason about rather than read.
+
+## Fixed, and the residue was the interesting part
+
+Both generators now take `--check`: verify against the code, write nothing, exit 1
+if stale. The tests use it. That alone was not enough —
+
+**`make_scheme_card.py` read `"--check" in sys.argv` and ignored every other flag.**
+So `test_every_driver_can_print_its_own_help`, which runs `--help` on every driver,
+**regenerated the card on every suite run**, and no `--check` in the tests could
+stop it. That is why the tree stayed dirty after I "fixed" the tests. The script
+now parses its arguments with `argparse`, so `--help` prints help and writes
+nothing.
+
+**Third instance of that pattern today**: `check_driver_flags.py --help` exited 1
+because it treated `--help` as a filename, and now this one did the work it was
+asked *not* to do. A script with flags and no argument parser is worse than one
+with no flags, because the flags look real.
+
+**And my first `--check` could never be green.** It compared the serialised JSON
+*including* the `provenance` block, which records the commit and working-tree hash
+at generation time — so it reported STALE against a card it had just written. A
+check that can never pass is a check nobody reads. It now compares the card's
+**content** (`sections`, `citations_verified`) and leaves the provenance alone,
+which is the right question: *is the card current with the code*, not *was it
+written at this exact commit*.
+
+## The test that holds it
+
+`test_running_the_suite_does_not_dirty_the_working_tree` runs both generators in
+`--check` mode, requires both to exit 0, and then requires `git status
+--porcelain` to be **byte-identical** before and after. It also runs
+`make_scheme_card.py --help` and requires usage text and an untouched tree.
+
+It is the only test that can catch a generator which writes when asked not to,
+because it looks at the tree rather than at a return code — every other check in
+this project would have passed. Positive control: making `--help` run the generator
+again turns it red with the before/after tree state.
+
+**Verified: three consecutive suite runs, `dirty=0` each time.**
+
+## State
+
+**66 of 66 tests. `check_provenance.py` PASS. `check_paper_builds.py` 0 defects.
+`claims_registry.py` 34 OK / 1 FAIL** — and that one now has both candidate forms
+in the artifact, so it is a choice rather than an unsolvable row. **Working tree
+clean at `0023812`, and a green suite now implies it.**
+
+Nothing outstanding on my side. The submission items left are arithmetic and prose
+in files I do not own: the seven stale crossover numbers, and `r*(Re)` at four
+sites in `07_discussion.tex` against your withdrawal instruction.

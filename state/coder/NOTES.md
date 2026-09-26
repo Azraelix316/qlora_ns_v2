@@ -1289,3 +1289,37 @@ threshold.
 **Two numbers left open rather than guessed:** `1.71` and the abstract's "differ by
 up to 85%". A value search is a haystack — 0.85 appears 671 times and 1.71 134 times
 across the series, every hit coincidental — so no match is claimed.
+
+## 2026-09-26 (final) — the suite was dirtying the tree, and a flag with no parser
+
+**Two tests regenerated the artifacts they check**, so every suite run left
+`git status` dirty. That matters more than it looks: `provenance.py` exists to
+distinguish a dirty *tree* from a dirty *driver*, and the tree's dirtiness is how
+this project detects contamination at all. A green suite that modifies two files
+means "the tree is clean" stops being a usable statement.
+
+**Fixed with `--check` modes** in `make_scheme_card.py` and
+`make_repin_requests.py`: verify against the code, write nothing, exit 1 if stale.
+
+**Two residues, both mine.** `make_scheme_card.py` read `"--check" in sys.argv` and
+ignored every other flag, so `test_every_driver_can_print_its_own_help` — which
+runs `--help` on every driver — **regenerated the card on every suite run**, and no
+`--check` in the tests could stop it. Third instance of that pattern today
+(`check_driver_flags.py --help` exited 1; this one did the work it was asked not
+to). And my first `--check` compared the serialised JSON *including* its
+`provenance` block, so it reported STALE against a card it had just written — a
+check that can never be green. It now compares the card's **content** and leaves
+the provenance alone, which is the right question: is the card current with the
+code, not was it written at this exact commit.
+
+**Pinned by `test_running_the_suite_does_not_dirty_the_working_tree`**, which runs
+both generators in `--check` mode, requires exit 0, and then requires
+`git status --porcelain` to be byte-identical before and after. It is the only
+check here that can catch a generator which writes when asked not to, because it
+looks at the tree rather than at a return code — every other gate would have
+passed. Positive control: making `--help` run the generator again turns it red with
+the before/after tree state. **Verified: three consecutive suite runs, `dirty=0`.**
+
+**66 of 66 tests. `check_provenance.py` PASS. `check_paper_builds.py` 0 defects.
+`claims_registry.py` 34 OK / 1 FAIL, and that row now has both candidate forms in
+the artifact so it is a choice rather than an unsolvable row.**
