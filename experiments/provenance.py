@@ -50,6 +50,7 @@ is a fact about the run, not a reason to discard the launch-time verdict.
 from __future__ import annotations
 
 import hashlib
+import os
 import subprocess
 import time
 from pathlib import Path
@@ -120,6 +121,38 @@ def sources_fingerprint() -> str:
     return hashlib.sha256(blob.encode()).hexdigest()
 
 
+def environment() -> dict:
+    """The software stack and machine, recorded by every driver that calls this.
+
+    It lives here rather than in each driver, for the reason this module exists at
+    all: one place, because copies drift. Measured on 2026-09-26, **14 of 23
+    artifacts recorded no environment at all** -- only the two cost artifacts and
+    the two crossover surfaces did -- so a claim that a run is reproducible rested
+    on the driver matching and on nothing about the stack it ran on. A different
+    numpy can change an FFT backend and a different BLAS a reduction order, and
+    neither shows up in a diff of this repository.
+
+    ``thread_settings`` is included rather than assumed, because the cost
+    artifacts showed the thread count moves a timing ratio by 43%, and
+    ``bench_cost.py`` now records whether it matches the canonical setting.
+    """
+    import platform
+
+    import numpy as np
+
+    keys = (
+        "OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+        "NUMEXPR_NUM_THREADS", "VECLIB_MAXIMUM_THREADS",
+    )
+    return {
+        "python": platform.python_version(),
+        "numpy": np.__version__,
+        "platform": platform.platform(),
+        "processor": platform.processor() or "unknown",
+        "thread_settings": {key: os.environ.get(key) for key in keys},
+    }
+
+
 def provenance(driver: Path) -> dict:
     """Record the launch-time commit and driver hash, and whether that is committed.
 
@@ -169,6 +202,7 @@ def provenance(driver: Path) -> dict:
         out["driver_matches_HEAD"] = False
         out["driver_matches_HEAD_note"] = f"{rel} was not readable at launch"
 
+    out["environment"] = environment()
     out["sources_fingerprint_at_launch"] = sources_fingerprint()
     out["sources_files_at_launch"] = len(LAUNCH_SOURCE_SHAS)
 
