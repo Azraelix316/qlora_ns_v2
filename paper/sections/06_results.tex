@@ -40,26 +40,34 @@ $r_0 = 3$ down to $r = 1$ as the vortex dissipates.
 Figures~\ref{fig:rank} and~\ref{fig:svd} show, for each
 $\mathrm{Re} \in \{100, 1000, 5000\}$, the adaptive rank $r(t)$ and the
 singular-value spectrum $\sigma_i(t)$ over the retained (statistical) window.
-The qualitative picture we expect, and which the runs must confirm, is: a
-growth phase during spin-up (residual indicator \eqref{eq:indicator}
-triggered), followed by a quasi-stationary rank $r^*(\mathrm{Re})$ that
-increases with $\mathrm{Re}$; and a slow-decaying singular-value spectrum at
-high Re, i.e.\ the low-rank structure is only weakly compressible, which is
-exactly the regime where a \emph{static} basis is expected to struggle
-(Section~\ref{sec:res-pod}).
+The rank behaves as a saturation, not as a diagnostic of the flow. Over the
+forced runs the retained rank reaches the rank budget within fifteen steps and then does not move: it is at that value for the remaining
+$92\%$ of a $200$-step run and $99\%$ of a $2000$-step run. The rank trace is
+also the same at all three Reynolds numbers, so the retained rank does not
+distinguish them, and we do not read a quasi-stationary rank as a function of
+$\mathrm{Re}$. What does vary is where the energy sits. The zonal mode holds
+$20.1\%$, $18.5\%$ and $18.4\%$ of the kinetic energy at $\mathrm{Re} = 100$,
+$1000$ and $5000$, and $17.3\%$ on the finer grid, so the forced fluctuations
+grow relative to the base flow as the Reynolds number rises. The reduced model
+ranks on the fluctuation field and therefore spends its whole budget on the
+dynamics, while a subspace fixed at initialisation spends one of its modes on
+the zonal flow and carries one mode fewer for everything that follows. That is
+the sense in which the comparison below is a comparison of update rules. The
+singular-value spectrum decays slowly at high Re, i.e.\ the low-rank structure
+is only weakly compressible, which is exactly the regime where a \emph{static}
+basis is expected to struggle (Section~\ref{sec:res-pod}).
 % [PENDING-CODER: rank-over-time curves per Re; representative singular-value
-% spectra (e.g.\ at the start and end of the statistical window) per Re; the
-% quasi-stationary rank r*(Re); number of indicator-triggered growth events
-% per run.]
+% spectra (e.g.\ at the start and end of the statistical window) per Re;
+% number of indicator-triggered growth events per run.]
 
 \begin{figure}[t]
   \centering
   % [PENDING-CODER: generate from the L2 run records.]
   \includegraphics[width=\linewidth]{figures/fig_rank_vs_time}
-  \caption{Adaptive rank $r(t)$ for forced Kolmogorov flow at
-  $\mathrm{Re} \in \{100, 1000, 5000\}$ (L2). Growth during spin-up, then a
-  quasi-stationary rank $r^*(\mathrm{Re})$.}
-  % [PENDING-CODER: confirm the spin-up duration and r*(Re) values.]
+  \caption{Retained rank $r(t)$ for forced Kolmogorov flow at
+  $\mathrm{Re} \in \{100, 1000, 5000\}$ (L2). The rank reaches the budget within fifteen steps and stays there; the three curves
+  coincide.}
+  % [PENDING-CODER: confirm the spin-up duration.]
   \label{fig:rank}
 \end{figure}
 
@@ -131,14 +139,11 @@ Reynolds number, and time.
 
 We compare the adaptive rank $r(t)$ of SP-DLRA with the static POD count
 $r_{\mathrm{POD}}$ (99\%-energy truncation of the reference snapshots,
-Section~\ref{sec:pod}). The expected outcome, to be verified:
-$r^*(\mathrm{Re}) \le r_{\mathrm{POD}}(\mathrm{Re})$ over the statistical
-window, with the gap widening at higher Re where the singular-value decay is
-slowest and the dynamics least compressible by a \emph{fixed} basis.
-% [PENDING-CODER: r*(Re) vs r_POD(Re) per Reynolds number; the error of the
-% POD baseline at fixed rank r_POD vs the error of SP-DLRA at its adaptive
-% rank (from Figure 3); any time intervals where the POD basis is
-% insufficient (error spikes) and SP-DLRA recovers by rank growth.]
+Section~\ref{sec:pod}).
+% [PENDING-CODER: the error of the POD baseline at fixed rank r_POD vs the
+% error of SP-DLRA at its retained rank (from Figure 3); any time intervals
+% where the POD basis is insufficient (error spikes) and SP-DLRA recovers by
+% rank growth.]
 
 \subsection{Cost (the honest where-slower story)}
 \label{sec:res-cost}

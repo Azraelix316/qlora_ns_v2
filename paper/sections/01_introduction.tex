@@ -30,7 +30,7 @@ sustained turbulent forcing, where new structures continually appear
 \emph{Dynamical low-rank approximation} (DLRA) makes the representation
 dynamic: the solution is kept in factored form $X(t) \approx U(t)\,S(t)\,V(t)^\top$
 with a small rank $r(t)$, and the factors are advanced in time so that the
-basis \emph{follows} the dynamics \cite{koch2019dlra}. Projector-splitting
+basis \emph{follows} the dynamics \cite{koch2007}. Projector-splitting
 and structure-preserving variants integrate the linear part of the dynamics
 exactly, which makes DLRA both accurate and efficient for stiff problems
 \cite{einkemmer2023,ceruti2024,einkemmer2024review}. Rank adaptation ---
@@ -74,14 +74,16 @@ stream function, so divergence-freeness holds identically in exact
 arithmetic, with a measured residual no larger than $1.1\times10^{-13}$ for
 the reduced integrator and the full-grid reference, and no larger than
 $1.1\times10^{-11}$ over every method we ran --- seven orders of magnitude
-below the reduced solver's own error; and (iii) the subspace is refitted as
-the dynamics develop, which we show is necessary: a fixed basis propagated
-through the nonlinearity overflows at ranks $32$ and $42$ where the refitted
-one does not. We validate the method on forced two-dimensional flow at
+below the reduced solver's own error; and (iii) the subspace is rebuilt as the dynamics develop, which is what
+separates it from a basis fixed at initialisation: such a basis overflows at
+ranks $32$ and $42$ where the rebuilt one does not, and its error stops
+improving once its rank reaches $16$. The rebuilt subspace reaches the rank budget within fifteen steps and stays there, which is the
+sense in which it is reporting the resolved band rather than the flow. We validate the method on forced two-dimensional flow at
 Reynolds numbers $100$, $1000$ and $5000$ against a full-grid spectral
 reference and a static POD baseline, and we benchmark cost honestly: the
-reduced integrator is $2.1$--$2.7\times$ the full-grid step in every regime
-we measured, with no compensating memory benefit.
+reduced integrator is $2.2$--$2.7\times$ the full-grid step in every regime
+we measured --- at least $1.4\times$ even at the pessimistic end of the
+measurement's own recorded noise --- with no compensating memory benefit.
 
 % [FLAG-D4 / REVIEWER: Short form of the BINDING R5d claim wording (see
 % state/reviewer/reviews/2026-09-25-R5d-prior-art-map-and-final-claim.md,

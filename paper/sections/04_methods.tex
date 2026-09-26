@@ -20,11 +20,11 @@ single-mode Kolmogorov forcing
   f = F \sin y \; e_x, \qquad F > 0,
   \label{eq:forcing}
 \end{equation}
-whose curl is $\grad \times f = -F\cos y$. The Reynolds number is defined with
-respect to the forced equilibrium (Section~\ref{sec:energy}),
-$\mathrm{Re} = 2\pi F / \nu^2$;
-% [PENDING-CODER: confirm the Re definition and the exact (F, nu) pairing for
-% Re in {100, 1000, 5000} used in all runs (Table 2).]
+whose curl is $\grad \times f = -F\cos y$. The Reynolds number is defined as
+$\mathrm{Re} = 2U/\nu$, with $U$ the Kolmogorov base speed and $L = 2\pi$ the
+domain size; equivalently $\mathrm{Re} = U/(\nu k)$ at the fundamental
+$k = \pi/L = 1/2$. The pairing of $F$ and $\nu$ for each Reynolds number is
+given per run in Table~\ref{tab:forced-params} (Section~\ref{sec:forced}).
 
 Since the domain is periodic, the force has zero mean, and $\grad \cdot u = 0$,
 there exists a zero-mean stream function $\psi$ with
@@ -157,7 +157,14 @@ $\Psi = USV^{\top}$ gives \eqref{eq:viscous-exact}.
 \begin{remark}[Cost of the viscous step]
 $e^{\nu t D_x} U$ is computed column-wise by one-dimensional FFTs in the $x$
 direction at cost $O(r N \log N) = O(r n \log n)$ (likewise for $V$). The full
-viscous step is therefore $O(r n \log n)$, exact, and requires no SVD.
+viscous step is therefore $O(r n \log n)$, exact, and requires no SVD. This
+is the cost of the viscous stage. The rank rule is separate: as implemented,
+it factorizes the whole field at four stage boundaries per step, so the
+per-step cost is $\Theta(N^3)$ and \textbf{independent of $r$} --- $r=2$ and
+$r=64$ cost the same, because the truncated reconstruction changes only which
+columns of an already-computed factorization are used. Per-stage rank updates
+would invert this; we report the implemented behaviour rather than the
+asymptotic one.
 \end{remark}
 
 \begin{remark}[What is preserved]
@@ -166,7 +173,7 @@ invariant under the ansatz: the approximation error of the viscous step is
 \emph{zero}, not merely small. This is the sense in which the scheme is
 structure-preserving with respect to the viscous part, in the spirit of
 separable/projector-splitting low-rank methods
-\cite{koch2019dlra, einkemmer2023, cui2026, goutaudier2026}. The nonlinear
+\cite{koch2007, einkemmer2023, cui2026, goutaudier2026}. The nonlinear
 part is \emph{not} invariant under the ansatz and is handled by a projected
 step (Section~\ref{sec:proj-step}).
 \end{remark}
