@@ -493,3 +493,115 @@ registry rows, the missing D138/D139 record, the `04:283` I1 bullet, the
 `04:319` cost-table tension, the item-9 term ruling, D18c block 2, and "a
 bounded factor of two" against a `3.54\times` band. The W7/D18c XREF figure now
 measures **33** (34 on `main`) — that document is yours to correct.
+
+## 2026-09-27T05:39:01+00:00 — from writer
+
+**Third pass, and this one found a class of miss worth naming. `agent/writer` @
+`9fb05bc`.**
+
+**How the previous two passes missed four binding corrections.** My block audit
+matched the order's paste-ready blocks — all 24 are ` ```latex ` fences, and all
+24 were accounted for. But the order also carries binding replacements in
+**markdown blockquotes and prose**, and those are not fences. I swept every
+`## ` section of `WRITER_ORDER.md` for quoted replacement text and tested each
+against the draft: `D11`, `D128`, `D130` present; **`D6`, `D8`, `D9`, `D10`
+absent** — four binding corrections, all in §4, none of which I had applied.
+**D8 and D9 are now applied. D6, D9's table label and D10 are not, and the
+reason is the subject of the next item.**
+
+### 1. `D8` applied (D60, binding) — I1 and I3
+
+I1 now carries your binding text, with the paper's `\grad` macro: the residual
+"never exceeds $1.1\times10^{-11}$ over every method, rank and Reynolds number we
+ran, which is seven orders of magnitude below the reduced solver's own error
+($\sim10^{-4}$) and therefore cannot account for it", is "the roundoff of the
+discrete spectral derivative pair", and "grows as the operators' conditioning
+does: $2.6\times$ from $N=64$ to $N=128$, consistently across methods", with a
+pointer to §6 for the band and its population. This also **closes the `04:283`
+D60 candidate** I had been flagging as needing your ruling — it needed your own
+earlier correction instead, which I had not matched against.
+
+I3 takes your second option: the static count is now reported as **the rank the
+baselines were given** — `$r_{\mathrm{POD}} = 16$`, fitted on the fluctuations
+including the initial condition at a `99%` threshold — and the text says plainly
+that it does not vary with the dynamics and that we therefore claim no measured
+rank saving. (Measuring it properly is the better fix and it is a one-line coder
+change; say the word and I will ask for it instead.)
+
+### 2. `D9` applied, except the one item that is about the wrong engine
+
+Applied: the cost paragraph no longer promises anything. It now reads
+"SP-DLRA is measured at $2.2$--$3.5\times$ the full-grid step", "Nor is there a
+compensating memory benefit: peak memory is $2.3$ MiB ($N=64$) to $4.0$ MiB
+($N=128$) *above* the full-grid step", "We therefore identify no end-to-end
+benefit … and the case for the method rests on its structural guarantees and its
+accuracy, not on efficiency", and the long-span route is declined for want of
+evidence beyond `200` steps. The memory route is gone, which was the point.
+**The setup marker is narrowed** to the one thing still missing: the
+static-baseline family is not timed, so there is no measured baseline cost ratio
+(the same item I sent to `coder`).
+
+### 3. `D6`'s Remark, `D9`'s table label and `D10`'s step 4 all describe `bug.py`, not the engine the paper validates
+
+**This is the substantive finding of the pass, and I need your ruling.** The
+evidence, all in the tree:
+
+| | |
+|---|---|
+| what is timed | `cost_retiming.json` → `integrators_timed: ["full_grid_reference", "projected_dlra"]` |
+| what runs | `experiments/run_kolmogorov.py` → `solvers.dlra` |
+| `solvers/dlra.py:94` (its own docstring) | *"`_svd` factorizes the **whole N x N field** at four stage boundaries per step, so per-step cost is `Θ(N³)` and **rank-independent**"* — i.e. **D128**, which is applied |
+| `solvers/dlra.py:199–205` | `_svd` **raises** unless `field.shape == (N, N)`. So the cleanup is a whole-field SVD: not an `n×r` centred matrix (**D9's label fix**), and not a QR (**D10**) |
+| `dlra.py` | never calls `spectral.factor_semigroup`; its viscous stage is field-level. The factor-wise `O(rN log N)` path of **D6's Remark** is `bug.py:183–184` |
+| the two tests | `test_svd_call_count_per_step` (dlra.py, four whole-field factorizations) and `test_bug_never_factorizes_the_full_state_inside_a_step` (bug.py). D10 cites the second and generalises it to the paper |
+| the measurement | the band is nearly rank-independent at every grid (`r=2` vs `r=64` within 10%), which is what four whole-field factorizations predict and what an `O(nr²)` QR cleanup would not be |
+
+So pasting D6, D9's label or D10 into §4 would make the paper describe the BUG
+port while every number in §6 comes from `projected_dlra` — and §9 already
+presents the BUG integrator as *planned* future work. I did not paste them.
+
+**What I did instead, and will reverse if you overrule it:** the cost table's
+cleanup row contradicted your own D128 Remark twenty lines above it, so I
+corrected it to the object that is actually implemented — *"Cleanup: thin SVD of
+the whole field, four per step & $\Theta(N^3)$ & rank-independent"* — and tied
+step 4 to the cost model with one clause. §4 is now internally consistent and
+consistent with the timing. **The question for you: does §4 describe
+`projected_dlra`, which is my assumption, or the BUG port?** If the latter, the
+cost story needs restating rather than a row edit, and I would rather you made
+that call than me.
+
+### 4. A block I had pasted was wrong: D18c block 7's population
+
+**B7's "the $26$ committed measurements we pool" pools both residual keys, and
+its claims only hold for one of them.** Measured over the committed artifacts:
+
+| key | n | min | max | span | argmax |
+|---|---|---|---|---|---|
+| `max_scaled_pde_energy_residual` | **14** | `1.287e-04` | `4.933e-04` | `3.83×` | **dlra (ours)** |
+| `max_scaled_projected_energy_residual` | 14 | `1.287e-04` | **`3.089e-01`** | `2400×` | pod |
+
+So "between `1.3e-4` and `4.9e-4`", "the largest residual belongs to our own
+method", and "spans less than a factor of four" are all true of the **full-PDE
+key over 14 measurements** — which is exactly the key **D18a** tells us to report
+("*We compare methods on the first*") — and false of the 26. B7's next sentence
+also named the two inconsistently: it said we report this quantity "and not the
+balance of the full partial differential equation", which is the quantity we *do*
+report. Fixed to 14, the key is now named, and the two sentences agree.
+
+**Related, and it keeps D18a blocked: `2.2e-3` is not in the repository.** I
+searched every `*resid*` key of every committed artifact; the static
+projection's full-PDE residual is `1.287e-04`–`2.588e-04` and its
+projection-subtracted residual is `3.089e-01`. So D18a's "with the static
+projection worst and only at $N=128$ ($2.2\times10^{-3}$)" is not reproducible
+from the tree, which is presumably why the §3 block is still waiting. If the
+value moved, D18a needs the new one before I can paste it.
+
+### 5. State
+
+Gates on `9fb05bc`: `check_paper_builds --ref` **0 defects**, 7 graphics, 65
+labels; `claims_registry` draft **57 traced / 0 untraced**, 0 uncovered; the 29
+untraced remain in your own documents. `check_order_withdrawn` now reports
+**4 candidates in the draft, all read**: three are the band pattern firing on
+correctly re-pinned values (`00:17`, `01:84`, and now `04:339`, which is D9's new
+sentence), and one is the `fig:divfree` caption, which names its population. The
+`04:283` D60 candidate is **gone**. Still not compiled — no TeX engine here.

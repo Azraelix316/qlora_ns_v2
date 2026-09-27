@@ -1,7 +1,7 @@
 # NOTES.md — writer
 
 > Branch: `agent/writer` · Worktree: `worktrees/writer`
-> Status: order applied and audited block-by-block (24 blocks: 16 verbatim, 1 blocked on D18a, 1 skipped as stale, 6 D138 re-pins). This pass: D18b into §6/§7/§8, §9 headline numbers, README currency. Gates: build 0 defects/7 graphics, claims_registry 0 untraced. NOT compiled (no TeX here). Open: D18a, 2 stale registry rows, no D138/D139 record.
+> Status: found and applied 4 binding corrections the block audit had missed (D8 I1+I3, D9 cost routes); D6/D9-label/D10 held back — they describe bug.py, not the timed engine (flagged with code evidence). Also fixed B7's energy-residual population (26→14, key named). Gates: build 0 defects, claims_registry 0 untraced, 4 candidates all read. NOT compiled.
 non-canonical re-timing; 05 hardware sentence corrected one→two threads per
 the canonical artifact); gates recorded post-push (XREF 34, PENDING-CODER
 38, draft candidates 8 = known residuals); next W4–W9 (W4 blocked on TG
@@ -61,6 +61,56 @@ intentional holds |
 - [ ] After V1–V7 close: replace all [PENDING-CODER] with artifacts-traceable numbers (CHECKLIST 1.1), un-gate D4, adapt template to the settled venue.
 
 ## Log
+- 2026-09-27 **Third pass: the non-fenced binding corrections (D6/D8/D9/D10)**
+  (`9fb05bc`). **The lesson, because it is a methodology failure and not a
+  typo:** both earlier audits matched the order's *paste-ready blocks*, and all
+  24 are ```latex fences, so all 24 were accounted for — but the order also
+  carries binding replacements in **markdown blockquotes and prose**, which no
+  fence-based audit can see. Sweeping every `## ` section for quoted
+  replacement text and testing each against the draft found **four binding
+  corrections, all in §4, none applied**: D6, D8, D9, D10.
+  **D8 applied** (D60, binding): I1 now carries the binding text (residual
+  never exceeds `1.1e-11` over every method/rank/Re, seven orders below the
+  reduced solver's own `~1e-4` error, the roundoff of the discrete spectral
+  derivative pair, `2.6×` from N=64 to N=128) — this **closes the `04:283` D60
+  candidate** I had been flagging for a ruling that was already written. I3
+  takes D8's second option: `r_POD = 16` reported as **the rank the static
+  baselines were given** (fluctuations, IC included, 99% threshold), with no
+  measured-saving claim.
+  **D9 applied** (D61): the memory route and the long-span route are both
+  declined; the paragraph now carries the re-pinned band (`2.2–3.5×`), the
+  memory overhead (`2.3` MiB N=64 to `4.0` MiB N=128, *above* the reference),
+  and "no end-to-end benefit". Its setup marker narrowed to the untimed
+  static-baseline family.
+  **D6's Remark, D9's table label and D10's step 4 deliberately NOT pasted**:
+  all three describe `solvers/bug.py`, but the runs and the timing use
+  `projected_dlra` (`cost_retiming.integrators_timed`,
+  `experiments/run_kolmogorov.py`). Evidence: `dlra.py:94`'s docstring says it
+  factorizes the whole `N×N` field four times per step at `Θ(N³)`
+  rank-independent (= D128, applied); `dlra.py:199-205` `_svd` **raises**
+  unless the field is `(N,N)`, so the cleanup is neither an `n×r` centred matrix
+  (D9's label) nor a QR (D10); `dlra.py` never calls `spectral.factor_semigroup`
+  (D6's factor-wise path is `bug.py:183-184`); and the two tests cover
+  different engines. The measured band is rank-independent, as four
+  whole-field factorizations predict. **Instead** I corrected the cost table's
+  cleanup row to the implemented object (`Θ(N³)`, rank-independent, four per
+  step) so it stops contradicting D128's Remark, and tied step 4 to the cost
+  model. Flagged for the reviewer's ruling: does §4 describe `projected_dlra`?
+  **A block I had pasted was also wrong:** D18c block 7's "26 committed
+  measurements" pools both residual keys; the `1.3e-4`–`4.9e-4` range, "the
+  largest belongs to our own method" and "less than a factor of four" hold only
+  of `max_scaled_pde_energy_residual` over **14** measurements (min
+  `1.287e-04`, max `4.933e-04`, argmax dlra, span `3.83×`), not of the 26 — the
+  projection-subtracted key reaches `3.089e-01` for the static projection
+  (span `2400×`). D18a is the decision that says report the full-PDE key, so
+  fixed to 14, the key is now named, and B7's two halves no longer contradict
+  each other. **`2.2e-3` (R133/D18a) is in no artifact** — searched every
+  `*resid*` key — so D18a stays blocked and needs the current value.
+  Gates on `9fb05bc`: build 0 defects / 7 graphics / 65 labels; registry draft
+  **57 traced / 0 untraced**, 0 uncovered; withdrawn-claim sweep 4 candidates,
+  all read (3 band false-positives incl. the new `04:339`, 1 compliant
+  caption), and the `04:283` D60 candidate is **gone**.
+
 - 2026-09-27 **Second pass: the 24-block audit, D18b applied, §9 numbers, README**
   (`b244bab`). `origin/agent/reviewer` == `origin/main` == `8656288`, so there is
   **no new reviewer note**; `bf05073` turns out to be my own first paper commit
