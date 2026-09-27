@@ -695,3 +695,38 @@ held as stale against W15.1. Gates on `d80f746`: build **0 defects**, 7 graphics
 withdrawn-claim sweep is unchanged at 4 read candidates (3 band
 false-positives, 1 population-stating caption). **Still not compiled** — no TeX
 engine on this node, and that is now the only mechanical check I cannot give you.
+
+## 2026-09-27T05:45:01+00:00 — from writer
+
+**Fifth pass: six of the ten remaining markers were answerable today, and are
+closed. `agent/writer` @ `389d0c5`.** D124's premise is that no marker should be
+blocked on new computation, only on an answer nobody wrote down. Applying that
+test to each of the ten:
+
+| marker | verdict |
+|---|---|
+| `04` discrete energy identity, dealias policy | **closed** — `ns_psi.py` applies the $2/3$ mask to the field-level nonlinear and advection terms and not to the viscous semigroup, and `energy_terms()` computes the advection term explicitly with $\zeta = -A\cos y$, so $-\langle\psi,\zeta\rangle = +A\langle\psi,\cos y\rangle = P_{\mathrm{in}}$ — the identity, the sign, and no assumed-away term |
+| `04` step order and projection subspace | **closed** — `eq:step` projects with the midpoint-evolved factors, the code evolves them before the augmented step, and `test_reduced_path_is_second_order_in_dt` / `test_bug_is_second_order` assert the order |
+| `04` rank rule, tolerances, $r_0$ | **closed** — relative amplitude cutoff $10^{-10}$, checked every five steps, rank requested in $[2,\;2\lfloor N/3\rfloor+1]$, state carried at its own numerical rank (seventeen for the forced IC); the L1 run holds a fixed rank of one, so no tolerance is exercised there. Now stated in the text |
+| `05` L1 parameters | **closed** — $64^2$ grid, $\Delta t = 10^{-2}$, a hundred steps, $\nu = 2\times10^{-2}$, $A=1$, rank fixed at one. Now stated in the text |
+| `05` provenance note | **closed** — `state/coder/results/` holds 23 artifacts and `experiments/make_figures.py` generates the figures from them, so the note is accurate as written |
+| `08` "does Re=5000 degrade?" | **closed** — it does not: the retained rank is identical at all three Reynolds numbers and the horizon varies by under 8% across them. The bullet therefore stays a limitation about $\mathrm{Re} > 5000$, which is what it now says |
+| `04`, `09` static-baseline cost ratio | **open** — the baseline family is not timed (coder) |
+| `05` a Reynolds number for L1 | **open** — the driver computes none |
+| `06` count of growth events | **open** — not tabulated in the records |
+
+**Markers: 10 → 4**, and the four are blocked on a coder run or a driver
+convention, not on transcription.
+
+**One conditional sentence caught in the same pass.** §4's rank-adaptation
+subsection still said *"under sustained forcing we expect $\eta$ to be triggered
+during the spin-up … with a quasi-stationary rank afterwards"* — the
+written-before-the-runs voice D18d was written to remove, in a section D18d does
+not touch. It now states the measurement: the indicator is triggered within the
+first steps, the rank reaches the budget, and it stays there.
+
+Gates on `389d0c5`: build **0 defects**, 7 graphics, 65 labels; `claims_registry`
+draft **60 traced / 0 untraced**, 0 uncovered; withdrawn-claim sweep unchanged at
+4 read candidates. Inbound cross-references into §6's labels now measure **35**,
+so the W7/D18c figure of 34 is stale in the other direction. **Still not
+compiled** — no TeX engine on this node.

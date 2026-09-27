@@ -1,7 +1,7 @@
 # NOTES.md — writer
 
 > Branch: `agent/writer` · Worktree: `worktrees/writer`
-> Status: every binding item in WRITER_ORDER is now applied or explicitly held with a reason. This pass: D7 (stale Re + duplicate P_in + the runs do NOT start at the Kolmogorov equilibrium), D4 (timing protocol §5 pointed at), D1 (two timescales apart). Held: D18a (2.2e-3 in no artifact), D6/D9-label/D10 (describe bug.py), D18c-B2 (stale). Gates: 0 defects, 0 untraced. NOT compiled — no TeX here.
+> Status: order fully applied or explicitly held; 6 of 10 markers closed from artifacts/code (10 -> 4, the rest blocked on a coder run or a driver convention). Held: D18a (2.2e-3 in no artifact), D6/D9-label/D10 (describe bug.py), D18c-B2 (stale). Gates: 0 defects, 0 untraced. NOT compiled — no TeX here.
 non-canonical re-timing; 05 hardware sentence corrected one→two threads per
 the canonical artifact); gates recorded post-push (XREF 34, PENDING-CODER
 38, draft candidates 8 = known residuals); next W4–W9 (W4 blocked on TG
@@ -61,6 +61,33 @@ intentional holds |
 - [ ] After V1–V7 close: replace all [PENDING-CODER] with artifacts-traceable numbers (CHECKLIST 1.1), un-gate D4, adapt template to the settled venue.
 
 ## Log
+- 2026-09-27 **Fifth pass: six answerable markers closed (10 → 4)**
+  (`389d0c5`). Applied D124's premise — no marker should be blocked on
+  computation, only on an answer nobody wrote down — to each of the ten
+  remaining `[PENDING-CODER]` markers. **Closed and now stated in the text:**
+  `04` energy identity + dealias policy (`ns_psi.py` masks the field-level
+  nonlinear and advection terms, not the viscous semigroup; `energy_terms()`
+  computes advection explicitly with `zeta = -A cos y`, so the identity and its
+  sign check out); `04` step order and projection subspace (midpoint-evolved
+  factors; two order tests); `04` rank rule and tolerances (relative amplitude
+  cutoff `1e-10`, checked every 5 steps, rank requested in `[2, 2⌊N/3⌋+1]`,
+  state carried at its own numerical rank = 17 for the forced IC, L1 fixed at 1);
+  `05` L1 parameters (`64²`, `dt=1e-2`, 100 steps, `ν=2e-2`, `A=1`, rank 1);
+  `05` provenance note (23 artifacts + `experiments/make_figures.py`); `08` the
+  Re=5000 degradation question (**it does not degrade** — rank identical across
+  all three Re, horizon varies <8% — so the bullet stays a limitation about
+  Re>5000). **Open (4):** the untimed static-baseline family (×2, coder), the
+  absence of an L1 Reynolds number in the record, and the un-tabulated count of
+  growth events.
+  **Also caught a conditional sentence in a section D18d does not touch:** §4's
+  rank-adaptation still said "we expect $\eta$ to be triggered during the
+  spin-up … with a quasi-stationary rank afterwards" — the written-before-the-
+  runs voice D18d exists to remove. Now the measurement.
+  Gates on `389d0c5`: build 0 defects / 7 graphics / 65 labels; registry draft
+  **60 traced / 0 untraced**, 0 uncovered; withdrawn sweep unchanged at 4 read
+  candidates; inbound refs into §6 now 35 (W7's "34" stale the other way).
+  **Still not compiled** — no TeX engine on this node.
+
 - 2026-09-27 **Fourth pass: D7, D4 and D1 from the order's prose form
   (`d80f746`)** — the sweep that found D6/D8/D9/D10 also covered the remaining
   prose sections, and three more binding items were unapplied. **D5, D12, D15,
