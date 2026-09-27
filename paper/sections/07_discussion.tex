@@ -87,7 +87,10 @@ multi-scale dynamics) become active in the periodically forced 2D problem.
 The regime we validate is the one where low-rank approximation is hardest and most
 worth having: forced two-dimensional turbulence at Reynolds numbers up to $5000$, with
 a slowly decaying singular-value spectrum and a rank requirement well beyond a handful
-of modes. That is the regime in which a method can be cheaper than the full grid in
+of modes. Two-dimensionality is what makes this regime tractable at all: the
+enstrophy-cascade picture of Kraichnan~\cite{kraichnan1967} places the nonlinear
+transfer at large scales, so the dynamics that a reduced model must reproduce are
+large-scale and slow, even as $\mathrm{Re}$ grows. That is the regime in which a method can be cheaper than the full grid in
 principle, and it is also the regime in which a static basis has the most to gain from
 being refitted. The trade we measure is therefore the honest one: at equal rank the
 reduced integrator is the more accurate method for a horizon that grows with rank, and
