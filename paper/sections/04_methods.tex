@@ -263,8 +263,9 @@ the statistical regime, with a quasi-stationary rank afterwards
 At the cleanup SVD, singular values with $\sigma_i < \sigma_{\mathrm{tol}}$
 (absolute) or $\sigma_i/\sigma_1 < \sigma_{\mathrm{tol}}$ (relative) are
 dropped. This is a deterministic, cheap rule requiring no additional
-decompositions. In the unforced Taylor--Green test it drives a controlled
-rank decay $3 \to 2 \to 1$ as the vortex dissipates
+decompositions. In the unforced Taylor--Green test the state is a single
+Fourier mode, so the rule holds the rank at one from the outset rather than
+spend rank on a spectrum that is not present
 (Section~\ref{sec:results}).
 % [PENDING-CODER: confirm the exact rank rule and the tolerances
 % eta_tol, sigma_tol (absolute/relative), and the initial rank r_0 for each

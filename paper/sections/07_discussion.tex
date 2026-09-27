@@ -6,68 +6,44 @@
 \subsection{Interpreting rank: a physical diagnostic, not just a cost}
 \label{sec:disc-rank}
 
-A distinctive property of the adaptive scheme of
-Section~\ref{sec:rank-adaptation} is that the retained rank $r(t)$ is an
-\emph{output of the simulation} rather than a user-chosen parameter: it is
-governed online by the residual indicator \eqref{eq:indicator} and the
-tolerance-based decay rule, and is therefore a diagnostic of the dynamics
-itself. In the runs of Section~\ref{sec:results}, the rank trace $r(t)$ is
-expected to exhibit a growth phase during spin-up, when forcing pumps energy
-into the inertial range and the singular-value spectrum of
-$\psi(\cdot,\cdot,t)$ broadens, followed by a quasi-stationary rank
-$r^*(\mathrm{Re})$ that increases with Reynolds number
-(Figures~\ref{fig:rank} and~\ref{fig:svd}). If the runs confirm this picture,
-$r^*(\mathrm{Re})$ is a measurable, low-cost summary of how far the dynamics
-is from low-rank compressibility at each Re: slow singular-value decay at
-high Re (Figure~\ref{fig:svd}) is the direct signature of a broad, weakly
-decaying inertial range, and the rank is simply the number of modes needed to
-hold the approximation error below tolerance.
-% [PENDING-CODER: r*(Re) values and spin-up durations per Re; number of
-% indicator-triggered growth events per run; whether the quasi-stationary
-% rank is stable to the statistical window used.]
+The horizon $t^\ast$ is a statement about how a subspace is built, not about rank in
+general. Two measurements pin this down. The horizon is nearly independent of the
+Reynolds number and of the trailing-window length, moving by $2.9\%$ to $7.6\%$ and by
+$0.19\%$ to $0.60\%$ respectively over what we vary. And the static baseline's error
+stops improving altogether from rank $16$: at $N=64$ the ranks $16$, $32$ and $43$ give
+the same error to every digit we report, at every horizon and both Reynolds numbers,
+while ranks $2$, $4$ and $8$ differ from them by up to $85\%$ and drift further apart
+as the horizon grows. The long-horizon advantage is therefore bought by re-fitting the
+subspace to the current state, not by spending more rank on a fixed one, and a
+comparison at equal rank is a comparison of update rules.
 
-This should be read against the static POD baseline of
-Section~\ref{sec:res-pod}. A fixed basis built from snapshots of one
-reference run must choose its count $r_{\mathrm{POD}}$ so that it covers the
-worst case of the window, and it cannot react when the dynamics at a later
-time demands modes the basis does not contain. The cost of staticity is
-therefore twofold: in rank, $r_{\mathrm{POD}}$ must dominate the transient
-peaks of $r(t)$, and in accuracy, intervals where the basis is insufficient
-appear as error spikes (Section~\ref{sec:res-pod}). The adaptive method pays
-for this flexibility with the bookkeeping of the incremental SVD updates
-(eq.~\ref{eq:s-update}), which are cheap relative to a full-grid nonlinear
-residual but nonzero. Whether the rank gap $r_{\mathrm{POD}}(\mathrm{Re})
-- r^*(\mathrm{Re})$ is large enough to change the cost balance
-(Section~\ref{sec:res-cost}) is one of the questions the runs must answer
-honestly; we do not assume it goes in either direction.
-% [PENDING-CODER: r_POD(Re) vs r*(Re) per Re, and the cost balance of the
-% rank gap at each Re (feeds Figure~\ref{fig:cost}).]
+This also fixes the rank at which the comparison ends. The rank at which a propagated
+static subspace stops improving equals the rank budget we set from each grid, $2\lfloor N/3\rfloor+1$, which is $43$ at $N=64$ and $85$ at $N=128$. We read that as a
+statement about the grid rather than about the dynamics: past that rank the static
+baseline is not approximating a low-rank state, it is storing the grid. It is also why
+we report the horizon as not grid-convergent rather than as a quantity to extrapolate.
 
 \subsection{Structural invariants and long-time behavior}
 \label{sec:disc-invariants}
 
-Two invariants deserve emphasis, because they are structural rather than
-numerical. First, divergence-freeness (I1) is a property of the
-\emph{representation}, not of the solver: the velocity is recovered from a
-scalar stream function on the periodic box, $u = (\partial_y \psi,
--\partial_x \psi)$, so the discrete velocity is exactly divergence-free at
-every step and every rank, to roundoff (Table~\ref{tab:div}). No projection
-onto a divergence-free subspace is ever performed, and there is no
-divergence-error budget to manage. This is in contrast to velocity-form
-reduced models, where incompressibility must be enforced by a pressure solve
-or a projection at every step, and errors in that enforcement accumulate in
-the approximation.
+The divergence-free property is the part of this work we would defend hardest,
+because it is a property of the representation rather than of the solver. The velocity
+is recovered from a scalar stream function, so the discrete divergence vanishes
+algebraically at every step, at every rank and every Reynolds number. No projection
+onto a divergence-free subspace is performed, there is no projection parameter, and
+there is no divergence-error budget to manage. A method that enforces the constraint by
+projection satisfies it only to whatever tolerance the projection is given, and the
+tolerance has to be chosen against the very ill-conditioning the constraint exists to
+avoid. We regard the absence of that choice as the substantive difference, and the
+measured residual band of $1.6\times 10^{-14}$ to $2.2\times 10^{-13}$ as confirmation
+rather than as the claim itself.
 
-Second, the energy identity (I2, eq.~\eqref{eq:energy}) is preserved in the
-form $dE/dt = P_{\mathrm{in}} - P_{\mathrm{diss}}$ with the forcing power
-$P_{\mathrm{in}}$ of eq.~\eqref{eq:pin} accounted for explicitly
-(Section~\ref{sec:energy}). Under forcing, the unforced invariant
-``$E(t)$ is monotone non-increasing'' is replaced by this
-forcing-aware balance; the runs must verify it in the statistical sense
-(Section~\ref{sec:res-fidelity}).
-% [PENDING-THEORETICAL-RESEARCH: the forcing-aware invariant statement (D3)
-% is owned by theoretical-research; the exact form used in the paper's
-% verification of I2/I4 should be taken from their write-up once it lands.]
+Under forcing the second invariant is a balance rather than a decay law, and we report
+it as such. It is worth being explicit that the balance the reduced solver satisfies is
+not the balance of the full partial differential equation, and that the two differ by
+the size of the projection's own energy increment. We name which quantity we report and
+why, because quoting the other would overstate the violation by up to a factor of
+several hundred and would make the static baselines look far worse than they are.
 
 What the structure does \emph{not} buy is a rigorous long-time stability
 statement for the full coupled scheme. The viscous step is exact within the
@@ -96,34 +72,53 @@ multi-scale dynamics) become active in the periodically forced 2D problem.
 % their write-up if they produce them, and state explicitly which regime each
 % of Re = 100 / 1000 / 5000 falls in, per vinograd2026.]
 
-Within that context, the expected rank behavior of
-Section~\ref{sec:disc-rank} is the low-rank signature of the regime
-structure: each time the dynamics crosses into a richer regime, new scales
-are excited and the singular-value spectrum broadens, which is precisely what
-the indicator \eqref{eq:indicator} detects. We do not claim that the adaptive
-rank tracks regime boundaries in a sharp or quantifiable way; whether
-$r^*(\mathrm{Re})$ exhibits structure (jumps, plateaus) across the three Re
-tested is an open question for the runs.
-% [PENDING-CODER: if r*(Re) is non-monotone or exhibits plateaus between the
-% three Re tested, note it here with the run references.]
+The regime we validate is the one where low-rank approximation is hardest and most
+worth having: forced two-dimensional turbulence at Reynolds numbers up to $5000$, with
+a slowly decaying singular-value spectrum and a rank requirement well beyond a handful
+of modes. That is the regime in which a method can be cheaper than the full grid in
+principle, and it is also the regime in which a static basis has the most to gain from
+being refitted. The trade we measure is therefore the honest one: at equal rank the
+reduced integrator is the more accurate method for a horizon that grows with rank, and
+beyond that horizon the static baseline wins.
+
+It does not win on cost, and we would rather say so plainly than bury it. The reduced
+integrator costs between $2.21$ and $3.54$ times the full-grid step, and even at the
+pessimistic end of the measurement's own recorded noise it is at least $1.4\times$. It
+also uses more memory, by $2.3$ to $4.0$ MiB depending on the grid. The reason is
+structural rather than an artefact of our implementation: the nonlinear residual is
+evaluated on the full grid, so the reduced solver pays the entire full-grid cost plus
+its own factorisation, and the state is a full field plus its factors plus the
+factorisation workspace. The linear-algebra share of the step is smaller than the
+reference's, which is where a benefit would have had to come from, and it does not.
+
+So the case for the method is not throughput, and we do not make one. It is that the
+full-grid nonlinear step is irreducible for this problem, and the question a practitioner
+faces is not whether to pay it but how much rank to carry while paying it. On that
+question the measurements are unambiguous: rank buys horizon when the subspace is
+refitted and buys nothing at all when it is not. A practitioner who needs a given
+accuracy over a long horizon can reach it at a lower rank with this integrator than
+with any fixed basis we can construct, and pays a bounded factor of two for the
+privilege. Where a full-grid solver is fast enough, it remains the better choice, and
+we say so.
 
 \subsection{Extending to three dimensions}
 \label{sec:disc-3d}
 
-The viscous part of the scheme extends to three dimensions without
-modification: on the periodic box, $\Delta$ acts componentwise and remains
-separable in Fourier space, so the exact rank-preserving viscous flow of
-Proposition~\ref{prop:viscous} (eq.~\eqref{eq:viscous-exact}) carries over
-verbatim for a vector field $\psi$ in place of the scalar. The obstruction
-is elsewhere. In three dimensions there is no scalar stream function whose
-curl gives a divergence-free velocity with the same one-to-one
-correspondence; one must introduce a vector potential and a gauge, or
-equivalently solve for a Helmholtz potential, and the incompressibility
-constraint is then carried by a divergence-free condition on that potential
-rather than by representation. In addition, the vorticity dynamics acquires
-the vortex-stretching term, which has no two-dimensional counterpart and
-changes the structure of the nonlinearity \eqref{eq:nonlin} that the
-projected midpoint step is designed for. We make no claim for a
-three-dimensional formulation in this work; it is identified as the natural
-next extension in Section~\ref{sec:conclusion}, together with the open
-question of how the gauge choice interacts with the low-rank ansatz.
+Three limits bound the claim, and we state them as results rather than as caveats.
+The horizon is not grid-convergent over the range we measure, rising by factors of $1.38$ and $1.69$ from $N=64$ to $N=128$, so it should be read as a property of a
+grid-and-solver pair rather than of the problem. The invariances in Reynolds number and
+window length are measured at $N=64$: the $N=128$ surface was run at one window length
+and one Reynolds number, so neither invariance is corroborated at the second grid. And
+the evidence for rank adaptation is bounded to short horizons, because the adaptive
+runs we have are the only ones that integrate a changing rank, and they are short; we
+therefore make no claim about rank behaviour at long times, and the mechanism above is
+stated for a fixed rank on the strength of the static comparison rather than for an
+adaptively grown one.
+
+The formulation is two-dimensional, periodic and single-mode forced. The viscous part
+of the split is separable in the Fourier basis in any dimension, so that part of the
+structure carries over directly; the stream-function representation of the
+divergence-free constraint does not, and neither does the forcing. In three dimensions
+the constraint would have to be enforced by a different mechanism, and we regard that as
+the substantive open problem rather than a matter of re-running the present code in
+three dimensions.

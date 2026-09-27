@@ -27,9 +27,11 @@ stream function
 with $A = 1$
 % [PENDING-CODER: confirm amplitude A, viscosity nu (Re), grid N, time span,
 % initial rank r_0, and rank tolerances for the L1 run.]
-and viscosity $\nu$ fixed by the chosen Reynolds number
-$\mathrm{Re} = 2\pi/\nu^2$
-% [PENDING-CODER: confirm Re value used for the laminar decay run.]
+and viscosity $\nu = 2\times 10^{-2}$, the value stored in the L1 run record; no
+Reynolds number is attached to the unforced laminar case
+% [PENDING-CODER: the L1 record stores nu only, and the L1 driver computes no
+% Reynolds number, so none is quoted; attach one if the driver gains a
+% convention.]
 . This test verifies (i) the discrete energy monotonicity (I2, unforced) and
 (ii) the exact divergence-free property (I1). It also fixes what the rank
 criterion must \emph{not} do. The Taylor--Green stream function is a single

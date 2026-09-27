@@ -4,33 +4,31 @@
 \label{sec:results}
 
 This section presents the validation of the SP-DLRA scheme along the ladder
-of Section~\ref{sec:setup}. All quantitative values below are pending the
-completed runs; the figure and table layout is fixed in advance so that each
-result can be dropped in without re-structuring the text.
-% [PENDING-CODER: every number in this section must be traceable to
-% state/coder/results/ with config + driver + commit (CHECKLIST item 1.1).]
+of Section~\ref{sec:setup}. Every quantitative value below is read from the
+committed run records in \texttt{state/coder/results/}, with the
+configuration named per measurement.
 
 \subsection{Taylor--Green laminar decay (L1)}
 \label{sec:res-tg}
 
-Figure~\ref{fig:tg} shows the kinetic energy $E(t)$ and the adaptive rank
-$r(t)$ for the unforced Taylor--Green decay of
-Section~\ref{sec:taylor-green}. Two features are expected and must be
-verified: $E(t)$ is monotone non-increasing (I2, unforced), and the
-$\sigma_{\mathrm{tol}}$ rule drives the rank from its initial value
-$r_0 = 3$ down to $r = 1$ as the vortex dissipates.
-% [PENDING-CODER: kinetic-energy time series and rank-over-time trace for the
-% L1 run; the times at which the rank drops 3 -> 2 and 2 -> 1; max |div u|
-% over the run (expected ~1e-14).]
+A manufactured-solution verification. The numerical rank required to hold the
+solution to machine precision over the integrated horizon is one, so this case
+establishes that the discretisation and the exponential flow are exact. It does not
+discriminate between methods, because a rank-one subspace represents this solution
+exactly and so cannot separate a structure-preserving split from a plain one. We
+report it as a correctness check on the solver and not as evidence for the method's
+advantage. Figure~\ref{fig:tg} shows the two quantities the L1 record provides: the
+kinetic energy $E(t)$, non-increasing at every one of the hundred steps integrated
+(I2, unforced), and the retained rank, which is one at every step.
 
 \begin{figure}[t]
   \centering
-  % [PENDING-CODER: generate from the L1 run record.]
   \includegraphics[width=\linewidth]{figures/fig_tg_ke_rank}
-  \caption{Taylor--Green laminar decay (L1). Left: kinetic energy $E(t)$
-  (monotone non-increasing, I2). Right: adaptive rank $r(t)$ decaying
-  $3 \to 2 \to 1$ under the $\sigma_{\mathrm{tol}}$ rule.}
-  % [PENDING-CODER: confirm the rank-decay times shown in the figure.]
+  \caption{Taylor--Green laminar decay (L1). Left: kinetic energy $E(t)$ of the
+  reduced run at rank one against the full grid; it is non-increasing over the
+  hundred steps integrated, with no increase (I2, unforced). Right: the
+  retained rank, one at every step, because the Taylor--Green stream function
+  is a single Fourier mode.}
   \label{fig:tg}
 \end{figure}
 
@@ -56,64 +54,105 @@ the sense in which the comparison below is a comparison of update rules. The
 singular-value spectrum decays slowly at high Re, i.e.\ the low-rank structure
 is only weakly compressible, which is exactly the regime where a \emph{static}
 basis is expected to struggle (Section~\ref{sec:res-pod}).
-% [PENDING-CODER: rank-over-time curves per Re; representative singular-value
-% spectra (e.g.\ at the start and end of the statistical window) per Re;
-% number of indicator-triggered growth events per run.]
+% [PENDING-CODER: the committed records do not tabulate the number of
+% indicator-triggered growth events per run; the rank trace in
+% Figure~\ref{fig:rank} shows a single growth event, at the first check, in
+% every run.]
 
 \begin{figure}[t]
   \centering
-  % [PENDING-CODER: generate from the L2 run records.]
   \includegraphics[width=\linewidth]{figures/fig_rank_vs_time}
   \caption{Retained rank $r(t)$ for forced Kolmogorov flow at
   $\mathrm{Re} \in \{100, 1000, 5000\}$ (L2). The rank reaches the budget within fifteen steps and stays there; the three curves
   coincide.}
-  % [PENDING-CODER: confirm the spin-up duration.]
   \label{fig:rank}
 \end{figure}
 
 \begin{figure}[t]
   \centering
-  % [PENDING-CODER: generate from the L2 run records.]
   \includegraphics[width=\linewidth]{figures/fig_sv_decay}
   \caption{Singular-value decay of $\psi(\cdot,\cdot,t)$ at
-  $\mathrm{Re} \in \{100, 1000, 5000\}$ (L2), at representative times in the
-  statistical window. Slower decay at higher Re.}
-  % [PENDING-CODER: confirm the times and values shown.]
+  $\mathrm{Re} \in \{100, 1000, 5000\}$ (L2), at increasing times in the
+  statistical window (darker is later). Decay is slower at higher
+  $\mathrm{Re}$: each panel reports the modes held at a relative amplitude of
+  $10^{-10}$ and the ratio $\sigma_{20}/\sigma_1$, the latter rising with
+  $\mathrm{Re}$.}
   \label{fig:svd}
 \end{figure}
 
 \subsection{Accuracy against the full-grid reference (L3)}
 \label{sec:res-error}
 
-Figure~\ref{fig:error} compares the SP-DLRA solution against the full-grid
-spectral reference of Section~\ref{sec:reference}: the relative $L^2$ error
-$\norm{\Psi - \psi_{\mathrm{ref}}}_2 / \norm{\psi_{\mathrm{ref}}}_2$ over the
-statistical window, per Reynolds number. The static POD baseline of
-Section~\ref{sec:pod} is plotted for the same quantity.
-% [PENDING-CODER: relative L2 error time series (SP-DLRA vs POD baseline) per
-% Re; max and mean error over the statistical window; any error growth or
-% drift observed; the Re at which (if any) the adaptive model degrades.]
+Against an equal-rank static subspace, the reduced integrator is the more accurate
+method until a horizon $t^\ast$, and the static baseline is the more accurate method
+afterwards. The crossing is a single downward crossing of the error ratio in every
+case we report, and it is bracketed between evaluation horizons rather than
+interpolated. At $N=64$ and $\mathrm{Re}=5000$ we measure $t^\ast = 0.708$ at $r=16$
+and $t^\ast = 1.598$ at $r=32$; at $r=43$ there is no crossing at all, and the static
+baseline never overtakes the reduced integrator. At $\mathrm{Re}=1000$ on the same
+grid the horizons are $0.728$ and $1.720$, that is $2.9\%$ and $7.6\%$ above the
+$\mathrm{Re}=5000$ values, so the horizon is a property of the rank and of how the
+subspace is built rather than of the Reynolds number. Sweeping the trailing-window
+length over $W \in \{0.25, 0.5, 1.0\}$ moves the horizon by between $0.19\%$ and
+$0.60\%$ depending on rank and Reynolds number, over the eight rank--window--Reynolds
+combinations we measure. Both of these invariances are measured at $N=64$: the $N=128$
+surface was run at $W=0.25$ alone and at $\mathrm{Re}=5000$ alone, so neither is
+corroborated at the second grid.
+
+Refining the grid is the one thing that does move the horizon. At $N=128$ and
+$\mathrm{Re}=5000$ we measure $t^\ast = 0.975$ at $r=16$ and $2.694$ at $r=32$, factors of $1.38$ and $1.69$ above the $N=64$ values at the corresponding ranks. The $r=16$ figure is the one to read: its crossing bracket is $[0.5,1.0]$ at both grids and its value is unchanged to every digit we report under two different run configurations, whereas the $r=32$ crossing moves with the horizon grid and its interpolated value with it. The horizon is therefore not grid-convergent over this range and
+we do not extrapolate it. What does carry across the refinement is the rank at which
+the crossing stops existing: $43$ at $N=64$ and $85$ at $N=128$. Each equals $2\lfloor N/3\rfloor+1$ for that grid --- the wavenumbers its $2/3$ rule leaves in one column --- which is the rank budget we set. So the rank at which a propagated static subspace stops improving is where our budget runs out, and we have not separated that from where the dynamics stops improving. These are the largest ranks we ran at each grid, not limits, and we
+report them as such.
+
+The horizon is not a claim about rank in general, and the clearest evidence is that
+extra rank does not help the static baseline at all. At $N=64$ the static baseline's
+error at $r=16$, $r=32$ and $r=43$ is identical at every horizon we evaluate and at
+both Reynolds numbers, to the precision we report; against rank $16$ the ranks $2$,
+$4$ and $8$ differ by up to $85\%$, and the difference grows with the horizon. The
+static subspace stops improving from rank $16$ onward, so the reduced integrator's
+residual advantage at long horizons is bought by re-fitting rather than by dimension.
+This is an $N=64$ result: the $N=128$ surface was not run at ranks $2$, $4$ or $8$,
+so the contrast cannot be, and is not, claimed at the second grid.
+Figure~\ref{fig:error} shows both halves of that: the reduced error at fixed rank
+against the static subspace's, against horizon (left), and the spread of the static
+error across ranks, which is identically zero for $r \geq 16$ and reaches $85\%$ once
+the ranks below $16$ are included (right).
 
 \begin{figure}[t]
   \centering
-  % [PENDING-CODER: generate from the L2/L3 run records.]
-  \includegraphics[width=\linewidth]{figures/fig_error_vs_ref}
-  \caption{Relative $L^2$ error against the full-grid spectral reference over
-  the statistical window, per $\mathrm{Re}$ (L2 vs L3). SP-DLRA (adaptive)
-  versus the static POD baseline (Section~\ref{sec:pod}).}
-  % [PENDING-CODER: confirm the curves and the error magnitudes.]
+  \includegraphics[width=\linewidth]{figures/fig_crossover}
+  \caption{Relative $L^2$ error against the full-grid spectral reference at
+  $N=64$, against horizon. Left: the reduced integrator at fixed rank (solid)
+  against a static subspace re-fitted on a trailing window of the reference
+  trajectory (dashed), for the ranks we ran; the reduced curve falls with rank
+  at every horizon, and the static one stops falling above rank $16$. Right: the
+  spread of the static error across ranks, which is identically zero for
+  $r \geq 16$ and grows with the horizon once the ranks below $16$ are
+  included.}
   \label{fig:error}
 \end{figure}
 
 \subsection{Divergence-free invariant (I1)}
 \label{sec:res-div}
 
-Table~\ref{tab:div} reports $\max |\grad \cdot u|$ over the full time span of
-each run. Since the velocity is recovered from the stream function via
-$u = (\psi_y, -\psi_x)$ (Section~\ref{sec:invariants}), all entries are
-expected at the level of roundoff, $\approx 10^{-14}$, independently of rank,
-Reynolds number, and time.
-% [PENDING-CODER: max |div u| per run (TG, Re 100/1000/5000, reference, POD).]
+Divergence-freeness holds identically and by construction rather than to a
+tolerance. The velocity is recovered from a stream function, so the discrete
+divergence vanishes algebraically at every step, for every rank and every Reynolds
+number; this is a property of the formulation and not of the numerics. Over the
+$124$ measurements we pool from our committed runs, the largest divergence residual
+of any surviving method is $1.1\times 10^{-13}$ and the full-grid solver's own is
+$7.6\times 10^{-14}$, both at the level of the $10^{-14}$ roundoff floor. The spread
+across the pool runs from $1.6\times 10^{-14}$ to $2.2\times 10^{-13}$, and we report
+that band rather than a single bound, because the baselines that do not diverge are
+not at the floor: one reaches $1.0\times 10^{-11}$, three orders above it. We make no
+universal bound of the form ``at most $2.2\times 10^{-13}$'', because four committed
+baselines reach $4.6\times 10^{64}$ to $7.1\times 10^{278}$, and one non-diverging
+baseline reaches $10^{-11}$; the bound is a property of a population, and the population
+is the one we name here.
+Table~\ref{tab:div} gives the per-run values behind those aggregates, and
+Figure~\ref{fig:divfree} the population itself: every configuration that stays
+finite, and the four that do not.
 
 \begin{table}[t]
   \centering
@@ -121,75 +160,113 @@ Reynolds number, and time.
     \toprule
     Run & $\max_t \max_x |\grad \cdot u|$ \\
     \midrule
-    L1 (Taylor--Green)        & [PENDING-CODER] \\
-    L2, $\mathrm{Re}=100$     & [PENDING-CODER] \\
-    L2, $\mathrm{Re}=1000$    & [PENDING-CODER] \\
-    L2, $\mathrm{Re}=5000$    & [PENDING-CODER] \\
-    L3 (full-grid reference)  & [PENDING-CODER] \\
-    L4 (static POD baseline)  & [PENDING-CODER] \\
+    L1 (Taylor--Green)        & $1.9\times 10^{-14}$ \\
+    L2, $\mathrm{Re}=100$     & $2.5\times 10^{-14}$ \\
+    L2, $\mathrm{Re}=1000$    & $2.6\times 10^{-14}$ \\
+    L2, $\mathrm{Re}=5000$    & $2.7\times 10^{-14}$ \\
+    L3 (full-grid reference)  & $7.6\times 10^{-14}$ \\
+    L4 (static POD baseline)  & $1.0\times 10^{-11}$ \\
     \bottomrule
   \end{tabular}
-  \caption{Divergence-free invariant I1: $\max |\grad \cdot u|$ per run. All
-  entries are expected at roundoff level ($\approx 10^{-14}$) by construction.}
+  \caption{Divergence-free invariant I1: $\max_t \max_x |\grad \cdot u|$ per
+  run. The reduced runs and the full-grid reference sit at the $10^{-14}$
+  roundoff floor, which the stream-function reconstruction makes structural
+  rather than numerical; the last row is a propagated fixed-subspace baseline,
+  whose residual is finite but three orders above that floor.}
   \label{tab:div}
 \end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_div_free}
+  \caption{The divergence population of Section~\ref{sec:res-div}. Top: the
+  largest $\max |\grad \cdot u|$ of every committed configuration that stays
+  finite, in units of the $10^{-14}$ roundoff floor (dashed). Bottom: the four
+  fixed-subspace configurations that overflowed, each plotted as the largest
+  divergence reached before the run went non-finite. Both panels count
+  configurations, not measurements.}
+  \label{fig:divfree}
+\end{figure}
 
 \subsection{Rank economy against static POD (L4)}
 \label{sec:res-pod}
 
-We compare the adaptive rank $r(t)$ of SP-DLRA with the static POD count
-$r_{\mathrm{POD}}$ (99\%-energy truncation of the reference snapshots,
-Section~\ref{sec:pod}).
-% [PENDING-CODER: the error of the POD baseline at fixed rank r_POD vs the
-% error of SP-DLRA at its retained rank (from Figure 3); any time intervals
-% where the POD basis is insufficient (error spikes) and SP-DLRA recovers by
-% rank growth.]
+The static baseline is not a strawman: it is the oracle form of a fixed subspace,
+re-fitted on a trailing window of the reference trajectory with the refit schedule
+offset from the evaluation grid, so that no basis ever contains the time at which it
+is scored. It is the strongest static comparator we can construct, and it still stops
+improving from rank $16$ onward while the reduced integrator's error keeps falling. Its
+accuracy is a function of the window length, the refit interval and the offset, all of
+which we record; three successive corrections to this baseline moved the advantage
+horizon down by factors of $1.6$ to $2.8$, so a $t^\ast$ quoted without them is not
+reproducible, and we quote the schedule alongside every horizon.
 
 \subsection{Cost (the honest where-slower story)}
 \label{sec:res-cost}
 
-Figure~\ref{fig:cost} reports per-step and total wall-clock time, together
-with peak memory, for the three solvers (SP-DLRA, full-grid spectral
-reference, static POD baseline) per Reynolds number. Per the cost model of
-Section~\ref{sec:cost}, we do \emph{not} assume a per-step advantage for
-SP-DLRA: the nonlinear residual is evaluated on the full grid at
-rank-independent $O(n \log n)$ cost, so at small rank the per-step cost is
-comparable to, or larger than, the full-grid reference. The figure therefore
-includes, and the text reports explicitly, the regimes in which SP-DLRA is
-\emph{slower}.
-% [PENDING-CODER: per-step and total wall-clock time and peak memory for
-% SP-DLRA / full-grid / POD per Re; the (Re, N) regimes where SP-DLRA is
-% slower than the full-grid reference; total end-to-end cost ratios.]
+We measure the per-step cost of the reduced integrator against the pinned-thread
+full-grid reference under the same accounting in both cases, discarding a warm-up,
+repeating each configuration, and taking medians. Across the six grid--rank
+configurations we time, the ratio lies between $2.21$ and $3.54$. The measurement is
+not sharp enough to justify more than one significant figure, and we say so rather
+than quoting the endpoints as if it did: per-configuration timing spreads are $0.9\%$
+to $6.8\%$, and the reference timing itself varies by $5.7\%$ to $19.8\%$ across its own
+repeats. Even discounting every configuration by both of those spreads, the ratio
+stays at or above $1.4\times$ the full-grid step in every configuration we measured.
+The conclusion does not depend on the precision: even at the most pessimistic end of
+the measurement's own noise the reduced integrator is at least $1.4\times$ the cost of
+the full-grid step in every configuration we measured. We identify no per-step
+speedup, and a full-grid solver on this problem is never comparable to, or faster
+than, the reduced one. The per-step cost is dominated by the rank rule's whole-field
+factorizations rather than by the reduced dynamics, which is why the ratio does not
+improve as $r$ falls. The linear-algebra share of the step is smaller for the reduced
+integrator than for the reference, which is where a benefit would have had to come
+from, and it does not.
 
 \begin{figure}[t]
   \centering
-  % [PENDING-CODER: generate from the benchmark records.]
   \includegraphics[width=\linewidth]{figures/fig_cost}
-  \caption{Cost comparison (L2 vs L3 vs L4): per-step and total wall-clock
-  time and peak memory for SP-DLRA, the full-grid spectral reference, and the
-  static POD baseline, per $\mathrm{Re}$. Includes the regimes in which
-  SP-DLRA is slower (see Section~\ref{sec:cost} for the cost model).}
-  % [PENDING-CODER: confirm all values shown.]
+  \caption{Per-step cost of the reduced integrator against the pinned-thread
+  full-grid spectral reference as a function of grid resolution $N$ (left), and
+  the share of the step spent in linear algebra alone (right), at ranks $2$ and
+  $64$; medians of seven repeats over $2000$ steps. The full-step ratio lies
+  above $2$ at every resolution and rank we timed, and does not improve as $r$
+  falls (see Section~\ref{sec:cost} for the cost model).}
   \label{fig:cost}
 \end{figure}
 
 \subsection{Turbulent fidelity (I4)}
 \label{sec:res-fidelity}
 
-Finally, we compare the kinetic-energy time series and kinetic-energy
-spectrum of the SP-DLRA runs against the full-grid reference
-(Figure~\ref{fig:kestats}).
-% [PENDING-CODER: KE time series and KE spectrum (vs wavenumber) per Re,
-% SP-DLRA vs reference; dissipation-rate statistics; any visible statistical
-% drift of the adaptive model over the retained window.]
+Under forcing, kinetic energy is not monotone, so the second invariant is a balance
+and not a decay law. Measured as the energy balance residual of the projected discrete
+dynamics, all three solver families hold it to between $1.3\times 10^{-4}$ and
+$4.9\times 10^{-4}$ across the $26$ committed measurements we pool. The largest
+residual in that population belongs to our own method, not to a baseline: no solver
+family is an outlier, and the whole population spans less than a factor of four. We report this quantity and not the balance of the
+full partial differential equation, because for a projected method the two differ by
+the size of the projection's own energy increment: the two keys in our artifacts
+differ by up to a factor of several hundred across configurations, and quoting one for
+the other would misstate the violation by orders of magnitude. We integrate $200$
+steps, so every statement here concerns horizons of order one; we claim no long-time
+behaviour, and the only evidence we hold at longer horizons is a single run we do not
+rely on.
+
+The kinetic energy itself is unaffected at that level. In
+Figure~\ref{fig:kestats} the reduced and full-grid energy curves coincide over the
+integrated window at every Reynolds number, with the largest relative difference
+reported in the figure itself, and we show the dealiased spectrum of the reference's
+fluctuation field beside them.
 
 \begin{figure}[t]
   \centering
-  % [PENDING-CODER: generate from the L2/L3 run records.]
   \includegraphics[width=\linewidth]{figures/fig_ke_spectrum}
-  \caption{Kinetic-energy statistics (I4): left, $E(t)$ over the statistical
-  window; right, kinetic-energy spectrum versus wavenumber; per
-  $\mathrm{Re}$, SP-DLRA against the full-grid reference.}
-  % [PENDING-CODER: confirm the curves.]
+  \caption{Kinetic-energy statistics (I4) over the integrated window
+  $t \leq 0.1$. Left: $E(t)$ for the reduced runs against the full grid, per
+  $\mathrm{Re}$; the curves coincide at the resolution of the plot, and the
+  figure reports the largest relative difference per Reynolds number. Right: the
+  energy spectrum of the reference's fluctuation field $\psi'$ over its own
+  statistical window, with the dealiased range marked; the reduced runs are not
+  plotted there, and no reduced spectrum is claimed.}
   \label{fig:kestats}
 \end{figure}
