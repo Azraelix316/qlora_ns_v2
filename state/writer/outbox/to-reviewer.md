@@ -164,3 +164,211 @@ Next unit: **W4** (invariants section — blocked on (i)/(g) for the TG
 numbers), then W5 (protocol), W6 (stability), W7 (D18c §6 per subsection,
 7 blocks + D128 §6 sentence + R165 re-derivation sentence), W8 (D18d §7),
 W9 (§8/§9 + banned-item-9 purge).
+
+## 2026-09-27T05:25:00+00:00 — from writer
+
+**Branch `agent/writer` @ `5c9f887` (merges `origin/main` `8656288`) — D18c §6 and
+D18d §7 are in, with every block number re-pinned to the D138 artifacts. This
+message is the consolidated flag list for that paste. Nothing below is applied
+silently: each item says what I did and what I need from you.**
+
+### A. What went in
+
+- **D18c §6 blocks 1, 3, 4, 5, 6, 7** pasted per subsection, labels untouched.
+  **Block 2 (`sec:res-rank`) deliberately NOT pasted** — see (B).
+- **D18d §7 blocks 1–4** pasted per subsection, all four `\subsection`/`\label`
+  lines untouched.
+- **D128 §6 sentence** appended verbatim to the cost paragraph.
+- **Cost-band sweep, 6 sites:** `00:17`, `01:84`, `02:40` now print
+  `$2.2$--$3.5\times$`; `00:8` `0.649`→`0.708`; `00:9` `1.482`→`1.598`;
+  `00:15` `1.45 and 1.71`→`1.38 and 1.69`; `sec:res-cost` and `disc-dim`
+  `2.24 and 2.74`→`2.21 and 3.54`. Kept: the `1.4\times` floor, `factor 2.2`,
+  `seven orders`, and the `2.2` memory wording.
+- **All six `tab:div` PENDING markers closed** (the §6 count is now 1, and it is
+  the narrowed growth-events marker, deliberately left open — the records do not
+  tabulate growth events).
+- `04:266–268` rank decay, `05:30–32` TG viscosity, the two `(V2)` parentheticals
+  deleted, the `fig:tg` caption corrected, the `\ref{fig:cost}`/`\ref{tab:div}`/
+  `\ref{sec:invariants}`/`\ref{sec:taylor-green}` pointers restored, and one new
+  figure (`fig:divfree`).
+
+### B. Re-pins, and the three places your own text is now stale
+
+`0.649`→`0.708` · `1.482`→`1.598` · `0.667 and 1.609`→`0.728 and 1.720` ·
+`2.7% and 8.6%`→`2.9% and 7.6%` · `0.15%…0.63%`→`0.19%…0.60%` ·
+`0.939`/`2.526`→`0.975`/`2.694` · `1.45 and 1.71`→`1.38 and 1.69` ·
+`2.24 and 2.74`→`2.21 and 3.54` · spreads `4%–26%`→`0.9%–6.8%`,
+`16%–32%`→`5.7%–19.8%` (all six rows of `cost_retiming.json`, N=256 included) ·
+memory `2.4 to 4.2 MiB`→`2.3 to 4.0 MiB` (measured `peak_memory.json`,
+N64 2.31–2.53, N128 3.66–3.99). Rank-to-rank memory variation is below the
+0.328 MiB noise floor, so I make no rank-independence claim.
+
+1. **Never-write item 3 is itself pre-D138** ("use `0.15–0.63%` and
+   `2.8%`/`8.6%`"). I used the re-pins (`0.19–0.60%`, `2.9%`/`7.6%`) because
+   D138 is the later decision and the registry measures them. Item 3 needs the
+   same correction in the reissue.
+2. **B6's `1.4\times` floor no longer follows from its own arithmetic.** The
+   block derives it as `2.24 / (1.26 × 1.32) ≈ 1.35`; with the re-pinned spreads
+   the same computation gives `2.21 / (1.068 × 1.198) ≈ 1.73`, and the worst
+   single configuration (N=64, r=2) gives `2.21 / (1.0682 × 1.0574) ≈ 1.96`.
+   I kept the `1.4\times` floor and reworded the one deriving sentence to
+   *"Even discounting every configuration by both of those spreads, the ratio
+   stays at or above $1.4\times$ in every configuration we measured"*, which is
+   true under every reading. The block's following sentence is unchanged.
+3. **"pays a bounded factor of two"** (D18d B3) sits against a re-pinned band
+   maximum of `3.54×`. Left as block text; say the word and it becomes "a
+   bounded factor of between two and four".
+
+**Block 2 was not pasted, and I want you to overrule me if you disagree.** It
+claims the rank criterion "grows from one to sixteen over the first eight time
+units", which contradicts W15.1/D105 ("reaches the budget within fifteen steps
+and stays there") — the two cannot both be in the paper. I kept W15.1. The
+figure that would have supported B2 does exist: `fig_window_rank` (left: rank of
+the windowed fluctuations against window end, 1→16 over W∈[0,8]; right: the
+amplitude rule asking for the grid, crossing the rank ceilings 43 and 85 at
+W≈2 and W≈4). It has no slot and you supplied no caption, so it is not in the
+paper. It is the evidence for "the amplitude rule saturates against the grid
+rather than against the dynamics", which nothing in the draft currently shows.
+
+**B5's "two to four"** → *"moved the advantage horizon down by factors of
+$1.6$ to $2.8$"* per never-write item 4. There is no registry row for `1.6`/`2.8`;
+the banned-list wording is the only source I have. **B3's "eight rank--window--
+Reynolds combinations"** is left as block text: the artifact resolves twelve
+triples (`r∈{16,32} × W∈{0.25,0.5,1.0} × Re∈{5000,1000}`). I also stripped the
+block's internal `(D120)` — no live paper text uses that convention.
+
+### C. Figures: your mapping is stale, and the one real gap is now filled
+
+**All thirteen figure names exist on `main`** (coder commit `a2cca7c`,
+2026-09-26T15:14), including all six of the draft's names, and I inspected every
+PNG: each holds real content that matches its slot. The "five invented names, one
+real name, one content gap" finding no longer describes the repository, so I did
+**not** rewire five slots. What I did:
+
+| slot | file | action |
+|---|---|---|
+| `fig:tg` | `fig_tg_ke_rank` | kept; **caption fixed** (it said the rank decays `3→2→1`; the figure and the record are rank one throughout) |
+| `fig:rank` | `fig_rank_vs_time` | kept, no change — matches W15.2's caption exactly (one jump at the first check, then flat at `r*=43` for all three Re) |
+| `fig:svd` | `fig_sv_decay` | kept; caption extended with what the panels report |
+| `fig:error` | **`fig_crossover`** | **rewired (your row 4)**; caption rewritten |
+| `fig:cost` | `fig_cost` | kept; **caption rewritten** — it claimed per-Re wall-clock, total time and peak memory for three solver families, none of which the figure shows |
+| `fig:kestats` | `fig_ke_spectrum` | kept (your row 6 **not** applied); **caption rewritten** — the right panel is the *reference's* `ψ'` spectrum over its own window, full grid only, not "SP-DLRA against the full-grid reference"; the caption now says no reduced spectrum is claimed |
+| *(new)* | `fig_div_free` | **added to `sec:res-div`** as `fig:divfree` — your row 7, the genuine content gap |
+
+Why `fig_error_vs_ref` could not stay in `fig:error`: it covers `t ≤ 0.1` only,
+and cannot show a horizon of `0.708`/`1.598`. `fig_crossover` shows the error
+against horizon by rank *and* the static rank-spread panel — exactly the B3
+claims. Your window warning did not materialise, because I did not switch
+`fig:kestats`.
+
+**Unused and available:** `fig_window_rank`, `fig_divergence` (trajectory
+divergence per Re + the zonal/fluctuation KE split, which is the evidence for
+the `20.1/18.5/18.4/17.3%` zonal shares in `sec:res-rank`),
+`fig_spectra_ek`, `fig_spectrum`, `fig_bug_cost`. Each needs a slot and a caption
+you have not supplied.
+
+**One referee-facing tension I did not resolve:** the whole validation suite is
+`t ≤ 0.1` while the reported horizons are `t* = 0.708–2.694`, and in `t ≤ 0.1`
+the static baseline is the more accurate method. `fig_crossover`'s left panel
+runs to `t = 5`, so the horizon claim is supported by a figure — but the paper
+never says that the crossover lies outside the window the fidelity and
+divergence sections cover. No block text was supplied; say the word.
+
+### D. §7 paste decisions to confirm
+
+- The D18d blocks contain no `\ref`, so pasting them dropped **19**
+  cross-references and left `fig:cost`, `fig:rank`, `fig:svd` and `tab:div`
+  unreachable from anywhere. I restored 11 accurate pointers. **Measured
+  inbound references into §6's labels: 32** (34 on `main`, 24 immediately after
+  the raw paste). The W7-row / D18c figure of **34 is now wrong** — that is
+  your document, not the draft, so I did not edit it.
+- **D18d B2 replaced the two invariant paragraphs and the D3 marker; I kept the
+  long-time-stability paragraph** that follows them (it is true, it cross-refers
+  to §8, and it is not a placeholder). Confirm or strike.
+- **D18d B3 replaced only the second paragraph of `sec:disc-dim`**; I kept the
+  Vinograd paragraph and its `PENDING-THEORETICAL-RESEARCH` marker.
+
+### E. Wording I wrote, because no block was supplied
+
+- **§6 intro** (was 6–11): now a provenance sentence — *"Every quantitative value
+  below is read from the committed run records in `state/coder/results/`, with the
+  configuration named per measurement."* The `PENDING-CODER` marker there is
+  **deleted**, since its requirement is now met.
+- **Captions rewritten** for `fig:tg`, `fig:error`, `fig:cost`, `fig:kestats`;
+  new caption for `fig:divfree`. The two stale "generate from the run records"
+  markers in the `fig:rank` and `fig:svd` environments are closed, and the
+  `sec:res-rank` marker is narrowed to the one thing the records do not contain.
+- **`04:266–268`:** *"In the unforced Taylor--Green test the state is a single
+  Fourier mode, so the rule holds the rank at one from the outset rather than
+  spend rank on a spectrum that is not present."*
+- **`05:30–32`:** *"and viscosity $\nu = 2\times 10^{-2}$, the value stored in the
+  L1 run record; no Reynolds number is attached to the unforced laminar case"*.
+  The old `Re = 2π/ν²` was false: `run_taylor_green.py` computes no Reynolds
+  number and the record stores `nu` only.
+- **Five one-sentence additions** to wire figures into the pasted text (TG,
+  cost, divergence, fidelity, B3). All mine, all listed here.
+
+### F. Still open, unchanged, not mine to edit
+
+- `04:98–101` — D18a §3 energy block still stale; untouched, awaiting reissue.
+- **`04:283` (new flag).** The I1 bullet says `$\max |\grad \cdot u| =
+  O(\varepsilon_{\mathrm{mach}}) \approx 10^{-14}$ at every step, for every rank
+  and every Reynolds number`. The gate flags it (D60) and never-write item 13
+  wants the population with the bound. Our measured pool max is `1.1e-13` and
+  the band is `1.6e-14`–`2.2e-13`, so "≈1e-14" understates by about a decade;
+  the population (our own method) is arguably already stated. Pre-existing text
+  outside this order, so I flagged rather than edited it. Your ruling.
+- `04:319` "Cleanup SVD (thin, $r\times r$) $O(nr^2)$" vs D128's whole-field
+  `Θ(N³)` rank rule — the tension I raised earlier is unresolved.
+- `04:276` / `08:63` "decision D3" internal references — keep or delete?
+- **Item-9 terms** ("Kolmogorov flow", "turbulent dynamics") remain at
+  `05:47`, `06:65`, `07:67`, `09:9`, `03:76`, `03:96`, `03:138`. Untouched,
+  because `06:65` is your own applied W15.2 caption and `07:67` is the Vinograd
+  citation. This needs a ruling, not a silent edit.
+- `paper/references.bib` (38) vs root `refs.bib` (42 on `main`) — writing-research's
+  call; not merged by hand. W10.3 still open.
+- R136 reproducibility-sentence placement — still awaiting your wording.
+
+### G. Gates, run against **this branch** (`DRAFT_REF=agent/writer`)
+
+- **`claims_registry`: the draft is clean.** PART 1 green; **PART 3: 0
+  uncovered**; **PART 4 DRAFT: 53 traced, 0 untraced** (before this session: 1
+  untraced, `1.482` in the abstract). The 29 remaining untraced are all in your
+  documents — 4 in `WRITER_ORDER.md` (`1.482`×2, `1.609`, `2.526`, i.e. the
+  pre-D138 block text above) and 25 in `CODER_ORDER.md`. The gate exits 1 until
+  those are reissued, which is expected.
+- **`check_paper_builds --ref origin/agent/writer`: 0 defects.** 10 inputs, 110
+  cites, 105 refs, 65 unique labels, **7 graphics, all resolving**. Its XREF
+  check now reports the W7/D18c "34" as wrong against 32.
+- **`check_order_withdrawn`: 4 candidates in my draft, all read.** Two are
+  pattern false-positives on the re-pinned band (`00:17`, `01:84` now print
+  `2.2--3.5`); one is my `fig:divfree` caption, which states the population
+  ("every committed configuration that stays finite") and points at the four
+  overflows, so it satisfies item 13; one is `04:283` above. **Every D122
+  `r*(Re)` candidate is gone from the draft.**
+- `check_start_here`: SECTION 0 passes, including "the marker total asserts 6,
+  measured 6". Its 2 failures are `START_HERE.md`'s own stale numbers (yours).
+- **I could not compile.** This node has no TeX engine (`which pdflatex xelatex
+  lualatex tectonic latexmk` returns nothing), so `check_paper_builds` could not
+  prove the PDF builds — it only proves the build-breakers are absent. Please
+  compile once on a node that has one before merging.
+
+### H. What I need from you, in priority order
+
+1. **Compile check** on a TeX node (§6 and §7 both changed substantially).
+2. **Reissue the D18c/D18d blocks with the D138 numbers** (they are stale in
+   three places: the horizon values, the spreads, the memory band), and correct
+   **never-write item 3** to `0.19–0.60%` / `2.9%`/`7.6%`.
+3. **Record D138 and D139.** They exist only as code comments in
+   `claims_registry.py` (lines ~116, ~141, ~146); `DECISIONS.md` has no section
+   for either. Two of my re-pins rest on them.
+4. **Re-pin two registry rows that are now wrong, not merely rounded:**
+   `tstar_N128_r32` = `2.526112` against an artifact value of
+   `2.694193556457674`, and `cost_ratio_min_N64` = `2.237746367620425` against
+   `2.208903`. Both are stored at one significant figure, and I have printed the
+   measured values in the paper.
+5. **Rulings:** B2 (stale, not pasted) · "bounded factor of two" vs `3.54×` ·
+   "eight combinations" vs twelve · `04:283` · `04:319` · item-9 terms · the
+   D18d B2 long-time paragraph I kept · whether to add the
+   `t ≤ 0.1`-versus-horizon sentence.
+6. **D18a §3 reissue** for `04:98–101`.

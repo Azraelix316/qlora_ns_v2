@@ -1,7 +1,7 @@
 # NOTES.md — writer
 
 > Branch: `agent/writer` · Worktree: `worktrees/writer`
-> Status: reissued binding WRITER_ORDER (1364 lines, atop main@24d7700): batch 1 pushed (e3a0fa2); batch 2 (unit C) APPLIED + byte-verified in the working tree, pushed this session — W13 (§5 lead paragraph), W14 (TG setup, literal two-sentence replacement → preceding clause now verbless; 3 options flagged (m)), W12 (binding block + per-run lead naming the four record stems + tab:forced-params, 14 rows, every source key verified against the four kolmogorov records) + D124 (eq:re-set → Re = 2U/ν, k = π/L = 1/2) + D128 §4 cost sentence (04 viscous-cost remark) + L3/L4 rewrites + hardware/provenance closure; flags (a)–(r) in outbox ((r) covers the coder's f527aed 1-thread
+> Status: D18c §6 (blocks 1,3,4,5,6,7; block 2 stale, not pasted) + D18d §7 (blocks 1–4) APPLIED per subsection, all block numbers re-pinned to the D138 artifacts; cost band 2.2–3.5 at 6 sites; 6/6 tab:div markers closed; fig:div_free added to sec:res-div. Gates on this branch: claims_registry 0 untraced in the draft, check_paper_builds 0 defects (7 graphics), 0 D122 candidates. NOT compiled (no TeX here). 30 flags in outbox.
 non-canonical re-timing; 05 hardware sentence corrected one→two threads per
 the canonical artifact); gates recorded post-push (XREF 34, PENDING-CODER
 38, draft candidates 8 = known residuals); next W4–W9 (W4 blocked on TG
@@ -61,6 +61,62 @@ intentional holds |
 - [ ] After V1–V7 close: replace all [PENDING-CODER] with artifacts-traceable numbers (CHECKLIST 1.1), un-gate D4, adapt template to the settled venue.
 
 ## Log
+- 2026-09-27 **D18c §6 + D18d §7 applied, numbers re-pinned, markers closed**
+  (`5c9f887` + the xref-restore commit, both pushed). Seven D18c blocks
+  pasted per subsection with `\subsection`/`\label` lines untouched; block 2
+  (`sec:res-rank`) deliberately NOT pasted because it contradicts W15.1/D105
+  (rank 1→16 over eight time units vs "budget within fifteen steps"); the
+  reviewer is asked to overrule. Four D18d blocks pasted. D128's §6 sentence
+  appended verbatim to the cost paragraph.
+  **Re-pins from the D138 artifacts** (D138 has no DECISIONS.md section — it
+  exists only as `claims_registry.py` comments, flagged): `0.649`→`0.708`,
+  `1.482`→`1.598`, `0.667/1.609`→`0.728/1.720`, `2.7%/8.6%`→`2.9%/7.6%`,
+  `0.15%/0.63%`→`0.19%/0.60%`, `0.939/2.526`→`0.975/2.694`,
+  `1.45/1.71`→`1.38/1.69`, band `2.24–2.74`→`2.21–3.54` (printed `2.2–3.5`),
+  spreads `4–26%`/`16–32%`→`0.9–6.8%`/`5.7–19.8%`, memory `2.4–4.2`→
+  `2.3–4.0 MiB`. Never-write item 3 still quotes the pre-D138 values — flagged.
+  B6's `1.4×` floor kept but its deriving sentence reworded (the old
+  arithmetic no longer produces it: `2.24/1.26/1.32≈1.35` → `1.73` on the
+  re-pinned spreads, `1.96` for the worst single configuration). B5's "two to
+  four" → "down by factors of 1.6 to 2.8" (banned item 4; no registry row).
+  B3's `(D120)` internal reference stripped.
+  **All six `tab:div` PENDING markers closed** (TG `1.9e-14`; L2 `2.5/2.6/2.7e-14`;
+  L3 `7.6e-14`; L4 `1.0e-11`) and its "all entries … by construction" caption
+  corrected, since the last row is three orders above the floor. §6 now has one
+  marker, deliberately narrowed to the growth-event count the records do not
+  contain.
+  **Figures:** D18c's mapping is STALE — all thirteen names exist on `main`
+  (coder `a2cca7c`) and each of the six slots holds real, caption-matching
+  content, so five slots were NOT rewired. Rewired only `fig:error` →
+  `fig_crossover` (row 4: `fig_error_vs_ref` covers `t ≤ 0.1` and cannot show a
+  horizon of `0.708`/`1.598`). Added `fig_div_free` to `sec:res-div` as the one
+  genuine content gap (row 7), labelled `fig:divfree`. Captions rewritten for
+  `fig:tg` (rank is one throughout, not `3→2→1`), `fig:error`, `fig:cost` (it
+  never showed per-Re wall clock, total time or memory) and `fig:kestats` (its
+  right panel is the *reference's* spectrum, full grid only). The `fig:rank` and
+  `fig:svd` "generate from the records" markers are closed.
+  **§7:** the ref-free blocks dropped 19 cross-references and stranded
+  `fig:cost`/`fig:rank`/`fig:svd`/`tab:div`; 11 accurate pointers restored, so
+  measured inbound refs into §6's labels = 32 (34 on `main`) — the W7/D18c "34"
+  is now wrong and is the reviewer's to fix. Kept the D18d-B2 long-time-stability
+  paragraph and the Vinograd paragraph + its marker.
+  **My wording, no block supplied:** §6 intro (provenance sentence, marker
+  deleted), five figure-pointer sentences, `04:266–268` (rank one from the
+  outset), `05:30–32` (`ν = 2×10⁻²` from the record; the old `Re = 2π/ν²` was
+  false — the TG driver computes no Re), the two `(V2)` parentheticals deleted.
+  **Gates on this branch:** claims_registry PART 3 0 uncovered, PART 4 DRAFT
+  53 traced / **0 untraced** (was 1); check_paper_builds `--ref` **0 defects**,
+  65 unique labels, 7 graphics all resolving; check_order_withdrawn 4 candidates
+  in the draft, all read (2 band false-positives, 1 compliant population caption,
+  1 pre-existing `04:283` for the reviewer) and **every D122 `r*(Re)` candidate
+  gone**; check_start_here SECTION 0 pass, 6/6 markers, its 2 failures are the
+  reviewer's stale START_HERE numbers. **No TeX engine on this node, so the PDF
+  was not compiled** — the static gate cannot prove that, and the reviewer is
+  asked to compile once. 30 numbered flags in `outbox/to-reviewer.md`, including
+  two registry rows now wrong rather than rounded (`tstar_N128_r32` 2.526112 vs
+  2.694193556457674; `cost_ratio_min_N64` 2.2377 vs 2.208903) and the missing
+  D138/D139 record.
+
 
 - 2026-09-26 Batch 2 (unit C) applied — nine edits, all binding pastes
   byte-verified (whitespace-normalized substring check against
