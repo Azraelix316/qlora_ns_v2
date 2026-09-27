@@ -1,7 +1,7 @@
 # NOTES.md — writer
 
 > Branch: `agent/writer` · Worktree: `worktrees/writer`
-> Status: D18c §6 (blocks 1,3,4,5,6,7; block 2 stale, not pasted) + D18d §7 (1–4) APPLIED per subsection, block numbers re-pinned to the D138 artifacts; cost band 2.2–3.5 at 6 sites; 6/6 tab:div markers closed; fig:div_free added to sec:res-div. Gates on this branch: claims_registry 0 untraced, check_paper_builds 0 defects, 0 D122 candidates. NOT compiled (no TeX here). 30 flags in outbox.
+> Status: order applied and audited block-by-block (24 blocks: 16 verbatim, 1 blocked on D18a, 1 skipped as stale, 6 D138 re-pins). This pass: D18b into §6/§7/§8, §9 headline numbers, README currency. Gates: build 0 defects/7 graphics, claims_registry 0 untraced. NOT compiled (no TeX here). Open: D18a, 2 stale registry rows, no D138/D139 record.
 non-canonical re-timing; 05 hardware sentence corrected one→two threads per
 the canonical artifact); gates recorded post-push (XREF 34, PENDING-CODER
 38, draft candidates 8 = known residuals); next W4–W9 (W4 blocked on TG
@@ -61,6 +61,50 @@ intentional holds |
 - [ ] After V1–V7 close: replace all [PENDING-CODER] with artifacts-traceable numbers (CHECKLIST 1.1), un-gate D4, adapt template to the settled venue.
 
 ## Log
+- 2026-09-27 **Second pass: the 24-block audit, D18b applied, §9 numbers, README**
+  (`b244bab`). `origin/agent/reviewer` == `origin/main` == `8656288`, so there is
+  **no new reviewer note**; `bf05073` turns out to be my own first paper commit
+  (already merged), not a review of the draft — flagged to the reviewer in case a
+  different document was meant.
+  **Block audit** (the START_HERE §1.1 criterion, done by whitespace-normalised
+  match of all 24 paste-ready `latex` blocks against the rendered draft): **16
+  verbatim, 8 not** — 1 blocked (D18a §3 energy block, `04:98–101`, awaiting
+  reissue), 1 deliberately skipped (D18c block 2, stale vs W15.1/D105), 6
+  differing only by the D138 re-pins. Nothing unaccounted for.
+  **D18b applied to §6, §7 and the limitations** (D18b: "use this for §6, §7 and
+  the limitations"). Its substance was already in §6/§7 via the newer D18c/D18d
+  blocks, but **two of its sentences were in no block** and are now in the paper:
+  the *mechanism* of the horizon's refinement behaviour (§6 `sec:res-error`, §7
+  `sec:disc-3d`) and "rank therefore helps … up to the point where the
+  representation, not the method, runs out"; plus D18b's budget clarification
+  inserted *around* W15.4's phrase in §8 rather than replacing it.
+  **D18b's mechanism verified, after nearly inverting it**: the artifact's
+  `ratio_at_bracket` is `static/dlra`, not the reverse; read the other way the
+  reduced advantage looks like it grows. Measured from `crossover_surface.json`
+  vs `crossover_N128.json`, column `relative_l2`, `r=16`, `t=1`: reduced
+  `0.209 → 0.159`, static `0.127 → 0.153`. Reduced converges, static degrades —
+  D18b holds. Printed at 2 s.f. deliberately (no registry rows for the 4-s.f.
+  values).
+  **D18b's `r=43` at `N=128` value is stale** (`2.683` → artifact now
+  `2.989679444793215`); not printed, and it is the second stale registry row in
+  that object (`tstar_N128_r32` = its `t_star_legacy`, not its `t_star`).
+  **§9's headline-numbers marker filled** now that the runs have landed
+  (`≈1e-4` per Re, `4.6e-5` on the finer grid, `2.2–3.5×`, `2.3–4.0 MiB`); the
+  half asking for a **POD-baseline cost ratio is unfillable** — `cost_retiming`
+  times only the reduced integrator against the full-grid reference — so the
+  marker was narrowed and the request sent to `coder`.
+  **README.md had three now-false statements, fixed**: figures "not present yet"
+  (7/7 resolve, 13 PDFs), "§6 all numbers pending coder", and the marker section
+  had no counts (now: 10 `[PENDING-CODER]`: 04×4, 05×3, 06×1, 08×1, 09×1).
+  `main.tex` and `references.bib` audited, nothing needed (10 `\input`s present,
+  38 entries, 0 phantom citations).
+  **Gates on `b244bab`:** `check_paper_builds --ref` 0 defects, 7 graphics, 65
+  labels, XREF measures 33 (W7's "34" now wrong — the reviewer's to fix);
+  `claims_registry` draft **55 traced / 0 untraced**, 0 uncovered; the 29
+  untraced remain in the reviewer's own docs; `check_order_withdrawn` still the
+  same 4 read candidates, **no new one from D18b**. Still **not compiled** — no
+  TeX engine on this node.
+
 - 2026-09-27 **D18c §6 + D18d §7 applied, numbers re-pinned, markers closed**
   (`5c9f887` + the xref-restore commit, both pushed). Seven D18c blocks
   pasted per subsection with `\subsection`/`\label` lines untouched; block 2
