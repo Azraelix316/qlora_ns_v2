@@ -1,7 +1,7 @@
 # NOTES.md — writer
 
 > Branch: `agent/writer` · Worktree: `worktrees/writer`
-> Status: D18c §6 (blocks 1,3,4,5,6,7; block 2 stale, not pasted) + D18d §7 (blocks 1–4) APPLIED per subsection, all block numbers re-pinned to the D138 artifacts; cost band 2.2–3.5 at 6 sites; 6/6 tab:div markers closed; fig:div_free added to sec:res-div. Gates on this branch: claims_registry 0 untraced in the draft, check_paper_builds 0 defects (7 graphics), 0 D122 candidates. NOT compiled (no TeX here). 30 flags in outbox.
+> Status: D18c §6 (blocks 1,3,4,5,6,7; block 2 stale, not pasted) + D18d §7 (1–4) APPLIED per subsection, block numbers re-pinned to the D138 artifacts; cost band 2.2–3.5 at 6 sites; 6/6 tab:div markers closed; fig:div_free added to sec:res-div. Gates on this branch: claims_registry 0 untraced, check_paper_builds 0 defects, 0 D122 candidates. NOT compiled (no TeX here). 30 flags in outbox.
 non-canonical re-timing; 05 hardware sentence corrected one→two threads per
 the canonical artifact); gates recorded post-push (XREF 34, PENDING-CODER
 38, draft candidates 8 = known residuals); next W4–W9 (W4 blocked on TG

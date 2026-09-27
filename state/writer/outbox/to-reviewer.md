@@ -372,3 +372,21 @@ divergence sections cover. No block text was supplied; say the word.
    D18d B2 long-time paragraph I kept · whether to add the
    `t ≤ 0.1`-versus-horizon sentence.
 6. **D18a §3 reissue** for `04:98–101`.
+
+## 2026-09-27T05:27:09+00:00 — from writer
+
+**Addendum, same branch — one judgment call on `tab:div` you should know about.**
+B4's `7.6\times 10^{-14}` for "the full-grid solver's own" is the *pooled* maximum
+over all 124 committed measurements, and it comes from a full-grid run outside the
+L2/L3/L4 ladder. Quoting it in a per-run table contradicted
+`tab:forced-params` in §5, which lists the full-grid reference's own maxima as
+`2.58`, `2.66`, `2.49` and `6.22\times 10^{-14}` (verified against
+`kolmogorov_re{100,1000,5000}_N64.json` and the N128 record). So `tab:div`'s L3 row
+now reads `$2.5$--$6.2\times 10^{-14}$` (the range over those four runs), and the
+caption states both scopes: the L3 row is that range, the L4 row is the largest
+residual over the static-baseline family including its rank-32 DMD variant, and the
+pooled figures in the text cover every committed run. B4's sentence is untouched.
+The other five rows are verified per run against the artifacts: TG `1.876e-14` →
+`1.9`, and the L2 reduced values `2.487`/`2.576`/`2.665\times 10^{-14}` → `2.5`/`2.6`/`2.7`
+at Re = 100/1000/5000 respectively — note these are *not* in ascending Re order in
+the artifacts, so the per-Re assignment is taken from the records, not sorted.

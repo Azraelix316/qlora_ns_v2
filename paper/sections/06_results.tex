@@ -166,15 +166,19 @@ finite, and the four that do not.
     L2, $\mathrm{Re}=100$     & $2.5\times 10^{-14}$ \\
     L2, $\mathrm{Re}=1000$    & $2.6\times 10^{-14}$ \\
     L2, $\mathrm{Re}=5000$    & $2.7\times 10^{-14}$ \\
-    L3 (full-grid reference)  & $7.6\times 10^{-14}$ \\
+    L3 (full-grid reference)  & $2.5$--$6.2\times 10^{-14}$ \\
     L4 (static POD baseline)  & $1.0\times 10^{-11}$ \\
     \bottomrule
   \end{tabular}
   \caption{Divergence-free invariant I1: $\max_t \max_x |\grad \cdot u|$ per
   run. The reduced runs and the full-grid reference sit at the $10^{-14}$
   roundoff floor, which the stream-function reconstruction makes structural
-  rather than numerical; the last row is a propagated fixed-subspace baseline,
-  whose residual is finite but three orders above that floor.}
+  rather than numerical. The L3 row is the range over the four full-grid
+  reference runs, whose per-run values are in
+  Table~\ref{tab:forced-params}, and the L4 row is the largest residual over the
+  static-baseline family, which includes its rank-$32$ DMD variant and is
+  finite but three orders above the floor. The pooled figures quoted in
+  Section~\ref{sec:res-div} cover every committed run, not only these.}
   \label{tab:div}
 \end{table}
 
