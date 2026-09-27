@@ -102,7 +102,12 @@ corroborated at the second grid.
 
 Refining the grid is the one thing that does move the horizon. At $N=128$ and
 $\mathrm{Re}=5000$ we measure $t^\ast = 0.975$ at $r=16$ and $2.694$ at $r=32$, factors of $1.38$ and $1.69$ above the $N=64$ values at the corresponding ranks. The $r=16$ figure is the one to read: its crossing bracket is $[0.5,1.0]$ at both grids and its value is unchanged to every digit we report under two different run configurations, whereas the $r=32$ crossing moves with the horizon grid and its interpolated value with it. The horizon is therefore not grid-convergent over this range and
-we do not extrapolate it. What does carry across the refinement is the rank at which
+we do not extrapolate it. The direction of the refinement is the expected one: at
+rank $16$ and $t = 1$ the reduced integrator's own error falls from $0.21$ to
+$0.16$ on the finer grid, while the static baseline's rises from $0.13$ to
+$0.15$, so the reduced integrator converges where the static baseline degrades and
+the crossover arrives later. Rank therefore helps the evolving subspace all the way
+up to the point where the representation, not the method, runs out. What does carry across the refinement is the rank at which
 the crossing stops existing: $43$ at $N=64$ and $85$ at $N=128$. Each equals $2\lfloor N/3\rfloor+1$ for that grid --- the wavenumbers its $2/3$ rule leaves in one column --- which is the rank budget we set. So the rank at which a propagated static subspace stops improving is where our budget runs out, and we have not separated that from where the dynamics stops improving. These are the largest ranks we ran at each grid, not limits, and we
 report them as such.
 

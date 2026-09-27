@@ -111,7 +111,8 @@ we say so.
 
 Three limits bound the claim, and we state them as results rather than as caveats.
 The horizon is not grid-convergent over the range we measure, rising by factors of $1.38$ and $1.69$ from $N=64$ to $N=128$, so it should be read as a property of a
-grid-and-solver pair rather than of the problem. The invariances in Reynolds number and
+grid-and-solver pair rather than of the problem: under refinement the reduced
+integrator's error falls while the static baseline's rises. The invariances in Reynolds number and
 window length are measured at $N=64$: the $N=128$ surface was run at one window length
 and one Reynolds number, so neither invariance is corroborated at the second grid. And
 the evidence for rank adaptation is bounded to short horizons, because the adaptive

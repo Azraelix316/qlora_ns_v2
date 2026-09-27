@@ -22,11 +22,16 @@ claim is checkable against the runs: the invariants I1--I4, the accuracy
 against the full-grid spectral reference (Section~\ref{sec:res-error}), the
 rank economy against the static POD baseline (Section~\ref{sec:res-pod}),
 and the honest cost picture, including the regimes in which SP-DLRA is
-slower than the full-grid reference (Section~\ref{sec:res-cost}).
-% [PENDING-CODER: the headline numbers of the conclusion -- relative L2 error
-% over the statistical window per Re, and the per-step and total cost ratios
-% vs the full-grid reference and the POD baseline -- go here once the runs
-% land; every number traceable to state/coder/results/ (CHECKLIST 1.1).]
+slower than the full-grid reference (Section~\ref{sec:res-cost}). In numbers:
+over the integrated window the reduced integrator holds a relative $L^2$ error
+of about $10^{-4}$ against the full-grid reference at every Reynolds number we
+ran, and $4.6\times 10^{-5}$ on the finer grid, while costing $2.2$--$3.5\times$
+the full-grid step and using $2.3$--$4.0$~MiB more memory.
+% [PENDING-CODER: the marker asked for the cost ratio against the static POD
+% baseline as well. The committed timing artifact times the reduced integrator
+% against the pinned-thread full-grid reference only, so there is no measured
+% POD-baseline cost ratio to quote; this stays open until the coder times that
+% family.]
 
 Several directions follow directly from the open items identified in
 Section~\ref{sec:limitations}. First, a three-dimensional formulation: the

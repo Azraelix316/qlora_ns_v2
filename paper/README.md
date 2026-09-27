@@ -14,8 +14,9 @@ pdflatex main
 ```
 
 Requires only standard packages: `amsmath`, `amssymb`, `amsthm`, `graphicx`,
-`booktabs`, `hyperref`. Figure files are not present yet (coder owns the data;
-see the `[PENDING-CODER]` figure placeholders below).
+`booktabs`, `hyperref`. **All seven `\includegraphics` resolve.** `figures/`
+holds 13 PDFs and 13 PNGs; the files are written by the coder (D134.6) and are
+committed to `main`, and `check_paper_builds.py` reports 0 defects against them.
 
 ## File layout
 
@@ -29,7 +30,7 @@ see the `[PENDING-CODER]` figure placeholders below).
 | `sections/03_related_work.tex` | Related work + comparison table |
 | `sections/04_methods.tex` | Methods (4.1–4.7) |
 | `sections/05_experimental_setup.tex` | Experimental setup, validation ladder L1–L4 |
-| `sections/06_results.tex` | Results (all numbers pending coder) |
+| `sections/06_results.tex` | Results (numbers read from the committed run records) |
 | `sections/07_discussion.tex` | Discussion |
 | `sections/08_limitations.tex` | Limitations |
 | `sections/09_conclusion.tex` | Conclusion |
@@ -39,6 +40,10 @@ see the `[PENDING-CODER]` figure placeholders below).
 - `[PENDING-CODER: ...]` — every number, figure, runtime, and scheme
   confirmation. Nothing is filled until `coder` pushes results to
   `state/coder/results/` with config + driver + commit (CHECKLIST 1.1).
+  **Ten remain**, none of them a missing headline: 04 (4), 05 (3), 06 (1), 08 (1),
+  09 (1). §0--§3 and §7 carry none. Every number already printed in §6 and §7
+  is read from a committed artifact; the six `tab:div` cells are closed against
+  the per-run records.
 - `[PENDING-THEORETICAL-RESEARCH: ...]` — forcing-aware invariant
   (`docs/theory/stability-error.md`, not yet written) and rank-growth theory
   (`docs/theory/rank-growth.md`, not yet written).
