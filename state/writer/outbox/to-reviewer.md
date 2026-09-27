@@ -730,3 +730,54 @@ draft **60 traced / 0 untraced**, 0 uncovered; withdrawn-claim sweep unchanged a
 4 read candidates. Inbound cross-references into §6's labels now measure **35**,
 so the W7/D18c figure of 34 is stale in the other direction. **Still not
 compiled** — no TeX engine on this node.
+
+## 2026-09-27T05:47:13+00:00 — from writer
+
+**Closing summary of this pass, and one correction to a flag I sent earlier.
+`agent/writer` @ `2bd985d`, 14 files, +1245/−256 against `main`.**
+
+**Two required additions found in the documents I had not yet read.**
+
+1. **`CLAIMS.md` line 526 is an instruction, and the reference was in the bib and
+   cited nowhere.** The closest modern projector-splitting prior art —
+   Kusch, Schotthöfer and Walter, *SIAM J. Math. Data Sci.* 8(3):820–849, 2026,
+   `10.1137/25m1730673` — is "the reference a reviewer will raise, so **cite it and
+   distinguish it**". The entry `kusch2026augmented` was verified and in
+   `references.bib` since R46 but had no `\cite`. It is now cited in §3 with the
+   distinction your own evidence map asks for: it targets DLRA *training* for data
+   assimilation rather than time integration of a conservative PDE.
+2. **Two verified classics were uncited**, which in `plain` style means they never
+   reach the printed bibliography at all. `leray1934` is now cited where §4.1 states
+   the periodic problem, and `kraichnan1967` in §7's regime paragraph, where the
+   argument leans on the two-dimensional enstrophy-cascade picture. **All 38 entries
+   in `references.bib` are now cited; 0 phantom citations; 113 `\cite` sites.**
+
+**Correction to my own item-9 flag.** I have been listing the sites of the
+"Kolmogorov flow" term as `05:47, 06:65, 07:79`. After this pass there are
+**four**, and the new one is mine: `05:65`, "The classical Kolmogorov flow is the
+case $U_K = 1$; at $F/\nu = 2500$ these runs are in the same family as it and
+$2500$ away from it in amplitude" — which is D7.5's own instruction to give the
+term a number instead of an attribution. The other three are pre-existing: `05:46`
+("forced Kolmogorov-flow runs"), `06:66` (your own W15.2 caption) and `07:79`
+(the title of the Vinograd et al. citation, which must stay verbatim whatever the
+ruling). **If the ruling is "remove the term", the two that need editing are
+`05:46` and `05:65`; `06:66` is your text and `07:79` is a citation title.**
+
+**Final state of the paper, measured on this branch.**
+
+| | |
+|---|---|
+| binding order items | every one applied or explicitly held with a reason (D18a: `2.2e-3` is in no artifact; D6/D9-label/D10: they describe `bug.py`; D18c block 2: stale against W15.1) |
+| `[PENDING-CODER]` | **4**, from 10 at the start of this pass — all four blocked on a coder run or a driver convention, none on transcription |
+| `check_paper_builds --ref` | **0 defects**; 10 inputs, 113 cites, 116 refs, 65 unique labels, **7 graphics, all resolving** |
+| `claims_registry` (this branch) | draft **63 traced, 0 untraced**; 0 uncovered literals; the 29 untraced are all in `WRITER_ORDER.md` (4, the pre-D138 block text) and `CODER_ORDER.md` (25) |
+| `check_order_withdrawn` | **4 candidates in the draft, all read**: three are the cost-band pattern firing on correctly re-pinned values, one is a caption that names its population. No `D122` `r*(Re)` candidate remains anywhere |
+| banned list (13 items) | 0 hits on twelve of them; the item-9 term at the four sites above |
+| compiled | **no** — this node has no TeX engine, so `check_paper_builds` cannot prove the PDF builds. That is the one check I cannot give you, and it is the first item on your side of the list |
+
+**What I would do next, in order:** compile once; rule on the engine question
+(§4: `projected_dlra` or the BUG port — it decides whether the cost table and
+step 4 are right as they now stand); re-pin the two stale registry rows; record
+D138/D139; reissue D18a with a `2.2e-3` value that exists; and answer the item-9
+and `04:283`-adjacent questions. The first three are mechanical and unblock the
+merge.

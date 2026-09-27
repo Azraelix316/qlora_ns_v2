@@ -1,7 +1,7 @@
 # NOTES.md — writer
 
 > Branch: `agent/writer` · Worktree: `worktrees/writer`
-> Status: order fully applied or explicitly held; 6 of 10 markers closed from artifacts/code (10 -> 4, the rest blocked on a coder run or a driver convention). Held: D18a (2.2e-3 in no artifact), D6/D9-label/D10 (describe bug.py), D18c-B2 (stale). Gates: 0 defects, 0 untraced. NOT compiled — no TeX here.
+> Status: order fully applied or explicitly held; markers 10 -> 4 (all blocked on coder/driver); all 38 bib entries now cited incl. kusch2026augmented (CLAIMS.md instruction). Gates: 0 defects, 0 untraced, 4 read candidates. AWAITING: one compile, the engine ruling, 2 registry re-pins, D138/D139 record, D18a. NOT compiled here (no TeX).
 non-canonical re-timing; 05 hardware sentence corrected one→two threads per
 the canonical artifact); gates recorded post-push (XREF 34, PENDING-CODER
 38, draft candidates 8 = known residuals); next W4–W9 (W4 blocked on TG
@@ -61,6 +61,35 @@ intentional holds |
 - [ ] After V1–V7 close: replace all [PENDING-CODER] with artifacts-traceable numbers (CHECKLIST 1.1), un-gate D4, adapt template to the settled venue.
 
 ## Log
+- 2026-09-27 **Sixth pass: CLAIMS.md and the citation inventory (`2bd985d`)**
+  — two required additions found in documents I had not yet read. **CLAIMS.md
+  line 526 is an instruction, and the reference was in the bib and cited
+  nowhere**: `kusch2026augmented` (Kusch, Schotthöfer, Walter, SIMODS 8(3),
+  820–849, 2026, the closest modern projector-splitting prior art, "the
+  reference a reviewer will raise, so cite it and distinguish it") is now cited
+  in §3 with D4's distinction (DLRA *training* / data assimilation, not time
+  integration of a conservative PDE). **Two verified classics were uncited** and
+  would never have reached the printed bibliography in `plain` style: `leray1934`
+  at §4.1's periodic problem and `kraichnan1967` at §7's regime paragraph, where
+  the 2D enstrophy-cascade picture is what the argument leans on. **All 38 bib
+  entries are now cited; 113 `\cite` sites; 0 phantom citations.**
+  **Corrected my own item-9 flag:** the "Kolmogorov flow" term now has **four**
+  sites, the new one being mine at `05:65` — D7.5's own instruction to give the
+  term a number rather than an attribution ("the classical Kolmogorov flow is
+  `U_K = 1`; at `F/ν = 2500` we are in the same family and 2500 away in
+  amplitude"). The other three are pre-existing (`05:46`, the reviewer's own
+  W15.2 caption at `06:66`, and the Vinograd citation title at `07:79`, which
+  must stay verbatim). If the ruling is "remove the term", only `05:46` and
+  `05:65` need editing.
+  **Measured final state on this branch:** every binding order item applied or
+  explicitly held with a reason; `[PENDING-CODER]` 4 (from 10), all blocked on a
+  coder run or a driver convention; `check_paper_builds --ref` **0 defects**
+  (10 inputs, 113 cites, 116 refs, 65 labels, 7 graphics resolving);
+  `claims_registry` draft **0 untraced**, 0 uncovered (the 29 are in the
+  reviewer's own docs); `check_order_withdrawn` 4 read candidates, no D122;
+  banned list clean on 12 of 13 items. **Still not compiled** — no TeX engine
+  on this node, and that is the one mechanical check I cannot supply.
+
 - 2026-09-27 **Fifth pass: six answerable markers closed (10 → 4)**
   (`389d0c5`). Applied D124's premise — no marker should be blocked on
   computation, only on an answer nobody wrote down — to each of the ten
