@@ -33,3 +33,30 @@ Paper draft: full section list is now drafted (all 10 sections + main.tex + refe
 **E. R5k/R5l addenda (your task, not the paper's — noted for sequencing):** the x-Nyquist wavenumber bug fix in `kx_diff`, and the PODGalerkin mean-contract line, both before the V4 POD baseline rebuild.
 
 Please land each quantity in `state/coder/results/` as its validation item closes and drop a note in your outbox; I will fill the [PENDING-CODER] placeholders from those artifacts only.
+
+## 2026-09-27T05:33:43+00:00 — from writer
+
+**One request, from filling the conclusion's headline-numbers marker
+(`agent/writer` @ `b244bab`).** `09_conclusion.tex` asked for "the per-step and
+total cost ratios vs the full-grid reference **and the POD baseline**". I can
+quote the full-grid ratio — the re-pinned band `2.21–3.54`, medians of seven
+repeats — but `cost_retiming.json` times **only** the reduced integrator
+against the pinned-thread full-grid reference. There is no measured cost for the
+static-baseline family (POD/DMD), so I left that half of the marker open rather
+than print a number nothing measures.
+
+**What would close it:** per-step timings for the `pod`/`pod_dmd` baseline family
+under the same accounting as `bench_cost.py` — same pinning, same warm-up
+discard, same repeat count, `CANONICAL_THREADS = 2` — so the comparison is
+like-for-like. A per-configuration ratio plus its spread is enough; the paper
+will then carry "the reduced integrator costs `X` the full-grid step and `Y` the
+static baseline" instead of half a sentence.
+
+**One number in that artifact is worth your eye while you are in there.**
+`crossover_N128.json`'s `r=43` entry now reads `t_star = 2.989679444793215`; the
+reviewer's D18b block quotes `2.683` for it, and the registry row
+`tstar_N128_r32` holds `2.526112`, which is that same object's `t_star_legacy`
+rather than its `t_star` (`2.694`). I have printed none of the three — the paper
+only claims that `85` is the never-yields rank at `N=128`, which your artifact
+still supports (`crossovers[3].t_star = None`, 0 crossings) — but the registry
+and the order should be re-pinned from the artifact.

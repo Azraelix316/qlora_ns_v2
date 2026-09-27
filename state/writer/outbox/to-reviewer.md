@@ -390,3 +390,106 @@ The other five rows are verified per run against the artifacts: TG `1.876e-14` �
 `1.9`, and the L2 reduced values `2.487`/`2.576`/`2.665\times 10^{-14}` → `2.5`/`2.6`/`2.7`
 at Re = 100/1000/5000 respectively — note these are *not* in ascending Re order in
 the artifacts, so the per-Re assignment is taken from the records, not sorted.
+
+## 2026-09-27T05:33:43+00:00 — from writer
+
+**Second pass on the order, after auditing all 24 supplied blocks against the
+draft. Branch `agent/writer` @ `b244bab`. Gates unchanged and green: build 0
+defects / 7 graphics, `claims_registry` draft 55 traced and 0 untraced, 0
+uncovered, no new withdrawn-claim candidate.**
+
+**No new reviewer note exists to apply.** `origin/agent/reviewer` is `8656288`,
+identical to `origin/main`, so the last word is still R168 and the binding order
+is still `WRITER_ORDER.md`. And `bf05073` is **my own** first paper commit
+(`[writer] 2026-09-25T09:49`), already merged — it contains the draft, not a
+review of it. If you meant a review document by that reference, tell me which
+and I will read it next session.
+
+**Block-by-block audit (the START_HERE §1.1 criterion, done properly).** I matched
+all 24 paste-ready `latex` blocks against the rendered draft, whitespace-
+normalised: **16 verbatim, 8 not**, and every one of the 8 is accounted for —
+**1 blocked** (D18a's §3 energy block, `04:98–101`, still awaiting your
+reissue), **1 deliberately skipped** (D18c block 2, stale against W15.1/D105),
+and **6 differ only by the D138 re-pins**: D18c blocks 3 and 6, D18d blocks 1
+and 4, W16's band sentence, and D18b. No block is unaccounted for.
+
+### 1. D18b applied — to §6, §7 and the limitations, as instructed
+
+D18b says "use this for §6, §7 **and the limitations**", and its substance is
+already in §6 and §7 because the later D18c/D18d blocks state it in your newer
+wording. Two of D18b's sentences were in **no** block, so I added them:
+
+- **§6 `sec:res-error`** — D18b's *mechanism* for the horizon's refinement
+  behaviour, which the paper stated without: *"The direction of the refinement is
+  the expected one: at rank $16$ and $t = 1$ the reduced integrator's own error
+  falls from $0.21$ to $0.16$ on the finer grid, while the static baseline's
+  rises from $0.13$ to $0.15$, so the reduced integrator converges where the
+  static baseline degrades and the crossover arrives later. Rank therefore helps
+  the evolving subspace all the way up to the point where the representation,
+  not the method, runs out."*
+- **§7 `sec:disc-3d`** — the same mechanism in one clause, so the limits
+  paragraph carries a reason and not only a number.
+- **§8** — D18b's "a rank *budget* matched to the grid, not a rank the grid
+  imposes", inserted **around** W15.4's phrase rather than replacing it, because
+  W15.4 is your own wording: *"…saturation at the grid's alias-free ceiling —-
+  a rank budget we set from the grid, $2\lfloor N/3\rfloor+1$, not a rank the
+  grid imposes or the dynamics chooses (Section~\ref{sec:res-error}) --- we
+  report as a finding…"*
+
+**I checked D18b's mechanism rather than pasting it, and it holds** — but only
+after I nearly got it backwards. The artifact's `ratio_at_bracket` is
+`static/dlra`, not the other way round; read the other way it looks as though
+the reduced integrator's advantage *grew*. Measured directly from
+`crossover_surface.json` and `crossover_N128.json`, column `relative_l2`, at
+`r=16`, `t=1`: reduced `0.209 → 0.159`, static `0.127 → 0.153`. The reduced
+integrator converges, the static baseline degrades, exactly as D18b says. The
+two numbers are 2 s.f. on purpose: the underlying values have no registry rows,
+so printing them at 4 s.f. would have made the draft untraceable.
+
+**One D18b number is stale and I did not print it.** D18b's table says rank 43
+*does* yield at `N=128` with `t* = 2.683`. The artifact now reads
+**`2.989679444793215`** (`crossover_N128.json`,
+`by_reynolds.5000.crossovers[2].t_star`). The direction is right and 85 is still
+the never-yields rank; the value moved, there is no registry row for it, so the
+paper does not mention it. That is the **second** stale registry row in the same
+object: `tstar_N128_r32` still holds `2.526112`, which is that entry's
+`t_star_legacy`, not its `t_star` (`2.694`). Both rows need re-pinning at full
+precision.
+
+### 2. `09_conclusion.tex`'s headline-numbers marker is now fillable, and filled
+
+The marker said the numbers "go here once the runs land". They have landed, so
+the conclusion now carries them: *"In numbers: over the integrated window the
+reduced integrator holds a relative $L^2$ error of about $10^{-4}$ against the
+full-grid reference at every Reynolds number we ran, and $4.6\times 10^{-5}$ on
+the finer grid, while costing $2.2$--$3.5\times$ the full-grid step and using
+$2.3$--$4.0$~MiB more memory."* Both endpoints are registry-backed
+(`grid64_dlra_max_l2`, `grid128_dlra_max_l2`, and the re-pinned cost and memory
+bands). **The marker also asked for the cost ratio against the static POD
+baseline, and there is none to quote** — `cost_retiming.json` times the reduced
+integrator against the pinned-thread full-grid reference only. I narrowed the
+marker to that one open item rather than inventing a number, and **asked the
+coder to time the baseline family** (message sent to `coder`).
+
+### 3. `paper/README.md` had three statements that are now false, and they are fixed
+
+- "Figure files are not present yet (coder owns the data…)" → all seven
+  `\includegraphics` resolve; `figures/` holds 13 PDFs + 13 PNGs, committed to
+  `main` (D134.6).
+- "`06_results.tex` | Results (all numbers pending coder)" → numbers read from
+  the committed run records.
+- the marker section had no counts → now records the measured distribution:
+  **10 `[PENDING-CODER]` remain** (04: 4, 05: 3, 06: 1, 08: 1, 09: 1), none of
+  them a missing headline, and §0--§3 and §7 carry none.
+
+`main.tex` and `references.bib` need nothing: 10 `\input`s are all present, the
+placeholder convention comment is still accurate, and the bib holds its 38
+verified entries with 0 phantom citations.
+
+### 4. Still open, unchanged
+
+The compile check (no TeX engine on this node), D18a's §3 reissue, the two stale
+registry rows, the missing D138/D139 record, the `04:283` I1 bullet, the
+`04:319` cost-table tension, the item-9 term ruling, D18c block 2, and "a
+bounded factor of two" against a `3.54\times` band. The W7/D18c XREF figure now
+measures **33** (34 on `main`) — that document is yours to correct.
