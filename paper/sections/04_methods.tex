@@ -96,9 +96,11 @@ system possesses the Kolmogorov equilibrium
   \label{eq:kolmogorov}
 \end{equation}
 at which \eqref{eq:energy} gives $P_{\mathrm{in}} = P_{\mathrm{diss}}
-= 2\pi^2 F^2/\nu$; for the definition
-$\mathrm{Re} = 2\pi F/\nu^2$ this reads $P_{\mathrm{in}}(\psi_K) =
-\mathrm{Re}\cdot \nu^2 \, \|\cos y\|_2^2/(2\pi)$.
+= 2\pi^2 F^2/\nu$. That equilibrium is an exact solution of the discretised
+equations for any $(F,\nu)$: the diffusion and forcing terms cancel, and the
+advection of $\omega_K$ vanishes identically. It is not, however, the state the
+runs are started from --- Section~\ref{sec:setup} records how far below it they
+begin.
 % [PENDING-CODER: confirm the discrete energy identity (de-aliasing policy,
 % e.g.\ 2/3 rule) and that P_in is computed as -F <psi, cos y> in the code.]
 
@@ -162,9 +164,11 @@ is the cost of the viscous stage. The rank rule is separate: as implemented,
 it factorizes the whole field at four stage boundaries per step, so the
 per-step cost is $\Theta(N^3)$ and \textbf{independent of $r$} --- $r=2$ and
 $r=64$ cost the same, because the truncated reconstruction changes only which
-columns of an already-computed factorization are used. Per-stage rank updates
-would invert this; we report the implemented behaviour rather than the
-asymptotic one.
+columns of an already-computed factorization are used --- measured, the ratio of
+the $r=64$ to the $r=2$ full-step cost is $1.13$ at $N=64$ and within $5\%$ at
+the two finer grids, against per-configuration timing spreads of order $1\%$.
+Per-stage rank updates would invert this; we report the implemented behaviour
+rather than the asymptotic one.
 \end{remark}
 
 \begin{remark}[What is preserved]
@@ -331,6 +335,21 @@ Per step, with $n = N^2$ grid points and rank $r$:
   \bottomrule
 \end{tabular}
 \end{center}
+
+\paragraph{Timing protocol.} Per-step cost is the median of seven or more
+repeats after a discarded warm-up, taken under two accountings --- the complete
+reduced step, including the full-grid nonlinear evaluation and all projections,
+and the time inside the whole-field factorizations alone --- each expressed as a
+ratio against the pinned-thread full-grid reference. Configurations are
+interleaved rather than run to completion one after another: on a shared node the
+per-configuration median is unreliable, while the ratio between two interleaved
+configurations is not. That is why we report the spreads and quote the band to one
+significant figure. Two further facts belong here rather than in a footnote. The
+rank is \emph{held fixed} for the timing, so the cost is measured at a fixed rank
+and not under adaptation. And the benchmark state is an unforced multi-mode decay
+rather than the forced initial condition, because a fixed low rank on a forced
+field grows without bound and makes the factorization fail --- a property of that
+configuration rather than a cost result.
 
 The full-grid spectral reference has per-step cost $O(n \log n)$ with the same
 asymptotic form. We emphasize the honest consequence: because the nonlinear

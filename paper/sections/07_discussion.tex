@@ -21,6 +21,14 @@ subspace to the current state, not by spending more rank on a fixed one, and a
 comparison at equal rank is a comparison of update rules; the static baseline
 itself is defined in Section~\ref{sec:res-pod}.
 
+One distinction this discussion keeps is between a static subspace that is
+merely worse and one that is unstable. The horizon above is where the evolving
+subspace becomes the \emph{more accurate} method, at $t^\ast$ below $2.7$; the
+propagated fixed subspace fails outright much later, at $t = 5.5$ to $7.2$ in the
+$T=8$ stability runs of Figure~\ref{fig:divfree}, which are not the validation
+runs of Section~\ref{sec:setup} and which we do not otherwise rely on. The two
+statements are separate, and we do not let the second stand in for the first.
+
 This also fixes the rank at which the comparison ends. The rank at which a propagated
 static subspace stops improving equals the rank budget we set from each grid, $2\lfloor N/3\rfloor+1$, which is $43$ at $N=64$ and $85$ at $N=128$. We read that as a
 statement about the grid rather than about the dynamics: past that rank the static

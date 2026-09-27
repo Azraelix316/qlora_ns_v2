@@ -55,9 +55,17 @@ on grid resolution $N = 64$, and $N = 128$ at $\mathrm{Re} = 5000$, with time
 step $\Delta t = 5\times 10^{-4}$ and $2.5\times 10^{-4}$ respectively --- the
 step halves with the resolution, which holds the Courant number fixed rather
 than the step alone, and the measured Courant numbers of the two runs differ by
-under $6\%$. The initial condition is the Kolmogorov equilibrium at base speed
-$0.5$ perturbed by a field of velocity RMS $1.0$ built from the modes below
-cutoff $8$, from a fixed seed. Runs are integrated to $t = 0.1$, and the
+under $6\%$. The initial condition is a shear of the Kolmogorov form
+$u = U \sin y\, e_x$ at $U = 0.5$, perturbed by a field of velocity RMS $1.0$
+built from the modes below cutoff $8$, from a fixed seed. It is emphatically
+\emph{not} the forced equilibrium $\psi_K$ of eq.~\eqref{eq:kolmogorov}, whose
+velocity amplitude is $U_K = F/\nu$: that is $2500$ at $\mathrm{Re}=5000$, where
+the runs start at $E(0)/E_K = 3.6\times 10^{-7}$ of its energy, essentially at
+rest and driven up toward it. The absence of stationarity over the horizons we
+measure is therefore a property of this initial condition and not of the flow,
+which possesses the exact steady state $\psi_K$. The classical Kolmogorov flow is
+the case $U_K = 1$; at $F/\nu = 2500$ these runs are in the same family as it and
+$2500$ away from it in amplitude. Runs are integrated to $t = 0.1$, and the
 $\mathrm{Re} = 5000$ case is also run to $t = 1.0$ at ten times the step count.
 The per-run configuration is transcribed from the run records in
 \texttt{state/coder/results/} ---
