@@ -17,9 +17,10 @@ establishes that the discretisation and the exponential flow are exact. It does 
 discriminate between methods, because a rank-one subspace represents this solution
 exactly and so cannot separate a structure-preserving split from a plain one. We
 report it as a correctness check on the solver and not as evidence for the method's
-advantage. Figure~\ref{fig:tg} shows the two quantities the L1 record provides: the
-kinetic energy $E(t)$, non-increasing at every one of the hundred steps integrated
-(I2, unforced), and the retained rank, which is one at every step.
+advantage. Figure~\ref{fig:tg} shows the two quantities the record of
+Section~\ref{sec:taylor-green} provides: the kinetic energy $E(t)$, non-increasing
+at every one of the hundred steps integrated (I2, unforced), and the retained
+rank, which is one at every step.
 
 \begin{figure}[t]
   \centering
@@ -150,6 +151,7 @@ universal bound of the form ``at most $2.2\times 10^{-13}$'', because four commi
 baselines reach $4.6\times 10^{64}$ to $7.1\times 10^{278}$, and one non-diverging
 baseline reaches $10^{-11}$; the bound is a property of a population, and the population
 is the one we name here.
+The reconstruction is the one of Section~\ref{sec:invariants}.
 Table~\ref{tab:div} gives the per-run values behind those aggregates, and
 Figure~\ref{fig:divfree} the population itself: every configuration that stays
 finite, and the four that do not.
@@ -206,7 +208,8 @@ reproducible, and we quote the schedule alongside every horizon.
 
 We measure the per-step cost of the reduced integrator against the pinned-thread
 full-grid reference under the same accounting in both cases, discarding a warm-up,
-repeating each configuration, and taking medians. Across the six grid--rank
+repeating each configuration, and taking medians
+(Figure~\ref{fig:cost}). Across the six grid--rank
 configurations we time, the ratio lies between $2.21$ and $3.54$. The measurement is
 not sharp enough to justify more than one significant figure, and we say so rather
 than quoting the endpoints as if it did: per-configuration timing spreads are $0.9\%$

@@ -7,7 +7,10 @@
 \label{sec:disc-rank}
 
 The horizon $t^\ast$ is a statement about how a subspace is built, not about rank in
-general. Two measurements pin this down. The horizon is nearly independent of the
+general. Two measurements pin this down
+(Section~\ref{sec:res-error}, with the rank trace and the singular-value decay
+they are read from in Figures~\ref{fig:rank} and~\ref{fig:svd}). The horizon is
+nearly independent of the
 Reynolds number and of the trailing-window length, moving by $2.9\%$ to $7.6\%$ and by
 $0.19\%$ to $0.60\%$ respectively over what we vary. And the static baseline's error
 stops improving altogether from rank $16$: at $N=64$ the ranks $16$, $32$ and $43$ give
@@ -15,7 +18,8 @@ the same error to every digit we report, at every horizon and both Reynolds numb
 while ranks $2$, $4$ and $8$ differ from them by up to $85\%$ and drift further apart
 as the horizon grows. The long-horizon advantage is therefore bought by re-fitting the
 subspace to the current state, not by spending more rank on a fixed one, and a
-comparison at equal rank is a comparison of update rules.
+comparison at equal rank is a comparison of update rules; the static baseline
+itself is defined in Section~\ref{sec:res-pod}.
 
 This also fixes the rank at which the comparison ends. The rank at which a propagated
 static subspace stops improving equals the rank budget we set from each grid, $2\lfloor N/3\rfloor+1$, which is $43$ at $N=64$ and $85$ at $N=128$. We read that as a
@@ -36,10 +40,10 @@ projection satisfies it only to whatever tolerance the projection is given, and 
 tolerance has to be chosen against the very ill-conditioning the constraint exists to
 avoid. We regard the absence of that choice as the substantive difference, and the
 measured residual band of $1.6\times 10^{-14}$ to $2.2\times 10^{-13}$ as confirmation
-rather than as the claim itself.
+rather than as the claim itself (Table~\ref{tab:div}, Figure~\ref{fig:divfree}).
 
 Under forcing the second invariant is a balance rather than a decay law, and we report
-it as such. It is worth being explicit that the balance the reduced solver satisfies is
+it as such (Section~\ref{sec:res-fidelity}). It is worth being explicit that the balance the reduced solver satisfies is
 not the balance of the full partial differential equation, and that the two differ by
 the size of the projection's own energy increment. We name which quantity we report and
 why, because quoting the other would overstate the violation by up to a factor of
@@ -82,7 +86,8 @@ reduced integrator is the more accurate method for a horizon that grows with ran
 beyond that horizon the static baseline wins.
 
 It does not win on cost, and we would rather say so plainly than bury it. The reduced
-integrator costs between $2.21$ and $3.54$ times the full-grid step, and even at the
+integrator costs between $2.21$ and $3.54$ times the full-grid step
+(Section~\ref{sec:res-cost}), and even at the
 pessimistic end of the measurement's own recorded noise it is at least $1.4\times$. It
 also uses more memory, by $2.3$ to $4.0$ MiB depending on the grid. The reason is
 structural rather than an artefact of our implementation: the nonlinear residual is
