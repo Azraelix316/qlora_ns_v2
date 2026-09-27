@@ -17,8 +17,14 @@ PDEs by Nonnenmacher and Lubich~\cite{nonnenmacher2008}. The key practical idea
 for stiff dynamics is
 the \emph{projector split}: integrate the linear part exactly with the frozen
 factors, then update the factors for the nonlinear part
-\cite{lubich2014}. Rank adaptation via incremental SVD (the row-action
-technique) makes the rank grow only when needed \cite{haasdonk2012}.
+\cite{lubich2014}. The most recent work on the split itself is the augmented
+backward-corrected projector-splitting integrator of Kusch, Schotthöfer and
+Walter~\cite{kusch2026augmented}, which targets the training of dynamical
+low-rank models for data assimilation rather than the time integration of a
+conservative PDE, and so addresses a different question from the one we pose
+here; we cite it as the closest modern projector-splitting method. Rank
+adaptation via incremental SVD (the row-action technique) makes the rank grow
+only when needed \cite{haasdonk2012}.
 Stability of robust projector-splitting schemes has been analyzed for
 hyperbolic problems \cite{kusch2023stability}; robustness and conservation
 properties have been established for kinetic equations \cite{einkemmer2023},
