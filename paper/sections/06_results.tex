@@ -251,15 +251,20 @@ from, and it does not.
 \label{sec:res-fidelity}
 
 Under forcing, kinetic energy is not monotone, so the second invariant is a balance
-and not a decay law. Measured as the energy balance residual of the projected discrete
-dynamics, all three solver families hold it to between $1.3\times 10^{-4}$ and
-$4.9\times 10^{-4}$ across the $26$ committed measurements we pool. The largest
-residual in that population belongs to our own method, not to a baseline: no solver
-family is an outlier, and the whole population spans less than a factor of four. We report this quantity and not the balance of the
-full partial differential equation, because for a projected method the two differ by
-the size of the projection's own energy increment: the two keys in our artifacts
-differ by up to a factor of several hundred across configurations, and quoting one for
-the other would misstate the violation by orders of magnitude. We integrate $200$
+and not a decay law. Measured as the energy balance residual of the
+projected dynamics against the full partial differential equation --- of the two
+such quantities our artifacts record, the one that is comparable across methods ---
+all three solver families hold it to between $1.3\times 10^{-4}$ and
+$4.9\times 10^{-4}$ across the $14$ committed measurements we pool, which is every
+run of Section~\ref{sec:setup} that has a full-grid reference. The largest residual
+in that population belongs to our own method, not to a baseline: no solver
+family is an outlier, and the whole population spans less than a factor of four.
+We report this quantity and not the same balance with the projection's own energy
+increment subtracted, because for a projected method the two differ by the size of
+that increment: the two keys in our artifacts differ by up to a factor of several
+hundred across configurations --- the static projection does the most work --- and
+quoting the second for the first would overstate its violation by orders of
+magnitude. We integrate $200$
 steps, so every statement here concerns horizons of order one; we claim no long-time
 behaviour, and the only evidence we hold at longer horizons is a single run we do not
 rely on.

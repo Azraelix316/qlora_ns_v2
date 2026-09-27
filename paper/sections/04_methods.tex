@@ -225,7 +225,9 @@ $\Delta t$ be the time step. One SP-DLRA step is:
   \item \textbf{Cleanup.} A thin SVD of $\Psi^{n+1}$ re-orthonormalizes the
   factors (rank at most $2r$ before truncation); singular values below
   tolerance are dropped (decay) and the residual indicator below may extend
-  the rank (growth; Section~\ref{sec:rank-adaptation}).
+  the rank (growth; Section~\ref{sec:rank-adaptation}). The SVD is of the
+  \emph{whole} field, and is the dominant per-step cost of the scheme as
+  implemented (Section~\ref{sec:cost}).
 \end{enumerate}
 
 The step is a \emph{projected exponential midpoint method}: the viscous part
@@ -277,12 +279,16 @@ spend rank on a spectrum that is not present
 We validate the scheme against four invariants, per reviewer decision D3:
 
 \begin{itemize}
-  \item \textbf{I1 (exact divergence-freeness).} The velocity is always
-  recovered as $u = (\psi_y, -\psi_x)$ from the (low-rank) stream function, so
-  $\grad \cdot u = 0$ holds \emph{identically} at the discrete level:
-  $\max |\grad \cdot u| = O(\varepsilon_{\mathrm{mach}}) \approx 10^{-14}$ at
-  every step, for every rank and every Reynolds number. This is a property of
-  the formulation, not of the numerics.
+  \item \textbf{I1 (exact divergence-freeness).} The velocity is recovered as
+  $u = (\psi_y, -\psi_x)$ from the (low-rank) stream function, so
+  $\grad \cdot u = 0$ \emph{identically in exact arithmetic}. The measured
+  residual never exceeds $1.1\times 10^{-11}$ over every method, rank and
+  Reynolds number we ran, which is seven orders of magnitude below the reduced
+  solver's own error ($\sim 10^{-4}$) and therefore cannot account for it. The
+  residual is the roundoff of the discrete spectral derivative pair, and grows as
+  the operators' conditioning does: $2.6\times$ from $N=64$ to $N=128$,
+  consistently across methods. Section~\ref{sec:res-div} reports the measured
+  band and the population it is taken over.
   \item \textbf{I2 (energy).} Unforced: $E(t)$ is monotone non-increasing
   (verified numerically in the Taylor--Green test). Forced: $E$ obeys
   \eqref{eq:energy} with $P_{\mathrm{in}} = -F\inner{\psi}{\cos y}$ and
@@ -292,11 +298,14 @@ We validate the scheme against four invariants, per reviewer decision D3:
   % [PENDING-THEORETICAL-RESEARCH: forcing-aware invariant and any
   % monotone/conserved quantity for the forced dynamics,
   % docs/theory/stability-error.md]
-  \item \textbf{I3 (rank economy).} The adaptive rank $r(t)$ against the
-  static POD count: the number of POD modes required to resolve 99\% of the
-  kinetic energy of the reference run. Static bases cannot follow rank growth,
-  so $r(t) \le r_{\mathrm{POD}}$ at late times is the expected (and measured)
-  outcome; the difference quantifies the cost of staticity.
+  \item \textbf{I3 (rank economy).} The adaptive rank $r(t)$ against the static
+  POD count $r_{\mathrm{POD}} = 16$ --- the rank the static baselines were
+  \emph{given}, not a count we measure. Their bases are fitted on the
+  fluctuations of the reference run, including the initial condition, at a
+  $99\%$-energy threshold. Because that rank is the requested cap and is the same
+  in every run, it does not vary with the dynamics, and we therefore report the
+  rank economy as a comparison against a fixed rank rather than as a measured
+  saving.
   \item \textbf{I4 (turbulent fidelity).} Kinetic-energy time series,
   kinetic-energy spectrum, and dissipation statistics against the full-grid
   spectral reference.
@@ -317,7 +326,8 @@ Per step, with $n = N^2$ grid points and rank $r$:
     & $\Delta$, $\Delta^{-1}$ by FFT; $J$ pointwise;
     \emph{rank-independent} \\
   Projection $\Pi_{\hat U, \hat V} N(\Psi_m)$ & $O(r n)$ & \\
-  Cleanup SVD (thin, $r \times r$) & $O(n r^2)$ & \\
+  Cleanup: thin SVD of the whole field, four per step & $\Theta(N^3)$ &
+    \emph{rank-independent} \\
   \bottomrule
 \end{tabular}
 \end{center}
@@ -325,13 +335,18 @@ Per step, with $n = N^2$ grid points and rank $r$:
 The full-grid spectral reference has per-step cost $O(n \log n)$ with the same
 asymptotic form. We emphasize the honest consequence: because the nonlinear
 residual is evaluated on the full grid, its $O(n \log n)$ cost is
-\emph{independent of the rank}. At small $r$, the per-step cost of SP-DLRA is
-therefore comparable to, or larger than, the full-grid reference, and we make
-no a priori claim of per-step speedup. Any end-to-end benefit has to come
-from the memory footprint of the factors ($O(nr)$ versus $O(n)$) or from
-regimes in which the rank stays small over long time spans; both are measured,
-not assumed, and Section~\ref{sec:results} reports wall-clock time and memory
-explicitly, including the regimes in which SP-DLRA is slower
-(Figure~\ref{fig:cost}).
-% [PENDING-CODER: measured per-step and total wall-clock times and peak
-% memory for SP-DLRA, full-grid spectral, and static POD, per (Re, N).]
+\emph{independent of the rank}, and we make no claim of per-step speedup:
+SP-DLRA is measured at $2.2$--$3.5\times$ the full-grid step
+(Section~\ref{sec:res-cost}, Figure~\ref{fig:cost}). Nor is there a compensating
+memory benefit: peak memory is $2.3$ MiB ($N=64$) to $4.0$ MiB ($N=128$)
+\emph{above} the full-grid step, because the state is a full field plus its
+factors plus the factorisation workspace. We therefore identify no end-to-end
+benefit in the regimes we have measured, and the case for the method rests on its
+structural guarantees and its accuracy, not on efficiency. Establishing a regime
+where the rank stays small over a long span would require evidence beyond the
+$200$-step horizons used here, and we do not have it.
+% [PENDING-CODER: the per-step cost and peak memory of SP-DLRA against the
+% pinned-thread full-grid reference are measured, per grid, in
+% cost_retiming.json and peak_memory.json. The static-baseline family is NOT
+% timed, so there is no measured baseline cost ratio to report; this stays open
+% until the coder times it.]
