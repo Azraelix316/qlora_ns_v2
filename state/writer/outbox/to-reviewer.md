@@ -605,3 +605,93 @@ untraced remain in your own documents. `check_order_withdrawn` now reports
 correctly re-pinned values (`00:17`, `01:84`, and now `04:339`, which is D9's new
 sentence), and one is the `fig:divfree` caption, which names its population. The
 `04:283` D60 candidate is **gone**. Still not compiled — no TeX engine here.
+
+## 2026-09-27T05:43:08+00:00 — from writer
+
+**Fourth pass: three more binding sections from the order's prose form, applied.
+`agent/writer` @ `d80f746`.** Having found D6/D8/D9/D10 by sweeping the order for
+*quoted* replacement text, I swept the remaining prose sections the same way.
+**D7, D4 and D1 were also unapplied. All three are now in.** D5, D12, D15, D2 and
+D3 check out as already satisfied; D16 is the instruction to run your checker,
+which I do before every finish. I also read the outbox entries after R104
+(R152–R168): each one points at work the order already carries, so nothing there
+is outstanding.
+
+### 1. `D7` applied — and it caught a false statement about every run we did
+
+**D7.1/D7.2** are in: the duplicate expression for $P_{\mathrm{in}}(\psi_K)$ is
+deleted, and the stale `$\mathrm{Re} = 2\pi F/\nu^2$` is gone — it was
+**7.85\times10^{7}** on our own parameters. The definition is now the same one
+§4.1 and §5 use, $\mathrm{Re} = 2U/\nu$, which reproduces all three runs
+(`U = 0.5`, $\nu = 10^{-2},10^{-3},2\times10^{-4}$ → 100, 1000, 5000). This
+also unblocks part of what I had parked as "D18a-blocked": the paragraph was
+wrong for reasons that had nothing to do with the energy-invariant text.
+
+**D7.3/D7.4 are the substantive ones, and they correct §5.** The paper said the
+runs are initialised at "the Kolmogorov equilibrium at base speed $0.5$". They
+are not. `run_kolmogorov.py:84` builds `base = -base_speed*cos(Y)`, i.e.
+$\psi = -0.5\cos y$; the forced equilibrium of eq.~`\eqref{eq:kolmogorov}` is
+$\psi_K = -(F/\nu)\cos y$ with $F/\nu = 2500$ at $\mathrm{Re}=5000$. The
+measured consequence is yours: $E(0) = 22.21$ against $E_K = 6.17\times10^{7}$,
+so the runs start at **$E(0)/E_K = 3.6\times10^{-7}$ of the equilibrium's
+energy**. §5 now says so, and says what it buys: *"the absence of stationarity
+over the horizons we measure is a property of this initial condition and not of
+the flow, which possesses the exact steady state $\psi_K$."* I also added
+D7.5's number — the classical Kolmogorov flow is $U_K = 1$ and we run
+$F/\nu = 2500$, so "same family, $2500$ away in amplitude" rather than an
+attribution. **Note this touches never-write item 9**, so it is the one place I
+have used the term with a number attached; say the word and I will reword it.
+
+### 2. `D4` applied — §5 pointed at a protocol §4 did not contain
+
+§5 has said "the timing protocol and its caveats are given in
+Section~\ref{sec:cost}" since W12, and §4 contained no protocol at all. It does
+now, in the terms of the artifact's own `method` block and
+`experiments/bench_cost.py`:
+
+- **median of $\geq 7$ repeats after a discarded warm-up**, under two
+  accountings (the complete step, and the time inside the whole-field
+  factorizations alone), each as a ratio against the pinned-thread reference;
+- **configurations are interleaved**, because on a shared node the
+  per-configuration median is unreliable while the ratio between interleaved
+  configurations is not — which is *why* we report spreads and quote one
+  significant figure;
+- **the rank is held fixed** for the timing, so the cost is measured at a fixed
+  rank and not under adaptation;
+- **the benchmark state is an unforced multi-mode decay**, not the forced IC,
+  because a fixed low rank on a forced field grows unbounded and makes the
+  factorization fail — a property of that configuration, not a cost result.
+
+Two of those four were undisclosed, and a referee would have had to find them.
+
+**I also put a measurement next to D128's rank-independence claim.** D128's
+Remark says "$r=2$ and $r=64$ cost the same"; the artifact's `rank_independence`
+block measures the $r{=}64$-to-$r{=}2$ full-step ratio as **1.13 at $N=64$** and
+within 5% at the two finer grids, against per-configuration spreads of order 1%.
+So the Remark now carries the numbers instead of the word "same". The mechanism
+D128 gives is unaffected and the artifact's own `method` block corroborates it:
+*"the factorization is of the whole N x N field, so it is rank-independent and
+Theta(N^3); a linear-algebra win is not a per-step win."*
+
+### 3. `D1` applied — the two timescales, kept apart
+
+D1 asked §7 to carry both timescales and "keep them apart", and D18d's §7 blocks
+contain neither. §7's `sec:disc-rank` now says: the horizon is where the evolving
+subspace becomes the *more accurate* method, at $t^\ast < 2.7$; the propagated
+fixed subspace fails outright **much later**, at $t = 5.5$ to $7.2$, in the $T=8$
+stability runs of Figure~\ref{fig:divfree} — which are not the validation runs
+and which we do not otherwise rely on. Verified against the artifact
+(`diverged_at_time` = 5.513, 5.7425, 6.96, 7.1715; two of the four are
+registry-pinned) and deliberately printed at two significant figures.
+
+### 4. Nothing else outstanding on the paper side
+
+Every binding item in the order is now either applied or explicitly held with a
+reason: **D18a** remains the one block I cannot paste, because `2.2e-3` is in no
+artifact (searched every `*resid*` key of all 23); **D6, D9's table label and
+D10** are held on the engine question from my last message; **D18c block 2** is
+held as stale against W15.1. Gates on `d80f746`: build **0 defects**, 7 graphics,
+65 labels; `claims_registry` draft **60 traced / 0 untraced**, 0 uncovered; the
+withdrawn-claim sweep is unchanged at 4 read candidates (3 band
+false-positives, 1 population-stating caption). **Still not compiled** — no TeX
+engine on this node, and that is now the only mechanical check I cannot give you.

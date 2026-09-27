@@ -1,7 +1,7 @@
 # NOTES.md — writer
 
 > Branch: `agent/writer` · Worktree: `worktrees/writer`
-> Status: found and applied 4 binding corrections the block audit had missed (D8 I1+I3, D9 cost routes); D6/D9-label/D10 held back — they describe bug.py, not the timed engine (flagged with code evidence). Also fixed B7's energy-residual population (26→14, key named). Gates: build 0 defects, claims_registry 0 untraced, 4 candidates all read. NOT compiled.
+> Status: every binding item in WRITER_ORDER is now applied or explicitly held with a reason. This pass: D7 (stale Re + duplicate P_in + the runs do NOT start at the Kolmogorov equilibrium), D4 (timing protocol §5 pointed at), D1 (two timescales apart). Held: D18a (2.2e-3 in no artifact), D6/D9-label/D10 (describe bug.py), D18c-B2 (stale). Gates: 0 defects, 0 untraced. NOT compiled — no TeX here.
 non-canonical re-timing; 05 hardware sentence corrected one→two threads per
 the canonical artifact); gates recorded post-push (XREF 34, PENDING-CODER
 38, draft candidates 8 = known residuals); next W4–W9 (W4 blocked on TG
@@ -61,6 +61,48 @@ intentional holds |
 - [ ] After V1–V7 close: replace all [PENDING-CODER] with artifacts-traceable numbers (CHECKLIST 1.1), un-gate D4, adapt template to the settled venue.
 
 ## Log
+- 2026-09-27 **Fourth pass: D7, D4 and D1 from the order's prose form
+  (`d80f746`)** — the sweep that found D6/D8/D9/D10 also covered the remaining
+  prose sections, and three more binding items were unapplied. **D5, D12, D15,
+  D2, D3 verify as already satisfied; D16 is "run the checker", which I do before
+  every finish. The outbox after R104 (R152–R168) is fully carried by the
+  order.**
+  **D7 applied.** D7.1/D7.2: the duplicate $P_{in}(\psi_K)$ deleted and the
+  stale `$\mathrm{Re} = 2\pi F/\nu^2$` removed — it evaluated to `7.85e7` on
+  our own parameters; the definition is now `$\mathrm{Re} = 2U/\nu$` as in §4.1
+  and §5, which reproduces all three runs. This unblocks the part of the
+  "D18a-blocked" paragraph that was wrong for reasons unrelated to D18a.
+  **D7.3/D7.4 corrected a false statement about every run:** §5 said the runs
+  start at "the Kolmogorov equilibrium at base speed 0.5"; the driver builds
+  `base = -base_speed*cos(Y)` and the forced equilibrium is `-(F/ν)cos y` with
+  `F/ν = 2500` at Re=5000, so `E(0) = 22.21` against `E_K = 6.17e7` —
+  `E(0)/E_K = 3.6e-7`. §5 now states the measured ratio and what it buys (the
+  absence of stationarity is a property of the IC, not the flow, which has the
+  exact steady state). D7.5's number added ($U_K = 1$ is the classical flow; we
+  run 2500) — the one place I used the item-9 term with a number, flagged.
+  **D4 applied:** §5 has pointed at "the timing protocol and its caveats" in
+  §4 since W12 and §4 had none. It now carries the artifact's own protocol —
+  median of ≥7 repeats after a discarded warm-up under two accountings;
+  configurations **interleaved** because on a shared node the per-config median
+  is unreliable while the interleaved ratio is not; **rank held fixed** so the
+  cost is not measured under adaptation; and the benchmark state is an **unforced
+  multi-mode decay**, not the forced IC. Two of those four were undisclosed.
+  Also put the measurement beside D128's rank-independence claim: the
+  `r=64`/`r=2` full-step ratio is `1.13` at N=64 and within 5% at the finer
+  grids, against spreads of order 1% — the Remark now carries numbers, not
+  "the same".
+  **D1 applied:** §7 now keeps the two timescales apart — the horizon (where the
+  evolving subspace becomes *more accurate*, `t* < 2.7`) versus the propagated
+  fixed subspace failing outright at `t = 5.5`–`7.2` in the `T=8` stability runs,
+  which are not the validation runs. Verified against `diverged_at_time`
+  (5.513/5.7425/6.96/7.1715; two registry-pinned) and printed at 2 s.f.
+  **Held with reasons:** D18a (`2.2e-3` is in no artifact — searched every
+  `*resid*` key of all 23), D6 + D9's label + D10 (they describe `bug.py`, not
+  the timed `projected_dlra`), D18c block 2 (stale vs W15.1).
+  Gates on `d80f746`: build 0 defects / 7 graphics / 65 labels; registry draft
+  **60 traced / 0 untraced**, 0 uncovered; withdrawn sweep unchanged at 4 read
+  candidates. **Still not compiled** — the one mechanical check I cannot give.
+
 - 2026-09-27 **Third pass: the non-fenced binding corrections (D6/D8/D9/D10)**
   (`9fb05bc`). **The lesson, because it is a methodology failure and not a
   typo:** both earlier audits matched the order's *paste-ready blocks*, and all
