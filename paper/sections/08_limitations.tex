@@ -23,9 +23,10 @@ them are deliberate scope choices rather than oversights.
   suggests the per-step picture should be stable (the nonlinear residual
   remains $O(n \log n)$ and rank-independent), but this is an expectation,
   not a result.
-  % [PENDING-CODER: if the runs at Re = 5000 already show degradation,
-  % state it here and in Section~\ref{sec:res-error} instead of as a
-  % forward-looking limitation.]
+  % [RESOLVED: the Re = 5000 runs show no degradation -- the retained rank is
+  % the same at all three Reynolds numbers and the horizon varies by under 8%
+  % across them (Section~\ref{sec:res-error}) -- so this stays a limitation
+  % about Re > 5000 rather than a statement about the runs we have.]
 
   \item \textbf{Rank decay is only fully exercised in the laminar run.}
   The tolerance-based decay rule is exercised only where a state genuinely loses

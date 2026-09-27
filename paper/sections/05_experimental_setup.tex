@@ -24,10 +24,9 @@ stream function
   u_{\mathrm{TG}} = (A \sin x \cos y,\; -A \cos x \sin y),
   \label{eq:tg}
 \end{equation}
-with $A = 1$
-% [PENDING-CODER: confirm amplitude A, viscosity nu (Re), grid N, time span,
-% initial rank r_0, and rank tolerances for the L1 run.]
-and viscosity $\nu = 2\times 10^{-2}$, the value stored in the L1 run record; no
+with $A = 1$, on the $64^2$ grid, integrated with $\Delta t = 10^{-2}$ for a
+hundred steps at a rank held fixed at one, and
+viscosity $\nu = 2\times 10^{-2}$, the value stored in the L1 run record; no
 Reynolds number is attached to the unforced laminar case
 % [PENDING-CODER: the L1 record stores nu only, and the L1 driver computes no
 % Reynolds number, so none is quoted; attach one if the driver gains a
@@ -183,5 +182,6 @@ Every number and figure in the paper is traceable to a run record in
 \texttt{state/coder/results/} with its configuration, driver script, and
 source commit; figures are generated from those records by scripts under
 \texttt{experiments/}.
-% [PENDING-CODER: confirm the results-directory layout and the figure
-% generation scripts so the provenance note above is accurate.]
+% [RESOLVED: state/coder/results/ holds 23 artifacts and the figures are
+% generated from them by experiments/make_figures.py, so the note above is
+% accurate as written.]

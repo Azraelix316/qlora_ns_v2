@@ -101,8 +101,10 @@ equations for any $(F,\nu)$: the diffusion and forcing terms cancel, and the
 advection of $\omega_K$ vanishes identically. It is not, however, the state the
 runs are started from --- Section~\ref{sec:setup} records how far below it they
 begin.
-% [PENDING-CODER: confirm the discrete energy identity (de-aliasing policy,
-% e.g.\ 2/3 rule) and that P_in is computed as -F <psi, cos y> in the code.]
+% [RESOLVED from solvers/ns_psi.py: the 2/3 mask is applied to the field-level
+% nonlinear and advection terms and not to the viscous semigroup;
+% energy_terms() computes the advection term explicitly rather than assuming it
+% vanishes, with zeta = -A cos y so that -<psi,zeta> = +A<psi,cos y> = P_in.]
 
 Two consequences matter for the validation design. First, under forcing the
 kinetic energy is \emph{not} monotone: $E(t)$ relaxes toward the forced
@@ -241,9 +243,10 @@ robust low-rank integrators of Einkemmer et al.~\cite{einkemmer2023} and
 Ceruti et al.~\cite{ceruti2024}. For fixed factors the step is second order
 in $\Delta t$; the projection error is the rank deficiency of the current
 subspace, which the rank adaptation below is designed to control.
-% [PENDING-CODER: confirm the exact step order and the projection subspace
-% (midpoint-evolved factors as above, or frozen at t^n) in the
-% implementation, and the observed order of accuracy.]
+% [RESOLVED (D10): eq:step projects with the midpoint-evolved factors
+% \hat U = e^{nu dt D_x/2} U, which the code evolves before the augmented step
+% uses them, and the second-order property is asserted by
+% test_reduced_path_is_second_order_in_dt and test_bug_is_second_order.]
 
 \subsection{Adaptive rank}
 \label{sec:rank-adaptation}
@@ -260,22 +263,26 @@ If $\eta > \eta_{\mathrm{tol}}$, the dominant direction of $G - \Pi G$ is
 added to the subspace via an incremental singular value decomposition of the
 augmented factors (the rank-adaptation technique of
 Haasdonk and Ohlberger~\cite{haasdonk2012}), and the coefficients are
-re-solved. Growth is the only \emph{active} rank change in the scheme; under
-sustained forcing we expect $\eta$ to be triggered during the spin-up toward
-the statistical regime, with a quasi-stationary rank afterwards
-(Section~\ref{sec:results}).
+re-solved. Growth is the only \emph{active} rank change in the scheme. In the
+forced runs the indicator is triggered within the first steps, the retained rank
+reaches the budget, and it stays there for the rest of the run
+(Section~\ref{sec:res-rank}).
 
 \paragraph{Decay.}
 At the cleanup SVD, singular values with $\sigma_i < \sigma_{\mathrm{tol}}$
 (absolute) or $\sigma_i/\sigma_1 < \sigma_{\mathrm{tol}}$ (relative) are
 dropped. This is a deterministic, cheap rule requiring no additional
-decompositions. In the unforced Taylor--Green test the state is a single
-Fourier mode, so the rule holds the rank at one from the outset rather than
-spend rank on a spectrum that is not present
+decompositions. The implemented rule is a \emph{relative} amplitude cutoff of
+$10^{-10}$ on the singular-value spectrum, tested every five steps, with the
+rank requested between $2$ and the budget $2\lfloor N/3\rfloor+1$
+(Section~\ref{sec:setup}); the state is carried at its own numerical rank, which
+for the forced initial condition is seventeen. In the unforced Taylor--Green test
+the state is a single Fourier mode, so the rule holds the rank at one from the
+outset rather than spend rank on a spectrum that is not present
 (Section~\ref{sec:results}).
-% [PENDING-CODER: confirm the exact rank rule and the tolerances
-% eta_tol, sigma_tol (absolute/relative), and the initial rank r_0 for each
-% experiment.]
+% [RESOLVED from the run records: parameters.dlra_relative_amplitude_cutoff,
+% dlra_check_every, dlra_min_rank, dlra_max_rank; the L1 run holds a fixed rank
+% of one, so no tolerance is exercised there.]
 
 \subsection{Invariants}
 \label{sec:invariants}
